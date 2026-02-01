@@ -40,7 +40,7 @@ const socialIcons: Record<string, JSX.Element> = {
 };
 
 // Default footer background from Cloudinary
-const DEFAULT_MOLECULES_URL = 'https://res.cloudinary.com/southland-organics/image/upload/f_auto,q_auto/Southland%20Website/Southland%20Branding/patterns/Footer_bg_qtqx95';
+const DEFAULT_MOLECULES_URL = 'https://res.cloudinary.com/southland-organics/image/upload/f_auto,q_auto/Southland%20Website/Footer_bg_qtqx95';
 
 // Default white logo from Cloudinary (square white version)
 const DEFAULT_WHITE_LOGO_URL = 'https://res.cloudinary.com/southland-organics/image/upload/f_auto,q_auto,w_400/Southland%20Website/Southland%20Branding/logos/Southland_Organics_Square_White_tuwhqk';
@@ -62,16 +62,15 @@ export function Footer({
 
   return (
     <footer>
-      {/* Main footer - Green with molecules pattern + parallax */}
+      {/* Main footer - Green with background pattern + parallax */}
       <div
         className="relative"
         style={{
-          backgroundColor: '#44883e',
-          backgroundImage: `url(${patternUrl})`,
+          backgroundImage: `url("${patternUrl}")`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundAttachment: 'fixed', // Parallax effect
-          backgroundBlendMode: 'soft-light',
+          backgroundRepeat: 'no-repeat',
         }}
       >
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
