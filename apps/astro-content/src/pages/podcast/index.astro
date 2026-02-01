@@ -8,6 +8,8 @@ import PodcastLayout from '../../layouts/PodcastLayout.astro';
 import EpisodeGrid from '../../components/podcast/EpisodeGrid.astro';
 import SubscribeButtons from '../../components/podcast/SubscribeButtons.astro';
 import EmailCapture from '../../components/shared/EmailCapture.astro';
+import PersonaCTA from '../../components/cdp/PersonaCTA.astro';
+import PersonaContent from '../../components/cdp/PersonaContent.astro';
 import { buildSouthlandUrl, getLogoUrl } from '../../lib/cloudinary';
 import { getCollection } from 'astro:content';
 
@@ -202,18 +204,56 @@ const podcastSchema = {
             <p class="text-shopify-secondary-text mb-6">
               Working with nature, not against it. Sustainable solutions for poultry, turf, and agriculture.
             </p>
-            <a
-              href="/"
-              class="btn-primary inline-flex items-center gap-2"
-            >
-              Explore Products
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </a>
+            <!-- Persona-aware CTA -->
+            <PersonaCTA
+              variant="primary"
+              defaultText="Explore Products"
+              defaultHref="/shop/"
+            />
           </div>
         </div>
       </div>
+    </div>
+  </section>
+
+  {/* Persona-Aware Product Recommendations */}
+  <section class="bg-gray-50 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Content for Backyard Betty -->
+      <PersonaContent show="backyard">
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 text-center">
+          <h3 class="text-xl font-bold text-amber-800 mb-2">For Your Backyard Flock</h3>
+          <p class="text-amber-700 mb-4">Keep your chickens healthy with our natural probiotics and supplements.</p>
+          <a href="/shop/poultry/backyard/" class="btn-primary">Shop Backyard Products</a>
+        </div>
+      </PersonaContent>
+
+      <!-- Content for Broiler Bill -->
+      <PersonaContent show="commercial">
+        <div class="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
+          <h3 class="text-xl font-bold text-green-800 mb-2">For Commercial Operations</h3>
+          <p class="text-green-700 mb-4">Proven solutions to improve FCR and reduce mortality. See how other growers are getting results.</p>
+          <a href="/poultry/commercial/" class="btn-primary">View Commercial Solutions</a>
+        </div>
+      </PersonaContent>
+
+      <!-- Content for Turf Taylor -->
+      <PersonaContent show="lawn">
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-6 text-center">
+          <h3 class="text-xl font-bold text-emerald-800 mb-2">For Lawn & Garden</h3>
+          <p class="text-emerald-700 mb-4">Build healthy soil for a naturally beautiful lawn without harsh chemicals.</p>
+          <a href="/lawn/" class="btn-primary">Shop Lawn Products</a>
+        </div>
+      </PersonaContent>
+
+      <!-- Content for Unknown visitors (prompt to select) -->
+      <PersonaContent showIfUnknown showWhileLoading>
+        <div class="bg-white border border-gray-200 rounded-xl p-6 text-center">
+          <h3 class="text-xl font-bold text-gray-800 mb-2">What brings you here?</h3>
+          <p class="text-gray-600 mb-4">Tell us about yourself so we can show you the most relevant content.</p>
+          <a href="/" class="btn-primary">Personalize My Experience</a>
+        </div>
+      </PersonaContent>
     </div>
   </section>
 

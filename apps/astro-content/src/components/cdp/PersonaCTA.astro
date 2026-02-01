@@ -1,0 +1,157 @@
+---
+/**
+ * PersonaCTA Component
+ *
+ * A call-to-action button that changes text and destination based on the
+ * visitor's persona. Shows a default CTA until persona is known.
+ *
+ * Usage:
+ * <PersonaCTA variant="primary" />
+ *
+ * With custom defaults:
+ * <PersonaCTA
+ *   defaultText="Get Started"
+ *   defaultHref="/shop/"
+ *   variant="secondary"
+ * />
+ *
+ * Override specific personas:
+ * <PersonaCTA
+ *   backyard={{ text: "Shop Now", href: "/shop/backyard/" }}
+ *   commercial={{ text: "Request Quote", href: "/contact/" }}
+ * />
+ */
+
+interface CTAConfig {
+  text: string;
+  href: string;
+}
+
+interface Props {
+  /** Default CTA text when no persona */
+  defaultText?: string;
+  /** Default CTA href when no persona */
+  defaultHref?: string;
+  /** Button variant */
+  variant?: 'primary' | 'secondary' | 'outline';
+  /** Override for backyard persona */
+  backyard?: CTAConfig;
+  /** Override for commercial persona */
+  commercial?: CTAConfig;
+  /** Override for lawn persona */
+  lawn?: CTAConfig;
+  /** Additional CSS classes */
+  class?: string;
+}
+
+const {
+  defaultText = 'Get Started',
+  defaultHref = '/shop/',
+  variant = 'primary',
+  backyard,
+  commercial,
+  lawn,
+  class: className = '',
+} = Astro.props;
+
+// Default CTAs per persona (can be overridden via props)
+const personaCTAs = {
+  backyard: backyard ?? { text: 'Shop Backyard Products', href: '/shop/poultry/backyard/' },
+  commercial: commercial ?? { text: 'Talk to a Specialist', href: '/contact/commercial/' },
+  lawn: lawn ?? { text: 'Shop Lawn Products', href: '/shop/lawn/' },
+  general: { text: defaultText, href: defaultHref },
+};
+
+const variantClasses = {
+  primary: 'btn-primary',
+  secondary: 'btn-secondary',
+  outline: 'persona-cta--outline',
+};
+---
+
+<a
+  class:list={[
+    'persona-cta',
+    variantClasses[variant],
+    className,
+  ]}
+  href={defaultHref}
+  data-default-text={defaultText}
+  data-default-href={defaultHref}
+  data-backyard-text={personaCTAs.backyard.text}
+  data-backyard-href={personaCTAs.backyard.href}
+  data-commercial-text={personaCTAs.commercial.text}
+  data-commercial-href={personaCTAs.commercial.href}
+  data-lawn-text={personaCTAs.lawn.text}
+  data-lawn-href={personaCTAs.lawn.href}
+>
+  <span class="persona-cta__text">{defaultText}</span>
+</a>
+
+<style>
+  .persona-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .persona-cta--outline {
+    background: transparent;
+    border: 2px solid currentColor;
+    color: var(--color-accent, #44883e);
+    padding: 10px 25px;
+    border-radius: 0;
+    font-weight: 600;
+  }
+
+  .persona-cta--outline:hover {
+    background: var(--color-accent, #44883e);
+    border-color: var(--color-accent, #44883e);
+    color: white;
+  }
+</style>
+
+<script>
+  import { getPersonaId, type PersonaId } from '../../lib/persona';
+
+  function updatePersonaCTAs(): void {
+    const personaId = getPersonaId();
+    const ctas = document.querySelectorAll('.persona-cta');
+
+    ctas.forEach((cta) => {
+      const el = cta as HTMLAnchorElement;
+      const textEl = el.querySelector('.persona-cta__text');
+
+      let text: string;
+      let href: string;
+
+      if (personaId && personaId !== 'general') {
+        text = el.dataset[`${personaId}Text`] || el.dataset.defaultText || 'Get Started';
+        href = el.dataset[`${personaId}Href`] || el.dataset.defaultHref || '/shop/';
+      } else {
+        text = el.dataset.defaultText || 'Get Started';
+        href = el.dataset.defaultHref || '/shop/';
+      }
+
+      if (textEl) {
+        textEl.textContent = text;
+      }
+      el.href = href;
+    });
+  }
+
+  // Run on page load
+  document.addEventListener('DOMContentLoaded', updatePersonaCTAs);
+  if (document.readyState !== 'loading') {
+    updatePersonaCTAs();
+  }
+
+  // Listen for persona changes
+  window.addEventListener('persona-changed', updatePersonaCTAs);
+
+  // Handle Astro View Transitions
+  document.addEventListener('astro:page-load', updatePersonaCTAs);
+</script>

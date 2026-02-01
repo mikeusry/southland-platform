@@ -1,0 +1,301 @@
+---
+/**
+ * PersonaBanner Component
+ *
+ * A small, persistent banner that shows the current persona and allows
+ * visitors to switch their persona. Appears at the top or bottom of the page.
+ *
+ * Usage:
+ * <PersonaBanner position="top" />
+ * <PersonaBanner position="bottom" showChangeLink />
+ */
+
+interface Props {
+  /** Position of the banner */
+  position?: 'top' | 'bottom';
+  /** Show a link to change persona */
+  showChangeLink?: boolean;
+  /** Additional CSS classes */
+  class?: string;
+}
+
+const {
+  position = 'bottom',
+  showChangeLink = true,
+  class: className = '',
+} = Astro.props;
+---
+
+<div
+  class:list={[
+    'persona-banner',
+    `persona-banner--${position}`,
+    className,
+  ]}
+  id="persona-banner"
+  style="display: none;"
+>
+  <div class="persona-banner__content">
+    <span class="persona-banner__label">
+      Browsing as: <strong class="persona-banner__name"></strong>
+    </span>
+    {showChangeLink && (
+      <button class="persona-banner__change" type="button">
+        Change
+      </button>
+    )}
+  </div>
+</div>
+
+<!-- Change Persona Modal -->
+<div class="persona-modal" id="persona-modal" style="display: none;">
+  <div class="persona-modal__backdrop"></div>
+  <div class="persona-modal__content">
+    <h3 class="persona-modal__title">Change Your Experience</h3>
+    <p class="persona-modal__desc">Select what best describes you:</p>
+    <div class="persona-modal__options">
+      <button class="persona-modal__option" data-persona="backyard">
+        <span class="persona-modal__option-icon">🐔</span>
+        <span class="persona-modal__option-label">Backyard Flock</span>
+      </button>
+      <button class="persona-modal__option" data-persona="commercial">
+        <span class="persona-modal__option-icon">🏠</span>
+        <span class="persona-modal__option-label">Commercial Poultry</span>
+      </button>
+      <button class="persona-modal__option" data-persona="lawn">
+        <span class="persona-modal__option-icon">🌱</span>
+        <span class="persona-modal__option-label">Lawn & Garden</span>
+      </button>
+    </div>
+    <button class="persona-modal__close" type="button">Cancel</button>
+  </div>
+</div>
+
+<style>
+  .persona-banner {
+    position: fixed;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    background: var(--persona-bg, #f3f4f6);
+    border: 1px solid var(--persona-border, #e5e7eb);
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .persona-banner--top {
+    top: 0;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+
+  .persona-banner--bottom {
+    bottom: 0;
+    border-bottom: none;
+    border-left: none;
+    border-right: none;
+  }
+
+  .persona-banner__content {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .persona-banner__label {
+    color: #4b5563;
+  }
+
+  .persona-banner__name {
+    color: var(--persona-color, #166534);
+  }
+
+  .persona-banner__change {
+    background: transparent;
+    border: none;
+    color: var(--color-accent, #44883e);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .persona-banner__change:hover {
+    color: var(--color-accent-hover, #2c5234);
+  }
+
+  /* Modal */
+  .persona-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .persona-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  .persona-modal__content {
+    position: relative;
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .persona-modal__title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-title, #2c5234);
+    margin-bottom: 8px;
+  }
+
+  .persona-modal__desc {
+    color: #6b7280;
+    margin-bottom: 20px;
+  }
+
+  .persona-modal__options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .persona-modal__option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: left;
+  }
+
+  .persona-modal__option:hover {
+    border-color: var(--color-accent, #44883e);
+    background: #f0fdf4;
+  }
+
+  .persona-modal__option-icon {
+    font-size: 24px;
+  }
+
+  .persona-modal__option-label {
+    font-weight: 600;
+    color: #374151;
+  }
+
+  .persona-modal__close {
+    background: transparent;
+    border: none;
+    color: #6b7280;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .persona-modal__close:hover {
+    color: #374151;
+  }
+</style>
+
+<script>
+  import { getPersonaId, setPersona, getPersonaConfig, PERSONA_CONFIG } from '../../lib/persona';
+
+  const banner = document.getElementById('persona-banner');
+  const nameEl = banner?.querySelector('.persona-banner__name');
+  const changeBtn = banner?.querySelector('.persona-banner__change');
+  const modal = document.getElementById('persona-modal');
+  const modalBackdrop = modal?.querySelector('.persona-modal__backdrop');
+  const modalClose = modal?.querySelector('.persona-modal__close');
+  const modalOptions = modal?.querySelectorAll('.persona-modal__option');
+
+  function updateBanner(): void {
+    const personaId = getPersonaId();
+    const config = getPersonaConfig(personaId);
+
+    if (personaId && config && banner && nameEl) {
+      nameEl.textContent = config.label;
+      banner.style.setProperty('--persona-bg', config.bgColor);
+      banner.style.setProperty('--persona-color', config.color);
+      banner.style.display = 'block';
+    } else if (banner) {
+      banner.style.display = 'none';
+    }
+  }
+
+  function openModal(): void {
+    if (modal) {
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeModal(): void {
+    if (modal) {
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+  }
+
+  // Change button click
+  changeBtn?.addEventListener('click', openModal);
+
+  // Modal backdrop click
+  modalBackdrop?.addEventListener('click', closeModal);
+
+  // Modal close button
+  modalClose?.addEventListener('click', closeModal);
+
+  // Modal option clicks
+  modalOptions?.forEach((option) => {
+    option.addEventListener('click', () => {
+      const personaId = (option as HTMLElement).dataset.persona;
+      if (personaId) {
+        setPersona(personaId as any, 'manual');
+        closeModal();
+        updateBanner();
+
+        // Track the change
+        if (window.pdPixel) {
+          window.pdPixel.track('persona_changed', {
+            new_persona: personaId,
+            source: 'banner_modal',
+          });
+        }
+      }
+    });
+  });
+
+  // Escape key closes modal
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeModal();
+    }
+  });
+
+  // Initialize
+  document.addEventListener('DOMContentLoaded', updateBanner);
+  if (document.readyState !== 'loading') {
+    updateBanner();
+  }
+
+  // Listen for persona changes
+  window.addEventListener('persona-changed', updateBanner);
+</script>

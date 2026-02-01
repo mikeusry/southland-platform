@@ -1,0 +1,164 @@
+---
+/**
+ * PersonaContent Component
+ *
+ * Shows or hides content based on the visitor's stored persona.
+ * Content is rendered in the HTML but hidden via CSS until client-side
+ * JavaScript determines if it should be shown.
+ *
+ * Usage:
+ * <PersonaContent show="backyard">
+ *   Content only for Backyard Betty
+ * </PersonaContent>
+ *
+ * <PersonaContent show={["backyard", "commercial"]}>
+ *   Content for poultry personas
+ * </PersonaContent>
+ *
+ * <PersonaContent hide="commercial">
+ *   Content hidden from commercial users
+ * </PersonaContent>
+ *
+ * <PersonaContent showIfUnknown>
+ *   Content shown only if no persona selected
+ * </PersonaContent>
+ */
+
+import type { PersonaId } from '../../lib/persona';
+
+interface Props {
+  /** Show content if persona matches (single or array) */
+  show?: PersonaId | PersonaId[];
+  /** Hide content if persona matches (single or array) */
+  hide?: PersonaId | PersonaId[];
+  /** Show content only if no persona is selected */
+  showIfUnknown?: boolean;
+  /** Hide content if no persona is selected */
+  hideIfUnknown?: boolean;
+  /** Fallback content while loading (default: hidden) */
+  showWhileLoading?: boolean;
+  /** Additional CSS classes */
+  class?: string;
+}
+
+const {
+  show,
+  hide,
+  showIfUnknown = false,
+  hideIfUnknown = false,
+  showWhileLoading = false,
+  class: className = '',
+} = Astro.props;
+
+// Convert single values to arrays for consistent handling
+const showPersonas = show ? (Array.isArray(show) ? show : [show]) : [];
+const hidePersonas = hide ? (Array.isArray(hide) ? hide : [hide]) : [];
+
+// Build data attributes for client-side logic
+const dataAttrs: Record<string, string> = {};
+if (showPersonas.length > 0) {
+  dataAttrs['data-persona-show'] = showPersonas.filter(Boolean).join(',');
+}
+if (hidePersonas.length > 0) {
+  dataAttrs['data-persona-hide'] = hidePersonas.filter(Boolean).join(',');
+}
+if (showIfUnknown) {
+  dataAttrs['data-persona-show-unknown'] = 'true';
+}
+if (hideIfUnknown) {
+  dataAttrs['data-persona-hide-unknown'] = 'true';
+}
+---
+
+<div
+  class:list={[
+    'persona-content',
+    { 'persona-content--loading': !showWhileLoading },
+    className,
+  ]}
+  {...dataAttrs}
+>
+  <slot />
+</div>
+
+<style is:global>
+  /* Hide content while loading (before JS runs) */
+  .persona-content--loading {
+    display: none;
+  }
+
+  /* Classes applied by JS */
+  .persona-content--visible {
+    display: block;
+  }
+
+  .persona-content--hidden {
+    display: none !important;
+  }
+</style>
+
+<script>
+  import { getPersonaId, type PersonaId } from '../../lib/persona';
+
+  function updatePersonaContent(): void {
+    const currentPersona = getPersonaId();
+    const elements = document.querySelectorAll('.persona-content');
+
+    elements.forEach((el) => {
+      const showAttr = el.getAttribute('data-persona-show');
+      const hideAttr = el.getAttribute('data-persona-hide');
+      const showIfUnknown = el.getAttribute('data-persona-show-unknown') === 'true';
+      const hideIfUnknown = el.getAttribute('data-persona-hide-unknown') === 'true';
+
+      let shouldShow = true;
+
+      // Check "show" condition
+      if (showAttr) {
+        const showPersonas = showAttr.split(',') as PersonaId[];
+        shouldShow = currentPersona !== null && showPersonas.includes(currentPersona);
+      }
+
+      // Check "hide" condition
+      if (hideAttr && shouldShow) {
+        const hidePersonas = hideAttr.split(',') as PersonaId[];
+        if (currentPersona !== null && hidePersonas.includes(currentPersona)) {
+          shouldShow = false;
+        }
+      }
+
+      // Check "showIfUnknown" condition
+      if (showIfUnknown) {
+        shouldShow = currentPersona === null;
+      }
+
+      // Check "hideIfUnknown" condition
+      if (hideIfUnknown && currentPersona === null) {
+        shouldShow = false;
+      }
+
+      // Apply visibility
+      el.classList.remove('persona-content--loading');
+      if (shouldShow) {
+        el.classList.remove('persona-content--hidden');
+        el.classList.add('persona-content--visible');
+      } else {
+        el.classList.remove('persona-content--visible');
+        el.classList.add('persona-content--hidden');
+      }
+    });
+  }
+
+  // Run on page load
+  document.addEventListener('DOMContentLoaded', updatePersonaContent);
+
+  // Also run immediately in case DOM is already loaded
+  if (document.readyState !== 'loading') {
+    updatePersonaContent();
+  }
+
+  // Listen for persona changes
+  window.addEventListener('persona-changed', updatePersonaContent);
+
+  // Re-run on Astro page transitions (View Transitions)
+  document.addEventListener('astro:page-load', updatePersonaContent);
+</script>
