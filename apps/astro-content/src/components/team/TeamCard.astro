@@ -4,7 +4,7 @@
  * Used in team grids and listings
  */
 
-import { buildCloudinaryUrl } from '../../lib/cloudinary';
+import { buildSouthlandUrl } from '../../lib/cloudinary';
 
 interface Props {
   name: string;
@@ -37,7 +37,7 @@ const {
 
 // Build Cloudinary URL for team photo
 const photoUrl = photo
-  ? buildCloudinaryUrl(photo, {
+  ? buildSouthlandUrl(photo, {
       width: variant === 'featured' ? 400 : 200,
       height: variant === 'featured' ? 400 : 200,
       crop: 'fill',
@@ -51,7 +51,7 @@ const photoUrl = photo
 const photoSrcset = photo
   ? [1, 1.5, 2].map(dpr => {
       const size = Math.round((variant === 'featured' ? 400 : 200) * dpr);
-      return `${buildCloudinaryUrl(photo, {
+      return `${buildSouthlandUrl(photo, {
         width: size,
         height: size,
         crop: 'fill',

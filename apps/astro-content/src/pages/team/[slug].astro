@@ -8,7 +8,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import TeamCard from '../../components/team/TeamCard.astro';
 import { getCollection, render } from 'astro:content';
-import { buildCloudinaryUrl } from '../../lib/cloudinary';
+import { buildSouthlandUrl } from '../../lib/cloudinary';
 
 export async function getStaticPaths() {
   const members = await getCollection('team', ({ data }) => {
@@ -30,7 +30,7 @@ const { Content } = await render(member);
 
 // Build photo URL for OG image
 const photoUrl = member.data.photo
-  ? buildCloudinaryUrl(member.data.photo, {
+  ? buildSouthlandUrl(member.data.photo, {
       width: 400,
       height: 400,
       crop: 'fill',
@@ -42,7 +42,7 @@ const photoUrl = member.data.photo
 
 // Large hero photo
 const heroPhotoUrl = member.data.photo
-  ? buildCloudinaryUrl(member.data.photo, {
+  ? buildSouthlandUrl(member.data.photo, {
       width: 600,
       height: 600,
       crop: 'fill',
