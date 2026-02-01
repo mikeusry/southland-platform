@@ -10,20 +10,57 @@ export default config({
       slugField: 'name',
       path: 'src/content/team/*',
       format: { contentField: 'content' },
+      columns: ['role', 'isAuthor', 'isReviewer', 'order'],
+      previewUrl: '/team/{slug}',
+      entryLayout: 'content',
       schema: {
         name: fields.slug({ name: { label: 'Name' } }),
         role: fields.text({ label: 'Role/Title', validation: { isRequired: true } }),
         bio: fields.text({ label: 'Short Bio', multiline: true, validation: { isRequired: true } }),
         photo: fields.text({
           label: 'Photo (Cloudinary Public ID)',
-          description: 'e.g., Staff Headshots 2023/MikeU_1_emtxw6',
+          description: 'e.g., team/MIKE_Usry',
         }),
         email: fields.text({ label: 'Email' }),
         phone: fields.text({ label: 'Phone' }),
         links: fields.object({
           linkedin: fields.url({ label: 'LinkedIn URL' }),
           twitter: fields.url({ label: 'Twitter/X URL' }),
+          website: fields.url({ label: 'Personal Website' }),
         }, { label: 'Social Links' }),
+        // E-E-A-T fields for author credibility
+        credentials: fields.array(fields.text({ label: 'Credential' }), {
+          label: 'Credentials',
+          description: 'Certifications, degrees, awards (e.g., "20+ years in organic agriculture")',
+          itemLabel: props => props.value || 'Credential',
+        }),
+        expertiseAreas: fields.multiselect({
+          label: 'Expertise Areas',
+          description: 'Topics this person is qualified to write about',
+          options: [
+            { label: 'Poultry', value: 'poultry' },
+            { label: 'Turf & Lawn', value: 'turf' },
+            { label: 'Agriculture', value: 'agriculture' },
+            { label: 'Soil Health', value: 'soil-health' },
+            { label: 'Organic Farming', value: 'organic-farming' },
+            { label: 'Waste Management', value: 'waste-management' },
+          ],
+        }),
+        yearsExperience: fields.number({
+          label: 'Years of Experience',
+          description: 'Years working in agriculture/industry',
+        }),
+        isAuthor: fields.checkbox({
+          label: 'Can Author Posts',
+          defaultValue: false,
+          description: 'This person can be selected as a blog author',
+        }),
+        isReviewer: fields.checkbox({
+          label: 'Can Review Posts',
+          defaultValue: false,
+          description: 'This person can be selected as a content reviewer',
+        }),
+        // Display settings
         order: fields.number({
           label: 'Display Order',
           defaultValue: 99,
@@ -50,6 +87,9 @@ export default config({
       slugField: 'title',
       path: 'src/content/episodes/*',
       format: { contentField: 'content' },
+      columns: ['episodeNumber', 'publishDate', 'duration'],
+      previewUrl: '/podcast/{slug}',
+      entryLayout: 'content',
       schema: {
         title: fields.slug({ name: { label: 'Title' } }),
         episodeNumber: fields.number({ label: 'Episode Number', validation: { isRequired: true } }),
@@ -99,18 +139,28 @@ export default config({
       slugField: 'title',
       path: 'src/content/blog/*',
       format: { contentField: 'content' },
+      columns: ['publishDate', 'segment', 'author'],
+      previewUrl: '/blog/{slug}',
+      entryLayout: 'content',
       schema: {
         title: fields.slug({ name: { label: 'Title' } }),
         publishDate: fields.date({ label: 'Publish Date', validation: { isRequired: true } }),
+        updatedDate: fields.date({ label: 'Last Updated', description: 'Set when content is significantly updated' }),
         description: fields.text({ label: 'Description', multiline: true, validation: { isRequired: true } }),
+        // E-E-A-T: Author and Reviewer (team member slugs)
         author: fields.relationship({
           label: 'Author',
+          description: 'Team member who wrote this article',
           collection: 'team',
-          description: 'Select the team member who authored this post',
         }),
-        topics: fields.array(fields.text({ label: 'Topic' }), {
-          label: 'Topics',
-          itemLabel: props => props.value || 'Topic',
+        reviewer: fields.relationship({
+          label: 'Reviewer',
+          description: 'Team member who reviewed/fact-checked this article (for E-E-A-T)',
+          collection: 'team',
+        }),
+        tags: fields.array(fields.text({ label: 'Tag' }), {
+          label: 'Tags',
+          itemLabel: props => props.value || 'Tag',
         }),
         segment: fields.select({
           label: 'Segment',
@@ -122,8 +172,11 @@ export default config({
           ],
           defaultValue: 'general',
         }),
-        featuredImage: fields.text({ label: 'Featured Image (Cloudinary ID)' }),
+        featuredImage: fields.text({ label: 'Featured Image URL' }),
         draft: fields.checkbox({ label: 'Draft', defaultValue: false }),
+        // Shopify migration fields (read-only reference)
+        shopifyId: fields.text({ label: 'Shopify ID', description: 'Original Shopify article ID' }),
+        shopifyHandle: fields.text({ label: 'Shopify Handle', description: 'Original Shopify URL handle' }),
         content: fields.mdx({ label: 'Content' }),
       },
     }),

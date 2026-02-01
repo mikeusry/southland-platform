@@ -1,12 +1,13 @@
 ---
 /**
  * Individual Blog Post Page - /blog/[slug]/
- * Shows full article content with sidebar, related posts, and SEO schema
+ * Shows full article content with E-E-A-T author/reviewer attribution and SEO schema
  */
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import BlogCard from '../../components/blog/BlogCard.astro';
-import { getCollection, render } from 'astro:content';
+import AuthorCard from '../../components/blog/AuthorCard.astro';
+import { getCollection, getEntry, render } from 'astro:content';
 
 export const prerender = true;
 
@@ -29,12 +30,54 @@ const { Content } = await render(post);
 
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com';
 
-// Format date
+// Fetch author from team collection (if it's a slug reference)
+let author = null;
+if (post.data.author) {
+  try {
+    // Try to get as team member slug
+    const teamMember = await getEntry('team', post.data.author);
+    if (teamMember) {
+      author = {
+        ...teamMember.data,
+        slug: post.data.author,
+      };
+    }
+  } catch {
+    // Fallback: author is just a name string (legacy data)
+    author = { name: post.data.author, slug: null };
+  }
+}
+
+// Fetch reviewer from team collection
+let reviewer = null;
+if (post.data.reviewer) {
+  try {
+    const teamMember = await getEntry('team', post.data.reviewer);
+    if (teamMember) {
+      reviewer = {
+        ...teamMember.data,
+        slug: post.data.reviewer,
+      };
+    }
+  } catch {
+    // Reviewer not found
+  }
+}
+
+// Format dates
 const formattedDate = new Date(post.data.publishDate).toLocaleDateString('en-US', {
   year: 'numeric',
   month: 'long',
   day: 'numeric',
 });
+
+const formattedUpdatedDate = post.data.updatedDate
+  ? new Date(post.data.updatedDate).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
+  : null;
 
 // Get related posts (same segment)
 const allPosts = await getCollection('blog', ({ data }) => data.draft !== true);
@@ -51,24 +94,51 @@ const segmentLabels: Record<string, string> = {
   general: 'General',
 };
 
-// Schema markup
+// Build E-E-A-T optimized schema markup
+const buildPersonSchema = (person: any, role: string) => {
+  if (!person || !person.slug) return null;
+  return {
+    '@type': 'Person',
+    name: person.name,
+    url: `${siteUrl}/team/${person.slug}/`,
+    jobTitle: person.role,
+    worksFor: {
+      '@type': 'Organization',
+      name: 'Southland Organics',
+      url: siteUrl,
+    },
+    ...(person.links?.linkedin && { sameAs: [person.links.linkedin] }),
+    ...(person.photo && { image: `https://res.cloudinary.com/southland-organics/image/upload/w_400/${person.photo}` }),
+  };
+};
+
+const authorSchema = author?.slug ? buildPersonSchema(author, 'author') : {
+  '@type': 'Organization',
+  name: author?.name || 'Southland Organics',
+  url: siteUrl,
+};
+
 const articleSchema = {
   '@context': 'https://schema.org',
   '@type': 'BlogPosting',
   headline: post.data.title,
   description: post.data.description,
   datePublished: new Date(post.data.publishDate).toISOString(),
-  dateModified: new Date(post.data.publishDate).toISOString(),
+  dateModified: post.data.updatedDate
+    ? new Date(post.data.updatedDate).toISOString()
+    : new Date(post.data.publishDate).toISOString(),
   url: `${siteUrl}/blog/${postSlug}/`,
   image: post.data.featuredImage || `${siteUrl}/og-image.jpg`,
-  author: {
-    '@type': 'Organization',
-    name: post.data.author || 'Southland Organics',
-  },
+  author: authorSchema,
+  ...(reviewer?.slug && { reviewedBy: buildPersonSchema(reviewer, 'reviewer') }),
   publisher: {
     '@type': 'Organization',
     name: 'Southland Organics',
     url: siteUrl,
+    logo: {
+      '@type': 'ImageObject',
+      url: `${siteUrl}/logo.png`,
+    },
   },
   mainEntityOfPage: {
     '@type': 'WebPage',
@@ -130,10 +200,22 @@ const articleSchema = {
         <time datetime={new Date(post.data.publishDate).toISOString()}>
           {formattedDate}
         </time>
-        {post.data.author && (
+        {formattedUpdatedDate && formattedUpdatedDate !== formattedDate && (
           <>
             <span>•</span>
-            <span>By {post.data.author}</span>
+            <span>Updated {formattedUpdatedDate}</span>
+          </>
+        )}
+        {author && (
+          <>
+            <span>•</span>
+            {author.slug ? (
+              <a href={`/team/${author.slug}/`} class="hover:text-white transition-colors">
+                By {author.name}
+              </a>
+            ) : (
+              <span>By {author.name}</span>
+            )}
           </>
         )}
       </div>
@@ -170,6 +252,40 @@ const articleSchema = {
       ">
         <Content />
       </div>
+
+      <!-- Author & Reviewer Cards (E-E-A-T) -->
+      {(author?.slug || reviewer?.slug) && (
+        <div class="mt-12 pt-8 border-t border-gray-200 space-y-6">
+          {author?.slug && (
+            <AuthorCard
+              name={author.name}
+              slug={author.slug}
+              role={author.role}
+              bio={author.bio}
+              photo={author.photo}
+              credentials={author.credentials}
+              yearsExperience={author.yearsExperience}
+              links={author.links}
+              variant="full"
+              label="Written by"
+            />
+          )}
+          {reviewer?.slug && (
+            <AuthorCard
+              name={reviewer.name}
+              slug={reviewer.slug}
+              role={reviewer.role}
+              bio={reviewer.bio}
+              photo={reviewer.photo}
+              credentials={reviewer.credentials}
+              yearsExperience={reviewer.yearsExperience}
+              links={reviewer.links}
+              variant="full"
+              label="Reviewed by"
+            />
+          )}
+        </div>
+      )}
 
       <!-- Tags -->
       {post.data.tags && post.data.tags.length > 0 && (

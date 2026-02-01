@@ -5,14 +5,17 @@
  * Also serves as author page for blog posts
  */
 
+export const prerender = true;
+
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import TeamCard from '../../components/team/TeamCard.astro';
 import { getCollection, render } from 'astro:content';
 import { buildSouthlandUrl } from '../../lib/cloudinary';
 
 export async function getStaticPaths() {
+  // Include active members AND anyone who is an author (for author pages of former employees)
   const members = await getCollection('team', ({ data }) => {
-    return data.active !== false;
+    return data.active !== false || data.isAuthor === true;
   });
 
   return members.map((member) => {

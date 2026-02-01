@@ -1,0 +1,158 @@
+---
+/**
+ * AuthorCard - Displays author information for E-E-A-T
+ * Shows photo, name, role, credentials, and links to author page
+ */
+
+import { buildSouthlandUrl } from '../../lib/cloudinary';
+
+interface Props {
+  name: string;
+  slug: string;
+  role: string;
+  bio: string;
+  photo?: string;
+  credentials?: string[];
+  yearsExperience?: number;
+  links?: {
+    linkedin?: string;
+    twitter?: string;
+    website?: string;
+  };
+  variant?: 'compact' | 'full'; // compact for inline, full for end of article
+  label?: string; // "Written by", "Reviewed by", etc.
+}
+
+const {
+  name,
+  slug,
+  role,
+  bio,
+  photo,
+  credentials = [],
+  yearsExperience,
+  links,
+  variant = 'full',
+  label = 'Written by',
+} = Astro.props;
+
+// Build photo URL from Cloudinary
+const photoUrl = photo
+  ? buildSouthlandUrl(photo, { width: variant === 'compact' ? 80 : 160, height: variant === 'compact' ? 80 : 160, crop: 'fill', gravity: 'face' })
+  : null;
+
+// Build credential string
+const credentialDisplay = credentials.length > 0
+  ? credentials.slice(0, 2).join(' • ')
+  : yearsExperience
+    ? `${yearsExperience}+ years experience`
+    : null;
+---
+
+{variant === 'compact' ? (
+  <!-- Compact variant - inline author mention -->
+  <div class="flex items-center gap-3">
+    {photoUrl && (
+      <a href={`/team/${slug}/`} class="flex-shrink-0">
+        <img
+          src={photoUrl}
+          alt={name}
+          class="w-10 h-10 rounded-full object-cover"
+          loading="lazy"
+        />
+      </a>
+    )}
+    <div class="min-w-0">
+      <p class="text-xs text-gray-500 uppercase tracking-wide">{label}</p>
+      <a href={`/team/${slug}/`} class="font-medium text-shopify-title hover:text-southland-green transition-colors">
+        {name}
+      </a>
+      {credentialDisplay && (
+        <p class="text-xs text-gray-500 truncate">{credentialDisplay}</p>
+      )}
+    </div>
+  </div>
+) : (
+  <!-- Full variant - detailed author box -->
+  <div class="bg-gray-50 rounded-xl p-6 border border-gray-100">
+    <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-4">{label}</p>
+    <div class="flex gap-4">
+      {photoUrl && (
+        <a href={`/team/${slug}/`} class="flex-shrink-0">
+          <img
+            src={photoUrl}
+            alt={name}
+            class="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-2 border-white shadow-sm"
+            loading="lazy"
+          />
+        </a>
+      )}
+      <div class="flex-1 min-w-0">
+        <a href={`/team/${slug}/`} class="text-lg font-bold text-shopify-title hover:text-southland-green transition-colors">
+          {name}
+        </a>
+        <p class="text-southland-green font-medium text-sm">{role}</p>
+
+        {credentialDisplay && (
+          <p class="text-xs text-gray-500 mt-1">{credentialDisplay}</p>
+        )}
+
+        <p class="text-gray-600 text-sm mt-2 line-clamp-2">{bio}</p>
+
+        {links && (links.linkedin || links.twitter || links.website) && (
+          <div class="flex gap-3 mt-3">
+            {links.linkedin && (
+              <a
+                href={links.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-gray-400 hover:text-[#0077b5] transition-colors"
+                title={`${name} on LinkedIn`}
+              >
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                </svg>
+              </a>
+            )}
+            {links.twitter && (
+              <a
+                href={links.twitter}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-gray-400 hover:text-black transition-colors"
+                title={`${name} on X`}
+              >
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+              </a>
+            )}
+            {links.website && (
+              <a
+                href={links.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-gray-400 hover:text-southland-green transition-colors"
+                title={`${name}'s website`}
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                </svg>
+              </a>
+            )}
+          </div>
+        )}
+
+        <a
+          href={`/team/${slug}/`}
+          class="inline-flex items-center gap-1 text-sm text-southland-green hover:underline mt-3"
+        >
+          View full profile
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+)}

@@ -114,21 +114,25 @@ const topicsCollection = defineCollection({
   }),
 });
 
-// Blog posts schema - migrated from Shopify
+// Blog posts schema - migrated from Shopify (E-E-A-T optimized)
 // Note: slug is auto-generated from filename in Astro v5
 const blogCollection = defineCollection({
   type: 'content',
   schema: z.object({
     title: z.string(),
     publishDate: z.coerce.date(),
+    updatedDate: z.coerce.date().optional(), // For "Last updated" display
     description: z.string(),
-    author: z.string().optional(),
+    // E-E-A-T: Author and Reviewer as team member slugs
+    author: z.string().optional(), // Team member slug (e.g., "mike-usry")
+    reviewer: z.string().optional(), // Team member who reviewed/fact-checked
+    // Content classification
     tags: z.array(z.string()).optional().default([]),
     segment: z.enum(['poultry', 'turf', 'agriculture', 'general']).optional().default('general'),
     featuredImage: z.string().optional(),
     draft: z.boolean().optional().default(false),
     // Shopify migration fields
-    shopifyId: z.number().optional(),
+    shopifyId: z.union([z.number(), z.string()]).optional(),
     shopifyHandle: z.string().optional(),
     // Legacy field mapping
     topics: z.array(z.string()).optional().default([]),
@@ -137,7 +141,7 @@ const blogCollection = defineCollection({
   }),
 });
 
-// Team members schema - for about pages and blog author pages
+// Team members schema - for about pages and blog author pages (E-E-A-T optimized)
 // Note: slug is auto-generated from filename in Astro v5
 const teamCollection = defineCollection({
   type: 'content',
@@ -151,7 +155,15 @@ const teamCollection = defineCollection({
     links: z.object({
       linkedin: z.string().optional(),
       twitter: z.string().optional(),
+      website: z.string().optional(),
     }).optional(),
+    // E-E-A-T fields for author credibility
+    credentials: z.array(z.string()).optional().default([]), // Certifications, degrees, awards
+    expertiseAreas: z.array(z.enum(['poultry', 'turf', 'agriculture', 'soil-health', 'organic-farming', 'waste-management'])).optional().default([]),
+    yearsExperience: z.number().optional(), // Years in the industry
+    isAuthor: z.boolean().optional().default(false), // Can author blog posts
+    isReviewer: z.boolean().optional().default(false), // Can review/fact-check content
+    // Display settings
     order: z.number().optional().default(99),
     featured: z.boolean().optional().default(false), // Show on homepage/contact
     active: z.boolean().optional().default(true),    // Still with company
