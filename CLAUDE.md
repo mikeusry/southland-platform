@@ -151,12 +151,12 @@ Comprehensive Customer Data Platform strategy combining:
 
 ### Current CDP Phase
 
-**Status:** Week 2 Complete - Reality Tunnels Infrastructure
+**Status:** Week 4 Complete - Persona Scoring Worker
 
 | Track | Focus | Owner |
 |-------|-------|-------|
 | **Track A: Ads** | Consolidate 99 → 15 campaigns | Marketing |
-| **Track B: CDP** | Reality Tunnels + Persona Content | Dev/Data |
+| **Track B: CDP** | Reality Tunnels Content (Betty) | Dev/Data |
 
 ### CDP Build Order
 
@@ -164,9 +164,9 @@ Comprehensive Customer Data Platform strategy combining:
 |------|-------------|--------|
 | 1 | Decision Engine + Outcome Surveys | ✅ COMPLETE |
 | 2 | Reality Tunnels Infrastructure | ✅ COMPLETE |
-| 3 | Semantic Search + First Proofs | Planned |
-| 4 | Persona Scoring Worker | Planned |
-| 5-6 | Reality Tunnels Content (Betty) | Planned |
+| 3 | Semantic Search + First Proofs | ✅ COMPLETE |
+| 4 | Persona Scoring Worker | ✅ COMPLETE |
+| 5-6 | Reality Tunnels Content (Betty) | ← NEXT |
 | 7-8 | Reality Tunnels Content (Bill) — GATED | Planned |
 
 ### Reality Tunnels (Week 2)
