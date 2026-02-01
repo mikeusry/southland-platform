@@ -1,0 +1,257 @@
+---
+/**
+ * Chapter markers component - clickable list that syncs with player
+ */
+
+interface Chapter {
+  time: number;
+  title: string;
+}
+
+interface Props {
+  chapters: Chapter[];
+  episodeSlug: string;
+  episodeNumber: number;
+  class?: string;
+}
+
+const {
+  chapters,
+  episodeSlug,
+  episodeNumber,
+  class: className = '',
+} = Astro.props;
+
+// Format time (seconds to MM:SS or HH:MM:SS)
+function formatTime(seconds: number): string {
+  const hours = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+
+  if (hours > 0) {
+    return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+---
+
+{chapters.length > 0 && (
+  <div
+    class={`chapter-markers ${className}`}
+    data-episode-slug={episodeSlug}
+    data-episode-number={episodeNumber}
+  >
+    <h3 class="font-semibold text-gray-900 mb-3">Chapters</h3>
+    <div class="chapter-list">
+      {chapters.map((chapter, index) => (
+        <button
+          class="chapter-marker group"
+          data-time={chapter.time}
+          data-chapter-index={index}
+          title={`Jump to ${formatTime(chapter.time)}`}
+        >
+          <span class="chapter-time">{formatTime(chapter.time)}</span>
+          <span class="chapter-title">{chapter.title}</span>
+          <svg class="chapter-play-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+          </svg>
+        </button>
+      ))}
+    </div>
+  </div>
+)}
+
+<style>
+  .chapter-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .chapter-marker {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.625rem 0.75rem;
+    text-align: left;
+    border-radius: 0.5rem;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+  }
+
+  .chapter-marker:hover {
+    background-color: #f0fdf4;
+  }
+
+  .chapter-marker.active {
+    background-color: #dcfce7;
+  }
+
+  .chapter-marker.active .chapter-time {
+    color: #166534;
+    background-color: #bbf7d0;
+  }
+
+  .chapter-marker.active .chapter-title {
+    color: #166534;
+    font-weight: 500;
+  }
+
+  .chapter-time {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #44883e;
+    background-color: #f0fdf4;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    min-width: 3.5rem;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .chapter-marker:hover .chapter-time {
+    background-color: #dcfce7;
+    color: #166534;
+  }
+
+  .chapter-title {
+    flex: 1;
+    color: #374151;
+    font-size: 0.9375rem;
+  }
+
+  .chapter-marker:hover .chapter-title {
+    color: #166534;
+  }
+
+  .chapter-play-icon {
+    width: 1rem;
+    height: 1rem;
+    color: #9ca3af;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    flex-shrink: 0;
+  }
+
+  .chapter-marker:hover .chapter-play-icon {
+    opacity: 1;
+    color: #44883e;
+  }
+
+  .chapter-marker.active .chapter-play-icon {
+    opacity: 1;
+    color: #166534;
+  }
+</style>
+
+<script>
+  // Chapter marker click handler
+  document.querySelectorAll('.chapter-markers').forEach((container) => {
+    const buttons = container.querySelectorAll('.chapter-marker');
+    const episodeSlug = (container as HTMLElement).dataset.episodeSlug;
+    const episodeNumber = parseInt((container as HTMLElement).dataset.episodeNumber || '0');
+
+    buttons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const time = parseInt((button as HTMLElement).dataset.time || '0');
+        const chapterIndex = parseInt((button as HTMLElement).dataset.chapterIndex || '0');
+
+        // Find players and seek
+        const audioPlayer = document.querySelector('.audio-player') as any;
+        const videoEmbed = document.querySelector('.video-embed video') as HTMLVideoElement;
+        const gumletIframe = document.querySelector('.gumlet-iframe') as HTMLIFrameElement;
+
+        if (audioPlayer?.seekTo) {
+          audioPlayer.seekTo(time);
+        } else if (videoEmbed) {
+          videoEmbed.currentTime = time;
+          if (videoEmbed.paused) {
+            videoEmbed.play();
+          }
+        } else if (gumletIframe) {
+          // Update Gumlet iframe src with timestamp parameter
+          const gumletId = gumletIframe.dataset.gumletId;
+          if (gumletId) {
+            gumletIframe.src = `https://play.gumlet.io/embed/${gumletId}?preload=metadata&autoplay=true&t=${time}`;
+          }
+        }
+
+        // Update active state
+        buttons.forEach((b) => b.classList.remove('active'));
+        button.classList.add('active');
+
+        // Scroll video into view smoothly
+        const videoContainer = document.querySelector('.video-embed');
+        if (videoContainer) {
+          videoContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Track chapter click
+        if (window.pdPixel) {
+          window.pdPixel.track('podcast_chapter_click', {
+            episode_slug: episodeSlug,
+            episode_number: episodeNumber,
+            chapter_index: chapterIndex,
+            chapter_time: time,
+          });
+        }
+      });
+    });
+  });
+
+  // Listen for Gumlet player time updates
+  window.addEventListener('message', (event) => {
+    if (event.origin !== 'https://play.gumlet.io') return;
+
+    const data = event.data;
+    if (data?.type === 'timeupdate' && typeof data.currentTime === 'number') {
+      updateActiveChapterByTime(data.currentTime);
+    }
+  });
+
+  // Update active chapter based on current time
+  function updateActiveChapterByTime(currentTime: number) {
+    const chapters = document.querySelectorAll('.chapter-marker');
+    let activeChapter: Element | null = null;
+
+    chapters.forEach((chapter) => {
+      const time = parseInt((chapter as HTMLElement).dataset.time || '0');
+      if (currentTime >= time) {
+        activeChapter = chapter;
+      }
+    });
+
+    chapters.forEach((chapter) => {
+      chapter.classList.toggle('active', chapter === activeChapter);
+    });
+  }
+
+  function updateActiveChapter() {
+    const audioPlayer = document.querySelector('.audio-player') as any;
+    const videoEmbed = document.querySelector('.video-embed video') as HTMLVideoElement;
+
+    let currentTime = 0;
+    if (audioPlayer?.getCurrentTime) {
+      currentTime = audioPlayer.getCurrentTime();
+    } else if (videoEmbed) {
+      currentTime = videoEmbed.currentTime;
+    }
+
+    updateActiveChapterByTime(currentTime);
+  }
+
+  // Listen to timeupdate events for non-Gumlet players
+  const audioElement = document.querySelector('.audio-element');
+  const videoElement = document.querySelector('.video-embed video');
+
+  if (audioElement) {
+    audioElement.addEventListener('timeupdate', updateActiveChapter);
+  }
+  if (videoElement) {
+    videoElement.addEventListener('timeupdate', updateActiveChapter);
+  }
+</script>

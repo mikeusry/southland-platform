@@ -1,0 +1,53 @@
+---
+/**
+ * Footer Component - Wrapper for shared @southland/ui-react Footer
+ * Data loaded from layout.json (synced from Shopify Storefront API)
+ *
+ * Note: This extends the base footer with podcast-specific links
+ */
+import { Footer as FooterReact } from '@southland/ui-react';
+import layout from '../../data/layout.json';
+
+// Extend footer columns with podcast links for this microsite
+const podcastColumn = {
+  title: 'Ag & Culture Podcast',
+  links: [
+    { label: 'All Episodes', href: '/podcast/' },
+    { label: 'Topics', href: '/podcast/topics/' },
+    { label: 'Guests', href: '/podcast/guests/' },
+  ]
+};
+
+// Build columns: use layout data if available, fallback to default structure
+const baseColumns = layout.footer.columns.length > 0 && layout.footer.columns[0].links.length > 0
+  ? layout.footer.columns
+  : [
+      {
+        title: 'Products',
+        links: [
+          { label: 'Poultry', href: 'https://southlandorganics.com/collections/poultry' },
+          { label: 'Lawn & Garden', href: 'https://southlandorganics.com/collections/lawn-garden' },
+          { label: 'Septic & Waste', href: 'https://southlandorganics.com/collections/septic-waste' },
+          { label: 'Swine', href: 'https://southlandorganics.com/collections/swine' },
+        ]
+      },
+      {
+        title: 'Company',
+        links: [
+          { label: 'About', href: 'https://southlandorganics.com/pages/about' },
+          { label: 'Contact', href: 'https://southlandorganics.com/pages/contact' },
+          { label: 'Blog', href: 'https://southlandorganics.com/blogs/blog' },
+        ]
+      }
+    ];
+
+const columns = [...baseColumns.slice(0, 3), podcastColumn];
+---
+
+<FooterReact
+  client:load
+  columns={columns}
+  copyright={layout.footer.copyright}
+  socialLinks={layout.footer.socialLinks}
+  logoUrl={layout.header.logoUrl}
+/>

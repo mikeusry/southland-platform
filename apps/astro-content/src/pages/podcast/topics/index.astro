@@ -1,0 +1,210 @@
+---
+/**
+ * Topic Browser Page - /podcast/topics/
+ * Browse episodes by topic
+ */
+
+import PodcastLayout from '../../../layouts/PodcastLayout.astro';
+import TopicTag from '../../../components/shared/TopicTag.astro';
+import { getCollection } from 'astro:content';
+
+// Get all topics
+const allTopics = await getCollection('topics');
+
+// Get all episodes to count topic usage
+const allEpisodes = await getCollection('episodes', ({ data }) => {
+  return data.draft !== true;
+});
+
+// Build topic episode counts
+const topicCounts: Record<string, number> = {};
+allEpisodes.forEach((episode) => {
+  episode.data.topics?.forEach((topic) => {
+    topicCounts[topic] = (topicCounts[topic] || 0) + 1;
+  });
+});
+
+// Sort topics by episode count
+const sortedTopics = [...allTopics].sort((a, b) => {
+  const aCount = topicCounts[a.id] || 0;
+  const bCount = topicCounts[b.id] || 0;
+  return bCount - aCount;
+});
+
+// Group by segment
+const segmentGroups: Record<string, typeof sortedTopics> = {
+  poultry: [],
+  turf: [],
+  agriculture: [],
+  general: [],
+};
+
+sortedTopics.forEach((topic) => {
+  const segment = topic.data.segment || 'general';
+  segmentGroups[segment].push(topic);
+});
+---
+
+<PodcastLayout
+  title="Topics"
+  description="Browse Ag & Culture Podcast episodes by topic - from poultry health to sustainable farming."
+  breadcrumbs={[{ label: 'Topics', href: '/podcast/topics/' }]}
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    {/* Header */}
+    <header class="text-center mb-12">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+        Browse by Topic
+      </h1>
+      <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+        Explore our episodes organized by subject. From poultry health to sustainable farming practices.
+      </p>
+    </header>
+
+    {/* All Topics Grid */}
+    {sortedTopics.length > 0 ? (
+      <div class="space-y-12">
+        {/* Poultry Topics */}
+        {segmentGroups.poultry.length > 0 && (
+          <section>
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <span>🐔</span>
+              Poultry
+            </h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {segmentGroups.poultry.map((topic) => (
+                <a
+                  href={`/podcast/topics/${topic.id}/`}
+                  class="block bg-white rounded-xl border border-gray-100 p-6 hover:shadow-md transition-shadow"
+                >
+                  <div class="flex items-start justify-between">
+                    <div>
+                      <h3 class="font-semibold text-gray-900 mb-1">{topic.data.name}</h3>
+                      <p class="text-sm text-gray-600 line-clamp-2">{topic.data.description}</p>
+                    </div>
+                    {topic.data.icon && (
+                      <span class="text-2xl">{topic.data.icon}</span>
+                    )}
+                  </div>
+                  <div class="mt-4">
+                    <span class="text-sm font-medium text-southland-green">
+                      {topicCounts[topic.id] || 0} episode{(topicCounts[topic.id] || 0) !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Turf Topics */}
+        {segmentGroups.turf.length > 0 && (
+          <section>
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <span>🌿</span>
+              Turf & Lawn Care
+            </h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {segmentGroups.turf.map((topic) => (
+                <a
+                  href={`/podcast/topics/${topic.id}/`}
+                  class="block bg-white rounded-xl border border-gray-100 p-6 hover:shadow-md transition-shadow"
+                >
+                  <div class="flex items-start justify-between">
+                    <div>
+                      <h3 class="font-semibold text-gray-900 mb-1">{topic.data.name}</h3>
+                      <p class="text-sm text-gray-600 line-clamp-2">{topic.data.description}</p>
+                    </div>
+                    {topic.data.icon && (
+                      <span class="text-2xl">{topic.data.icon}</span>
+                    )}
+                  </div>
+                  <div class="mt-4">
+                    <span class="text-sm font-medium text-southland-green">
+                      {topicCounts[topic.id] || 0} episode{(topicCounts[topic.id] || 0) !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Agriculture Topics */}
+        {segmentGroups.agriculture.length > 0 && (
+          <section>
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <span>🌾</span>
+              Agriculture
+            </h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {segmentGroups.agriculture.map((topic) => (
+                <a
+                  href={`/podcast/topics/${topic.id}/`}
+                  class="block bg-white rounded-xl border border-gray-100 p-6 hover:shadow-md transition-shadow"
+                >
+                  <div class="flex items-start justify-between">
+                    <div>
+                      <h3 class="font-semibold text-gray-900 mb-1">{topic.data.name}</h3>
+                      <p class="text-sm text-gray-600 line-clamp-2">{topic.data.description}</p>
+                    </div>
+                    {topic.data.icon && (
+                      <span class="text-2xl">{topic.data.icon}</span>
+                    )}
+                  </div>
+                  <div class="mt-4">
+                    <span class="text-sm font-medium text-southland-green">
+                      {topicCounts[topic.id] || 0} episode{(topicCounts[topic.id] || 0) !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* General Topics */}
+        {segmentGroups.general.length > 0 && (
+          <section>
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <span>📚</span>
+              General Topics
+            </h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {segmentGroups.general.map((topic) => (
+                <a
+                  href={`/podcast/topics/${topic.id}/`}
+                  class="block bg-white rounded-xl border border-gray-100 p-6 hover:shadow-md transition-shadow"
+                >
+                  <div class="flex items-start justify-between">
+                    <div>
+                      <h3 class="font-semibold text-gray-900 mb-1">{topic.data.name}</h3>
+                      <p class="text-sm text-gray-600 line-clamp-2">{topic.data.description}</p>
+                    </div>
+                    {topic.data.icon && (
+                      <span class="text-2xl">{topic.data.icon}</span>
+                    )}
+                  </div>
+                  <div class="mt-4">
+                    <span class="text-sm font-medium text-southland-green">
+                      {topicCounts[topic.id] || 0} episode{(topicCounts[topic.id] || 0) !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+    ) : (
+      <div class="text-center py-12">
+        <div class="w-20 h-20 mx-auto mb-4 text-gray-200">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+          </svg>
+        </div>
+        <p class="text-gray-500">Topic directory coming soon.</p>
+      </div>
+    )}
+  </div>
+</PodcastLayout>

@@ -1,0 +1,162 @@
+---
+/**
+ * Video embed component - supports Gumlet, YouTube, and direct video
+ * Tracks play events via Southland pixel
+ */
+
+interface Props {
+  gumletId?: string;
+  youtubeUrl?: string;
+  videoUrl?: string;
+  title: string;
+  episodeNumber: number;
+  episodeSlug: string;
+  poster?: string;
+  autoplay?: boolean;
+  class?: string;
+}
+
+const {
+  gumletId,
+  youtubeUrl,
+  videoUrl,
+  title,
+  episodeNumber,
+  episodeSlug,
+  poster,
+  autoplay = false,
+  class: className = '',
+} = Astro.props;
+
+// Extract YouTube video ID
+const youtubeId = youtubeUrl?.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/)?.[1];
+
+// Determine embed source
+const embedSource = gumletId ? 'gumlet' : youtubeId ? 'youtube' : videoUrl ? 'direct' : null;
+---
+
+<div
+  class={`video-embed relative aspect-video bg-black rounded-xl overflow-hidden ${className}`}
+  data-episode-slug={episodeSlug}
+  data-episode-number={episodeNumber}
+  data-embed-source={embedSource}
+>
+  {embedSource === 'gumlet' && gumletId && (
+    <iframe
+      id="gumlet-player"
+      src={`https://play.gumlet.io/embed/${gumletId}?autoplay=${autoplay ? 1 : 0}`}
+      class="absolute inset-0 w-full h-full gumlet-iframe"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen
+      title={title}
+      data-gumlet-id={gumletId}
+    />
+  )}
+
+  {embedSource === 'youtube' && youtubeId && (
+    <iframe
+      src={`https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=${autoplay ? 1 : 0}&rel=0&modestbranding=1`}
+      class="absolute inset-0 w-full h-full"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen
+      title={title}
+    />
+  )}
+
+  {embedSource === 'direct' && videoUrl && (
+    <video
+      class="absolute inset-0 w-full h-full video-player"
+      poster={poster}
+      controls
+      preload="metadata"
+    >
+      <source src={videoUrl} type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+  )}
+
+  {!embedSource && (
+    <div class="absolute inset-0 flex items-center justify-center bg-gray-900 text-white">
+      <div class="text-center">
+        <svg class="w-16 h-16 mx-auto mb-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        </svg>
+        <p class="text-gray-400">Video unavailable</p>
+      </div>
+    </div>
+  )}
+</div>
+
+<script>
+  // Video tracking
+  document.querySelectorAll('.video-embed').forEach((container) => {
+    const episodeSlug = (container as HTMLElement).dataset.episodeSlug;
+    const episodeNumber = parseInt((container as HTMLElement).dataset.episodeNumber || '0');
+    const embedSource = (container as HTMLElement).dataset.embedSource;
+
+    // Track direct video player
+    const videoPlayer = container.querySelector('.video-player') as HTMLVideoElement;
+    if (videoPlayer) {
+      let trackedMilestones = new Set<number>();
+
+      videoPlayer.addEventListener('play', () => {
+        if (window.pdPixel) {
+          window.pdPixel.track('podcast_play', {
+            episode_slug: episodeSlug,
+            episode_number: episodeNumber,
+            source: embedSource,
+          });
+        }
+      });
+
+      videoPlayer.addEventListener('timeupdate', () => {
+        const progress = (videoPlayer.currentTime / videoPlayer.duration) * 100;
+        const milestones = [25, 50, 75, 100];
+
+        milestones.forEach((milestone) => {
+          if (progress >= milestone && !trackedMilestones.has(milestone)) {
+            trackedMilestones.add(milestone);
+            if (window.pdPixel) {
+              window.pdPixel.track('podcast_progress', {
+                episode_slug: episodeSlug,
+                episode_number: episodeNumber,
+                progress_percent: milestone,
+                current_time: Math.floor(videoPlayer.currentTime),
+              });
+            }
+          }
+        });
+      });
+
+      videoPlayer.addEventListener('ended', () => {
+        if (window.pdPixel) {
+          window.pdPixel.track('podcast_complete', {
+            episode_slug: episodeSlug,
+            episode_number: episodeNumber,
+            duration_seconds: Math.floor(videoPlayer.duration),
+          });
+        }
+      });
+    }
+
+    // For embedded players (YouTube, Gumlet), we rely on their APIs
+    // or manual interaction tracking
+    if (embedSource === 'youtube' || embedSource === 'gumlet') {
+      // Track when iframe is clicked/focused
+      const iframe = container.querySelector('iframe');
+      if (iframe) {
+        iframe.addEventListener('load', () => {
+          if (window.pdPixel) {
+            window.pdPixel.track('podcast_embed_loaded', {
+              episode_slug: episodeSlug,
+              episode_number: episodeNumber,
+              source: embedSource,
+            });
+          }
+        });
+      }
+    }
+  });
+</script>

@@ -1,0 +1,214 @@
+{
+  "_meta": {
+    "synced": "2026-02-01T16:12:34.246Z",
+    "source": "Shopify Storefront API"
+  },
+  "header": {
+    "logoUrl": "https://cdn.shopify.com/s/files/1/0794/9519/files/Southland_Orgnaics_Horizontal_a76ce835-f89f-43e6-8a16-9bcf122d4922.png?v=1730460323",
+    "logoAlt": "Southland Organics",
+    "navigation": [
+      {
+        "label": "Home",
+        "href": "https://www.southlandorganics.com/"
+      },
+      {
+        "label": "Poultry",
+        "href": "https://www.southlandorganics.com/collections/poultry",
+        "children": [
+          {
+            "label": "Products",
+            "href": "https://www.southlandorganics.com/collections/all?filter.p.product_type=Poultry"
+          },
+          {
+            "label": "Poultry Broilers",
+            "href": "https://www.southlandorganics.com/collections/poultry-broilers"
+          },
+          {
+            "label": "Poultry Layers and Breeders",
+            "href": "https://www.southlandorganics.com/collections/poultry-breeders"
+          },
+          {
+            "label": "Turkey",
+            "href": "https://www.southlandorganics.com/collections/turkey"
+          },
+          {
+            "label": "Game Birds",
+            "href": "https://www.southlandorganics.com/collections/game-birds"
+          },
+          {
+            "label": "Backyard Birds",
+            "href": "https://www.southlandorganics.com/collections/backyard-birds"
+          },
+          {
+            "label": "Poultry Biosecurity",
+            "href": "https://www.southlandorganics.com/blogs/poultry-biosecurity"
+          }
+        ]
+      },
+      {
+        "label": "Lawn & Garden",
+        "href": "https://www.southlandorganics.com/collections/turf",
+        "children": [
+          {
+            "label": "Products",
+            "href": "https://www.southlandorganics.com/collections/all?filter.p.product_type=Lawn+%26+Garden"
+          },
+          {
+            "label": "Lawn Care",
+            "href": "https://www.southlandorganics.com/collections/homeowners"
+          },
+          {
+            "label": "Lawn Care Programs",
+            "href": "https://www.southlandorganics.com/products/natural-lawn-care-products"
+          },
+          {
+            "label": "Garden",
+            "href": "https://www.southlandorganics.com/collections/crops"
+          },
+          {
+            "label": "Hydroseeders",
+            "href": "https://www.southlandorganics.com/pages/hydroseeding"
+          },
+          {
+            "label": "Landscapers",
+            "href": "https://www.southlandorganics.com/collections/landscapers"
+          },
+          {
+            "label": "Golf Courses",
+            "href": "https://www.southlandorganics.com/collections/golf-courses"
+          },
+          {
+            "label": "Humate Hub",
+            "href": "https://www.southlandorganics.com/blogs/humate-hub"
+          }
+        ]
+      },
+      {
+        "label": "Septic & Waste",
+        "href": "https://www.southlandorganics.com/collections/waste",
+        "children": [
+          {
+            "label": "Products",
+            "href": "https://www.southlandorganics.com/collections/all?filter.p.product_type=Waste"
+          },
+          {
+            "label": "Septic Care",
+            "href": "https://www.southlandorganics.com/products/pour-the-port-septic-tank-treatment"
+          },
+          {
+            "label": "Odor Control",
+            "href": "https://www.southlandorganics.com/collections/waste"
+          },
+          {
+            "label": "Sanitizers",
+            "href": "https://www.southlandorganics.com/collections/sanitizers"
+          }
+        ]
+      },
+      {
+        "label": "Swine",
+        "href": "https://www.southlandorganics.com/collections/pig-and-swine-supplements"
+      },
+      {
+        "label": "About",
+        "href": "https://www.southlandorganics.com/pages/contact",
+        "children": [
+          {
+            "label": "Contact",
+            "href": "https://www.southlandorganics.com/pages/contact"
+          },
+          {
+            "label": "Blog",
+            "href": "https://www.southlandorganics.com/blogs/news"
+          },
+          {
+            "label": "Humate Hub",
+            "href": "https://www.southlandorganics.com/blogs/humate-hub"
+          },
+          {
+            "label": "Case Studies",
+            "href": "https://www.southlandorganics.com/blogs/case-studies"
+          },
+          {
+            "label": "Why Southland?",
+            "href": "https://www.southlandorganics.com/pages/why-southland"
+          },
+          {
+            "label": "Loyalty Program",
+            "href": "https://www.southlandorganics.com/pages/southland-organics-rewards"
+          },
+          {
+            "label": "FAQs",
+            "href": "https://www.southlandorganics.com/pages/faqs"
+          }
+        ]
+      }
+    ]
+  },
+  "footer": {
+    "columns": [
+      {
+        "title": "Why Choose Southland",
+        "links": []
+      },
+      {
+        "title": "Store Locator",
+        "links": []
+      },
+      {
+        "title": "Become a Distributor",
+        "links": []
+      },
+      {
+        "title": "Shopify Collective",
+        "links": []
+      },
+      {
+        "title": "Poultry Biosecurity Resources",
+        "links": []
+      },
+      {
+        "title": "Blog Posts",
+        "links": []
+      },
+      {
+        "title": "Case Studies",
+        "links": []
+      },
+      {
+        "title": "Search",
+        "links": []
+      },
+      {
+        "title": "Contact",
+        "links": []
+      },
+      {
+        "title": "Rewards Program",
+        "links": []
+      },
+      {
+        "title": "Subscriber Portal",
+        "links": []
+      }
+    ],
+    "copyright": "© 2026 Southland Organics. All rights reserved.",
+    "socialLinks": [
+      {
+        "platform": "facebook",
+        "url": "https://facebook.com/southlandorganics",
+        "icon": "facebook"
+      },
+      {
+        "platform": "instagram",
+        "url": "https://instagram.com/southlandorganics",
+        "icon": "instagram"
+      },
+      {
+        "platform": "youtube",
+        "url": "https://youtube.com/@southlandorganics",
+        "icon": "youtube"
+      }
+    ]
+  }
+}

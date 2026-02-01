@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "description": "Route configuration for Southland Platform hybrid routing",
+  "include": ["/*"],
+  "exclude": [
+    "/podcast/*",
+    "/admin/*",
+    "/_astro/*",
+    "/fonts/*",
+    "/images/*",
+    "/favicon.svg",
+    "/favicon.ico",
+    "/manifest.json",
+    "/sw.js",
+    "/robots.txt",
+    "/sitemap*.xml"
+  ]
+}

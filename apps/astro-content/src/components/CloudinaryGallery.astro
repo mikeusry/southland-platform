@@ -1,0 +1,321 @@
+---
+/**
+ * CloudinaryGallery Component
+ *
+ * Responsive image gallery with lightbox support and
+ * multiple layout options.
+ *
+ * @example
+ * <CloudinaryGallery
+ *   images={[
+ *     { publicId: 'gallery/img1', alt: 'Image 1' },
+ *     { publicId: 'gallery/img2', alt: 'Image 2' },
+ *   ]}
+ *   layout="masonry"
+ *   columns={3}
+ * />
+ */
+
+import { buildCloudinaryUrl } from '../lib/cloudinary';
+
+export interface GalleryImage {
+  /** Cloudinary public ID */
+  publicId: string;
+  /** Alt text */
+  alt: string;
+  /** Optional caption */
+  caption?: string;
+  /** Aspect ratio (e.g., '16/9', '1/1', '4/3') */
+  aspectRatio?: string;
+}
+
+export interface Props {
+  /** Array of images */
+  images: GalleryImage[];
+  /** Layout style */
+  layout?: 'grid' | 'masonry' | 'carousel';
+  /** Number of columns (1-6) */
+  columns?: 1 | 2 | 3 | 4 | 5 | 6;
+  /** Gap between items (in Tailwind spacing units) */
+  gap?: 1 | 2 | 3 | 4 | 6 | 8;
+  /** Thumbnail size */
+  thumbnailSize?: number;
+  /** Enable lightbox */
+  lightbox?: boolean;
+  /** Show captions */
+  showCaptions?: boolean;
+  /** Additional CSS classes */
+  class?: string;
+  /** Rounded corners */
+  rounded?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  /** Hover effect */
+  hoverEffect?: 'none' | 'zoom' | 'fade' | 'lift';
+}
+
+const {
+  images,
+  layout = 'grid',
+  columns = 3,
+  gap = 4,
+  thumbnailSize = 400,
+  lightbox = true,
+  showCaptions = false,
+  class: className = '',
+  rounded = 'lg',
+  hoverEffect = 'zoom'
+} = Astro.props;
+
+// Grid column classes
+const columnClasses: Record<number, string> = {
+  1: 'grid-cols-1',
+  2: 'grid-cols-1 sm:grid-cols-2',
+  3: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+  4: 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4',
+  5: 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5',
+  6: 'grid-cols-2 sm:grid-cols-4 lg:grid-cols-6'
+};
+
+// Gap classes
+const gapClasses: Record<number, string> = {
+  1: 'gap-1',
+  2: 'gap-2',
+  3: 'gap-3',
+  4: 'gap-4',
+  6: 'gap-6',
+  8: 'gap-8'
+};
+
+// Rounded classes
+const roundedClasses: Record<string, string> = {
+  none: 'rounded-none',
+  sm: 'rounded-sm',
+  md: 'rounded-md',
+  lg: 'rounded-lg',
+  xl: 'rounded-xl',
+  full: 'rounded-full'
+};
+
+// Hover effect classes
+const hoverClasses: Record<string, string> = {
+  none: '',
+  zoom: 'hover:scale-105',
+  fade: 'hover:opacity-80',
+  lift: 'hover:-translate-y-1 hover:shadow-lg'
+};
+
+// Generate thumbnail and full-size URLs for each image
+const processedImages = images.map((img, index) => ({
+  ...img,
+  thumbnail: buildCloudinaryUrl(img.publicId, {
+    width: thumbnailSize,
+    height: img.aspectRatio ? undefined : thumbnailSize,
+    crop: 'fill',
+    gravity: 'auto',
+    quality: 'auto',
+    format: 'auto'
+  }),
+  fullSize: buildCloudinaryUrl(img.publicId, {
+    width: 1920,
+    quality: 'auto:good',
+    format: 'auto'
+  }),
+  id: `gallery-img-${index}`
+}));
+
+const galleryId = `gallery-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<div
+  class:list={[
+    'cloudinary-gallery',
+    layout === 'grid' && `grid ${columnClasses[columns]} ${gapClasses[gap]}`,
+    layout === 'masonry' && `columns-1 sm:columns-2 lg:columns-${columns} ${gapClasses[gap]}`,
+    layout === 'carousel' && 'flex overflow-x-auto snap-x snap-mandatory scrollbar-hide',
+    className
+  ]}
+  data-gallery-id={galleryId}
+>
+  {processedImages.map((img, index) => (
+    <figure
+      class:list={[
+        'cloudinary-gallery-item relative overflow-hidden group',
+        roundedClasses[rounded],
+        layout === 'masonry' && 'break-inside-avoid mb-4',
+        layout === 'carousel' && `flex-none w-80 snap-center ${index > 0 ? 'ml-4' : ''}`
+      ]}
+    >
+      {lightbox ? (
+        <button
+          type="button"
+          class="w-full cursor-zoom-in focus:outline-none focus:ring-2 focus:ring-shopify-accent focus:ring-offset-2"
+          data-lightbox-trigger={galleryId}
+          data-lightbox-index={index}
+          aria-label={`View ${img.alt} in lightbox`}
+        >
+          <img
+            src={img.thumbnail}
+            alt={img.alt}
+            loading="lazy"
+            decoding="async"
+            class:list={[
+              'w-full h-auto object-cover transition-all duration-300',
+              roundedClasses[rounded],
+              hoverClasses[hoverEffect]
+            ]}
+            style={img.aspectRatio ? `aspect-ratio: ${img.aspectRatio};` : undefined}
+          />
+        </button>
+      ) : (
+        <img
+          src={img.thumbnail}
+          alt={img.alt}
+          loading="lazy"
+          decoding="async"
+          class:list={[
+            'w-full h-auto object-cover transition-all duration-300',
+            roundedClasses[rounded],
+            hoverClasses[hoverEffect]
+          ]}
+          style={img.aspectRatio ? `aspect-ratio: ${img.aspectRatio};` : undefined}
+        />
+      )}
+
+      {showCaptions && img.caption && (
+        <figcaption class="mt-2 text-sm text-shopify-secondary-text">
+          {img.caption}
+        </figcaption>
+      )}
+    </figure>
+  ))}
+</div>
+
+{lightbox && (
+  <!-- Lightbox Modal -->
+  <div
+    id={`${galleryId}-lightbox`}
+    class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-sm"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Image lightbox"
+  >
+    <!-- Close button -->
+    <button
+      type="button"
+      class="absolute top-4 right-4 z-10 p-2 text-white/80 hover:text-white transition-colors"
+      data-lightbox-close={galleryId}
+      aria-label="Close lightbox"
+    >
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    <!-- Navigation -->
+    <button
+      type="button"
+      class="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 text-white/80 hover:text-white transition-colors"
+      data-lightbox-prev={galleryId}
+      aria-label="Previous image"
+    >
+      <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    </button>
+
+    <button
+      type="button"
+      class="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 text-white/80 hover:text-white transition-colors"
+      data-lightbox-next={galleryId}
+      aria-label="Next image"
+    >
+      <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </button>
+
+    <!-- Image container -->
+    <div class="flex items-center justify-center w-full h-full p-16">
+      <img
+        id={`${galleryId}-lightbox-img`}
+        src=""
+        alt=""
+        class="max-w-full max-h-full object-contain"
+      />
+    </div>
+
+    <!-- Counter -->
+    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/80 text-sm">
+      <span data-lightbox-current={galleryId}>1</span> / {images.length}
+    </div>
+  </div>
+
+  <script is:inline define:vars={{ galleryId, images: processedImages }}>
+    // Lightbox functionality
+    const lightbox = document.getElementById(`${galleryId}-lightbox`);
+    const lightboxImg = document.getElementById(`${galleryId}-lightbox-img`);
+    const triggers = document.querySelectorAll(`[data-lightbox-trigger="${galleryId}"]`);
+    const closeBtn = document.querySelector(`[data-lightbox-close="${galleryId}"]`);
+    const prevBtn = document.querySelector(`[data-lightbox-prev="${galleryId}"]`);
+    const nextBtn = document.querySelector(`[data-lightbox-next="${galleryId}"]`);
+    const counter = document.querySelector(`[data-lightbox-current="${galleryId}"]`);
+
+    let currentIndex = 0;
+
+    function showImage(index) {
+      currentIndex = (index + images.length) % images.length;
+      const img = images[currentIndex];
+      lightboxImg.src = img.fullSize;
+      lightboxImg.alt = img.alt;
+      if (counter) counter.textContent = currentIndex + 1;
+    }
+
+    function openLightbox(index) {
+      showImage(index);
+      lightbox.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+      lightbox.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    triggers.forEach(trigger => {
+      trigger.addEventListener('click', () => {
+        const index = parseInt(trigger.getAttribute('data-lightbox-index') || '0', 10);
+        openLightbox(index);
+      });
+    });
+
+    closeBtn?.addEventListener('click', closeLightbox);
+    prevBtn?.addEventListener('click', () => showImage(currentIndex - 1));
+    nextBtn?.addEventListener('click', () => showImage(currentIndex + 1));
+
+    // Keyboard navigation
+    lightbox?.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') showImage(currentIndex - 1);
+      if (e.key === 'ArrowRight') showImage(currentIndex + 1);
+    });
+
+    // Click outside to close
+    lightbox?.addEventListener('click', (e) => {
+      if (e.target === lightbox) closeLightbox();
+    });
+  </script>
+)}
+
+<style>
+  .cloudinary-gallery {
+    contain: layout style;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+</style>

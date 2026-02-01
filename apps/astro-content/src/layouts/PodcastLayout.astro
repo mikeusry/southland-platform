@@ -1,0 +1,53 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Breadcrumbs from '../components/shared/Breadcrumbs.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  ogImage?: string;
+  canonicalUrl?: string;
+  schema?: object;
+  breadcrumbs?: Array<{ label: string; href: string }>;
+  showBreadcrumbs?: boolean;
+}
+
+const {
+  title,
+  description,
+  ogImage,
+  canonicalUrl,
+  schema,
+  breadcrumbs = [],
+  showBreadcrumbs = true,
+} = Astro.props;
+
+// Default breadcrumbs for podcast section
+const defaultBreadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Podcast', href: '/podcast/' },
+];
+
+const allBreadcrumbs = [...defaultBreadcrumbs, ...breadcrumbs];
+---
+
+<BaseLayout
+  title={`${title} | Ag & Culture Podcast`}
+  description={description}
+  ogImage={ogImage}
+  ogType="video.episode"
+  canonicalUrl={canonicalUrl}
+  schema={schema}
+>
+  <div class="bg-brand-gray min-h-screen">
+    {showBreadcrumbs && breadcrumbs.length > 0 && (
+      <div class="bg-white border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <Breadcrumbs items={allBreadcrumbs} />
+        </div>
+      </div>
+    )}
+
+    <slot />
+  </div>
+</BaseLayout>

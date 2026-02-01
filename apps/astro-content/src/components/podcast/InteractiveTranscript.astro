@@ -1,0 +1,329 @@
+---
+/**
+ * Interactive transcript component
+ * - Click any paragraph to jump to that moment
+ * - Highlights currently playing section
+ * - Copy text selection
+ * - Search within transcript
+ */
+
+interface TranscriptLine {
+  time: number;
+  speaker: string;
+  text: string;
+}
+
+interface Props {
+  transcript: TranscriptLine[];
+  episodeSlug: string;
+  episodeNumber: number;
+  showSearch?: boolean;
+  maxHeight?: string;
+  class?: string;
+}
+
+const {
+  transcript,
+  episodeSlug,
+  episodeNumber,
+  showSearch = true,
+  maxHeight = '500px',
+  class: className = '',
+} = Astro.props;
+
+// Format time (seconds to MM:SS)
+function formatTime(seconds: number): string {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+// Group consecutive lines by speaker for better readability
+interface GroupedTranscript {
+  speaker: string;
+  startTime: number;
+  lines: { time: number; text: string }[];
+}
+
+function groupBySpeaker(transcript: TranscriptLine[]): GroupedTranscript[] {
+  const groups: GroupedTranscript[] = [];
+  let currentGroup: GroupedTranscript | null = null;
+
+  transcript.forEach((line) => {
+    if (!currentGroup || currentGroup.speaker !== line.speaker) {
+      currentGroup = {
+        speaker: line.speaker,
+        startTime: line.time,
+        lines: [],
+      };
+      groups.push(currentGroup);
+    }
+    currentGroup.lines.push({ time: line.time, text: line.text });
+  });
+
+  return groups;
+}
+
+const groupedTranscript = groupBySpeaker(transcript);
+---
+
+{transcript.length > 0 ? (
+  <div
+    class={`interactive-transcript ${className}`}
+    data-episode-slug={episodeSlug}
+    data-episode-number={episodeNumber}
+  >
+    {/* Header with search */}
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-semibold text-gray-900">Transcript</h3>
+      {showSearch && (
+        <div class="relative">
+          <input
+            type="text"
+            class="transcript-search text-sm px-3 py-1.5 pl-8 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-southland-green focus:border-transparent"
+            placeholder="Search transcript..."
+          />
+          <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+      )}
+    </div>
+
+    {/* Search results count */}
+    <div class="search-results-count hidden text-sm text-gray-500 mb-2"></div>
+
+    {/* Transcript content */}
+    <div
+      class="transcript-content overflow-y-auto scrollbar-thin pr-2"
+      style={`max-height: ${maxHeight}`}
+    >
+      {groupedTranscript.map((group, groupIndex) => (
+        <div class="transcript-group mb-4" data-group-index={groupIndex}>
+          {/* Speaker header */}
+          <div class="flex items-center gap-2 mb-2">
+            <span class="transcript-speaker">{group.speaker}</span>
+            <button
+              class="transcript-timestamp text-gray-400 hover:text-southland-green transition-colors"
+              data-time={group.startTime}
+            >
+              {formatTime(group.startTime)}
+            </button>
+          </div>
+
+          {/* Lines */}
+          <div class="space-y-2">
+            {group.lines.map((line, lineIndex) => (
+              <p
+                class="transcript-line"
+                data-time={line.time}
+                data-group-index={groupIndex}
+                data-line-index={lineIndex}
+              >
+                <span class="transcript-text">{line.text}</span>
+              </p>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+
+    {/* Copy selection helper */}
+    <div class="copy-toast fixed bottom-4 right-4 px-4 py-2 bg-gray-900 text-white text-sm rounded-lg shadow-lg hidden z-50">
+      Copied to clipboard!
+    </div>
+  </div>
+) : (
+  <div class={`interactive-transcript ${className}`}>
+    <h3 class="font-semibold text-gray-900 mb-4">Transcript</h3>
+    <p class="text-gray-500 text-sm">Transcript not available for this episode.</p>
+  </div>
+)}
+
+<script>
+  document.querySelectorAll('.interactive-transcript').forEach((container) => {
+    const episodeSlug = (container as HTMLElement).dataset.episodeSlug;
+    const episodeNumber = parseInt((container as HTMLElement).dataset.episodeNumber || '0');
+    const searchInput = container.querySelector('.transcript-search') as HTMLInputElement;
+    const resultsCount = container.querySelector('.search-results-count');
+    const copyToast = container.querySelector('.copy-toast');
+    const lines = container.querySelectorAll('.transcript-line');
+    const timestamps = container.querySelectorAll('.transcript-timestamp');
+
+    // Click to jump to timestamp
+    lines.forEach((line) => {
+      line.addEventListener('click', () => {
+        const time = parseInt((line as HTMLElement).dataset.time || '0');
+        seekToTime(time);
+
+        // Track transcript click
+        if (window.pdPixel) {
+          window.pdPixel.track('podcast_transcript_click', {
+            episode_slug: episodeSlug,
+            episode_number: episodeNumber,
+            timestamp: time,
+          });
+        }
+      });
+    });
+
+    timestamps.forEach((timestamp) => {
+      timestamp.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const time = parseInt((timestamp as HTMLElement).dataset.time || '0');
+        seekToTime(time);
+      });
+    });
+
+    // Seek function
+    function seekToTime(time: number) {
+      const audioPlayer = document.querySelector('.audio-player') as any;
+      const videoEmbed = document.querySelector('.video-embed video') as HTMLVideoElement;
+
+      if (audioPlayer?.seekTo) {
+        audioPlayer.seekTo(time);
+      } else if (videoEmbed) {
+        videoEmbed.currentTime = time;
+        if (videoEmbed.paused) {
+          videoEmbed.play();
+        }
+      }
+    }
+
+    // Search functionality
+    if (searchInput) {
+      let searchTimeout: number;
+
+      searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = window.setTimeout(() => {
+          const query = searchInput.value.toLowerCase().trim();
+
+          if (!query) {
+            lines.forEach((line) => {
+              line.classList.remove('highlight', 'hidden');
+              const textSpan = line.querySelector('.transcript-text');
+              if (textSpan) {
+                textSpan.innerHTML = textSpan.textContent || '';
+              }
+            });
+            resultsCount?.classList.add('hidden');
+            return;
+          }
+
+          let matchCount = 0;
+
+          lines.forEach((line) => {
+            const textSpan = line.querySelector('.transcript-text');
+            const text = textSpan?.textContent || '';
+            const lowerText = text.toLowerCase();
+
+            if (lowerText.includes(query)) {
+              line.classList.add('highlight');
+              line.classList.remove('hidden');
+              matchCount++;
+
+              // Highlight matching text
+              const regex = new RegExp(`(${query})`, 'gi');
+              textSpan!.innerHTML = text.replace(regex, '<mark class="bg-yellow-200">$1</mark>');
+            } else {
+              line.classList.remove('highlight');
+              line.classList.add('hidden');
+              textSpan!.innerHTML = text;
+            }
+          });
+
+          // Show/hide groups based on visible lines
+          container.querySelectorAll('.transcript-group').forEach((group) => {
+            const visibleLines = group.querySelectorAll('.transcript-line:not(.hidden)');
+            (group as HTMLElement).style.display = visibleLines.length > 0 ? '' : 'none';
+          });
+
+          // Update results count
+          if (resultsCount) {
+            resultsCount.textContent = `${matchCount} result${matchCount !== 1 ? 's' : ''} found`;
+            resultsCount.classList.remove('hidden');
+          }
+        }, 200);
+      });
+    }
+
+    // Copy selection
+    container.addEventListener('mouseup', () => {
+      const selection = window.getSelection();
+      const selectedText = selection?.toString().trim();
+
+      if (selectedText && selectedText.length > 0) {
+        // Add copy to clipboard
+        navigator.clipboard.writeText(selectedText).then(() => {
+          copyToast?.classList.remove('hidden');
+          setTimeout(() => copyToast?.classList.add('hidden'), 2000);
+        });
+      }
+    });
+
+    // Update active line based on current time
+    function updateActiveLine() {
+      const audioPlayer = document.querySelector('.audio-player') as any;
+      const videoEmbed = document.querySelector('.video-embed video') as HTMLVideoElement;
+
+      let currentTime = 0;
+      if (audioPlayer?.getCurrentTime) {
+        currentTime = audioPlayer.getCurrentTime();
+      } else if (videoEmbed) {
+        currentTime = videoEmbed.currentTime;
+      }
+
+      let activeLine: Element | null = null;
+
+      lines.forEach((line) => {
+        const time = parseInt((line as HTMLElement).dataset.time || '0');
+        if (currentTime >= time) {
+          activeLine = line;
+        }
+      });
+
+      lines.forEach((line) => {
+        line.classList.toggle('active', line === activeLine);
+      });
+
+      // Scroll active line into view
+      if (activeLine) {
+        const transcriptContent = container.querySelector('.transcript-content');
+        if (transcriptContent) {
+          const lineTop = (activeLine as HTMLElement).offsetTop;
+          const containerScroll = transcriptContent.scrollTop;
+          const containerHeight = (transcriptContent as HTMLElement).clientHeight;
+
+          if (lineTop < containerScroll || lineTop > containerScroll + containerHeight - 100) {
+            transcriptContent.scrollTo({
+              top: lineTop - containerHeight / 3,
+              behavior: 'smooth',
+            });
+          }
+        }
+      }
+    }
+
+    // Listen to timeupdate events
+    const audioElement = document.querySelector('.audio-element');
+    const videoElement = document.querySelector('.video-embed video');
+
+    if (audioElement) {
+      audioElement.addEventListener('timeupdate', updateActiveLine);
+    }
+    if (videoElement) {
+      videoElement.addEventListener('timeupdate', updateActiveLine);
+    }
+  });
+</script>
+
+<style>
+  .transcript-line.hidden {
+    display: none;
+  }
+
+  .transcript-group[style*="display: none"] .transcript-speaker {
+    display: none;
+  }
+</style>

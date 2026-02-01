@@ -1,0 +1,18 @@
+# Cloudflare Pages configuration for Southland Platform
+name = "southland-content"
+pages_build_output_dir = "dist"
+compatibility_date = "2024-01-01"
+
+# Environment variables for all environments
+[vars]
+SHOPIFY_ORIGIN = "https://southland-organics.myshopify.com"
+
+# Production environment
+[env.production.vars]
+PUBLIC_SITE_URL = "https://southlandorganics.com"
+SHOPIFY_ORIGIN = "https://southland-organics.myshopify.com"
+
+# Preview/staging environment
+[env.preview.vars]
+PUBLIC_SITE_URL = "https://preview.southlandorganics.com"
+SHOPIFY_ORIGIN = "https://southland-organics.myshopify.com"

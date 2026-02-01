@@ -1,0 +1,173 @@
+---
+/**
+ * Schema.org JSON-LD markup generator for structured data
+ * Supports PodcastSeries, PodcastEpisode, Person, and Organization schemas
+ */
+
+interface PodcastSeriesSchema {
+  type: 'PodcastSeries';
+  name: string;
+  description: string;
+  url: string;
+  image?: string;
+  author?: {
+    name: string;
+    url?: string;
+  };
+  webFeed?: string;
+}
+
+interface PodcastEpisodeSchema {
+  type: 'PodcastEpisode';
+  name: string;
+  description: string;
+  url: string;
+  datePublished: string;
+  episodeNumber: number;
+  seasonNumber?: number;
+  duration?: string; // ISO 8601 duration format PT45M32S
+  image?: string;
+  audio?: string;
+  video?: string;
+  transcript?: string;
+  partOfSeries: {
+    name: string;
+    url: string;
+  };
+  guests?: Array<{
+    name: string;
+    url?: string;
+  }>;
+}
+
+interface PersonSchema {
+  type: 'Person';
+  name: string;
+  description?: string;
+  url?: string;
+  image?: string;
+  jobTitle?: string;
+  worksFor?: {
+    name: string;
+    url?: string;
+  };
+  sameAs?: string[];
+}
+
+interface OrganizationSchema {
+  type: 'Organization';
+  name: string;
+  description?: string;
+  url: string;
+  logo?: string;
+  sameAs?: string[];
+}
+
+type SchemaType = PodcastSeriesSchema | PodcastEpisodeSchema | PersonSchema | OrganizationSchema;
+
+interface Props {
+  schema: SchemaType;
+}
+
+const { schema } = Astro.props;
+
+function generateSchema(schema: SchemaType): object {
+  const baseContext = 'https://schema.org';
+
+  switch (schema.type) {
+    case 'PodcastSeries':
+      return {
+        '@context': baseContext,
+        '@type': 'PodcastSeries',
+        name: schema.name,
+        description: schema.description,
+        url: schema.url,
+        ...(schema.image && { image: schema.image }),
+        ...(schema.author && {
+          author: {
+            '@type': 'Organization',
+            name: schema.author.name,
+            ...(schema.author.url && { url: schema.author.url }),
+          },
+        }),
+        ...(schema.webFeed && { webFeed: schema.webFeed }),
+      };
+
+    case 'PodcastEpisode':
+      return {
+        '@context': baseContext,
+        '@type': 'PodcastEpisode',
+        name: schema.name,
+        description: schema.description,
+        url: schema.url,
+        datePublished: schema.datePublished,
+        episodeNumber: schema.episodeNumber,
+        ...(schema.seasonNumber && { seasonNumber: schema.seasonNumber }),
+        ...(schema.duration && { duration: schema.duration }),
+        ...(schema.image && { image: schema.image }),
+        partOfSeries: {
+          '@type': 'PodcastSeries',
+          name: schema.partOfSeries.name,
+          url: schema.partOfSeries.url,
+        },
+        ...(schema.audio && {
+          associatedMedia: {
+            '@type': 'AudioObject',
+            contentUrl: schema.audio,
+          },
+        }),
+        ...(schema.video && {
+          video: {
+            '@type': 'VideoObject',
+            contentUrl: schema.video,
+          },
+        }),
+        ...(schema.transcript && { transcript: schema.transcript }),
+        ...(schema.guests && schema.guests.length > 0 && {
+          actor: schema.guests.map((guest) => ({
+            '@type': 'Person',
+            name: guest.name,
+            ...(guest.url && { url: guest.url }),
+          })),
+        }),
+      };
+
+    case 'Person':
+      return {
+        '@context': baseContext,
+        '@type': 'Person',
+        name: schema.name,
+        ...(schema.description && { description: schema.description }),
+        ...(schema.url && { url: schema.url }),
+        ...(schema.image && { image: schema.image }),
+        ...(schema.jobTitle && { jobTitle: schema.jobTitle }),
+        ...(schema.worksFor && {
+          worksFor: {
+            '@type': 'Organization',
+            name: schema.worksFor.name,
+            ...(schema.worksFor.url && { url: schema.worksFor.url }),
+          },
+        }),
+        ...(schema.sameAs && { sameAs: schema.sameAs }),
+      };
+
+    case 'Organization':
+      return {
+        '@context': baseContext,
+        '@type': 'Organization',
+        name: schema.name,
+        ...(schema.description && { description: schema.description }),
+        url: schema.url,
+        ...(schema.logo && { logo: schema.logo }),
+        ...(schema.sameAs && { sameAs: schema.sameAs }),
+      };
+
+    default:
+      return {};
+  }
+}
+
+const jsonLd = generateSchema(schema);
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(jsonLd, null, 2)} />

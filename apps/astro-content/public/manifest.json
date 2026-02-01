@@ -1,0 +1,21 @@
+{
+  "name": "Ag & Culture Podcast",
+  "short_name": "Ag & Culture",
+  "description": "You can't have culture without agriculture. Conversations about sustainable farming.",
+  "start_url": "/podcast/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#44883e",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["education", "news"],
+  "lang": "en-US",
+  "dir": "ltr"
+}

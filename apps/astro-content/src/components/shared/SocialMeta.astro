@@ -1,0 +1,37 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  ogImage: string;
+  ogType?: 'website' | 'article' | 'video.episode';
+  url: string;
+  twitterCard?: 'summary' | 'summary_large_image' | 'player';
+  twitterSite?: string;
+}
+
+const {
+  title,
+  description,
+  ogImage,
+  ogType = 'website',
+  url,
+  twitterCard = 'summary_large_image',
+  twitterSite = '@SouthlandOrg',
+} = Astro.props;
+---
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content={ogType} />
+<meta property="og:url" content={url} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:site_name" content="Southland Organics" />
+
+<!-- Twitter -->
+<meta name="twitter:card" content={twitterCard} />
+<meta name="twitter:url" content={url} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+{twitterSite && <meta name="twitter:site" content={twitterSite} />}

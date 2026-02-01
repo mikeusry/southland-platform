@@ -1,0 +1,859 @@
+---
+/**
+ * Admin Brand Guide
+ * Southland Organics brand standards and assets
+ *
+ * Cloudinary Folder: Southland Website/Southland Branding/
+ */
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { buildBrandingUrl, BRANDING_FOLDER } from '../../lib/cloudinary';
+
+// Logo URLs from Cloudinary
+// Path: Southland Website/Southland Branding/logos/
+const logos = {
+  primary: buildBrandingUrl('logos/Primary_Logo_CMYK_sglfaj', { width: 300 }),
+  horizontalSvg: buildBrandingUrl('logos/Southland_Organics_Horizontal_womxky', { width: 400 }),
+  horizontalPng: buildBrandingUrl('logos/Southland_Organics_Horizontal_yymno6', { width: 400 }),
+  square: buildBrandingUrl('logos/Southland_Primary_Square_Logo_sertzs', { width: 300 }),
+};
+
+// Icons from Cloudinary
+// Path: Southland Website/Southland Branding/icons/
+const icons = {
+  iconPng: buildBrandingUrl('icons/Icon_qgeqxn', { width: 100 }),
+  iconSvg: buildBrandingUrl('icons/Southland_Icon_Icon_xwytez', { width: 100 }),
+  blackSvg: buildBrandingUrl('icons/Southland_Logo_-_Black_ajmlea', { width: 300 }),
+};
+
+// Patterns from Cloudinary
+// Path: Southland Website/Southland Branding/patterns/
+const patterns = {
+  bottomMolecules: buildBrandingUrl('patterns/bottom_molecules_krnlk5', { width: 800 }),
+  topMoleculesGreen: buildBrandingUrl('patterns/top_molecules_green_zeewhr', { width: 800 }),
+  topMolecules: buildBrandingUrl('patterns/top_molecules_nsvuao', { width: 800 }),
+  topMoleculesFilledGreen: buildBrandingUrl('patterns/top_molecules-filled_green_e2fxlb', { width: 800 }),
+  topMoleculesFilled: buildBrandingUrl('patterns/top_molecules-filled_xzfsv2', { width: 800 }),
+};
+
+// Brand colors from 2021 Brand Guide
+const colors = {
+  primary: [
+    {
+      name: 'Southland Dark Green',
+      hex: '#2C5234',
+      rgb: '44, 82, 52',
+      cmyk: '74, 18, 81, 62',
+      pantone: '350 C',
+      usage: 'Logo dark half, titles, accents'
+    },
+    {
+      name: 'Southland Green',
+      hex: '#44883E',
+      rgb: '68, 136, 62',
+      cmyk: '69, 3, 89, 26',
+      pantone: '7741 C',
+      usage: 'Logo light half, links, buttons'
+    }
+  ],
+  neutral: [
+    { name: 'White', hex: '#FFFFFF', usage: 'Backgrounds, logo knockout' },
+    { name: 'Black', hex: '#191D21', usage: 'Body text' },
+    { name: 'Gray', hex: '#686363', usage: 'Secondary text' }
+  ]
+};
+
+// Typography from brand guide
+const typography = {
+  headings: [
+    { name: 'Eveleth Clean Regular', usage: 'Headers & Titles', sample: 'SOUTHLAND' },
+    { name: 'Eveleth Dot Regular', usage: 'Headers & Titles (alternate)', sample: 'ORGANICS' },
+    { name: 'Eveleth Clean Thin', usage: 'Subheaders', sample: 'Natural Solutions' }
+  ],
+  body: [
+    { name: 'Open Sans', usage: 'Body copy, UI text', sample: 'Working with nature, not against it.' },
+    { name: 'Verdana', usage: 'Fallback body text', sample: 'Sustainable agriculture solutions.' }
+  ]
+};
+
+const headingSizes = [
+  { tag: 'H1', size: '48px', sample: 'Natural Solutions' },
+  { tag: 'H2', size: '38px', sample: 'Working with Nature' },
+  { tag: 'H3', size: '24px', sample: 'Sustainable Agriculture' },
+  { tag: 'H4', size: '20px', sample: 'Organic Products' },
+  { tag: 'Body', size: '16px', sample: 'Southland Organics was founded in 2009 to help growers address natural problems with natural solutions.' },
+  { tag: 'Small', size: '13px', sample: 'Helping thousands of farmers and landscape professionals.' },
+];
+---
+
+<AdminLayout title="Brand Guide" activeNav="/admin/branding">
+  <header class="page-header">
+    <h1 class="page-title">Brand Guide</h1>
+    <p class="page-subtitle">Southland Organics brand standards, colors, and typography</p>
+  </header>
+
+  <!-- Logo Section -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Logo</h2>
+    </div>
+    <p class="section-desc">
+      The Southland Organics logo features a hexagonal icon with organic "S" leaf shapes, representing our molecular-level approach to natural solutions.
+    </p>
+
+    <!-- Cloudinary folder info -->
+    <div class="cloudinary-info">
+      <code>{BRANDING_FOLDER}/</code>
+    </div>
+
+    <h3 class="subsection-title">Logos</h3>
+    <div class="logo-grid">
+      <div class="logo-card light">
+        <div class="logo-preview">
+          <img src={logos.primary} alt="Primary Logo" class="logo-img" />
+        </div>
+        <span class="logo-label">Primary (CMYK)</span>
+        <code class="logo-file">logos/Primary_Logo_CMYK_sglfaj</code>
+      </div>
+
+      <div class="logo-card light">
+        <div class="logo-preview">
+          <img src={logos.horizontalSvg} alt="Horizontal Logo SVG" class="logo-img wide" />
+        </div>
+        <span class="logo-label">Horizontal (SVG)</span>
+        <code class="logo-file">logos/Southland_Organics_Horizontal_womxky</code>
+      </div>
+
+      <div class="logo-card light">
+        <div class="logo-preview">
+          <img src={logos.horizontalPng} alt="Horizontal Logo PNG" class="logo-img wide" />
+        </div>
+        <span class="logo-label">Horizontal (PNG)</span>
+        <code class="logo-file">logos/Southland_Organics_Horizontal_yymno6</code>
+      </div>
+
+      <div class="logo-card light">
+        <div class="logo-preview">
+          <img src={logos.square} alt="Square Logo" class="logo-img" />
+        </div>
+        <span class="logo-label">Square</span>
+        <code class="logo-file">logos/Southland_Primary_Square_Logo_sertzs</code>
+      </div>
+    </div>
+
+    <h3 class="subsection-title">Icons</h3>
+    <div class="logo-grid">
+      <div class="logo-card light">
+        <div class="logo-preview">
+          <img src={icons.iconPng} alt="Icon PNG" class="logo-img icon" />
+        </div>
+        <span class="logo-label">Icon (PNG)</span>
+        <code class="logo-file">icons/Icon_qgeqxn</code>
+      </div>
+
+      <div class="logo-card light">
+        <div class="logo-preview">
+          <img src={icons.iconSvg} alt="Icon SVG" class="logo-img icon" />
+        </div>
+        <span class="logo-label">Icon (SVG)</span>
+        <code class="logo-file">icons/Southland_Icon_Icon_xwytez</code>
+      </div>
+
+      <div class="logo-card light">
+        <div class="logo-preview">
+          <img src={icons.blackSvg} alt="Black Logo SVG" class="logo-img" />
+        </div>
+        <span class="logo-label">Black (SVG)</span>
+        <code class="logo-file">icons/Southland_Logo_-_Black_ajmlea</code>
+      </div>
+    </div>
+
+    <h3 class="subsection-title">Patterns</h3>
+    <div class="pattern-grid">
+      <div class="pattern-card">
+        <img src={patterns.topMoleculesGreen} alt="Top Molecules Green" class="pattern-img" />
+        <span class="pattern-label">Top Molecules (Green)</span>
+      </div>
+      <div class="pattern-card">
+        <img src={patterns.topMolecules} alt="Top Molecules" class="pattern-img" />
+        <span class="pattern-label">Top Molecules</span>
+      </div>
+      <div class="pattern-card">
+        <img src={patterns.topMoleculesFilledGreen} alt="Top Molecules Filled Green" class="pattern-img" />
+        <span class="pattern-label">Top Filled (Green)</span>
+      </div>
+      <div class="pattern-card">
+        <img src={patterns.topMoleculesFilled} alt="Top Molecules Filled" class="pattern-img" />
+        <span class="pattern-label">Top Filled</span>
+      </div>
+      <div class="pattern-card">
+        <img src={patterns.bottomMolecules} alt="Bottom Molecules" class="pattern-img" />
+        <span class="pattern-label">Bottom Molecules</span>
+      </div>
+    </div>
+
+    <div class="logo-note">
+      <strong>Missing:</strong> White logo variant for dark backgrounds.
+    </div>
+  </div>
+
+  <!-- Colors Section -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Colors</h2>
+    </div>
+    <p class="section-desc">
+      Our two-tone green palette reflects growth, sustainability, and agricultural heritage.
+    </p>
+
+    <h3 class="subsection-title">Primary Colors</h3>
+    <div class="color-grid">
+      {colors.primary.map((color) => (
+        <div class="color-card">
+          <div class="color-swatch" style={`background-color: ${color.hex};`}></div>
+          <div class="color-info">
+            <span class="color-name">{color.name}</span>
+            <div class="color-values">
+              <code>HEX: {color.hex}</code>
+              <code>RGB: {color.rgb}</code>
+              <code>CMYK: {color.cmyk}</code>
+              <code>Pantone: {color.pantone}</code>
+            </div>
+            <span class="color-usage">{color.usage}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <h3 class="subsection-title">Color Tints</h3>
+    <div class="tint-grid">
+      <div class="tint-row">
+        <span class="tint-label">Dark Green</span>
+        <div class="tint-swatches">
+          <div class="tint" style="background: #2c5234;" title="100%"></div>
+          <div class="tint" style="background: rgba(44, 82, 52, 0.8);" title="80%"></div>
+          <div class="tint" style="background: rgba(44, 82, 52, 0.6);" title="60%"></div>
+          <div class="tint" style="background: rgba(44, 82, 52, 0.4);" title="40%"></div>
+          <div class="tint" style="background: rgba(44, 82, 52, 0.2);" title="20%"></div>
+        </div>
+      </div>
+      <div class="tint-row">
+        <span class="tint-label">Light Green</span>
+        <div class="tint-swatches">
+          <div class="tint" style="background: #44883e;" title="100%"></div>
+          <div class="tint" style="background: rgba(68, 136, 62, 0.8);" title="80%"></div>
+          <div class="tint" style="background: rgba(68, 136, 62, 0.6);" title="60%"></div>
+          <div class="tint" style="background: rgba(68, 136, 62, 0.4);" title="40%"></div>
+          <div class="tint" style="background: rgba(68, 136, 62, 0.2);" title="20%"></div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="subsection-title">Neutral Colors</h3>
+    <div class="neutral-grid">
+      {colors.neutral.map((color) => (
+        <div class="neutral-card">
+          <div class="neutral-swatch" style={`background-color: ${color.hex}; ${color.hex === '#FFFFFF' ? 'border: 1px solid var(--border);' : ''}`}></div>
+          <div class="neutral-info">
+            <span class="neutral-name">{color.name}</span>
+            <code>{color.hex}</code>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <!-- Typography Section -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Typography</h2>
+    </div>
+    <p class="section-desc">
+      Eveleth Dot for distinctive headings, Open Sans for readable body text.
+    </p>
+
+    <h3 class="subsection-title">Font Families</h3>
+    <div class="font-samples">
+      <div class="font-sample">
+        <span class="font-label">Heading Font (Eveleth Dot)</span>
+        <span class="font-preview heading">SOUTHLAND ORGANICS</span>
+        <code>font-family: "Eveleth Dot", sans-serif</code>
+      </div>
+      <div class="font-sample">
+        <span class="font-label">Body Font (Open Sans)</span>
+        <span class="font-preview body">Working with nature, not against it.</span>
+        <code>font-family: "Open Sans", sans-serif</code>
+      </div>
+    </div>
+
+    <h3 class="subsection-title">Type Scale</h3>
+    <div class="type-scale">
+      {headingSizes.map((h) => (
+        <div class="type-row">
+          <span class="type-tag">{h.tag}</span>
+          <span class="type-preview" style={`font-size: ${h.size === '48px' ? '24px' : h.size === '38px' ? '20px' : h.size};`}>
+            {h.sample}
+          </span>
+          <code class="type-size">{h.size}</code>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <!-- Buttons Section -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Buttons</h2>
+    </div>
+    <div class="button-samples">
+      <button class="sample-btn primary">Primary Button</button>
+      <button class="sample-btn secondary">Secondary Button</button>
+      <button class="sample-btn outline">Outline Button</button>
+    </div>
+  </div>
+
+  <!-- Usage Guidelines -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Usage Guidelines</h2>
+    </div>
+    <div class="guidelines-grid">
+      <div class="guideline do">
+        <h4>Do</h4>
+        <ul>
+          <li>Use approved logo files</li>
+          <li>Maintain clear space around logo</li>
+          <li>Use full-color logo on light backgrounds</li>
+          <li>Scale proportionally</li>
+        </ul>
+      </div>
+      <div class="guideline dont">
+        <h4>Don't</h4>
+        <ul>
+          <li>Alter logo colors</li>
+          <li>Stretch or distort</li>
+          <li>Add effects (shadows, gradients)</li>
+          <li>Place on busy backgrounds</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- CSS Variables -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">CSS Variables</h2>
+    </div>
+    <pre class="code-block"><code>:root {'{'}
+  --color-title: #2c5234;
+  --color-accent: #44883e;
+  --color-accent-hover: #2c5234;
+  --color-text: #191d21;
+  --color-text-secondary: #686363;
+  --font-heading: "Eveleth Dot", sans-serif;
+  --font-body: "Open Sans", sans-serif;
+{'}'}</code></pre>
+  </div>
+</AdminLayout>
+
+<style>
+  .section-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+  }
+
+  .subsection-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 24px 0 12px;
+  }
+
+  .subsection-title:first-of-type {
+    margin-top: 0;
+  }
+
+  /* Cloudinary info */
+  .cloudinary-info {
+    margin-bottom: 16px;
+    padding: 8px 12px;
+    background: var(--surface-alt);
+    border-radius: var(--radius-sm);
+    display: inline-block;
+  }
+
+  .cloudinary-info code {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  /* Logo styles */
+  .logo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .logo-card {
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+  }
+
+  .logo-card.light {
+    background: #f8f8f8;
+    border: 1px solid var(--border);
+  }
+
+  .logo-card.dark {
+    background: #1a1a1a;
+  }
+
+  .logo-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    min-height: 100px;
+  }
+
+  .logo-img {
+    max-width: 180px;
+    max-height: 80px;
+    object-fit: contain;
+  }
+
+  .logo-img.wide {
+    max-width: 240px;
+  }
+
+  .logo-img.icon {
+    max-width: 80px;
+    max-height: 80px;
+  }
+
+  .logo-file {
+    display: block;
+    font-size: 10px;
+    color: var(--text-tertiary);
+    margin-top: 4px;
+    word-break: break-all;
+  }
+
+  .logo-note {
+    margin-top: 16px;
+    padding: 12px;
+    background: var(--warning-light);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: #92400e;
+  }
+
+  .pattern-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  .pattern-card {
+    background: #f8f8f8;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+    text-align: center;
+  }
+
+  .pattern-img {
+    width: 100%;
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: 8px;
+  }
+
+  .pattern-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  .logo-fallback {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-icon.outline {
+    background: transparent;
+    border: 2px solid white;
+  }
+
+  .logo-icon span {
+    font-size: 28px;
+    font-weight: bold;
+    color: white;
+  }
+
+  .logo-text {
+    text-align: center;
+  }
+
+  .logo-name {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  .logo-tagline {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 3px;
+  }
+
+  .logo-label {
+    font-size: 11px;
+    color: var(--text-tertiary);
+  }
+
+  .logo-card.dark .logo-label {
+    color: #888;
+  }
+
+  /* Color styles */
+  .color-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  .color-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .color-swatch {
+    height: 80px;
+  }
+
+  .color-info {
+    padding: 12px;
+    background: var(--surface);
+  }
+
+  .color-name {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .color-values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .color-values code {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--text-tertiary);
+    background: var(--surface-alt);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  .color-usage {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  /* Tint styles */
+  .tint-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .tint-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .tint-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    width: 80px;
+    flex-shrink: 0;
+  }
+
+  .tint-swatches {
+    display: flex;
+    gap: 4px;
+    flex: 1;
+  }
+
+  .tint {
+    flex: 1;
+    height: 32px;
+    border-radius: 4px;
+  }
+
+  /* Neutral colors */
+  .neutral-grid {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .neutral-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: var(--surface-alt);
+    border-radius: var(--radius-sm);
+  }
+
+  .neutral-swatch {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+  }
+
+  .neutral-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .neutral-info code {
+    font-size: 11px;
+    color: var(--text-tertiary);
+  }
+
+  /* Font samples */
+  .font-samples {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .font-sample {
+    padding: 16px;
+    background: var(--surface-alt);
+    border-radius: var(--radius);
+  }
+
+  .font-label {
+    display: block;
+    font-size: 11px;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  .font-preview {
+    display: block;
+    font-size: 24px;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .font-preview.heading {
+    font-family: 'Eveleth Dot', sans-serif;
+    font-weight: 700;
+    color: #2c5234;
+  }
+
+  .font-preview.body {
+    font-family: 'Open Sans', sans-serif;
+  }
+
+  .font-sample code {
+    font-size: 11px;
+    color: var(--text-tertiary);
+  }
+
+  /* Type scale */
+  .type-scale {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .type-row {
+    display: grid;
+    grid-template-columns: 50px 1fr 60px;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .type-row:last-child {
+    border-bottom: none;
+  }
+
+  .type-tag {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--surface-alt);
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-align: center;
+  }
+
+  .type-preview {
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .type-size {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    text-align: right;
+  }
+
+  /* Button samples */
+  .button-samples {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .sample-btn {
+    padding: 10px 20px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: 2px solid transparent;
+  }
+
+  .sample-btn.primary {
+    background: #44883e;
+    color: white;
+  }
+
+  .sample-btn.primary:hover {
+    background: #2c5234;
+  }
+
+  .sample-btn.secondary {
+    background: #2c5234;
+    color: white;
+  }
+
+  .sample-btn.secondary:hover {
+    background: #1a3d1f;
+  }
+
+  .sample-btn.outline {
+    background: transparent;
+    border-color: #44883e;
+    color: #44883e;
+  }
+
+  .sample-btn.outline:hover {
+    background: #44883e;
+    color: white;
+  }
+
+  /* Guidelines */
+  .guidelines-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .guideline {
+    padding: 16px;
+    border-radius: var(--radius);
+  }
+
+  .guideline.do {
+    background: var(--success-light);
+  }
+
+  .guideline.dont {
+    background: var(--error-light);
+  }
+
+  .guideline h4 {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .guideline.do h4 {
+    color: #166534;
+  }
+
+  .guideline.dont h4 {
+    color: #991b1b;
+  }
+
+  .guideline ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .guideline li {
+    font-size: 13px;
+    color: var(--text-secondary);
+    padding: 4px 0;
+    padding-left: 16px;
+    position: relative;
+  }
+
+  .guideline li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 10px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  .guideline.do li::before {
+    background: #22c55e;
+  }
+
+  .guideline.dont li::before {
+    background: #ef4444;
+  }
+
+  /* Code block */
+  .code-block {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    padding: 16px;
+    border-radius: var(--radius);
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+</style>

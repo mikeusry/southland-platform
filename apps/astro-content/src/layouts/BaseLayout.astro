@@ -1,0 +1,139 @@
+---
+import '../styles/global.css';
+import Header from '../components/shared/Header.astro';
+import Footer from '../components/shared/Footer.astro';
+import SocialMeta from '../components/shared/SocialMeta.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  ogImage?: string;
+  ogType?: 'website' | 'article' | 'video.episode';
+  canonicalUrl?: string;
+  noIndex?: boolean;
+  schema?: object;
+}
+
+const {
+  title,
+  description,
+  ogImage = '/images/podcast/og-default.jpg',
+  ogType = 'website',
+  canonicalUrl,
+  noIndex = false,
+  schema,
+} = Astro.props;
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com';
+const fullCanonicalUrl = canonicalUrl || new URL(Astro.url.pathname, siteUrl).href;
+const fullOgImage = ogImage.startsWith('http') ? ogImage : new URL(ogImage, siteUrl).href;
+
+// Pixel config
+const pixelBrandId = import.meta.env.PUBLIC_PIXEL_BRAND_ID || 'southland';
+const pixelEndpoint = import.meta.env.PUBLIC_PIXEL_ENDPOINT || 'https://pixel.southlandorganics.com/collect';
+
+// GTM config
+const gtmContainerId = import.meta.env.PUBLIC_GTM_CONTAINER_ID;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- Primary Meta Tags -->
+    <title>{title}</title>
+    <meta name="title" content={title} />
+    <meta name="description" content={description} />
+
+    <!-- Canonical -->
+    <link rel="canonical" href={fullCanonicalUrl} />
+
+    <!-- Robots -->
+    {noIndex && <meta name="robots" content="noindex, nofollow" />}
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#44883e" />
+
+    <!-- Social Meta Tags -->
+    <SocialMeta
+      title={title}
+      description={description}
+      ogImage={fullOgImage}
+      ogType={ogType}
+      url={fullCanonicalUrl}
+    />
+
+    <!-- Schema.org JSON-LD -->
+    {schema && (
+      <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+    )}
+
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Fonts - Open Sans (body) from Google, Eveleth Dot (headings) loaded via CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- point.dog Pixel -->
+    <script is:inline define:vars={{ pixelBrandId, pixelEndpoint }}>
+      window.pdPixelConfig = {
+        brandId: pixelBrandId,
+        endpoint: pixelEndpoint
+      };
+    </script>
+    <script src="https://cdn.point.dog/pixel/pd-pixel.min.js" async></script>
+
+    <!-- Google Tag Manager -->
+    {gtmContainerId && (
+      <script is:inline define:vars={{ gtmContainerId }}>
+        (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer', gtmContainerId);
+      </script>
+    )}
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <!-- Google Tag Manager (noscript) -->
+    {gtmContainerId && (
+      <noscript>
+        <iframe
+          src={`https://www.googletagmanager.com/ns.html?id=${gtmContainerId}`}
+          height="0"
+          width="0"
+          style="display:none;visibility:hidden"
+        ></iframe>
+      </noscript>
+    )}
+
+    <Header />
+
+    <main class="flex-1">
+      <slot />
+    </main>
+
+    <Footer />
+
+    <!-- Service Worker Registration -->
+    <script is:inline>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js').catch(function(err) {
+            console.log('ServiceWorker registration failed:', err);
+          });
+        });
+      }
+    </script>
+  </body>
+</html>

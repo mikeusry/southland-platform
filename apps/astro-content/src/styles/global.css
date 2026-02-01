@@ -1,0 +1,181 @@
+@import './shopify-tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Southland Organics Brand Styles */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply text-shopify-text bg-white font-sans;
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-bold;
+    font-family: var(--font-heading);
+    color: var(--color-title);
+    letter-spacing: -0.01em;
+  }
+
+  /* Header spacing for prose content */
+  article h1,
+  article h2,
+  article h3,
+  article h4,
+  .prose h1,
+  .prose h2,
+  .prose h3,
+  .prose h4 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+  }
+
+  article h1,
+  .prose h1 {
+    letter-spacing: -0.02em;
+  }
+
+  article h2,
+  .prose h2 {
+    margin-top: 2em;
+  }
+
+  /* Reset margin-top for first heading in a section */
+  article > h1:first-child,
+  .prose > h1:first-child,
+  article > h2:first-child,
+  .prose > h2:first-child,
+  article > h3:first-child,
+  .prose > h3:first-child {
+    margin-top: 0;
+  }
+
+  a {
+    @apply transition-colors duration-200;
+  }
+}
+
+@layer components {
+  /* Primary Button */
+  .btn-primary {
+    @apply bg-southland-green text-white px-6 py-3 rounded-lg font-semibold
+           hover:bg-southland-green-dark transition-colors duration-200
+           focus:outline-none focus:ring-2 focus:ring-southland-green focus:ring-offset-2;
+  }
+
+  /* Secondary Button */
+  .btn-secondary {
+    @apply bg-transparent text-southland-green border-2 border-southland-green
+           px-6 py-3 rounded-lg font-semibold
+           hover:bg-southland-green hover:text-white transition-colors duration-200
+           focus:outline-none focus:ring-2 focus:ring-southland-green focus:ring-offset-2;
+  }
+
+  /* Card Component */
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-100
+           hover:shadow-md transition-shadow duration-200;
+  }
+
+  /* Episode Card */
+  .episode-card {
+    @apply card overflow-hidden;
+  }
+
+  .episode-card-thumbnail {
+    @apply aspect-video bg-gray-100 relative overflow-hidden;
+  }
+
+  .episode-card-content {
+    @apply p-4;
+  }
+
+  /* Topic Tag */
+  .topic-tag {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+           bg-southland-green/10 text-southland-green
+           hover:bg-southland-green/20 transition-colors duration-200;
+  }
+
+  /* Subscribe Button */
+  .subscribe-btn {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium
+           bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors duration-200;
+  }
+
+  /* Player Controls */
+  .player-btn {
+    @apply p-2 rounded-full bg-southland-green text-white
+           hover:bg-southland-green-dark transition-colors duration-200
+           focus:outline-none focus:ring-2 focus:ring-southland-green focus:ring-offset-2;
+  }
+
+  /* Transcript */
+  .transcript-line {
+    @apply py-2 px-3 rounded cursor-pointer transition-colors duration-200
+           hover:bg-gray-50;
+  }
+
+  .transcript-line.active {
+    @apply bg-southland-green/10 border-l-4 border-southland-green;
+  }
+
+  .transcript-timestamp {
+    @apply text-xs text-gray-500 font-mono mr-2;
+  }
+
+  .transcript-speaker {
+    @apply font-semibold text-southland-green mr-2;
+  }
+
+  /* Chapter Marker */
+  .chapter-marker {
+    @apply flex items-center gap-3 p-3 rounded-lg cursor-pointer
+           hover:bg-gray-50 transition-colors duration-200;
+  }
+
+  .chapter-marker.active {
+    @apply bg-southland-green/10;
+  }
+
+  .chapter-time {
+    @apply text-sm font-mono text-gray-500 min-w-[60px];
+  }
+}
+
+@layer utilities {
+  /* Custom scrollbar for transcript */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-accent) #f5f5f5;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: #f5f5f5;
+    border-radius: 4px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: var(--color-accent);
+    border-radius: 4px;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}

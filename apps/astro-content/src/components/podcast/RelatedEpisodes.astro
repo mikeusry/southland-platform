@@ -1,0 +1,48 @@
+---
+/**
+ * Related episodes component - shows similar episodes
+ */
+
+import EpisodeCard from './EpisodeCard.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  currentSlug: string;
+  episodes: CollectionEntry<'episodes'>[];
+  maxItems?: number;
+  class?: string;
+}
+
+const {
+  currentSlug,
+  episodes,
+  maxItems = 3,
+  class: className = '',
+} = Astro.props;
+
+// Filter out current episode and limit
+const relatedEpisodes = episodes
+  .filter((ep) => ep.id !== currentSlug)
+  .slice(0, maxItems);
+---
+
+{relatedEpisodes.length > 0 && (
+  <div class={`related-episodes ${className}`}>
+    <h3 class="font-semibold text-gray-900 mb-4">Related Episodes</h3>
+    <div class="space-y-4">
+      {relatedEpisodes.map((episode) => (
+        <EpisodeCard
+          title={episode.data.title}
+          slug={episode.id.replace(/\.mdx?$/, '')}
+          episodeNumber={episode.data.episodeNumber}
+          description={episode.data.description}
+          thumbnail={episode.data.thumbnail}
+          duration={episode.data.duration}
+          publishDate={episode.data.publishDate}
+          topics={episode.data.topics}
+          class="!shadow-none !border-0 bg-gray-50"
+        />
+      ))}
+    </div>
+  </div>
+)}

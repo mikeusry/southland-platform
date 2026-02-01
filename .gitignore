@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+.turbo/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Astro
+apps/astro-content/.astro/
+
+# Shopify
+apps/shopify-app/.shopify/
+apps/shopify-app/build/
+apps/shopify-app/prisma/*.db
+apps/shopify-app/prisma/*.db-journal
+
+# Package build artifacts
+packages/*/dist/
+*.tsbuildinfo

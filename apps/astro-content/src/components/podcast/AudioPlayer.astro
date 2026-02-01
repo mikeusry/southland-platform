@@ -1,0 +1,336 @@
+---
+/**
+ * Custom audio player component with full controls
+ * - Progress bar with scrubbing
+ * - Speed control (0.5x - 2x)
+ * - Skip forward/back 15s
+ * - Volume control
+ * - Chapter markers integration
+ */
+import { getLogoUrl } from '../../lib/cloudinary';
+
+interface Chapter {
+  time: number;
+  title: string;
+}
+
+interface Props {
+  audioUrl: string;
+  title: string;
+  episodeNumber: number;
+  episodeSlug: string;
+  duration: string;
+  durationSeconds: number;
+  chapters?: Chapter[];
+  thumbnail?: string;
+  class?: string;
+}
+
+const {
+  audioUrl,
+  title,
+  episodeNumber,
+  episodeSlug,
+  duration,
+  durationSeconds,
+  chapters = [],
+  thumbnail,
+  class: className = '',
+} = Astro.props;
+
+// Default thumbnail uses Southland logo until proper podcast cover is available
+const defaultThumbnail = getLogoUrl('square', { width: 200 });
+---
+
+<div
+  class={`audio-player bg-white rounded-xl border border-gray-100 p-4 ${className}`}
+  data-episode-slug={episodeSlug}
+  data-episode-number={episodeNumber}
+  data-duration-seconds={durationSeconds}
+  data-chapters={JSON.stringify(chapters)}
+>
+  {/* Player top section */}
+  <div class="flex items-center gap-4 mb-4">
+    {/* Thumbnail */}
+    <div class="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+      <img
+        src={thumbnail || defaultThumbnail}
+        alt={title}
+        class="w-full h-full object-cover"
+      />
+    </div>
+
+    {/* Info */}
+    <div class="flex-1 min-w-0">
+      <p class="text-sm text-southland-green font-medium">Episode {episodeNumber}</p>
+      <h4 class="font-semibold text-gray-900 truncate">{title}</h4>
+    </div>
+  </div>
+
+  {/* Progress bar */}
+  <div class="progress-container mb-4">
+    <div class="relative h-2 bg-gray-200 rounded-full cursor-pointer group">
+      <div class="progress-bar absolute inset-y-0 left-0 bg-southland-green rounded-full" style="width: 0%"></div>
+      <div class="progress-chapters absolute inset-0">
+        {chapters.map((chapter) => (
+          <div
+            class="chapter-marker-dot absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-white border-2 border-southland-green rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+            style={`left: ${(chapter.time / durationSeconds) * 100}%`}
+            title={chapter.title}
+          />
+        ))}
+      </div>
+      <div class="progress-handle absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-southland-green rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity" style="left: 0%"></div>
+    </div>
+    <div class="flex justify-between mt-1 text-xs text-gray-500">
+      <span class="current-time">0:00</span>
+      <span class="total-time">{duration}</span>
+    </div>
+  </div>
+
+  {/* Controls */}
+  <div class="flex items-center justify-between">
+    {/* Left controls */}
+    <div class="flex items-center gap-2">
+      {/* Speed control */}
+      <button class="speed-btn text-sm font-medium text-gray-600 hover:text-southland-green px-2 py-1 rounded transition-colors" title="Playback speed">
+        1x
+      </button>
+    </div>
+
+    {/* Center controls */}
+    <div class="flex items-center gap-2">
+      {/* Skip back 15s */}
+      <button class="skip-back-btn p-2 text-gray-600 hover:text-southland-green transition-colors" title="Skip back 15 seconds">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z" />
+        </svg>
+        <span class="sr-only">-15s</span>
+      </button>
+
+      {/* Play/Pause */}
+      <button class="play-pause-btn player-btn w-12 h-12" title="Play">
+        <svg class="play-icon w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M8 5v14l11-7z" />
+        </svg>
+        <svg class="pause-icon hidden w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+        </svg>
+      </button>
+
+      {/* Skip forward 15s */}
+      <button class="skip-forward-btn p-2 text-gray-600 hover:text-southland-green transition-colors" title="Skip forward 15 seconds">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z" />
+        </svg>
+        <span class="sr-only">+15s</span>
+      </button>
+    </div>
+
+    {/* Right controls */}
+    <div class="flex items-center gap-2">
+      {/* Volume */}
+      <div class="volume-control flex items-center gap-1">
+        <button class="volume-btn p-2 text-gray-600 hover:text-southland-green transition-colors" title="Volume">
+          <svg class="volume-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+          </svg>
+          <svg class="mute-icon hidden w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" clip-rule="evenodd" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+          </svg>
+        </button>
+        <input
+          type="range"
+          class="volume-slider w-20 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+          min="0"
+          max="100"
+          value="100"
+        />
+      </div>
+    </div>
+  </div>
+
+  {/* Hidden audio element */}
+  <audio class="audio-element hidden" preload="metadata">
+    <source src={audioUrl} type="audio/mpeg" />
+    Your browser does not support the audio element.
+  </audio>
+</div>
+
+<script>
+  // Audio player logic
+  document.querySelectorAll('.audio-player').forEach((playerContainer) => {
+    const audio = playerContainer.querySelector('.audio-element') as HTMLAudioElement;
+    const playPauseBtn = playerContainer.querySelector('.play-pause-btn');
+    const playIcon = playerContainer.querySelector('.play-icon');
+    const pauseIcon = playerContainer.querySelector('.pause-icon');
+    const skipBackBtn = playerContainer.querySelector('.skip-back-btn');
+    const skipForwardBtn = playerContainer.querySelector('.skip-forward-btn');
+    const speedBtn = playerContainer.querySelector('.speed-btn');
+    const volumeBtn = playerContainer.querySelector('.volume-btn');
+    const volumeSlider = playerContainer.querySelector('.volume-slider') as HTMLInputElement;
+    const volumeIcon = playerContainer.querySelector('.volume-icon');
+    const muteIcon = playerContainer.querySelector('.mute-icon');
+    const progressContainer = playerContainer.querySelector('.progress-container');
+    const progressBar = playerContainer.querySelector('.progress-bar') as HTMLElement;
+    const progressHandle = playerContainer.querySelector('.progress-handle') as HTMLElement;
+    const currentTimeEl = playerContainer.querySelector('.current-time');
+    const totalTimeEl = playerContainer.querySelector('.total-time');
+
+    const episodeSlug = (playerContainer as HTMLElement).dataset.episodeSlug;
+    const episodeNumber = parseInt((playerContainer as HTMLElement).dataset.episodeNumber || '0');
+    const durationSeconds = parseInt((playerContainer as HTMLElement).dataset.durationSeconds || '0');
+
+    const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
+    let currentSpeedIndex = 2; // 1x
+    let trackedMilestones = new Set<number>();
+
+    // Format time (seconds to MM:SS)
+    function formatTime(seconds: number): string {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    // Play/Pause
+    playPauseBtn?.addEventListener('click', () => {
+      if (audio.paused) {
+        audio.play();
+        playIcon?.classList.add('hidden');
+        pauseIcon?.classList.remove('hidden');
+        playPauseBtn.setAttribute('title', 'Pause');
+
+        // Track play event
+        if (window.pdPixel && audio.currentTime < 1) {
+          window.pdPixel.track('podcast_play', {
+            episode_slug: episodeSlug,
+            episode_number: episodeNumber,
+            source: 'audio_player',
+          });
+        }
+      } else {
+        audio.pause();
+        playIcon?.classList.remove('hidden');
+        pauseIcon?.classList.add('hidden');
+        playPauseBtn.setAttribute('title', 'Play');
+      }
+    });
+
+    // Skip back 15s
+    skipBackBtn?.addEventListener('click', () => {
+      audio.currentTime = Math.max(0, audio.currentTime - 15);
+    });
+
+    // Skip forward 15s
+    skipForwardBtn?.addEventListener('click', () => {
+      audio.currentTime = Math.min(audio.duration, audio.currentTime + 15);
+    });
+
+    // Speed control
+    speedBtn?.addEventListener('click', () => {
+      currentSpeedIndex = (currentSpeedIndex + 1) % speeds.length;
+      const speed = speeds[currentSpeedIndex];
+      audio.playbackRate = speed;
+      speedBtn.textContent = `${speed}x`;
+    });
+
+    // Volume control
+    volumeBtn?.addEventListener('click', () => {
+      audio.muted = !audio.muted;
+      volumeIcon?.classList.toggle('hidden', audio.muted);
+      muteIcon?.classList.toggle('hidden', !audio.muted);
+    });
+
+    volumeSlider?.addEventListener('input', () => {
+      audio.volume = parseInt(volumeSlider.value) / 100;
+      audio.muted = audio.volume === 0;
+      volumeIcon?.classList.toggle('hidden', audio.muted);
+      muteIcon?.classList.toggle('hidden', !audio.muted);
+    });
+
+    // Progress update
+    audio.addEventListener('timeupdate', () => {
+      const progress = (audio.currentTime / audio.duration) * 100;
+      progressBar.style.width = `${progress}%`;
+      progressHandle.style.left = `${progress}%`;
+      currentTimeEl && (currentTimeEl.textContent = formatTime(audio.currentTime));
+
+      // Track milestones
+      const milestones = [25, 50, 75];
+      milestones.forEach((milestone) => {
+        if (progress >= milestone && !trackedMilestones.has(milestone)) {
+          trackedMilestones.add(milestone);
+          if (window.pdPixel) {
+            window.pdPixel.track('podcast_progress', {
+              episode_slug: episodeSlug,
+              episode_number: episodeNumber,
+              progress_percent: milestone,
+              current_time: Math.floor(audio.currentTime),
+            });
+          }
+        }
+      });
+    });
+
+    // Seek on progress bar click
+    progressContainer?.addEventListener('click', (e) => {
+      const rect = (progressContainer as HTMLElement).getBoundingClientRect();
+      const clickX = (e as MouseEvent).clientX - rect.left;
+      const progress = clickX / rect.width;
+      audio.currentTime = progress * audio.duration;
+    });
+
+    // Duration loaded
+    audio.addEventListener('loadedmetadata', () => {
+      totalTimeEl && (totalTimeEl.textContent = formatTime(audio.duration));
+    });
+
+    // Ended
+    audio.addEventListener('ended', () => {
+      playIcon?.classList.remove('hidden');
+      pauseIcon?.classList.add('hidden');
+      playPauseBtn?.setAttribute('title', 'Play');
+
+      if (window.pdPixel) {
+        window.pdPixel.track('podcast_complete', {
+          episode_slug: episodeSlug,
+          episode_number: episodeNumber,
+          duration_seconds: Math.floor(audio.duration),
+        });
+      }
+    });
+
+    // Expose seek function for chapter markers and transcript
+    (playerContainer as any).seekTo = (time: number) => {
+      audio.currentTime = time;
+      if (audio.paused) {
+        audio.play();
+        playIcon?.classList.add('hidden');
+        pauseIcon?.classList.remove('hidden');
+      }
+    };
+
+    (playerContainer as any).getCurrentTime = () => audio.currentTime;
+  });
+</script>
+
+<style>
+  .volume-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background: #1a5f3c;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .volume-slider::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    background: #1a5f3c;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+  }
+</style>

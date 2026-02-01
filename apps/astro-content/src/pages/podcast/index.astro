@@ -1,0 +1,252 @@
+---
+/**
+ * Podcast Hub Page - /podcast/
+ * Main landing page for Ag & Culture Podcast
+ */
+
+import PodcastLayout from '../../layouts/PodcastLayout.astro';
+import EpisodeGrid from '../../components/podcast/EpisodeGrid.astro';
+import SubscribeButtons from '../../components/podcast/SubscribeButtons.astro';
+import EmailCapture from '../../components/shared/EmailCapture.astro';
+import { buildSouthlandUrl, getLogoUrl } from '../../lib/cloudinary';
+import { getCollection } from 'astro:content';
+
+// Cloudinary image URLs
+const mikeUsryPhoto = buildSouthlandUrl('Staff Headshots 2023/MikeU_1_emtxw6', {
+  width: 200,
+  height: 200,
+  crop: 'fill',
+  gravity: 'face',
+  format: 'auto',
+  quality: 'auto'
+});
+
+// Podcast cover - using logo as placeholder until real cover exists
+const podcastCoverUrl = getLogoUrl('square', { width: 400 });
+
+// Get all published episodes
+const allEpisodes = await getCollection('episodes', ({ data }) => {
+  return data.draft !== true;
+});
+
+// Sort by publish date (newest first)
+const episodes = allEpisodes.sort(
+  (a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
+);
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com';
+
+// Schema markup for PodcastSeries
+const podcastSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'PodcastSeries',
+  name: 'Ag & Culture Podcast',
+  description: "You can't have culture without agriculture. Join us for conversations about sustainable farming, animal health, and the communities built around agriculture.",
+  url: `${siteUrl}/podcast/`,
+  image: podcastCoverUrl,
+  author: {
+    '@type': 'Organization',
+    name: 'Southland Organics',
+    url: siteUrl,
+  },
+  webFeed: `${siteUrl}/podcast/feed.xml`,
+};
+---
+
+<PodcastLayout
+  title="Ag & Culture Podcast"
+  description="You can't have culture without agriculture. Join us for conversations about sustainable farming, animal health, and the communities built around agriculture."
+  ogImage={podcastCoverUrl}
+  schema={podcastSchema}
+  showBreadcrumbs={false}
+>
+  {/* Hero Section - Dark gradient with depth */}
+  <section class="podcast-hero relative overflow-hidden">
+    {/* Background gradient - uses brand dark green */}
+    <div class="absolute inset-0 bg-gradient-to-br from-southland-green-dark via-southland-green-dark to-[#1f3d24]"></div>
+
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        {/* Left: Content */}
+        <div class="text-white">
+          <p class="text-southland-green font-medium text-sm tracking-wide uppercase mb-3">
+            A Southland Organics Production
+          </p>
+          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight text-white">
+            Ag & Culture<br />
+            <span class="text-southland-green">Podcast</span>
+          </h1>
+          <p class="text-2xl text-white/90 mb-4 font-light italic">
+            You can't have culture without agriculture.
+          </p>
+          <p class="text-white/70 text-lg mb-8 max-w-lg">
+            Real conversations about what actually works in agriculture. From soil biology to poultry health, we dig into the science and stories that matter.
+          </p>
+
+          {/* Email Capture - Primary CTA */}
+          <div class="mb-8 max-w-md">
+            <EmailCapture
+              headline="Get new episodes in your inbox"
+              description=""
+              variant="banner"
+              source="hub"
+              buttonText="Subscribe"
+            />
+          </div>
+
+          {/* Subscribe Buttons - Secondary */}
+          <div>
+            <p class="text-sm text-white/50 mb-3">Or subscribe on your favorite platform:</p>
+            <SubscribeButtons variant="hero" />
+          </div>
+        </div>
+
+        {/* Right: Podcast Cover Art */}
+        <div class="flex justify-center lg:justify-end">
+          <div class="relative">
+            {/* Glow effect */}
+            <div class="absolute -inset-4 bg-southland-green/20 rounded-3xl blur-2xl"></div>
+            {/* Cover image - using logo placeholder until real cover art is available */}
+            <div class="relative w-72 h-72 md:w-80 md:h-80 lg:w-96 lg:h-96 rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 bg-gradient-to-br from-southland-green to-southland-green-dark flex items-center justify-center p-8">
+              <img
+                src={podcastCoverUrl}
+                alt="Ag & Culture Podcast Cover"
+                class="w-full h-full object-contain"
+                loading="eager"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Episodes Section - Slightly darker background */}
+  <section class="bg-brand-gray py-16 md:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
+        <h2 class="text-3xl md:text-4xl font-bold text-shopify-title">Latest Episodes</h2>
+        <div class="flex items-center gap-6">
+          <a
+            href="/podcast/topics/"
+            class="text-sm font-medium text-southland-green hover:text-southland-green-dark transition-colors"
+          >
+            Browse by Topic →
+          </a>
+        </div>
+      </div>
+
+      {episodes.length > 0 ? (
+        <EpisodeGrid episodes={episodes} showFeatured={true} />
+      ) : (
+        <div class="text-center py-16 bg-white rounded-2xl shadow-sm">
+          <div class="w-20 h-20 mx-auto mb-6 text-shopify-secondary-text">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-shopify-title mb-3">Coming Soon</h3>
+          <p class="text-shopify-secondary-text max-w-md mx-auto">
+            Our first episodes are in production. Subscribe above to be notified when we launch!
+          </p>
+        </div>
+      )}
+    </div>
+  </section>
+
+  {/* About Section */}
+  <section class="bg-white py-16 md:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-5 gap-12 items-start">
+        {/* Host Info - 3 cols */}
+        <div class="lg:col-span-3">
+          <h2 class="text-3xl md:text-4xl font-bold text-shopify-title mb-6">
+            About the Show
+          </h2>
+
+          {/* Host Card */}
+          <div class="flex items-start gap-6 mb-8">
+            <div class="w-24 h-24 rounded-full bg-gradient-to-br from-southland-green/10 to-southland-green/20 flex-shrink-0 overflow-hidden">
+              <img
+                src={mikeUsryPhoto}
+                alt="Mike Usry"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <div>
+              <h3 class="font-bold text-xl text-shopify-text">Mike Usry</h3>
+              <p class="text-southland-green font-medium mb-2">Host & Founder, Southland Organics</p>
+              <p class="text-shopify-secondary-text">
+                With years of experience in humate deposits and soil biology, Mike brings practical knowledge from the field to every conversation.
+              </p>
+            </div>
+          </div>
+
+          <div class="prose prose-lg text-shopify-secondary-text max-w-none">
+            <p>
+              Ag & Culture is more than just a podcast about farming — it's about the people, practices, and science that make agriculture work.
+            </p>
+            <p>
+              Each episode, we dig into topics that matter: soil biology, animal health, sustainable practices, and the economics of farming. No fluff, no filler — just real conversations with people doing the work.
+            </p>
+          </div>
+        </div>
+
+        {/* Brought to you by - 2 cols */}
+        <div class="lg:col-span-2">
+          <div class="bg-brand-gray rounded-2xl p-8 sticky top-8">
+            <p class="text-sm font-medium text-shopify-secondary-text uppercase tracking-wide mb-4">Brought to you by</p>
+            <a href="/" class="block mb-4">
+              <span class="text-2xl font-bold text-southland-green">Southland Organics</span>
+            </a>
+            <p class="text-shopify-secondary-text mb-6">
+              Working with nature, not against it. Sustainable solutions for poultry, turf, and agriculture.
+            </p>
+            <a
+              href="/"
+              class="btn-primary inline-flex items-center gap-2"
+            >
+              Explore Products
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* CTA Section */}
+  <section class="bg-gradient-to-br from-southland-green-dark via-southland-green-dark to-[#1f3d24] py-16">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-bold text-white mb-4">
+        Never miss an episode
+      </h2>
+      <p class="text-white/70 mb-8 text-lg">
+        Get new episodes delivered to your inbox. No spam, just agriculture.
+      </p>
+      <div class="max-w-md mx-auto">
+        <EmailCapture
+          headline=""
+          description=""
+          variant="banner"
+          source="hub"
+          buttonText="Subscribe Now"
+        />
+      </div>
+    </div>
+  </section>
+</PodcastLayout>
+
+<style>
+  .podcast-hero {
+    min-height: 600px;
+  }
+
+  @media (max-width: 1024px) {
+    .podcast-hero {
+      min-height: auto;
+    }
+  }
+</style>

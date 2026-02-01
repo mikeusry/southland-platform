@@ -1,0 +1,222 @@
+---
+/**
+ * CloudinaryHero Component
+ *
+ * Full-width hero banner with overlay support, responsive images,
+ * and optional text content slot.
+ *
+ * @example
+ * <CloudinaryHero
+ *   publicId="banners/podcast-hero"
+ *   alt="Ag & Culture Podcast"
+ *   height={500}
+ *   overlay="dark"
+ * >
+ *   <h1>Welcome to the Podcast</h1>
+ * </CloudinaryHero>
+ */
+
+import { buildCloudinaryUrl, getCloudinaryResponsiveSet } from '../lib/cloudinary';
+
+export interface Props {
+  /** Cloudinary public ID */
+  publicId: string;
+  /** Alt text for accessibility */
+  alt: string;
+  /** Height in pixels (default: 500) */
+  height?: number;
+  /** Min height CSS value */
+  minHeight?: string;
+  /** Max height CSS value */
+  maxHeight?: string;
+  /** Overlay type */
+  overlay?: 'none' | 'light' | 'dark' | 'gradient' | 'brand';
+  /** Custom overlay color (hex without #) */
+  overlayColor?: string;
+  /** Overlay opacity (0-100) */
+  overlayOpacity?: number;
+  /** Content vertical alignment */
+  contentAlign?: 'start' | 'center' | 'end';
+  /** Content horizontal alignment */
+  contentJustify?: 'start' | 'center' | 'end';
+  /** Additional CSS classes for wrapper */
+  class?: string;
+  /** Additional CSS classes for content */
+  contentClass?: string;
+  /** Is this the LCP image? (loads eagerly with preload) */
+  priority?: boolean;
+  /** Parallax scroll effect */
+  parallax?: boolean;
+  /** Image effect */
+  effect?: 'blur' | 'grayscale' | 'sepia' | 'darken' | 'none';
+}
+
+const {
+  publicId,
+  alt,
+  height = 500,
+  minHeight,
+  maxHeight,
+  overlay = 'dark',
+  overlayColor,
+  overlayOpacity = 50,
+  contentAlign = 'center',
+  contentJustify = 'center',
+  class: className = '',
+  contentClass = '',
+  priority = false,
+  parallax = false,
+  effect = 'none'
+} = Astro.props;
+
+// Responsive widths for hero images
+const widths = [640, 1024, 1536, 1920, 2560];
+
+// Build effect option
+const effectMap: Record<string, string | undefined> = {
+  blur: 'blur:200',
+  grayscale: 'grayscale',
+  sepia: 'sepia',
+  darken: 'brightness:70',
+  none: undefined
+};
+
+// Generate responsive srcset
+const responsiveSet = getCloudinaryResponsiveSet(publicId, widths, {
+  height,
+  crop: 'fill',
+  gravity: 'auto',
+  quality: 'auto:good',
+  format: 'auto',
+  effect: effectMap[effect] as any
+});
+
+// Overlay styles
+const overlayStyles: Record<string, string> = {
+  none: '',
+  light: `background: rgba(255, 255, 255, ${overlayOpacity / 100});`,
+  dark: `background: rgba(0, 0, 0, ${overlayOpacity / 100});`,
+  gradient: `background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,${overlayOpacity / 100}) 100%);`,
+  brand: `background: rgba(68, 136, 62, ${overlayOpacity / 100});` // #44883e
+};
+
+const customOverlayStyle = overlayColor
+  ? `background: rgba(${parseInt(overlayColor.slice(0, 2), 16)}, ${parseInt(overlayColor.slice(2, 4), 16)}, ${parseInt(overlayColor.slice(4, 6), 16)}, ${overlayOpacity / 100});`
+  : overlayStyles[overlay];
+
+// Alignment classes
+const alignClasses = {
+  start: 'items-start',
+  center: 'items-center',
+  end: 'items-end'
+};
+
+const justifyClasses = {
+  start: 'justify-start text-left',
+  center: 'justify-center text-center',
+  end: 'justify-end text-right'
+};
+
+// Height styles
+const heightStyle = [
+  height ? `height: ${height}px;` : '',
+  minHeight ? `min-height: ${minHeight};` : '',
+  maxHeight ? `max-height: ${maxHeight};` : ''
+].filter(Boolean).join(' ');
+---
+
+<div
+  class:list={[
+    'cloudinary-hero relative w-full overflow-hidden',
+    className
+  ]}
+  style={heightStyle}
+>
+  <!-- Background Image -->
+  <img
+    src={responsiveSet.src}
+    srcset={responsiveSet.srcset}
+    sizes="100vw"
+    alt={alt}
+    loading={priority ? 'eager' : 'lazy'}
+    fetchpriority={priority ? 'high' : undefined}
+    decoding={priority ? 'sync' : 'async'}
+    class:list={[
+      'absolute inset-0 w-full h-full object-cover',
+      parallax && 'cloudinary-hero-parallax'
+    ]}
+  />
+
+  <!-- Overlay -->
+  {overlay !== 'none' && (
+    <div
+      class="absolute inset-0"
+      style={customOverlayStyle}
+      aria-hidden="true"
+    />
+  )}
+
+  <!-- Content Slot -->
+  <div
+    class:list={[
+      'relative z-10 flex flex-col w-full h-full px-4 sm:px-6 lg:px-8',
+      alignClasses[contentAlign],
+      justifyClasses[contentJustify],
+      contentClass
+    ]}
+  >
+    <slot />
+  </div>
+</div>
+
+{priority && (
+  <link
+    rel="preload"
+    as="image"
+    href={responsiveSet.src}
+    imagesrcset={responsiveSet.srcset}
+    imagesizes="100vw"
+  />
+)}
+
+{parallax && (
+  <style>
+    .cloudinary-hero-parallax {
+      transform: translateZ(0);
+      will-change: transform;
+    }
+
+    @supports (background-attachment: fixed) {
+      .cloudinary-hero {
+        background-attachment: fixed;
+      }
+    }
+  </style>
+
+  <script is:inline>
+    // Simple parallax effect
+    const hero = document.querySelector('.cloudinary-hero-parallax');
+    if (hero && window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+      let ticking = false;
+      window.addEventListener('scroll', () => {
+        if (!ticking) {
+          window.requestAnimationFrame(() => {
+            const scrolled = window.pageYOffset;
+            const rect = hero.getBoundingClientRect();
+            if (rect.bottom > 0 && rect.top < window.innerHeight) {
+              hero.style.transform = `translateY(${scrolled * 0.3}px)`;
+            }
+            ticking = false;
+          });
+          ticking = true;
+        }
+      });
+    }
+  </script>
+)}
+
+<style>
+  .cloudinary-hero {
+    contain: layout style;
+  }
+</style>

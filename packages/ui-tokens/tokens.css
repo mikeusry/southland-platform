@@ -1,0 +1,35 @@
+/**
+ * Southland Platform Design Tokens
+ * Synced from Shopify Booster theme
+ */
+
+@font-face {
+  font-family: 'Eveleth Dot';
+  src: url('/fonts/eveleth-dot-regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Typography */
+  --font-body: "Open Sans", system-ui, -apple-system, sans-serif;
+  --font-heading: "Eveleth Dot", system-ui, sans-serif;
+
+  /* Colors - Primary */
+  --color-bg: #ffffff;
+  --color-text: #191d21;
+  --color-title: #2c5234;
+  --color-link: #44883e;
+  --color-accent: #44883e;
+  --color-accent-hover: #2c5234;
+
+  /* Colors - Secondary */
+  --color-secondary-bg: #efefef;
+  --color-secondary-text: #686363;
+  --color-border: #e5e7eb;
+
+  /* Layout */
+  --max-width: 1400px;
+  --header-height: 75px;
+}

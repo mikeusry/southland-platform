@@ -1,0 +1,96 @@
+---
+/**
+ * Product card component - links to Shopify product
+ * Used for related products on episode pages
+ */
+
+interface Props {
+  name: string;
+  slug: string;
+  description?: string;
+  image?: string;
+  cta?: string;
+  price?: string;
+  segment?: string;
+  class?: string;
+}
+
+const {
+  name,
+  slug,
+  description,
+  image,
+  cta = 'Shop Now',
+  price,
+  segment,
+  class: className = '',
+} = Astro.props;
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com';
+const productUrl = `${siteUrl}/products/${slug}`;
+const defaultImage = '/images/products/placeholder.jpg';
+---
+
+<div class={`product-card bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition-shadow ${className}`}>
+  {/* Product Image */}
+  <a href={productUrl} class="block aspect-square bg-gray-50 relative overflow-hidden">
+    <img
+      src={image || defaultImage}
+      alt={name}
+      class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+      loading="lazy"
+    />
+    {segment && (
+      <span class="absolute top-2 left-2 px-2 py-1 bg-southland-green text-white text-xs font-medium rounded">
+        {segment}
+      </span>
+    )}
+  </a>
+
+  {/* Product Info */}
+  <div class="p-4">
+    <a href={productUrl} class="block">
+      <h4 class="font-semibold text-gray-900 hover:text-southland-green transition-colors">
+        {name}
+      </h4>
+    </a>
+
+    {description && (
+      <p class="text-sm text-gray-600 mt-1 line-clamp-2">
+        {description}
+      </p>
+    )}
+
+    <div class="mt-4 flex items-center justify-between">
+      {price && (
+        <span class="font-semibold text-gray-900">{price}</span>
+      )}
+      <a
+        href={productUrl}
+        class="inline-flex items-center gap-1 text-sm font-medium text-southland-green hover:text-southland-green-dark transition-colors"
+        data-product-slug={slug}
+      >
+        {cta}
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Track product clicks
+  document.querySelectorAll('.product-card a[data-product-slug]').forEach((link) => {
+    link.addEventListener('click', () => {
+      const productSlug = (link as HTMLElement).dataset.productSlug;
+      if (window.pdPixel && productSlug) {
+        window.pdPixel.track('product_cta_click', {
+          product_slug: productSlug,
+          source: 'podcast',
+          page: window.location.pathname,
+        });
+      }
+    });
+  });
+</script>

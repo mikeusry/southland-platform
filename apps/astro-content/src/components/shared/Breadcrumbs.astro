@@ -1,0 +1,57 @@
+---
+/**
+ * Breadcrumbs component with Schema.org BreadcrumbList markup
+ */
+
+interface BreadcrumbItem {
+  label: string;
+  href: string;
+}
+
+interface Props {
+  items: BreadcrumbItem[];
+  class?: string;
+}
+
+const { items, class: className = '' } = Astro.props;
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com';
+
+// Generate BreadcrumbList schema
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: items.map((item, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: item.label,
+    item: item.href.startsWith('http') ? item.href : `${siteUrl}${item.href}`,
+  })),
+};
+---
+
+<nav aria-label="Breadcrumb" class={`text-sm ${className}`}>
+  <ol class="flex items-center gap-2 flex-wrap">
+    {items.map((item, index) => (
+      <li class="flex items-center gap-2">
+        {index > 0 && (
+          <span class="text-gray-400" aria-hidden="true">/</span>
+        )}
+        {index === items.length - 1 ? (
+          <span class="text-gray-600" aria-current="page">
+            {item.label}
+          </span>
+        ) : (
+          <a
+            href={item.href}
+            class="text-southland-green hover:text-southland-green-dark transition-colors"
+          >
+            {item.label}
+          </a>
+        )}
+      </li>
+    ))}
+  </ol>
+</nav>
+
+<script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />

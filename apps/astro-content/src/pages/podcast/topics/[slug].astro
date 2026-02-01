@@ -1,0 +1,244 @@
+---
+/**
+ * Individual Topic Page - /podcast/topics/[slug]/
+ * Shows topic description and related episodes
+ * SEO optimized with JSON-LD structured data
+ */
+
+import PodcastLayout from '../../../layouts/PodcastLayout.astro';
+import EpisodeCard from '../../../components/podcast/EpisodeCard.astro';
+import TopicTag from '../../../components/shared/TopicTag.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const topics = await getCollection('topics');
+  return topics.map((topic) => ({
+    params: { slug: topic.id.replace(/\.mdx?$/, '') },
+    props: { topic },
+  }));
+}
+
+const { topic } = Astro.props;
+const { Content } = await topic.render();
+
+// Get the slug without extension
+const topicSlug = topic.id.replace(/\.mdx?$/, '');
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com';
+const pageUrl = `${siteUrl}/podcast/topics/${topicSlug}/`;
+
+// Get episodes with this topic
+const allEpisodes = await getCollection('episodes', ({ data }) => {
+  return data.draft !== true && data.topics?.includes(topicSlug);
+});
+
+// Sort by publish date (newest first)
+const episodes = allEpisodes.sort(
+  (a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
+);
+
+// Get related topics
+const allTopics = await getCollection('topics');
+const relatedTopics = topic.data.relatedTopics
+  ?.map((slug: string) => allTopics.find((t) => t.id.replace(/\.mdx?$/, '') === slug))
+  .filter(Boolean) || [];
+
+// Get related products (matching topic or segment)
+const allProducts = await getCollection('products');
+const relatedProducts = allProducts.filter((product) => {
+  const matchesTopic = product.data.topics?.includes(topicSlug);
+  const matchesSegment = topic.data.segment && product.data.segment === topic.data.segment;
+  return matchesTopic || matchesSegment;
+}).slice(0, 4);
+
+// SEO meta - use custom or fallback to defaults
+const metaTitle = topic.data.metaTitle || `${topic.data.name} - Ag & Culture Podcast Topics`;
+const metaDescription = topic.data.metaDescription || topic.data.description;
+
+// JSON-LD structured data
+const schema = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "CollectionPage",
+      "@id": pageUrl,
+      "url": pageUrl,
+      "name": metaTitle,
+      "description": metaDescription,
+      "isPartOf": {
+        "@type": "WebSite",
+        "@id": `${siteUrl}/#website`,
+        "name": "Southland Organics",
+        "url": siteUrl
+      },
+      "about": {
+        "@type": "Thing",
+        "name": topic.data.name,
+        "description": topic.data.description
+      },
+      "mainEntity": {
+        "@type": "ItemList",
+        "itemListElement": episodes.map((episode, index) => ({
+          "@type": "ListItem",
+          "position": index + 1,
+          "item": {
+            "@type": "PodcastEpisode",
+            "name": episode.data.title,
+            "url": `${siteUrl}/podcast/${episode.id.replace(/\.mdx?$/, '')}/`,
+            "description": episode.data.description,
+            "episodeNumber": episode.data.episodeNumber,
+            "duration": `PT${episode.data.durationSeconds}S`
+          }
+        }))
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": siteUrl },
+        { "@type": "ListItem", "position": 2, "name": "Podcast", "item": `${siteUrl}/podcast/` },
+        { "@type": "ListItem", "position": 3, "name": "Topics", "item": `${siteUrl}/podcast/topics/` },
+        { "@type": "ListItem", "position": 4, "name": topic.data.name, "item": pageUrl }
+      ]
+    }
+  ]
+};
+---
+
+<PodcastLayout
+  title={metaTitle}
+  description={metaDescription}
+  ogImage={topic.data.ogImage}
+  schema={schema}
+  breadcrumbs={[
+    { label: 'Topics', href: '/podcast/topics/' },
+    { label: topic.data.name, href: `/podcast/topics/${topicSlug}/` },
+  ]}
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    {/* Header */}
+    <header class="mb-12">
+      <div class="flex items-center gap-3 mb-4">
+        {topic.data.icon && (
+          <span class="text-4xl">{topic.data.icon}</span>
+        )}
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900">
+          {topic.data.name}
+        </h1>
+      </div>
+      <p class="text-lg text-gray-600 max-w-3xl">
+        {topic.data.description}
+      </p>
+    </header>
+
+    <div class="grid lg:grid-cols-3 gap-12">
+      {/* Main Content */}
+      <div class="lg:col-span-2">
+        {/* Episodes */}
+        <section>
+          <h2 class="text-xl font-semibold text-gray-900 mb-6">
+            {episodes.length} Episode{episodes.length !== 1 ? 's' : ''}
+          </h2>
+
+          {episodes.length > 0 ? (
+            <div class="space-y-6">
+              {episodes.map((episode) => (
+                <EpisodeCard
+                  title={episode.data.title}
+                  slug={episode.id.replace(/\.mdx?$/, '')}
+                  episodeNumber={episode.data.episodeNumber}
+                  description={episode.data.description}
+                  thumbnail={episode.data.thumbnail}
+                  duration={episode.data.duration}
+                  publishDate={episode.data.publishDate}
+                  topics={episode.data.topics}
+                />
+              ))}
+            </div>
+          ) : (
+            <div class="text-center py-12 bg-gray-50 rounded-xl">
+              <p class="text-gray-500">No episodes on this topic yet. Check back soon!</p>
+            </div>
+          )}
+        </section>
+
+        {/* Related Products */}
+        {relatedProducts.length > 0 && (
+          <section class="mt-12 pt-12 border-t border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900 mb-6">
+              Shop Related Products
+            </h2>
+            <div class="grid sm:grid-cols-2 gap-4">
+              {relatedProducts.map((product) => (
+                <a
+                  href={`https://southlandorganics.com/products/${product.data.shopifyHandle}`}
+                  target="_blank"
+                  rel="noopener"
+                  class="group flex items-center gap-4 p-4 bg-white rounded-xl border border-gray-100 hover:border-southland-green hover:shadow-md transition-all"
+                >
+                  <div class="flex-1 min-w-0">
+                    <h3 class="font-medium text-gray-900 group-hover:text-southland-green transition-colors truncate">
+                      {product.data.name}
+                    </h3>
+                    <p class="text-sm text-gray-500 line-clamp-2 mt-1">
+                      {product.data.shortDescription}
+                    </p>
+                  </div>
+                  <svg class="w-5 h-5 text-gray-400 group-hover:text-southland-green flex-shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+              ))}
+            </div>
+            <div class="mt-6 text-center">
+              <a
+                href={`https://southlandorganics.com/collections/${topic.data.segment || 'all'}`}
+                target="_blank"
+                rel="noopener"
+                class="inline-flex items-center gap-2 text-southland-green hover:text-southland-green-dark font-medium transition-colors"
+              >
+                Browse all {topic.data.name.toLowerCase()} products
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </a>
+            </div>
+          </section>
+        )}
+      </div>
+
+      {/* Sidebar */}
+      <aside class="space-y-8">
+        {/* About Topic */}
+        <div class="bg-white rounded-xl border border-gray-100 p-6">
+          <h3 class="font-semibold text-gray-900 mb-4">About This Topic</h3>
+          <div class="prose prose-sm max-w-none text-gray-600">
+            <Content />
+          </div>
+        </div>
+
+        {/* Related Topics */}
+        {relatedTopics.length > 0 && (
+          <div class="bg-white rounded-xl border border-gray-100 p-6">
+            <h3 class="font-semibold text-gray-900 mb-4">Related Topics</h3>
+            <div class="flex flex-wrap gap-2">
+              {relatedTopics.map((related: any) => (
+                <TopicTag
+                  topic={related.data.name}
+                  href={`/podcast/topics/${related.id.replace(/\.mdx?$/, '')}/`}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Browse All */}
+        <a
+          href="/podcast/topics/"
+          class="block text-center py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
+        >
+          ← Browse All Topics
+        </a>
+      </aside>
+    </div>
+  </div>
+</PodcastLayout>

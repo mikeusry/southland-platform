@@ -1,0 +1,669 @@
+{
+  "current": {
+    "demo": false,
+    "textLogo": "",
+    "defaultLogo": "shopify://shop_images/Southland_Orgnaics_Horizontal.png",
+    "darkLogo": "",
+    "transparentLogo": "",
+    "mobileLogo": "",
+    "favicon": "shopify://shop_images/Southland_Organics_Icon_32.png",
+    "storeLocation": "189 Luke Road Bogart, GA 30611",
+    "storeEmail": "support@southlandorganics.com",
+    "storePhone": "+18006083755",
+    "sFacebook": "https://www.facebook.com/SouthlandOrganics",
+    "sInstagram": "https://www.instagram.com/southlandorganics/",
+    "sTwitter": "https://twitter.com/SouthlandOrg",
+    "sYoutube": "https://www.youtube.com/SouthlandOrganics",
+    "sPinterest": "https://www.pinterest.com/SouthlandOrganics/",
+    "baseLayout": "stretchBg",
+    "baseMaxWidth": "1400",
+    "baseBorderRadius": 0,
+    "baseBorderRadiusSmall": 4,
+    "baseBorderWidth": 2,
+    "baseSectionMargin": 30,
+    "pagination": "infinite",
+    "breadcrumbs": false,
+    "emptySearch": "poultry",
+    "baseBackground": "#ffffff",
+    "baseText": "#191d21",
+    "baseTitle": "#2c5234",
+    "baseSecondaryBackground": "#efefef",
+    "baseSecondaryText": "#686363",
+    "baseLink": "#44883e",
+    "primaryAccentBackground": "#44883e",
+    "primaryAccentText": "#ffffff",
+    "secondaryAccentBackground": "#ffffff",
+    "secondaryAccentText": "#000000",
+    "baseAlert": "#ef5600",
+    "primaryFont": "open_sans_n4",
+    "secondaryFont": "rubik_n9",
+    "smallFontSize": 13,
+    "baseFontSize": 16,
+    "mediumFontSize": 24,
+    "bigFontSize": 38,
+    "headingFontSize": 5,
+    "subHeadingFontSize": 18,
+    "buttonFontSize": "baseFontSize",
+    "buttonPaddingHorizontal": 25,
+    "buttonPaddingVertical": 10,
+    "primaryButtonStyle": "filled",
+    "primaryButtonColorCombo": "primaryCombo",
+    "primaryButtonCustomFill": "#000000",
+    "primaryButtonCustomContent": "rgba(0,0,0,0)",
+    "primaryButtonHover": "lighten",
+    "primaryButtonCustomHoverFill": "#fff",
+    "primaryButtonCustomHoverContent": "#000",
+    "primaryButtonCustomBorder": false,
+    "primaryButtonBorderRadius": 0,
+    "primaryButtonBorderWidth": 0,
+    "secondaryButtonStyle": "filled",
+    "secondaryButtonColorCombo": "primaryCombo",
+    "secondaryButtonCustomFill": "rgba(0,0,0,0)",
+    "secondaryButtonCustomContent": "rgb(0,0,0)",
+    "secondaryButtonHover": "darken",
+    "secondaryButtonCustomHoverFill": "rgba(0,0,0,0)",
+    "secondaryButtonCustomHoverContent": "rgb(0,0,0)",
+    "secondaryButtonCustomBorder": false,
+    "secondaryButtonBorderRadius": 0,
+    "secondaryButtonBorderWidth": 0,
+    "inputFill": "#efefef",
+    "inputContent": "#000000",
+    "inputBorderColor": "#e2e2e2",
+    "inputCustomBorder": false,
+    "inputBorderRadius": 0,
+    "inputBorderWidth": 1,
+    "freeShipping": false,
+    "addToCartColor": "primary",
+    "addToCartType": "default",
+    "addToCartIcon": "none",
+    "addToCartFontSize": "default",
+    "addToCartTransform": "initial",
+    "buyNowColor": "primary",
+    "buyNowType": "default",
+    "buyNowFontSize": "default",
+    "buyNowTransform": "initial",
+    "headerType": "default",
+    "cardDesktop": "3",
+    "cardMobile": "12",
+    "baseCardPadding": 12,
+    "cardImageFit": "cover",
+    "cardImageRatio": "133.33",
+    "cardImageRatioWidth": "16",
+    "cardImageRatioHeight": "9",
+    "cardStyle": "noButton",
+    "cardShowGallery": false,
+    "cardShowSecondary": false,
+    "cardTextAlign": "center",
+    "cardShowBrand": false,
+    "cardShowRating": false,
+    "cardBrandColor": "rgba(0,0,0,0)",
+    "cardNameColor": "rgba(0,0,0,0)",
+    "cardNameLimit": "none",
+    "cardPriceColor": "rgba(0,0,0,0)",
+    "tagEnabled": false,
+    "tagPosition": "top-right",
+    "tagOffset": 5,
+    "tagSale": true,
+    "tagSaleColor": "#ef0000",
+    "tagSoldOut": true,
+    "tagSoldOutColor": "#000",
+    "collectionCardStyle": "default",
+    "collectionCardTextColor": "rgb(0,0,0)",
+    "collectionCardTextAlign": "left",
+    "collectionCardTextAlignVertical": "bottom",
+    "collectionCardTextBackground": "rgba(0,0,0,0)",
+    "collectionCardOverlayOpacity": 0,
+    "collectionCardOverlayColor": "rgba(0,0,0,0)",
+    "blogCardStyle": "default",
+    "blogCardAuthor": true,
+    "blogCardExcerpt": false,
+    "variantShowImage": true,
+    "preselectSwatch": "false",
+    "swatchCustomColors": "red: #EF0000, blue: #00e",
+    "swatchFileExt": "jpg",
+    "cartStyle": "drawer",
+    "quickBuy": true,
+    "ajaxType": "disabled",
+    "dynamicCheckout": true,
+    "cartAction": "added",
+    "lazyLoadSvg": true,
+    "nativeLazyLoad": true,
+    "geolocation": false,
+    "multilanguage": false,
+    "shopCurrency": "none",
+    "enabledCurrencies": "USD, HRK, GBP",
+    "countdown": false,
+    "countdownCard": true,
+    "countdownTime": "24",
+    "countdownTimeFormat": "days",
+    "countdownRandom": 15,
+    "recentlyBought": false,
+    "recentlyBoughtMobile": false,
+    "recentlyBoughtCollection": "",
+    "recentlyBoughtInterval": 5,
+    "recentlyBoughtRemain": 10,
+    "recentlyBoughtPosition": "left",
+    "recentlyBoughtBackground": "#050505",
+    "recentlyBoughtColor": "#ffffff",
+    "recentlyBoughtBorderRadius": 90,
+    "recentlyBoughtImage": "full",
+    "recentlyBoughtNames": true,
+    "recentlyBoughtNameFormat": "shorten",
+    "recentlyBoughtNamesList": "Alissa Ashford, Carroll Calley, Augustina Angulo, Kenna Kuntz, Hailey Hinkle, Breann Beckham, Raquel Roles, Bernetta Beeks, Sol Silverio, Somer Sherrell, Yadira Yann, Belva Bumpus, Arlen Atherton, Huey Hanway, Suzette Stayton, Jeffry Jason, Libby Levasseur, Shaun Sparkman, Alison Almon, Rocco Rexroat",
+    "reviewApp": "shopifyReviews",
+    "freeShippingAmount": "99.95",
+    "messenger": false,
+    "optimizedMessenger": true,
+    "messengerID": "316229588744482",
+    "messengerLang": "en_US",
+    "messengerColor": "#0084ff",
+    "messengerGreeting": "What can we help you with?",
+    "gdpr": false,
+    "gdprText": "<p>This site requires cookies in order to provide all of its functionality.</p>",
+    "gdprAccept": "Accept",
+    "floatingContact": false,
+    "floatingContactMobile": false,
+    "floatingContactPage": "",
+    "floatingContactPosition": "left",
+    "floatingContactSize": 60,
+    "floatingContactColor": "#000000",
+    "floatingContactIconColor": "#fff",
+    "headHTML": "",
+    "bodyHTML": "",
+    "bodyCSS": ".max960 {max-width: 960px;\nmargin-left: auto;\nmargin-right: auto}\n\n.tab--product, .featured-tabs__tab {\n\tborder: 1px solid #a7a7a7; border-radius: 10px;}\n.tab--show p {margin-bottom: 1em!important}\n.tab--product accordion__item  {\n\tborder-top: none; border-bottom: none;}\n.max150 {max-width: 150px; margin-left: auto}\n.product--tab__content .row {padding:20px; align-items: center;}\ndt.species {margin-left: 5px; margin-top: 1em; font-style: italic;}\n.flex-container {\ndisplay: -webkit-flex;\ndisplay: flex;\n-webkit-flex-direction: row;\nflex-direction: row;\n-webkit-align-items: center;\nalign-items: center;\n}\n.flex-item {\n    display:flex;\n    align-items: center;\n}\n.flex-item img{\n    flex-grow:0;\n    flex-shrink:0;\n}\n.just-center {\n    justify-content: center;\n    justify-items: center;}\n.box {\n  align-items: center;\n  justify-content: center;\nmargin-left: auto;\nmargin-right: auto;\n}\n.btn {font-size: 18px;\n    padding: 9px 15px;\n    margin-bottom: 0;\n    display: inline-block;\n    text-decoration: none;\n    text-align: center;\n    white-space: nowrap;\n    vertical-align: middle;\n    -ms-touch-action: manipulation;\n    touch-action: manipulation;\n    cursor: pointer;\n    -webkit-user-select: none;\n    -moz-user-select: none;\n    -ms-user-select: none;\n    user-select: none;\n    background-image: none;\n    border: 1px solid transparent;\n    color: #333;\n    background-color: #fff;\n    border-color: #ccc;\n}\n.btn.primary {background-color: #40863F; color: white}\n.mt-0 {margin-top: 0px}\n.btn {\n\tdisplay: inline-block;\n\tmargin-top: 12px;\n\tmargin-right: 12px;\n\tpadding: 8px 18px;\n\tborder: 1px solid transparent;\n\tborder-radius: 4px;\n\tbackground-color: #212121;\n\tbox-shadow: inset 0 0 0 0 transparent;\n\t-webkit-transition: box-shadow 300ms ease-out, border-color 300ms ease-out;\n\ttransition: box-shadow 300ms ease-out, border-color 300ms ease-out;\n\tcolor: #fff;\n\ttext-decoration: none;\n}\n\n.btn:hover {\n\tbox-shadow: inset 0 0 0 100px rgba(0, 0, 0, 0.15);\n\tcolor: #fff;\n}\n\n.btn.btn-primary {\n\tborder-color: transparent;\n\tbackground-color: #4253ff;\n}\n\n.btn.red {\n\tbackground-color: #862f2c;\n}\n\n.btn.btn-secondary {\n\tborder-color: #fff;\n\tbackground-color: transparent;\n}\n\n.mb-0 {\n\tmargin-bottom: 0px;\n}\n.mb-1 {\n\tmargin-bottom: 12px;\n\tfont-family: \"Open Sans\", sans-serif;\n}\n.mb-2 {\n\tmargin-bottom: 28px;\n}\n\n.mb-3 {\n\tmargin-bottom: 48px;\n}\n\n.p-big {\n\tfont-family: \"Open Sans\", sans-serif;\n\tfont-size: 1.25em;\n}\n\n.m-0 {\n\tmargin: 0px;\n}\n\n.mt-1 {\n\tmargin-top: 16px;\n}\n.mt-2 {\n\tmargin-top: 28px;\n}\n.mt-3 {\n\tmargin-top: 48px;\n}\n\n.card {\n\tdisplay: -webkit-box;\n\tdisplay: -webkit-flex;\n\tdisplay: -ms-flexbox;\n\tdisplay: flex;\n\toverflow: hidden;\n\tmargin-bottom: 1em;\n\t-webkit-box-orient: vertical;\n\t-webkit-box-direction: normal;\n\t-webkit-flex-direction: column;\n\t-ms-flex-direction: column;\n\tflex-direction: column;\n\t-webkit-box-pack: start;\n\t-webkit-justify-content: flex-start;\n\t-ms-flex-pack: start;\n\tjustify-content: flex-start;\n\t-webkit-box-flex: 1;\n\t-webkit-flex: 1;\n\t-ms-flex: 1;\n\tflex: 1;\n\tborder-radius: 4px;\n\tbackground-color: #fff;\n\tbox-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08), 0 1px 2px 0 rgba(0, 0, 0, 0.12);\n}\n\n.pt-0 {\n\tpadding-top: 0px;\n}\n.pt-1 {\n\tpadding-top: 20px;\n}\n.pt-2 {\n\tpadding-top: 40px;\n}\n\n.pb-0 {\n\tpadding-bottom: 0px;\n}\n\n.pb-1 {\n\tpadding-bottom: 20px;\n}\n\n.pb-2 {\n\tpadding-bottom: 40px;\n}\n.py60 {\n\tpadding-top: 60px;\n\tpadding-bottom: 60px;\n}\n\n.py96 {\n\tpadding-top: 96px;\n\tpadding-bottom: 96px;\n}",
+    "headJS": "",
+    "bodyJS": "",
+    "checkout_header_image": "",
+    "checkout_logo_image": "shopify://shop_images/Southland_Primary_Square_Logo.png",
+    "checkout_logo_position": "center",
+    "checkout_logo_size": "large",
+    "checkout_body_background_image": "",
+    "checkout_body_background_color": "#fff",
+    "checkout_input_background_color_mode": "white",
+    "checkout_sidebar_background_image": "",
+    "checkout_sidebar_background_color": "#fafafa",
+    "checkout_heading_font": "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+    "checkout_body_font": "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+    "checkout_accent_color": "#44883e",
+    "checkout_button_color": "#ef5600",
+    "checkout_error_color": "#e32c2b",
+    "enableCloudinary": true,
+    "cloudinaryUrl": "https://res.cloudinary.com/southland-organics/image/fetch/q_auto,f_auto,fl_lossy",
+    "facebookLink": "#",
+    "instagramLink": "#",
+    "linkedinLink": "#",
+    "sections": {
+      "top-info-bar": {
+        "type": "top-info-bar",
+        "blocks": {
+          "65f3729d-e484-4f89-a1e5-3cba357f0dbb": {
+            "type": "barTextMarquee",
+            "disabled": true,
+            "settings": {
+              "enabled": true,
+              "enabledMobile": false,
+              "align": "auto",
+              "messages": "<p>Black Friday Sale - 20% Off Sitewide - Use Code: BLKFRDY24</p>"
+            }
+          }
+        },
+        "block_order": [
+          "65f3729d-e484-4f89-a1e5-3cba357f0dbb"
+        ],
+        "settings": {
+          "enabled": false,
+          "enabledMobile": false,
+          "layout": "stretchBg",
+          "height": 30,
+          "fontSize": "font__size--small",
+          "colorCombo": "customCombo",
+          "customFillColor": "#000000",
+          "customContentColor": "#ffffff"
+        }
+      },
+      "bottom-info-bar": {
+        "type": "bottom-info-bar",
+        "blocks": {
+          "3e8bbac9-3dc4-421f-9bed-80b334ce5602": {
+            "type": "barTextMarquee",
+            "settings": {
+              "enabled": true,
+              "enabledMobile": true,
+              "align": "center",
+              "messages": "<p>This is one message</p><p>This is another one</p>"
+            }
+          }
+        },
+        "block_order": [
+          "3e8bbac9-3dc4-421f-9bed-80b334ce5602"
+        ],
+        "settings": {
+          "enabled": false,
+          "enabledMobile": false,
+          "layout": "default",
+          "height": 30,
+          "fontSize": "font__size--small",
+          "colorCombo": "secondaryCombo",
+          "customFillColor": "rgba(0,0,0,0)",
+          "customContentColor": "rgba(0,0,0,0)"
+        }
+      },
+      "api__upsell": {
+        "type": "api__upsell",
+        "settings": {
+          "defaultCollection": ""
+        }
+      },
+      "info-badges": {
+        "type": "info-badges",
+        "blocks": {
+          "1599773459557": {
+            "type": "infoBadge",
+            "settings": {
+              "icon": "shopping-bag",
+              "heading": "This is awesome!",
+              "subheading": "This is even more info about how awesome this is!"
+            }
+          },
+          "1599773463160": {
+            "type": "infoBadge",
+            "settings": {
+              "icon": "shopping-cart",
+              "heading": "This is awesome!",
+              "subheading": "This is even more info about how awesome this is!"
+            }
+          }
+        },
+        "block_order": [
+          "1599773459557",
+          "1599773463160"
+        ],
+        "settings": {
+          "enabled": false,
+          "displayFor": "display--both",
+          "layout": "default",
+          "nomargin": false,
+          "scopedCSS": "",
+          "height": 0,
+          "padding": 0,
+          "lineMargin": 12,
+          "backgroundColor": "rgba(0,0,0,0)",
+          "backgroundPosition": "middle",
+          "backgroundFilter": "none",
+          "backdropIntensity": 50,
+          "parallax": false,
+          "backgroundPattern": false,
+          "overlayOpacity": 0,
+          "overlayColor": "#000000",
+          "contentColor": "rgba(0,0,0,0)",
+          "horizontalAlignment": "end",
+          "verticalAlignment": "middle",
+          "iconPosition": "icon--left"
+        }
+      },
+      "footer": {
+        "type": "footer",
+        "blocks": {
+          "bb34d9cd-0d6e-4ca5-a281-b68143edc255": {
+            "type": "footerImage",
+            "settings": {
+              "width": "12",
+              "horizontalAlignment": "center",
+              "verticalAlignment": "middle",
+              "image": "shopify://shop_images/Southland_Organics_Square_White.png",
+              "imageWidth": 50,
+              "url": "https://www.southlandorganics.com/"
+            }
+          },
+          "1599697760840": {
+            "type": "footerText",
+            "settings": {
+              "width": "4",
+              "horizontalAlignment": "center",
+              "verticalAlignment": "top",
+              "heading": "Southland Organics",
+              "text": "<p><br/>189 Luke Road<br/>Bogart, GA 30622</p><p><a href=\"tel:800-608-3755\" target=\"_blank\" title=\"tel:800-608-3755\">800-608-3755</a></p>"
+            }
+          },
+          "1599697832224": {
+            "type": "footerLinks",
+            "settings": {
+              "width": "4",
+              "horizontalAlignment": "center",
+              "verticalAlignment": "top",
+              "heading": "Navigate",
+              "links": "footer"
+            }
+          },
+          "1599697930519": {
+            "type": "footerLinks",
+            "settings": {
+              "width": "4",
+              "horizontalAlignment": "center",
+              "verticalAlignment": "top",
+              "heading": "Product Specialties",
+              "links": "main-menu"
+            }
+          },
+          "1599697964869": {
+            "type": "footerSocial",
+            "settings": {
+              "width": "6",
+              "horizontalAlignment": "center",
+              "verticalAlignment": "top",
+              "heading": "Let's Be Social"
+            }
+          },
+          "5d841428-cf49-4b78-9034-a7acddbf2733": {
+            "type": "footerText",
+            "settings": {
+              "width": "6",
+              "horizontalAlignment": "center",
+              "verticalAlignment": "middle",
+              "heading": "Sam.Gov",
+              "text": "<p>Southland Organics is fully registered with Sam.gov! Entity ID: L9GTYJCHK2Q5</p>"
+            }
+          }
+        },
+        "block_order": [
+          "bb34d9cd-0d6e-4ca5-a281-b68143edc255",
+          "1599697760840",
+          "1599697832224",
+          "1599697930519",
+          "1599697964869",
+          "5d841428-cf49-4b78-9034-a7acddbf2733"
+        ],
+        "settings": {
+          "layout": "stretchBg",
+          "fillColor": "rgba(0,0,0,0)",
+          "contentColor": "rgba(0,0,0,0)",
+          "spacing": 11
+        }
+      },
+      "subfooter": {
+        "type": "subfooter",
+        "blocks": {
+          "131e8c14-f28a-40af-b769-f59cd93aa924": {
+            "type": "footerPayment",
+            "settings": {
+              "width": "auto",
+              "horizontalAlignment": "center",
+              "verticalAlignment": "middle",
+              "heading": "",
+              "customIcons": true,
+              "icons": "american_express, apple_pay, diners_club, discover, google_pay, paypal, shopify_pay, visa"
+            }
+          },
+          "61e9de9f-a684-4641-9ee9-7b538e0c3dac": {
+            "type": "footerText",
+            "settings": {
+              "width": "auto",
+              "horizontalAlignment": "center",
+              "verticalAlignment": "middle",
+              "heading": "",
+              "text": "<p>© 2025 Southland Organics   |  <a href=\"/pages/terms-of-use\" target=\"_blank\" title=\"Terms of Use\">Terms Of Use</a>  |  <a href=\"/pages/privacy-policy\" target=\"_blank\" title=\"Privacy Policy\">Privacy Policy</a> | <a href=\"/pages/return-policy\" title=\"Shipping & Returns\">Shipping & Returns</a></p>"
+            }
+          }
+        },
+        "block_order": [
+          "131e8c14-f28a-40af-b769-f59cd93aa924",
+          "61e9de9f-a684-4641-9ee9-7b538e0c3dac"
+        ],
+        "settings": {
+          "layout": "default",
+          "fillColor": "#000000",
+          "contentColor": "#ffffff",
+          "spacing": 0
+        }
+      },
+      "placeholder_section": {
+        "type": "placeholder_section",
+        "settings": {}
+      },
+      "header--default": {
+        "type": "header--default",
+        "settings": {
+          "layout": "stretchBg",
+          "minHeight": 75,
+          "borderRadius": 0,
+          "shadow": false,
+          "menuLinks": "main-menu",
+          "megamenu": false,
+          "logoWidth": 240,
+          "logoHeight": 0,
+          "sticky": true,
+          "contentMargin": 0,
+          "desktopCart": true,
+          "headerBg": "rgba(0,0,0,0)",
+          "linkColor": "#727272",
+          "accentColor": "#000000",
+          "hoverStyle": "underline",
+          "tagBgColor": "#000000",
+          "tagTextColor": "#ffffff",
+          "transparent": false,
+          "linkColorT": "#ffffff",
+          "accentColorT": "#efefef",
+          "fontSize": "base",
+          "customFont": false,
+          "fontFamily": "work_sans_n6",
+          "cartIcon": "shopping-basket",
+          "mobileLogoPosition": "center",
+          "mobileCart": true
+        }
+      },
+      "header--inline-search": {
+        "type": "header--inline-search",
+        "settings": {
+          "layout": "default",
+          "minHeight": 0,
+          "borderRadius": 0,
+          "shadow": true,
+          "menuLinks": "main-menu",
+          "megamenu": true,
+          "linkPosition": "center",
+          "logoWidth": 160,
+          "logoHeight": 0,
+          "desktopLogoPosition": "left",
+          "sticky": true,
+          "contentMargin": 0,
+          "desktopCart": true,
+          "linkColor": "#000000",
+          "accentColor": "#000000",
+          "hoverStyle": "fill",
+          "tagBgColor": "#000",
+          "tagTextColor": "#FFF",
+          "searchBg": "rgba(0,0,0,0)",
+          "searchText": "rgba(0,0,0,0)",
+          "fontSize": "base",
+          "customFont": false,
+          "fontFamily": "work_sans_n6",
+          "cartIcon": "shopping-cart",
+          "mobileLogoPosition": "left",
+          "mobileCart": true
+        }
+      },
+      "header--logo-top": {
+        "type": "header--logo-top",
+        "settings": {
+          "layout": "default",
+          "minHeight": 0,
+          "borderRadius": 0,
+          "shadow": true,
+          "menuLinks": "main-menu",
+          "megamenu": true,
+          "linkPosition": "center",
+          "logoWidth": 160,
+          "logoHeight": 0,
+          "desktopLogoPosition": "left",
+          "sticky": true,
+          "contentMargin": 0,
+          "desktopCart": true,
+          "linkColor": "#000000",
+          "accentColor": "#000000",
+          "hoverStyle": "fill",
+          "tagBgColor": "#000",
+          "tagTextColor": "#FFF",
+          "fontSize": "base",
+          "customFont": false,
+          "fontFamily": "work_sans_n6",
+          "cartIcon": "shopping-cart",
+          "mobileLogoPosition": "left",
+          "mobileCart": true
+        }
+      },
+      "banner--collection": {
+        "type": "banner--collection",
+        "settings": {
+          "layout": "default",
+          "height": 320,
+          "horizontalAlignment": "center",
+          "verticalAlignment": "middle",
+          "showTitle": false,
+          "showNumber": false,
+          "fontSize": "big",
+          "showDescription": false,
+          "truncateReadMore": true,
+          "truncateDesc": 0,
+          "contentColor": "#ffffff",
+          "fillColor": "rgba(0,0,0,0)",
+          "useCollectionImage": true,
+          "overlayOpacity": 60,
+          "overlayColor": "#000000"
+        }
+      },
+      "product-list__filters": {
+        "type": "product-list__filters",
+        "blocks": {
+          "9b7349dd-06d0-4d67-8251-fc1e952bf437": {
+            "type": "text",
+            "settings": {
+              "name": "Look at this",
+              "text": "<p>I am on the poultry page</p>"
+            }
+          }
+        },
+        "block_order": [
+          "9b7349dd-06d0-4d67-8251-fc1e952bf437"
+        ],
+        "settings": {
+          "filter": true
+        }
+      },
+      "product-list": {
+        "type": "product-list",
+        "settings": {
+          "cardDesktop": "default",
+          "cardsPerPage": 15
+        }
+      },
+      "banner--collection__desc": {
+        "type": "banner--collection__desc",
+        "settings": {
+          "enabled": false,
+          "layout": "default",
+          "height": 300,
+          "horizontalAlignment": "center",
+          "verticalAlignment": "middle",
+          "showTitle": false,
+          "showNumber": true,
+          "fontSize": "medium",
+          "showDescription": true,
+          "truncateReadMore": true,
+          "truncateDesc": 0,
+          "contentColor": "rgba(0,0,0,0)",
+          "fillColor": "rgba(0,0,0,0)",
+          "useCollectionImage": false,
+          "overlayOpacity": 0,
+          "overlayColor": "#000000"
+        }
+      },
+      "banner--login": {
+        "type": "banner--login",
+        "settings": {
+          "layout": "default",
+          "height": 300,
+          "horizontalAlignment": "center",
+          "verticalAlignment": "middle",
+          "fontSize": "medium",
+          "contentColor": "#ffffff",
+          "fillColor": "rgba(0,0,0,0)",
+          "defaultBackgroundImage": "shopify://shop_images/waterfall-in-yosemite-national-park.jpg",
+          "overlayOpacity": 20,
+          "overlayColor": "#000000"
+        }
+      }
+    },
+    "content_for_index": [],
+    "blocks": {
+      "15683396631634586217": {
+        "type": "shopify://apps/inbox/blocks/chat/841fc607-4181-4ad1-842d-e24d7f8bad6b",
+        "disabled": true,
+        "settings": {
+          "button_color": "#202a36",
+          "button_icon": "chat_bubble",
+          "button_text": "no_text",
+          "button_horizontal_position": "bottom_right",
+          "button_vertical_position": "lowest",
+          "greeting_message": "👋 Hi, message us with any questions. We're happy to help!"
+        }
+      },
+      "21474836472147483647": {
+        "type": "shopify://apps/fontify/blocks/app-embed/334490e2-2153-4a2e-a452-e90bdeffa3cc",
+        "disabled": false,
+        "settings": {}
+      },
+      "9199904770951461025": {
+        "type": "shopify://apps/whatconverts/blocks/tracking/d7b55a5f-477a-452c-8760-a3e5c5badb93",
+        "disabled": false,
+        "settings": {}
+      },
+      "14327677521557774844": {
+        "type": "shopify://apps/simprosys-google-shopping-feed/blocks/core_settings_block/1f0b859e-9fa6-4007-97e8-4513aff5ff3b",
+        "disabled": false,
+        "settings": {}
+      },
+      "855628211100114053": {
+        "type": "shopify://apps/klaviyo-email-marketing-sms/blocks/klaviyo-onsite-embed/2632fe16-c075-4321-a88b-50b567f42507",
+        "disabled": false,
+        "settings": {}
+      },
+      "6251270934270006384": {
+        "type": "shopify://apps/stape-server-gtm/blocks/gtm/7e13c847-7971-409d-8fe0-29ec14d5f048",
+        "disabled": false,
+        "settings": {}
+      },
+      "10840395464443086010": {
+        "type": "shopify://apps/alia/blocks/customer-app-frame/51f1d398-3e41-44da-b81e-defd5804b292",
+        "disabled": true,
+        "settings": {}
+      },
+      "6174324309569838175": {
+        "type": "shopify://apps/smile-io/blocks/smile-shopify-app/2fae4e25-1841-4ea2-bc02-bd548478c4f6",
+        "disabled": true,
+        "settings": {}
+      },
+      "15588394620387169604": {
+        "type": "shopify://apps/subi-subscriptions/blocks/app-embed-block/bc0dba25-cd46-4841-bea4-6bdfe9ac815f",
+        "disabled": true,
+        "settings": {}
+      },
+      "18228966181090706294": {
+        "type": "shopify://apps/selleasy/blocks/app-embed/790c1a03-a71f-4bc1-9869-00dad526d3c2",
+        "disabled": true,
+        "settings": {
+          "storefrontAccessToken": ""
+        }
+      },
+      "10864971697205422121": {
+        "type": "shopify://apps/gorgias-live-chat-helpdesk/blocks/gorgias/a66db725-7b96-4e3f-916e-6c8e6f87aaaa",
+        "disabled": false,
+        "settings": {}
+      }
+    }
+  },
+  "platform_customizations": {
+    "custom_css": [
+      ".card-title .m0 {margin: 0 !important;}"
+    ]
+  }
+}

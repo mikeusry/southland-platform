@@ -1,0 +1,1046 @@
+---
+/**
+ * Admin Images Documentation
+ * Comprehensive guide to Cloudinary image components and utilities
+ */
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import CloudinaryImage from '../../components/CloudinaryImage.astro';
+import CloudinaryHero from '../../components/CloudinaryHero.astro';
+import CloudinaryAvatar from '../../components/CloudinaryAvatar.astro';
+import {
+  SOUTHLAND_FOLDER,
+  BRANDING_FOLDER,
+  buildCloudinaryUrl,
+  buildBrandingUrl,
+  buildSouthlandUrl,
+  getLogoUrl,
+  getCloudinaryResponsiveSet,
+  getDprSrcset
+} from '../../lib/cloudinary';
+
+// Sample images for demos (using Cloudinary demo account as fallback)
+const demoPublicId = 'sample';
+const cloudName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || 'demo';
+---
+
+<AdminLayout title="Image Components" activeNav="/admin/images">
+  <header class="page-header">
+    <h1 class="page-title">Image Components</h1>
+    <p class="page-subtitle">Cloudinary integration documentation and examples</p>
+  </header>
+
+  <!-- Quick Reference -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Quick Reference</h2>
+      <span class="badge badge-success">Active</span>
+    </div>
+    <div class="quick-ref-grid">
+      <div class="quick-ref-item">
+        <span class="quick-ref-label">Cloud Name</span>
+        <code class="quick-ref-value">{cloudName}</code>
+      </div>
+      <div class="quick-ref-item">
+        <span class="quick-ref-label">Base Folder</span>
+        <code class="quick-ref-value">{SOUTHLAND_FOLDER}</code>
+      </div>
+      <div class="quick-ref-item">
+        <span class="quick-ref-label">Branding Folder</span>
+        <code class="quick-ref-value">{BRANDING_FOLDER}</code>
+      </div>
+      <div class="quick-ref-item">
+        <span class="quick-ref-label">Auto Format</span>
+        <code class="quick-ref-value">WebP/AVIF</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- Folder Structure -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Cloudinary Folder Structure</h2>
+    </div>
+    <pre class="code-block"><code>Southland Website/
+├── Southland Branding/      # Brand assets
+│   ├── logos/               # Logo variations
+│   ├── icons/               # UI icons, favicons
+│   └── patterns/            # Brand patterns
+├── podcast/                 # Ag & Culture assets
+│   ├── episodes/            # Episode thumbnails
+│   ├── guests/              # Guest headshots
+│   └── covers/              # Podcast art
+├── products/                # Product images
+├── team/                    # Team photos
+├── blog/                    # Blog images
+└── heroes/                  # Hero banners</code></pre>
+  </div>
+
+  <!-- CloudinaryImage Component -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">CloudinaryImage Component</h2>
+      <span class="badge badge-neutral">Primary</span>
+    </div>
+
+    <p class="section-desc">
+      Full-featured image component with lazy loading, blur placeholders, responsive srcset, and error handling.
+    </p>
+
+    <h3 class="subsection-title">Basic Usage</h3>
+    <pre class="code-block"><code>&lt;CloudinaryImage
+  publicId="podcast/episode-01"
+  alt="Episode thumbnail"
+  width={800}
+  height={450}
+/&gt;</code></pre>
+
+    <h3 class="subsection-title">Props Reference</h3>
+    <div class="props-table-wrapper">
+      <table class="props-table">
+        <thead>
+          <tr>
+            <th>Prop</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>publicId</code></td>
+            <td>string</td>
+            <td>required</td>
+            <td>Cloudinary public ID</td>
+          </tr>
+          <tr>
+            <td><code>alt</code></td>
+            <td>string</td>
+            <td>required</td>
+            <td>Alt text for accessibility</td>
+          </tr>
+          <tr>
+            <td><code>width</code></td>
+            <td>number</td>
+            <td>-</td>
+            <td>Desired width in pixels</td>
+          </tr>
+          <tr>
+            <td><code>height</code></td>
+            <td>number</td>
+            <td>-</td>
+            <td>Desired height in pixels</td>
+          </tr>
+          <tr>
+            <td><code>crop</code></td>
+            <td>CropMode</td>
+            <td>'fill'</td>
+            <td>fill, fit, scale, thumb, crop, pad</td>
+          </tr>
+          <tr>
+            <td><code>quality</code></td>
+            <td>Quality</td>
+            <td>'auto'</td>
+            <td>auto, auto:best, auto:good, auto:eco</td>
+          </tr>
+          <tr>
+            <td><code>format</code></td>
+            <td>ImageFormat</td>
+            <td>'auto'</td>
+            <td>auto, webp, avif, jpg, png</td>
+          </tr>
+          <tr>
+            <td><code>gravity</code></td>
+            <td>Gravity</td>
+            <td>'auto'</td>
+            <td>auto, face, faces, center, north, etc.</td>
+          </tr>
+          <tr>
+            <td><code>effect</code></td>
+            <td>ImageEffect</td>
+            <td>-</td>
+            <td>blur, grayscale, sepia, art filters</td>
+          </tr>
+          <tr>
+            <td><code>placeholder</code></td>
+            <td>'blur' | 'color' | 'none'</td>
+            <td>'blur'</td>
+            <td>Loading placeholder type</td>
+          </tr>
+          <tr>
+            <td><code>loading</code></td>
+            <td>'lazy' | 'eager'</td>
+            <td>'lazy'</td>
+            <td>Loading strategy</td>
+          </tr>
+          <tr>
+            <td><code>fetchpriority</code></td>
+            <td>'high' | 'low' | 'auto'</td>
+            <td>-</td>
+            <td>Fetch priority for LCP</td>
+          </tr>
+          <tr>
+            <td><code>responsive</code></td>
+            <td>boolean</td>
+            <td>true</td>
+            <td>Generate responsive srcset</td>
+          </tr>
+          <tr>
+            <td><code>responsiveWidths</code></td>
+            <td>number[]</td>
+            <td>[400,800,1200,1600]</td>
+            <td>Custom srcset widths</td>
+          </tr>
+          <tr>
+            <td><code>observeLazy</code></td>
+            <td>boolean</td>
+            <td>true</td>
+            <td>Use Intersection Observer</td>
+          </tr>
+          <tr>
+            <td><code>useDprSrcset</code></td>
+            <td>boolean</td>
+            <td>false</td>
+            <td>DPR-based srcset (1x, 2x, 3x)</td>
+          </tr>
+          <tr>
+            <td><code>fallbackSrc</code></td>
+            <td>string</td>
+            <td>-</td>
+            <td>Fallback image on error</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CloudinaryHero Component -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">CloudinaryHero Component</h2>
+      <span class="badge badge-neutral">Banner</span>
+    </div>
+
+    <p class="section-desc">
+      Full-width hero banner with overlay support, responsive images, and optional parallax effect.
+    </p>
+
+    <h3 class="subsection-title">Usage</h3>
+    <pre class="code-block"><code>&lt;CloudinaryHero
+  publicId="heroes/farm-sunrise"
+  alt="Southland Organics Farm"
+  height={500}
+  overlay="dark"
+  overlayOpacity={50}
+  priority
+&gt;
+  &lt;h1&gt;Welcome to Southland&lt;/h1&gt;
+  &lt;p&gt;Regenerative agriculture solutions&lt;/p&gt;
+&lt;/CloudinaryHero&gt;</code></pre>
+
+    <h3 class="subsection-title">Props Reference</h3>
+    <div class="props-table-wrapper">
+      <table class="props-table">
+        <thead>
+          <tr>
+            <th>Prop</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>publicId</code></td>
+            <td>string</td>
+            <td>required</td>
+            <td>Cloudinary public ID</td>
+          </tr>
+          <tr>
+            <td><code>alt</code></td>
+            <td>string</td>
+            <td>required</td>
+            <td>Alt text for accessibility</td>
+          </tr>
+          <tr>
+            <td><code>height</code></td>
+            <td>number</td>
+            <td>500</td>
+            <td>Height in pixels</td>
+          </tr>
+          <tr>
+            <td><code>overlay</code></td>
+            <td>'none' | 'light' | 'dark' | 'gradient' | 'brand'</td>
+            <td>'dark'</td>
+            <td>Overlay type</td>
+          </tr>
+          <tr>
+            <td><code>overlayColor</code></td>
+            <td>string</td>
+            <td>-</td>
+            <td>Custom overlay color (hex without #)</td>
+          </tr>
+          <tr>
+            <td><code>overlayOpacity</code></td>
+            <td>number</td>
+            <td>50</td>
+            <td>Overlay opacity (0-100)</td>
+          </tr>
+          <tr>
+            <td><code>contentAlign</code></td>
+            <td>'start' | 'center' | 'end'</td>
+            <td>'center'</td>
+            <td>Vertical alignment</td>
+          </tr>
+          <tr>
+            <td><code>contentJustify</code></td>
+            <td>'start' | 'center' | 'end'</td>
+            <td>'center'</td>
+            <td>Horizontal alignment</td>
+          </tr>
+          <tr>
+            <td><code>priority</code></td>
+            <td>boolean</td>
+            <td>false</td>
+            <td>LCP image (eager load + preload)</td>
+          </tr>
+          <tr>
+            <td><code>parallax</code></td>
+            <td>boolean</td>
+            <td>false</td>
+            <td>Enable parallax scroll effect</td>
+          </tr>
+          <tr>
+            <td><code>effect</code></td>
+            <td>'blur' | 'grayscale' | 'sepia' | 'darken' | 'none'</td>
+            <td>'none'</td>
+            <td>Image effect</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CloudinaryAvatar Component -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">CloudinaryAvatar Component</h2>
+      <span class="badge badge-neutral">Profile</span>
+    </div>
+
+    <p class="section-desc">
+      Circular avatar with face detection, status indicators, and DPR-aware srcset.
+    </p>
+
+    <h3 class="subsection-title">Usage</h3>
+    <pre class="code-block"><code>&lt;CloudinaryAvatar
+  publicId="team/john-doe"
+  alt="John Doe"
+  size={64}
+  showStatus
+  status="online"
+  borderWidth={2}
+  borderColor="44883e"
+/&gt;</code></pre>
+
+    <h3 class="subsection-title">Props Reference</h3>
+    <div class="props-table-wrapper">
+      <table class="props-table">
+        <thead>
+          <tr>
+            <th>Prop</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>publicId</code></td>
+            <td>string</td>
+            <td>required</td>
+            <td>Cloudinary public ID</td>
+          </tr>
+          <tr>
+            <td><code>alt</code></td>
+            <td>string</td>
+            <td>required</td>
+            <td>Alt text for accessibility</td>
+          </tr>
+          <tr>
+            <td><code>size</code></td>
+            <td>number</td>
+            <td>64</td>
+            <td>Avatar size in pixels</td>
+          </tr>
+          <tr>
+            <td><code>showStatus</code></td>
+            <td>boolean</td>
+            <td>false</td>
+            <td>Show status indicator</td>
+          </tr>
+          <tr>
+            <td><code>status</code></td>
+            <td>'online' | 'offline' | 'away' | 'busy'</td>
+            <td>'offline'</td>
+            <td>Status state</td>
+          </tr>
+          <tr>
+            <td><code>borderColor</code></td>
+            <td>string</td>
+            <td>-</td>
+            <td>Border color (hex without #)</td>
+          </tr>
+          <tr>
+            <td><code>borderWidth</code></td>
+            <td>number</td>
+            <td>0</td>
+            <td>Border width in pixels</td>
+          </tr>
+          <tr>
+            <td><code>fallbackInitials</code></td>
+            <td>string</td>
+            <td>-</td>
+            <td>Initials if image fails</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Performance Optimizations -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Performance Optimizations</h2>
+      <span class="badge badge-success">Built-in</span>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <path d="m9 9 6 6m0-6-6 6"/>
+          </svg>
+        </div>
+        <h4>Intersection Observer</h4>
+        <p>Images load only when entering viewport (50px margin)</p>
+        <code>observeLazy={true}</code>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48 2.83-2.83"/>
+          </svg>
+        </div>
+        <h4>Blur Placeholder</h4>
+        <p>20px blurred LQIP for smooth loading transition</p>
+        <code>placeholder="blur"</code>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 14h6v6M4 10V4h6m10 10v6h-6m0-16h6v6"/>
+          </svg>
+        </div>
+        <h4>Responsive Srcset</h4>
+        <p>Auto-generated at 400, 800, 1200, 1600px widths</p>
+        <code>responsive={true}</code>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <h4>LCP Preload</h4>
+        <p>Critical images with fetchpriority="high"</p>
+        <code>fetchpriority="high"</code>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <h4>DPR Srcset</h4>
+        <p>1x, 1.5x, 2x, 3x for retina displays</p>
+        <code>useDprSrcset={true}</code>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <h4>Auto Format</h4>
+        <p>WebP/AVIF served based on browser support</p>
+        <code>format="auto"</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- Available Effects -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Available Effects</h2>
+    </div>
+
+    <h3 class="subsection-title">Standard Effects</h3>
+    <div class="effects-grid">
+      <div class="effect-item">
+        <code>blur</code>
+        <span>Gaussian blur</span>
+      </div>
+      <div class="effect-item">
+        <code>blur:100</code> / <code>blur:500</code> / <code>blur:1000</code>
+        <span>Blur intensity levels</span>
+      </div>
+      <div class="effect-item">
+        <code>grayscale</code>
+        <span>Black & white</span>
+      </div>
+      <div class="effect-item">
+        <code>sepia</code>
+        <span>Vintage tone</span>
+      </div>
+      <div class="effect-item">
+        <code>brightness:50</code> / <code>brightness:150</code>
+        <span>Darken/lighten</span>
+      </div>
+      <div class="effect-item">
+        <code>contrast:50</code> / <code>contrast:150</code>
+        <span>Adjust contrast</span>
+      </div>
+      <div class="effect-item">
+        <code>saturation:50</code> / <code>saturation:150</code>
+        <span>Color intensity</span>
+      </div>
+      <div class="effect-item">
+        <code>sharpen</code>
+        <span>Sharpen image</span>
+      </div>
+      <div class="effect-item">
+        <code>vignette</code>
+        <span>Dark corners</span>
+      </div>
+      <div class="effect-item">
+        <code>pixelate</code> / <code>pixelate:10</code>
+        <span>Pixelation effect</span>
+      </div>
+    </div>
+
+    <h3 class="subsection-title">Art Filters</h3>
+    <div class="effects-grid">
+      <div class="effect-item">
+        <code>art:athena</code>
+        <span>Artistic style</span>
+      </div>
+      <div class="effect-item">
+        <code>art:audrey</code>
+        <span>Vintage portrait</span>
+      </div>
+      <div class="effect-item">
+        <code>art:frost</code>
+        <span>Cool tones</span>
+      </div>
+      <div class="effect-item">
+        <code>art:hokusai</code>
+        <span>Japanese woodblock</span>
+      </div>
+      <div class="effect-item">
+        <code>art:peacock</code>
+        <span>Vibrant colors</span>
+      </div>
+      <div class="effect-item">
+        <code>art:zorro</code>
+        <span>High contrast B&W</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Helper Functions -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Helper Functions</h2>
+      <span class="badge badge-neutral">lib/cloudinary.ts</span>
+    </div>
+
+    <div class="helper-section">
+      <h3 class="helper-name">buildCloudinaryUrl(publicId, options)</h3>
+      <p class="helper-desc">Core function to build Cloudinary URLs with transformations</p>
+      <pre class="code-block"><code>import {'{'} buildCloudinaryUrl {'}'} from '../lib/cloudinary';
+
+const url = buildCloudinaryUrl('podcast/episode-01', {'{'}
+  width: 800,
+  height: 450,
+  crop: 'fill',
+  quality: 'auto',
+  format: 'auto'
+{'}'});</code></pre>
+    </div>
+
+    <div class="helper-section">
+      <h3 class="helper-name">buildSouthlandUrl(imagePath, options)</h3>
+      <p class="helper-desc">Build URL with Southland Website/ prefix</p>
+      <pre class="code-block"><code>// Automatically prefixes with "Southland Website/"
+const url = buildSouthlandUrl('podcast/episodes/ep-42', {'{'}
+  width: 400
+{'}'});
+// Result: .../Southland Website/podcast/episodes/ep-42</code></pre>
+    </div>
+
+    <div class="helper-section">
+      <h3 class="helper-name">buildBrandingUrl(imagePath, options)</h3>
+      <p class="helper-desc">Build URL for branding assets (logos, icons)</p>
+      <pre class="code-block"><code>// Automatically prefixes with "Southland Website/Southland Branding/"
+const logoUrl = buildBrandingUrl('logos/southland-logo-primary', {'{'}
+  width: 300,
+  format: 'png'
+{'}'});</code></pre>
+    </div>
+
+    <div class="helper-section">
+      <h3 class="helper-name">getLogoUrl(variant, options)</h3>
+      <p class="helper-desc">Get logo URL by variant name</p>
+      <pre class="code-block"><code>const primary = getLogoUrl('primary');  // Main logo
+const white = getLogoUrl('white');      // White version
+const black = getLogoUrl('black');      // Black version
+const icon = getLogoUrl('icon');        // Icon only</code></pre>
+    </div>
+
+    <div class="helper-section">
+      <h3 class="helper-name">getCloudinaryResponsiveSet(publicId, widths, options)</h3>
+      <p class="helper-desc">Generate responsive srcset with sizes</p>
+      <pre class="code-block"><code>const {'{'} src, srcset, sizes {'}'} = getCloudinaryResponsiveSet(
+  'heroes/farm',
+  [640, 1024, 1536, 1920],
+  {'{'} crop: 'fill', quality: 'auto' {'}'}
+);
+
+// Use in img tag
+&lt;img src={'{'}src{'}'} srcset={'{'}srcset{'}'} sizes={'{'}sizes{'}'} /&gt;</code></pre>
+    </div>
+
+    <div class="helper-section">
+      <h3 class="helper-name">getDprSrcset(publicId, baseWidth, options)</h3>
+      <p class="helper-desc">Generate DPR-based srcset (1x, 1.5x, 2x, 3x)</p>
+      <pre class="code-block"><code>const srcset = getDprSrcset('team/john', 200);
+// Returns: "url 1x, url 1.5x, url 2x, url 3x"</code></pre>
+    </div>
+
+    <div class="helper-section">
+      <h3 class="helper-name">getEpisodeThumbnail(episodeSlug, width)</h3>
+      <p class="helper-desc">Get podcast episode thumbnail (16:9)</p>
+      <pre class="code-block"><code>const thumb = getEpisodeThumbnail('regenerative-farming-101', 400);
+// Returns 400x225 thumbnail from podcast/episodes/</code></pre>
+    </div>
+
+    <div class="helper-section">
+      <h3 class="helper-name">getGuestImage(guestSlug, size)</h3>
+      <p class="helper-desc">Get guest profile image (face-focused square)</p>
+      <pre class="code-block"><code>const guest = getGuestImage('dr-allen-williams', 200);
+// Returns face-cropped 200x200 from podcast/guests/</code></pre>
+    </div>
+  </div>
+
+  <!-- Integration Examples -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Integration Examples</h2>
+    </div>
+
+    <h3 class="subsection-title">Gallery Grid</h3>
+    <pre class="code-block"><code>&lt;div class="grid grid-cols-2 md:grid-cols-3 gap-4"&gt;
+  {'{'}images.map(img =&gt; (
+    &lt;CloudinaryImage
+      publicId={'{'}img.publicId{'}'}
+      alt={'{'}img.alt{'}'}
+      width={400}
+      height={300}
+      crop="fill"
+      class="rounded-lg hover:scale-105 transition-transform"
+    /&gt;
+  )){'}'}
+&lt;/div&gt;</code></pre>
+
+    <h3 class="subsection-title">Product Card</h3>
+    <pre class="code-block"><code>&lt;article class="product-card"&gt;
+  &lt;CloudinaryImage
+    publicId={'{'}product.image{'}'}
+    alt={'{'}product.name{'}'}
+    width={300}
+    height={300}
+    crop="pad"
+    background="white"
+    class="product-image"
+  /&gt;
+  &lt;h3&gt;{'{'}product.name{'}'}&lt;/h3&gt;
+  &lt;p&gt;{'{'}product.price{'}'}&lt;/p&gt;
+&lt;/article&gt;</code></pre>
+
+    <h3 class="subsection-title">Team Member Card</h3>
+    <pre class="code-block"><code>&lt;div class="team-member"&gt;
+  &lt;CloudinaryAvatar
+    publicId={'{'}member.photo{'}'}
+    alt={'{'}member.name{'}'}
+    size={120}
+    borderWidth={3}
+    borderColor="44883e"
+  /&gt;
+  &lt;h4&gt;{'{'}member.name{'}'}&lt;/h4&gt;
+  &lt;p&gt;{'{'}member.title{'}'}&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+
+    <h3 class="subsection-title">Blog Hero</h3>
+    <pre class="code-block"><code>&lt;CloudinaryHero
+  publicId={'{'}post.featuredImage{'}'}
+  alt={'{'}post.title{'}'}
+  height={400}
+  overlay="gradient"
+  overlayOpacity={60}
+  contentAlign="end"
+  contentJustify="start"
+  priority={'{'}isFirstPost{'}'}
+&gt;
+  &lt;span class="category"&gt;{'{'}post.category{'}'}&lt;/span&gt;
+  &lt;h1&gt;{'{'}post.title{'}'}&lt;/h1&gt;
+  &lt;time&gt;{'{'}post.date{'}'}&lt;/time&gt;
+&lt;/CloudinaryHero&gt;</code></pre>
+  </div>
+
+  <!-- TypeScript Types -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">TypeScript Types</h2>
+    </div>
+    <pre class="code-block"><code>// Available from lib/cloudinary.ts
+import type {'{'}
+  CloudinaryTransformOptions,
+  ImageEffect,
+  CropMode,
+  Gravity,
+  ImageFormat,
+  Quality,
+  ResponsiveImageSet,
+  PlaceholderOptions
+{'}'} from '../lib/cloudinary';
+
+// CropMode
+type CropMode = 'fill' | 'fit' | 'scale' | 'thumb' | 'crop' | 'pad' | 'limit' | 'lfill' | 'mfit';
+
+// Gravity
+type Gravity = 'auto' | 'face' | 'faces' | 'center' | 'north' | 'south' | 'east' | 'west' | ...;
+
+// Quality
+type Quality = number | 'auto' | 'auto:best' | 'auto:good' | 'auto:eco' | 'auto:low';
+
+// ImageFormat
+type ImageFormat = 'auto' | 'webp' | 'avif' | 'jpg' | 'png' | 'gif';</code></pre>
+  </div>
+
+  <!-- Best Practices -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Best Practices</h2>
+    </div>
+    <div class="best-practices">
+      <div class="practice-item">
+        <span class="practice-icon do">&#10003;</span>
+        <div>
+          <strong>Use helper functions</strong>
+          <p>Use buildSouthlandUrl() and buildBrandingUrl() for consistent folder paths</p>
+        </div>
+      </div>
+      <div class="practice-item">
+        <span class="practice-icon do">&#10003;</span>
+        <div>
+          <strong>Set fetchpriority="high" for LCP</strong>
+          <p>Add to above-the-fold hero images and first visible content</p>
+        </div>
+      </div>
+      <div class="practice-item">
+        <span class="practice-icon do">&#10003;</span>
+        <div>
+          <strong>Use CloudinaryHero for heroes</strong>
+          <p>Includes preload link and optimized responsive widths for banners</p>
+        </div>
+      </div>
+      <div class="practice-item">
+        <span class="practice-icon do">&#10003;</span>
+        <div>
+          <strong>Let Cloudinary handle formats</strong>
+          <p>Use format="auto" to serve WebP/AVIF based on browser support</p>
+        </div>
+      </div>
+      <div class="practice-item">
+        <span class="practice-icon dont">&#10007;</span>
+        <div>
+          <strong>Don't disable responsive by default</strong>
+          <p>Keep responsive={true} unless image has fixed dimensions</p>
+        </div>
+      </div>
+      <div class="practice-item">
+        <span class="practice-icon dont">&#10007;</span>
+        <div>
+          <strong>Don't skip alt text</strong>
+          <p>All images require meaningful alt text for accessibility</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<style>
+  .section-desc {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+  .quick-ref-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+  }
+
+  .quick-ref-item {
+    background: var(--surface-alt);
+    padding: 12px;
+    border-radius: var(--radius-sm);
+  }
+
+  .quick-ref-label {
+    display: block;
+    font-size: 11px;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  .quick-ref-value {
+    font-size: 13px;
+    color: var(--accent-dark);
+  }
+
+  .code-block {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    padding: 16px;
+    border-radius: var(--radius);
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.6;
+    margin: 12px 0;
+  }
+
+  .subsection-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 24px 0 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .subsection-title:first-of-type {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+
+  .props-table-wrapper {
+    overflow-x: auto;
+    margin: 12px 0;
+  }
+
+  .props-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .props-table th,
+  .props-table td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .props-table th {
+    background: var(--surface-alt);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+  }
+
+  .props-table td code {
+    background: var(--surface-alt);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+    color: var(--accent-dark);
+  }
+
+  .props-table td:last-child {
+    color: var(--text-secondary);
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+  }
+
+  .feature-card {
+    background: var(--surface-alt);
+    padding: 16px;
+    border-radius: var(--radius);
+  }
+
+  .feature-icon {
+    width: 32px;
+    height: 32px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .feature-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .feature-card h4 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .feature-card p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+
+  .feature-card code {
+    font-size: 11px;
+    background: var(--surface);
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: var(--accent-dark);
+  }
+
+  .effects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .effect-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: var(--surface-alt);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+  }
+
+  .effect-item code {
+    background: var(--surface);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    color: var(--accent-dark);
+  }
+
+  .effect-item span {
+    color: var(--text-secondary);
+    font-size: 12px;
+  }
+
+  .helper-section {
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .helper-section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .helper-name {
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .helper-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+
+  .best-practices {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .practice-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    background: var(--surface-alt);
+    border-radius: var(--radius);
+  }
+
+  .practice-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+
+  .practice-icon.do {
+    background: var(--success-light);
+    color: #166534;
+  }
+
+  .practice-icon.dont {
+    background: var(--error-light);
+    color: #991b1b;
+  }
+
+  .practice-item strong {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 2px;
+  }
+
+  .practice-item p {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+</style>
