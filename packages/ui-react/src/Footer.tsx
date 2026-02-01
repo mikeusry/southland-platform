@@ -1,6 +1,15 @@
 import type { FooterData } from '@southland/ui-schema';
 
-type FooterProps = FooterData;
+interface FooterProps extends FooterData {
+  /** URL for the white logo (used on green background) */
+  whiteLogoUrl?: string;
+  /** URL for the molecules background pattern */
+  moleculesPatternUrl?: string;
+  /** Company address */
+  address?: string;
+  /** Company phone */
+  phone?: string;
+}
 
 const socialIcons: Record<string, JSX.Element> = {
   facebook: (
@@ -30,85 +39,205 @@ const socialIcons: Record<string, JSX.Element> = {
   ),
 };
 
-export function Footer({ columns, copyright, socialLinks, logoUrl }: FooterProps) {
+// Payment method icons
+const paymentIcons = {
+  amex: (
+    <svg className="h-8 w-auto" viewBox="0 0 38 24" fill="none">
+      <rect width="38" height="24" rx="3" fill="#006FCF"/>
+      <path d="M10.5 16.5L8 11.5H9.5L11 14.5L12.5 11.5H14L11.5 16.5H10.5ZM14 16.5V11.5H15.5V16.5H14ZM16 14C16 12.5 17 11.5 18.5 11.5C20 11.5 21 12.5 21 14C21 15.5 20 16.5 18.5 16.5C17 16.5 16 15.5 16 14ZM17.5 14C17.5 14.75 18 15.25 18.5 15.25C19 15.25 19.5 14.75 19.5 14C19.5 13.25 19 12.75 18.5 12.75C18 12.75 17.5 13.25 17.5 14ZM21.5 16.5V11.5H23L25 14.5V11.5H26.5V16.5H25L23 13.5V16.5H21.5Z" fill="white"/>
+    </svg>
+  ),
+  apple: (
+    <svg className="h-8 w-auto" viewBox="0 0 38 24" fill="none">
+      <rect width="38" height="24" rx="3" fill="black"/>
+      <path d="M19 7.5C17.5 7.5 16.5 8.5 16.5 10V10.5H15V12H16.5V16.5H18V12H19.5L19.75 10.5H18V10.25C18 9.75 18.25 9.5 18.75 9.5H20V7.5H19Z" fill="white"/>
+    </svg>
+  ),
+  discover: (
+    <svg className="h-8 w-auto" viewBox="0 0 38 24" fill="none">
+      <rect width="38" height="24" rx="3" fill="#FF6000"/>
+      <circle cx="19" cy="12" r="5" fill="white"/>
+    </svg>
+  ),
+  gpay: (
+    <svg className="h-8 w-auto" viewBox="0 0 38 24" fill="none">
+      <rect width="38" height="24" rx="3" fill="white" stroke="#E5E5E5"/>
+      <path d="M19 8C16.8 8 15 9.8 15 12C15 14.2 16.8 16 19 16C21.2 16 23 14.2 23 12C23 9.8 21.2 8 19 8Z" fill="#4285F4"/>
+    </svg>
+  ),
+  paypal: (
+    <svg className="h-8 w-auto" viewBox="0 0 38 24" fill="none">
+      <rect width="38" height="24" rx="3" fill="#003087"/>
+      <path d="M15 16.5L16.5 8.5H19C20.5 8.5 21.5 9.5 21.5 11C21.5 13 20 14 18 14H17L16.5 16.5H15Z" fill="white"/>
+    </svg>
+  ),
+  shopify: (
+    <svg className="h-8 w-auto" viewBox="0 0 38 24" fill="none">
+      <rect width="38" height="24" rx="3" fill="#96BF48"/>
+      <path d="M19 7L22 12L19 17L16 12L19 7Z" fill="white"/>
+    </svg>
+  ),
+  visa: (
+    <svg className="h-8 w-auto" viewBox="0 0 38 24" fill="none">
+      <rect width="38" height="24" rx="3" fill="#1A1F71"/>
+      <path d="M16 15.5L17.5 8.5H19.5L18 15.5H16ZM23 8.5L21 13L20.5 8.5H18.5L20.5 15.5H22.5L26 8.5H23Z" fill="white"/>
+    </svg>
+  ),
+};
+
+// Default molecules pattern from Cloudinary
+const DEFAULT_MOLECULES_URL = 'https://res.cloudinary.com/southland-organics/image/upload/f_auto,q_auto/Southland%20Website/Southland%20Branding/patterns/top_molecules_green_zeewhr';
+
+// Default white logo from Cloudinary (horizontal white version)
+const DEFAULT_WHITE_LOGO_URL = 'https://res.cloudinary.com/southland-organics/image/upload/f_auto,q_auto,w_300/Southland%20Website/Southland%20Branding/logos/Southland_Organics_Horizontal_yymno6';
+
+export function Footer({
+  columns,
+  copyright,
+  socialLinks,
+  whiteLogoUrl,
+  moleculesPatternUrl,
+  address = '189 Luke Road\nBogart, GA 30622',
+  phone = '800-608-3755'
+}: FooterProps) {
   // Filter out columns with no links
   const visibleColumns = columns.filter(col => col.links && col.links.length > 0);
 
+  const logoUrl = whiteLogoUrl || DEFAULT_WHITE_LOGO_URL;
+  const patternUrl = moleculesPatternUrl || DEFAULT_MOLECULES_URL;
+
   return (
-    <footer className="bg-shopify-secondary-bg border-t border-gray-200">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-        {/* Main footer content */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 mb-12">
-          {/* Brand column */}
-          <div className="md:col-span-4 lg:col-span-3">
-            {logoUrl ? (
-              <a href="https://southlandorganics.com" className="inline-block mb-4">
-                <img src={logoUrl} alt="Southland Organics" className="h-10 w-auto" />
-              </a>
-            ) : (
-              <a href="https://southlandorganics.com" className="inline-block mb-4">
-                <span className="text-xl font-bold text-shopify-title">Southland Organics</span>
-              </a>
-            )}
-            <p className="text-sm text-shopify-secondary-text mb-6 max-w-xs">
-              Working with nature, not against it. Sustainable solutions for poultry, turf, and agriculture.
-            </p>
-            {/* Social links */}
-            <div className="flex gap-3">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.platform}
-                  href={social.url}
-                  className="text-shopify-secondary-text hover:text-shopify-accent transition-colors"
-                  aria-label={social.platform}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {socialIcons[social.platform] || social.icon}
-                </a>
-              ))}
-            </div>
+    <footer>
+      {/* Main footer - Green with molecules pattern */}
+      <div
+        className="relative"
+        style={{
+          backgroundColor: '#44883e',
+          backgroundImage: `url(${patternUrl})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundBlendMode: 'soft-light',
+        }}
+      >
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+          {/* Centered Logo */}
+          <div className="flex justify-center mb-12">
+            <a href="https://southlandorganics.com" className="inline-block">
+              <img
+                src={logoUrl}
+                alt="Southland Organics"
+                className="h-32 w-auto"
+                style={{ filter: 'brightness(0) invert(1)' }}
+              />
+            </a>
           </div>
 
-          {/* Link columns */}
-          <div className="md:col-span-8 lg:col-span-9">
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8">
-              {visibleColumns.map((column) => (
-                <div key={column.title}>
-                  <h3 className="font-semibold text-shopify-title text-sm uppercase tracking-wide mb-4">
-                    {column.title}
-                  </h3>
-                  <ul className="space-y-3">
-                    {column.links.map((link) => (
-                      <li key={link.label}>
-                        <a
-                          href={link.href}
-                          className="text-sm text-shopify-secondary-text hover:text-shopify-accent transition-colors"
-                        >
-                          {link.label}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
+          {/* Three column layout */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 text-white">
+            {/* Left column - Company info + Social */}
+            <div className="text-center md:text-left">
+              <h3 className="font-semibold text-lg mb-4">Southland Organics</h3>
+              <p className="text-white/90 text-sm whitespace-pre-line mb-4">
+                {address}
+              </p>
+              <a
+                href={`tel:${phone.replace(/[^0-9]/g, '')}`}
+                className="text-white underline hover:text-white/80 transition-colors"
+              >
+                {phone}
+              </a>
+
+              {/* Social links */}
+              <div className="mt-8">
+                <h4 className="font-semibold text-lg mb-4">Let's Be Social</h4>
+                <div className="flex justify-center md:justify-start gap-4">
+                  {socialLinks.map((social) => (
+                    <a
+                      key={social.platform}
+                      href={social.url}
+                      className="text-white hover:text-white/80 transition-colors"
+                      aria-label={social.platform}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {socialIcons[social.platform] || social.icon}
+                    </a>
+                  ))}
                 </div>
-              ))}
+              </div>
+            </div>
+
+            {/* Middle column - Navigate */}
+            <div className="text-center">
+              <h3 className="font-semibold text-lg mb-4">Navigate</h3>
+              <ul className="space-y-2">
+                {visibleColumns.flatMap(col => col.links).slice(0, 12).map((link) => (
+                  <li key={link.label}>
+                    <a
+                      href={link.href}
+                      className="text-white/90 text-sm hover:text-white transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Right column - Product Specialties */}
+            <div className="text-center md:text-right">
+              <h3 className="font-semibold text-lg mb-4">Product Specialties</h3>
+              <ul className="space-y-2">
+                <li><a href="https://www.southlandorganics.com/" className="text-white/90 text-sm hover:text-white transition-colors">Home</a></li>
+                <li><a href="https://www.southlandorganics.com/collections/poultry" className="text-white/90 text-sm hover:text-white transition-colors">Poultry</a></li>
+                <li><a href="https://www.southlandorganics.com/collections/turf" className="text-white/90 text-sm hover:text-white transition-colors">Lawn & Garden</a></li>
+                <li><a href="https://www.southlandorganics.com/collections/waste" className="text-white/90 text-sm hover:text-white transition-colors">Septic & Waste</a></li>
+                <li><a href="https://www.southlandorganics.com/collections/pig-and-swine-supplements" className="text-white/90 text-sm hover:text-white transition-colors">Swine</a></li>
+                <li><a href="https://www.southlandorganics.com/pages/why-southland" className="text-white/90 text-sm hover:text-white transition-colors">About</a></li>
+              </ul>
+
+              {/* Sam.Gov section */}
+              <div className="mt-8">
+                <h4 className="font-semibold text-lg mb-2">Sam.Gov</h4>
+                <p className="text-white/80 text-xs">
+                  Southland Organics is fully registered with Sam.gov!<br />
+                  Entity ID: L9GTYJCHK2Q5
+                </p>
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Bottom bar */}
-        <div className="border-t border-gray-300 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-shopify-secondary-text">{copyright}</p>
-          <div className="flex flex-wrap justify-center gap-4 text-sm text-shopify-secondary-text">
-            <a href="https://southlandorganics.com/pages/privacy-policy" className="hover:text-shopify-accent transition-colors">
-              Privacy Policy
-            </a>
-            <a href="https://southlandorganics.com/pages/terms-of-service" className="hover:text-shopify-accent transition-colors">
-              Terms of Service
-            </a>
-            <a href="https://southlandorganics.com/pages/shipping-policy" className="hover:text-shopify-accent transition-colors">
-              Shipping
-            </a>
+      {/* Bottom bar - Black background */}
+      <div className="bg-black">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            {/* Payment icons */}
+            <div className="flex items-center gap-2">
+              {Object.entries(paymentIcons).map(([name, icon]) => (
+                <div key={name} className="opacity-80 hover:opacity-100 transition-opacity">
+                  {icon}
+                </div>
+              ))}
+            </div>
+
+            {/* Copyright and links */}
+            <div className="flex flex-wrap justify-center sm:justify-end items-center gap-2 text-sm text-white/90">
+              <span>{copyright}</span>
+              <span className="hidden sm:inline">|</span>
+              <a href="https://southlandorganics.com/pages/terms-of-service" className="hover:text-white transition-colors">
+                Terms Of Use
+              </a>
+              <span>|</span>
+              <a href="https://southlandorganics.com/pages/privacy-policy" className="hover:text-white transition-colors">
+                Privacy Policy
+              </a>
+              <span>|</span>
+              <a href="https://southlandorganics.com/pages/shipping-policy" className="hover:text-white transition-colors">
+                Shipping & Returns
+              </a>
+            </div>
           </div>
         </div>
       </div>
