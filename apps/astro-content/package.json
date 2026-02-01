@@ -10,10 +10,13 @@
     "fetch-layout": "node scripts/fetch-layout.js"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^12.6.12",
     "@astrojs/mdx": "^4.3.13",
     "@astrojs/react": "^4.2.1",
     "@astrojs/tailwind": "^6.0.2",
     "@cloudinary/url-gen": "^1.22.0",
+    "@keystatic/astro": "^5.0.6",
+    "@keystatic/core": "^0.5.48",
     "@southland/ui-react": "workspace:*",
     "@southland/ui-schema": "workspace:*",
     "@southland/ui-tokens": "workspace:*",

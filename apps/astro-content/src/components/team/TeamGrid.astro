@@ -1,0 +1,78 @@
+---
+/**
+ * TeamGrid - Displays a grid of team members
+ * Can be embedded on any page (team listing, contact, about)
+ */
+
+import TeamCard from './TeamCard.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  /** Team members to display */
+  members: CollectionEntry<'team'>[];
+  /** Display variant */
+  variant?: 'grid' | 'featured' | 'compact';
+  /** Number of columns (for grid variant) */
+  columns?: 2 | 3 | 4;
+  /** Show only featured members */
+  featuredOnly?: boolean;
+  /** Maximum number of members to show */
+  limit?: number;
+  /** Custom class */
+  class?: string;
+}
+
+const {
+  members,
+  variant = 'grid',
+  columns = 3,
+  featuredOnly = false,
+  limit,
+  class: className = '',
+} = Astro.props;
+
+// Filter and sort members
+let displayMembers = members
+  .filter(member => member.data.active !== false)
+  .filter(member => !featuredOnly || member.data.featured)
+  .sort((a, b) => (a.data.order || 99) - (b.data.order || 99));
+
+// Apply limit
+if (limit) {
+  displayMembers = displayMembers.slice(0, limit);
+}
+
+const gridClasses = {
+  2: 'grid-cols-1 sm:grid-cols-2',
+  3: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+  4: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
+};
+---
+
+{displayMembers.length > 0 ? (
+  <div
+    class:list={[
+      variant === 'grid' && `grid ${gridClasses[columns]} gap-6`,
+      variant === 'featured' && 'grid grid-cols-1 md:grid-cols-2 gap-8',
+      variant === 'compact' && 'space-y-3',
+      className,
+    ]}
+  >
+    {displayMembers.map((member) => (
+      <TeamCard
+        name={member.data.name}
+        slug={member.id.replace(/\.mdx?$/, '')}
+        role={member.data.role}
+        bio={member.data.bio}
+        photo={member.data.photo}
+        email={member.data.email}
+        links={member.data.links}
+        variant={variant === 'compact' ? 'compact' : variant === 'featured' ? 'featured' : 'card'}
+      />
+    ))}
+  </div>
+) : (
+  <div class="text-center py-12 text-shopify-secondary-text">
+    <p>No team members to display.</p>
+  </div>
+)}

@@ -3,6 +3,8 @@ import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 import mdx from '@astrojs/mdx';
 import react from '@astrojs/react';
+import keystatic from '@keystatic/astro';
+import cloudflare from '@astrojs/cloudflare';
 
 // https://astro.build/config
 export default defineConfig({
@@ -11,9 +13,11 @@ export default defineConfig({
   integrations: [
     react(),
     tailwind(),
-    mdx()
+    mdx(),
+    keystatic()
   ],
   output: 'static',
+  adapter: cloudflare(),
   build: {
     format: 'directory'
   },

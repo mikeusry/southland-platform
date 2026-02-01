@@ -16,7 +16,9 @@ interface Env {
 // Routes that should be served by Astro (this deployment)
 const ASTRO_ROUTES = [
   '/podcast',
+  '/team',
   '/admin',
+  '/keystatic',
   '/_astro',
   '/fonts',
   '/images',

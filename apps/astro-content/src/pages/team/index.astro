@@ -1,0 +1,103 @@
+---
+/**
+ * Team Listing Page - /team/
+ * Shows all team members in a grid layout
+ */
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TeamGrid from '../../components/team/TeamGrid.astro';
+import { getCollection } from 'astro:content';
+import { getLogoUrl } from '../../lib/cloudinary';
+
+// Get all active team members
+const allMembers = await getCollection('team', ({ data }) => {
+  return data.active !== false;
+});
+
+// Sort by order
+const members = allMembers.sort((a, b) => (a.data.order || 99) - (b.data.order || 99));
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com';
+
+// Schema markup for team page
+const teamSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  name: 'Our Team | Southland Organics',
+  description: 'Meet the team behind Southland Organics. Experts in sustainable agriculture, soil biology, and organic solutions for poultry, turf, and farming.',
+  url: `${siteUrl}/team/`,
+  mainEntity: {
+    '@type': 'Organization',
+    name: 'Southland Organics',
+    url: siteUrl,
+    employee: members.map(member => ({
+      '@type': 'Person',
+      name: member.data.name,
+      jobTitle: member.data.role,
+      description: member.data.bio,
+      url: `${siteUrl}/team/${member.id.replace(/\.mdx?$/, '')}/`,
+    })),
+  },
+};
+---
+
+<BaseLayout
+  title="Our Team | Southland Organics"
+  description="Meet the team behind Southland Organics. Experts in sustainable agriculture, soil biology, and organic solutions for poultry, turf, and farming."
+  ogImage={getLogoUrl('square', { width: 800 })}
+  schema={teamSchema}
+>
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-br from-southland-green-dark via-southland-green-dark to-[#1f3d24] py-16 md:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <p class="text-southland-green font-medium text-sm tracking-wide uppercase mb-3">
+        Southland Organics
+      </p>
+      <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+        Meet Our Team
+      </h1>
+      <p class="text-white/70 text-lg md:text-xl max-w-2xl mx-auto">
+        The people behind Southland Organics. We're passionate about sustainable agriculture and committed to helping you succeed.
+      </p>
+    </div>
+  </section>
+
+  <!-- Team Grid -->
+  <section class="bg-brand-gray py-16 md:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {members.length > 0 ? (
+        <TeamGrid members={members} variant="grid" columns={3} />
+      ) : (
+        <div class="text-center py-16 bg-white rounded-2xl shadow-sm">
+          <div class="w-20 h-20 mx-auto mb-6 text-shopify-secondary-text">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-shopify-title mb-3">Coming Soon</h3>
+          <p class="text-shopify-secondary-text max-w-md mx-auto">
+            Team profiles are being added. Check back soon!
+          </p>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="bg-white py-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-bold text-shopify-title mb-4">
+        Want to Work With Us?
+      </h2>
+      <p class="text-shopify-secondary-text text-lg mb-8 max-w-2xl mx-auto">
+        Whether you have questions about our products or want to discuss how we can help your operation, we'd love to hear from you.
+      </p>
+      <a href="/contact/" class="btn-primary inline-flex items-center gap-2">
+        Get in Touch
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </a>
+    </div>
+  </section>
+</BaseLayout>

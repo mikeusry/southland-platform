@@ -1,0 +1,283 @@
+---
+/**
+ * Individual Team Member Page - /team/[slug]/
+ * Shows full bio, photo, and related content for a team member
+ * Also serves as author page for blog posts
+ */
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TeamCard from '../../components/team/TeamCard.astro';
+import { getCollection, render } from 'astro:content';
+import { buildCloudinaryUrl } from '../../lib/cloudinary';
+
+export async function getStaticPaths() {
+  const members = await getCollection('team', ({ data }) => {
+    return data.active !== false;
+  });
+
+  return members.map((member) => {
+    // Remove file extension from id for clean URLs (Astro 5 includes .mdx in id)
+    const slug = member.id.replace(/\.mdx?$/, '');
+    return {
+      params: { slug },
+      props: { member, slug },
+    };
+  });
+}
+
+const { member, slug: memberSlug } = Astro.props;
+const { Content } = await render(member);
+
+// Build photo URL for OG image
+const photoUrl = member.data.photo
+  ? buildCloudinaryUrl(member.data.photo, {
+      width: 400,
+      height: 400,
+      crop: 'fill',
+      gravity: 'face',
+      format: 'auto',
+      quality: 'auto',
+    })
+  : null;
+
+// Large hero photo
+const heroPhotoUrl = member.data.photo
+  ? buildCloudinaryUrl(member.data.photo, {
+      width: 600,
+      height: 600,
+      crop: 'fill',
+      gravity: 'face',
+      format: 'auto',
+      quality: 'auto',
+    })
+  : null;
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com';
+
+// Get blog posts authored by this team member
+const blogPosts = await getCollection('blog', ({ data }) => {
+  return data.author === memberSlug && data.draft !== true;
+});
+
+// Get other team members for "Meet the Team" section
+const allMembers = await getCollection('team', ({ data }) => {
+  return data.active !== false;
+});
+const otherMembers = allMembers
+  .filter(m => m.id !== member.id)
+  .sort((a, b) => (a.data.order || 99) - (b.data.order || 99))
+  .slice(0, 3);
+
+// Schema markup
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: member.data.name,
+  jobTitle: member.data.role,
+  description: member.data.bio,
+  url: `${siteUrl}/team/${memberSlug}/`,
+  image: photoUrl,
+  email: member.data.email,
+  sameAs: [
+    member.data.links?.linkedin,
+    member.data.links?.twitter,
+  ].filter(Boolean),
+  worksFor: {
+    '@type': 'Organization',
+    name: 'Southland Organics',
+    url: siteUrl,
+  },
+};
+---
+
+<BaseLayout
+  title={`${member.data.name} - ${member.data.role} | Southland Organics`}
+  description={member.data.bio}
+  ogImage={photoUrl || undefined}
+  schema={personSchema}
+>
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-br from-southland-green-dark via-southland-green-dark to-[#1f3d24] py-16 md:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Breadcrumb -->
+      <nav class="mb-8">
+        <ol class="flex items-center gap-2 text-sm text-white/60">
+          <li>
+            <a href="/" class="hover:text-white transition-colors">Home</a>
+          </li>
+          <li>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </li>
+          <li>
+            <a href="/team/" class="hover:text-white transition-colors">Team</a>
+          </li>
+          <li>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </li>
+          <li class="text-white">{member.data.name}</li>
+        </ol>
+      </nav>
+
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <!-- Left: Content -->
+        <div class="text-white">
+          <h1 class="text-4xl md:text-5xl font-bold mb-4">
+            {member.data.name}
+          </h1>
+          <p class="text-2xl text-southland-green mb-6">
+            {member.data.role}
+          </p>
+          <p class="text-white/80 text-lg mb-8 max-w-lg">
+            {member.data.bio}
+          </p>
+
+          <!-- Contact & Social -->
+          <div class="flex flex-wrap items-center gap-4">
+            {member.data.email && (
+              <a
+                href={`mailto:${member.data.email}`}
+                class="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors text-white"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                Email
+              </a>
+            )}
+            {member.data.links?.linkedin && (
+              <a
+                href={member.data.links.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors text-white"
+              >
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                </svg>
+                LinkedIn
+              </a>
+            )}
+            {member.data.links?.twitter && (
+              <a
+                href={member.data.links.twitter}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors text-white"
+              >
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+                X
+              </a>
+            )}
+          </div>
+        </div>
+
+        <!-- Right: Photo -->
+        <div class="flex justify-center lg:justify-end">
+          <div class="relative">
+            <div class="absolute -inset-4 bg-southland-green/20 rounded-3xl blur-2xl"></div>
+            {heroPhotoUrl ? (
+              <img
+                src={heroPhotoUrl}
+                alt={member.data.name}
+                class="relative w-72 h-72 md:w-80 md:h-80 lg:w-96 lg:h-96 rounded-2xl object-cover shadow-2xl ring-1 ring-white/10"
+                loading="eager"
+              />
+            ) : (
+              <div class="relative w-72 h-72 md:w-80 md:h-80 lg:w-96 lg:h-96 rounded-2xl bg-gradient-to-br from-southland-green to-southland-green-dark flex items-center justify-center shadow-2xl ring-1 ring-white/10">
+                <span class="text-8xl font-bold text-white/30">
+                  {member.data.name.split(' ').map(n => n[0]).join('')}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Extended Bio / Content -->
+  <section class="bg-white py-16 md:py-20">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="prose prose-lg max-w-none prose-headings:text-shopify-title prose-p:text-shopify-secondary-text prose-a:text-southland-green">
+        <Content />
+      </div>
+    </div>
+  </section>
+
+  <!-- Blog Posts by this Author -->
+  {blogPosts.length > 0 && (
+    <section class="bg-brand-gray py-16 md:py-20">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-shopify-title mb-8">
+          Articles by {member.data.name.split(' ')[0]}
+        </h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {blogPosts.slice(0, 6).map((post) => (
+            <a
+              href={`/blog/${post.id}/`}
+              class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow"
+            >
+              <h3 class="font-bold text-shopify-title mb-2">{post.data.title}</h3>
+              <p class="text-sm text-shopify-secondary-text line-clamp-2">{post.data.description}</p>
+              <p class="text-xs text-gray-400 mt-3">
+                {new Date(post.data.publishDate).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </p>
+            </a>
+          ))}
+        </div>
+        {blogPosts.length > 6 && (
+          <div class="text-center mt-8">
+            <a href={`/blog/?author=${memberSlug}`} class="text-southland-green font-medium hover:underline">
+              View all articles by {member.data.name.split(' ')[0]} →
+            </a>
+          </div>
+        )}
+      </div>
+    </section>
+  )}
+
+  <!-- Other Team Members -->
+  {otherMembers.length > 0 && (
+    <section class="bg-white py-16 md:py-20">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="text-3xl font-bold text-shopify-title">Meet the Team</h2>
+          <a href="/team/" class="text-southland-green font-medium hover:underline">
+            View all →
+          </a>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6">
+          {otherMembers.map((m) => (
+            <TeamCard
+              name={m.data.name}
+              slug={m.id.replace(/\.mdx?$/, '')}
+              role={m.data.role}
+              bio={m.data.bio}
+              photo={m.data.photo}
+              variant="card"
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+</BaseLayout>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

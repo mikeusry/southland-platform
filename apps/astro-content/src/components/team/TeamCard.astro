@@ -1,0 +1,207 @@
+---
+/**
+ * TeamCard - Displays a team member card with photo, name, role, and bio
+ * Used in team grids and listings
+ */
+
+import { buildCloudinaryUrl } from '../../lib/cloudinary';
+
+interface Props {
+  name: string;
+  slug: string;
+  role: string;
+  bio: string;
+  photo?: string;
+  email?: string;
+  links?: {
+    linkedin?: string;
+    twitter?: string;
+  };
+  variant?: 'card' | 'compact' | 'featured';
+  showLink?: boolean;
+  class?: string;
+}
+
+const {
+  name,
+  slug,
+  role,
+  bio,
+  photo,
+  email,
+  links,
+  variant = 'card',
+  showLink = true,
+  class: className = '',
+} = Astro.props;
+
+// Build Cloudinary URL for team photo
+const photoUrl = photo
+  ? buildCloudinaryUrl(photo, {
+      width: variant === 'featured' ? 400 : 200,
+      height: variant === 'featured' ? 400 : 200,
+      crop: 'fill',
+      gravity: 'face',
+      format: 'auto',
+      quality: 'auto',
+    })
+  : null;
+
+// Responsive srcset for retina displays
+const photoSrcset = photo
+  ? [1, 1.5, 2].map(dpr => {
+      const size = Math.round((variant === 'featured' ? 400 : 200) * dpr);
+      return `${buildCloudinaryUrl(photo, {
+        width: size,
+        height: size,
+        crop: 'fill',
+        gravity: 'face',
+        format: 'auto',
+        quality: 'auto',
+      })} ${dpr}x`;
+    }).join(', ')
+  : '';
+
+const variantClasses = {
+  card: 'bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow',
+  compact: 'flex items-center gap-4 p-4 bg-white rounded-lg',
+  featured: 'bg-white rounded-2xl shadow-lg border border-gray-100 p-8',
+};
+
+const photoSizes = {
+  card: 'w-24 h-24',
+  compact: 'w-16 h-16',
+  featured: 'w-40 h-40',
+};
+---
+
+<div class={`team-card ${variantClasses[variant]} ${className}`}>
+  {variant === 'compact' ? (
+    <!-- Compact layout: horizontal -->
+    <Fragment>
+      {photoUrl ? (
+        <img
+          src={photoUrl}
+          srcset={photoSrcset}
+          alt={name}
+          class={`${photoSizes[variant]} rounded-full object-cover flex-shrink-0`}
+          loading="lazy"
+        />
+      ) : (
+        <div class={`${photoSizes[variant]} rounded-full bg-southland-green/10 flex items-center justify-center flex-shrink-0`}>
+          <span class="text-2xl font-bold text-southland-green">
+            {name.split(' ').map(n => n[0]).join('')}
+          </span>
+        </div>
+      )}
+      <div class="flex-1 min-w-0">
+        <h3 class="font-bold text-shopify-title truncate">{name}</h3>
+        <p class="text-sm text-southland-green">{role}</p>
+        {showLink && (
+          <a
+            href={`/team/${slug}/`}
+            class="text-sm text-southland-green hover:underline mt-1 inline-block"
+          >
+            View profile →
+          </a>
+        )}
+      </div>
+    </Fragment>
+  ) : (
+    <!-- Card/Featured layout: vertical -->
+    <Fragment>
+      <div class="flex flex-col items-center text-center">
+        {photoUrl ? (
+          <img
+            src={photoUrl}
+            srcset={photoSrcset}
+            alt={name}
+            class={`${photoSizes[variant]} rounded-full object-cover mb-4`}
+            loading="lazy"
+          />
+        ) : (
+          <div class={`${photoSizes[variant]} rounded-full bg-southland-green/10 flex items-center justify-center mb-4`}>
+            <span class={`font-bold text-southland-green ${variant === 'featured' ? 'text-4xl' : 'text-3xl'}`}>
+              {name.split(' ').map(n => n[0]).join('')}
+            </span>
+          </div>
+        )}
+
+        <h3 class={`font-bold text-shopify-title ${variant === 'featured' ? 'text-2xl' : 'text-lg'}`}>
+          {name}
+        </h3>
+        <p class={`text-southland-green font-medium ${variant === 'featured' ? 'text-lg mb-4' : 'mb-2'}`}>
+          {role}
+        </p>
+
+        <p class={`text-shopify-secondary-text ${variant === 'featured' ? 'text-base mb-6' : 'text-sm mb-4'} line-clamp-3`}>
+          {bio}
+        </p>
+
+        {/* Social Links */}
+        {(links?.linkedin || links?.twitter || email) && (
+          <div class="flex items-center gap-3 mb-4">
+            {email && (
+              <a
+                href={`mailto:${email}`}
+                class="text-gray-400 hover:text-southland-green transition-colors"
+                title={`Email ${name}`}
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </a>
+            )}
+            {links?.linkedin && (
+              <a
+                href={links.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-gray-400 hover:text-southland-green transition-colors"
+                title={`${name} on LinkedIn`}
+              >
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                </svg>
+              </a>
+            )}
+            {links?.twitter && (
+              <a
+                href={links.twitter}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-gray-400 hover:text-southland-green transition-colors"
+                title={`${name} on X`}
+              >
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+              </a>
+            )}
+          </div>
+        )}
+
+        {showLink && (
+          <a
+            href={`/team/${slug}/`}
+            class={`inline-flex items-center gap-2 ${variant === 'featured' ? 'btn-primary' : 'text-southland-green hover:underline font-medium'}`}
+          >
+            {variant === 'featured' ? 'View Full Profile' : 'Learn more'}
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+        )}
+      </div>
+    </Fragment>
+  )}
+</div>
+
+<style>
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

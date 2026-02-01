@@ -132,7 +132,7 @@ const blogCollection = defineCollection({
   }),
 });
 
-// Team members schema - for about pages
+// Team members schema - for about pages and blog author pages
 // Note: slug is auto-generated from filename in Astro v5
 const teamCollection = defineCollection({
   type: 'content',
@@ -140,13 +140,16 @@ const teamCollection = defineCollection({
     name: z.string(),
     role: z.string(),
     bio: z.string(),
-    photo: z.string().optional(),
+    photo: z.string().optional(), // Cloudinary public ID
     email: z.string().optional(),
+    phone: z.string().optional(),
     links: z.object({
       linkedin: z.string().optional(),
       twitter: z.string().optional(),
     }).optional(),
     order: z.number().optional().default(99),
+    featured: z.boolean().optional().default(false), // Show on homepage/contact
+    active: z.boolean().optional().default(true),    // Still with company
   }),
 });
 
