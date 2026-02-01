@@ -1,0 +1,39 @@
+# Persona Scoring Worker
+# Receives pixel events, computes persona scores, caches in KV
+
+name = "southland-persona-worker"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# KV Namespaces
+[[kv_namespaces]]
+binding = "VISITOR_KV"
+id = "your-kv-namespace-id"  # Replace with actual KV namespace ID
+
+# Environment variables
+[vars]
+BRAND_ID = "southland"
+
+# Staging environment
+[env.staging]
+name = "southland-persona-worker-staging"
+
+[[env.staging.kv_namespaces]]
+binding = "VISITOR_KV"
+id = "staging-kv-namespace-id"  # Replace with staging KV ID
+
+[env.staging.vars]
+BRAND_ID = "southland"
+BIGQUERY_WEBHOOK_URL = "https://staging-webhook.example.com"
+
+# Production environment
+[env.production]
+name = "southland-persona-worker"
+
+[[env.production.kv_namespaces]]
+binding = "VISITOR_KV"
+id = "production-kv-namespace-id"  # Replace with production KV ID
+
+[env.production.vars]
+BRAND_ID = "southland"
+BIGQUERY_WEBHOOK_URL = "https://production-webhook.example.com"
