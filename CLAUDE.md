@@ -139,6 +139,47 @@ Monorepo for Southland Organics digital platform.
 
 ---
 
+## CDP PLAYBOOK
+
+**Master Document:** [docs/SOUTHLAND-CDP-PLAYBOOK.md](docs/SOUTHLAND-CDP-PLAYBOOK.md)
+
+Comprehensive Customer Data Platform strategy combining:
+- **4 Personas:** Broiler Bill, Backyard Betty, Turf Pro Taylor, Mold Molly
+- **10 Hero Journey Stages:** unAware → Evangelist
+- **Vector-powered personalization:** Supabase embeddings + semantic search
+- **Outcome tracking:** FCR, mortality, problem-solved metrics
+
+### Current CDP Phase
+
+**Status:** Week 1 - Foundation + Proof Collection
+
+| Track | Focus | Owner |
+|-------|-------|-------|
+| **Track A: Ads** | Consolidate 99 → 15 campaigns | Marketing |
+| **Track B: CDP** | Decision Engine + Outcome Surveys | Dev/Data |
+
+### CDP Build Order
+
+| Week | Deliverable | Status |
+|------|-------------|--------|
+| 1 | Decision Engine + Outcome Surveys | 🔄 IN PROGRESS |
+| 2 | Poultry Guide + Phone Attribution | Planned |
+| 3 | Semantic Search + First Proofs | Planned |
+| 4 | Persona Scoring Worker | Planned |
+| 5-6 | Reality Tunnels (Betty) | Planned |
+| 7-8 | Reality Tunnels (Bill) — GATED | Planned |
+
+### Key CDP Decisions
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Outcomes start Week 1 | ✅ | Proof points are the moat |
+| Betty tunnels before Bill | ✅ | Her loop is fully online |
+| Bill tunnels gated | ✅ | Need 30+ days phone outcomes first |
+| Dual-track execution | ✅ | Ads cleanup shouldn't block CDP |
+
+---
+
 ## Repository Structure
 
 ```
