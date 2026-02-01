@@ -1,0 +1,212 @@
+---
+/**
+ * SearchFeedback Component
+ *
+ * "Was this helpful?" feedback widget for search results.
+ * Captures user feedback and sends to BigQuery via API.
+ *
+ * Usage:
+ * <SearchFeedback searchId={searchResults.searchId} query={query} />
+ */
+
+interface Props {
+  /** The search ID for tracking */
+  searchId: string;
+  /** The original search query */
+  query?: string;
+  /** Additional CSS classes */
+  class?: string;
+}
+
+const {
+  searchId,
+  query = '',
+  class: className = '',
+} = Astro.props;
+---
+
+<div
+  class:list={['search-feedback', className]}
+  data-search-id={searchId}
+  data-query={query}
+>
+  <p class="search-feedback__question">Was this helpful?</p>
+  <div class="search-feedback__buttons">
+    <button
+      type="button"
+      class="search-feedback__btn search-feedback__btn--yes"
+      data-helpful="true"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+      </svg>
+      Yes
+    </button>
+    <button
+      type="button"
+      class="search-feedback__btn search-feedback__btn--no"
+      data-helpful="false"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path>
+      </svg>
+      No
+    </button>
+  </div>
+  <div class="search-feedback__thanks" style="display: none;">
+    <span class="search-feedback__thanks-icon">✓</span>
+    Thanks for your feedback!
+  </div>
+</div>
+
+<style>
+  .search-feedback {
+    margin-top: 40px;
+    padding: 24px;
+    background: #f9fafb;
+    border-radius: 12px;
+    text-align: center;
+  }
+
+  .search-feedback__question {
+    font-size: 16px;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 16px;
+  }
+
+  .search-feedback__buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .search-feedback__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    border: 2px solid #e5e7eb;
+    border-radius: 9999px;
+    background: white;
+    font-size: 15px;
+    font-weight: 500;
+    color: #4b5563;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .search-feedback__btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .search-feedback__btn--yes:hover {
+    border-color: #22c55e;
+    background: #f0fdf4;
+    color: #16a34a;
+  }
+
+  .search-feedback__btn--no:hover {
+    border-color: #ef4444;
+    background: #fef2f2;
+    color: #dc2626;
+  }
+
+  .search-feedback__btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .search-feedback__btn--selected {
+    border-width: 2px;
+  }
+
+  .search-feedback__btn--yes.search-feedback__btn--selected {
+    border-color: #22c55e;
+    background: #dcfce7;
+    color: #16a34a;
+  }
+
+  .search-feedback__btn--no.search-feedback__btn--selected {
+    border-color: #ef4444;
+    background: #fee2e2;
+    color: #dc2626;
+  }
+
+  .search-feedback__thanks {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    color: #16a34a;
+    font-weight: 500;
+  }
+
+  .search-feedback__thanks-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: #dcfce7;
+    border-radius: 50%;
+    font-size: 14px;
+  }
+</style>
+
+<script>
+  document.querySelectorAll('.search-feedback').forEach((widget) => {
+    const buttons = widget.querySelectorAll('.search-feedback__btn');
+    const buttonsContainer = widget.querySelector('.search-feedback__buttons');
+    const thanks = widget.querySelector('.search-feedback__thanks');
+    const searchId = widget.getAttribute('data-search-id');
+    const query = widget.getAttribute('data-query');
+
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const helpful = btn.getAttribute('data-helpful') === 'true';
+
+        // Disable buttons
+        buttons.forEach((b) => {
+          (b as HTMLButtonElement).disabled = true;
+        });
+
+        // Show selected state
+        btn.classList.add('search-feedback__btn--selected');
+
+        try {
+          // Send feedback to API
+          await fetch('/api/search/feedback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ searchId, helpful, query }),
+          });
+
+          // Track with pixel
+          if (window.pdPixel) {
+            window.pdPixel.track('search_feedback', {
+              search_id: searchId,
+              helpful,
+              query,
+            });
+          }
+
+          // Show thanks message
+          if (buttonsContainer && thanks) {
+            (buttonsContainer as HTMLElement).style.display = 'none';
+            (thanks as HTMLElement).style.display = 'flex';
+          }
+        } catch (error) {
+          console.error('Failed to submit feedback:', error);
+          // Re-enable buttons on error
+          buttons.forEach((b) => {
+            (b as HTMLButtonElement).disabled = false;
+          });
+          btn.classList.remove('search-feedback__btn--selected');
+        }
+      });
+    });
+  });
+</script>

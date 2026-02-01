@@ -1,0 +1,209 @@
+---
+/**
+ * ProofPoint Component
+ *
+ * Displays customer outcome statistics as social proof.
+ * Shows real data when available, falls back to placeholder messaging.
+ *
+ * Usage:
+ * <ProofPoint
+ *   stat="87%"
+ *   label="report improved FCR"
+ *   icon="chart"
+ *   source="Customer Survey, Q4 2024"
+ * />
+ *
+ * <ProofPoint
+ *   stat="3.2x"
+ *   label="average ROI"
+ *   variant="highlight"
+ * />
+ */
+
+interface Props {
+  /** The main statistic (e.g., "87%", "3.2x", "500+") */
+  stat: string;
+  /** Description of what the stat represents */
+  label: string;
+  /** Icon type */
+  icon?: 'chart' | 'check' | 'star' | 'users' | 'trending' | 'heart';
+  /** Source attribution */
+  source?: string;
+  /** Visual variant */
+  variant?: 'default' | 'highlight' | 'minimal' | 'card';
+  /** Persona this applies to (for conditional display) */
+  persona?: 'backyard' | 'commercial' | 'lawn' | 'all';
+  /** Additional CSS classes */
+  class?: string;
+}
+
+const {
+  stat,
+  label,
+  icon = 'check',
+  source,
+  variant = 'default',
+  persona = 'all',
+  class: className = '',
+} = Astro.props;
+
+const icons = {
+  chart: `<path d="M18 20V10M12 20V4M6 20v-6"/>`,
+  check: `<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>`,
+  star: `<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>`,
+  users: `<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`,
+  trending: `<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>`,
+  heart: `<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>`,
+};
+---
+
+<div
+  class:list={[
+    'proof-point',
+    `proof-point--${variant}`,
+    className,
+  ]}
+  data-persona={persona}
+>
+  <div class="proof-point__icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <Fragment set:html={icons[icon]} />
+    </svg>
+  </div>
+  <div class="proof-point__content">
+    <span class="proof-point__stat">{stat}</span>
+    <span class="proof-point__label">{label}</span>
+    {source && <span class="proof-point__source">{source}</span>}
+  </div>
+</div>
+
+<style>
+  .proof-point {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .proof-point__icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: #dcfce7;
+    border-radius: 10px;
+    color: var(--color-accent, #44883e);
+  }
+
+  .proof-point__icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .proof-point__content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .proof-point__stat {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--color-accent, #44883e);
+    line-height: 1.2;
+  }
+
+  .proof-point__label {
+    font-size: 14px;
+    color: #4b5563;
+    line-height: 1.4;
+  }
+
+  .proof-point__source {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-top: 4px;
+  }
+
+  /* Highlight variant */
+  .proof-point--highlight {
+    padding: 20px;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border-radius: 16px;
+    border: 1px solid #bbf7d0;
+  }
+
+  .proof-point--highlight .proof-point__icon {
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .proof-point--highlight .proof-point__stat {
+    font-size: 32px;
+    color: var(--color-title, #2c5234);
+  }
+
+  /* Minimal variant */
+  .proof-point--minimal {
+    align-items: center;
+    gap: 8px;
+  }
+
+  .proof-point--minimal .proof-point__icon {
+    width: 24px;
+    height: 24px;
+    background: transparent;
+    color: var(--color-accent, #44883e);
+  }
+
+  .proof-point--minimal .proof-point__icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .proof-point--minimal .proof-point__content {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .proof-point--minimal .proof-point__stat {
+    font-size: 16px;
+  }
+
+  .proof-point--minimal .proof-point__label {
+    font-size: 14px;
+  }
+
+  /* Card variant */
+  .proof-point--card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 24px;
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  .proof-point--card .proof-point__icon {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 8px;
+  }
+
+  .proof-point--card .proof-point__icon svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .proof-point--card .proof-point__stat {
+    font-size: 36px;
+  }
+
+  .proof-point--card .proof-point__label {
+    font-size: 15px;
+    max-width: 180px;
+  }
+</style>

@@ -12,6 +12,8 @@
  */
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { buildBrandingUrl } from '../../../lib/cloudinary';
+import ProofPoints from '../../../components/cdp/ProofPoints.astro';
+import SearchBar from '../../../components/cdp/SearchBar.astro';
 
 const title = "Backyard Flock Solutions | Southland Organics";
 const description = "Organic solutions for backyard chicken keepers. Keep your flock healthy naturally with probiotics, supplements, and expert advice.";
@@ -61,6 +63,29 @@ const schema = {
           </div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- Proof Points from Customer Outcomes -->
+  <section class="py-12 bg-amber-50">
+    <div class="max-w-4xl mx-auto px-4">
+      <h2 class="text-xl font-semibold text-center mb-8" style="color: var(--color-title);">
+        What Our Customers Say
+      </h2>
+      <ProofPoints persona="backyard" variant="cards" />
+    </div>
+  </section>
+
+  <!-- Problem Search -->
+  <section class="py-12 bg-white border-b">
+    <div class="max-w-2xl mx-auto px-4 text-center">
+      <h2 class="text-xl font-semibold mb-4" style="color: var(--color-title);">
+        What's going on with your flock?
+      </h2>
+      <SearchBar
+        size="large"
+        placeholder="e.g., sick chickens, not laying eggs, runny poop..."
+      />
     </div>
   </section>
 

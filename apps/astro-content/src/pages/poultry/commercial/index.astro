@@ -11,6 +11,8 @@
  * - ROI and proof points
  */
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ProofPoints from '../../../components/cdp/ProofPoints.astro';
+import SearchBar from '../../../components/cdp/SearchBar.astro';
 
 const title = "Commercial Poultry Solutions | Southland Organics";
 const description = "Proven organic solutions for commercial broiler operations. Improve FCR, reduce mortality, and meet integrator requirements naturally.";
@@ -63,27 +65,26 @@ const schema = {
     </div>
   </section>
 
-  <!-- Results Stats -->
+  <!-- Proof Points from Customer Outcomes -->
   <section class="py-12 bg-green-50">
-    <div class="max-w-6xl mx-auto px-4">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-        <div>
-          <div class="text-4xl font-bold text-green-700 mb-1">2-5%</div>
-          <div class="text-sm text-gray-600">FCR Improvement</div>
-        </div>
-        <div>
-          <div class="text-4xl font-bold text-green-700 mb-1">30%+</div>
-          <div class="text-sm text-gray-600">Mortality Reduction</div>
-        </div>
-        <div>
-          <div class="text-4xl font-bold text-green-700 mb-1">500+</div>
-          <div class="text-sm text-gray-600">Commercial Farms</div>
-        </div>
-        <div>
-          <div class="text-4xl font-bold text-green-700 mb-1">OMRI</div>
-          <div class="text-sm text-gray-600">Listed Organic</div>
-        </div>
-      </div>
+    <div class="max-w-4xl mx-auto px-4">
+      <h2 class="text-xl font-semibold text-center mb-8" style="color: var(--color-title);">
+        Results Our Customers Report
+      </h2>
+      <ProofPoints persona="commercial" variant="cards" />
+    </div>
+  </section>
+
+  <!-- Problem Search -->
+  <section class="py-12 bg-white border-b">
+    <div class="max-w-2xl mx-auto px-4 text-center">
+      <h2 class="text-xl font-semibold mb-4" style="color: var(--color-title);">
+        What challenge are you facing?
+      </h2>
+      <SearchBar
+        size="large"
+        placeholder="e.g., high mortality, poor FCR, ammonia issues..."
+      />
     </div>
   </section>
 

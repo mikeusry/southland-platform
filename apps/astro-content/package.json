@@ -22,15 +22,15 @@
     "@southland/ui-tokens": "workspace:*",
     "@supabase/supabase-js": "^2.89.0",
     "astro": "^5.16.6",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "openai": "^4.67.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "tailwindcss": "^3.4.19",
     "turndown": "^7.2.2"
   },
   "devDependencies": {
-    "@types/react": "^18.3.0",
-    "@types/react-dom": "^18.3.0",
-    "openai": "^6.15.0",
+    "@types/react": "^19.2.10",
+    "@types/react-dom": "^19.2.3",
     "pagefind": "^1.4.0"
   }
 }
