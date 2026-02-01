@@ -114,7 +114,7 @@ const topicsCollection = defineCollection({
   }),
 });
 
-// Blog posts schema - for future blog content
+// Blog posts schema - migrated from Shopify
 // Note: slug is auto-generated from filename in Astro v5
 const blogCollection = defineCollection({
   type: 'content',
@@ -123,10 +123,15 @@ const blogCollection = defineCollection({
     publishDate: z.coerce.date(),
     description: z.string(),
     author: z.string().optional(),
-    topics: z.array(z.string()).optional().default([]),
+    tags: z.array(z.string()).optional().default([]),
     segment: z.enum(['poultry', 'turf', 'agriculture', 'general']).optional().default('general'),
     featuredImage: z.string().optional(),
     draft: z.boolean().optional().default(false),
+    // Shopify migration fields
+    shopifyId: z.number().optional(),
+    shopifyHandle: z.string().optional(),
+    // Legacy field mapping
+    topics: z.array(z.string()).optional().default([]),
     relatedProducts: z.array(z.string()).optional().default([]),
     relatedEpisodes: z.array(z.string()).optional().default([]),
   }),

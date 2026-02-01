@@ -16,7 +16,7 @@ export default defineConfig({
     mdx(),
     keystatic()
   ],
-  output: 'static',
+  output: 'server',
   adapter: cloudflare(),
   build: {
     format: 'directory'

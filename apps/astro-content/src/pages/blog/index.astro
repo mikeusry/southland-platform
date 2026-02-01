@@ -1,0 +1,152 @@
+---
+/**
+ * Blog Listing Page - /blog/
+ * Shows all blog posts with filtering by segment
+ */
+
+export const prerender = true;
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BlogGrid from '../../components/blog/BlogGrid.astro';
+import { getCollection } from 'astro:content';
+import { getLogoUrl } from '../../lib/cloudinary';
+
+// Get all published blog posts
+const allPosts = await getCollection('blog', ({ data }) => {
+  return data.draft !== true;
+});
+
+// Sort by publish date (newest first)
+const posts = allPosts.sort((a, b) =>
+  new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
+);
+
+// Get unique segments for filtering
+const segments = ['all', ...new Set(posts.map(p => p.data.segment).filter(Boolean))];
+
+// Count posts per segment
+const segmentCounts: Record<string, number> = {
+  all: posts.length,
+};
+posts.forEach(post => {
+  const seg = post.data.segment || 'general';
+  segmentCounts[seg] = (segmentCounts[seg] || 0) + 1;
+});
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com';
+
+// Schema markup for blog
+const blogSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Blog',
+  name: 'Southland Organics Blog',
+  description: 'Expert insights on organic agriculture, soil health, poultry farming, turf care, and sustainable growing practices.',
+  url: `${siteUrl}/blog/`,
+  publisher: {
+    '@type': 'Organization',
+    name: 'Southland Organics',
+    url: siteUrl,
+    logo: {
+      '@type': 'ImageObject',
+      url: getLogoUrl('primary', { width: 600 }),
+    },
+  },
+  blogPost: posts.slice(0, 10).map(post => ({
+    '@type': 'BlogPosting',
+    headline: post.data.title,
+    description: post.data.description,
+    datePublished: new Date(post.data.publishDate).toISOString(),
+    url: `${siteUrl}/blog/${post.id.replace(/\.mdx?$/, '')}/`,
+    author: {
+      '@type': 'Organization',
+      name: post.data.author || 'Southland Organics',
+    },
+  })),
+};
+---
+
+<BaseLayout
+  title="Blog | Southland Organics"
+  description="Expert insights on organic agriculture, soil health, poultry farming, turf care, and sustainable growing practices from Southland Organics."
+  ogImage={getLogoUrl('square', { width: 800 })}
+  schema={blogSchema}
+>
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-br from-southland-green-dark via-southland-green-dark to-[#1f3d24] py-16 md:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <p class="text-southland-green font-medium text-sm tracking-wide uppercase mb-3">
+        Southland Organics
+      </p>
+      <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+        Blog & Resources
+      </h1>
+      <p class="text-white/70 text-lg md:text-xl max-w-2xl mx-auto">
+        Expert insights on organic agriculture, soil health, poultry farming, and sustainable growing practices.
+      </p>
+    </div>
+  </section>
+
+  <!-- Segment Filter -->
+  <section class="bg-white border-b border-gray-100 sticky top-0 z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex gap-2 overflow-x-auto py-4 -mx-4 px-4 scrollbar-hide">
+        {segments.map((segment) => (
+          <a
+            href={segment === 'all' ? '/blog/' : `/blog/category/${segment}/`}
+            class={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors
+              ${segment === 'all'
+                ? 'bg-southland-green text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+          >
+            {segment.charAt(0).toUpperCase() + segment.slice(1)}
+            <span class="ml-1 text-xs opacity-75">({segmentCounts[segment] || 0})</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Blog Grid -->
+  <section class="bg-brand-gray py-16 md:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <BlogGrid posts={posts} showFeatured={true} columns={3} />
+
+      <!-- Load More / Pagination would go here -->
+      {posts.length > 12 && (
+        <div class="text-center mt-12">
+          <p class="text-gray-500">
+            Showing {Math.min(posts.length, 12)} of {posts.length} articles
+          </p>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- Newsletter CTA -->
+  <section class="bg-white py-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-bold text-shopify-title mb-4">
+        Stay Updated
+      </h2>
+      <p class="text-shopify-secondary-text text-lg mb-8 max-w-2xl mx-auto">
+        Get the latest articles and insights delivered to your inbox. No spam, just helpful content for growers like you.
+      </p>
+      <a href="/podcast/" class="btn-primary inline-flex items-center gap-2">
+        Subscribe to Our Podcast
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+</style>
