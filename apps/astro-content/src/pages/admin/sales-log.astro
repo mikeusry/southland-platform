@@ -1,0 +1,619 @@
+---
+/**
+ * Sales Outcome Log - Internal Admin Tool
+ *
+ * CDP Week 1 - Phone outcome tracking for Bill persona
+ *
+ * Addresses the "34% phone revenue blind spot" - commercial customers
+ * who call to order or discuss results aren't captured in digital analytics.
+ *
+ * Sales team uses this form to log:
+ * - FCR/mortality improvements reported by customers
+ * - Reorders and order values
+ * - Referrals and testimonials
+ * - Customer profile data for CDP
+ */
+import AdminLayout from '../../layouts/AdminLayout.astro';
+
+const title = "Sales Outcome Log | Admin";
+
+// Sales team members (could be fetched from config)
+const salesReps = [
+  { value: 'allen', label: 'Allen Reynolds' },
+  { value: 'brad', label: 'Brad Broxton' },
+  { value: 'matt', label: 'Matt Austin' },
+  { value: 'other', label: 'Other' },
+];
+
+const outcomeTypes = [
+  { value: 'fcr_improvement', label: 'FCR Improvement Reported', description: 'Customer reported better feed conversion' },
+  { value: 'mortality_reduction', label: 'Mortality Reduction Reported', description: 'Customer reported fewer bird losses' },
+  { value: 'reorder', label: 'Reorder Placed', description: 'Customer placed a reorder via phone' },
+  { value: 'referral', label: 'Referral Given', description: 'Customer referred another grower' },
+  { value: 'testimonial', label: 'Testimonial Offered', description: 'Customer willing to share their story' },
+  { value: 'general_positive', label: 'General Positive Feedback', description: 'Customer shared positive experience' },
+  { value: 'issue_resolved', label: 'Issue Resolved', description: 'Customer issue was resolved successfully' },
+];
+
+const operationTypes = [
+  { value: 'broiler_contract', label: 'Contract Broiler Grower' },
+  { value: 'broiler_independent', label: 'Independent Broiler' },
+  { value: 'layer', label: 'Layer/Egg Production' },
+  { value: 'breeder', label: 'Breeder Operation' },
+  { value: 'pullet', label: 'Pullet Grower' },
+  { value: 'backyard', label: 'Backyard (transferred from Betty)' },
+  { value: 'unknown', label: 'Unknown' },
+];
+
+const integrators = [
+  { value: 'tyson', label: 'Tyson' },
+  { value: 'perdue', label: 'Perdue' },
+  { value: 'pilgrims', label: "Pilgrim's" },
+  { value: 'koch', label: 'Koch Foods' },
+  { value: 'sanderson', label: 'Sanderson Farms' },
+  { value: 'wayne', label: 'Wayne Farms' },
+  { value: 'mountaire', label: 'Mountaire' },
+  { value: 'other', label: 'Other' },
+  { value: 'independent', label: 'Independent' },
+  { value: 'unknown', label: 'Unknown' },
+];
+
+const products = [
+  { value: 'big_ole_bird', label: 'Big Ole Bird' },
+  { value: 'litter_life', label: 'Litter Life' },
+  { value: 'water_treatment', label: 'Water Treatment' },
+  { value: 'gut_health', label: 'Gut Health Products' },
+  { value: 'other', label: 'Other Products' },
+];
+---
+
+<AdminLayout title={title}>
+  <div class="max-w-3xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold mb-2" style="color: var(--color-title);">
+        Sales Outcome Log
+      </h1>
+      <p class="text-gray-600">
+        Log customer outcomes from phone calls. This data feeds the CDP to track proof points and improve persona scoring.
+      </p>
+    </div>
+
+    <!-- Form -->
+    <form id="sales-log-form" class="space-y-8 bg-white rounded-xl border border-gray-200 p-6">
+      <!-- Call Information -->
+      <fieldset class="space-y-4">
+        <legend class="text-lg font-semibold text-gray-900 mb-4">Call Information</legend>
+
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label for="sales_rep" class="block text-sm font-medium text-gray-700 mb-1">
+              Sales Rep <span class="text-red-500">*</span>
+            </label>
+            <select
+              id="sales_rep"
+              name="sales_rep"
+              required
+              class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              <option value="">Select rep...</option>
+              {salesReps.map(rep => (
+                <option value={rep.value}>{rep.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label for="call_date" class="block text-sm font-medium text-gray-700 mb-1">
+              Call Date <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              id="call_date"
+              name="call_date"
+              required
+              class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label for="call_type" class="block text-sm font-medium text-gray-700 mb-1">
+            Call Type
+          </label>
+          <div class="flex gap-4">
+            <label class="flex items-center gap-2">
+              <input type="radio" name="call_type" value="inbound" class="text-green-600" checked />
+              <span>Inbound</span>
+            </label>
+            <label class="flex items-center gap-2">
+              <input type="radio" name="call_type" value="outbound" class="text-green-600" />
+              <span>Outbound</span>
+            </label>
+            <label class="flex items-center gap-2">
+              <input type="radio" name="call_type" value="follow_up" class="text-green-600" />
+              <span>Follow-up</span>
+            </label>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Customer Information -->
+      <fieldset class="space-y-4">
+        <legend class="text-lg font-semibold text-gray-900 mb-4">Customer Information</legend>
+
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label for="customer_name" class="block text-sm font-medium text-gray-700 mb-1">
+              Customer Name
+            </label>
+            <input
+              type="text"
+              id="customer_name"
+              name="customer_name"
+              placeholder="John Smith"
+              class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+
+          <div>
+            <label for="company_name" class="block text-sm font-medium text-gray-700 mb-1">
+              Farm/Company Name
+            </label>
+            <input
+              type="text"
+              id="company_name"
+              name="company_name"
+              placeholder="Smith Family Farm"
+              class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label for="customer_email" class="block text-sm font-medium text-gray-700 mb-1">
+              Email (for CDP matching)
+            </label>
+            <input
+              type="email"
+              id="customer_email"
+              name="customer_email"
+              placeholder="john@smithfarm.com"
+              class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+
+          <div>
+            <label for="customer_phone" class="block text-sm font-medium text-gray-700 mb-1">
+              Phone
+            </label>
+            <input
+              type="tel"
+              id="customer_phone"
+              name="customer_phone"
+              placeholder="555-123-4567"
+              class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label for="operation_type" class="block text-sm font-medium text-gray-700 mb-1">
+              Operation Type
+            </label>
+            <select
+              id="operation_type"
+              name="operation_type"
+              class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              <option value="">Select type...</option>
+              {operationTypes.map(op => (
+                <option value={op.value}>{op.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label for="integrator" class="block text-sm font-medium text-gray-700 mb-1">
+              Integrator
+            </label>
+            <select
+              id="integrator"
+              name="integrator"
+              class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              <option value="">Select integrator...</option>
+              {integrators.map(int => (
+                <option value={int.value}>{int.label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label for="house_count" class="block text-sm font-medium text-gray-700 mb-1">
+              Number of Houses
+            </label>
+            <input
+              type="number"
+              id="house_count"
+              name="house_count"
+              min="1"
+              placeholder="4"
+              class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+
+          <div>
+            <label for="bird_capacity" class="block text-sm font-medium text-gray-700 mb-1">
+              Bird Capacity
+            </label>
+            <input
+              type="text"
+              id="bird_capacity"
+              name="bird_capacity"
+              placeholder="150,000"
+              class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Outcome Details -->
+      <fieldset class="space-y-4">
+        <legend class="text-lg font-semibold text-gray-900 mb-4">Outcome Details</legend>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Outcome Type <span class="text-red-500">*</span>
+          </label>
+          <div class="space-y-2">
+            {outcomeTypes.map(outcome => (
+              <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors">
+                <input
+                  type="radio"
+                  name="outcome_type"
+                  value={outcome.value}
+                  required
+                  class="mt-1 text-green-600"
+                />
+                <div>
+                  <span class="font-medium text-gray-900">{outcome.label}</span>
+                  <span class="block text-sm text-gray-500">{outcome.description}</span>
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <!-- FCR Improvement Fields (shown conditionally) -->
+        <div id="fcr-fields" class="hidden space-y-4 p-4 bg-green-50 rounded-lg">
+          <h4 class="font-medium text-green-800">FCR Improvement Details</h4>
+          <div class="grid md:grid-cols-3 gap-4">
+            <div>
+              <label for="fcr_before" class="block text-sm font-medium text-gray-700 mb-1">
+                FCR Before
+              </label>
+              <input
+                type="number"
+                id="fcr_before"
+                name="fcr_before"
+                step="0.01"
+                placeholder="1.85"
+                class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+            </div>
+            <div>
+              <label for="fcr_after" class="block text-sm font-medium text-gray-700 mb-1">
+                FCR After
+              </label>
+              <input
+                type="number"
+                id="fcr_after"
+                name="fcr_after"
+                step="0.01"
+                placeholder="1.78"
+                class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+            </div>
+            <div>
+              <label for="fcr_improvement_pct" class="block text-sm font-medium text-gray-700 mb-1">
+                Improvement %
+              </label>
+              <input
+                type="number"
+                id="fcr_improvement_pct"
+                name="fcr_improvement_pct"
+                step="0.1"
+                placeholder="3.8"
+                class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Mortality Reduction Fields (shown conditionally) -->
+        <div id="mortality-fields" class="hidden space-y-4 p-4 bg-blue-50 rounded-lg">
+          <h4 class="font-medium text-blue-800">Mortality Reduction Details</h4>
+          <div class="grid md:grid-cols-3 gap-4">
+            <div>
+              <label for="mortality_before" class="block text-sm font-medium text-gray-700 mb-1">
+                Mortality % Before
+              </label>
+              <input
+                type="number"
+                id="mortality_before"
+                name="mortality_before"
+                step="0.1"
+                placeholder="4.5"
+                class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+            </div>
+            <div>
+              <label for="mortality_after" class="block text-sm font-medium text-gray-700 mb-1">
+                Mortality % After
+              </label>
+              <input
+                type="number"
+                id="mortality_after"
+                name="mortality_after"
+                step="0.1"
+                placeholder="3.2"
+                class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+            </div>
+            <div>
+              <label for="mortality_reduction_pct" class="block text-sm font-medium text-gray-700 mb-1">
+                Reduction %
+              </label>
+              <input
+                type="number"
+                id="mortality_reduction_pct"
+                name="mortality_reduction_pct"
+                step="0.1"
+                placeholder="29"
+                class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Reorder Fields (shown conditionally) -->
+        <div id="reorder-fields" class="hidden space-y-4 p-4 bg-amber-50 rounded-lg">
+          <h4 class="font-medium text-amber-800">Reorder Details</h4>
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label for="order_value" class="block text-sm font-medium text-gray-700 mb-1">
+                Order Value ($)
+              </label>
+              <input
+                type="number"
+                id="order_value"
+                name="order_value"
+                step="0.01"
+                placeholder="2500.00"
+                class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Products Ordered
+              </label>
+              <div class="flex flex-wrap gap-2">
+                {products.map(prod => (
+                  <label class="flex items-center gap-2 px-3 py-1 bg-white rounded-full border border-gray-200">
+                    <input type="checkbox" name="products_mentioned" value={prod.value} class="text-green-600" />
+                    <span class="text-sm">{prod.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label for="outcome_details" class="block text-sm font-medium text-gray-700 mb-1">
+            Outcome Details / Notes
+          </label>
+          <textarea
+            id="outcome_details"
+            name="outcome_details"
+            rows={3}
+            placeholder="Describe what the customer reported..."
+            class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+          ></textarea>
+        </div>
+      </fieldset>
+
+      <!-- Follow-up -->
+      <fieldset class="space-y-4">
+        <legend class="text-lg font-semibold text-gray-900 mb-4">Follow-up</legend>
+
+        <div class="flex items-center gap-4">
+          <label class="flex items-center gap-2">
+            <input type="checkbox" id="follow_up_needed" name="follow_up_needed" class="text-green-600" />
+            <span>Follow-up needed</span>
+          </label>
+        </div>
+
+        <div id="follow-up-section" class="hidden">
+          <label for="follow_up_notes" class="block text-sm font-medium text-gray-700 mb-1">
+            Follow-up Notes
+          </label>
+          <textarea
+            id="follow_up_notes"
+            name="follow_up_notes"
+            rows={2}
+            placeholder="What needs to be followed up on..."
+            class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+          ></textarea>
+        </div>
+      </fieldset>
+
+      <!-- Submit -->
+      <div class="flex gap-4 pt-4 border-t border-gray-200">
+        <button
+          type="submit"
+          class="btn-primary flex-1"
+        >
+          Log Outcome
+        </button>
+        <button
+          type="reset"
+          class="btn-secondary"
+        >
+          Clear Form
+        </button>
+      </div>
+    </form>
+
+    <!-- Success Message (hidden by default) -->
+    <div id="success-message" class="hidden mt-6 p-6 bg-green-50 border border-green-200 rounded-xl text-center">
+      <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
+      </div>
+      <h3 class="text-lg font-semibold text-green-800 mb-2">Outcome Logged!</h3>
+      <p class="text-green-600 mb-4">The outcome has been recorded and will be synced to the CDP.</p>
+      <button id="log-another" class="text-green-700 font-medium hover:underline">
+        Log Another Outcome
+      </button>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  // Conditional field visibility
+  const outcomeRadios = document.querySelectorAll('input[name="outcome_type"]');
+  const fcrFields = document.getElementById('fcr-fields');
+  const mortalityFields = document.getElementById('mortality-fields');
+  const reorderFields = document.getElementById('reorder-fields');
+
+  outcomeRadios.forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      const value = (e.target as HTMLInputElement).value;
+
+      // Hide all conditional fields
+      fcrFields?.classList.add('hidden');
+      mortalityFields?.classList.add('hidden');
+      reorderFields?.classList.add('hidden');
+
+      // Show relevant fields
+      if (value === 'fcr_improvement') {
+        fcrFields?.classList.remove('hidden');
+      } else if (value === 'mortality_reduction') {
+        mortalityFields?.classList.remove('hidden');
+      } else if (value === 'reorder') {
+        reorderFields?.classList.remove('hidden');
+      }
+    });
+  });
+
+  // Follow-up toggle
+  const followUpCheckbox = document.getElementById('follow_up_needed') as HTMLInputElement;
+  const followUpSection = document.getElementById('follow-up-section');
+
+  followUpCheckbox?.addEventListener('change', () => {
+    if (followUpCheckbox.checked) {
+      followUpSection?.classList.remove('hidden');
+    } else {
+      followUpSection?.classList.add('hidden');
+    }
+  });
+
+  // Set default date to today
+  const callDateInput = document.getElementById('call_date') as HTMLInputElement;
+  if (callDateInput) {
+    callDateInput.value = new Date().toISOString().split('T')[0];
+  }
+
+  // Form submission
+  const form = document.getElementById('sales-log-form') as HTMLFormElement;
+  const successMessage = document.getElementById('success-message');
+  const logAnotherBtn = document.getElementById('log-another');
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+    const data: Record<string, any> = {};
+
+    // Collect form data
+    const processedFields = new Set<string>();
+    formData.forEach((value, key) => {
+      if (processedFields.has(key)) return;
+
+      const allValues = formData.getAll(key);
+      if (allValues.length > 1) {
+        data[key] = allValues;
+      } else {
+        data[key] = value;
+      }
+      processedFields.add(key);
+    });
+
+    // Add metadata
+    data.logged_at = new Date().toISOString();
+    data.log_id = `sales-${Date.now()}`;
+
+    const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Logging...';
+
+    try {
+      const response = await fetch('/api/sales-log/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        // Show success
+        form.classList.add('hidden');
+        successMessage?.classList.remove('hidden');
+
+        // Track event
+        if (window.pdPixel) {
+          window.pdPixel.track('sales_outcome_logged', {
+            outcome_type: data.outcome_type,
+            sales_rep: data.sales_rep,
+          });
+        }
+      } else {
+        throw new Error('Submission failed');
+      }
+    } catch (error) {
+      console.error('Sales log error:', error);
+      alert('Failed to log outcome. Please try again.');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Log Outcome';
+    }
+  });
+
+  // Log another button
+  logAnotherBtn?.addEventListener('click', () => {
+    form.reset();
+    form.classList.remove('hidden');
+    successMessage?.classList.add('hidden');
+
+    // Reset conditional fields
+    fcrFields?.classList.add('hidden');
+    mortalityFields?.classList.add('hidden');
+    reorderFields?.classList.add('hidden');
+    followUpSection?.classList.add('hidden');
+
+    // Reset date to today
+    if (callDateInput) {
+      callDateInput.value = new Date().toISOString().split('T')[0];
+    }
+
+    // Reset submit button
+    const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Log Outcome';
+  });
+</script>

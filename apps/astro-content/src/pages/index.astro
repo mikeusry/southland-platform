@@ -1,16 +1,115 @@
 ---
-// Root redirects to podcast hub (MVP)
+/**
+ * Homepage - Decision Engine
+ *
+ * CDP Week 1: 3-way branch to route visitors into persona-specific reality tunnels
+ *
+ * Visitor Flow:
+ * 1. New visitor arrives at homepage
+ * 2. Decision Engine asks "What best describes you?"
+ * 3. Selection stored in localStorage + cookie
+ * 4. Event fired to point.dog pixel + GTM
+ * 5. Redirect to persona landing page
+ *
+ * Returning visitors with stored persona will see a personalized welcome
+ * (future enhancement: auto-redirect to their tunnel)
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import DecisionEngine from '../components/cdp/DecisionEngine.astro';
+
+const title = "Southland Organics | Organic Solutions for Poultry & Lawn";
+const description = "Organic probiotics and natural solutions for backyard flocks, commercial poultry operations, and lawn care. OMRI Listed, family-owned, made in Georgia.";
+
+// Schema for homepage
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Southland Organics",
+  description: description,
+  url: "https://southlandorganics.com",
+  logo: "https://res.cloudinary.com/southland-organics/image/upload/v1/Southland%20Website/Southland%20Branding/logos/southland-logo-primary.png",
+  contactPoint: {
+    "@type": "ContactPoint",
+    telephone: "+1-800-608-3755",
+    contactType: "customer service",
+    areaServed: "US",
+    availableLanguage: "English"
+  },
+  sameAs: [
+    "https://www.facebook.com/southlandorganics",
+    "https://www.instagram.com/southlandorganics",
+    "https://www.youtube.com/southlandorganics"
+  ]
+};
 ---
 
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="refresh" content="0;url=/podcast/" />
-    <link rel="canonical" href="/podcast/" />
-    <title>Redirecting to Ag &amp; Culture Podcast</title>
-  </head>
-  <body>
-    <p>Redirecting to <a href="/podcast/">Ag &amp; Culture Podcast</a>...</p>
-  </body>
-</html>
+<BaseLayout title={title} description={description} schema={schema}>
+  <!-- Hero Section with Decision Engine -->
+  <section class="min-h-[80vh] flex items-center bg-gradient-to-b from-white to-gray-50">
+    <div class="w-full">
+      <!-- Logo & Tagline -->
+      <div class="text-center py-8 md:py-12">
+        <img
+          src="https://res.cloudinary.com/southland-organics/image/upload/c_scale,w_300/v1/Southland%20Website/Southland%20Branding/logos/southland-logo-primary.png"
+          alt="Southland Organics"
+          class="h-20 md:h-24 mx-auto mb-4"
+          width="300"
+          height="96"
+        />
+        <p class="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto px-4">
+          Organic solutions for healthier birds, better soil, and a cleaner planet.
+        </p>
+      </div>
+
+      <!-- Decision Engine -->
+      <DecisionEngine />
+    </div>
+  </section>
+
+  <!-- Trust Badges -->
+  <section class="py-12 bg-white border-t border-gray-100">
+    <div class="max-w-4xl mx-auto px-4">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        <div>
+          <div class="text-3xl font-bold text-green-700 mb-1">15+</div>
+          <div class="text-sm text-gray-600">Years in Business</div>
+        </div>
+        <div>
+          <div class="text-3xl font-bold text-green-700 mb-1">OMRI</div>
+          <div class="text-sm text-gray-600">Listed Organic</div>
+        </div>
+        <div>
+          <div class="text-3xl font-bold text-green-700 mb-1">USA</div>
+          <div class="text-sm text-gray-600">Made in Georgia</div>
+        </div>
+        <div>
+          <div class="text-3xl font-bold text-green-700 mb-1">100%</div>
+          <div class="text-sm text-gray-600">Natural Ingredients</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Links for Returning Visitors -->
+  <section class="py-12 bg-gray-50">
+    <div class="max-w-6xl mx-auto px-4">
+      <h2 class="text-2xl font-bold text-center mb-8" style="color: var(--color-title);">
+        Quick Links
+      </h2>
+      <div class="grid md:grid-cols-4 gap-4">
+        <a href="/shop/" class="block p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow text-center">
+          <span class="text-lg font-semibold text-gray-800">Shop All Products</span>
+        </a>
+        <a href="/podcast/" class="block p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow text-center">
+          <span class="text-lg font-semibold text-gray-800">Ag & Culture Podcast</span>
+        </a>
+        <a href="/about/" class="block p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow text-center">
+          <span class="text-lg font-semibold text-gray-800">About Us</span>
+        </a>
+        <a href="/contact/" class="block p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow text-center">
+          <span class="text-lg font-semibold text-gray-800">Contact</span>
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

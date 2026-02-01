@@ -1,0 +1,256 @@
+---
+/**
+ * Commercial Poultry Outcome Survey (Bill Persona)
+ *
+ * CDP Week 1 - Post-purchase outcome collection
+ *
+ * Triggered via Klaviyo at 30/60/90 days post-purchase.
+ * URL format: /survey/commercial?order_id=123&email=bill@farm.com
+ *
+ * Questions focus on:
+ * - FCR (Feed Conversion Ratio) improvement
+ * - Mortality rate reduction
+ * - Flock uniformity
+ * - Settlement/pay improvements
+ * - ROI and willingness to reorder
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import OutcomeSurvey from '../../components/cdp/OutcomeSurvey.astro';
+
+const title = "How Are Your Numbers Looking? | Southland Organics";
+const description = "Share your flock performance data and help us track the impact of our products.";
+
+// Bill's survey questions - focused on commercial metrics and ROI
+const questions = [
+  {
+    id: 'operation_type',
+    type: 'select' as const,
+    question: "What type of operation do you run?",
+    required: true,
+    options: [
+      { value: 'broiler_contract', label: 'Contract Broiler Grower' },
+      { value: 'broiler_independent', label: 'Independent Broiler Operation' },
+      { value: 'layer', label: 'Layer/Egg Production' },
+      { value: 'breeder', label: 'Breeder Operation' },
+      { value: 'pullet', label: 'Pullet Grower' },
+      { value: 'other', label: 'Other' },
+    ],
+  },
+  {
+    id: 'house_count',
+    type: 'select' as const,
+    question: "How many houses do you have?",
+    required: true,
+    options: [
+      { value: '1-2', label: '1-2 houses' },
+      { value: '3-4', label: '3-4 houses' },
+      { value: '5-6', label: '5-6 houses' },
+      { value: '7-10', label: '7-10 houses' },
+      { value: '10+', label: '10+ houses' },
+    ],
+  },
+  {
+    id: 'bird_capacity',
+    type: 'select' as const,
+    question: "What is your total bird capacity?",
+    required: true,
+    options: [
+      { value: 'under_50k', label: 'Under 50,000 birds' },
+      { value: '50k-100k', label: '50,000 - 100,000 birds' },
+      { value: '100k-250k', label: '100,000 - 250,000 birds' },
+      { value: '250k-500k', label: '250,000 - 500,000 birds' },
+      { value: '500k+', label: '500,000+ birds' },
+    ],
+  },
+  {
+    id: 'fcr_change',
+    type: 'select' as const,
+    question: "Have you seen improvement in Feed Conversion Ratio (FCR)?",
+    description: "Comparing flocks before and after using our products",
+    required: true,
+    options: [
+      { value: 'significant_improvement', label: 'Yes, significant improvement (5%+ better)' },
+      { value: 'moderate_improvement', label: 'Yes, moderate improvement (2-5% better)' },
+      { value: 'slight_improvement', label: 'Yes, slight improvement (under 2%)' },
+      { value: 'no_change', label: 'No noticeable change' },
+      { value: 'worse', label: 'FCR got worse' },
+      { value: 'not_tracking', label: "Don't track FCR closely" },
+    ],
+  },
+  {
+    id: 'fcr_before',
+    type: 'number' as const,
+    question: "What was your FCR BEFORE using our products? (Optional)",
+    placeholder: "e.g., 1.85",
+    required: false,
+  },
+  {
+    id: 'fcr_after',
+    type: 'number' as const,
+    question: "What is your FCR NOW with our products? (Optional)",
+    placeholder: "e.g., 1.78",
+    required: false,
+  },
+  {
+    id: 'mortality_change',
+    type: 'select' as const,
+    question: "Have you seen a reduction in mortality?",
+    required: true,
+    options: [
+      { value: 'significant_reduction', label: 'Yes, significant reduction (30%+ fewer losses)' },
+      { value: 'moderate_reduction', label: 'Yes, moderate reduction (15-30% fewer losses)' },
+      { value: 'slight_reduction', label: 'Yes, slight reduction (under 15%)' },
+      { value: 'no_change', label: 'No noticeable change' },
+      { value: 'worse', label: 'Mortality increased' },
+    ],
+  },
+  {
+    id: 'mortality_before',
+    type: 'number' as const,
+    question: "What was your mortality rate BEFORE? (Optional, as percentage)",
+    placeholder: "e.g., 4.5",
+    required: false,
+  },
+  {
+    id: 'mortality_after',
+    type: 'number' as const,
+    question: "What is your mortality rate NOW? (Optional, as percentage)",
+    placeholder: "e.g., 3.2",
+    required: false,
+  },
+  {
+    id: 'other_improvements',
+    type: 'multiselect' as const,
+    question: "What other improvements have you noticed? (Select all that apply)",
+    options: [
+      { value: 'better_uniformity', label: 'Better flock uniformity' },
+      { value: 'fewer_culls', label: 'Fewer culls/condemnations' },
+      { value: 'better_paw_quality', label: 'Improved paw quality' },
+      { value: 'less_ammonia', label: 'Reduced ammonia levels' },
+      { value: 'better_litter', label: 'Better litter condition' },
+      { value: 'healthier_birds', label: 'Overall healthier birds' },
+      { value: 'faster_growth', label: 'Faster growth rate' },
+      { value: 'less_medication', label: 'Reduced need for medication' },
+      { value: 'none', label: 'No improvements noticed' },
+    ],
+  },
+  {
+    id: 'settlement_impact',
+    type: 'select' as const,
+    question: "Has using our products improved your settlement/pay?",
+    description: "For contract growers",
+    options: [
+      { value: 'yes_significant', label: 'Yes, noticeably higher settlements' },
+      { value: 'yes_slight', label: 'Yes, slightly higher settlements' },
+      { value: 'no_change', label: 'No change in settlements' },
+      { value: 'not_applicable', label: 'N/A - Not a contract grower' },
+    ],
+  },
+  {
+    id: 'roi_assessment',
+    type: 'select' as const,
+    question: "How would you assess the return on investment (ROI)?",
+    required: true,
+    options: [
+      { value: 'excellent', label: 'Excellent - Products pay for themselves many times over' },
+      { value: 'good', label: 'Good - Clear positive ROI' },
+      { value: 'break_even', label: 'About break-even' },
+      { value: 'negative', label: 'Negative - Cost more than the benefit' },
+      { value: 'too_early', label: 'Too early to tell' },
+    ],
+  },
+  {
+    id: 'integrator',
+    type: 'select' as const,
+    question: "Who is your integrator? (Optional)",
+    options: [
+      { value: 'tyson', label: 'Tyson' },
+      { value: 'perdue', label: 'Perdue' },
+      { value: 'pilgrims', label: "Pilgrim's" },
+      { value: 'koch', label: 'Koch Foods' },
+      { value: 'sanderson', label: 'Sanderson Farms' },
+      { value: 'wayne', label: 'Wayne Farms' },
+      { value: 'mountaire', label: 'Mountaire' },
+      { value: 'other', label: 'Other' },
+      { value: 'independent', label: 'Independent (no integrator)' },
+      { value: 'prefer_not', label: 'Prefer not to say' },
+    ],
+  },
+  {
+    id: 'will_reorder',
+    type: 'select' as const,
+    question: "Do you plan to continue using our products?",
+    required: true,
+    options: [
+      { value: 'definitely', label: 'Definitely - Already reordering' },
+      { value: 'probably', label: 'Probably - Plan to reorder' },
+      { value: 'maybe', label: 'Maybe - Still evaluating' },
+      { value: 'unlikely', label: 'Unlikely to reorder' },
+      { value: 'no', label: 'No - Will not reorder' },
+    ],
+  },
+  {
+    id: 'nps',
+    type: 'rating' as const,
+    question: "How likely are you to recommend Southland Organics to another grower?",
+    description: "1 = Not at all likely, 10 = Extremely likely",
+    required: true,
+    min: 1,
+    max: 10,
+  },
+  {
+    id: 'testimonial',
+    type: 'text' as const,
+    question: "Would you be willing to share your results as a case study?",
+    placeholder: "Tell us about your experience and results...",
+    required: false,
+  },
+  {
+    id: 'can_contact',
+    type: 'select' as const,
+    question: "May we contact you to discuss your results in more detail?",
+    options: [
+      { value: 'yes_phone', label: 'Yes, by phone' },
+      { value: 'yes_email', label: 'Yes, by email' },
+      { value: 'no', label: 'No thanks' },
+    ],
+  },
+  {
+    id: 'phone',
+    type: 'text' as const,
+    question: "Best phone number to reach you (Optional)",
+    placeholder: "xxx-xxx-xxxx",
+    required: false,
+  },
+];
+---
+
+<BaseLayout title={title} description={description} noIndex={true}>
+  <section class="py-12 bg-gradient-to-b from-green-50 to-white min-h-screen">
+    <div class="max-w-2xl mx-auto px-4">
+      <!-- Branding -->
+      <div class="text-center mb-8">
+        <img
+          src="https://res.cloudinary.com/southland-organics/image/upload/c_scale,w_200/v1/Southland%20Website/Southland%20Branding/logos/southland-logo-primary.png"
+          alt="Southland Organics"
+          class="h-12 mx-auto mb-4"
+          width="200"
+          height="48"
+        />
+        <span class="inline-block px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">
+          Commercial Grower Feedback
+        </span>
+      </div>
+
+      <!-- Survey Component -->
+      <OutcomeSurvey
+        surveyId="commercial-outcome-v1"
+        persona="commercial"
+        title="How Are Your Numbers Looking?"
+        description="Your performance data helps us demonstrate ROI and improve our products for commercial operations. This survey takes about 3-4 minutes."
+        questions={questions}
+        successMessage="Thank you for sharing your results! Your data helps us prove the value of organic solutions for commercial poultry."
+      />
+    </div>
+  </section>
+</BaseLayout>
