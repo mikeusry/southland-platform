@@ -39,8 +39,8 @@ const socialIcons: Record<string, JSX.Element> = {
   ),
 };
 
-// Default molecules pattern from Cloudinary
-const DEFAULT_MOLECULES_URL = 'https://res.cloudinary.com/southland-organics/image/upload/f_auto,q_auto/Southland%20Website/Southland%20Branding/patterns/top_molecules_green_zeewhr';
+// Default footer background from Cloudinary
+const DEFAULT_MOLECULES_URL = 'https://res.cloudinary.com/southland-organics/image/upload/f_auto,q_auto/Southland%20Website/Southland%20Branding/patterns/Footer_bg_qtqx95';
 
 // Default white logo from Cloudinary (square white version)
 const DEFAULT_WHITE_LOGO_URL = 'https://res.cloudinary.com/southland-organics/image/upload/f_auto,q_auto,w_400/Southland%20Website/Southland%20Branding/logos/Southland_Organics_Square_White_tuwhqk';
