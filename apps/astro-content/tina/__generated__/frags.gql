@@ -1,0 +1,89 @@
+fragment BlogParts on Blog {
+  __typename
+  title
+  publishDate
+  updatedDate
+  description
+  author
+  reviewer
+  tags
+  segment
+  featuredImage
+  draft
+  shopifyId
+  shopifyHandle
+  body
+}
+
+fragment TeamParts on Team {
+  __typename
+  name
+  role
+  bio
+  photo
+  email
+  phone
+  links {
+    __typename
+    linkedin
+    twitter
+    website
+  }
+  credentials
+  expertiseAreas
+  yearsExperience
+  isAuthor
+  isReviewer
+  order
+  featured
+  active
+  body
+}
+
+fragment EpisodesParts on Episodes {
+  __typename
+  title
+  episodeNumber
+  season
+  publishDate
+  description
+  longDescription
+  gumletId
+  audioUrl
+  youtubeUrl
+  applePodcastUrl
+  spotifyUrl
+  thumbnail
+  duration
+  durationSeconds
+  topics
+  draft
+  body
+}
+
+fragment GuestsParts on Guests {
+  __typename
+  name
+  role
+  company
+  bio
+  photo
+  links {
+    __typename
+    website
+    linkedin
+    twitter
+    instagram
+  }
+  featured
+  body
+}
+
+fragment TopicsParts on Topics {
+  __typename
+  name
+  description
+  icon
+  segment
+  body
+}
