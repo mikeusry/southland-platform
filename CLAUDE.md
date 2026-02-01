@@ -151,23 +151,72 @@ Comprehensive Customer Data Platform strategy combining:
 
 ### Current CDP Phase
 
-**Status:** Week 1 - Foundation + Proof Collection
+**Status:** Week 2 Complete - Reality Tunnels Infrastructure
 
 | Track | Focus | Owner |
 |-------|-------|-------|
 | **Track A: Ads** | Consolidate 99 → 15 campaigns | Marketing |
-| **Track B: CDP** | Decision Engine + Outcome Surveys | Dev/Data |
+| **Track B: CDP** | Reality Tunnels + Persona Content | Dev/Data |
 
 ### CDP Build Order
 
 | Week | Deliverable | Status |
 |------|-------------|--------|
-| 1 | Decision Engine + Outcome Surveys | 🔄 IN PROGRESS |
-| 2 | Poultry Guide + Phone Attribution | Planned |
+| 1 | Decision Engine + Outcome Surveys | ✅ COMPLETE |
+| 2 | Reality Tunnels Infrastructure | ✅ COMPLETE |
 | 3 | Semantic Search + First Proofs | Planned |
 | 4 | Persona Scoring Worker | Planned |
-| 5-6 | Reality Tunnels (Betty) | Planned |
-| 7-8 | Reality Tunnels (Bill) — GATED | Planned |
+| 5-6 | Reality Tunnels Content (Betty) | Planned |
+| 7-8 | Reality Tunnels Content (Bill) — GATED | Planned |
+
+### Reality Tunnels (Week 2)
+
+**Concept:** Same site shows different content based on visitor persona. Components conditionally render CTAs, messaging, and content sections.
+
+#### Personas
+
+| ID | Name | Storage Key | Color |
+|----|------|-------------|-------|
+| `backyard` | Backyard Betty | `southland_persona` | Amber |
+| `commercial` | Broiler Bill | `southland_persona` | Green |
+| `lawn` | Turf Pro Taylor | `southland_persona` | Emerald |
+| `general` | Skipped selection | `southland_persona` | Gray |
+
+#### CDP Components
+
+| Component | Purpose | Location |
+|-----------|---------|----------|
+| `DecisionEngine` | Homepage 3-way branch | `components/cdp/DecisionEngine.astro` |
+| `PersonaContent` | Show/hide by persona | `components/cdp/PersonaContent.astro` |
+| `PersonaCTA` | CTA changes by persona | `components/cdp/PersonaCTA.astro` |
+| `PersonaBanner` | Bottom bar + change modal | `components/cdp/PersonaBanner.astro` |
+| `OutcomeSurvey` | Post-purchase surveys | `components/cdp/OutcomeSurvey.astro` |
+
+#### Persona Utilities
+
+```typescript
+import { getPersonaId, setPersona, getPersonaConfig } from '../lib/persona';
+
+// Get current persona
+const persona = getPersonaId(); // 'backyard' | 'commercial' | 'lawn' | 'general' | null
+
+// Set persona (fires 'persona-changed' event)
+setPersona('commercial', 'decision_engine');
+```
+
+#### Usage Examples
+
+```astro
+<!-- Show content only for commercial users -->
+<PersonaContent show="commercial">
+  <p>Call our commercial team: 1-800-XXX-XXXX</p>
+</PersonaContent>
+
+<!-- CTA that auto-changes by persona -->
+<PersonaCTA variant="primary" />
+<!-- Backyard sees "Shop Backyard Products" → /shop/poultry/backyard/ -->
+<!-- Commercial sees "Talk to a Specialist" → /contact/commercial/ -->
+```
 
 ### Key CDP Decisions
 
