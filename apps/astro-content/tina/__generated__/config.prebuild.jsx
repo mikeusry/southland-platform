@@ -5,7 +5,7 @@ var config_default = defineConfig({
   clientId: process.env.TINA_CLIENT_ID || "",
   token: process.env.TINA_TOKEN || "",
   build: {
-    outputFolder: "admin",
+    outputFolder: "cms",
     publicFolder: "public"
   },
   media: {
@@ -13,6 +13,14 @@ var config_default = defineConfig({
       mediaRoot: "",
       publicFolder: "public"
     }
+  },
+  search: {
+    tina: {
+      indexerToken: process.env.TINA_SEARCH_TOKEN,
+      stopwordLanguages: ["eng"]
+    },
+    indexBatchSize: 100,
+    maxSearchIndexFieldLength: 100
   },
   schema: {
     collections: [

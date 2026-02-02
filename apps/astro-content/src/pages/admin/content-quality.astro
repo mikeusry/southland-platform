@@ -1,0 +1,541 @@
+---
+/**
+ * Content Quality Dashboard
+ * Documentation for TinaCMS + Mothership integration
+ * Future: Real-time persona fit, originality scores, DataforSEO
+ */
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Content Quality" activeNav="/admin/content-quality">
+  <header class="page-header">
+    <h1 class="page-title">Content Quality</h1>
+    <p class="page-subtitle">Persona alignment, originality scoring, and SEO analysis</p>
+  </header>
+
+  <!-- Status Banner -->
+  <div class="status-banner">
+    <div class="status-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+    </div>
+    <div class="status-content">
+      <strong>Integration Roadmap</strong>
+      <p>This page documents the planned TinaCMS + Mothership integration for content quality scoring.</p>
+    </div>
+  </div>
+
+  <!-- Current Capabilities -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Current Capabilities (Mothership)</h2>
+      <span class="badge badge-success">Live</span>
+    </div>
+    <div class="feature-grid">
+      <div class="feature-item">
+        <div class="feature-icon green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div class="feature-content">
+          <h3>Persona Alignment Scoring</h3>
+          <p>Vector embeddings (OpenAI text-embedding-3-small) compute similarity scores against 3 personas:</p>
+          <ul>
+            <li><strong>Broiler Bill</strong> - Commercial poultry (55% weight)</li>
+            <li><strong>Backyard Betty</strong> - Backyard flock owners (10%)</li>
+            <li><strong>Turf Taylor</strong> - Lawn professionals (12%)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div class="feature-content">
+          <h3>Content Gap Analysis</h3>
+          <p>Supabase queries identify content health:</p>
+          <ul>
+            <li><strong>ORPHAN</strong> - Persona fit &lt; 0.5 (needs rewrite)</li>
+            <li><strong>WEAK</strong> - Persona fit &lt; 0.6 (needs improvement)</li>
+            <li><strong>CONFUSED</strong> - Multiple personas scored high (too broad)</li>
+            <li><strong>OK</strong> - Clear persona alignment</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div class="feature-content">
+          <h3>Buyer Journey Stage Detection</h3>
+          <p>10-stage journey mapping via title regex patterns:</p>
+          <code class="code-block">unaware → aware → receptive → zmot → objections → test_prep → challenge → success → commitment → evangelist</code>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Planned: TinaCMS Integration -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Planned: TinaCMS Integration</h2>
+      <span class="badge badge-warning">Roadmap</span>
+    </div>
+    <div class="integration-preview">
+      <div class="preview-sidebar">
+        <h4>Quality Sidebar (Concept)</h4>
+        <div class="mock-sidebar">
+          <div class="mock-section">
+            <span class="mock-label">Persona Fit</span>
+            <div class="mock-scores">
+              <div class="mock-score good">
+                <span>Broiler Bill</span>
+                <span class="score">0.78 ✓</span>
+              </div>
+              <div class="mock-score">
+                <span>Backyard Betty</span>
+                <span class="score">0.42</span>
+              </div>
+              <div class="mock-score">
+                <span>Turf Taylor</span>
+                <span class="score">0.31</span>
+              </div>
+            </div>
+          </div>
+          <div class="mock-section">
+            <span class="mock-label">Stage Target</span>
+            <div class="mock-badge">ZMOT ✓</div>
+          </div>
+          <div class="mock-section">
+            <span class="mock-label">Originality</span>
+            <div class="mock-badge good">94%</div>
+          </div>
+          <div class="mock-section">
+            <span class="mock-label">AI Detection</span>
+            <div class="mock-badge good">8%</div>
+          </div>
+          <div class="mock-section">
+            <span class="mock-label">DataforSEO</span>
+            <div class="mock-list">
+              <span>Keyword Density: OK</span>
+              <span>SERP Gap: 3 competitors</span>
+            </div>
+          </div>
+          <button class="mock-button disabled">Publish Blocked</button>
+          <span class="mock-warning">⚠ Persona fit &lt; 0.6</span>
+        </div>
+      </div>
+      <div class="preview-description">
+        <h4>Integration Points</h4>
+        <ol>
+          <li><strong>Real-time persona scoring</strong> - As content is edited, compute embedding and score against personas</li>
+          <li><strong>Pre-publish validation</strong> - Block publish if persona fit &lt; 0.6 or AI detection &gt; 50%</li>
+          <li><strong>Originality.ai integration</strong> - $30/mo for plagiarism + AI detection</li>
+          <li><strong>DataforSEO integration</strong> - $50/mo for SERP analysis, keyword density</li>
+          <li><strong>Stage targeting</strong> - Dropdown to assign journey stage, validate against content</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- Implementation Phases -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Implementation Phases</h2>
+    </div>
+    <div class="phases">
+      <div class="phase">
+        <div class="phase-header">
+          <span class="phase-number">1</span>
+          <h3>Add Scoring Fields to TinaCMS</h3>
+        </div>
+        <p>Add read-only computed fields to blog schema:</p>
+        <code class="code-block">personaScore, originalityScore, aiDetectionScore, stageTarget, gapStatus</code>
+      </div>
+
+      <div class="phase">
+        <div class="phase-header">
+          <span class="phase-number">2</span>
+          <h3>Supabase API Endpoint</h3>
+        </div>
+        <p>Create <code>/api/content-score</code> endpoint:</p>
+        <ul>
+          <li>POST body content → compute embedding</li>
+          <li>Score against persona vectors</li>
+          <li>Return persona scores, gap status, stage inference</li>
+        </ul>
+      </div>
+
+      <div class="phase">
+        <div class="phase-header">
+          <span class="phase-number">3</span>
+          <h3>External Integrations</h3>
+        </div>
+        <ul>
+          <li><strong>Originality.ai</strong> - AI detection + plagiarism check</li>
+          <li><strong>DataforSEO</strong> - SERP analysis, competitor gaps</li>
+        </ul>
+      </div>
+
+      <div class="phase">
+        <div class="phase-header">
+          <span class="phase-number">4</span>
+          <h3>TinaCMS Custom Field</h3>
+        </div>
+        <p>React sidebar component showing real-time scores with pre-publish validation</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Links -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Related Resources</h2>
+    </div>
+    <div class="quick-actions">
+      <a href="/cms/index.html" class="action-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+        </svg>
+        <span>TinaCMS Editor</span>
+      </a>
+      <a href="/admin/cdp-guide" class="action-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+        </svg>
+        <span>CDP Guide</span>
+      </a>
+      <a href="https://supabase.com/dashboard" target="_blank" class="action-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/>
+        </svg>
+        <span>Supabase</span>
+      </a>
+    </div>
+  </div>
+</AdminLayout>
+
+<style>
+  .status-banner {
+    display: flex;
+    gap: 16px;
+    padding: 16px 20px;
+    background: #dbeafe;
+    border: 1px solid #93c5fd;
+    border-radius: var(--radius);
+    margin-bottom: 24px;
+  }
+
+  .status-icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    color: #1d4ed8;
+  }
+
+  .status-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .status-content strong {
+    display: block;
+    color: #1e40af;
+    margin-bottom: 4px;
+  }
+
+  .status-content p {
+    color: #1e40af;
+    font-size: 14px;
+    margin: 0;
+  }
+
+  .feature-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .feature-item {
+    display: flex;
+    gap: 16px;
+  }
+
+  .feature-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .feature-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .feature-icon.green {
+    background: var(--success-light);
+    color: #166534;
+  }
+
+  .feature-content h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .feature-content p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+
+  .feature-content ul {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-left: 20px;
+  }
+
+  .feature-content li {
+    margin-bottom: 4px;
+  }
+
+  .code-block {
+    display: block;
+    background: var(--surface-alt);
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text);
+    overflow-x: auto;
+  }
+
+  .integration-preview {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 32px;
+  }
+
+  @media (max-width: 768px) {
+    .integration-preview {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .preview-sidebar h4,
+  .preview-description h4 {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+  }
+
+  .mock-sidebar {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+
+  .mock-section {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .mock-section:last-of-type {
+    border-bottom: none;
+  }
+
+  .mock-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-tertiary);
+    margin-bottom: 8px;
+  }
+
+  .mock-scores {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .mock-score {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .mock-score.good {
+    color: var(--accent-dark);
+    font-weight: 500;
+  }
+
+  .mock-score .score {
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+
+  .mock-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .mock-badge.good {
+    background: var(--success-light);
+    color: #166534;
+  }
+
+  .mock-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .mock-button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-top: 16px;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    cursor: not-allowed;
+  }
+
+  .mock-button.disabled {
+    background: var(--error-light);
+    color: #991b1b;
+  }
+
+  .mock-warning {
+    display: block;
+    text-align: center;
+    font-size: 12px;
+    color: #dc2626;
+    margin-top: 8px;
+  }
+
+  .preview-description ol {
+    margin-left: 20px;
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+
+  .preview-description li {
+    margin-bottom: 12px;
+  }
+
+  .phases {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .phase {
+    padding: 20px;
+    background: var(--surface-alt);
+    border-radius: var(--radius);
+  }
+
+  .phase-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .phase-number {
+    width: 28px;
+    height: 28px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .phase h3 {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .phase p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+
+  .phase ul {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-left: 40px;
+  }
+
+  .phase li {
+    margin-bottom: 4px;
+  }
+
+  .quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+  }
+
+  .action-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 20px;
+    background: var(--surface-alt);
+    border-radius: var(--radius);
+    text-decoration: none;
+    color: var(--text-secondary);
+    transition: all 0.15s ease;
+  }
+
+  .action-card:hover {
+    background: var(--accent-light);
+    color: var(--accent-dark);
+  }
+
+  .action-card svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .action-card span {
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+  }
+</style>

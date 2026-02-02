@@ -162,6 +162,12 @@ function slugify(text) {
  */
 function getSegment(blogHandle) {
   const segmentMap = {
+    // Actual Shopify blog handles
+    'poultry-biosecurity': 'poultry',
+    'news': 'general',
+    'humate-hub': 'agriculture',
+    'case-studies': 'general',
+    // Legacy/alternate handles
     'poultry': 'poultry',
     'poultry-blog': 'poultry',
     'commercial-poultry': 'poultry',
@@ -172,7 +178,6 @@ function getSegment(blogHandle) {
     'agriculture': 'agriculture',
     'ag': 'agriculture',
     'general': 'general',
-    'news': 'general',
   };
 
   return segmentMap[blogHandle] || 'general';

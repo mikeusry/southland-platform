@@ -1,0 +1,187 @@
+---
+/**
+ * ABTest Component
+ *
+ * A/B testing wrapper that randomly assigns visitors to variants
+ * and tracks conversion events.
+ *
+ * Usage:
+ * <ABTest testId="homepage-hero" variants={['control', 'variant-a']}>
+ *   <div slot="control">Control content</div>
+ *   <div slot="variant-a">Variant A content</div>
+ * </ABTest>
+ *
+ * Or with weights:
+ * <ABTest
+ *   testId="cta-test"
+ *   variants={[
+ *     { id: 'green', weight: 0.5 },
+ *     { id: 'orange', weight: 0.3 },
+ *     { id: 'blue', weight: 0.2 },
+ *   ]}
+ * >
+ *   <div slot="green">Green CTA</div>
+ *   <div slot="orange">Orange CTA</div>
+ *   <div slot="blue">Blue CTA</div>
+ * </ABTest>
+ */
+
+interface VariantConfig {
+  id: string;
+  weight: number;
+}
+
+interface Props {
+  /** Unique test identifier */
+  testId: string;
+  /** Variant IDs or configs with weights */
+  variants: string[] | VariantConfig[];
+  /** Force a specific variant (for preview/testing) */
+  forceVariant?: string;
+  /** Cookie duration in days */
+  cookieDays?: number;
+  /** Additional CSS classes */
+  class?: string;
+}
+
+const {
+  testId,
+  variants: rawVariants,
+  forceVariant,
+  cookieDays = 30,
+  class: className = '',
+} = Astro.props;
+
+// Normalize variants to config format
+const variants: VariantConfig[] = rawVariants.map((v) =>
+  typeof v === 'string' ? { id: v, weight: 1 } : v
+);
+
+// Calculate total weight
+const totalWeight = variants.reduce((sum, v) => sum + v.weight, 0);
+
+// Normalize weights
+const normalizedVariants = variants.map((v) => ({
+  ...v,
+  weight: v.weight / totalWeight,
+}));
+
+// Determine variant from cookie or random assignment
+let selectedVariant = forceVariant || null;
+const cookieName = `ab_${testId}`;
+
+if (!selectedVariant) {
+  const existingCookie = Astro.cookies.get(cookieName);
+  if (existingCookie) {
+    selectedVariant = existingCookie.value;
+  } else {
+    // Random weighted selection
+    const random = Math.random();
+    let cumulative = 0;
+    for (const variant of normalizedVariants) {
+      cumulative += variant.weight;
+      if (random <= cumulative) {
+        selectedVariant = variant.id;
+        break;
+      }
+    }
+    selectedVariant = selectedVariant || normalizedVariants[0].id;
+  }
+}
+
+// Set cookie for persistence (client-side)
+const shouldSetCookie = !Astro.cookies.get(cookieName) && !forceVariant;
+---
+
+<div
+  class:list={['ab-test', className]}
+  data-test-id={testId}
+  data-variant={selectedVariant}
+  data-set-cookie={shouldSetCookie ? 'true' : undefined}
+  data-cookie-name={cookieName}
+  data-cookie-days={cookieDays}
+>
+  {variants.map((variant) => (
+    <div
+      class:list={[
+        'ab-test__variant',
+        { 'ab-test__variant--active': variant.id === selectedVariant },
+        { 'ab-test__variant--hidden': variant.id !== selectedVariant },
+      ]}
+      data-variant-id={variant.id}
+    >
+      <slot name={variant.id} />
+    </div>
+  ))}
+</div>
+
+<style>
+  .ab-test__variant--hidden {
+    display: none !important;
+  }
+
+  .ab-test__variant--active {
+    display: contents;
+  }
+</style>
+
+<script>
+  // A/B Test client-side initialization
+  function initABTests() {
+    const tests = document.querySelectorAll('.ab-test');
+
+    tests.forEach((test) => {
+      const el = test as HTMLElement;
+      const testId = el.dataset.testId;
+      const variant = el.dataset.variant;
+      const shouldSetCookie = el.dataset.setCookie === 'true';
+      const cookieName = el.dataset.cookieName;
+      const cookieDays = parseInt(el.dataset.cookieDays || '30', 10);
+
+      // Set cookie if needed
+      if (shouldSetCookie && cookieName && variant) {
+        const expires = new Date(Date.now() + cookieDays * 864e5).toUTCString();
+        document.cookie = `${cookieName}=${variant}; expires=${expires}; path=/; SameSite=Lax`;
+      }
+
+      // Track test exposure
+      if (window.pdPixel && testId && variant) {
+        window.pdPixel.track('ab_test_exposure', {
+          test_id: testId,
+          variant_id: variant,
+          page_url: window.location.pathname,
+        });
+      }
+    });
+  }
+
+  // Track conversions
+  window.trackABConversion = function(testId: string, conversionType: string, value?: number) {
+    const test = document.querySelector(`[data-test-id="${testId}"]`);
+    if (!test) return;
+
+    const variant = (test as HTMLElement).dataset.variant;
+    if (window.pdPixel && variant) {
+      window.pdPixel.track('ab_test_conversion', {
+        test_id: testId,
+        variant_id: variant,
+        conversion_type: conversionType,
+        conversion_value: value,
+      });
+    }
+  };
+
+  // Declare global function
+  declare global {
+    interface Window {
+      trackABConversion: (testId: string, conversionType: string, value?: number) => void;
+    }
+  }
+
+  // Initialize
+  document.addEventListener('DOMContentLoaded', initABTests);
+  if (document.readyState !== 'loading') {
+    initABTests();
+  }
+  document.addEventListener('astro:page-load', initABTests);
+</script>
