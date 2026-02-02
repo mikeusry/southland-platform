@@ -229,3 +229,57 @@ export function initPersonaFromUrl(): boolean {
   }
   return false;
 }
+
+/**
+ * Journey stages for the customer journey
+ */
+export type JourneyStage =
+  | 'unaware'
+  | 'aware'
+  | 'receptive'
+  | 'zmot'
+  | 'objections'
+  | 'test_prep'
+  | 'challenge'
+  | 'success'
+  | 'commitment'
+  | 'evangelist';
+
+const STAGE_COOKIE_NAME = 'sl_stage';
+
+/**
+ * Get the current journey stage from cookie
+ */
+export function getJourneyStage(): JourneyStage {
+  const cookieVal = getCookie(STAGE_COOKIE_NAME);
+  if (cookieVal && isValidJourneyStage(cookieVal)) {
+    return cookieVal;
+  }
+  return 'unaware';
+}
+
+/**
+ * Set the journey stage
+ */
+export function setJourneyStage(stage: JourneyStage): void {
+  if (typeof window === 'undefined') return;
+  setCookie(STAGE_COOKIE_NAME, stage, COOKIE_DAYS);
+}
+
+/**
+ * Check if a string is a valid journey stage
+ */
+export function isValidJourneyStage(value: string): value is JourneyStage {
+  return [
+    'unaware',
+    'aware',
+    'receptive',
+    'zmot',
+    'objections',
+    'test_prep',
+    'challenge',
+    'success',
+    'commitment',
+    'evangelist',
+  ].includes(value);
+}
