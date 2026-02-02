@@ -76,7 +76,7 @@ export function Footer({
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
           {/* Centered Logo */}
           <div className="flex justify-center mb-12">
-            <a href="https://southlandorganics.com" className="inline-block">
+            <a href="/" className="inline-block">
               <img
                 src={logoUrl}
                 alt="Southland Organics"
@@ -125,14 +125,12 @@ export function Footer({
               <h3 className="font-semibold text-lg mb-4">Navigate</h3>
               <ul className="space-y-2">
                 <li><a href="https://www.southlandorganics.com/pages/why-southland" className="text-white/90 text-sm hover:text-white transition-colors">Why Choose Southland</a></li>
-                <li><a href="https://www.southlandorganics.com/pages/store-locator" className="text-white/90 text-sm hover:text-white transition-colors">Store Locator</a></li>
-                <li><a href="https://www.southlandorganics.com/pages/become-a-distributor" className="text-white/90 text-sm hover:text-white transition-colors">Become a Distributor</a></li>
-                <li><a href="https://www.southlandorganics.com/blogs/poultry-biosecurity" className="text-white/90 text-sm hover:text-white transition-colors">Poultry Biosecurity</a></li>
-                <li><a href="https://www.southlandorganics.com/blogs/news" className="text-white/90 text-sm hover:text-white transition-colors">Blog Posts</a></li>
-                <li><a href="https://www.southlandorganics.com/blogs/case-studies" className="text-white/90 text-sm hover:text-white transition-colors">Case Studies</a></li>
-                <li><a href="https://www.southlandorganics.com/search" className="text-white/90 text-sm hover:text-white transition-colors">Search</a></li>
+                <li><a href="/team/" className="text-white/90 text-sm hover:text-white transition-colors">Our Team</a></li>
+                <li><a href="/blog/" className="text-white/90 text-sm hover:text-white transition-colors">Blog Posts</a></li>
+                <li><a href="/podcast/" className="text-white/90 text-sm hover:text-white transition-colors">Podcast</a></li>
+                <li><a href="/search" className="text-white/90 text-sm hover:text-white transition-colors">Search</a></li>
                 <li><a href="https://www.southlandorganics.com/pages/contact" className="text-white/90 text-sm hover:text-white transition-colors">Contact</a></li>
-                <li><a href="https://www.southlandorganics.com/pages/southland-organics-rewards" className="text-white/90 text-sm hover:text-white transition-colors">Rewards Program</a></li>
+                <li><a href="https://www.southlandorganics.com/pages/store-locator" className="text-white/90 text-sm hover:text-white transition-colors">Store Locator</a></li>
               </ul>
             </div>
 
@@ -140,12 +138,12 @@ export function Footer({
             <div className="text-center sm:text-left">
               <h3 className="font-semibold text-lg mb-4">Product Specialties</h3>
               <ul className="space-y-2">
-                <li><a href="https://www.southlandorganics.com/" className="text-white/90 text-sm hover:text-white transition-colors">Home</a></li>
-                <li><a href="https://www.southlandorganics.com/collections/poultry" className="text-white/90 text-sm hover:text-white transition-colors">Poultry</a></li>
-                <li><a href="https://www.southlandorganics.com/collections/turf" className="text-white/90 text-sm hover:text-white transition-colors">Lawn & Garden</a></li>
+                <li><a href="/" className="text-white/90 text-sm hover:text-white transition-colors">Home</a></li>
+                <li><a href="/poultry/" className="text-white/90 text-sm hover:text-white transition-colors">Poultry</a></li>
+                <li><a href="/poultry/backyard/" className="text-white/90 text-sm hover:text-white transition-colors">Backyard Poultry</a></li>
+                <li><a href="/poultry/commercial/" className="text-white/90 text-sm hover:text-white transition-colors">Commercial Poultry</a></li>
+                <li><a href="/lawn/" className="text-white/90 text-sm hover:text-white transition-colors">Lawn & Garden</a></li>
                 <li><a href="https://www.southlandorganics.com/collections/waste" className="text-white/90 text-sm hover:text-white transition-colors">Septic & Waste</a></li>
-                <li><a href="https://www.southlandorganics.com/collections/pig-and-swine-supplements" className="text-white/90 text-sm hover:text-white transition-colors">Swine</a></li>
-                <li><a href="https://www.southlandorganics.com/pages/why-southland" className="text-white/90 text-sm hover:text-white transition-colors">About</a></li>
               </ul>
             </div>
 

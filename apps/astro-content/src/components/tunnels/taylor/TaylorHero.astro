@@ -1,0 +1,288 @@
+---
+/**
+ * TaylorHero Component
+ *
+ * Hero section personalized for Turf Pro Taylor (Lawn Care) persona.
+ * Messaging focused on soil health, sustainable turf management, and client results.
+ *
+ * Usage:
+ * <TaylorHero stage="aware" />
+ */
+
+import type { JourneyStage } from '../../../lib/visitor';
+
+interface Props {
+  /** Current journey stage for stage-specific messaging */
+  stage?: JourneyStage;
+  /** Override the default headline */
+  headline?: string;
+  /** Override the default subheadline */
+  subheadline?: string;
+  /** Additional CSS classes */
+  class?: string;
+}
+
+const {
+  stage = 'aware',
+  headline,
+  subheadline,
+  class: className = '',
+} = Astro.props;
+
+// Stage-specific content variations for lawn care professionals
+const stageContent = {
+  unaware: {
+    headline: 'Looking for Better Turf Results?',
+    subheadline: 'Discover how organic soil biology is transforming professional lawn care and turf management.',
+    cta: { text: 'Learn the Science', href: '/learn/soil-biology/' },
+    secondaryCta: { text: 'View Products', href: '/shop/lawn/' },
+  },
+  aware: {
+    headline: 'Healthier Soil. Greener Turf. Happier Clients.',
+    subheadline: 'Our organic soil amendments restore microbial balance for naturally resilient, beautiful lawns.',
+    cta: { text: 'Shop Lawn Products', href: '/shop/lawn/' },
+    secondaryCta: { text: 'Take the Soil Quiz', href: '/quiz/lawn/' },
+  },
+  receptive: {
+    headline: 'The Soil Biology Advantage',
+    subheadline: 'Learn how probiotics and humic acids work together to create self-sustaining turf systems.',
+    cta: { text: 'How It Works', href: '/learn/soil-biology-101/' },
+    secondaryCta: { text: 'Browse Products', href: '/shop/lawn/' },
+  },
+  zmot: {
+    headline: 'Compare Organic Soil Solutions',
+    subheadline: 'Find the right products for your turf type, climate, and client needs.',
+    cta: { text: 'Compare Products', href: '/collections/lawn-compare/' },
+    secondaryCta: { text: 'Request Sample', href: '/contact/sample/' },
+  },
+  objections: {
+    headline: 'Questions About Organic Lawn Care?',
+    subheadline: 'See how professionals are achieving better results while reducing chemical inputs.',
+    cta: { text: 'Read FAQs', href: '/faq/lawn/' },
+    secondaryCta: { text: 'See Results', href: '/case-studies/lawn/' },
+  },
+  test_prep: {
+    headline: 'Ready to Try Organic?',
+    subheadline: 'Start with a small area or single client. Our sample program makes it easy to test.',
+    cta: { text: 'Get Samples', href: '/contact/sample/' },
+    secondaryCta: { text: 'View Starter Kits', href: '/shop/lawn/kits/' },
+  },
+  challenge: {
+    headline: 'Welcome to the Pro Program',
+    subheadline: 'Access application guides, mixing ratios, and seasonal protocols for best results.',
+    cta: { text: 'Application Guides', href: '/guides/lawn/' },
+    secondaryCta: { text: 'Contact Support', href: '/contact/' },
+  },
+  success: {
+    headline: 'Great Results This Season!',
+    subheadline: 'Ready to stock up? Lock in pricing and never run low on product.',
+    cta: { text: 'Reorder', href: '/account/orders/' },
+    secondaryCta: { text: 'Seasonal Bundles', href: '/shop/lawn/bundles/' },
+  },
+  commitment: {
+    headline: 'Thanks for Growing With Us',
+    subheadline: 'Access exclusive pro pricing, early product access, and referral rewards.',
+    cta: { text: 'Pro Dashboard', href: '/account/pro/' },
+    secondaryCta: { text: 'Refer a Pro', href: '/referral/lawn/' },
+  },
+  evangelist: {
+    headline: 'Help Other Pros Go Organic',
+    subheadline: 'Share your success and earn rewards when fellow professionals sign up.',
+    cta: { text: 'Share Your Results', href: '/case-studies/submit/' },
+    secondaryCta: { text: 'Referral Program', href: '/referral/lawn/' },
+  },
+};
+
+const content = stageContent[stage] || stageContent.aware;
+const displayHeadline = headline || content.headline;
+const displaySubheadline = subheadline || content.subheadline;
+---
+
+<section class:list={['taylor-hero', className]}>
+  <div class="taylor-hero__container">
+    <div class="taylor-hero__content">
+      <span class="taylor-hero__badge">
+        For Lawn Care Professionals
+      </span>
+      <h1 class="taylor-hero__headline">{displayHeadline}</h1>
+      <p class="taylor-hero__subheadline">{displaySubheadline}</p>
+      <div class="taylor-hero__ctas">
+        <a href={content.cta.href} class="taylor-hero__cta taylor-hero__cta--primary">
+          {content.cta.text}
+        </a>
+        <a href={content.secondaryCta.href} class="taylor-hero__cta taylor-hero__cta--secondary">
+          {content.secondaryCta.text}
+        </a>
+      </div>
+      <div class="taylor-hero__trust">
+        <span class="taylor-hero__trust-item">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          Trusted by 1,000+ Pros
+        </span>
+        <span class="taylor-hero__trust-item">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          OMRI Listed Organic
+        </span>
+        <span class="taylor-hero__trust-item">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          Made in USA
+        </span>
+      </div>
+    </div>
+    <div class="taylor-hero__visual">
+      <div class="taylor-hero__image-placeholder">
+        <span>Lush Green Lawn Image</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .taylor-hero {
+    background: linear-gradient(135deg, #166534 0%, #14532d 50%, #052e16 100%);
+    padding: 60px 20px;
+  }
+
+  .taylor-hero__container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 40px;
+    align-items: center;
+  }
+
+  @media (min-width: 768px) {
+    .taylor-hero {
+      padding: 80px 40px;
+    }
+
+    .taylor-hero__container {
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+    }
+  }
+
+  .taylor-hero__badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.15);
+    color: #86efac;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    margin-bottom: 16px;
+  }
+
+  .taylor-hero__headline {
+    font-family: var(--font-heading, 'Eveleth Dot', serif);
+    font-size: clamp(32px, 6vw, 52px);
+    color: white;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+
+  .taylor-hero__subheadline {
+    font-size: clamp(16px, 2vw, 20px);
+    color: #bbf7d0;
+    line-height: 1.6;
+    margin-bottom: 28px;
+    max-width: 500px;
+  }
+
+  .taylor-hero__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .taylor-hero__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .taylor-hero__cta--primary {
+    background: white;
+    color: #166534;
+  }
+
+  .taylor-hero__cta--primary:hover {
+    background: #f0fdf4;
+    transform: translateY(-2px);
+  }
+
+  .taylor-hero__cta--secondary {
+    background: transparent;
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+  }
+
+  .taylor-hero__cta--secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: white;
+  }
+
+  .taylor-hero__trust {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .taylor-hero__trust-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #bbf7d0;
+  }
+
+  .taylor-hero__trust-item svg {
+    width: 16px;
+    height: 16px;
+    color: #4ade80;
+  }
+
+  .taylor-hero__visual {
+    display: flex;
+    justify-content: center;
+  }
+
+  .taylor-hero__image-placeholder {
+    width: 100%;
+    max-width: 500px;
+    aspect-ratio: 4/3;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 18px;
+  }
+</style>
+
+<script>
+  // Track hero view and CTA clicks
+  document.querySelectorAll('.taylor-hero__cta').forEach((cta) => {
+    cta.addEventListener('click', () => {
+      if (window.pdPixel) {
+        window.pdPixel.track('hero_cta_clicked', {
+          tunnel: 'taylor',
+          cta_text: cta.textContent?.trim(),
+          cta_href: (cta as HTMLAnchorElement).href,
+        });
+      }
+    });
+  });
+</script>

@@ -1,0 +1,288 @@
+---
+/**
+ * BettyHero Component
+ *
+ * Hero section personalized for Backyard Betty persona.
+ * Messaging focused on happy, healthy backyard flocks.
+ *
+ * Usage:
+ * <BettyHero stage="aware" />
+ */
+
+import type { JourneyStage } from '../../../lib/visitor';
+
+interface Props {
+  /** Current journey stage for stage-specific messaging */
+  stage?: JourneyStage;
+  /** Override the default headline */
+  headline?: string;
+  /** Override the default subheadline */
+  subheadline?: string;
+  /** Additional CSS classes */
+  class?: string;
+}
+
+const {
+  stage = 'aware',
+  headline,
+  subheadline,
+  class: className = '',
+} = Astro.props;
+
+// Stage-specific content variations
+const stageContent = {
+  unaware: {
+    headline: 'Raising Backyard Chickens?',
+    subheadline: 'Discover how to keep your flock healthy and happy with organic, natural solutions.',
+    cta: { text: 'Learn the Basics', href: '/learn/backyard-chickens/' },
+    secondaryCta: { text: 'Shop Starter Bundles', href: '/shop/poultry/backyard/bundles/' },
+  },
+  aware: {
+    headline: 'Happy, Healthy Hens Start Here',
+    subheadline: 'Whether you have 5 hens or 50, our organic probiotics make it easy to raise thriving birds naturally.',
+    cta: { text: 'Shop Backyard Products', href: '/shop/poultry/backyard/' },
+    secondaryCta: { text: 'Take the Quiz', href: '/quiz/backyard/' },
+  },
+  receptive: {
+    headline: 'Natural Solutions for Common Flock Problems',
+    subheadline: 'From gut health to egg production, learn how probiotics can help your chickens thrive.',
+    cta: { text: 'See How It Works', href: '/learn/probiotics-101/' },
+    secondaryCta: { text: 'Browse Products', href: '/shop/poultry/backyard/' },
+  },
+  zmot: {
+    headline: 'Find the Right Product for Your Flock',
+    subheadline: 'Compare our backyard solutions and find the perfect fit for your chickens.',
+    cta: { text: 'Compare Products', href: '/collections/backyard-compare/' },
+    secondaryCta: { text: 'Start with Hen Helper', href: '/products/hen-helper/' },
+  },
+  objections: {
+    headline: 'Questions About Our Products?',
+    subheadline: 'We\'re here to help. See what other backyard chicken keepers are saying.',
+    cta: { text: 'Read FAQs', href: '/faq/backyard/' },
+    secondaryCta: { text: 'See Reviews', href: '/reviews/backyard/' },
+  },
+  test_prep: {
+    headline: 'Ready to Try? Start Small.',
+    subheadline: 'Our starter bundles are perfect for first-timers. 100% satisfaction guaranteed.',
+    cta: { text: 'Shop Starter Bundles', href: '/shop/poultry/backyard/bundles/' },
+    secondaryCta: { text: 'View Guarantee', href: '/guarantee/' },
+  },
+  challenge: {
+    headline: 'Welcome to the Flock!',
+    subheadline: 'Get the most out of your products with our beginner guides and support.',
+    cta: { text: 'Usage Guides', href: '/guides/getting-started/' },
+    secondaryCta: { text: 'Contact Support', href: '/contact/' },
+  },
+  success: {
+    headline: 'Glad Your Flock is Thriving!',
+    subheadline: 'Ready for more? Stock up and save with our bundles and subscriptions.',
+    cta: { text: 'Reorder', href: '/account/orders/' },
+    secondaryCta: { text: 'Try Something New', href: '/shop/poultry/backyard/' },
+  },
+  commitment: {
+    headline: 'Thanks for Being Part of the Family!',
+    subheadline: 'Save even more with subscriptions and exclusive member deals.',
+    cta: { text: 'Subscribe & Save', href: '/subscriptions/' },
+    secondaryCta: { text: 'Refer a Friend', href: '/referral/' },
+  },
+  evangelist: {
+    headline: 'Share the Love with Fellow Chicken Keepers',
+    subheadline: 'Earn rewards when your friends discover Southland Organics.',
+    cta: { text: 'Get Your Referral Link', href: '/referral/' },
+    secondaryCta: { text: 'Leave a Review', href: '/reviews/submit/' },
+  },
+};
+
+const content = stageContent[stage] || stageContent.aware;
+const displayHeadline = headline || content.headline;
+const displaySubheadline = subheadline || content.subheadline;
+---
+
+<section class:list={['betty-hero', className]}>
+  <div class="betty-hero__container">
+    <div class="betty-hero__content">
+      <span class="betty-hero__badge">
+        For Backyard Flocks
+      </span>
+      <h1 class="betty-hero__headline">{displayHeadline}</h1>
+      <p class="betty-hero__subheadline">{displaySubheadline}</p>
+      <div class="betty-hero__ctas">
+        <a href={content.cta.href} class="betty-hero__cta betty-hero__cta--primary">
+          {content.cta.text}
+        </a>
+        <a href={content.secondaryCta.href} class="betty-hero__cta betty-hero__cta--secondary">
+          {content.secondaryCta.text}
+        </a>
+      </div>
+      <div class="betty-hero__trust">
+        <span class="betty-hero__trust-item">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          4.8 Star Rating
+        </span>
+        <span class="betty-hero__trust-item">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          OMRI Listed Organic
+        </span>
+        <span class="betty-hero__trust-item">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          Family Owned
+        </span>
+      </div>
+    </div>
+    <div class="betty-hero__visual">
+      <div class="betty-hero__image-placeholder">
+        <span>Happy Backyard Flock Image</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .betty-hero {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 50%, #fcd34d 100%);
+    padding: 60px 20px;
+  }
+
+  .betty-hero__container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 40px;
+    align-items: center;
+  }
+
+  @media (min-width: 768px) {
+    .betty-hero {
+      padding: 80px 40px;
+    }
+
+    .betty-hero__container {
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+    }
+  }
+
+  .betty-hero__badge {
+    display: inline-block;
+    background: #92400e;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    margin-bottom: 16px;
+  }
+
+  .betty-hero__headline {
+    font-family: var(--font-heading, 'Eveleth Dot', serif);
+    font-size: clamp(32px, 6vw, 52px);
+    color: var(--color-title, #2c5234);
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+
+  .betty-hero__subheadline {
+    font-size: clamp(16px, 2vw, 20px);
+    color: #78350f;
+    line-height: 1.6;
+    margin-bottom: 28px;
+    max-width: 500px;
+  }
+
+  .betty-hero__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .betty-hero__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .betty-hero__cta--primary {
+    background: var(--color-accent, #44883e);
+    color: white;
+  }
+
+  .betty-hero__cta--primary:hover {
+    background: var(--color-accent-hover, #2c5234);
+    transform: translateY(-2px);
+  }
+
+  .betty-hero__cta--secondary {
+    background: white;
+    color: var(--color-title, #2c5234);
+    border: 2px solid var(--color-title, #2c5234);
+  }
+
+  .betty-hero__cta--secondary:hover {
+    background: var(--color-title, #2c5234);
+    color: white;
+  }
+
+  .betty-hero__trust {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .betty-hero__trust-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #78350f;
+  }
+
+  .betty-hero__trust-item svg {
+    width: 16px;
+    height: 16px;
+    color: #d97706;
+  }
+
+  .betty-hero__visual {
+    display: flex;
+    justify-content: center;
+  }
+
+  .betty-hero__image-placeholder {
+    width: 100%;
+    max-width: 500px;
+    aspect-ratio: 4/3;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #92400e;
+    font-size: 18px;
+  }
+</style>
+
+<script>
+  // Track hero view and CTA clicks
+  document.querySelectorAll('.betty-hero__cta').forEach((cta) => {
+    cta.addEventListener('click', () => {
+      if (window.pdPixel) {
+        window.pdPixel.track('hero_cta_clicked', {
+          tunnel: 'betty',
+          cta_text: cta.textContent?.trim(),
+          cta_href: (cta as HTMLAnchorElement).href,
+        });
+      }
+    });
+  });
+</script>

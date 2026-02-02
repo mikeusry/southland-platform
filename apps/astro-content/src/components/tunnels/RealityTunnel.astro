@@ -1,0 +1,158 @@
+---
+/**
+ * RealityTunnel Container Component
+ *
+ * Reads visitor persona/stage and renders the appropriate tunnel content.
+ * Uses explicit choice (from Decision Engine) first, then inferred persona.
+ *
+ * Usage:
+ * <RealityTunnel>
+ *   <slot name="backyard">Backyard Betty content</slot>
+ *   <slot name="commercial">Broiler Bill content</slot>
+ *   <slot name="lawn">Turf Pro Taylor content</slot>
+ *   <slot name="default">Default content for unknown visitors</slot>
+ * </RealityTunnel>
+ *
+ * Or use as a simple wrapper:
+ * <RealityTunnel persona="backyard" stage="aware" />
+ */
+
+import { getPersonaId } from '../../lib/persona';
+
+type PersonaId = 'backyard' | 'commercial' | 'lawn' | 'general' | null;
+type JourneyStage = 'unaware' | 'aware' | 'receptive' | 'zmot' | 'objections' | 'test_prep' | 'challenge' | 'success' | 'commitment' | 'evangelist';
+
+interface Props {
+  /** Override persona (useful for static rendering) */
+  persona?: PersonaId;
+  /** Override stage (useful for static rendering) */
+  stage?: JourneyStage;
+  /** Enable A/B test mode */
+  enableABTest?: boolean;
+  /** A/B test variant override */
+  variant?: 'tunnel' | 'generic';
+  /** Additional CSS classes */
+  class?: string;
+}
+
+const {
+  persona: propPersona,
+  stage: propStage = 'aware',
+  enableABTest = false,
+  variant: propVariant,
+  class: className = '',
+} = Astro.props;
+
+// Get persona from props or cookie (server-side)
+let currentPersona: PersonaId = propPersona || null;
+let currentStage: JourneyStage = propStage;
+
+// Try to read persona from cookie if not provided
+if (!currentPersona) {
+  const personaCookie = Astro.cookies.get('sl_persona');
+  if (personaCookie) {
+    const value = personaCookie.value;
+    if (['backyard', 'commercial', 'lawn', 'general'].includes(value)) {
+      currentPersona = value as PersonaId;
+    }
+  }
+}
+
+// Determine A/B test variant
+let tunnelVariant: 'tunnel' | 'generic' = 'tunnel';
+if (enableABTest) {
+  if (propVariant) {
+    tunnelVariant = propVariant;
+  } else {
+    // Random assignment (50/50)
+    // In production, this should use a consistent hash based on visitor ID
+    const variantCookie = Astro.cookies.get('sl_tunnel_variant');
+    if (variantCookie) {
+      tunnelVariant = variantCookie.value as 'tunnel' | 'generic';
+    } else {
+      tunnelVariant = Math.random() > 0.5 ? 'tunnel' : 'generic';
+    }
+  }
+}
+
+// Determine which slot to render
+const shouldShowTunnel = tunnelVariant === 'tunnel' && currentPersona && currentPersona !== 'general';
+---
+
+<div
+  class:list={['reality-tunnel', className]}
+  data-persona={currentPersona || 'unknown'}
+  data-stage={currentStage}
+  data-variant={tunnelVariant}
+>
+  {shouldShowTunnel ? (
+    currentPersona === 'backyard' ? (
+      <slot name="backyard">
+        <!-- Fallback if no backyard slot provided -->
+        <slot name="default" />
+      </slot>
+    ) : currentPersona === 'commercial' ? (
+      <slot name="commercial">
+        <slot name="default" />
+      </slot>
+    ) : currentPersona === 'lawn' ? (
+      <slot name="lawn">
+        <slot name="default" />
+      </slot>
+    ) : (
+      <slot name="default" />
+    )
+  ) : (
+    <slot name="default">
+      <slot />
+    </slot>
+  )}
+</div>
+
+<script>
+  import { getPersonaId } from '../../lib/persona';
+
+  // Client-side persona detection and tunnel update
+  function initRealityTunnel() {
+    const tunnels = document.querySelectorAll('.reality-tunnel');
+    const personaId = getPersonaId();
+
+    tunnels.forEach((tunnel) => {
+      const el = tunnel as HTMLElement;
+
+      // Update data attributes for CSS/JS targeting
+      if (personaId) {
+        el.dataset.persona = personaId;
+      }
+
+      // Track tunnel view
+      if (window.pdPixel) {
+        const variant = el.dataset.variant || 'tunnel';
+        window.pdPixel.track('tunnel_viewed', {
+          persona: personaId || 'unknown',
+          stage: el.dataset.stage,
+          variant,
+          is_personalized: variant === 'tunnel' && personaId && personaId !== 'general',
+        });
+      }
+    });
+  }
+
+  // Run on load
+  document.addEventListener('DOMContentLoaded', initRealityTunnel);
+  if (document.readyState !== 'loading') {
+    initRealityTunnel();
+  }
+
+  // Re-run on Astro View Transitions
+  document.addEventListener('astro:page-load', initRealityTunnel);
+
+  // Re-run on persona change
+  window.addEventListener('persona-changed', initRealityTunnel);
+</script>
+
+<style>
+  .reality-tunnel {
+    /* Container for tunnel content - no visual styling */
+  }
+</style>

@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "synced": "2026-02-01T16:41:56.023Z",
+    "synced": "2026-02-01T23:14:08.485Z",
     "source": "Shopify Storefront API"
   },
   "header": {
@@ -9,35 +9,23 @@
     "navigation": [
       {
         "label": "Home",
-        "href": "https://www.southlandorganics.com/"
+        "href": "/"
       },
       {
         "label": "Poultry",
-        "href": "https://www.southlandorganics.com/collections/poultry",
+        "href": "/poultry/",
         "children": [
           {
-            "label": "Products",
-            "href": "https://www.southlandorganics.com/collections/all?filter.p.product_type=Poultry"
+            "label": "Backyard Poultry",
+            "href": "/poultry/backyard/"
           },
           {
-            "label": "Poultry Broilers",
-            "href": "https://www.southlandorganics.com/collections/poultry-broilers"
+            "label": "Commercial Poultry",
+            "href": "/poultry/commercial/"
           },
           {
-            "label": "Poultry Layers and Breeders",
-            "href": "https://www.southlandorganics.com/collections/poultry-breeders"
-          },
-          {
-            "label": "Turkey",
-            "href": "https://www.southlandorganics.com/collections/turkey"
-          },
-          {
-            "label": "Game Birds",
-            "href": "https://www.southlandorganics.com/collections/game-birds"
-          },
-          {
-            "label": "Backyard Birds",
-            "href": "https://www.southlandorganics.com/collections/backyard-birds"
+            "label": "Shop Products",
+            "href": "https://www.southlandorganics.com/collections/poultry"
           },
           {
             "label": "Poultry Biosecurity",
@@ -47,39 +35,23 @@
       },
       {
         "label": "Lawn & Garden",
-        "href": "https://www.southlandorganics.com/collections/turf",
+        "href": "/lawn/",
         "children": [
           {
-            "label": "Products",
-            "href": "https://www.southlandorganics.com/collections/all?filter.p.product_type=Lawn+%26+Garden"
-          },
-          {
             "label": "Lawn Care",
-            "href": "https://www.southlandorganics.com/collections/homeowners"
+            "href": "/lawn/"
           },
           {
-            "label": "Lawn Care Programs",
-            "href": "https://www.southlandorganics.com/products/natural-lawn-care-products"
-          },
-          {
-            "label": "Garden",
-            "href": "https://www.southlandorganics.com/collections/crops"
-          },
-          {
-            "label": "Hydroseeders",
-            "href": "https://www.southlandorganics.com/pages/hydroseeding"
-          },
-          {
-            "label": "Landscapers",
-            "href": "https://www.southlandorganics.com/collections/landscapers"
+            "label": "Shop Products",
+            "href": "https://www.southlandorganics.com/collections/turf"
           },
           {
             "label": "Golf Courses",
             "href": "https://www.southlandorganics.com/collections/golf-courses"
           },
           {
-            "label": "Humate Hub",
-            "href": "https://www.southlandorganics.com/blogs/humate-hub"
+            "label": "Landscapers",
+            "href": "https://www.southlandorganics.com/collections/landscapers"
           }
         ]
       },
@@ -111,35 +83,27 @@
       },
       {
         "label": "About",
-        "href": "https://www.southlandorganics.com/pages/contact",
+        "href": "/team/",
         "children": [
+          {
+            "label": "Our Team",
+            "href": "/team/"
+          },
+          {
+            "label": "Podcast",
+            "href": "/podcast/"
+          },
+          {
+            "label": "Blog",
+            "href": "/blog/"
+          },
           {
             "label": "Contact",
             "href": "https://www.southlandorganics.com/pages/contact"
           },
           {
-            "label": "Blog",
-            "href": "https://www.southlandorganics.com/blogs/news"
-          },
-          {
-            "label": "Humate Hub",
-            "href": "https://www.southlandorganics.com/blogs/humate-hub"
-          },
-          {
-            "label": "Case Studies",
-            "href": "https://www.southlandorganics.com/blogs/case-studies"
-          },
-          {
             "label": "Why Southland?",
             "href": "https://www.southlandorganics.com/pages/why-southland"
-          },
-          {
-            "label": "Loyalty Program",
-            "href": "https://www.southlandorganics.com/pages/southland-organics-rewards"
-          },
-          {
-            "label": "FAQs",
-            "href": "https://www.southlandorganics.com/pages/faqs"
           }
         ]
       }

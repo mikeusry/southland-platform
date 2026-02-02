@@ -1,0 +1,314 @@
+---
+/**
+ * BettyProducts Component
+ *
+ * Featured products for Backyard Betty persona.
+ * Focuses on starter bundles, smaller sizes, and beginner-friendly products.
+ *
+ * Usage:
+ * <BettyProducts />
+ * <BettyProducts showBundles />
+ */
+
+interface Props {
+  /** Heading text */
+  heading?: string;
+  /** Show bundles first */
+  showBundles?: boolean;
+  /** Additional CSS classes */
+  class?: string;
+}
+
+const {
+  heading = 'Perfect for Your Backyard Flock',
+  showBundles = true,
+  class: className = '',
+} = Astro.props;
+
+// Betty-recommended products (smaller sizes, bundles, beginner-friendly)
+const products = [
+  {
+    id: 'starter-bundle',
+    name: 'Backyard Starter Bundle',
+    description: 'Everything you need to get started with a healthy flock. Includes Hen Helper, Big Ole Bird, and a getting-started guide.',
+    price: '$59.99',
+    originalPrice: '$74.99',
+    savings: 'Save 20%',
+    image: '/images/products/starter-bundle.jpg',
+    href: '/products/backyard-starter-bundle/',
+    badge: 'Best for Beginners',
+    isBundle: true,
+  },
+  {
+    id: 'hen-helper-16oz',
+    name: 'Hen Helper (16 oz)',
+    description: 'Our #1 bestseller for backyard flocks. Supports gut health, feather quality, and egg production naturally.',
+    price: '$24.99',
+    image: '/images/products/hen-helper-16oz.jpg',
+    href: '/products/hen-helper/',
+    badge: 'Bestseller',
+    isBundle: false,
+  },
+  {
+    id: 'big-ole-bird-16oz',
+    name: 'Big Ole Bird (16 oz)',
+    description: 'Probiotic supplement for overall health and vitality. Perfect for maintaining a thriving backyard flock.',
+    price: '$22.99',
+    image: '/images/products/big-ole-bird-16oz.jpg',
+    href: '/products/big-ole-bird/',
+    badge: null,
+    isBundle: false,
+  },
+  {
+    id: 'coop-care-kit',
+    name: 'Coop Care Kit',
+    description: 'Keep your coop clean and fresh with our organic coop treatment bundle. Reduces odors and promotes a healthy environment.',
+    price: '$34.99',
+    image: '/images/products/coop-care-kit.jpg',
+    href: '/products/coop-care-kit/',
+    badge: 'Popular',
+    isBundle: true,
+  },
+];
+
+// Sort bundles first if enabled
+const sortedProducts = showBundles
+  ? [...products].sort((a, b) => (b.isBundle ? 1 : 0) - (a.isBundle ? 1 : 0))
+  : products;
+---
+
+<section class:list={['betty-products', className]}>
+  <div class="betty-products__container">
+    <div class="betty-products__header">
+      <h2 class="betty-products__heading">{heading}</h2>
+      <p class="betty-products__subheading">
+        Trusted by thousands of backyard chicken keepers. OMRI Listed organic.
+      </p>
+    </div>
+
+    <div class="betty-products__grid">
+      {sortedProducts.map((product) => (
+        <a href={product.href} class="product-card" data-product-id={product.id}>
+          <div class="product-card__image">
+            {product.badge && (
+              <span class="product-card__badge">{product.badge}</span>
+            )}
+            <div class="product-card__image-placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+            </div>
+          </div>
+          <div class="product-card__content">
+            <h3 class="product-card__name">{product.name}</h3>
+            <p class="product-card__description">{product.description}</p>
+            <div class="product-card__pricing">
+              <span class="product-card__price">{product.price}</span>
+              {product.originalPrice && (
+                <span class="product-card__original-price">{product.originalPrice}</span>
+              )}
+              {product.savings && (
+                <span class="product-card__savings">{product.savings}</span>
+              )}
+            </div>
+            <span class="product-card__cta">
+              View Product →
+            </span>
+          </div>
+        </a>
+      ))}
+    </div>
+
+    <div class="betty-products__footer">
+      <a href="/shop/poultry/backyard/" class="betty-products__view-all">
+        View All Backyard Products
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .betty-products {
+    background: white;
+    padding: 60px 20px;
+  }
+
+  .betty-products__container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .betty-products__header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .betty-products__heading {
+    font-family: var(--font-heading, 'Eveleth Dot', serif);
+    font-size: clamp(24px, 4vw, 36px);
+    color: var(--color-title, #2c5234);
+    margin-bottom: 12px;
+  }
+
+  .betty-products__subheading {
+    color: #6b7280;
+    font-size: 16px;
+  }
+
+  .betty-products__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+
+  .product-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
+  .product-card:hover {
+    border-color: var(--color-accent, #44883e);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    transform: translateY(-4px);
+  }
+
+  .product-card__image {
+    position: relative;
+    aspect-ratio: 1;
+    background: #fef3c7;
+  }
+
+  .product-card__image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #d97706;
+  }
+
+  .product-card__image-placeholder svg {
+    width: 64px;
+    height: 64px;
+    opacity: 0.5;
+  }
+
+  .product-card__badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: var(--color-accent, #44883e);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+
+  .product-card__content {
+    padding: 20px;
+  }
+
+  .product-card__name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 8px;
+  }
+
+  .product-card__description {
+    font-size: 14px;
+    color: #6b7280;
+    line-height: 1.5;
+    margin-bottom: 16px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .product-card__pricing {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .product-card__price {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-title, #2c5234);
+  }
+
+  .product-card__original-price {
+    font-size: 14px;
+    color: #9ca3af;
+    text-decoration: line-through;
+  }
+
+  .product-card__savings {
+    font-size: 12px;
+    font-weight: 600;
+    color: #059669;
+    background: #d1fae5;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .product-card__cta {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-accent, #44883e);
+  }
+
+  .product-card:hover .product-card__cta {
+    text-decoration: underline;
+  }
+
+  .betty-products__footer {
+    text-align: center;
+  }
+
+  .betty-products__view-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--color-accent, #44883e);
+    color: white;
+    padding: 14px 32px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .betty-products__view-all:hover {
+    background: var(--color-accent-hover, #2c5234);
+    transform: translateY(-2px);
+  }
+</style>
+
+<script>
+  // Track product card clicks
+  document.querySelectorAll('.product-card').forEach((card) => {
+    card.addEventListener('click', () => {
+      const productId = card.getAttribute('data-product-id');
+      if (window.pdPixel && productId) {
+        window.pdPixel.track('product_clicked', {
+          tunnel: 'betty',
+          product_id: productId,
+          source: 'betty_products_section',
+        });
+      }
+    });
+  });
+</script>

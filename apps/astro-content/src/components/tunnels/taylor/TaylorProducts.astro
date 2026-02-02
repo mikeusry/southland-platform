@@ -1,0 +1,363 @@
+---
+/**
+ * TaylorProducts Component
+ *
+ * Featured products for Turf Pro Taylor (Lawn Care) persona.
+ * Focuses on soil amendments, professional sizes, and seasonal programs.
+ *
+ * Usage:
+ * <TaylorProducts />
+ */
+
+interface Props {
+  /** Heading text */
+  heading?: string;
+  /** Additional CSS classes */
+  class?: string;
+}
+
+const {
+  heading = 'Professional Soil & Turf Solutions',
+  class: className = '',
+} = Astro.props;
+
+// Taylor-recommended products (professional focus, soil health)
+const products = [
+  {
+    id: 'genesis-soil-gallon',
+    name: 'Genesis Soil Conditioner (1 Gallon)',
+    description: 'Our flagship soil biology product. Restores beneficial microbes, breaks down thatch, and improves nutrient uptake.',
+    price: '$79.99',
+    coverage: 'Covers 1 acre',
+    image: '/images/products/genesis-gallon.jpg',
+    href: '/products/genesis/',
+    badge: 'Pro Favorite',
+    benefits: ['Improves soil structure', 'Reduces compaction', 'Enhances root growth'],
+  },
+  {
+    id: 'humic-acid-2.5gal',
+    name: 'Liquid Humic Acid (2.5 Gallon)',
+    description: 'Concentrated humic acids to boost nutrient availability and improve water retention in all soil types.',
+    price: '$129.99',
+    coverage: 'Covers 2.5 acres',
+    image: '/images/products/humic-acid-2.5gal.jpg',
+    href: '/products/humic-acid/',
+    badge: 'Best Value',
+    benefits: ['Increases CEC', 'Chelates nutrients', 'Improves water efficiency'],
+  },
+  {
+    id: 'lawn-pro-kit',
+    name: 'Lawn Pro Starter Kit',
+    description: 'Everything you need to trial our organic program: Genesis, Humic Acid, application guide, and pH test strips.',
+    price: '$149.99',
+    coverage: 'Trial bundle',
+    image: '/images/products/lawn-pro-kit.jpg',
+    href: '/products/lawn-pro-kit/',
+    badge: 'Starter Bundle',
+    benefits: ['Complete system', 'Protocol included', 'Support access'],
+  },
+  {
+    id: 'seasonal-program',
+    name: 'Seasonal Application Program',
+    description: 'Pre-packaged quarterly shipments tailored to your region and turf type. Set it and forget it.',
+    price: 'From $299/qtr',
+    coverage: 'Auto-ship',
+    image: '/images/products/seasonal-program.jpg',
+    href: '/products/seasonal-program/',
+    badge: 'Subscribe & Save',
+    benefits: ['Regional protocols', 'Auto-delivery', '15% savings'],
+  },
+];
+---
+
+<section class:list={['taylor-products', className]}>
+  <div class="taylor-products__container">
+    <div class="taylor-products__header">
+      <h2 class="taylor-products__heading">{heading}</h2>
+      <p class="taylor-products__subheading">
+        OMRI Listed organic products trusted by lawn care professionals nationwide.
+      </p>
+    </div>
+
+    <div class="taylor-products__grid">
+      {products.map((product) => (
+        <a href={product.href} class="product-card" data-product-id={product.id}>
+          <div class="product-card__image">
+            {product.badge && (
+              <span class="product-card__badge">{product.badge}</span>
+            )}
+            <div class="product-card__image-placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+            </div>
+          </div>
+          <div class="product-card__content">
+            <h3 class="product-card__name">{product.name}</h3>
+            <p class="product-card__description">{product.description}</p>
+            <ul class="product-card__benefits">
+              {product.benefits.map((benefit) => (
+                <li class="product-card__benefit">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-.997-6l7.07-7.071-1.414-1.414-5.656 5.657-2.829-2.829-1.414 1.414L11.003 16z"/>
+                  </svg>
+                  {benefit}
+                </li>
+              ))}
+            </ul>
+            <div class="product-card__pricing">
+              <span class="product-card__price">{product.price}</span>
+              <span class="product-card__coverage">{product.coverage}</span>
+            </div>
+            <span class="product-card__cta">
+              View Product →
+            </span>
+          </div>
+        </a>
+      ))}
+    </div>
+
+    <div class="taylor-products__footer">
+      <div class="taylor-products__ctas">
+        <a href="/shop/lawn/" class="taylor-products__btn taylor-products__btn--primary">
+          View All Lawn Products
+        </a>
+        <a href="/contact/sample/" class="taylor-products__btn taylor-products__btn--secondary">
+          Request Free Samples
+        </a>
+      </div>
+      <p class="taylor-products__note">
+        Pro pricing available for licensed lawn care professionals. Contact us for volume discounts.
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .taylor-products {
+    background: white;
+    padding: 60px 20px;
+  }
+
+  .taylor-products__container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .taylor-products__header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .taylor-products__heading {
+    font-family: var(--font-heading, 'Eveleth Dot', serif);
+    font-size: clamp(24px, 4vw, 36px);
+    color: var(--color-title, #2c5234);
+    margin-bottom: 12px;
+  }
+
+  .taylor-products__subheading {
+    color: #6b7280;
+    font-size: 16px;
+  }
+
+  .taylor-products__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+
+  .product-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    text-decoration: none;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .product-card:hover {
+    border-color: #166534;
+    box-shadow: 0 8px 24px rgba(22, 101, 52, 0.15);
+    transform: translateY(-4px);
+  }
+
+  .product-card__image {
+    position: relative;
+    aspect-ratio: 16/10;
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  }
+
+  .product-card__image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #166534;
+  }
+
+  .product-card__image-placeholder svg {
+    width: 48px;
+    height: 48px;
+    opacity: 0.4;
+  }
+
+  .product-card__badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: #166534;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+
+  .product-card__content {
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .product-card__name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 8px;
+  }
+
+  .product-card__description {
+    font-size: 14px;
+    color: #6b7280;
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+
+  .product-card__benefits {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px 0;
+    flex: 1;
+  }
+
+  .product-card__benefit {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #374151;
+    margin-bottom: 6px;
+  }
+
+  .product-card__benefit svg {
+    width: 16px;
+    height: 16px;
+    color: #16a34a;
+    flex-shrink: 0;
+  }
+
+  .product-card__pricing {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .product-card__price {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--color-title, #2c5234);
+  }
+
+  .product-card__coverage {
+    font-size: 13px;
+    color: #166534;
+    background: #dcfce7;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .product-card__cta {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #166534;
+  }
+
+  .product-card:hover .product-card__cta {
+    text-decoration: underline;
+  }
+
+  .taylor-products__footer {
+    text-align: center;
+  }
+
+  .taylor-products__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .taylor-products__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 32px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .taylor-products__btn--primary {
+    background: #166534;
+    color: white;
+  }
+
+  .taylor-products__btn--primary:hover {
+    background: #14532d;
+    transform: translateY(-2px);
+  }
+
+  .taylor-products__btn--secondary {
+    background: white;
+    color: #166534;
+    border: 2px solid #166534;
+  }
+
+  .taylor-products__btn--secondary:hover {
+    background: #f0fdf4;
+  }
+
+  .taylor-products__note {
+    font-size: 14px;
+    color: #6b7280;
+  }
+</style>
+
+<script>
+  // Track product card clicks
+  document.querySelectorAll('.taylor-products .product-card').forEach((card) => {
+    card.addEventListener('click', () => {
+      const productId = card.getAttribute('data-product-id');
+      if (window.pdPixel && productId) {
+        window.pdPixel.track('product_clicked', {
+          tunnel: 'taylor',
+          product_id: productId,
+          source: 'taylor_products_section',
+        });
+      }
+    });
+  });
+</script>

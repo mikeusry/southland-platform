@@ -1,0 +1,43 @@
+---
+/**
+ * CDP Analytics Dashboard
+ *
+ * Real-time analytics for Customer Data Platform performance.
+ * Shows tunnel conversions, A/B test results, persona distribution,
+ * journey stages, and recent events.
+ */
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import CDPDashboard from '../../../components/dashboard/CDPDashboard';
+
+const title = "CDP Analytics | Admin";
+---
+
+<AdminLayout title={title} activeNav="/admin/cdp">
+  <header class="page-header">
+    <h1 class="page-title">CDP Analytics</h1>
+    <p class="page-subtitle">
+      Customer Data Platform performance metrics and insights
+    </p>
+  </header>
+
+  <CDPDashboard client:load />
+</AdminLayout>
+
+<style>
+  .page-header {
+    margin-bottom: 24px;
+  }
+
+  .page-title {
+    font-family: var(--font-heading, 'Eveleth Dot', serif);
+    font-size: 28px;
+    color: var(--color-title, #2c5234);
+    margin: 0 0 8px 0;
+  }
+
+  .page-subtitle {
+    color: #6b7280;
+    font-size: 16px;
+    margin: 0;
+  }
+</style>

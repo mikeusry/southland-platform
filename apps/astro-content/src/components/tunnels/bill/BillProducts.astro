@@ -1,0 +1,364 @@
+---
+/**
+ * BillProducts Component
+ *
+ * Featured products for Broiler Bill (Commercial) persona.
+ * Focuses on bulk sizes, volume pricing, and ROI-driven products.
+ *
+ * Usage:
+ * <BillProducts />
+ */
+
+interface Props {
+  /** Heading text */
+  heading?: string;
+  /** Additional CSS classes */
+  class?: string;
+}
+
+const {
+  heading = 'Commercial-Grade Probiotic Solutions',
+  class: className = '',
+} = Astro.props;
+
+// Bill-recommended products (bulk sizes, commercial focus)
+const products = [
+  {
+    id: 'big-ole-bird-gallon',
+    name: 'Big Ole Bird (1 Gallon)',
+    description: 'Our flagship probiotic for commercial broiler and layer operations. Proven to reduce mortality and improve feed conversion ratios.',
+    price: '$89.99',
+    perUnit: '$0.70/oz',
+    image: '/images/products/big-ole-bird-gallon.jpg',
+    href: '/products/big-ole-bird/',
+    badge: 'Best Seller',
+    specs: ['Treats 10,000+ birds', 'OMRI Listed', '2-year shelf life'],
+  },
+  {
+    id: 'litter-life-5gal',
+    name: 'Litter Life (5 Gallon)',
+    description: 'Probiotic litter treatment that reduces ammonia, improves air quality, and extends litter life between cleanouts.',
+    price: '$249.99',
+    perUnit: '$0.39/oz',
+    image: '/images/products/litter-life-5gal.jpg',
+    href: '/products/litter-life/',
+    badge: 'ROI Champion',
+    specs: ['Covers 20,000 sq ft', 'Reduces ammonia 40%+', 'Monthly application'],
+  },
+  {
+    id: 'commercial-starter-kit',
+    name: 'Commercial Starter Kit',
+    description: 'Everything you need to trial our program: 1 gal Big Ole Bird, 5 gal Litter Life, and implementation guide.',
+    price: '$299.99',
+    perUnit: 'Save $40',
+    image: '/images/products/commercial-kit.jpg',
+    href: '/products/commercial-starter-kit/',
+    badge: 'Trial Package',
+    specs: ['Full house coverage', 'Support included', 'Dosing calculator'],
+  },
+  {
+    id: 'hen-helper-commercial',
+    name: 'Hen Helper (5 Gallon)',
+    description: 'Layer-specific probiotic for commercial egg operations. Supports shell quality, production consistency, and bird health.',
+    price: '$399.99',
+    perUnit: '$0.62/oz',
+    image: '/images/products/hen-helper-5gal.jpg',
+    href: '/products/hen-helper/',
+    badge: 'For Layers',
+    specs: ['Layer-specific formula', 'Improves shell quality', 'Bulk pricing available'],
+  },
+];
+---
+
+<section class:list={['bill-products', className]}>
+  <div class="bill-products__container">
+    <div class="bill-products__header">
+      <h2 class="bill-products__heading">{heading}</h2>
+      <p class="bill-products__subheading">
+        OMRI Listed organic probiotics trusted by integrators and independent growers nationwide.
+      </p>
+    </div>
+
+    <div class="bill-products__grid">
+      {products.map((product) => (
+        <a href={product.href} class="product-card" data-product-id={product.id}>
+          <div class="product-card__image">
+            {product.badge && (
+              <span class="product-card__badge">{product.badge}</span>
+            )}
+            <div class="product-card__image-placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+            </div>
+          </div>
+          <div class="product-card__content">
+            <h3 class="product-card__name">{product.name}</h3>
+            <p class="product-card__description">{product.description}</p>
+            <ul class="product-card__specs">
+              {product.specs.map((spec) => (
+                <li class="product-card__spec">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  {spec}
+                </li>
+              ))}
+            </ul>
+            <div class="product-card__pricing">
+              <span class="product-card__price">{product.price}</span>
+              <span class="product-card__per-unit">{product.perUnit}</span>
+            </div>
+            <span class="product-card__cta">
+              View Details →
+            </span>
+          </div>
+        </a>
+      ))}
+    </div>
+
+    <div class="bill-products__footer">
+      <div class="bill-products__ctas">
+        <a href="/shop/poultry/commercial/" class="bill-products__btn bill-products__btn--primary">
+          View All Commercial Products
+        </a>
+        <a href="/contact/quote/" class="bill-products__btn bill-products__btn--secondary">
+          Request Volume Quote
+        </a>
+      </div>
+      <p class="bill-products__note">
+        Volume discounts available for 10+ units. Contact us for integrator pricing.
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .bill-products {
+    background: #f8fafc;
+    padding: 60px 20px;
+  }
+
+  .bill-products__container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .bill-products__header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .bill-products__heading {
+    font-family: var(--font-heading, 'Eveleth Dot', serif);
+    font-size: clamp(24px, 4vw, 36px);
+    color: var(--color-title, #2c5234);
+    margin-bottom: 12px;
+  }
+
+  .bill-products__subheading {
+    color: #64748b;
+    font-size: 16px;
+  }
+
+  .bill-products__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+
+  .product-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    text-decoration: none;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .product-card:hover {
+    border-color: #1e3a5f;
+    box-shadow: 0 8px 24px rgba(30, 58, 95, 0.15);
+    transform: translateY(-4px);
+  }
+
+  .product-card__image {
+    position: relative;
+    aspect-ratio: 16/10;
+    background: #e2e8f0;
+  }
+
+  .product-card__image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+  }
+
+  .product-card__image-placeholder svg {
+    width: 48px;
+    height: 48px;
+    opacity: 0.5;
+  }
+
+  .product-card__badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: #1e3a5f;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+
+  .product-card__content {
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .product-card__name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 8px;
+  }
+
+  .product-card__description {
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.5;
+    margin-bottom: 16px;
+    flex: 1;
+  }
+
+  .product-card__specs {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px 0;
+  }
+
+  .product-card__spec {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #475569;
+    margin-bottom: 6px;
+  }
+
+  .product-card__spec svg {
+    width: 14px;
+    height: 14px;
+    color: #4ade80;
+    flex-shrink: 0;
+  }
+
+  .product-card__pricing {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .product-card__price {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--color-title, #2c5234);
+  }
+
+  .product-card__per-unit {
+    font-size: 13px;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .product-card__cta {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e3a5f;
+  }
+
+  .product-card:hover .product-card__cta {
+    text-decoration: underline;
+  }
+
+  .bill-products__footer {
+    text-align: center;
+  }
+
+  .bill-products__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .bill-products__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 32px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .bill-products__btn--primary {
+    background: #1e3a5f;
+    color: white;
+  }
+
+  .bill-products__btn--primary:hover {
+    background: #0f172a;
+    transform: translateY(-2px);
+  }
+
+  .bill-products__btn--secondary {
+    background: white;
+    color: #1e3a5f;
+    border: 2px solid #1e3a5f;
+  }
+
+  .bill-products__btn--secondary:hover {
+    background: #1e3a5f;
+    color: white;
+  }
+
+  .bill-products__note {
+    font-size: 14px;
+    color: #64748b;
+  }
+</style>
+
+<script>
+  // Track product card clicks
+  document.querySelectorAll('.bill-products .product-card').forEach((card) => {
+    card.addEventListener('click', () => {
+      const productId = card.getAttribute('data-product-id');
+      if (window.pdPixel && productId) {
+        window.pdPixel.track('product_clicked', {
+          tunnel: 'bill',
+          product_id: productId,
+          source: 'bill_products_section',
+        });
+      }
+    });
+  });
+</script>

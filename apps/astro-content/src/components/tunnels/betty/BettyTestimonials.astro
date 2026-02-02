@@ -1,0 +1,296 @@
+---
+/**
+ * BettyTestimonials Component
+ *
+ * Testimonials section featuring problem-solved stories from
+ * backyard chicken keepers. Focuses on relatable problems and
+ * emotional outcomes (happy hens, peace of mind).
+ *
+ * Usage:
+ * <BettyTestimonials />
+ * <BettyTestimonials limit={3} />
+ */
+
+interface Props {
+  /** Number of testimonials to show */
+  limit?: number;
+  /** Heading text */
+  heading?: string;
+  /** Additional CSS classes */
+  class?: string;
+}
+
+const {
+  limit = 3,
+  heading = 'What Backyard Chicken Keepers Say',
+  class: className = '',
+} = Astro.props;
+
+// Betty-specific testimonials (problem → solution stories)
+const testimonials = [
+  {
+    id: 'betty-1',
+    quote: 'My girls were lethargic and their feathers looked dull. After two weeks on Hen Helper, they\'re active, glossy, and laying more eggs than ever!',
+    author: 'Sarah M.',
+    location: 'Georgia',
+    problem: 'Lethargic hens, dull feathers',
+    outcome: 'Active, glossy hens, more eggs',
+    product: 'Hen Helper',
+    rating: 5,
+    avatar: '🐔',
+  },
+  {
+    id: 'betty-2',
+    quote: 'I was worried about runny droppings in my small flock. This stuff cleared it up in just a few days. Now I recommend it to everyone in my chicken Facebook group!',
+    author: 'Jennifer K.',
+    location: 'Texas',
+    problem: 'Runny droppings',
+    outcome: 'Healthy digestion in days',
+    product: 'Hen Helper',
+    rating: 5,
+    avatar: '🌻',
+  },
+  {
+    id: 'betty-3',
+    quote: 'First-time chicken mom here. I was overwhelmed until I found Southland. Their products are easy to use and my hens are thriving. Plus their customer service is amazing!',
+    author: 'Amanda R.',
+    location: 'North Carolina',
+    problem: 'Overwhelmed as new chicken keeper',
+    outcome: 'Confident chicken mom',
+    product: 'Starter Bundle',
+    rating: 5,
+    avatar: '🌸',
+  },
+  {
+    id: 'betty-4',
+    quote: 'My rescue hens came to me in rough shape. After a month on the probiotics, they\'ve transformed. Healthy, happy, and finally laying!',
+    author: 'Michelle T.',
+    location: 'Florida',
+    problem: 'Rescue hens in poor condition',
+    outcome: 'Healthy, laying hens',
+    product: 'Big Ole Bird',
+    rating: 5,
+    avatar: '💚',
+  },
+  {
+    id: 'betty-5',
+    quote: 'I love that it\'s organic and safe for my family. The eggs taste even better now, and I know my hens are getting the best.',
+    author: 'Lisa D.',
+    location: 'Tennessee',
+    problem: 'Wanted organic, family-safe solution',
+    outcome: 'Better eggs, peace of mind',
+    product: 'Hen Helper',
+    rating: 5,
+    avatar: '🥚',
+  },
+];
+
+const displayTestimonials = testimonials.slice(0, limit);
+---
+
+<section class:list={['betty-testimonials', className]}>
+  <div class="betty-testimonials__container">
+    <h2 class="betty-testimonials__heading">{heading}</h2>
+    <div class="betty-testimonials__grid">
+      {displayTestimonials.map((testimonial) => (
+        <article class="testimonial-card" data-testimonial-id={testimonial.id}>
+          <div class="testimonial-card__header">
+            <span class="testimonial-card__avatar">{testimonial.avatar}</span>
+            <div class="testimonial-card__author-info">
+              <span class="testimonial-card__author">{testimonial.author}</span>
+              <span class="testimonial-card__location">{testimonial.location}</span>
+            </div>
+            <div class="testimonial-card__rating">
+              {[...Array(testimonial.rating)].map(() => (
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+              ))}
+            </div>
+          </div>
+          <div class="testimonial-card__problem">
+            <span class="testimonial-card__label">Problem:</span>
+            {testimonial.problem}
+          </div>
+          <blockquote class="testimonial-card__quote">
+            "{testimonial.quote}"
+          </blockquote>
+          <div class="testimonial-card__footer">
+            <span class="testimonial-card__outcome">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              {testimonial.outcome}
+            </span>
+            <span class="testimonial-card__product">
+              Used: {testimonial.product}
+            </span>
+          </div>
+        </article>
+      ))}
+    </div>
+    <div class="betty-testimonials__cta">
+      <a href="/reviews/backyard/" class="betty-testimonials__link">
+        Read More Reviews →
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .betty-testimonials {
+    background: #fffbeb;
+    padding: 60px 20px;
+  }
+
+  .betty-testimonials__container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .betty-testimonials__heading {
+    font-family: var(--font-heading, 'Eveleth Dot', serif);
+    font-size: clamp(24px, 4vw, 36px);
+    color: var(--color-title, #2c5234);
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .betty-testimonials__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+
+  .testimonial-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .testimonial-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  }
+
+  .testimonial-card__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .testimonial-card__avatar {
+    width: 48px;
+    height: 48px;
+    background: #fef3c7;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+
+  .testimonial-card__author-info {
+    flex: 1;
+  }
+
+  .testimonial-card__author {
+    display: block;
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 15px;
+  }
+
+  .testimonial-card__location {
+    font-size: 13px;
+    color: #6b7280;
+  }
+
+  .testimonial-card__rating {
+    display: flex;
+    gap: 2px;
+    color: #f59e0b;
+  }
+
+  .testimonial-card__rating svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .testimonial-card__problem {
+    background: #fef3c7;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #92400e;
+    margin-bottom: 16px;
+  }
+
+  .testimonial-card__label {
+    font-weight: 600;
+    margin-right: 4px;
+  }
+
+  .testimonial-card__quote {
+    font-size: 15px;
+    color: #374151;
+    line-height: 1.6;
+    margin: 0 0 16px 0;
+    font-style: italic;
+  }
+
+  .testimonial-card__footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .testimonial-card__outcome {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #059669;
+  }
+
+  .testimonial-card__outcome svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .testimonial-card__product {
+    font-size: 12px;
+    color: #6b7280;
+    background: #f3f4f6;
+    padding: 4px 10px;
+    border-radius: 9999px;
+  }
+
+  .betty-testimonials__cta {
+    text-align: center;
+  }
+
+  .betty-testimonials__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    color: var(--color-accent, #44883e);
+    text-decoration: none;
+    font-size: 16px;
+    transition: gap 0.2s;
+  }
+
+  .betty-testimonials__link:hover {
+    gap: 10px;
+    text-decoration: underline;
+  }
+</style>
