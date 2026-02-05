@@ -18,11 +18,11 @@ module.exports = {
         body: ['"Open Sans"', 'system-ui', '-apple-system', 'sans-serif'],
       },
       maxWidth: {
-        'shopify': '1400px',
+        shopify: '1400px',
       },
       height: {
-        'header': '75px',
+        header: '75px',
       },
     },
   },
-};
+}

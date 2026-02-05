@@ -9,43 +9,41 @@
  * <BillHero stage="aware" />
  */
 
-import type { JourneyStage } from '../../../lib/visitor';
+import type { JourneyStage } from '../../../lib/visitor'
 
 interface Props {
   /** Current journey stage for stage-specific messaging */
-  stage?: JourneyStage;
+  stage?: JourneyStage
   /** Override the default headline */
-  headline?: string;
+  headline?: string
   /** Override the default subheadline */
-  subheadline?: string;
+  subheadline?: string
   /** Additional CSS classes */
-  class?: string;
+  class?: string
 }
 
-const {
-  stage = 'aware',
-  headline,
-  subheadline,
-  class: className = '',
-} = Astro.props;
+const { stage = 'aware', headline, subheadline, class: className = '' } = Astro.props
 
 // Stage-specific content variations for commercial operators
 const stageContent = {
   unaware: {
     headline: 'Running a Commercial Poultry Operation?',
-    subheadline: 'Discover how leading integrators reduce mortality and improve feed conversion with organic probiotics.',
+    subheadline:
+      'Discover how leading integrators reduce mortality and improve feed conversion with organic probiotics.',
     cta: { text: 'Learn How It Works', href: '/learn/commercial-poultry/' },
     secondaryCta: { text: 'Request Consultation', href: '/contact/commercial/' },
   },
   aware: {
     headline: 'Proven Results for Commercial Poultry',
-    subheadline: 'Reduce mortality by 1-2%, improve FCR, and increase settlement weights with our OMRI Listed organic probiotics.',
+    subheadline:
+      'Reduce mortality by 1-2%, improve FCR, and increase settlement weights with our OMRI Listed organic probiotics.',
     cta: { text: 'View Commercial Products', href: '/shop/poultry/commercial/' },
     secondaryCta: { text: 'See Case Studies', href: '/case-studies/' },
   },
   receptive: {
     headline: 'The Science Behind Better Flock Performance',
-    subheadline: 'Learn how probiotics improve gut health, reduce ammonia, and create a healthier grow-out environment.',
+    subheadline:
+      'Learn how probiotics improve gut health, reduce ammonia, and create a healthier grow-out environment.',
     cta: { text: 'Technical Resources', href: '/resources/commercial/' },
     secondaryCta: { text: 'Schedule Demo', href: '/contact/demo/' },
   },
@@ -63,7 +61,7 @@ const stageContent = {
   },
   test_prep: {
     headline: 'Ready for a Trial Run?',
-    subheadline: 'Start with a single house or flock. We\'ll help you measure the results.',
+    subheadline: "Start with a single house or flock. We'll help you measure the results.",
     cta: { text: 'Start a Trial', href: '/trial/' },
     secondaryCta: { text: 'Volume Pricing', href: '/pricing/commercial/' },
   },
@@ -91,19 +89,17 @@ const stageContent = {
     cta: { text: 'Share Your Story', href: '/case-studies/submit/' },
     secondaryCta: { text: 'Referral Program', href: '/referral/commercial/' },
   },
-};
+}
 
-const content = stageContent[stage] || stageContent.aware;
-const displayHeadline = headline || content.headline;
-const displaySubheadline = subheadline || content.subheadline;
+const content = stageContent[stage] || stageContent.aware
+const displayHeadline = headline || content.headline
+const displaySubheadline = subheadline || content.subheadline
 ---
 
 <section class:list={['bill-hero', className]}>
   <div class="bill-hero__container">
     <div class="bill-hero__content">
-      <span class="bill-hero__badge">
-        For Commercial Operations
-      </span>
+      <span class="bill-hero__badge"> For Commercial Operations </span>
       <h1 class="bill-hero__headline">{displayHeadline}</h1>
       <p class="bill-hero__subheadline">{displaySubheadline}</p>
       <div class="bill-hero__ctas">
@@ -284,8 +280,8 @@ const displaySubheadline = subheadline || content.subheadline;
           tunnel: 'bill',
           cta_text: cta.textContent?.trim(),
           cta_href: (cta as HTMLAnchorElement).href,
-        });
+        })
       }
-    });
-  });
+    })
+  })
 </script>

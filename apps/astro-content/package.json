@@ -8,7 +8,12 @@
     "build": "tinacms build && node scripts/fetch-layout.js || true && astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "fetch-layout": "node scripts/fetch-layout.js"
+    "fetch-layout": "node scripts/fetch-layout.js",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "typecheck": "astro check",
+    "format": "prettier --write 'src/**/*.{ts,tsx,js,astro}'",
+    "format:check": "prettier --check 'src/**/*.{ts,tsx,js,astro}'"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.12",
@@ -32,8 +37,16 @@
     "turndown": "^7.2.2"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.5",
+    "@eslint/js": "^9.18.0",
     "@types/react": "^19.2.10",
     "@types/react-dom": "^19.2.3",
-    "pagefind": "^1.4.0"
+    "@typescript-eslint/eslint-plugin": "^8.20.0",
+    "@typescript-eslint/parser": "^8.20.0",
+    "eslint": "^9.18.0",
+    "pagefind": "^1.4.0",
+    "prettier": "^3.4.2",
+    "prettier-plugin-astro": "^0.14.1",
+    "prettier-plugin-tailwindcss": "^0.6.11"
   }
 }

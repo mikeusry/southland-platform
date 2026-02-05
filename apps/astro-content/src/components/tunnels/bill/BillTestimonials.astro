@@ -12,24 +12,25 @@
 
 interface Props {
   /** Number of testimonials to show */
-  limit?: number;
+  limit?: number
   /** Heading text */
-  heading?: string;
+  heading?: string
   /** Additional CSS classes */
-  class?: string;
+  class?: string
 }
 
 const {
   limit = 3,
   heading = 'Results from Commercial Operations',
   class: className = '',
-} = Astro.props;
+} = Astro.props
 
 // Bill-specific testimonials (ROI-focused, measurable results)
 const testimonials = [
   {
     id: 'bill-1',
-    quote: 'We saw a 1.8% reduction in mortality and our FCR improved from 1.72 to 1.65 within the first two flocks. The ROI was evident by month three.',
+    quote:
+      'We saw a 1.8% reduction in mortality and our FCR improved from 1.72 to 1.65 within the first two flocks. The ROI was evident by month three.',
     author: 'Mike S.',
     role: 'Integrator Operations Manager',
     location: 'Arkansas',
@@ -43,7 +44,8 @@ const testimonials = [
   },
   {
     id: 'bill-2',
-    quote: 'Litter Life has been a game-changer for ammonia control. We\'ve extended our litter cycles from 3 to 5 flocks without sacrificing air quality.',
+    quote:
+      "Litter Life has been a game-changer for ammonia control. We've extended our litter cycles from 3 to 5 flocks without sacrificing air quality.",
     author: 'David R.',
     role: 'Independent Grower',
     location: 'Georgia',
@@ -57,7 +59,8 @@ const testimonials = [
   },
   {
     id: 'bill-3',
-    quote: 'After implementing Big Ole Bird across our 12-house operation, we\'ve consistently ranked in the top 5% of our integrator\'s growers for the past year.',
+    quote:
+      "After implementing Big Ole Bird across our 12-house operation, we've consistently ranked in the top 5% of our integrator's growers for the past year.",
     author: 'Robert T.',
     role: 'Contract Grower',
     location: 'Alabama',
@@ -71,7 +74,8 @@ const testimonials = [
   },
   {
     id: 'bill-4',
-    quote: 'The technical support team helped us dial in the dosing for our specific water system. Settlement weights are up 3% and our birds are healthier.',
+    quote:
+      'The technical support team helped us dial in the dosing for our specific water system. Settlement weights are up 3% and our birds are healthier.',
     author: 'James P.',
     role: 'Farm Manager',
     location: 'North Carolina',
@@ -83,48 +87,46 @@ const testimonials = [
     product: 'Commercial Starter Kit',
     avatar: '📊',
   },
-];
+]
 
-const displayTestimonials = testimonials.slice(0, limit);
+const displayTestimonials = testimonials.slice(0, limit)
 ---
 
 <section class:list={['bill-testimonials', className]}>
   <div class="bill-testimonials__container">
     <h2 class="bill-testimonials__heading">{heading}</h2>
     <div class="bill-testimonials__grid">
-      {displayTestimonials.map((testimonial) => (
-        <article class="testimonial-card" data-testimonial-id={testimonial.id}>
-          <div class="testimonial-card__header">
-            <span class="testimonial-card__avatar">{testimonial.avatar}</span>
-            <div class="testimonial-card__author-info">
-              <span class="testimonial-card__author">{testimonial.author}</span>
-              <span class="testimonial-card__role">{testimonial.role}</span>
-              <span class="testimonial-card__location">{testimonial.location}</span>
-            </div>
-          </div>
-          <div class="testimonial-card__metrics">
-            {Object.entries(testimonial.metrics).map(([key, value]) => (
-              <div class="testimonial-card__metric">
-                <span class="testimonial-card__metric-value">{value}</span>
-                <span class="testimonial-card__metric-label">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+      {
+        displayTestimonials.map((testimonial) => (
+          <article class="testimonial-card" data-testimonial-id={testimonial.id}>
+            <div class="testimonial-card__header">
+              <span class="testimonial-card__avatar">{testimonial.avatar}</span>
+              <div class="testimonial-card__author-info">
+                <span class="testimonial-card__author">{testimonial.author}</span>
+                <span class="testimonial-card__role">{testimonial.role}</span>
+                <span class="testimonial-card__location">{testimonial.location}</span>
               </div>
-            ))}
-          </div>
-          <blockquote class="testimonial-card__quote">
-            "{testimonial.quote}"
-          </blockquote>
-          <div class="testimonial-card__footer">
-            <span class="testimonial-card__product">
-              Using: {testimonial.product}
-            </span>
-          </div>
-        </article>
-      ))}
+            </div>
+            <div class="testimonial-card__metrics">
+              {Object.entries(testimonial.metrics).map(([key, value]) => (
+                <div class="testimonial-card__metric">
+                  <span class="testimonial-card__metric-value">{value}</span>
+                  <span class="testimonial-card__metric-label">
+                    {key.replace(/([A-Z])/g, ' $1').trim()}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <blockquote class="testimonial-card__quote">"{testimonial.quote}"</blockquote>
+            <div class="testimonial-card__footer">
+              <span class="testimonial-card__product">Using: {testimonial.product}</span>
+            </div>
+          </article>
+        ))
+      }
     </div>
     <div class="bill-testimonials__cta">
-      <a href="/case-studies/" class="bill-testimonials__link">
-        View Full Case Studies →
-      </a>
+      <a href="/case-studies/" class="bill-testimonials__link"> View Full Case Studies → </a>
     </div>
   </div>
 </section>
@@ -159,7 +161,9 @@ const displayTestimonials = testimonials.slice(0, limit);
     background: rgba(255, 255, 255, 0.95);
     border-radius: 16px;
     padding: 24px;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition:
+      transform 0.2s,
+      box-shadow 0.2s;
   }
 
   .testimonial-card:hover {

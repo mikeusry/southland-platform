@@ -23,25 +23,25 @@
  */
 
 interface CTAConfig {
-  text: string;
-  href: string;
+  text: string
+  href: string
 }
 
 interface Props {
   /** Default CTA text when no persona */
-  defaultText?: string;
+  defaultText?: string
   /** Default CTA href when no persona */
-  defaultHref?: string;
+  defaultHref?: string
   /** Button variant */
-  variant?: 'primary' | 'secondary' | 'outline';
+  variant?: 'primary' | 'secondary' | 'outline'
   /** Override for backyard persona */
-  backyard?: CTAConfig;
+  backyard?: CTAConfig
   /** Override for commercial persona */
-  commercial?: CTAConfig;
+  commercial?: CTAConfig
   /** Override for lawn persona */
-  lawn?: CTAConfig;
+  lawn?: CTAConfig
   /** Additional CSS classes */
-  class?: string;
+  class?: string
 }
 
 const {
@@ -52,7 +52,7 @@ const {
   commercial,
   lawn,
   class: className = '',
-} = Astro.props;
+} = Astro.props
 
 // Default CTAs per persona (can be overridden via props)
 const personaCTAs = {
@@ -60,21 +60,17 @@ const personaCTAs = {
   commercial: commercial ?? { text: 'Talk to a Specialist', href: '/contact/commercial/' },
   lawn: lawn ?? { text: 'Shop Lawn Products', href: '/shop/lawn/' },
   general: { text: defaultText, href: defaultHref },
-};
+}
 
 const variantClasses = {
   primary: 'btn-primary',
   secondary: 'btn-secondary',
   outline: 'persona-cta--outline',
-};
+}
 ---
 
 <a
-  class:list={[
-    'persona-cta',
-    variantClasses[variant],
-    className,
-  ]}
+  class:list={['persona-cta', variantClasses[variant], className]}
   href={defaultHref}
   data-default-text={defaultText}
   data-default-href={defaultHref}
@@ -115,43 +111,43 @@ const variantClasses = {
 </style>
 
 <script>
-  import { getPersonaId, type PersonaId } from '../../lib/persona';
+  import { getPersonaId, type PersonaId } from '../../lib/persona'
 
   function updatePersonaCTAs(): void {
-    const personaId = getPersonaId();
-    const ctas = document.querySelectorAll('.persona-cta');
+    const personaId = getPersonaId()
+    const ctas = document.querySelectorAll('.persona-cta')
 
     ctas.forEach((cta) => {
-      const el = cta as HTMLAnchorElement;
-      const textEl = el.querySelector('.persona-cta__text');
+      const el = cta as HTMLAnchorElement
+      const textEl = el.querySelector('.persona-cta__text')
 
-      let text: string;
-      let href: string;
+      let text: string
+      let href: string
 
       if (personaId && personaId !== 'general') {
-        text = el.dataset[`${personaId}Text`] || el.dataset.defaultText || 'Get Started';
-        href = el.dataset[`${personaId}Href`] || el.dataset.defaultHref || '/shop/';
+        text = el.dataset[`${personaId}Text`] || el.dataset.defaultText || 'Get Started'
+        href = el.dataset[`${personaId}Href`] || el.dataset.defaultHref || '/shop/'
       } else {
-        text = el.dataset.defaultText || 'Get Started';
-        href = el.dataset.defaultHref || '/shop/';
+        text = el.dataset.defaultText || 'Get Started'
+        href = el.dataset.defaultHref || '/shop/'
       }
 
       if (textEl) {
-        textEl.textContent = text;
+        textEl.textContent = text
       }
-      el.href = href;
-    });
+      el.href = href
+    })
   }
 
   // Run on page load
-  document.addEventListener('DOMContentLoaded', updatePersonaCTAs);
+  document.addEventListener('DOMContentLoaded', updatePersonaCTAs)
   if (document.readyState !== 'loading') {
-    updatePersonaCTAs();
+    updatePersonaCTAs()
   }
 
   // Listen for persona changes
-  window.addEventListener('persona-changed', updatePersonaCTAs);
+  window.addEventListener('persona-changed', updatePersonaCTAs)
 
   // Handle Astro View Transitions
-  document.addEventListener('astro:page-load', updatePersonaCTAs);
+  document.addEventListener('astro:page-load', updatePersonaCTAs)
 </script>

@@ -10,22 +10,18 @@
  * <ProofPoints persona="backyard" variant="cards" />
  */
 
-import ProofPoint from './ProofPoint.astro';
+import ProofPoint from './ProofPoint.astro'
 
 interface Props {
   /** Which persona's proof points to show */
-  persona: 'backyard' | 'commercial' | 'lawn';
+  persona: 'backyard' | 'commercial' | 'lawn'
   /** Layout variant */
-  variant?: 'default' | 'cards' | 'inline';
+  variant?: 'default' | 'cards' | 'inline'
   /** Additional CSS classes */
-  class?: string;
+  class?: string
 }
 
-const {
-  persona,
-  variant = 'default',
-  class: className = '',
-} = Astro.props;
+const { persona, variant = 'default', class: className = '' } = Astro.props
 
 // Proof points by persona (will be populated from BigQuery as data comes in)
 // For now, these are conservative placeholder estimates
@@ -88,49 +84,37 @@ const proofPointsByPersona = {
       source: '200+ reviews',
     },
   ],
-};
+}
 
-const points = proofPointsByPersona[persona] || [];
+const points = proofPointsByPersona[persona] || []
 ---
 
-<div
-  class:list={[
-    'proof-points',
-    `proof-points--${variant}`,
-    className,
-  ]}
-  data-persona={persona}
->
-  {variant === 'cards' ? (
-    points.map((point) => (
-      <ProofPoint
-        stat={point.stat}
-        label={point.label}
-        icon={point.icon}
-        source={point.source}
-        variant="card"
-      />
-    ))
-  ) : variant === 'inline' ? (
-    points.map((point) => (
-      <ProofPoint
-        stat={point.stat}
-        label={point.label}
-        icon={point.icon}
-        variant="minimal"
-      />
-    ))
-  ) : (
-    points.map((point) => (
-      <ProofPoint
-        stat={point.stat}
-        label={point.label}
-        icon={point.icon}
-        source={point.source}
-        variant="default"
-      />
-    ))
-  )}
+<div class:list={['proof-points', `proof-points--${variant}`, className]} data-persona={persona}>
+  {
+    variant === 'cards'
+      ? points.map((point) => (
+          <ProofPoint
+            stat={point.stat}
+            label={point.label}
+            icon={point.icon}
+            source={point.source}
+            variant="card"
+          />
+        ))
+      : variant === 'inline'
+        ? points.map((point) => (
+            <ProofPoint stat={point.stat} label={point.label} icon={point.icon} variant="minimal" />
+          ))
+        : points.map((point) => (
+            <ProofPoint
+              stat={point.stat}
+              label={point.label}
+              icon={point.icon}
+              source={point.source}
+              variant="default"
+            />
+          ))
+  }
 </div>
 
 <style>

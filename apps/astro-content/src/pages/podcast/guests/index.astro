@@ -4,42 +4,42 @@
  * Browse all podcast guests
  */
 
-import PodcastLayout from '../../../layouts/PodcastLayout.astro';
-import GuestCard from '../../../components/podcast/GuestCard.astro';
-import { getCollection } from 'astro:content';
+import PodcastLayout from '../../../layouts/PodcastLayout.astro'
+import GuestCard from '../../../components/podcast/GuestCard.astro'
+import { getCollection } from 'astro:content'
 
 // Get all guests
-const allGuests = await getCollection('guests');
+const allGuests = await getCollection('guests')
 
 // Get all episodes to count appearances
 const allEpisodes = await getCollection('episodes', ({ data }) => {
-  return data.draft !== true;
-});
+  return data.draft !== true
+})
 
 // Build guest appearance counts
-const guestAppearances: Record<string, number> = {};
+const guestAppearances: Record<string, number> = {}
 allEpisodes.forEach((episode) => {
   episode.data.guests?.forEach((guest) => {
-    const slug = guest.slug;
-    guestAppearances[slug] = (guestAppearances[slug] || 0) + 1;
-  });
-});
+    const slug = guest.slug
+    guestAppearances[slug] = (guestAppearances[slug] || 0) + 1
+  })
+})
 
 // Also count from guest collection
 allGuests.forEach((guest) => {
   if (guest.data.episodes) {
-    guestAppearances[guest.id] = guest.data.episodes.length;
+    guestAppearances[guest.id] = guest.data.episodes.length
   }
-});
+})
 
 // Sort guests by featured first, then by appearances
 const sortedGuests = [...allGuests].sort((a, b) => {
-  if (a.data.featured && !b.data.featured) return -1;
-  if (!a.data.featured && b.data.featured) return 1;
-  const aCount = guestAppearances[a.id] || 0;
-  const bCount = guestAppearances[b.id] || 0;
-  return bCount - aCount;
-});
+  if (a.data.featured && !b.data.featured) return -1
+  if (!a.data.featured && b.data.featured) return 1
+  const aCount = guestAppearances[a.id] || 0
+  const bCount = guestAppearances[b.id] || 0
+  return bCount - aCount
+})
 ---
 
 <PodcastLayout
@@ -47,42 +47,48 @@ const sortedGuests = [...allGuests].sort((a, b) => {
   description="Meet the farmers, researchers, and industry experts who have joined us on the Ag & Culture Podcast."
   breadcrumbs={[{ label: 'Guests', href: '/podcast/guests/' }]}
 >
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
     {/* Header */}
-    <header class="text-center mb-12">
-      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-        Our Guests
-      </h1>
-      <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-        Meet the farmers, researchers, and industry experts who have joined us on the Ag & Culture Podcast.
+    <header class="mb-12 text-center">
+      <h1 class="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">Our Guests</h1>
+      <p class="mx-auto max-w-2xl text-lg text-gray-600">
+        Meet the farmers, researchers, and industry experts who have joined us on the Ag & Culture
+        Podcast.
       </p>
     </header>
 
     {/* Guest Grid */}
-    {sortedGuests.length > 0 ? (
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {sortedGuests.map((guest) => (
-          <GuestCard
-            name={guest.data.name}
-            slug={guest.id}
-            role={guest.data.role}
-            company={guest.data.company}
-            bio={guest.data.bio}
-            photo={guest.data.photo}
-            links={guest.data.links}
-            episodeCount={guestAppearances[guest.id]}
-          />
-        ))}
-      </div>
-    ) : (
-      <div class="text-center py-12">
-        <div class="w-20 h-20 mx-auto mb-4 text-gray-200">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-          </svg>
+    {
+      sortedGuests.length > 0 ? (
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {sortedGuests.map((guest) => (
+            <GuestCard
+              name={guest.data.name}
+              slug={guest.id}
+              role={guest.data.role}
+              company={guest.data.company}
+              bio={guest.data.bio}
+              photo={guest.data.photo}
+              links={guest.data.links}
+              episodeCount={guestAppearances[guest.id]}
+            />
+          ))}
         </div>
-        <p class="text-gray-500">Guest directory coming soon.</p>
-      </div>
-    )}
+      ) : (
+        <div class="py-12 text-center">
+          <div class="mx-auto mb-4 h-20 w-20 text-gray-200">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+              />
+            </svg>
+          </div>
+          <p class="text-gray-500">Guest directory coming soon.</p>
+        </div>
+      )
+    }
   </div>
 </PodcastLayout>

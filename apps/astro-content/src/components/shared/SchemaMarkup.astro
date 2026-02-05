@@ -5,74 +5,74 @@
  */
 
 interface PodcastSeriesSchema {
-  type: 'PodcastSeries';
-  name: string;
-  description: string;
-  url: string;
-  image?: string;
+  type: 'PodcastSeries'
+  name: string
+  description: string
+  url: string
+  image?: string
   author?: {
-    name: string;
-    url?: string;
-  };
-  webFeed?: string;
+    name: string
+    url?: string
+  }
+  webFeed?: string
 }
 
 interface PodcastEpisodeSchema {
-  type: 'PodcastEpisode';
-  name: string;
-  description: string;
-  url: string;
-  datePublished: string;
-  episodeNumber: number;
-  seasonNumber?: number;
-  duration?: string; // ISO 8601 duration format PT45M32S
-  image?: string;
-  audio?: string;
-  video?: string;
-  transcript?: string;
+  type: 'PodcastEpisode'
+  name: string
+  description: string
+  url: string
+  datePublished: string
+  episodeNumber: number
+  seasonNumber?: number
+  duration?: string // ISO 8601 duration format PT45M32S
+  image?: string
+  audio?: string
+  video?: string
+  transcript?: string
   partOfSeries: {
-    name: string;
-    url: string;
-  };
+    name: string
+    url: string
+  }
   guests?: Array<{
-    name: string;
-    url?: string;
-  }>;
+    name: string
+    url?: string
+  }>
 }
 
 interface PersonSchema {
-  type: 'Person';
-  name: string;
-  description?: string;
-  url?: string;
-  image?: string;
-  jobTitle?: string;
+  type: 'Person'
+  name: string
+  description?: string
+  url?: string
+  image?: string
+  jobTitle?: string
   worksFor?: {
-    name: string;
-    url?: string;
-  };
-  sameAs?: string[];
+    name: string
+    url?: string
+  }
+  sameAs?: string[]
 }
 
 interface OrganizationSchema {
-  type: 'Organization';
-  name: string;
-  description?: string;
-  url: string;
-  logo?: string;
-  sameAs?: string[];
+  type: 'Organization'
+  name: string
+  description?: string
+  url: string
+  logo?: string
+  sameAs?: string[]
 }
 
-type SchemaType = PodcastSeriesSchema | PodcastEpisodeSchema | PersonSchema | OrganizationSchema;
+type SchemaType = PodcastSeriesSchema | PodcastEpisodeSchema | PersonSchema | OrganizationSchema
 
 interface Props {
-  schema: SchemaType;
+  schema: SchemaType
 }
 
-const { schema } = Astro.props;
+const { schema } = Astro.props
 
 function generateSchema(schema: SchemaType): object {
-  const baseContext = 'https://schema.org';
+  const baseContext = 'https://schema.org'
 
   switch (schema.type) {
     case 'PodcastSeries':
@@ -91,7 +91,7 @@ function generateSchema(schema: SchemaType): object {
           },
         }),
         ...(schema.webFeed && { webFeed: schema.webFeed }),
-      };
+      }
 
     case 'PodcastEpisode':
       return {
@@ -123,14 +123,15 @@ function generateSchema(schema: SchemaType): object {
           },
         }),
         ...(schema.transcript && { transcript: schema.transcript }),
-        ...(schema.guests && schema.guests.length > 0 && {
-          actor: schema.guests.map((guest) => ({
-            '@type': 'Person',
-            name: guest.name,
-            ...(guest.url && { url: guest.url }),
-          })),
-        }),
-      };
+        ...(schema.guests &&
+          schema.guests.length > 0 && {
+            actor: schema.guests.map((guest) => ({
+              '@type': 'Person',
+              name: guest.name,
+              ...(guest.url && { url: guest.url }),
+            })),
+          }),
+      }
 
     case 'Person':
       return {
@@ -149,7 +150,7 @@ function generateSchema(schema: SchemaType): object {
           },
         }),
         ...(schema.sameAs && { sameAs: schema.sameAs }),
-      };
+      }
 
     case 'Organization':
       return {
@@ -160,14 +161,14 @@ function generateSchema(schema: SchemaType): object {
         url: schema.url,
         ...(schema.logo && { logo: schema.logo }),
         ...(schema.sameAs && { sameAs: schema.sameAs }),
-      };
+      }
 
     default:
-      return {};
+      return {}
   }
 }
 
-const jsonLd = generateSchema(schema);
+const jsonLd = generateSchema(schema)
 ---
 
 <script type="application/ld+json" set:html={JSON.stringify(jsonLd, null, 2)} />

@@ -3,10 +3,10 @@
  * Admin Images Documentation
  * Comprehensive guide to Cloudinary image components and utilities
  */
-import AdminLayout from '../../layouts/AdminLayout.astro';
-import CloudinaryImage from '../../components/CloudinaryImage.astro';
-import CloudinaryHero from '../../components/CloudinaryHero.astro';
-import CloudinaryAvatar from '../../components/CloudinaryAvatar.astro';
+import AdminLayout from '../../layouts/AdminLayout.astro'
+import CloudinaryImage from '../../components/CloudinaryImage.astro'
+import CloudinaryHero from '../../components/CloudinaryHero.astro'
+import CloudinaryAvatar from '../../components/CloudinaryAvatar.astro'
 import {
   SOUTHLAND_FOLDER,
   BRANDING_FOLDER,
@@ -15,12 +15,12 @@ import {
   buildSouthlandUrl,
   getLogoUrl,
   getCloudinaryResponsiveSet,
-  getDprSrcset
-} from '../../lib/cloudinary';
+  getDprSrcset,
+} from '../../lib/cloudinary'
 
 // Sample images for demos (using Cloudinary demo account as fallback)
-const demoPublicId = 'sample';
-const cloudName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || 'demo';
+const demoPublicId = 'sample'
+const cloudName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || 'demo'
 ---
 
 <AdminLayout title="Image Components" activeNav="/admin/images">
@@ -60,7 +60,8 @@ const cloudName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || 'demo';
     <div class="card-header">
       <h2 class="card-title">Cloudinary Folder Structure</h2>
     </div>
-    <pre class="code-block"><code>Southland Website/
+    <pre
+      class="code-block"><code>Southland Website/
 ├── Southland Branding/      # Brand assets
 │   ├── logos/               # Logo variations
 │   ├── icons/               # UI icons, favicons
@@ -83,11 +84,13 @@ const cloudName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || 'demo';
     </div>
 
     <p class="section-desc">
-      Full-featured image component with lazy loading, blur placeholders, responsive srcset, and error handling.
+      Full-featured image component with lazy loading, blur placeholders, responsive srcset, and
+      error handling.
     </p>
 
     <h3 class="subsection-title">Basic Usage</h3>
-    <pre class="code-block"><code>&lt;CloudinaryImage
+    <pre
+      class="code-block"><code>&lt;CloudinaryImage
   publicId="podcast/episode-01"
   alt="Episode thumbnail"
   width={800}
@@ -225,7 +228,8 @@ const cloudName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || 'demo';
     </p>
 
     <h3 class="subsection-title">Usage</h3>
-    <pre class="code-block"><code>&lt;CloudinaryHero
+    <pre
+      class="code-block"><code>&lt;CloudinaryHero
   publicId="heroes/farm-sunrise"
   alt="Southland Organics Farm"
   height={500}
@@ -332,7 +336,8 @@ const cloudName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || 'demo';
     </p>
 
     <h3 class="subsection-title">Usage</h3>
-    <pre class="code-block"><code>&lt;CloudinaryAvatar
+    <pre
+      class="code-block"><code>&lt;CloudinaryAvatar
   publicId="team/john-doe"
   alt="John Doe"
   size={64}
@@ -418,8 +423,8 @@ const cloudName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || 'demo';
       <div class="feature-card">
         <div class="feature-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2"/>
-            <path d="m9 9 6 6m0-6-6 6"/>
+            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+            <path d="m9 9 6 6m0-6-6 6"></path>
           </svg>
         </div>
         <h4>Intersection Observer</h4>
@@ -430,7 +435,9 @@ const cloudName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || 'demo';
       <div class="feature-card">
         <div class="feature-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48 2.83-2.83"/>
+            <path
+              d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48 2.83-2.83"
+            ></path>
           </svg>
         </div>
         <h4>Blur Placeholder</h4>
@@ -441,7 +448,7 @@ const cloudName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || 'demo';
       <div class="feature-card">
         <div class="feature-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 14h6v6M4 10V4h6m10 10v6h-6m0-16h6v6"/>
+            <path d="M4 14h6v6M4 10V4h6m10 10v6h-6m0-16h6v6"></path>
           </svg>
         </div>
         <h4>Responsive Srcset</h4>
@@ -452,7 +459,7 @@ const cloudName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || 'demo';
       <div class="feature-card">
         <div class="feature-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
         </div>
         <h4>LCP Preload</h4>
@@ -463,7 +470,9 @@ const cloudName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || 'demo';
       <div class="feature-card">
         <div class="feature-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            <path
+              d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+            ></path>
           </svg>
         </div>
         <h4>DPR Srcset</h4>
@@ -474,7 +483,9 @@ const cloudName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || 'demo';
       <div class="feature-card">
         <div class="feature-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            <path
+              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+            ></path>
           </svg>
         </div>
         <h4>Auto Format</h4>
@@ -573,7 +584,8 @@ const cloudName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || 'demo';
     <div class="helper-section">
       <h3 class="helper-name">buildCloudinaryUrl(publicId, options)</h3>
       <p class="helper-desc">Core function to build Cloudinary URLs with transformations</p>
-      <pre class="code-block"><code>import {'{'} buildCloudinaryUrl {'}'} from '../lib/cloudinary';
+      <pre
+        class="code-block"><code>import {'{'} buildCloudinaryUrl {'}'} from '../lib/cloudinary';
 
 const url = buildCloudinaryUrl('podcast/episode-01', {'{'}
   width: 800,
@@ -587,7 +599,8 @@ const url = buildCloudinaryUrl('podcast/episode-01', {'{'}
     <div class="helper-section">
       <h3 class="helper-name">buildSouthlandUrl(imagePath, options)</h3>
       <p class="helper-desc">Build URL with Southland Website/ prefix</p>
-      <pre class="code-block"><code>// Automatically prefixes with "Southland Website/"
+      <pre
+        class="code-block"><code>// Automatically prefixes with "Southland Website/"
 const url = buildSouthlandUrl('podcast/episodes/ep-42', {'{'}
   width: 400
 {'}'});
@@ -597,7 +610,8 @@ const url = buildSouthlandUrl('podcast/episodes/ep-42', {'{'}
     <div class="helper-section">
       <h3 class="helper-name">buildBrandingUrl(imagePath, options)</h3>
       <p class="helper-desc">Build URL for branding assets (logos, icons)</p>
-      <pre class="code-block"><code>// Automatically prefixes with "Southland Website/Southland Branding/"
+      <pre
+        class="code-block"><code>// Automatically prefixes with "Southland Website/Southland Branding/"
 const logoUrl = buildBrandingUrl('logos/southland-logo-primary', {'{'}
   width: 300,
   format: 'png'
@@ -607,7 +621,8 @@ const logoUrl = buildBrandingUrl('logos/southland-logo-primary', {'{'}
     <div class="helper-section">
       <h3 class="helper-name">getLogoUrl(variant, options)</h3>
       <p class="helper-desc">Get logo URL by variant name</p>
-      <pre class="code-block"><code>const primary = getLogoUrl('primary');  // Main logo
+      <pre
+        class="code-block"><code>const primary = getLogoUrl('primary');  // Main logo
 const white = getLogoUrl('white');      // White version
 const black = getLogoUrl('black');      // Black version
 const icon = getLogoUrl('icon');        // Icon only</code></pre>
@@ -616,7 +631,8 @@ const icon = getLogoUrl('icon');        // Icon only</code></pre>
     <div class="helper-section">
       <h3 class="helper-name">getCloudinaryResponsiveSet(publicId, widths, options)</h3>
       <p class="helper-desc">Generate responsive srcset with sizes</p>
-      <pre class="code-block"><code>const {'{'} src, srcset, sizes {'}'} = getCloudinaryResponsiveSet(
+      <pre
+        class="code-block"><code>const {'{'} src, srcset, sizes {'}'} = getCloudinaryResponsiveSet(
   'heroes/farm',
   [640, 1024, 1536, 1920],
   {'{'} crop: 'fill', quality: 'auto' {'}'}
@@ -629,21 +645,24 @@ const icon = getLogoUrl('icon');        // Icon only</code></pre>
     <div class="helper-section">
       <h3 class="helper-name">getDprSrcset(publicId, baseWidth, options)</h3>
       <p class="helper-desc">Generate DPR-based srcset (1x, 1.5x, 2x, 3x)</p>
-      <pre class="code-block"><code>const srcset = getDprSrcset('team/john', 200);
+      <pre
+        class="code-block"><code>const srcset = getDprSrcset('team/john', 200);
 // Returns: "url 1x, url 1.5x, url 2x, url 3x"</code></pre>
     </div>
 
     <div class="helper-section">
       <h3 class="helper-name">getEpisodeThumbnail(episodeSlug, width)</h3>
       <p class="helper-desc">Get podcast episode thumbnail (16:9)</p>
-      <pre class="code-block"><code>const thumb = getEpisodeThumbnail('regenerative-farming-101', 400);
+      <pre
+        class="code-block"><code>const thumb = getEpisodeThumbnail('regenerative-farming-101', 400);
 // Returns 400x225 thumbnail from podcast/episodes/</code></pre>
     </div>
 
     <div class="helper-section">
       <h3 class="helper-name">getGuestImage(guestSlug, size)</h3>
       <p class="helper-desc">Get guest profile image (face-focused square)</p>
-      <pre class="code-block"><code>const guest = getGuestImage('dr-allen-williams', 200);
+      <pre
+        class="code-block"><code>const guest = getGuestImage('dr-allen-williams', 200);
 // Returns face-cropped 200x200 from podcast/guests/</code></pre>
     </div>
   </div>
@@ -655,7 +674,8 @@ const icon = getLogoUrl('icon');        // Icon only</code></pre>
     </div>
 
     <h3 class="subsection-title">Gallery Grid</h3>
-    <pre class="code-block"><code>&lt;div class="grid grid-cols-2 md:grid-cols-3 gap-4"&gt;
+    <pre
+      class="code-block"><code>&lt;div class="grid grid-cols-2 md:grid-cols-3 gap-4"&gt;
   {'{'}images.map(img =&gt; (
     &lt;CloudinaryImage
       publicId={'{'}img.publicId{'}'}
@@ -669,7 +689,8 @@ const icon = getLogoUrl('icon');        // Icon only</code></pre>
 &lt;/div&gt;</code></pre>
 
     <h3 class="subsection-title">Product Card</h3>
-    <pre class="code-block"><code>&lt;article class="product-card"&gt;
+    <pre
+      class="code-block"><code>&lt;article class="product-card"&gt;
   &lt;CloudinaryImage
     publicId={'{'}product.image{'}'}
     alt={'{'}product.name{'}'}
@@ -684,7 +705,8 @@ const icon = getLogoUrl('icon');        // Icon only</code></pre>
 &lt;/article&gt;</code></pre>
 
     <h3 class="subsection-title">Team Member Card</h3>
-    <pre class="code-block"><code>&lt;div class="team-member"&gt;
+    <pre
+      class="code-block"><code>&lt;div class="team-member"&gt;
   &lt;CloudinaryAvatar
     publicId={'{'}member.photo{'}'}
     alt={'{'}member.name{'}'}
@@ -697,7 +719,8 @@ const icon = getLogoUrl('icon');        // Icon only</code></pre>
 &lt;/div&gt;</code></pre>
 
     <h3 class="subsection-title">Blog Hero</h3>
-    <pre class="code-block"><code>&lt;CloudinaryHero
+    <pre
+      class="code-block"><code>&lt;CloudinaryHero
   publicId={'{'}post.featuredImage{'}'}
   alt={'{'}post.title{'}'}
   height={400}
@@ -718,7 +741,8 @@ const icon = getLogoUrl('icon');        // Icon only</code></pre>
     <div class="card-header">
       <h2 class="card-title">TypeScript Types</h2>
     </div>
-    <pre class="code-block"><code>// Available from lib/cloudinary.ts
+    <pre
+      class="code-block"><code>// Available from lib/cloudinary.ts
 import type {'{'}
   CloudinaryTransformOptions,
   ImageEffect,

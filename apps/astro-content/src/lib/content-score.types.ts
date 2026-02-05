@@ -9,19 +9,19 @@
 
 export interface ContentScoreRequest {
   /** Optional: existing URL for cached data lookup */
-  url?: string;
+  url?: string
   /** Content title */
-  title: string;
+  title: string
   /** Raw MDX body content */
-  body: string;
+  body: string
   /** Content description/excerpt */
-  description?: string;
+  description?: string
   /** Tags array */
-  tags?: string[];
+  tags?: string[]
   /** Segment: poultry, turf, agriculture, general */
-  segment?: string;
+  segment?: string
   /** Target keyword (optional, for SEO analysis) */
-  targetKeyword?: string;
+  targetKeyword?: string
 }
 
 // ============================================================================
@@ -30,28 +30,39 @@ export interface ContentScoreRequest {
 
 export interface ContentScoreResponse {
   /** Request ID for tracking */
-  requestId: string;
+  requestId: string
   /** Timestamp of analysis */
-  analyzedAt: string;
+  analyzedAt: string
+  /** Content hash for cache busting */
+  contentHash?: string
+  /** Scan mode used */
+  mode?: 'light' | 'full'
+  /** When light scan was last run */
+  lightScanAt?: string
+  /** When full scan was last run */
+  fullScanAt?: string
+
   /** Overall quality score 0-100 */
-  overallScore: number;
+  overallScore: number
   /** Can this content be published? */
-  publishable: boolean;
-  /** Blocking issues that prevent publish */
-  blockers: string[];
+  publishable: boolean
+  /** Blocking issues that prevent publish (hard blocks) */
+  blockers: string[]
+  /** Advisory warnings (non-blocking) */
+  warnings?: string[]
 
   /** Persona alignment scores */
-  persona: PersonaScores;
+  persona: PersonaScores
   /** Content gap status */
-  gap: GapStatus;
+  gap: GapStatus
   /** Originality/plagiarism check */
-  originality: OriginalityScore;
+  originality: OriginalityScore
   /** AI detection */
-  aiDetection: AIDetectionScore;
+  aiDetection: AIDetectionScore
   /** SEO analysis (DataforSEO) */
-  seo: SEOScore;
+  seo: SEOScore
   /** Content quality metrics */
-  quality: QualityMetrics;
+  quality: QualityMetrics
 }
 
 // ============================================================================
@@ -61,23 +72,23 @@ export interface ContentScoreResponse {
 export interface PersonaScores {
   /** Primary persona match */
   primary: {
-    name: PersonaName;
-    slug: string;
-    score: number; // 0-1
-  };
+    name: PersonaName
+    slug: string
+    score: number // 0-1
+  }
   /** All persona scores */
   scores: {
-    broilerBill: number;    // Commercial poultry
-    backyardBetty: number;  // Backyard flock
-    turfTaylor: number;     // Lawn professionals
-  };
+    broilerBill: number // Commercial poultry
+    backyardBetty: number // Backyard flock
+    turfTaylor: number // Lawn professionals
+  }
   /** Is primary score above threshold (0.6)? */
-  aligned: boolean;
+  aligned: boolean
   /** Recommendation */
-  recommendation?: string;
+  recommendation?: string
 }
 
-export type PersonaName = 'Broiler Bill' | 'Backyard Betty' | 'Turf Taylor' | 'Unknown';
+export type PersonaName = 'Broiler Bill' | 'Backyard Betty' | 'Turf Taylor' | 'Unknown'
 
 // ============================================================================
 // CONTENT GAP STATUS (from Mothership SQL)
@@ -85,17 +96,17 @@ export type PersonaName = 'Broiler Bill' | 'Backyard Betty' | 'Turf Taylor' | 'U
 
 export interface GapStatus {
   /** Gap classification */
-  status: 'ORPHAN' | 'WEAK' | 'CONFUSED' | 'OK';
+  status: 'ORPHAN' | 'WEAK' | 'CONFUSED' | 'OK'
   /** Human-readable explanation */
-  message: string;
+  message: string
   /** Inferred buyer journey stage */
-  stage?: BuyerStage;
+  stage?: BuyerStage
   /** Similar content that already exists */
   existingContent?: {
-    url: string;
-    title: string;
-    similarity: number;
-  }[];
+    url: string
+    title: string
+    similarity: number
+  }[]
 }
 
 export type BuyerStage =
@@ -108,7 +119,7 @@ export type BuyerStage =
   | 'challenge'
   | 'success'
   | 'commitment'
-  | 'evangelist';
+  | 'evangelist'
 
 // ============================================================================
 // ORIGINALITY (Originality.ai API)
@@ -116,17 +127,17 @@ export type BuyerStage =
 
 export interface OriginalityScore {
   /** Overall originality percentage (100 = fully original) */
-  score: number;
+  score: number
   /** Plagiarism sources found */
   sources?: {
-    url: string;
-    matchPercentage: number;
-  }[];
+    url: string
+    matchPercentage: number
+  }[]
   /** Is score above threshold (90%)? */
-  passed: boolean;
+  passed: boolean
   /** Skipped if content too short */
-  skipped?: boolean;
-  skipReason?: string;
+  skipped?: boolean
+  skipReason?: string
 }
 
 // ============================================================================
@@ -135,16 +146,16 @@ export interface OriginalityScore {
 
 export interface AIDetectionScore {
   /** Percentage likelihood content is AI-generated */
-  aiProbability: number;
+  aiProbability: number
   /** Percentage likelihood content is human-written */
-  humanProbability: number;
+  humanProbability: number
   /** Classification */
-  classification: 'human' | 'ai' | 'mixed';
+  classification: 'human' | 'ai' | 'mixed'
   /** Is AI probability below threshold (50%)? */
-  passed: boolean;
+  passed: boolean
   /** Skipped if content too short */
-  skipped?: boolean;
-  skipReason?: string;
+  skipped?: boolean
+  skipReason?: string
 }
 
 // ============================================================================
@@ -153,38 +164,38 @@ export interface AIDetectionScore {
 
 export interface SEOScore {
   /** Overall SEO score 0-100 */
-  score: number;
+  score: number
   /** Keyword density for target keyword */
   keywordDensity?: {
-    keyword: string;
-    density: number;
-    recommendation: 'too_low' | 'optimal' | 'too_high';
-  };
+    keyword: string
+    density: number
+    recommendation: 'too_low' | 'optimal' | 'too_high'
+  }
   /** Readability metrics */
   readability?: {
-    fleschKincaid: number;
-    gradeLevel: string;
-  };
+    fleschKincaid: number
+    gradeLevel: string
+  }
   /** Content length */
-  wordCount: number;
+  wordCount: number
   /** Headings analysis */
   headings?: {
-    h1Count: number;
-    h2Count: number;
-    h3Count: number;
-    hasProperStructure: boolean;
-  };
+    h1Count: number
+    h2Count: number
+    h3Count: number
+    hasProperStructure: boolean
+  }
   /** SERP competitors for target keyword */
   competitors?: {
-    position: number;
-    url: string;
-    title: string;
-    wordCount: number;
-  }[];
+    position: number
+    url: string
+    title: string
+    wordCount: number
+  }[]
   /** Recommendations */
-  recommendations: string[];
+  recommendations: string[]
   /** Cached data age (null if fresh) */
-  cachedAt?: string;
+  cachedAt?: string
 }
 
 // ============================================================================
@@ -193,24 +204,24 @@ export interface SEOScore {
 
 export interface QualityMetrics {
   /** Word count */
-  wordCount: number;
+  wordCount: number
   /** Estimated reading time in minutes */
-  readingTime: number;
+  readingTime: number
   /** Has featured image? */
-  hasFeaturedImage: boolean;
+  hasFeaturedImage: boolean
   /** Has meta description? */
-  hasMetaDescription: boolean;
+  hasMetaDescription: boolean
   /** Description length in range? (120-160 chars) */
-  metaDescriptionOptimal: boolean;
+  metaDescriptionOptimal: boolean
   /** Has internal links? */
-  hasInternalLinks: boolean;
+  hasInternalLinks: boolean
   /** Has external links? */
-  hasExternalLinks: boolean;
+  hasExternalLinks: boolean
   /** Link count */
   linkCount: {
-    internal: number;
-    external: number;
-  };
+    internal: number
+    external: number
+  }
 }
 
 // ============================================================================
@@ -218,10 +229,10 @@ export interface QualityMetrics {
 // ============================================================================
 
 export interface ContentScoreError {
-  error: true;
-  code: string;
-  message: string;
-  details?: Record<string, unknown>;
+  error: true
+  code: string
+  message: string
+  details?: Record<string, unknown>
 }
 
 // ============================================================================
@@ -230,17 +241,17 @@ export interface ContentScoreError {
 
 export const SCORE_THRESHOLDS = {
   persona: {
-    aligned: 0.6,      // Minimum score to be "aligned"
-    strong: 0.75,      // Strong alignment
+    aligned: 0.6, // Minimum score to be "aligned"
+    strong: 0.75, // Strong alignment
   },
   originality: {
-    minimum: 90,       // Minimum % to pass
+    minimum: 90, // Minimum % to pass
   },
   aiDetection: {
-    maximum: 50,       // Maximum AI % to pass
+    maximum: 50, // Maximum AI % to pass
   },
   seo: {
-    minimum: 60,       // Minimum SEO score
+    minimum: 60, // Minimum SEO score
   },
   quality: {
     minWordCount: 300,
@@ -248,4 +259,4 @@ export const SCORE_THRESHOLDS = {
     minDescriptionLength: 120,
     maxDescriptionLength: 160,
   },
-} as const;
+} as const

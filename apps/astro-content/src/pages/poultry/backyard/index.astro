@@ -10,56 +10,56 @@
  * - Organic solutions for hobby farmers
  * - Community & educational resources
  */
-import BaseLayout from '../../../layouts/BaseLayout.astro';
-import { buildBrandingUrl } from '../../../lib/cloudinary';
-import ProofPoints from '../../../components/cdp/ProofPoints.astro';
-import SearchBar from '../../../components/cdp/SearchBar.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import { buildBrandingUrl } from '../../../lib/cloudinary'
+import ProofPoints from '../../../components/cdp/ProofPoints.astro'
+import SearchBar from '../../../components/cdp/SearchBar.astro'
 
-const title = "Backyard Flock Solutions | Southland Organics";
-const description = "Organic solutions for backyard chicken keepers. Keep your flock healthy naturally with probiotics, supplements, and expert advice.";
+const title = 'Backyard Flock Solutions | Southland Organics'
+const description =
+  'Organic solutions for backyard chicken keepers. Keep your flock healthy naturally with probiotics, supplements, and expert advice.'
 
 // Schema for SEO
 const schema = {
-  "@context": "https://schema.org",
-  "@type": "CollectionPage",
-  name: "Backyard Flock Solutions",
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'Backyard Flock Solutions',
   description: description,
-  url: "https://southlandorganics.com/poultry/backyard/",
+  url: 'https://southlandorganics.com/poultry/backyard/',
   provider: {
-    "@type": "Organization",
-    name: "Southland Organics",
-  }
-};
+    '@type': 'Organization',
+    name: 'Southland Organics',
+  },
+}
 ---
 
 <BaseLayout title={title} description={description} schema={schema}>
   <!-- Hero Section -->
   <section class="relative bg-gradient-to-br from-amber-50 to-orange-50 py-16 md:py-24">
-    <div class="max-w-6xl mx-auto px-4">
-      <div class="grid md:grid-cols-2 gap-12 items-center">
+    <div class="mx-auto max-w-6xl px-4">
+      <div class="grid items-center gap-12 md:grid-cols-2">
         <div>
-          <span class="inline-block px-3 py-1 bg-amber-100 text-amber-700 text-sm font-medium rounded-full mb-4">
+          <span
+            class="mb-4 inline-block rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-700"
+          >
             For Backyard Flocks
           </span>
-          <h1 class="text-4xl md:text-5xl font-bold mb-6" style="color: var(--color-title);">
+          <h1 class="mb-6 text-4xl font-bold md:text-5xl" style="color: var(--color-title);">
             Happy, Healthy Chickens Start Here
           </h1>
-          <p class="text-lg text-gray-600 mb-8 leading-relaxed">
-            Whether you have 5 hens or 50, keeping your backyard flock healthy doesn't have to be complicated.
-            Our organic probiotics and supplements make it easy to raise thriving birds naturally.
+          <p class="mb-8 text-lg leading-relaxed text-gray-600">
+            Whether you have 5 hens or 50, keeping your backyard flock healthy doesn't have to be
+            complicated. Our organic probiotics and supplements make it easy to raise thriving birds
+            naturally.
           </p>
           <div class="flex flex-wrap gap-4">
-            <a href="/shop/poultry/backyard/" class="btn-primary">
-              Shop Backyard Products
-            </a>
-            <a href="/learn/backyard-chickens/" class="btn-secondary">
-              Learn the Basics
-            </a>
+            <a href="/shop/poultry/backyard/" class="btn-primary"> Shop Backyard Products </a>
+            <a href="/learn/backyard-chickens/" class="btn-secondary"> Learn the Basics </a>
           </div>
         </div>
         <div class="relative">
-          <div class="aspect-square bg-amber-100 rounded-2xl flex items-center justify-center">
-            <span class="text-amber-300 text-6xl">Coming Soon</span>
+          <div class="flex aspect-square items-center justify-center rounded-2xl bg-amber-100">
+            <span class="text-6xl text-amber-300">Coming Soon</span>
           </div>
         </div>
       </div>
@@ -67,9 +67,9 @@ const schema = {
   </section>
 
   <!-- Proof Points from Customer Outcomes -->
-  <section class="py-12 bg-amber-50">
-    <div class="max-w-4xl mx-auto px-4">
-      <h2 class="text-xl font-semibold text-center mb-8" style="color: var(--color-title);">
+  <section class="bg-amber-50 py-12">
+    <div class="mx-auto max-w-4xl px-4">
+      <h2 class="mb-8 text-center text-xl font-semibold" style="color: var(--color-title);">
         What Our Customers Say
       </h2>
       <ProofPoints persona="backyard" variant="cards" />
@@ -77,92 +77,131 @@ const schema = {
   </section>
 
   <!-- Problem Search -->
-  <section class="py-12 bg-white border-b">
-    <div class="max-w-2xl mx-auto px-4 text-center">
-      <h2 class="text-xl font-semibold mb-4" style="color: var(--color-title);">
+  <section class="border-b bg-white py-12">
+    <div class="mx-auto max-w-2xl px-4 text-center">
+      <h2 class="mb-4 text-xl font-semibold" style="color: var(--color-title);">
         What's going on with your flock?
       </h2>
-      <SearchBar
-        size="large"
-        placeholder="e.g., sick chickens, not laying eggs, runny poop..."
-      />
+      <SearchBar size="large" placeholder="e.g., sick chickens, not laying eggs, runny poop..." />
     </div>
   </section>
 
   <!-- Value Props -->
-  <section class="py-16 bg-white">
-    <div class="max-w-6xl mx-auto px-4">
-      <h2 class="text-3xl font-bold text-center mb-12" style="color: var(--color-title);">
+  <section class="bg-white py-16">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="mb-12 text-center text-3xl font-bold" style="color: var(--color-title);">
         Why Backyard Keepers Choose Us
       </h2>
-      <div class="grid md:grid-cols-3 gap-8">
-        <div class="text-center p-6">
-          <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      <div class="grid gap-8 md:grid-cols-3">
+        <div class="p-6 text-center">
+          <div
+            class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100"
+          >
+            <svg
+              class="h-8 w-8 text-amber-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
           </div>
-          <h3 class="text-xl font-bold mb-2" style="color: var(--color-title);">Safe & Natural</h3>
-          <p class="text-gray-600">OMRI Listed organic products safe for you, your birds, and the eggs you eat.</p>
+          <h3 class="mb-2 text-xl font-bold" style="color: var(--color-title);">Safe & Natural</h3>
+          <p class="text-gray-600">
+            OMRI Listed organic products safe for you, your birds, and the eggs you eat.
+          </p>
         </div>
-        <div class="text-center p-6">
-          <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+        <div class="p-6 text-center">
+          <div
+            class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100"
+          >
+            <svg
+              class="h-8 w-8 text-amber-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+              ></path>
             </svg>
           </div>
-          <h3 class="text-xl font-bold mb-2" style="color: var(--color-title);">Expert Support</h3>
-          <p class="text-gray-600">Real poultry experts on our team, plus educational content for every skill level.</p>
+          <h3 class="mb-2 text-xl font-bold" style="color: var(--color-title);">Expert Support</h3>
+          <p class="text-gray-600">
+            Real poultry experts on our team, plus educational content for every skill level.
+          </p>
         </div>
-        <div class="text-center p-6">
-          <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+        <div class="p-6 text-center">
+          <div
+            class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100"
+          >
+            <svg
+              class="h-8 w-8 text-amber-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+              ></path>
             </svg>
           </div>
-          <h3 class="text-xl font-bold mb-2" style="color: var(--color-title);">Made with Love</h3>
-          <p class="text-gray-600">Family-owned in Georgia. We raise chickens too and use these products daily.</p>
+          <h3 class="mb-2 text-xl font-bold" style="color: var(--color-title);">Made with Love</h3>
+          <p class="text-gray-600">
+            Family-owned in Georgia. We raise chickens too and use these products daily.
+          </p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Popular Products (Placeholder) -->
-  <section class="py-16 bg-gray-50">
-    <div class="max-w-6xl mx-auto px-4">
-      <h2 class="text-3xl font-bold text-center mb-4" style="color: var(--color-title);">
+  <section class="bg-gray-50 py-16">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="mb-4 text-center text-3xl font-bold" style="color: var(--color-title);">
         Backyard Bestsellers
       </h2>
-      <p class="text-center text-gray-600 mb-12">
-        Our most-loved products for small flocks
-      </p>
-      <div class="grid md:grid-cols-4 gap-6">
-        {[1, 2, 3, 4].map((i) => (
-          <div class="bg-white rounded-xl shadow-sm p-4">
-            <div class="aspect-square bg-gray-100 rounded-lg mb-4 flex items-center justify-center">
-              <span class="text-gray-400">Product {i}</span>
+      <p class="mb-12 text-center text-gray-600">Our most-loved products for small flocks</p>
+      <div class="grid gap-6 md:grid-cols-4">
+        {
+          [1, 2, 3, 4].map((i) => (
+            <div class="rounded-xl bg-white p-4 shadow-sm">
+              <div class="mb-4 flex aspect-square items-center justify-center rounded-lg bg-gray-100">
+                <span class="text-gray-400">Product {i}</span>
+              </div>
+              <h3 class="mb-1 font-semibold">Product Name</h3>
+              <p class="text-sm text-gray-500">Coming soon</p>
             </div>
-            <h3 class="font-semibold mb-1">Product Name</h3>
-            <p class="text-sm text-gray-500">Coming soon</p>
-          </div>
-        ))}
+          ))
+        }
       </div>
-      <div class="text-center mt-8">
-        <a href="/shop/poultry/backyard/" class="btn-secondary">
-          View All Backyard Products
-        </a>
+      <div class="mt-8 text-center">
+        <a href="/shop/poultry/backyard/" class="btn-secondary"> View All Backyard Products </a>
       </div>
     </div>
   </section>
 
   <!-- Educational CTA -->
-  <section class="py-16 bg-amber-600 text-white">
-    <div class="max-w-4xl mx-auto px-4 text-center">
-      <h2 class="text-3xl font-bold mb-4">New to Backyard Chickens?</h2>
-      <p class="text-lg text-amber-100 mb-8">
+  <section class="bg-amber-600 py-16 text-white">
+    <div class="mx-auto max-w-4xl px-4 text-center">
+      <h2 class="mb-4 text-3xl font-bold">New to Backyard Chickens?</h2>
+      <p class="mb-8 text-lg text-amber-100">
         Check out our Ag & Culture Podcast for expert tips on raising healthy flocks.
       </p>
-      <a href="/podcast/" class="inline-block px-8 py-4 bg-white text-amber-600 font-semibold rounded-lg hover:bg-amber-50 transition-colors">
+      <a
+        href="/podcast/"
+        class="inline-block rounded-lg bg-white px-8 py-4 font-semibold text-amber-600 transition-colors hover:bg-amber-50"
+      >
         Listen to the Podcast
       </a>
     </div>

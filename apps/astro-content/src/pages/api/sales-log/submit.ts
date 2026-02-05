@@ -10,39 +10,39 @@
  * 4. Sends to point.dog CDP (if configured)
  */
 
-import type { APIRoute } from 'astro';
+import type { APIRoute } from 'astro'
 
 interface SalesLogSubmission {
-  log_id: string;
-  sales_rep: string;
-  call_date: string;
-  call_type: string;
-  customer_name?: string;
-  customer_email?: string;
-  customer_phone?: string;
-  company_name?: string;
-  operation_type?: string;
-  integrator?: string;
-  house_count?: number;
-  bird_capacity?: string;
-  outcome_type: string;
-  outcome_details?: string;
-  fcr_before?: number;
-  fcr_after?: number;
-  fcr_improvement_pct?: number;
-  mortality_before?: number;
-  mortality_after?: number;
-  mortality_reduction_pct?: number;
-  order_value?: number;
-  products_mentioned?: string[];
-  follow_up_needed?: boolean;
-  follow_up_notes?: string;
-  logged_at: string;
+  log_id: string
+  sales_rep: string
+  call_date: string
+  call_type: string
+  customer_name?: string
+  customer_email?: string
+  customer_phone?: string
+  company_name?: string
+  operation_type?: string
+  integrator?: string
+  house_count?: number
+  bird_capacity?: string
+  outcome_type: string
+  outcome_details?: string
+  fcr_before?: number
+  fcr_after?: number
+  fcr_improvement_pct?: number
+  mortality_before?: number
+  mortality_after?: number
+  mortality_reduction_pct?: number
+  order_value?: number
+  products_mentioned?: string[]
+  follow_up_needed?: boolean
+  follow_up_notes?: string
+  logged_at: string
 }
 
 export const POST: APIRoute = async ({ request }) => {
   try {
-    const data: SalesLogSubmission = await request.json();
+    const data: SalesLogSubmission = await request.json()
 
     // Validate required fields
     if (!data.sales_rep || !data.call_date || !data.outcome_type) {
@@ -52,7 +52,7 @@ export const POST: APIRoute = async ({ request }) => {
           status: 400,
           headers: { 'Content-Type': 'application/json' },
         }
-      );
+      )
     }
 
     // Enrich with server-side metadata
@@ -62,38 +62,41 @@ export const POST: APIRoute = async ({ request }) => {
         received_at: new Date().toISOString(),
         source: 'sales_log_form',
       },
-    };
+    }
 
     // Log for development/debugging
-    console.log('[Sales Log Submission]', JSON.stringify({
-      log_id: enrichedData.log_id,
-      sales_rep: enrichedData.sales_rep,
-      outcome_type: enrichedData.outcome_type,
-      received_at: enrichedData._meta.received_at,
-    }));
+    console.log(
+      '[Sales Log Submission]',
+      JSON.stringify({
+        log_id: enrichedData.log_id,
+        sales_rep: enrichedData.sales_rep,
+        outcome_type: enrichedData.outcome_type,
+        received_at: enrichedData._meta.received_at,
+      })
+    )
 
     // Forward to BigQuery webhook if configured
-    const bigqueryWebhook = import.meta.env.BIGQUERY_SALES_LOG_WEBHOOK;
+    const bigqueryWebhook = import.meta.env.BIGQUERY_SALES_LOG_WEBHOOK
     if (bigqueryWebhook) {
       try {
         await fetch(bigqueryWebhook, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.BIGQUERY_WEBHOOK_TOKEN || ''}`,
+            Authorization: `Bearer ${import.meta.env.BIGQUERY_WEBHOOK_TOKEN || ''}`,
           },
           body: JSON.stringify({
             table: 'cdp.sales_outcome_logs',
             data: enrichedData,
           }),
-        });
+        })
       } catch (webhookError) {
-        console.error('[BigQuery Webhook Error]', webhookError);
+        console.error('[BigQuery Webhook Error]', webhookError)
       }
     }
 
     // Forward to point.dog CDP if configured
-    const pointdogEndpoint = import.meta.env.POINTDOG_INGEST_ENDPOINT;
+    const pointdogEndpoint = import.meta.env.POINTDOG_INGEST_ENDPOINT
     if (pointdogEndpoint) {
       try {
         await fetch(pointdogEndpoint, {
@@ -108,9 +111,9 @@ export const POST: APIRoute = async ({ request }) => {
             timestamp: enrichedData._meta.received_at,
             email: enrichedData.customer_email,
           }),
-        });
+        })
       } catch (cdpError) {
-        console.error('[point.dog CDP Error]', cdpError);
+        console.error('[point.dog CDP Error]', cdpError)
       }
     }
 
@@ -127,9 +130,9 @@ export const POST: APIRoute = async ({ request }) => {
           'Cache-Control': 'no-store',
         },
       }
-    );
+    )
   } catch (error) {
-    console.error('[Sales Log Error]', error);
+    console.error('[Sales Log Error]', error)
 
     return new Response(
       JSON.stringify({
@@ -140,19 +143,16 @@ export const POST: APIRoute = async ({ request }) => {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       }
-    );
+    )
   }
-};
+}
 
 export const ALL: APIRoute = async () => {
-  return new Response(
-    JSON.stringify({ error: 'Method not allowed' }),
-    {
-      status: 405,
-      headers: {
-        'Content-Type': 'application/json',
-        'Allow': 'POST',
-      },
-    }
-  );
-};
+  return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+    status: 405,
+    headers: {
+      'Content-Type': 'application/json',
+      Allow: 'POST',
+    },
+  })
+}

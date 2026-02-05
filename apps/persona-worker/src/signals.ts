@@ -5,7 +5,7 @@
  * them into a standardized format for persona scoring.
  */
 
-import type { PixelEvent, Signal, SignalType, PersonaId } from './types';
+import type { PixelEvent, Signal, SignalType, PersonaId } from './types'
 
 // Keywords that indicate persona affinity
 const PERSONA_KEYWORDS: Record<PersonaId, string[]> = {
@@ -50,7 +50,7 @@ const PERSONA_KEYWORDS: Record<PersonaId, string[]> = {
     'humate',
   ],
   general: [],
-};
+}
 
 // URL patterns that indicate persona
 const URL_PERSONA_PATTERNS: Array<{ pattern: RegExp; persona: PersonaId }> = [
@@ -64,19 +64,19 @@ const URL_PERSONA_PATTERNS: Array<{ pattern: RegExp; persona: PersonaId }> = [
   { pattern: /\/collections\/commercial/i, persona: 'commercial' },
   { pattern: /\/products\/.*gallon/i, persona: 'commercial' }, // Bulk sizes
   { pattern: /\/products\/.*bulk/i, persona: 'commercial' },
-];
+]
 
 /**
  * Extract signals from a pixel event
  */
 export function extractSignals(event: PixelEvent): Signal[] {
-  const signals: Signal[] = [];
-  const timestamp = event.timestamp || new Date().toISOString();
+  const signals: Signal[] = []
+  const timestamp = event.timestamp || new Date().toISOString()
 
   // Page view signal with persona detection
   if (event.page_url) {
-    const pageSignal = processPageView(event.page_url, event.page_title, timestamp);
-    if (pageSignal) signals.push(pageSignal);
+    const pageSignal = processPageView(event.page_url, event.page_title, timestamp)
+    if (pageSignal) signals.push(pageSignal)
   }
 
   // Search query signal
@@ -86,7 +86,7 @@ export function extractSignals(event: PixelEvent): Signal[] {
       value: String(event.properties.query),
       timestamp,
       metadata: { results_count: event.properties.results_count },
-    });
+    })
   }
 
   // Product view signal
@@ -99,7 +99,7 @@ export function extractSignals(event: PixelEvent): Signal[] {
         product_title: event.properties.product_title,
         price: event.properties.price,
       },
-    });
+    })
   }
 
   // Add to cart signal
@@ -112,7 +112,7 @@ export function extractSignals(event: PixelEvent): Signal[] {
         quantity: event.properties.quantity,
         variant: event.properties.variant_title,
       },
-    });
+    })
   }
 
   // Purchase signal
@@ -125,7 +125,7 @@ export function extractSignals(event: PixelEvent): Signal[] {
         total: event.properties?.total,
         products: event.properties?.products,
       },
-    });
+    })
   }
 
   // Decision Engine selection
@@ -135,7 +135,7 @@ export function extractSignals(event: PixelEvent): Signal[] {
       value: String(event.properties.persona),
       timestamp,
       metadata: { source: 'decision_engine' },
-    });
+    })
   }
 
   // Email signup
@@ -144,7 +144,7 @@ export function extractSignals(event: PixelEvent): Signal[] {
       type: 'email_signup',
       value: event.properties?.list_id ? String(event.properties.list_id) : 'general',
       timestamp,
-    });
+    })
   }
 
   // Content engagement (blog, podcast, etc.)
@@ -157,20 +157,16 @@ export function extractSignals(event: PixelEvent): Signal[] {
         engagement_type: event.properties?.engagement_type,
         time_on_page: event.properties?.time_on_page,
       },
-    });
+    })
   }
 
-  return signals;
+  return signals
 }
 
 /**
  * Process page view and detect persona signals from URL
  */
-function processPageView(
-  url: string,
-  title: string,
-  timestamp: string
-): Signal | null {
+function processPageView(url: string, title: string, timestamp: string): Signal | null {
   // Check URL patterns for persona indicators
   for (const { pattern, persona } of URL_PERSONA_PATTERNS) {
     if (pattern.test(url)) {
@@ -182,7 +178,7 @@ function processPageView(
           title,
           detected_persona: persona,
         },
-      };
+      }
     }
   }
 
@@ -192,29 +188,29 @@ function processPageView(
     value: url,
     timestamp,
     metadata: { title },
-  };
+  }
 }
 
 /**
  * Detect persona from text content (search query, page title, etc.)
  */
 export function detectPersonaFromText(text: string): PersonaId | null {
-  const lowerText = text.toLowerCase();
+  const lowerText = text.toLowerCase()
 
-  let bestMatch: PersonaId | null = null;
-  let bestScore = 0;
+  let bestMatch: PersonaId | null = null
+  let bestScore = 0
 
   for (const [persona, keywords] of Object.entries(PERSONA_KEYWORDS)) {
-    if (persona === 'general') continue;
+    if (persona === 'general') continue
 
-    const matchCount = keywords.filter((kw) => lowerText.includes(kw)).length;
+    const matchCount = keywords.filter((kw) => lowerText.includes(kw)).length
     if (matchCount > bestScore) {
-      bestScore = matchCount;
-      bestMatch = persona as PersonaId;
+      bestScore = matchCount
+      bestMatch = persona as PersonaId
     }
   }
 
-  return bestMatch;
+  return bestMatch
 }
 
 /**
@@ -234,9 +230,9 @@ export function getSignalWeight(signal: Signal): number {
     survey_response: 6,
     page_view: 1,
     return_visit: 2,
-  };
+  }
 
-  return weights[signal.type] || 1;
+  return weights[signal.type] || 1
 }
 
 /**
@@ -245,17 +241,17 @@ export function getSignalWeight(signal: Signal): number {
 export function getSignalPersonaHint(signal: Signal): PersonaId | null {
   // Decision engine is explicit
   if (signal.type === 'decision_engine') {
-    const persona = signal.value as PersonaId;
+    const persona = signal.value as PersonaId
     if (['backyard', 'commercial', 'lawn', 'general'].includes(persona)) {
-      return persona;
+      return persona
     }
   }
 
   // Check metadata for detected persona
   if (signal.metadata?.detected_persona) {
-    return signal.metadata.detected_persona as PersonaId;
+    return signal.metadata.detected_persona as PersonaId
   }
 
   // Try to detect from value text
-  return detectPersonaFromText(signal.value);
+  return detectPersonaFromText(signal.value)
 }

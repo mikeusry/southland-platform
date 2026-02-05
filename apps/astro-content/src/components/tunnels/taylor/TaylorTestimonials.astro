@@ -12,24 +12,21 @@
 
 interface Props {
   /** Number of testimonials to show */
-  limit?: number;
+  limit?: number
   /** Heading text */
-  heading?: string;
+  heading?: string
   /** Additional CSS classes */
-  class?: string;
+  class?: string
 }
 
-const {
-  limit = 3,
-  heading = 'What Lawn Pros Are Saying',
-  class: className = '',
-} = Astro.props;
+const { limit = 3, heading = 'What Lawn Pros Are Saying', class: className = '' } = Astro.props
 
 // Taylor-specific testimonials (professional results, client satisfaction)
 const testimonials = [
   {
     id: 'taylor-1',
-    quote: 'After switching to Genesis and Humic Acid, I\'m seeing turf that holds up better in drought conditions. My callbacks for stress-related issues dropped by 60%.',
+    quote:
+      "After switching to Genesis and Humic Acid, I'm seeing turf that holds up better in drought conditions. My callbacks for stress-related issues dropped by 60%.",
     author: 'Marcus W.',
     company: 'GreenPro Lawn Services',
     location: 'Texas',
@@ -40,7 +37,8 @@ const testimonials = [
   },
   {
     id: 'taylor-2',
-    quote: 'My clients love that we\'re using organic products. It\'s become a selling point that differentiates us from competitors. And the results speak for themselves.',
+    quote:
+      "My clients love that we're using organic products. It's become a selling point that differentiates us from competitors. And the results speak for themselves.",
     author: 'Sarah L.',
     company: 'Evergreen Landscapes',
     location: 'Colorado',
@@ -51,7 +49,8 @@ const testimonials = [
   },
   {
     id: 'taylor-3',
-    quote: 'The soil biology approach took some learning, but now I\'m using less fertilizer and getting better color. The seasonal program makes it foolproof.',
+    quote:
+      "The soil biology approach took some learning, but now I'm using less fertilizer and getting better color. The seasonal program makes it foolproof.",
     author: 'James H.',
     company: 'Turf Masters LLC',
     location: 'Ohio',
@@ -62,7 +61,8 @@ const testimonials = [
   },
   {
     id: 'taylor-4',
-    quote: 'We manage 3 golf courses and switched to Southland products last year. Greens are healthier and we\'ve reduced our fungicide applications significantly.',
+    quote:
+      "We manage 3 golf courses and switched to Southland products last year. Greens are healthier and we've reduced our fungicide applications significantly.",
     author: 'Robert C.',
     company: 'Course Management Inc.',
     location: 'Florida',
@@ -73,7 +73,8 @@ const testimonials = [
   },
   {
     id: 'taylor-5',
-    quote: 'The support team helped me develop protocols for my specific region. First year using the products and I\'ve already renewed for next season.',
+    quote:
+      "The support team helped me develop protocols for my specific region. First year using the products and I've already renewed for next season.",
     author: 'Tyler M.',
     company: 'First Green Lawn Care',
     location: 'Minnesota',
@@ -82,48 +83,46 @@ const testimonials = [
     rating: 5,
     avatar: '❄️',
   },
-];
+]
 
-const displayTestimonials = testimonials.slice(0, limit);
+const displayTestimonials = testimonials.slice(0, limit)
 ---
 
 <section class:list={['taylor-testimonials', className]}>
   <div class="taylor-testimonials__container">
     <h2 class="taylor-testimonials__heading">{heading}</h2>
     <div class="taylor-testimonials__grid">
-      {displayTestimonials.map((testimonial) => (
-        <article class="testimonial-card" data-testimonial-id={testimonial.id}>
-          <div class="testimonial-card__header">
-            <span class="testimonial-card__avatar">{testimonial.avatar}</span>
-            <div class="testimonial-card__author-info">
-              <span class="testimonial-card__author">{testimonial.author}</span>
-              <span class="testimonial-card__company">{testimonial.company}</span>
-              <span class="testimonial-card__location">{testimonial.location}</span>
+      {
+        displayTestimonials.map((testimonial) => (
+          <article class="testimonial-card" data-testimonial-id={testimonial.id}>
+            <div class="testimonial-card__header">
+              <span class="testimonial-card__avatar">{testimonial.avatar}</span>
+              <div class="testimonial-card__author-info">
+                <span class="testimonial-card__author">{testimonial.author}</span>
+                <span class="testimonial-card__company">{testimonial.company}</span>
+                <span class="testimonial-card__location">{testimonial.location}</span>
+              </div>
+              <div class="testimonial-card__rating">
+                {[...Array(testimonial.rating)].map(() => (
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  </svg>
+                ))}
+              </div>
             </div>
-            <div class="testimonial-card__rating">
-              {[...Array(testimonial.rating)].map(() => (
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                </svg>
-              ))}
+            <div class="testimonial-card__result">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span>{testimonial.result}</span>
             </div>
-          </div>
-          <div class="testimonial-card__result">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
-            <span>{testimonial.result}</span>
-          </div>
-          <blockquote class="testimonial-card__quote">
-            "{testimonial.quote}"
-          </blockquote>
-          <div class="testimonial-card__footer">
-            <span class="testimonial-card__product">
-              Using: {testimonial.product}
-            </span>
-          </div>
-        </article>
-      ))}
+            <blockquote class="testimonial-card__quote">"{testimonial.quote}"</blockquote>
+            <div class="testimonial-card__footer">
+              <span class="testimonial-card__product">Using: {testimonial.product}</span>
+            </div>
+          </article>
+        ))
+      }
     </div>
     <div class="taylor-testimonials__cta">
       <a href="/case-studies/lawn/" class="taylor-testimonials__link">
@@ -164,7 +163,9 @@ const displayTestimonials = testimonials.slice(0, limit);
     border-radius: 16px;
     padding: 24px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition:
+      transform 0.2s,
+      box-shadow 0.2s;
   }
 
   .testimonial-card:hover {

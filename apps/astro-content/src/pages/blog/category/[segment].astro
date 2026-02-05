@@ -4,71 +4,75 @@
  * Shows blog posts filtered by segment (poultry, agriculture, turf, general)
  */
 
-export const prerender = true;
+export const prerender = true
 
-import BaseLayout from '../../../layouts/BaseLayout.astro';
-import BlogGrid from '../../../components/blog/BlogGrid.astro';
-import { getCollection } from 'astro:content';
-import { getLogoUrl } from '../../../lib/cloudinary';
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import BlogGrid from '../../../components/blog/BlogGrid.astro'
+import { getCollection } from 'astro:content'
+import { getLogoUrl } from '../../../lib/cloudinary'
 
 export async function getStaticPaths() {
-  const posts = await getCollection('blog', ({ data }) => data.draft !== true);
-  const segments = [...new Set(posts.map(p => p.data.segment).filter(Boolean))];
+  const posts = await getCollection('blog', ({ data }) => data.draft !== true)
+  const segments = [...new Set(posts.map((p) => p.data.segment).filter(Boolean))]
 
-  return segments.map(segment => ({
+  return segments.map((segment) => ({
     params: { segment },
     props: { segment },
-  }));
+  }))
 }
 
-const { segment } = Astro.props;
+const { segment } = Astro.props
 
 // Segment labels and descriptions
 const segmentInfo: Record<string, { label: string; description: string }> = {
   poultry: {
     label: 'Poultry',
-    description: 'Expert resources on poultry farming, biosecurity, bird health, and raising healthier flocks.',
+    description:
+      'Expert resources on poultry farming, biosecurity, bird health, and raising healthier flocks.',
   },
   agriculture: {
     label: 'Agriculture',
-    description: 'Insights on soil health, humates, organic farming practices, and sustainable crop production.',
+    description:
+      'Insights on soil health, humates, organic farming practices, and sustainable crop production.',
   },
   turf: {
     label: 'Turf & Lawn',
-    description: 'Tips and guides for lawn care, turf management, and achieving a healthier, greener lawn.',
+    description:
+      'Tips and guides for lawn care, turf management, and achieving a healthier, greener lawn.',
   },
   general: {
     label: 'News & Updates',
-    description: 'Company news, case studies, industry insights, and general updates from Southland Organics.',
+    description:
+      'Company news, case studies, industry insights, and general updates from Southland Organics.',
   },
-};
+}
 
-const info = segmentInfo[segment] || { label: segment, description: '' };
+const info = segmentInfo[segment] || { label: segment, description: '' }
 
 // Get all published blog posts for this segment
 const allPosts = await getCollection('blog', ({ data }) => {
-  return data.draft !== true && data.segment === segment;
-});
+  return data.draft !== true && data.segment === segment
+})
 
 // Sort by publish date (newest first)
-const posts = allPosts.sort((a, b) =>
-  new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
-);
+const posts = allPosts.sort(
+  (a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
+)
 
 // Get all segments for filter nav
-const allBlogPosts = await getCollection('blog', ({ data }) => data.draft !== true);
-const segments = ['all', ...new Set(allBlogPosts.map(p => p.data.segment).filter(Boolean))];
+const allBlogPosts = await getCollection('blog', ({ data }) => data.draft !== true)
+const segments = ['all', ...new Set(allBlogPosts.map((p) => p.data.segment).filter(Boolean))]
 
 // Count posts per segment
 const segmentCounts: Record<string, number> = {
   all: allBlogPosts.length,
-};
-allBlogPosts.forEach(post => {
-  const seg = post.data.segment || 'general';
-  segmentCounts[seg] = (segmentCounts[seg] || 0) + 1;
-});
+}
+allBlogPosts.forEach((post) => {
+  const seg = post.data.segment || 'general'
+  segmentCounts[seg] = (segmentCounts[seg] || 0) + 1
+})
 
-const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com';
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
 
 // Schema markup
 const blogSchema = {
@@ -82,7 +86,7 @@ const blogSchema = {
     name: 'Southland Organics',
     url: siteUrl,
   },
-};
+}
 ---
 
 <BaseLayout
@@ -92,87 +96,92 @@ const blogSchema = {
   schema={blogSchema}
 >
   <!-- Hero Section -->
-  <section class="bg-gradient-to-br from-southland-green-dark via-southland-green-dark to-[#1f3d24] py-16 md:py-24">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <p class="text-southland-green font-medium text-sm tracking-wide uppercase mb-3">
-        Blog
-      </p>
-      <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+  <section
+    class="bg-gradient-to-br from-southland-green-dark via-southland-green-dark to-[#1f3d24] py-16 md:py-24"
+  >
+    <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+      <p class="mb-3 text-sm font-medium uppercase tracking-wide text-southland-green">Blog</p>
+      <h1 class="mb-6 text-4xl font-bold text-white md:text-5xl lg:text-6xl">
         {info.label}
       </h1>
-      <p class="text-white/70 text-lg md:text-xl max-w-2xl mx-auto">
+      <p class="mx-auto max-w-2xl text-lg text-white/70 md:text-xl">
         {info.description}
       </p>
     </div>
   </section>
 
   <!-- Segment Filter -->
-  <section class="bg-white border-b border-gray-100 sticky top-0 z-10">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex gap-2 overflow-x-auto py-4 -mx-4 px-4 scrollbar-hide">
-        {segments.map((seg) => {
-          const isActive = seg === segment;
-          const label = seg === 'all' ? 'All' : (segmentInfo[seg]?.label || seg.charAt(0).toUpperCase() + seg.slice(1));
-          return (
-            <a
-              href={seg === 'all' ? '/blog/' : `/blog/category/${seg}/`}
-              class={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors
-                ${isActive
-                  ? 'bg-southland-green text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-            >
-              {label}
-              <span class="ml-1 text-xs opacity-75">({segmentCounts[seg] || 0})</span>
-            </a>
-          );
-        })}
+  <section class="sticky top-0 z-10 border-b border-gray-100 bg-white">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="scrollbar-hide -mx-4 flex gap-2 overflow-x-auto px-4 py-4">
+        {
+          segments.map((seg) => {
+            const isActive = seg === segment
+            const label =
+              seg === 'all'
+                ? 'All'
+                : segmentInfo[seg]?.label || seg.charAt(0).toUpperCase() + seg.slice(1)
+            return (
+              <a
+                href={seg === 'all' ? '/blog/' : `/blog/category/${seg}/`}
+                class={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                  isActive
+                    ? 'bg-southland-green text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {label}
+                <span class="ml-1 text-xs opacity-75">({segmentCounts[seg] || 0})</span>
+              </a>
+            )
+          })
+        }
       </div>
     </div>
   </section>
 
   <!-- Blog Grid -->
   <section class="bg-brand-gray py-16 md:py-20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      {posts.length > 0 ? (
-        <BlogGrid posts={posts} showFeatured={true} columns={3} />
-      ) : (
-        <div class="text-center py-12">
-          <p class="text-gray-500 text-lg">No articles found in this category.</p>
-          <a href="/blog/" class="text-southland-green hover:underline mt-4 inline-block">
-            View all articles
-          </a>
-        </div>
-      )}
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      {
+        posts.length > 0 ? (
+          <BlogGrid posts={posts} showFeatured={true} columns={3} />
+        ) : (
+          <div class="py-12 text-center">
+            <p class="text-lg text-gray-500">No articles found in this category.</p>
+            <a href="/blog/" class="mt-4 inline-block text-southland-green hover:underline">
+              View all articles
+            </a>
+          </div>
+        )
+      }
 
-      {posts.length > 12 && (
-        <div class="text-center mt-12">
-          <p class="text-gray-500">
-            Showing {posts.length} articles
-          </p>
-        </div>
-      )}
+      {
+        posts.length > 12 && (
+          <div class="mt-12 text-center">
+            <p class="text-gray-500">Showing {posts.length} articles</p>
+          </div>
+        )
+      }
     </div>
   </section>
 
   <!-- Back to Blog CTA -->
   <section class="bg-white py-16">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h2 class="text-3xl font-bold text-shopify-title mb-4">
-        Explore More Content
-      </h2>
-      <p class="text-shopify-secondary-text text-lg mb-8 max-w-2xl mx-auto">
+    <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+      <h2 class="mb-4 text-3xl font-bold text-shopify-title">Explore More Content</h2>
+      <p class="mx-auto mb-8 max-w-2xl text-lg text-shopify-secondary-text">
         Check out our other resources and expert insights across all categories.
       </p>
       <div class="flex flex-wrap justify-center gap-4">
         <a href="/blog/" class="btn-primary inline-flex items-center gap-2">
           All Articles
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"
+            ></path>
           </svg>
         </a>
-        <a href="/podcast/" class="btn-secondary inline-flex items-center gap-2">
-          Podcast
-        </a>
+        <a href="/podcast/" class="btn-secondary inline-flex items-center gap-2"> Podcast </a>
       </div>
     </div>
   </section>

@@ -4,43 +4,42 @@
  * Individual episode with video/audio, transcript, chapters, and sharing
  */
 
-import PodcastLayout from '../../layouts/PodcastLayout.astro';
-import VideoEmbed from '../../components/podcast/VideoEmbed.astro';
-import AudioPlayer from '../../components/podcast/AudioPlayer.astro';
-import ChapterMarkers from '../../components/podcast/ChapterMarkers.astro';
-import InteractiveTranscript from '../../components/podcast/InteractiveTranscript.astro';
-import ShareClipTool from '../../components/podcast/ShareClipTool.astro';
-import SubscribeButtons from '../../components/podcast/SubscribeButtons.astro';
-import GuestCard from '../../components/podcast/GuestCard.astro';
-import RelatedEpisodes from '../../components/podcast/RelatedEpisodes.astro';
-import EpisodeNav from '../../components/podcast/EpisodeNav.astro';
-import EmailCapture from '../../components/shared/EmailCapture.astro';
-import ProductCard from '../../components/shared/ProductCard.astro';
-import TopicTag from '../../components/shared/TopicTag.astro';
-import { getCollection } from 'astro:content';
+import PodcastLayout from '../../layouts/PodcastLayout.astro'
+import VideoEmbed from '../../components/podcast/VideoEmbed.astro'
+import AudioPlayer from '../../components/podcast/AudioPlayer.astro'
+import ChapterMarkers from '../../components/podcast/ChapterMarkers.astro'
+import InteractiveTranscript from '../../components/podcast/InteractiveTranscript.astro'
+import ShareClipTool from '../../components/podcast/ShareClipTool.astro'
+import SubscribeButtons from '../../components/podcast/SubscribeButtons.astro'
+import GuestCard from '../../components/podcast/GuestCard.astro'
+import RelatedEpisodes from '../../components/podcast/RelatedEpisodes.astro'
+import EpisodeNav from '../../components/podcast/EpisodeNav.astro'
+import EmailCapture from '../../components/shared/EmailCapture.astro'
+import ProductCard from '../../components/shared/ProductCard.astro'
+import TopicTag from '../../components/shared/TopicTag.astro'
+import { getCollection } from 'astro:content'
 
 export async function getStaticPaths() {
-  const episodes = await getCollection('episodes');
+  const episodes = await getCollection('episodes')
   return episodes.map((episode) => {
     // Remove file extension from id for clean URLs
-    const slug = episode.id.replace(/\.mdx?$/, '');
+    const slug = episode.id.replace(/\.mdx?$/, '')
     return {
       params: { slug },
       props: { episode, slug },
-    };
-  });
+    }
+  })
 }
 
-
-const { episode, slug: episodeSlug } = Astro.props;
-const { Content } = await episode.render();
+const { episode, slug: episodeSlug } = Astro.props
+const { Content } = await episode.render()
 
 // Get all episodes for navigation and related
 const allEpisodes = await getCollection('episodes', ({ data }) => {
-  return data.draft !== true;
-});
+  return data.draft !== true
+})
 
-const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com';
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
 
 // Format date
 const formattedDate = new Intl.DateTimeFormat('en-US', {
@@ -48,17 +47,17 @@ const formattedDate = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
   month: 'long',
   day: 'numeric',
-}).format(episode.data.publishDate);
+}).format(episode.data.publishDate)
 
 // Convert duration to ISO 8601 format for schema
 function durationToISO(durationStr: string): string {
-  const parts = durationStr.split(':').map(Number);
+  const parts = durationStr.split(':').map(Number)
   if (parts.length === 2) {
-    return `PT${parts[0]}M${parts[1]}S`;
+    return `PT${parts[0]}M${parts[1]}S`
   } else if (parts.length === 3) {
-    return `PT${parts[0]}H${parts[1]}M${parts[2]}S`;
+    return `PT${parts[0]}H${parts[1]}M${parts[2]}S`
   }
-  return 'PT0S';
+  return 'PT0S'
 }
 
 // Schema markup for PodcastEpisode
@@ -71,7 +70,9 @@ const episodeSchema = {
   datePublished: episode.data.publishDate.toISOString(),
   episodeNumber: episode.data.episodeNumber,
   duration: durationToISO(episode.data.duration),
-  image: episode.data.thumbnail ? `${siteUrl}${episode.data.thumbnail}` : `${siteUrl}/images/podcast/og-default.jpg`,
+  image: episode.data.thumbnail
+    ? `${siteUrl}${episode.data.thumbnail}`
+    : `${siteUrl}/images/podcast/og-default.jpg`,
   partOfSeries: {
     '@type': 'PodcastSeries',
     name: 'Ag & Culture Podcast',
@@ -83,17 +84,18 @@ const episodeSchema = {
       contentUrl: episode.data.audioUrl,
     },
   }),
-  ...(episode.data.guests && episode.data.guests.length > 0 && {
-    actor: episode.data.guests.map((guest) => ({
-      '@type': 'Person',
-      name: guest.name,
-    })),
-  }),
-};
+  ...(episode.data.guests &&
+    episode.data.guests.length > 0 && {
+      actor: episode.data.guests.map((guest) => ({
+        '@type': 'Person',
+        name: guest.name,
+      })),
+    }),
+}
 
 // Determine if we have video or audio
-const hasVideo = episode.data.gumletId || episode.data.youtubeUrl;
-const hasAudio = episode.data.audioUrl;
+const hasVideo = episode.data.gumletId || episode.data.youtubeUrl
+const hasAudio = episode.data.audioUrl
 ---
 
 <PodcastLayout
@@ -101,34 +103,38 @@ const hasAudio = episode.data.audioUrl;
   description={episode.data.description}
   ogImage={episode.data.thumbnail || '/images/podcast/og-default.jpg'}
   schema={episodeSchema}
-  breadcrumbs={[{ label: `Episode ${episode.data.episodeNumber}`, href: `/podcast/${episodeSlug}/` }]}
+  breadcrumbs={[
+    { label: `Episode ${episode.data.episodeNumber}`, href: `/podcast/${episodeSlug}/` },
+  ]}
 >
   <article class="py-8 md:py-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       {/* Episode Header */}
       <header class="mb-8">
-        <div class="flex items-center gap-2 text-sm text-gray-500 mb-2">
+        <div class="mb-2 flex items-center gap-2 text-sm text-gray-500">
           <span class="font-medium text-southland-green">Episode {episode.data.episodeNumber}</span>
           <span>•</span>
           <time datetime={episode.data.publishDate.toISOString()}>{formattedDate}</time>
           <span>•</span>
           <span>{episode.data.duration}</span>
         </div>
-        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+        <h1 class="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">
           {episode.data.title}
         </h1>
-        <p class="text-lg text-gray-600 mb-6">
+        <p class="mb-6 text-lg text-gray-600">
           {episode.data.description}
         </p>
 
         {/* Topics */}
-        {episode.data.topics && episode.data.topics.length > 0 && (
-          <div class="flex flex-wrap gap-2 mb-6">
-            {episode.data.topics.map((topic) => (
-              <TopicTag topic={topic} />
-            ))}
-          </div>
-        )}
+        {
+          episode.data.topics && episode.data.topics.length > 0 && (
+            <div class="mb-6 flex flex-wrap gap-2">
+              {episode.data.topics.map((topic) => (
+                <TopicTag topic={topic} />
+              ))}
+            </div>
+          )
+        }
 
         {/* Subscribe Buttons */}
         <SubscribeButtons
@@ -140,98 +146,105 @@ const hasAudio = episode.data.audioUrl;
       </header>
 
       {/* Main Content Grid */}
-      <div class="grid lg:grid-cols-3 gap-8">
+      <div class="grid gap-8 lg:grid-cols-3">
         {/* Main Column */}
-        <div class="lg:col-span-2 space-y-8">
+        <div class="space-y-8 lg:col-span-2">
           {/* Video Player */}
-          {hasVideo && (
-            <VideoEmbed
-              gumletId={episode.data.gumletId}
-              youtubeUrl={episode.data.youtubeUrl}
-              title={episode.data.title}
-              episodeNumber={episode.data.episodeNumber}
-              episodeSlug={episodeSlug}
-              poster={episode.data.thumbnail}
-            />
-          )}
+          {
+            hasVideo && (
+              <VideoEmbed
+                gumletId={episode.data.gumletId}
+                youtubeUrl={episode.data.youtubeUrl}
+                title={episode.data.title}
+                episodeNumber={episode.data.episodeNumber}
+                episodeSlug={episodeSlug}
+                poster={episode.data.thumbnail}
+              />
+            )
+          }
 
           {/* Audio Player (if no video or as alternative) */}
-          {hasAudio && (
-            <AudioPlayer
-              audioUrl={episode.data.audioUrl!}
-              title={episode.data.title}
-              episodeNumber={episode.data.episodeNumber}
-              episodeSlug={episodeSlug}
-              duration={episode.data.duration}
-              durationSeconds={episode.data.durationSeconds}
-              chapters={episode.data.chapters}
-              thumbnail={episode.data.thumbnail}
-            />
-          )}
+          {
+            hasAudio && (
+              <AudioPlayer
+                audioUrl={episode.data.audioUrl!}
+                title={episode.data.title}
+                episodeNumber={episode.data.episodeNumber}
+                episodeSlug={episodeSlug}
+                duration={episode.data.duration}
+                durationSeconds={episode.data.durationSeconds}
+                chapters={episode.data.chapters}
+                thumbnail={episode.data.thumbnail}
+              />
+            )
+          }
 
           {/* Chapter Markers */}
-          {episode.data.chapters && episode.data.chapters.length > 0 && (
-            <div class="bg-white rounded-xl border border-gray-100 p-6">
-              <ChapterMarkers
-                chapters={episode.data.chapters}
-                episodeSlug={episodeSlug}
-                episodeNumber={episode.data.episodeNumber}
-              />
-            </div>
-          )}
+          {
+            episode.data.chapters && episode.data.chapters.length > 0 && (
+              <div class="rounded-xl border border-gray-100 bg-white p-6">
+                <ChapterMarkers
+                  chapters={episode.data.chapters}
+                  episodeSlug={episodeSlug}
+                  episodeNumber={episode.data.episodeNumber}
+                />
+              </div>
+            )
+          }
 
           {/* Show Notes / Content */}
-          <div class="bg-white rounded-xl border border-gray-100 p-6">
-            <h2 class="text-xl font-semibold text-gray-900 mb-4">Show Notes</h2>
+          <div class="rounded-xl border border-gray-100 bg-white p-6">
+            <h2 class="mb-4 text-xl font-semibold text-gray-900">Show Notes</h2>
             <div class="prose prose-southland max-w-none">
               <Content />
             </div>
           </div>
 
           {/* Interactive Transcript */}
-          {episode.data.transcript && episode.data.transcript.length > 0 && (
-            <div class="bg-white rounded-xl border border-gray-100 p-6">
-              <InteractiveTranscript
-                transcript={episode.data.transcript}
-                episodeSlug={episodeSlug}
-                episodeNumber={episode.data.episodeNumber}
-                maxHeight="600px"
-              />
-            </div>
-          )}
+          {
+            episode.data.transcript && episode.data.transcript.length > 0 && (
+              <div class="rounded-xl border border-gray-100 bg-white p-6">
+                <InteractiveTranscript
+                  transcript={episode.data.transcript}
+                  episodeSlug={episodeSlug}
+                  episodeNumber={episode.data.episodeNumber}
+                  maxHeight="600px"
+                />
+              </div>
+            )
+          }
 
           {/* Episode Navigation */}
-          <div class="bg-white rounded-xl border border-gray-100">
-            <EpisodeNav
-              currentEpisode={episode}
-              allEpisodes={allEpisodes}
-            />
+          <div class="rounded-xl border border-gray-100 bg-white">
+            <EpisodeNav currentEpisode={episode} allEpisodes={allEpisodes} />
           </div>
         </div>
 
         {/* Sidebar */}
         <aside class="space-y-6">
           {/* Guests */}
-          {episode.data.guests && episode.data.guests.length > 0 && (
-            <div class="bg-white rounded-xl border border-gray-100 p-6">
-              <h3 class="font-semibold text-gray-900 mb-4">
-                {episode.data.guests.length === 1 ? 'Guest' : 'Guests'}
-              </h3>
-              <div class="space-y-4">
-                {episode.data.guests.map((guest) => (
-                  <GuestCard
-                    name={guest.name}
-                    slug={guest.slug}
-                    role={guest.role}
-                    bio={guest.bio}
-                    photo={guest.photo}
-                    links={guest.links}
-                    variant="sidebar"
-                  />
-                ))}
+          {
+            episode.data.guests && episode.data.guests.length > 0 && (
+              <div class="rounded-xl border border-gray-100 bg-white p-6">
+                <h3 class="mb-4 font-semibold text-gray-900">
+                  {episode.data.guests.length === 1 ? 'Guest' : 'Guests'}
+                </h3>
+                <div class="space-y-4">
+                  {episode.data.guests.map((guest) => (
+                    <GuestCard
+                      name={guest.name}
+                      slug={guest.slug}
+                      role={guest.role}
+                      bio={guest.bio}
+                      photo={guest.photo}
+                      links={guest.links}
+                      variant="sidebar"
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )
+          }
 
           {/* Share Clip Tool */}
           <ShareClipTool
@@ -251,27 +264,21 @@ const hasAudio = episode.data.audioUrl;
           />
 
           {/* Related Episodes */}
-          <RelatedEpisodes
-            currentSlug={episodeSlug}
-            episodes={allEpisodes}
-            maxItems={3}
-          />
+          <RelatedEpisodes currentSlug={episodeSlug} episodes={allEpisodes} maxItems={3} />
 
           {/* Related Products */}
-          {episode.data.relatedProducts && episode.data.relatedProducts.length > 0 && (
-            <div class="bg-white rounded-xl border border-gray-100 p-6">
-              <h3 class="font-semibold text-gray-900 mb-4">Related Products</h3>
-              <div class="space-y-4">
-                {episode.data.relatedProducts.map((product) => (
-                  <ProductCard
-                    name={product.name}
-                    slug={product.slug}
-                    cta={product.cta}
-                  />
-                ))}
+          {
+            episode.data.relatedProducts && episode.data.relatedProducts.length > 0 && (
+              <div class="rounded-xl border border-gray-100 bg-white p-6">
+                <h3 class="mb-4 font-semibold text-gray-900">Related Products</h3>
+                <div class="space-y-4">
+                  {episode.data.relatedProducts.map((product) => (
+                    <ProductCard name={product.name} slug={product.slug} cta={product.cta} />
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )
+          }
         </aside>
       </div>
     </div>

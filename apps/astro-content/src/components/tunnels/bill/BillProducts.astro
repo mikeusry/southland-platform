@@ -11,22 +11,20 @@
 
 interface Props {
   /** Heading text */
-  heading?: string;
+  heading?: string
   /** Additional CSS classes */
-  class?: string;
+  class?: string
 }
 
-const {
-  heading = 'Commercial-Grade Probiotic Solutions',
-  class: className = '',
-} = Astro.props;
+const { heading = 'Commercial-Grade Probiotic Solutions', class: className = '' } = Astro.props
 
 // Bill-recommended products (bulk sizes, commercial focus)
 const products = [
   {
     id: 'big-ole-bird-gallon',
     name: 'Big Ole Bird (1 Gallon)',
-    description: 'Our flagship probiotic for commercial broiler and layer operations. Proven to reduce mortality and improve feed conversion ratios.',
+    description:
+      'Our flagship probiotic for commercial broiler and layer operations. Proven to reduce mortality and improve feed conversion ratios.',
     price: '$89.99',
     perUnit: '$0.70/oz',
     image: '/images/products/big-ole-bird-gallon.jpg',
@@ -37,7 +35,8 @@ const products = [
   {
     id: 'litter-life-5gal',
     name: 'Litter Life (5 Gallon)',
-    description: 'Probiotic litter treatment that reduces ammonia, improves air quality, and extends litter life between cleanouts.',
+    description:
+      'Probiotic litter treatment that reduces ammonia, improves air quality, and extends litter life between cleanouts.',
     price: '$249.99',
     perUnit: '$0.39/oz',
     image: '/images/products/litter-life-5gal.jpg',
@@ -48,7 +47,8 @@ const products = [
   {
     id: 'commercial-starter-kit',
     name: 'Commercial Starter Kit',
-    description: 'Everything you need to trial our program: 1 gal Big Ole Bird, 5 gal Litter Life, and implementation guide.',
+    description:
+      'Everything you need to trial our program: 1 gal Big Ole Bird, 5 gal Litter Life, and implementation guide.',
     price: '$299.99',
     perUnit: 'Save $40',
     image: '/images/products/commercial-kit.jpg',
@@ -59,7 +59,8 @@ const products = [
   {
     id: 'hen-helper-commercial',
     name: 'Hen Helper (5 Gallon)',
-    description: 'Layer-specific probiotic for commercial egg operations. Supports shell quality, production consistency, and bird health.',
+    description:
+      'Layer-specific probiotic for commercial egg operations. Supports shell quality, production consistency, and bird health.',
     price: '$399.99',
     perUnit: '$0.62/oz',
     image: '/images/products/hen-helper-5gal.jpg',
@@ -67,7 +68,7 @@ const products = [
     badge: 'For Layers',
     specs: ['Layer-specific formula', 'Improves shell quality', 'Bulk pricing available'],
   },
-];
+]
 ---
 
 <section class:list={['bill-products', className]}>
@@ -80,43 +81,41 @@ const products = [
     </div>
 
     <div class="bill-products__grid">
-      {products.map((product) => (
-        <a href={product.href} class="product-card" data-product-id={product.id}>
-          <div class="product-card__image">
-            {product.badge && (
-              <span class="product-card__badge">{product.badge}</span>
-            )}
-            <div class="product-card__image-placeholder">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <polyline points="21 15 16 10 5 21"/>
-              </svg>
+      {
+        products.map((product) => (
+          <a href={product.href} class="product-card" data-product-id={product.id}>
+            <div class="product-card__image">
+              {product.badge && <span class="product-card__badge">{product.badge}</span>}
+              <div class="product-card__image-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21 15 16 10 5 21" />
+                </svg>
+              </div>
             </div>
-          </div>
-          <div class="product-card__content">
-            <h3 class="product-card__name">{product.name}</h3>
-            <p class="product-card__description">{product.description}</p>
-            <ul class="product-card__specs">
-              {product.specs.map((spec) => (
-                <li class="product-card__spec">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                  {spec}
-                </li>
-              ))}
-            </ul>
-            <div class="product-card__pricing">
-              <span class="product-card__price">{product.price}</span>
-              <span class="product-card__per-unit">{product.perUnit}</span>
+            <div class="product-card__content">
+              <h3 class="product-card__name">{product.name}</h3>
+              <p class="product-card__description">{product.description}</p>
+              <ul class="product-card__specs">
+                {product.specs.map((spec) => (
+                  <li class="product-card__spec">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    {spec}
+                  </li>
+                ))}
+              </ul>
+              <div class="product-card__pricing">
+                <span class="product-card__price">{product.price}</span>
+                <span class="product-card__per-unit">{product.perUnit}</span>
+              </div>
+              <span class="product-card__cta">View Details →</span>
             </div>
-            <span class="product-card__cta">
-              View Details →
-            </span>
-          </div>
-        </a>
-      ))}
+          </a>
+        ))
+      }
     </div>
 
     <div class="bill-products__footer">
@@ -351,14 +350,14 @@ const products = [
   // Track product card clicks
   document.querySelectorAll('.bill-products .product-card').forEach((card) => {
     card.addEventListener('click', () => {
-      const productId = card.getAttribute('data-product-id');
+      const productId = card.getAttribute('data-product-id')
       if (window.pdPixel && productId) {
         window.pdPixel.track('product_clicked', {
           tunnel: 'bill',
           product_id: productId,
           source: 'bill_products_section',
-        });
+        })
       }
-    });
-  });
+    })
+  })
 </script>

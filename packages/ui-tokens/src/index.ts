@@ -16,6 +16,6 @@ export const tokens = {
     maxWidth: '1400px',
     headerHeight: '75px',
   },
-} as const;
+} as const
 
-export type Tokens = typeof tokens;
+export type Tokens = typeof tokens

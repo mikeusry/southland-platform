@@ -12,26 +12,18 @@
 
 interface Props {
   /** Position of the banner */
-  position?: 'top' | 'bottom';
+  position?: 'top' | 'bottom'
   /** Show a link to change persona */
-  showChangeLink?: boolean;
+  showChangeLink?: boolean
   /** Additional CSS classes */
-  class?: string;
+  class?: string
 }
 
-const {
-  position = 'bottom',
-  showChangeLink = true,
-  class: className = '',
-} = Astro.props;
+const { position = 'bottom', showChangeLink = true, class: className = '' } = Astro.props
 ---
 
 <div
-  class:list={[
-    'persona-banner',
-    `persona-banner--${position}`,
-    className,
-  ]}
+  class:list={['persona-banner', `persona-banner--${position}`, className]}
   id="persona-banner"
   style="display: none;"
 >
@@ -39,11 +31,13 @@ const {
     <span class="persona-banner__label">
       Browsing as: <strong class="persona-banner__name"></strong>
     </span>
-    {showChangeLink && (
-      <button class="persona-banner__change" type="button">
-        Change
-      </button>
-    )}
+    {
+      showChangeLink && (
+        <button class="persona-banner__change" type="button">
+          Change
+        </button>
+      )
+    }
   </div>
 </div>
 
@@ -216,86 +210,86 @@ const {
 </style>
 
 <script>
-  import { getPersonaId, setPersona, getPersonaConfig, PERSONA_CONFIG } from '../../lib/persona';
+  import { getPersonaId, setPersona, getPersonaConfig, PERSONA_CONFIG } from '../../lib/persona'
 
-  const banner = document.getElementById('persona-banner');
-  const nameEl = banner?.querySelector('.persona-banner__name');
-  const changeBtn = banner?.querySelector('.persona-banner__change');
-  const modal = document.getElementById('persona-modal');
-  const modalBackdrop = modal?.querySelector('.persona-modal__backdrop');
-  const modalClose = modal?.querySelector('.persona-modal__close');
-  const modalOptions = modal?.querySelectorAll('.persona-modal__option');
+  const banner = document.getElementById('persona-banner')
+  const nameEl = banner?.querySelector('.persona-banner__name')
+  const changeBtn = banner?.querySelector('.persona-banner__change')
+  const modal = document.getElementById('persona-modal')
+  const modalBackdrop = modal?.querySelector('.persona-modal__backdrop')
+  const modalClose = modal?.querySelector('.persona-modal__close')
+  const modalOptions = modal?.querySelectorAll('.persona-modal__option')
 
   function updateBanner(): void {
-    const personaId = getPersonaId();
-    const config = getPersonaConfig(personaId);
+    const personaId = getPersonaId()
+    const config = getPersonaConfig(personaId)
 
     if (personaId && config && banner && nameEl) {
-      nameEl.textContent = config.label;
-      banner.style.setProperty('--persona-bg', config.bgColor);
-      banner.style.setProperty('--persona-color', config.color);
-      banner.style.display = 'block';
+      nameEl.textContent = config.label
+      banner.style.setProperty('--persona-bg', config.bgColor)
+      banner.style.setProperty('--persona-color', config.color)
+      banner.style.display = 'block'
     } else if (banner) {
-      banner.style.display = 'none';
+      banner.style.display = 'none'
     }
   }
 
   function openModal(): void {
     if (modal) {
-      modal.style.display = 'flex';
-      document.body.style.overflow = 'hidden';
+      modal.style.display = 'flex'
+      document.body.style.overflow = 'hidden'
     }
   }
 
   function closeModal(): void {
     if (modal) {
-      modal.style.display = 'none';
-      document.body.style.overflow = '';
+      modal.style.display = 'none'
+      document.body.style.overflow = ''
     }
   }
 
   // Change button click
-  changeBtn?.addEventListener('click', openModal);
+  changeBtn?.addEventListener('click', openModal)
 
   // Modal backdrop click
-  modalBackdrop?.addEventListener('click', closeModal);
+  modalBackdrop?.addEventListener('click', closeModal)
 
   // Modal close button
-  modalClose?.addEventListener('click', closeModal);
+  modalClose?.addEventListener('click', closeModal)
 
   // Modal option clicks
   modalOptions?.forEach((option) => {
     option.addEventListener('click', () => {
-      const personaId = (option as HTMLElement).dataset.persona;
+      const personaId = (option as HTMLElement).dataset.persona
       if (personaId) {
-        setPersona(personaId as any, 'manual');
-        closeModal();
-        updateBanner();
+        setPersona(personaId as any, 'manual')
+        closeModal()
+        updateBanner()
 
         // Track the change
         if (window.pdPixel) {
           window.pdPixel.track('persona_changed', {
             new_persona: personaId,
             source: 'banner_modal',
-          });
+          })
         }
       }
-    });
-  });
+    })
+  })
 
   // Escape key closes modal
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      closeModal();
+      closeModal()
     }
-  });
+  })
 
   // Initialize
-  document.addEventListener('DOMContentLoaded', updateBanner);
+  document.addEventListener('DOMContentLoaded', updateBanner)
   if (document.readyState !== 'loading') {
-    updateBanner();
+    updateBanner()
   }
 
   // Listen for persona changes
-  window.addEventListener('persona-changed', updateBanner);
+  window.addEventListener('persona-changed', updateBanner)
 </script>

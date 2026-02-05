@@ -5,8 +5,8 @@
  *
  * Note: This extends the base footer with podcast-specific links
  */
-import { Footer as FooterReact } from '@southland/ui-react';
-import layout from '../../data/layout.json';
+import { Footer as FooterReact } from '@southland/ui-react'
+import layout from '../../data/layout.json'
 
 // Extend footer columns with podcast links for this microsite
 const podcastColumn = {
@@ -15,42 +15,55 @@ const podcastColumn = {
     { label: 'All Episodes', href: '/podcast/' },
     { label: 'Topics', href: '/podcast/topics/' },
     { label: 'Guests', href: '/podcast/guests/' },
-  ]
-};
+  ],
+}
 
 // Build columns: use layout data if available, fallback to default structure
-const baseColumns = layout.footer.columns.length > 0 && layout.footer.columns[0].links.length > 0
-  ? layout.footer.columns
-  : [
-      {
-        title: 'Products',
-        links: [
-          { label: 'Poultry', href: 'https://www.southlandorganics.com/collections/poultry' },
-          { label: 'Lawn & Garden', href: 'https://www.southlandorganics.com/collections/turf' },
-          { label: 'Septic & Waste', href: 'https://www.southlandorganics.com/collections/waste' },
-          { label: 'Swine', href: 'https://www.southlandorganics.com/collections/pig-and-swine-supplements' },
-        ]
-      },
-      {
-        title: 'Resources',
-        links: [
-          { label: 'Blog', href: 'https://www.southlandorganics.com/blogs/news' },
-          { label: 'Case Studies', href: 'https://www.southlandorganics.com/blogs/case-studies' },
-          { label: 'Humate Hub', href: 'https://www.southlandorganics.com/blogs/humate-hub' },
-          { label: 'FAQs', href: 'https://www.southlandorganics.com/pages/faqs' },
-        ]
-      },
-      {
-        title: 'Company',
-        links: [
-          { label: 'Why Southland?', href: 'https://www.southlandorganics.com/pages/why-southland' },
-          { label: 'Contact', href: 'https://www.southlandorganics.com/pages/contact' },
-          { label: 'Rewards Program', href: 'https://www.southlandorganics.com/pages/southland-organics-rewards' },
-        ]
-      }
-    ];
+const baseColumns =
+  layout.footer.columns.length > 0 && layout.footer.columns[0].links.length > 0
+    ? layout.footer.columns
+    : [
+        {
+          title: 'Products',
+          links: [
+            { label: 'Poultry', href: 'https://www.southlandorganics.com/collections/poultry' },
+            { label: 'Lawn & Garden', href: 'https://www.southlandorganics.com/collections/turf' },
+            {
+              label: 'Septic & Waste',
+              href: 'https://www.southlandorganics.com/collections/waste',
+            },
+            {
+              label: 'Swine',
+              href: 'https://www.southlandorganics.com/collections/pig-and-swine-supplements',
+            },
+          ],
+        },
+        {
+          title: 'Resources',
+          links: [
+            { label: 'Blog', href: 'https://www.southlandorganics.com/blogs/news' },
+            { label: 'Case Studies', href: 'https://www.southlandorganics.com/blogs/case-studies' },
+            { label: 'Humate Hub', href: 'https://www.southlandorganics.com/blogs/humate-hub' },
+            { label: 'FAQs', href: 'https://www.southlandorganics.com/pages/faqs' },
+          ],
+        },
+        {
+          title: 'Company',
+          links: [
+            {
+              label: 'Why Southland?',
+              href: 'https://www.southlandorganics.com/pages/why-southland',
+            },
+            { label: 'Contact', href: 'https://www.southlandorganics.com/pages/contact' },
+            {
+              label: 'Rewards Program',
+              href: 'https://www.southlandorganics.com/pages/southland-organics-rewards',
+            },
+          ],
+        },
+      ]
 
-const columns = [...baseColumns.slice(0, 3), podcastColumn];
+const columns = [...baseColumns.slice(0, 3), podcastColumn]
 ---
 
 <FooterReact

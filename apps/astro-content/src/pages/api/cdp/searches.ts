@@ -6,8 +6,8 @@
  * Returns top search queries with result counts.
  */
 
-import type { APIRoute } from 'astro';
-import type { SearchQuery } from '../../../components/dashboard/types';
+import type { APIRoute } from 'astro'
+import type { SearchQuery } from '../../../components/dashboard/types'
 
 const mockSearches: SearchQuery[] = [
   { query: 'big ole bird', count: 342, avgResults: 5, zeroResultRate: 0 },
@@ -25,26 +25,29 @@ const mockSearches: SearchQuery[] = [
   { query: 'lawn care organic', count: 38, avgResults: 5, zeroResultRate: 0 },
   { query: 'layer health', count: 35, avgResults: 9, zeroResultRate: 0 },
   { query: 'soil amendment', count: 32, avgResults: 4, zeroResultRate: 3.1 },
-];
+]
 
 export const GET: APIRoute = async ({ url }) => {
-  const limit = Math.min(parseInt(url.searchParams.get('limit') || '20', 10), 50);
+  const limit = Math.min(parseInt(url.searchParams.get('limit') || '20', 10), 50)
 
   try {
-    const searches = mockSearches.slice(0, limit);
+    const searches = mockSearches.slice(0, limit)
 
-    return new Response(JSON.stringify({
-      searches,
-      totalUniqueQueries: 1247,
-      totalSearches: 4823,
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  } catch (error) {
     return new Response(
-      JSON.stringify({ error: 'Failed to fetch searches' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
+      JSON.stringify({
+        searches,
+        totalUniqueQueries: 1247,
+        totalSearches: 4823,
+      }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    )
+  } catch (error) {
+    return new Response(JSON.stringify({ error: 'Failed to fetch searches' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
-};
+}

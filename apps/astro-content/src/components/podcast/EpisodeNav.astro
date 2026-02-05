@@ -3,86 +3,110 @@
  * Episode navigation - previous/next episode links
  */
 
-import type { CollectionEntry } from 'astro:content';
+import type { CollectionEntry } from 'astro:content'
 
 interface Props {
-  currentEpisode: CollectionEntry<'episodes'>;
-  allEpisodes: CollectionEntry<'episodes'>[];
-  class?: string;
+  currentEpisode: CollectionEntry<'episodes'>
+  allEpisodes: CollectionEntry<'episodes'>[]
+  class?: string
 }
 
-const {
-  currentEpisode,
-  allEpisodes,
-  class: className = '',
-} = Astro.props;
+const { currentEpisode, allEpisodes, class: className = '' } = Astro.props
 
 // Sort by episode number
-const sortedEpisodes = [...allEpisodes].sort(
-  (a, b) => a.data.episodeNumber - b.data.episodeNumber
-);
+const sortedEpisodes = [...allEpisodes].sort((a, b) => a.data.episodeNumber - b.data.episodeNumber)
 
-const currentIndex = sortedEpisodes.findIndex(
-  (ep) => ep.id === currentEpisode.id
-);
+const currentIndex = sortedEpisodes.findIndex((ep) => ep.id === currentEpisode.id)
 
-const prevEpisode = currentIndex > 0 ? sortedEpisodes[currentIndex - 1] : null;
-const nextEpisode = currentIndex < sortedEpisodes.length - 1 ? sortedEpisodes[currentIndex + 1] : null;
+const prevEpisode = currentIndex > 0 ? sortedEpisodes[currentIndex - 1] : null
+const nextEpisode =
+  currentIndex < sortedEpisodes.length - 1 ? sortedEpisodes[currentIndex + 1] : null
 ---
 
-<nav class={`episode-nav flex items-center justify-between ${className}`} aria-label="Episode navigation">
+<nav
+  class={`episode-nav flex items-center justify-between ${className}`}
+  aria-label="Episode navigation"
+>
   {/* Previous */}
   <div class="flex-1">
-    {prevEpisode ? (
-      <a
-        href={`/podcast/${prevEpisode.id}/`}
-        class="group flex items-center gap-3 p-4 rounded-lg hover:bg-gray-50 transition-colors"
-      >
-        <svg class="w-5 h-5 text-gray-400 group-hover:text-southland-green transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-        </svg>
-        <div class="min-w-0">
-          <p class="text-xs text-gray-500 mb-1">Previous Episode</p>
-          <p class="text-sm font-medium text-gray-900 group-hover:text-southland-green transition-colors truncate">
-            EP {prevEpisode.data.episodeNumber}: {prevEpisode.data.title}
-          </p>
-        </div>
-      </a>
-    ) : (
-      <div></div>
-    )}
+    {
+      prevEpisode ? (
+        <a
+          href={`/podcast/${prevEpisode.id}/`}
+          class="group flex items-center gap-3 rounded-lg p-4 transition-colors hover:bg-gray-50"
+        >
+          <svg
+            class="h-5 w-5 text-gray-400 transition-colors group-hover:text-southland-green"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+          <div class="min-w-0">
+            <p class="mb-1 text-xs text-gray-500">Previous Episode</p>
+            <p class="truncate text-sm font-medium text-gray-900 transition-colors group-hover:text-southland-green">
+              EP {prevEpisode.data.episodeNumber}: {prevEpisode.data.title}
+            </p>
+          </div>
+        </a>
+      ) : (
+        <div />
+      )
+    }
   </div>
 
   {/* Center - all episodes link */}
   <a
     href="/podcast/"
-    class="hidden md:flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-southland-green transition-colors"
+    class="hidden items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-southland-green md:flex"
   >
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
     </svg>
     All Episodes
   </a>
 
   {/* Next */}
-  <div class="flex-1 flex justify-end">
-    {nextEpisode ? (
-      <a
-        href={`/podcast/${nextEpisode.id}/`}
-        class="group flex items-center gap-3 p-4 rounded-lg hover:bg-gray-50 transition-colors text-right"
-      >
-        <div class="min-w-0">
-          <p class="text-xs text-gray-500 mb-1">Next Episode</p>
-          <p class="text-sm font-medium text-gray-900 group-hover:text-southland-green transition-colors truncate">
-            EP {nextEpisode.data.episodeNumber}: {nextEpisode.data.title}
-          </p>
-        </div>
-        <svg class="w-5 h-5 text-gray-400 group-hover:text-southland-green transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-      </a>
-    ) : (
-      <div></div>
-    )}
+  <div class="flex flex-1 justify-end">
+    {
+      nextEpisode ? (
+        <a
+          href={`/podcast/${nextEpisode.id}/`}
+          class="group flex items-center gap-3 rounded-lg p-4 text-right transition-colors hover:bg-gray-50"
+        >
+          <div class="min-w-0">
+            <p class="mb-1 text-xs text-gray-500">Next Episode</p>
+            <p class="truncate text-sm font-medium text-gray-900 transition-colors group-hover:text-southland-green">
+              EP {nextEpisode.data.episodeNumber}: {nextEpisode.data.title}
+            </p>
+          </div>
+          <svg
+            class="h-5 w-5 text-gray-400 transition-colors group-hover:text-southland-green"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
+        </a>
+      ) : (
+        <div />
+      )
+    }
   </div>
 </nav>

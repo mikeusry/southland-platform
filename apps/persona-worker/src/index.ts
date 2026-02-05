@@ -10,149 +10,134 @@
  * - POST /batch - Process multiple events
  */
 
-import type {
-  Env,
-  PixelEvent,
-  VisitorData,
-  ScoringResponse,
-  PersonaId,
-} from './types';
-import { extractSignals } from './signals';
+import type { Env, PixelEvent, VisitorData, ScoringResponse, PersonaId } from './types'
+import { extractSignals } from './signals'
 import {
   computePersonaScores,
   getPredictedPersona,
   calculateConfidence,
   getEffectivePersona,
-} from './scoring';
-import {
-  detectJourneyStage,
-  calculateStageConfidence,
-  updateStageHistory,
-} from './stages';
+} from './scoring'
+import { detectJourneyStage, calculateStageConfidence, updateStageHistory } from './stages'
 
 // KV expiration: 30 days
-const KV_TTL_SECONDS = 30 * 24 * 60 * 60;
+const KV_TTL_SECONDS = 30 * 24 * 60 * 60
 
 // Max signals to keep per visitor
-const MAX_SIGNALS = 100;
+const MAX_SIGNALS = 100
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
-    const url = new URL(request.url);
+    const url = new URL(request.url)
 
     // CORS headers for cross-origin requests
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
-    };
+    }
 
     // Handle CORS preflight
     if (request.method === 'OPTIONS') {
-      return new Response(null, { headers: corsHeaders });
+      return new Response(null, { headers: corsHeaders })
     }
 
     try {
       // Route: POST /event - Process single pixel event
       if (request.method === 'POST' && url.pathname === '/event') {
-        const event = (await request.json()) as PixelEvent;
-        const result = await processEvent(event, env);
+        const event = (await request.json()) as PixelEvent
+        const result = await processEvent(event, env)
         return new Response(JSON.stringify(result), {
           headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        });
+        })
       }
 
       // Route: GET /visitor/:id - Get visitor data
       if (request.method === 'GET' && url.pathname.startsWith('/visitor/')) {
-        const visitorId = url.pathname.split('/visitor/')[1];
-        const visitor = await getVisitor(visitorId, env);
+        const visitorId = url.pathname.split('/visitor/')[1]
+        const visitor = await getVisitor(visitorId, env)
         if (!visitor) {
           return new Response(JSON.stringify({ error: 'Visitor not found' }), {
             status: 404,
             headers: { 'Content-Type': 'application/json', ...corsHeaders },
-          });
+          })
         }
         return new Response(JSON.stringify(visitor), {
           headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        });
+        })
       }
 
       // Route: POST /batch - Process multiple events
       if (request.method === 'POST' && url.pathname === '/batch') {
-        const events = (await request.json()) as PixelEvent[];
-        const results = await Promise.all(
-          events.map((event) => processEvent(event, env))
-        );
+        const events = (await request.json()) as PixelEvent[]
+        const results = await Promise.all(events.map((event) => processEvent(event, env)))
         return new Response(JSON.stringify({ results }), {
           headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        });
+        })
       }
 
       // Route: GET /health - Health check
       if (url.pathname === '/health') {
         return new Response(JSON.stringify({ status: 'ok' }), {
           headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        });
+        })
       }
 
-      return new Response('Not found', { status: 404 });
+      return new Response('Not found', { status: 404 })
     } catch (error) {
-      console.error('Worker error:', error);
-      return new Response(
-        JSON.stringify({ error: 'Internal server error' }),
-        {
-          status: 500,
-          headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        }
-      );
+      console.error('Worker error:', error)
+      return new Response(JSON.stringify({ error: 'Internal server error' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      })
     }
   },
-};
+}
 
 /**
  * Process a single pixel event
  */
 async function processEvent(event: PixelEvent, env: Env): Promise<ScoringResponse> {
-  const visitorId = event.anonymous_id;
+  const visitorId = event.anonymous_id
 
   // Get or create visitor
-  let visitor = await getVisitor(visitorId, env);
+  let visitor = await getVisitor(visitorId, env)
   if (!visitor) {
-    visitor = createNewVisitor(visitorId);
+    visitor = createNewVisitor(visitorId)
   }
 
   // Extract signals from event
-  const newSignals = extractSignals(event);
+  const newSignals = extractSignals(event)
 
   // Update visitor signals (keep last N)
-  visitor.signals = [...visitor.signals, ...newSignals].slice(-MAX_SIGNALS);
-  visitor.total_signals = visitor.signals.length;
-  visitor.session_count = (visitor.session_count || 0) + 1;
+  visitor.signals = [...visitor.signals, ...newSignals].slice(-MAX_SIGNALS)
+  visitor.total_signals = visitor.signals.length
+  visitor.session_count = (visitor.session_count || 0) + 1
 
   // Check for explicit persona choice in event
   if (event.event === 'persona_selected' && event.properties?.persona) {
-    visitor.explicit_persona = event.properties.persona as PersonaId;
+    visitor.explicit_persona = event.properties.persona as PersonaId
   }
 
   // Compute persona scores
-  visitor.persona_scores = computePersonaScores(visitor);
-  visitor.predicted_persona = getPredictedPersona(visitor.persona_scores);
-  visitor.persona_confidence = calculateConfidence(visitor.persona_scores);
+  visitor.persona_scores = computePersonaScores(visitor)
+  visitor.predicted_persona = getPredictedPersona(visitor.persona_scores)
+  visitor.persona_confidence = calculateConfidence(visitor.persona_scores)
 
   // Detect journey stage
-  const newStage = detectJourneyStage(visitor);
-  visitor.stage_history = updateStageHistory(visitor, newStage);
-  visitor.current_stage = newStage;
-  visitor.stage_confidence = calculateStageConfidence(visitor, newStage);
+  const newStage = detectJourneyStage(visitor)
+  visitor.stage_history = updateStageHistory(visitor, newStage)
+  visitor.current_stage = newStage
+  visitor.stage_confidence = calculateStageConfidence(visitor, newStage)
 
   // Update timestamps
-  visitor.last_updated = new Date().toISOString();
+  visitor.last_updated = new Date().toISOString()
 
   // Save to KV
-  await saveVisitor(visitor, env);
+  await saveVisitor(visitor, env)
 
   // Forward to BigQuery (non-blocking)
-  forwardToBigQuery(event, visitor, env).catch(console.error);
+  forwardToBigQuery(event, visitor, env).catch(console.error)
 
   return {
     success: true,
@@ -162,7 +147,7 @@ async function processEvent(event: PixelEvent, env: Env): Promise<ScoringRespons
     stage: visitor.current_stage,
     stage_confidence: visitor.stage_confidence,
     explicit_choice: visitor.explicit_persona,
-  };
+  }
 }
 
 /**
@@ -170,10 +155,10 @@ async function processEvent(event: PixelEvent, env: Env): Promise<ScoringRespons
  */
 async function getVisitor(id: string, env: Env): Promise<VisitorData | null> {
   try {
-    const data = await env.VISITOR_KV.get(`visitor:${id}`, 'json');
-    return data as VisitorData | null;
+    const data = await env.VISITOR_KV.get(`visitor:${id}`, 'json')
+    return data as VisitorData | null
   } catch {
-    return null;
+    return null
   }
 }
 
@@ -181,18 +166,16 @@ async function getVisitor(id: string, env: Env): Promise<VisitorData | null> {
  * Save visitor to KV
  */
 async function saveVisitor(visitor: VisitorData, env: Env): Promise<void> {
-  await env.VISITOR_KV.put(
-    `visitor:${visitor.anonymous_id}`,
-    JSON.stringify(visitor),
-    { expirationTtl: KV_TTL_SECONDS }
-  );
+  await env.VISITOR_KV.put(`visitor:${visitor.anonymous_id}`, JSON.stringify(visitor), {
+    expirationTtl: KV_TTL_SECONDS,
+  })
 }
 
 /**
  * Create new visitor record
  */
 function createNewVisitor(id: string): VisitorData {
-  const now = new Date().toISOString();
+  const now = new Date().toISOString()
   return {
     anonymous_id: id,
     signals: [],
@@ -211,18 +194,14 @@ function createNewVisitor(id: string): VisitorData {
     last_updated: now,
     session_count: 1,
     total_signals: 0,
-  };
+  }
 }
 
 /**
  * Forward event + visitor data to BigQuery via webhook
  */
-async function forwardToBigQuery(
-  event: PixelEvent,
-  visitor: VisitorData,
-  env: Env
-): Promise<void> {
-  if (!env.BIGQUERY_WEBHOOK_URL) return;
+async function forwardToBigQuery(event: PixelEvent, visitor: VisitorData, env: Env): Promise<void> {
+  if (!env.BIGQUERY_WEBHOOK_URL) return
 
   try {
     await fetch(env.BIGQUERY_WEBHOOK_URL, {
@@ -263,8 +242,8 @@ async function forwardToBigQuery(
           brand_id: env.BRAND_ID,
         },
       }),
-    });
+    })
   } catch (error) {
-    console.error('BigQuery forward failed:', error);
+    console.error('BigQuery forward failed:', error)
   }
 }

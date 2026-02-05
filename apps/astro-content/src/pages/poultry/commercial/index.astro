@@ -10,55 +10,65 @@
  * - Scale-appropriate solutions (farm size calculators)
  * - ROI and proof points
  */
-import BaseLayout from '../../../layouts/BaseLayout.astro';
-import ProofPoints from '../../../components/cdp/ProofPoints.astro';
-import SearchBar from '../../../components/cdp/SearchBar.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import ProofPoints from '../../../components/cdp/ProofPoints.astro'
+import SearchBar from '../../../components/cdp/SearchBar.astro'
 
-const title = "Commercial Poultry Solutions | Southland Organics";
-const description = "Proven organic solutions for commercial broiler operations. Improve FCR, reduce mortality, and meet integrator requirements naturally.";
+const title = 'Commercial Poultry Solutions | Southland Organics'
+const description =
+  'Proven organic solutions for commercial broiler operations. Improve FCR, reduce mortality, and meet integrator requirements naturally.'
 
 // Schema for SEO
 const schema = {
-  "@context": "https://schema.org",
-  "@type": "CollectionPage",
-  name: "Commercial Poultry Solutions",
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'Commercial Poultry Solutions',
   description: description,
-  url: "https://southlandorganics.com/poultry/commercial/",
+  url: 'https://southlandorganics.com/poultry/commercial/',
   provider: {
-    "@type": "Organization",
-    name: "Southland Organics",
-  }
-};
+    '@type': 'Organization',
+    name: 'Southland Organics',
+  },
+}
 ---
 
 <BaseLayout title={title} description={description} schema={schema}>
   <!-- Hero Section -->
-  <section class="relative bg-gradient-to-br from-green-900 to-green-800 text-white py-16 md:py-24">
-    <div class="max-w-6xl mx-auto px-4">
-      <div class="grid md:grid-cols-2 gap-12 items-center">
+  <section class="relative bg-gradient-to-br from-green-900 to-green-800 py-16 text-white md:py-24">
+    <div class="mx-auto max-w-6xl px-4">
+      <div class="grid items-center gap-12 md:grid-cols-2">
         <div>
-          <span class="inline-block px-3 py-1 bg-green-700 text-green-100 text-sm font-medium rounded-full mb-4">
+          <span
+            class="mb-4 inline-block rounded-full bg-green-700 px-3 py-1 text-sm font-medium text-green-100"
+          >
             For Commercial Operations
           </span>
-          <h1 class="text-4xl md:text-5xl font-bold mb-6">
+          <h1 class="mb-6 text-4xl font-bold md:text-5xl">
             Better FCR. Lower Mortality. Proven Results.
           </h1>
-          <p class="text-lg text-green-100 mb-8 leading-relaxed">
-            Join hundreds of commercial growers who've improved their numbers with our organic probiotics and gut health solutions.
-            OMRI Listed, integrator-approved, and backed by real farm data.
+          <p class="mb-8 text-lg leading-relaxed text-green-100">
+            Join hundreds of commercial growers who've improved their numbers with our organic
+            probiotics and gut health solutions. OMRI Listed, integrator-approved, and backed by
+            real farm data.
           </p>
           <div class="flex flex-wrap gap-4">
-            <a href="/contact/commercial/" class="inline-block px-6 py-3 bg-white text-green-800 font-semibold rounded-lg hover:bg-green-50 transition-colors">
+            <a
+              href="/contact/commercial/"
+              class="inline-block rounded-lg bg-white px-6 py-3 font-semibold text-green-800 transition-colors hover:bg-green-50"
+            >
               Talk to a Specialist
             </a>
-            <a href="/resources/case-studies/" class="inline-block px-6 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white/10 transition-colors">
+            <a
+              href="/resources/case-studies/"
+              class="inline-block rounded-lg border-2 border-white px-6 py-3 font-semibold text-white transition-colors hover:bg-white/10"
+            >
               View Case Studies
             </a>
           </div>
         </div>
         <div class="relative">
-          <div class="aspect-video bg-green-700 rounded-2xl flex items-center justify-center">
-            <span class="text-green-500 text-4xl">Video Coming Soon</span>
+          <div class="flex aspect-video items-center justify-center rounded-2xl bg-green-700">
+            <span class="text-4xl text-green-500">Video Coming Soon</span>
           </div>
         </div>
       </div>
@@ -66,9 +76,9 @@ const schema = {
   </section>
 
   <!-- Proof Points from Customer Outcomes -->
-  <section class="py-12 bg-green-50">
-    <div class="max-w-4xl mx-auto px-4">
-      <h2 class="text-xl font-semibold text-center mb-8" style="color: var(--color-title);">
+  <section class="bg-green-50 py-12">
+    <div class="mx-auto max-w-4xl px-4">
+      <h2 class="mb-8 text-center text-xl font-semibold" style="color: var(--color-title);">
         Results Our Customers Report
       </h2>
       <ProofPoints persona="commercial" variant="cards" />
@@ -76,103 +86,173 @@ const schema = {
   </section>
 
   <!-- Problem Search -->
-  <section class="py-12 bg-white border-b">
-    <div class="max-w-2xl mx-auto px-4 text-center">
-      <h2 class="text-xl font-semibold mb-4" style="color: var(--color-title);">
+  <section class="border-b bg-white py-12">
+    <div class="mx-auto max-w-2xl px-4 text-center">
+      <h2 class="mb-4 text-xl font-semibold" style="color: var(--color-title);">
         What challenge are you facing?
       </h2>
-      <SearchBar
-        size="large"
-        placeholder="e.g., high mortality, poor FCR, ammonia issues..."
-      />
+      <SearchBar size="large" placeholder="e.g., high mortality, poor FCR, ammonia issues..." />
     </div>
   </section>
 
   <!-- Value Props -->
-  <section class="py-16 bg-white">
-    <div class="max-w-6xl mx-auto px-4">
-      <h2 class="text-3xl font-bold text-center mb-4" style="color: var(--color-title);">
+  <section class="bg-white py-16">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="mb-4 text-center text-3xl font-bold" style="color: var(--color-title);">
         Why Commercial Growers Choose Us
       </h2>
-      <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
-        We understand the pressures of commercial poultry. That's why we focus on solutions that deliver measurable ROI.
+      <p class="mx-auto mb-12 max-w-2xl text-center text-gray-600">
+        We understand the pressures of commercial poultry. That's why we focus on solutions that
+        deliver measurable ROI.
       </p>
-      <div class="grid md:grid-cols-3 gap-8">
-        <div class="bg-gray-50 rounded-xl p-6">
-          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-            <svg class="w-6 h-6 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+      <div class="grid gap-8 md:grid-cols-3">
+        <div class="rounded-xl bg-gray-50 p-6">
+          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
+            <svg
+              class="h-6 w-6 text-green-700"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+              ></path>
             </svg>
           </div>
-          <h3 class="text-xl font-bold mb-2" style="color: var(--color-title);">Proven Performance</h3>
-          <p class="text-gray-600">Real data from real farms. We track outcomes and can show you what to expect based on operations like yours.</p>
+          <h3 class="mb-2 text-xl font-bold" style="color: var(--color-title);">
+            Proven Performance
+          </h3>
+          <p class="text-gray-600">
+            Real data from real farms. We track outcomes and can show you what to expect based on
+            operations like yours.
+          </p>
         </div>
-        <div class="bg-gray-50 rounded-xl p-6">
-          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-            <svg class="w-6 h-6 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+        <div class="rounded-xl bg-gray-50 p-6">
+          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
+            <svg
+              class="h-6 w-6 text-green-700"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+              ></path>
             </svg>
           </div>
-          <h3 class="text-xl font-bold mb-2" style="color: var(--color-title);">Integrator Approved</h3>
-          <p class="text-gray-600">OMRI Listed and compliant with major integrator requirements. No withdrawal periods, no residue concerns.</p>
+          <h3 class="mb-2 text-xl font-bold" style="color: var(--color-title);">
+            Integrator Approved
+          </h3>
+          <p class="text-gray-600">
+            OMRI Listed and compliant with major integrator requirements. No withdrawal periods, no
+            residue concerns.
+          </p>
         </div>
-        <div class="bg-gray-50 rounded-xl p-6">
-          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-            <svg class="w-6 h-6 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
+        <div class="rounded-xl bg-gray-50 p-6">
+          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
+            <svg
+              class="h-6 w-6 text-green-700"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"
+              ></path>
             </svg>
           </div>
-          <h3 class="text-xl font-bold mb-2" style="color: var(--color-title);">Expert Support</h3>
-          <p class="text-gray-600">Dedicated commercial specialists who understand your operation. Call us anytime—we answer the phone.</p>
+          <h3 class="mb-2 text-xl font-bold" style="color: var(--color-title);">Expert Support</h3>
+          <p class="text-gray-600">
+            Dedicated commercial specialists who understand your operation. Call us anytime—we
+            answer the phone.
+          </p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Products for Commercial -->
-  <section class="py-16 bg-gray-50">
-    <div class="max-w-6xl mx-auto px-4">
-      <h2 class="text-3xl font-bold text-center mb-4" style="color: var(--color-title);">
+  <section class="bg-gray-50 py-16">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="mb-4 text-center text-3xl font-bold" style="color: var(--color-title);">
         Solutions for Every Stage
       </h2>
-      <p class="text-center text-gray-600 mb-12">
+      <p class="mb-12 text-center text-gray-600">
         From day-old chicks to processing, we have you covered
       </p>
-      <div class="grid md:grid-cols-3 gap-6">
-        <div class="bg-white rounded-xl shadow-sm p-6">
-          <h3 class="text-xl font-bold mb-3" style="color: var(--color-title);">Gut Health</h3>
-          <p class="text-gray-600 mb-4">Probiotics and prebiotics for optimal digestion and nutrient absorption.</p>
-          <a href="/shop/poultry/commercial/gut-health/" class="text-green-600 font-medium hover:underline">Learn more →</a>
+      <div class="grid gap-6 md:grid-cols-3">
+        <div class="rounded-xl bg-white p-6 shadow-sm">
+          <h3 class="mb-3 text-xl font-bold" style="color: var(--color-title);">Gut Health</h3>
+          <p class="mb-4 text-gray-600">
+            Probiotics and prebiotics for optimal digestion and nutrient absorption.
+          </p>
+          <a
+            href="/shop/poultry/commercial/gut-health/"
+            class="font-medium text-green-600 hover:underline">Learn more →</a
+          >
         </div>
-        <div class="bg-white rounded-xl shadow-sm p-6">
-          <h3 class="text-xl font-bold mb-3" style="color: var(--color-title);">Litter Treatment</h3>
-          <p class="text-gray-600 mb-4">Reduce ammonia, improve paw quality, and extend litter life naturally.</p>
-          <a href="/shop/poultry/commercial/litter/" class="text-green-600 font-medium hover:underline">Learn more →</a>
+        <div class="rounded-xl bg-white p-6 shadow-sm">
+          <h3 class="mb-3 text-xl font-bold" style="color: var(--color-title);">
+            Litter Treatment
+          </h3>
+          <p class="mb-4 text-gray-600">
+            Reduce ammonia, improve paw quality, and extend litter life naturally.
+          </p>
+          <a
+            href="/shop/poultry/commercial/litter/"
+            class="font-medium text-green-600 hover:underline">Learn more →</a
+          >
         </div>
-        <div class="bg-white rounded-xl shadow-sm p-6">
-          <h3 class="text-xl font-bold mb-3" style="color: var(--color-title);">Water Treatment</h3>
-          <p class="text-gray-600 mb-4">Clean water lines and improve water quality for better bird health.</p>
-          <a href="/shop/poultry/commercial/water/" class="text-green-600 font-medium hover:underline">Learn more →</a>
+        <div class="rounded-xl bg-white p-6 shadow-sm">
+          <h3 class="mb-3 text-xl font-bold" style="color: var(--color-title);">Water Treatment</h3>
+          <p class="mb-4 text-gray-600">
+            Clean water lines and improve water quality for better bird health.
+          </p>
+          <a
+            href="/shop/poultry/commercial/water/"
+            class="font-medium text-green-600 hover:underline">Learn more →</a
+          >
         </div>
       </div>
     </div>
   </section>
 
   <!-- CTA Section -->
-  <section class="py-16 bg-green-800 text-white">
-    <div class="max-w-4xl mx-auto px-4 text-center">
-      <h2 class="text-3xl font-bold mb-4">Ready to Improve Your Numbers?</h2>
-      <p class="text-lg text-green-100 mb-8">
-        Talk to one of our commercial poultry specialists. We'll help you find the right solution for your operation.
+  <section class="bg-green-800 py-16 text-white">
+    <div class="mx-auto max-w-4xl px-4 text-center">
+      <h2 class="mb-4 text-3xl font-bold">Ready to Improve Your Numbers?</h2>
+      <p class="mb-8 text-lg text-green-100">
+        Talk to one of our commercial poultry specialists. We'll help you find the right solution
+        for your operation.
       </p>
       <div class="flex flex-wrap justify-center gap-4">
-        <a href="tel:800-608-3755" class="inline-flex items-center gap-2 px-8 py-4 bg-white text-green-800 font-semibold rounded-lg hover:bg-green-50 transition-colors">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+        <a
+          href="tel:800-608-3755"
+          class="inline-flex items-center gap-2 rounded-lg bg-white px-8 py-4 font-semibold text-green-800 transition-colors hover:bg-green-50"
+        >
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+            ></path>
           </svg>
           Call 800-608-3755
         </a>
-        <a href="/contact/commercial/" class="inline-block px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white/10 transition-colors">
+        <a
+          href="/contact/commercial/"
+          class="inline-block rounded-lg border-2 border-white px-8 py-4 font-semibold text-white transition-colors hover:bg-white/10"
+        >
           Request a Consultation
         </a>
       </div>

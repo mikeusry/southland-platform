@@ -13,8 +13,8 @@
 
 :root {
   /* Typography */
-  --font-body: "Open Sans", system-ui, -apple-system, sans-serif;
-  --font-heading: "Eveleth Dot", system-ui, sans-serif;
+  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Eveleth Dot', system-ui, sans-serif;
 
   /* Colors - Primary */
   --color-bg: #ffffff;

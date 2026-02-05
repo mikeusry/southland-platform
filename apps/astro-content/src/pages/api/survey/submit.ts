@@ -11,34 +11,34 @@
  * 5. Sends to point.dog CDP (if configured)
  */
 
-import type { APIRoute } from 'astro';
+import type { APIRoute } from 'astro'
 
 interface SurveySubmission {
-  survey_id: string;
-  persona: 'backyard' | 'commercial' | 'lawn';
-  submitted_at: string;
-  order_id?: string;
-  email?: string;
-  flow_id?: string;
-  page_url?: string;
-  user_agent?: string;
-  referrer?: string;
-  [key: string]: any; // Survey responses
+  survey_id: string
+  persona: 'backyard' | 'commercial' | 'lawn'
+  submitted_at: string
+  order_id?: string
+  email?: string
+  flow_id?: string
+  page_url?: string
+  user_agent?: string
+  referrer?: string
+  [key: string]: any // Survey responses
 }
 
 interface EnrichedSubmission extends SurveySubmission {
   _meta: {
-    received_at: string;
-    source: 'web_survey';
-    ip_country?: string;
-    cf_ray?: string;
-  };
+    received_at: string
+    source: 'web_survey'
+    ip_country?: string
+    cf_ray?: string
+  }
 }
 
 export const POST: APIRoute = async ({ request, clientAddress }) => {
   try {
     // Parse request body
-    const data: SurveySubmission = await request.json();
+    const data: SurveySubmission = await request.json()
 
     // Validate required fields
     if (!data.survey_id || !data.persona) {
@@ -48,7 +48,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
           status: 400,
           headers: { 'Content-Type': 'application/json' },
         }
-      );
+      )
     }
 
     // Enrich with server-side metadata
@@ -60,39 +60,42 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
         ip_country: request.headers.get('cf-ipcountry') || undefined,
         cf_ray: request.headers.get('cf-ray') || undefined,
       },
-    };
+    }
 
     // Log for development/debugging
-    console.log('[Survey Submission]', JSON.stringify({
-      survey_id: enrichedData.survey_id,
-      persona: enrichedData.persona,
-      order_id: enrichedData.order_id,
-      received_at: enrichedData._meta.received_at,
-    }));
+    console.log(
+      '[Survey Submission]',
+      JSON.stringify({
+        survey_id: enrichedData.survey_id,
+        persona: enrichedData.persona,
+        order_id: enrichedData.order_id,
+        received_at: enrichedData._meta.received_at,
+      })
+    )
 
     // Forward to BigQuery webhook if configured
-    const bigqueryWebhook = import.meta.env.BIGQUERY_SURVEY_WEBHOOK;
+    const bigqueryWebhook = import.meta.env.BIGQUERY_SURVEY_WEBHOOK
     if (bigqueryWebhook) {
       try {
         await fetch(bigqueryWebhook, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.BIGQUERY_WEBHOOK_TOKEN || ''}`,
+            Authorization: `Bearer ${import.meta.env.BIGQUERY_WEBHOOK_TOKEN || ''}`,
           },
           body: JSON.stringify({
             table: 'cdp.outcome_surveys',
             data: enrichedData,
           }),
-        });
+        })
       } catch (webhookError) {
-        console.error('[BigQuery Webhook Error]', webhookError);
+        console.error('[BigQuery Webhook Error]', webhookError)
         // Don't fail the request if webhook fails - we have backups
       }
     }
 
     // Forward to point.dog CDP if configured
-    const pointdogEndpoint = import.meta.env.POINTDOG_INGEST_ENDPOINT;
+    const pointdogEndpoint = import.meta.env.POINTDOG_INGEST_ENDPOINT
     if (pointdogEndpoint) {
       try {
         await fetch(pointdogEndpoint, {
@@ -107,9 +110,9 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
             timestamp: enrichedData._meta.received_at,
             email: enrichedData.email,
           }),
-        });
+        })
       } catch (cdpError) {
-        console.error('[point.dog CDP Error]', cdpError);
+        console.error('[point.dog CDP Error]', cdpError)
       }
     }
 
@@ -127,9 +130,9 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
           'Cache-Control': 'no-store',
         },
       }
-    );
+    )
   } catch (error) {
-    console.error('[Survey Submission Error]', error);
+    console.error('[Survey Submission Error]', error)
 
     return new Response(
       JSON.stringify({
@@ -140,20 +143,17 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       }
-    );
+    )
   }
-};
+}
 
 // Reject other methods
 export const ALL: APIRoute = async () => {
-  return new Response(
-    JSON.stringify({ error: 'Method not allowed' }),
-    {
-      status: 405,
-      headers: {
-        'Content-Type': 'application/json',
-        'Allow': 'POST',
-      },
-    }
-  );
-};
+  return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+    status: 405,
+    headers: {
+      'Content-Type': 'application/json',
+      Allow: 'POST',
+    },
+  })
+}

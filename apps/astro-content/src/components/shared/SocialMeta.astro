@@ -1,12 +1,12 @@
 ---
 interface Props {
-  title: string;
-  description: string;
-  ogImage: string;
-  ogType?: 'website' | 'article' | 'video.episode';
-  url: string;
-  twitterCard?: 'summary' | 'summary_large_image' | 'player';
-  twitterSite?: string;
+  title: string
+  description: string
+  ogImage: string
+  ogType?: 'website' | 'article' | 'video.episode'
+  url: string
+  twitterCard?: 'summary' | 'summary_large_image' | 'player'
+  twitterSite?: string
 }
 
 const {
@@ -17,7 +17,7 @@ const {
   url,
   twitterCard = 'summary_large_image',
   twitterSite = '@SouthlandOrg',
-} = Astro.props;
+} = Astro.props
 ---
 
 <!-- Open Graph / Facebook -->

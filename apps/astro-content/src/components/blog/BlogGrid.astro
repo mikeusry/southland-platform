@@ -4,69 +4,68 @@
  * Supports filtering by segment and pagination
  */
 
-import BlogCard from './BlogCard.astro';
-import type { CollectionEntry } from 'astro:content';
+import BlogCard from './BlogCard.astro'
+import type { CollectionEntry } from 'astro:content'
 
 interface Props {
-  posts: CollectionEntry<'blog'>[];
-  columns?: 2 | 3 | 4;
-  showFeatured?: boolean;
-  class?: string;
+  posts: CollectionEntry<'blog'>[]
+  columns?: 2 | 3 | 4
+  showFeatured?: boolean
+  class?: string
 }
 
-const {
-  posts,
-  columns = 3,
-  showFeatured = false,
-  class: className = '',
-} = Astro.props;
+const { posts, columns = 3, showFeatured = false, class: className = '' } = Astro.props
 
 // Separate featured post if needed
-const featuredPost = showFeatured ? posts[0] : null;
-const gridPosts = showFeatured ? posts.slice(1) : posts;
+const featuredPost = showFeatured ? posts[0] : null
+const gridPosts = showFeatured ? posts.slice(1) : posts
 
 const gridColsClass = {
   2: 'md:grid-cols-2',
   3: 'md:grid-cols-2 lg:grid-cols-3',
   4: 'md:grid-cols-2 lg:grid-cols-4',
-};
+}
 ---
 
 <div class={`blog-grid ${className}`}>
-  {featuredPost && (
-    <div class="mb-8">
-      <BlogCard
-        title={featuredPost.data.title}
-        slug={featuredPost.id.replace(/\.mdx?$/, '')}
-        description={featuredPost.data.description}
-        publishDate={featuredPost.data.publishDate}
-        featuredImage={featuredPost.data.featuredImage}
-        author={featuredPost.data.author}
-        segment={featuredPost.data.segment}
-        tags={featuredPost.data.tags}
-        variant="featured"
-      />
-    </div>
-  )}
-
-  {gridPosts.length > 0 ? (
-    <div class={`grid grid-cols-1 ${gridColsClass[columns]} gap-6`}>
-      {gridPosts.map((post) => (
+  {
+    featuredPost && (
+      <div class="mb-8">
         <BlogCard
-          title={post.data.title}
-          slug={post.id.replace(/\.mdx?$/, '')}
-          description={post.data.description}
-          publishDate={post.data.publishDate}
-          featuredImage={post.data.featuredImage}
-          author={post.data.author}
-          segment={post.data.segment}
-          tags={post.data.tags}
+          title={featuredPost.data.title}
+          slug={featuredPost.id.replace(/\.mdx?$/, '')}
+          description={featuredPost.data.description}
+          publishDate={featuredPost.data.publishDate}
+          featuredImage={featuredPost.data.featuredImage}
+          author={featuredPost.data.author}
+          segment={featuredPost.data.segment}
+          tags={featuredPost.data.tags}
+          variant="featured"
         />
-      ))}
-    </div>
-  ) : (
-    <div class="text-center py-12 text-gray-500">
-      <p>No posts found.</p>
-    </div>
-  )}
+      </div>
+    )
+  }
+
+  {
+    gridPosts.length > 0 ? (
+      <div class={`grid grid-cols-1 ${gridColsClass[columns]} gap-6`}>
+        {gridPosts.map((post) => (
+          <BlogCard
+            title={post.data.title}
+            slug={post.id.replace(/\.mdx?$/, '')}
+            description={post.data.description}
+            publishDate={post.data.publishDate}
+            featuredImage={post.data.featuredImage}
+            author={post.data.author}
+            segment={post.data.segment}
+            tags={post.data.tags}
+          />
+        ))}
+      </div>
+    ) : (
+      <div class="py-12 text-center text-gray-500">
+        <p>No posts found.</p>
+      </div>
+    )
+  }
 </div>

@@ -3,22 +3,22 @@
  * Generates RSS 2.0 feed with iTunes and Podcast Index extensions
  */
 
-import type { APIRoute } from 'astro';
-import { getCollection } from 'astro:content';
-import { getLogoUrl } from '../../lib/cloudinary';
+import type { APIRoute } from 'astro'
+import { getCollection } from 'astro:content'
+import { getLogoUrl } from '../../lib/cloudinary'
 
-const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com';
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
 
 // Podcast cover image from Cloudinary (using logo until proper cover is available)
-const podcastCoverUrl = getLogoUrl('square', { width: 1400 });
+const podcastCoverUrl = getLogoUrl('square', { width: 1400 })
 
 // Format duration from "45:32" to "00:45:32"
 function formatDuration(duration: string): string {
-  const parts = duration.split(':');
+  const parts = duration.split(':')
   if (parts.length === 2) {
-    return `00:${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}`;
+    return `00:${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}`
   }
-  return duration;
+  return duration
 }
 
 // Escape XML special characters
@@ -28,22 +28,23 @@ function escapeXml(text: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
+    .replace(/'/g, '&apos;')
 }
 
 export const GET: APIRoute = async () => {
   const episodes = await getCollection('episodes', ({ data }) => {
-    return data.draft !== true;
-  });
+    return data.draft !== true
+  })
 
   // Sort by publish date (newest first)
   const sortedEpisodes = [...episodes].sort(
     (a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
-  );
+  )
 
-  const lastBuildDate = sortedEpisodes.length > 0
-    ? sortedEpisodes[0].data.publishDate.toUTCString()
-    : new Date().toUTCString();
+  const lastBuildDate =
+    sortedEpisodes.length > 0
+      ? sortedEpisodes[0].data.publishDate.toUTCString()
+      : new Date().toUTCString()
 
   const rss = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"
@@ -81,12 +82,13 @@ export const GET: APIRoute = async () => {
     <podcast:locked>no</podcast:locked>
     <podcast:guid>${siteUrl}/podcast/</podcast:guid>
 
-    ${sortedEpisodes.map((episode) => {
-      const slug = episode.id.replace(/\.mdx?$/, '');
-      const episodeUrl = `${siteUrl}/podcast/${slug}/`;
-      const pubDate = episode.data.publishDate.toUTCString();
+    ${sortedEpisodes
+      .map((episode) => {
+        const slug = episode.id.replace(/\.mdx?$/, '')
+        const episodeUrl = `${siteUrl}/podcast/${slug}/`
+        const pubDate = episode.data.publishDate.toUTCString()
 
-      return `
+        return `
     <item>
       <title>${escapeXml(episode.data.title)}</title>
       <link>${episodeUrl}</link>
@@ -105,20 +107,29 @@ export const GET: APIRoute = async () => {
       ${episode.data.thumbnail ? `<itunes:image href="${siteUrl}${episode.data.thumbnail}"/>` : ''}
       <itunes:summary><![CDATA[${episode.data.description}]]></itunes:summary>
 
-      ${episode.data.transcript && episode.data.transcript.length > 0 ? `
-      <podcast:transcript url="${episodeUrl}transcript.vtt" type="text/vtt"/>` : ''}
+      ${
+        episode.data.transcript && episode.data.transcript.length > 0
+          ? `
+      <podcast:transcript url="${episodeUrl}transcript.vtt" type="text/vtt"/>`
+          : ''
+      }
 
-      ${episode.data.chapters && episode.data.chapters.length > 0 ? `
-      <podcast:chapters url="${episodeUrl}chapters.json" type="application/json+chapters"/>` : ''}
-    </item>`;
-    }).join('')}
+      ${
+        episode.data.chapters && episode.data.chapters.length > 0
+          ? `
+      <podcast:chapters url="${episodeUrl}chapters.json" type="application/json+chapters"/>`
+          : ''
+      }
+    </item>`
+      })
+      .join('')}
   </channel>
-</rss>`;
+</rss>`
 
   return new Response(rss.trim(), {
     headers: {
       'Content-Type': 'application/xml; charset=utf-8',
       'Cache-Control': 'public, max-age=3600',
     },
-  });
-};
+  })
+}

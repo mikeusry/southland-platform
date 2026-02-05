@@ -6,7 +6,7 @@
  */
 
 // Persona IDs matching the CDP system
-export type PersonaId = 'backyard' | 'commercial' | 'lawn' | 'general';
+export type PersonaId = 'backyard' | 'commercial' | 'lawn' | 'general'
 
 // Journey stages from the CDP Playbook (10 stages)
 export type JourneyStage =
@@ -19,7 +19,7 @@ export type JourneyStage =
   | 'challenge'
   | 'success'
   | 'commitment'
-  | 'evangelist';
+  | 'evangelist'
 
 // Signal types that indicate persona/stage
 export type SignalType =
@@ -34,91 +34,91 @@ export type SignalType =
   | 'decision_engine'
   | 'survey_response'
   | 'phone_call'
-  | 'return_visit';
+  | 'return_visit'
 
 // Individual behavioral signal
 export interface Signal {
-  type: SignalType;
-  value: string;
-  timestamp: string;
-  metadata?: Record<string, unknown>;
+  type: SignalType
+  value: string
+  timestamp: string
+  metadata?: Record<string, unknown>
 }
 
 // Persona scores (probabilities that sum to 1)
 export interface PersonaScores {
-  backyard: number;
-  commercial: number;
-  lawn: number;
-  general: number;
+  backyard: number
+  commercial: number
+  lawn: number
+  general: number
 }
 
 // Visitor data stored in KV
 export interface VisitorData {
   // Identity
-  anonymous_id: string;
-  customer_id?: string;
-  email?: string;
+  anonymous_id: string
+  customer_id?: string
+  email?: string
 
   // Signals collected
-  signals: Signal[];
+  signals: Signal[]
 
   // Computed persona
-  persona_scores: PersonaScores;
-  predicted_persona: PersonaId;
-  persona_confidence: number;
+  persona_scores: PersonaScores
+  predicted_persona: PersonaId
+  persona_confidence: number
 
   // Explicit choice (from Decision Engine)
-  explicit_persona?: PersonaId;
+  explicit_persona?: PersonaId
 
   // Journey stage
-  current_stage: JourneyStage;
-  stage_confidence: number;
+  current_stage: JourneyStage
+  stage_confidence: number
   stage_history: Array<{
-    stage: JourneyStage;
-    entered_at: string;
-  }>;
+    stage: JourneyStage
+    entered_at: string
+  }>
 
   // Metadata
-  first_seen: string;
-  last_updated: string;
-  session_count: number;
-  total_signals: number;
+  first_seen: string
+  last_updated: string
+  session_count: number
+  total_signals: number
 }
 
 // Incoming pixel event
 export interface PixelEvent {
-  event: string;
-  anonymous_id: string;
-  customer_id?: string;
-  session_id: string;
-  timestamp: string;
+  event: string
+  anonymous_id: string
+  customer_id?: string
+  session_id: string
+  timestamp: string
 
   // Context
-  page_url: string;
-  page_title: string;
-  referrer?: string;
-  utm_source?: string;
-  utm_medium?: string;
-  utm_campaign?: string;
+  page_url: string
+  page_title: string
+  referrer?: string
+  utm_source?: string
+  utm_medium?: string
+  utm_campaign?: string
 
   // Event properties
-  properties?: Record<string, unknown>;
+  properties?: Record<string, unknown>
 }
 
 // Worker environment bindings
 export interface Env {
-  VISITOR_KV: KVNamespace;
-  BRAND_ID: string;
-  BIGQUERY_WEBHOOK_URL?: string;
+  VISITOR_KV: KVNamespace
+  BRAND_ID: string
+  BIGQUERY_WEBHOOK_URL?: string
 }
 
 // Response from the worker
 export interface ScoringResponse {
-  success: boolean;
-  visitor_id: string;
-  persona: PersonaId;
-  persona_confidence: number;
-  stage: JourneyStage;
-  stage_confidence: number;
-  explicit_choice?: PersonaId;
+  success: boolean
+  visitor_id: string
+  persona: PersonaId
+  persona_confidence: number
+  stage: JourneyStage
+  stage_confidence: number
+  explicit_choice?: PersonaId
 }

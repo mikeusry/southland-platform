@@ -4,14 +4,14 @@
  * Main landing page for Ag & Culture Podcast
  */
 
-import PodcastLayout from '../../layouts/PodcastLayout.astro';
-import EpisodeGrid from '../../components/podcast/EpisodeGrid.astro';
-import SubscribeButtons from '../../components/podcast/SubscribeButtons.astro';
-import EmailCapture from '../../components/shared/EmailCapture.astro';
-import PersonaCTA from '../../components/cdp/PersonaCTA.astro';
-import PersonaContent from '../../components/cdp/PersonaContent.astro';
-import { buildSouthlandUrl, getLogoUrl } from '../../lib/cloudinary';
-import { getCollection } from 'astro:content';
+import PodcastLayout from '../../layouts/PodcastLayout.astro'
+import EpisodeGrid from '../../components/podcast/EpisodeGrid.astro'
+import SubscribeButtons from '../../components/podcast/SubscribeButtons.astro'
+import EmailCapture from '../../components/shared/EmailCapture.astro'
+import PersonaCTA from '../../components/cdp/PersonaCTA.astro'
+import PersonaContent from '../../components/cdp/PersonaContent.astro'
+import { buildSouthlandUrl, getLogoUrl } from '../../lib/cloudinary'
+import { getCollection } from 'astro:content'
 
 // Cloudinary image URLs
 const mikeUsryPhoto = buildSouthlandUrl('Staff Headshots 2023/MikeU_1_emtxw6', {
@@ -20,30 +20,31 @@ const mikeUsryPhoto = buildSouthlandUrl('Staff Headshots 2023/MikeU_1_emtxw6', {
   crop: 'fill',
   gravity: 'face',
   format: 'auto',
-  quality: 'auto'
-});
+  quality: 'auto',
+})
 
 // Podcast cover - using logo as placeholder until real cover exists
-const podcastCoverUrl = getLogoUrl('square', { width: 400 });
+const podcastCoverUrl = getLogoUrl('square', { width: 400 })
 
 // Get all published episodes
 const allEpisodes = await getCollection('episodes', ({ data }) => {
-  return data.draft !== true;
-});
+  return data.draft !== true
+})
 
 // Sort by publish date (newest first)
 const episodes = allEpisodes.sort(
   (a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
-);
+)
 
-const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com';
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
 
 // Schema markup for PodcastSeries
 const podcastSchema = {
   '@context': 'https://schema.org',
   '@type': 'PodcastSeries',
   name: 'Ag & Culture Podcast',
-  description: "You can't have culture without agriculture. Join us for conversations about sustainable farming, animal health, and the communities built around agriculture.",
+  description:
+    "You can't have culture without agriculture. Join us for conversations about sustainable farming, animal health, and the communities built around agriculture.",
   url: `${siteUrl}/podcast/`,
   image: podcastCoverUrl,
   author: {
@@ -52,7 +53,7 @@ const podcastSchema = {
     url: siteUrl,
   },
   webFeed: `${siteUrl}/podcast/feed.xml`,
-};
+}
 ---
 
 <PodcastLayout
@@ -65,24 +66,28 @@ const podcastSchema = {
   {/* Hero Section - Dark gradient with depth */}
   <section class="podcast-hero relative overflow-hidden">
     {/* Background gradient - uses brand dark green */}
-    <div class="absolute inset-0 bg-gradient-to-br from-southland-green-dark via-southland-green-dark to-[#1f3d24]"></div>
+    <div
+      class="absolute inset-0 bg-gradient-to-br from-southland-green-dark via-southland-green-dark to-[#1f3d24]"
+    >
+    </div>
 
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-      <div class="grid lg:grid-cols-2 gap-12 items-center">
+    <div class="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 md:py-24 lg:px-8">
+      <div class="grid items-center gap-12 lg:grid-cols-2">
         {/* Left: Content */}
         <div class="text-white">
-          <p class="text-southland-green font-medium text-sm tracking-wide uppercase mb-3">
+          <p class="mb-3 text-sm font-medium uppercase tracking-wide text-southland-green">
             A Southland Organics Production
           </p>
-          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight text-white">
+          <h1 class="mb-4 text-4xl font-bold leading-tight text-white md:text-5xl lg:text-6xl">
             Ag & Culture<br />
             <span class="text-southland-green">Podcast</span>
           </h1>
-          <p class="text-2xl text-white/90 mb-4 font-light italic">
+          <p class="mb-4 text-2xl font-light italic text-white/90">
             You can't have culture without agriculture.
           </p>
-          <p class="text-white/70 text-lg mb-8 max-w-lg">
-            Real conversations about what actually works in agriculture. From soil biology to poultry health, we dig into the science and stories that matter.
+          <p class="mb-8 max-w-lg text-lg text-white/70">
+            Real conversations about what actually works in agriculture. From soil biology to
+            poultry health, we dig into the science and stories that matter.
           </p>
 
           {/* Email Capture - Primary CTA */}
@@ -98,7 +103,7 @@ const podcastSchema = {
 
           {/* Subscribe Buttons - Secondary */}
           <div>
-            <p class="text-sm text-white/50 mb-3">Or subscribe on your favorite platform:</p>
+            <p class="mb-3 text-sm text-white/50">Or subscribe on your favorite platform:</p>
             <SubscribeButtons variant="hero" />
           </div>
         </div>
@@ -107,13 +112,15 @@ const podcastSchema = {
         <div class="flex justify-center lg:justify-end">
           <div class="relative">
             {/* Glow effect */}
-            <div class="absolute -inset-4 bg-southland-green/20 rounded-3xl blur-2xl"></div>
+            <div class="absolute -inset-4 rounded-3xl bg-southland-green/20 blur-2xl"></div>
             {/* Cover image - using logo placeholder until real cover art is available */}
-            <div class="relative w-72 h-72 md:w-80 md:h-80 lg:w-96 lg:h-96 rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 bg-gradient-to-br from-southland-green to-southland-green-dark flex items-center justify-center p-8">
+            <div
+              class="relative flex h-72 w-72 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-southland-green to-southland-green-dark p-8 shadow-2xl ring-1 ring-white/10 md:h-80 md:w-80 lg:h-96 lg:w-96"
+            >
               <img
                 src={podcastCoverUrl}
                 alt="Ag & Culture Podcast Cover"
-                class="w-full h-full object-contain"
+                class="h-full w-full object-contain"
                 loading="eager"
               />
             </div>
@@ -125,91 +132,99 @@ const podcastSchema = {
 
   {/* Episodes Section - Slightly darker background */}
   <section class="bg-brand-gray py-16 md:py-20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
-        <h2 class="text-3xl md:text-4xl font-bold text-shopify-title">Latest Episodes</h2>
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h2 class="text-3xl font-bold text-shopify-title md:text-4xl">Latest Episodes</h2>
         <div class="flex items-center gap-6">
           <a
             href="/podcast/topics/"
-            class="text-sm font-medium text-southland-green hover:text-southland-green-dark transition-colors"
+            class="text-sm font-medium text-southland-green transition-colors hover:text-southland-green-dark"
           >
             Browse by Topic →
           </a>
         </div>
       </div>
 
-      {episodes.length > 0 ? (
-        <EpisodeGrid episodes={episodes} showFeatured={true} />
-      ) : (
-        <div class="text-center py-16 bg-white rounded-2xl shadow-sm">
-          <div class="w-20 h-20 mx-auto mb-6 text-shopify-secondary-text">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-            </svg>
+      {
+        episodes.length > 0 ? (
+          <EpisodeGrid episodes={episodes} showFeatured={true} />
+        ) : (
+          <div class="rounded-2xl bg-white py-16 text-center shadow-sm">
+            <div class="mx-auto mb-6 h-20 w-20 text-shopify-secondary-text">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+                />
+              </svg>
+            </div>
+            <h3 class="mb-3 text-2xl font-bold text-shopify-title">Coming Soon</h3>
+            <p class="mx-auto max-w-md text-shopify-secondary-text">
+              Our first episodes are in production. Subscribe above to be notified when we launch!
+            </p>
           </div>
-          <h3 class="text-2xl font-bold text-shopify-title mb-3">Coming Soon</h3>
-          <p class="text-shopify-secondary-text max-w-md mx-auto">
-            Our first episodes are in production. Subscribe above to be notified when we launch!
-          </p>
-        </div>
-      )}
+        )
+      }
     </div>
   </section>
 
   {/* About Section */}
   <section class="bg-white py-16 md:py-20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid lg:grid-cols-5 gap-12 items-start">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid items-start gap-12 lg:grid-cols-5">
         {/* Host Info - 3 cols */}
         <div class="lg:col-span-3">
-          <h2 class="text-3xl md:text-4xl font-bold text-shopify-title mb-6">
-            About the Show
-          </h2>
+          <h2 class="mb-6 text-3xl font-bold text-shopify-title md:text-4xl">About the Show</h2>
 
           {/* Host Card */}
-          <div class="flex items-start gap-6 mb-8">
-            <div class="w-24 h-24 rounded-full bg-gradient-to-br from-southland-green/10 to-southland-green/20 flex-shrink-0 overflow-hidden">
-              <img
-                src={mikeUsryPhoto}
-                alt="Mike Usry"
-                class="w-full h-full object-cover"
-              />
+          <div class="mb-8 flex items-start gap-6">
+            <div
+              class="h-24 w-24 flex-shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-southland-green/10 to-southland-green/20"
+            >
+              <img src={mikeUsryPhoto} alt="Mike Usry" class="h-full w-full object-cover" />
             </div>
             <div>
-              <h3 class="font-bold text-xl text-shopify-text">Mike Usry</h3>
-              <p class="text-southland-green font-medium mb-2">Host & Founder, Southland Organics</p>
+              <h3 class="text-xl font-bold text-shopify-text">Mike Usry</h3>
+              <p class="mb-2 font-medium text-southland-green">
+                Host & Founder, Southland Organics
+              </p>
               <p class="text-shopify-secondary-text">
-                With years of experience in humate deposits and soil biology, Mike brings practical knowledge from the field to every conversation.
+                With years of experience in humate deposits and soil biology, Mike brings practical
+                knowledge from the field to every conversation.
               </p>
             </div>
           </div>
 
-          <div class="prose prose-lg text-shopify-secondary-text max-w-none">
+          <div class="prose prose-lg max-w-none text-shopify-secondary-text">
             <p>
-              Ag & Culture is more than just a podcast about farming — it's about the people, practices, and science that make agriculture work.
+              Ag & Culture is more than just a podcast about farming — it's about the people,
+              practices, and science that make agriculture work.
             </p>
             <p>
-              Each episode, we dig into topics that matter: soil biology, animal health, sustainable practices, and the economics of farming. No fluff, no filler — just real conversations with people doing the work.
+              Each episode, we dig into topics that matter: soil biology, animal health, sustainable
+              practices, and the economics of farming. No fluff, no filler — just real conversations
+              with people doing the work.
             </p>
           </div>
         </div>
 
         {/* Brought to you by - 2 cols */}
         <div class="lg:col-span-2">
-          <div class="bg-brand-gray rounded-2xl p-8 sticky top-8">
-            <p class="text-sm font-medium text-shopify-secondary-text uppercase tracking-wide mb-4">Brought to you by</p>
-            <a href="/" class="block mb-4">
+          <div class="sticky top-8 rounded-2xl bg-brand-gray p-8">
+            <p class="mb-4 text-sm font-medium uppercase tracking-wide text-shopify-secondary-text">
+              Brought to you by
+            </p>
+            <a href="/" class="mb-4 block">
               <span class="text-2xl font-bold text-southland-green">Southland Organics</span>
             </a>
-            <p class="text-shopify-secondary-text mb-6">
-              Working with nature, not against it. Sustainable solutions for poultry, turf, and agriculture.
+            <p class="mb-6 text-shopify-secondary-text">
+              Working with nature, not against it. Sustainable solutions for poultry, turf, and
+              agriculture.
             </p>
             <!-- Persona-aware CTA -->
-            <PersonaCTA
-              variant="primary"
-              defaultText="Explore Products"
-              defaultHref="/shop/"
-            />
+            <PersonaCTA variant="primary" defaultText="Explore Products" defaultHref="/shop/" />
           </div>
         </div>
       </div>
@@ -218,39 +233,48 @@ const podcastSchema = {
 
   {/* Persona-Aware Product Recommendations */}
   <section class="bg-gray-50 py-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <!-- Content for Backyard Betty -->
       <PersonaContent show="backyard">
-        <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 text-center">
-          <h3 class="text-xl font-bold text-amber-800 mb-2">For Your Backyard Flock</h3>
-          <p class="text-amber-700 mb-4">Keep your chickens healthy with our natural probiotics and supplements.</p>
+        <div class="rounded-xl border border-amber-200 bg-amber-50 p-6 text-center">
+          <h3 class="mb-2 text-xl font-bold text-amber-800">For Your Backyard Flock</h3>
+          <p class="mb-4 text-amber-700">
+            Keep your chickens healthy with our natural probiotics and supplements.
+          </p>
           <a href="/shop/poultry/backyard/" class="btn-primary">Shop Backyard Products</a>
         </div>
       </PersonaContent>
 
       <!-- Content for Broiler Bill -->
       <PersonaContent show="commercial">
-        <div class="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
-          <h3 class="text-xl font-bold text-green-800 mb-2">For Commercial Operations</h3>
-          <p class="text-green-700 mb-4">Proven solutions to improve FCR and reduce mortality. See how other growers are getting results.</p>
+        <div class="rounded-xl border border-green-200 bg-green-50 p-6 text-center">
+          <h3 class="mb-2 text-xl font-bold text-green-800">For Commercial Operations</h3>
+          <p class="mb-4 text-green-700">
+            Proven solutions to improve FCR and reduce mortality. See how other growers are getting
+            results.
+          </p>
           <a href="/poultry/commercial/" class="btn-primary">View Commercial Solutions</a>
         </div>
       </PersonaContent>
 
       <!-- Content for Turf Taylor -->
       <PersonaContent show="lawn">
-        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-6 text-center">
-          <h3 class="text-xl font-bold text-emerald-800 mb-2">For Lawn & Garden</h3>
-          <p class="text-emerald-700 mb-4">Build healthy soil for a naturally beautiful lawn without harsh chemicals.</p>
+        <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-6 text-center">
+          <h3 class="mb-2 text-xl font-bold text-emerald-800">For Lawn & Garden</h3>
+          <p class="mb-4 text-emerald-700">
+            Build healthy soil for a naturally beautiful lawn without harsh chemicals.
+          </p>
           <a href="/lawn/" class="btn-primary">Shop Lawn Products</a>
         </div>
       </PersonaContent>
 
       <!-- Content for Unknown visitors (prompt to select) -->
       <PersonaContent showIfUnknown showWhileLoading>
-        <div class="bg-white border border-gray-200 rounded-xl p-6 text-center">
-          <h3 class="text-xl font-bold text-gray-800 mb-2">What brings you here?</h3>
-          <p class="text-gray-600 mb-4">Tell us about yourself so we can show you the most relevant content.</p>
+        <div class="rounded-xl border border-gray-200 bg-white p-6 text-center">
+          <h3 class="mb-2 text-xl font-bold text-gray-800">What brings you here?</h3>
+          <p class="mb-4 text-gray-600">
+            Tell us about yourself so we can show you the most relevant content.
+          </p>
           <a href="/" class="btn-primary">Personalize My Experience</a>
         </div>
       </PersonaContent>
@@ -258,15 +282,15 @@ const podcastSchema = {
   </section>
 
   {/* CTA Section */}
-  <section class="bg-gradient-to-br from-southland-green-dark via-southland-green-dark to-[#1f3d24] py-16">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h2 class="text-3xl font-bold text-white mb-4">
-        Never miss an episode
-      </h2>
-      <p class="text-white/70 mb-8 text-lg">
+  <section
+    class="bg-gradient-to-br from-southland-green-dark via-southland-green-dark to-[#1f3d24] py-16"
+  >
+    <div class="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+      <h2 class="mb-4 text-3xl font-bold text-white">Never miss an episode</h2>
+      <p class="mb-8 text-lg text-white/70">
         Get new episodes delivered to your inbox. No spam, just agriculture.
       </p>
-      <div class="max-w-md mx-auto">
+      <div class="mx-auto max-w-md">
         <EmailCapture
           headline=""
           description=""

@@ -11,61 +11,111 @@
 // TYPES
 // =============================================================================
 
-export type CropMode = 'fill' | 'fit' | 'scale' | 'thumb' | 'crop' | 'pad' | 'limit' | 'lfill' | 'mfit';
-export type Gravity = 'auto' | 'face' | 'faces' | 'center' | 'north' | 'south' | 'east' | 'west' | 'north_east' | 'north_west' | 'south_east' | 'south_west';
-export type ImageFormat = 'auto' | 'webp' | 'avif' | 'jpg' | 'png' | 'gif';
-export type Quality = number | 'auto' | 'auto:best' | 'auto:good' | 'auto:eco' | 'auto:low';
+export type CropMode =
+  | 'fill'
+  | 'fit'
+  | 'scale'
+  | 'thumb'
+  | 'crop'
+  | 'pad'
+  | 'limit'
+  | 'lfill'
+  | 'mfit'
+export type Gravity =
+  | 'auto'
+  | 'face'
+  | 'faces'
+  | 'center'
+  | 'north'
+  | 'south'
+  | 'east'
+  | 'west'
+  | 'north_east'
+  | 'north_west'
+  | 'south_east'
+  | 'south_west'
+export type ImageFormat = 'auto' | 'webp' | 'avif' | 'jpg' | 'png' | 'gif'
+export type Quality = number | 'auto' | 'auto:best' | 'auto:good' | 'auto:eco' | 'auto:low'
 
 /** Effect types supported by Cloudinary */
 export type ImageEffect =
-  | 'blur' | 'blur:100' | 'blur:200' | 'blur:500' | 'blur:1000'
-  | 'grayscale' | 'sepia' | 'saturation:50' | 'saturation:150'
-  | 'brightness:50' | 'brightness:150'
-  | 'contrast:50' | 'contrast:150'
-  | 'sharpen' | 'unsharp_mask'
-  | 'pixelate' | 'pixelate:5' | 'pixelate:10'
-  | 'vignette' | 'oil_paint'
-  | 'art:athena' | 'art:audrey' | 'art:aurora' | 'art:daguerre' | 'art:eucalyptus'
-  | 'art:fes' | 'art:frost' | 'art:hairspray' | 'art:hokusai' | 'art:incognito'
-  | 'art:linen' | 'art:peacock' | 'art:primavera' | 'art:quartz' | 'art:red_rock'
-  | 'art:refresh' | 'art:sizzle' | 'art:sonnet' | 'art:ukulele' | 'art:zorro';
+  | 'blur'
+  | 'blur:100'
+  | 'blur:200'
+  | 'blur:500'
+  | 'blur:1000'
+  | 'grayscale'
+  | 'sepia'
+  | 'saturation:50'
+  | 'saturation:150'
+  | 'brightness:50'
+  | 'brightness:150'
+  | 'contrast:50'
+  | 'contrast:150'
+  | 'sharpen'
+  | 'unsharp_mask'
+  | 'pixelate'
+  | 'pixelate:5'
+  | 'pixelate:10'
+  | 'vignette'
+  | 'oil_paint'
+  | 'art:athena'
+  | 'art:audrey'
+  | 'art:aurora'
+  | 'art:daguerre'
+  | 'art:eucalyptus'
+  | 'art:fes'
+  | 'art:frost'
+  | 'art:hairspray'
+  | 'art:hokusai'
+  | 'art:incognito'
+  | 'art:linen'
+  | 'art:peacock'
+  | 'art:primavera'
+  | 'art:quartz'
+  | 'art:red_rock'
+  | 'art:refresh'
+  | 'art:sizzle'
+  | 'art:sonnet'
+  | 'art:ukulele'
+  | 'art:zorro'
 
 export interface CloudinaryTransformOptions {
-  width?: number;
-  height?: number;
-  crop?: CropMode;
-  quality?: Quality;
-  format?: ImageFormat;
-  gravity?: Gravity;
-  fetchFormat?: 'auto';
-  dpr?: number | 'auto';
+  width?: number
+  height?: number
+  crop?: CropMode
+  quality?: Quality
+  format?: ImageFormat
+  gravity?: Gravity
+  fetchFormat?: 'auto'
+  dpr?: number | 'auto'
   /** Apply image effects */
-  effect?: ImageEffect | ImageEffect[];
+  effect?: ImageEffect | ImageEffect[]
   /** Border (e.g., '2px_solid_rgb:44883e') */
-  border?: string;
+  border?: string
   /** Radius for rounded corners (e.g., 'max' for circle, or number) */
-  radius?: number | 'max';
+  radius?: number | 'max'
   /** Background color for transparent images */
-  background?: string;
+  background?: string
   /** Overlay text or image */
-  overlay?: string;
+  overlay?: string
   /** Named transformation preset */
-  transformation?: string;
+  transformation?: string
   /** Raw transformation string for advanced use */
-  rawTransformation?: string;
+  rawTransformation?: string
 }
 
 export interface ResponsiveImageSet {
-  src: string;
-  srcset: string;
-  sizes?: string;
+  src: string
+  srcset: string
+  sizes?: string
 }
 
 export interface PlaceholderOptions {
   /** Type of placeholder */
-  type: 'blur' | 'color' | 'pixelate' | 'vectorize' | 'predominant';
+  type: 'blur' | 'color' | 'pixelate' | 'vectorize' | 'predominant'
   /** For color placeholder, the hex color */
-  color?: string;
+  color?: string
 }
 
 // =============================================================================
@@ -79,14 +129,14 @@ export interface PlaceholderOptions {
 export function getCloudName(): string {
   const cloudName =
     import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME ||
-    (typeof process !== 'undefined' ? process.env.PUBLIC_CLOUDINARY_CLOUD_NAME : null);
+    (typeof process !== 'undefined' ? process.env.PUBLIC_CLOUDINARY_CLOUD_NAME : null)
 
   if (!cloudName) {
-    console.warn('PUBLIC_CLOUDINARY_CLOUD_NAME is not set. Using placeholder.');
-    return 'demo';
+    console.warn('PUBLIC_CLOUDINARY_CLOUD_NAME is not set. Using placeholder.')
+    return 'demo'
   }
 
-  return cloudName;
+  return cloudName
 }
 
 /**
@@ -104,63 +154,61 @@ export function buildCloudinaryUrl(
   publicId: string,
   options: CloudinaryTransformOptions = {}
 ): string {
-  const cloudName = getCloudName();
-  const baseUrl = `https://res.cloudinary.com/${cloudName}/image/upload`;
+  const cloudName = getCloudName()
+  const baseUrl = `https://res.cloudinary.com/${cloudName}/image/upload`
 
-  const transformations: string[] = [];
+  const transformations: string[] = []
 
   // Named transformation preset
   if (options.transformation) {
-    transformations.push(`t_${options.transformation}`);
+    transformations.push(`t_${options.transformation}`)
   }
 
   // Basic transforms
-  if (options.width) transformations.push(`w_${options.width}`);
-  if (options.height) transformations.push(`h_${options.height}`);
-  if (options.crop) transformations.push(`c_${options.crop}`);
-  if (options.quality) transformations.push(`q_${options.quality}`);
-  if (options.format) transformations.push(`f_${options.format}`);
+  if (options.width) transformations.push(`w_${options.width}`)
+  if (options.height) transformations.push(`h_${options.height}`)
+  if (options.crop) transformations.push(`c_${options.crop}`)
+  if (options.quality) transformations.push(`q_${options.quality}`)
+  if (options.format) transformations.push(`f_${options.format}`)
 
   // Gravity (only for applicable crop modes)
-  const gravityApplicableCrops = ['fill', 'lfill', 'thumb', 'crop'];
+  const gravityApplicableCrops = ['fill', 'lfill', 'thumb', 'crop']
   if (options.gravity && (!options.crop || gravityApplicableCrops.includes(options.crop))) {
-    transformations.push(`g_${options.gravity}`);
+    transformations.push(`g_${options.gravity}`)
   }
 
-  if (options.fetchFormat) transformations.push(`f_${options.fetchFormat}`);
-  if (options.dpr) transformations.push(`dpr_${options.dpr}`);
+  if (options.fetchFormat) transformations.push(`f_${options.fetchFormat}`)
+  if (options.dpr) transformations.push(`dpr_${options.dpr}`)
 
   // Effects
   if (options.effect) {
-    const effects = Array.isArray(options.effect) ? options.effect : [options.effect];
-    effects.forEach(e => transformations.push(`e_${e}`));
+    const effects = Array.isArray(options.effect) ? options.effect : [options.effect]
+    effects.forEach((e) => transformations.push(`e_${e}`))
   }
 
   // Style transforms
-  if (options.border) transformations.push(`bo_${options.border}`);
-  if (options.radius !== undefined) transformations.push(`r_${options.radius}`);
-  if (options.background) transformations.push(`b_${options.background}`);
-  if (options.overlay) transformations.push(`l_${options.overlay}`);
+  if (options.border) transformations.push(`bo_${options.border}`)
+  if (options.radius !== undefined) transformations.push(`r_${options.radius}`)
+  if (options.background) transformations.push(`b_${options.background}`)
+  if (options.overlay) transformations.push(`l_${options.overlay}`)
 
   // Raw transformation for advanced use
   if (options.rawTransformation) {
-    transformations.push(options.rawTransformation);
+    transformations.push(options.rawTransformation)
   }
 
   // Auto format and quality if not specified
   if (!options.format && !options.fetchFormat) {
-    transformations.push('f_auto');
+    transformations.push('f_auto')
   }
   if (!options.quality) {
-    transformations.push('q_auto');
+    transformations.push('q_auto')
   }
 
-  const transformString = transformations.length > 0
-    ? `${transformations.join(',')}/`
-    : '';
+  const transformString = transformations.length > 0 ? `${transformations.join(',')}/` : ''
 
-  const encodedPublicId = publicId.replace(/ /g, '%20');
-  return `${baseUrl}/${transformString}${encodedPublicId}`;
+  const encodedPublicId = publicId.replace(/ /g, '%20')
+  return `${baseUrl}/${transformString}${encodedPublicId}`
 }
 
 /**
@@ -174,20 +222,26 @@ export function buildPlaceholderUrl(
     width: 20,
     quality: 'auto:low',
     format: 'auto',
-  };
+  }
 
   switch (options.type) {
     case 'blur':
-      return buildCloudinaryUrl(publicId, { ...baseOptions, effect: 'blur:1000' });
+      return buildCloudinaryUrl(publicId, { ...baseOptions, effect: 'blur:1000' })
     case 'pixelate':
-      return buildCloudinaryUrl(publicId, { ...baseOptions, effect: 'pixelate:10' });
+      return buildCloudinaryUrl(publicId, { ...baseOptions, effect: 'pixelate:10' })
     case 'color':
       // Return a 1x1 pixel with the specified color
-      return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect fill='%23${options.color || 'f5f5f5'}' width='1' height='1'/%3E%3C/svg%3E`;
+      return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect fill='%23${options.color || 'f5f5f5'}' width='1' height='1'/%3E%3C/svg%3E`
     case 'predominant':
-      return buildCloudinaryUrl(publicId, { ...baseOptions, effect: 'blur:1000', width: 1, height: 1, crop: 'scale' });
+      return buildCloudinaryUrl(publicId, {
+        ...baseOptions,
+        effect: 'blur:1000',
+        width: 1,
+        height: 1,
+        crop: 'scale',
+      })
     default:
-      return buildCloudinaryUrl(publicId, baseOptions);
+      return buildCloudinaryUrl(publicId, baseOptions)
   }
 }
 
@@ -199,23 +253,23 @@ export function getCloudinaryResponsiveSet(
   widths: number[] = [400, 800, 1200, 1600],
   options: CloudinaryTransformOptions = {}
 ): ResponsiveImageSet {
-  const srcsetParts = widths.map(width => {
-    const url = buildCloudinaryUrl(publicId, { ...options, width });
-    return `${url} ${width}w`;
-  });
+  const srcsetParts = widths.map((width) => {
+    const url = buildCloudinaryUrl(publicId, { ...options, width })
+    return `${url} ${width}w`
+  })
 
-  const defaultWidth = widths[Math.floor(widths.length / 2)];
-  const src = buildCloudinaryUrl(publicId, { ...options, width: defaultWidth });
+  const defaultWidth = widths[Math.floor(widths.length / 2)]
+  const src = buildCloudinaryUrl(publicId, { ...options, width: defaultWidth })
 
   const sizes = options.width
     ? `${options.width}px`
-    : '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 1200px';
+    : '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 1200px'
 
   return {
     src,
     srcset: srcsetParts.join(', '),
-    sizes
-  };
+    sizes,
+  }
 }
 
 /**
@@ -227,14 +281,16 @@ export function getDprSrcset(
   options: CloudinaryTransformOptions = {},
   dprs: number[] = [1, 1.5, 2, 3]
 ): string {
-  return dprs.map(dpr => {
-    const url = buildCloudinaryUrl(publicId, {
-      ...options,
-      width: Math.round(baseWidth * dpr),
-      dpr: 1 // We're handling DPR manually via width
-    });
-    return `${url} ${dpr}x`;
-  }).join(', ');
+  return dprs
+    .map((dpr) => {
+      const url = buildCloudinaryUrl(publicId, {
+        ...options,
+        width: Math.round(baseWidth * dpr),
+        dpr: 1, // We're handling DPR manually via width
+      })
+      return `${url} ${dpr}x`
+    })
+    .join(', ')
 }
 
 // =============================================================================
@@ -244,34 +300,28 @@ export function getDprSrcset(
 /**
  * Generates a Cloudinary thumbnail URL
  */
-export function getCloudinaryThumbnail(
-  publicId: string,
-  size: number = 200
-): string {
+export function getCloudinaryThumbnail(publicId: string, size: number = 200): string {
   return buildCloudinaryUrl(publicId, {
     width: size,
     height: size,
     crop: 'thumb',
     gravity: 'auto',
     quality: 'auto',
-    format: 'auto'
-  });
+    format: 'auto',
+  })
 }
 
 /**
  * Generates a Cloudinary hero image URL
  */
-export function getCloudinaryHero(
-  publicId: string,
-  width: number = 1600
-): string {
+export function getCloudinaryHero(publicId: string, width: number = 1600): string {
   return buildCloudinaryUrl(publicId, {
     width,
     crop: 'fill',
     gravity: 'auto',
     quality: 'auto',
-    format: 'auto'
-  });
+    format: 'auto',
+  })
 }
 
 // =============================================================================
@@ -299,25 +349,25 @@ export function getCloudinaryHero(
  */
 
 /** Base folder for Southland Organics images in Cloudinary */
-export const SOUTHLAND_FOLDER = 'Southland Website';
+export const SOUTHLAND_FOLDER = 'Southland Website'
 
 /** Branding assets subfolder */
-export const BRANDING_FOLDER = `${SOUTHLAND_FOLDER}/Southland Branding`;
+export const BRANDING_FOLDER = `${SOUTHLAND_FOLDER}/Southland Branding`
 
 /**
  * Helper function to build public ID with Southland base folder
  */
 export function getSouthlandImageId(imagePath: string): string {
-  const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
-  return `${SOUTHLAND_FOLDER}/${cleanPath}`;
+  const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath
+  return `${SOUTHLAND_FOLDER}/${cleanPath}`
 }
 
 /**
  * Helper function to build public ID for branding assets
  */
 export function getBrandingImageId(imagePath: string): string {
-  const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
-  return `${BRANDING_FOLDER}/${cleanPath}`;
+  const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath
+  return `${BRANDING_FOLDER}/${cleanPath}`
 }
 
 /**
@@ -327,7 +377,7 @@ export function buildSouthlandUrl(
   imagePath: string,
   options: CloudinaryTransformOptions = {}
 ): string {
-  return buildCloudinaryUrl(getSouthlandImageId(imagePath), options);
+  return buildCloudinaryUrl(getSouthlandImageId(imagePath), options)
 }
 
 /**
@@ -337,7 +387,7 @@ export function buildBrandingUrl(
   imagePath: string,
   options: CloudinaryTransformOptions = {}
 ): string {
-  return buildCloudinaryUrl(getBrandingImageId(imagePath), options);
+  return buildCloudinaryUrl(getBrandingImageId(imagePath), options)
 }
 
 /**
@@ -355,7 +405,14 @@ export function buildBrandingUrl(
  * - black: icons/Southland_Logo_-_Black_ajmlea (svg)
  */
 export function getLogoUrl(
-  variant: 'primary' | 'horizontal' | 'horizontalPng' | 'square' | 'icon' | 'iconSvg' | 'black' = 'primary',
+  variant:
+    | 'primary'
+    | 'horizontal'
+    | 'horizontalPng'
+    | 'square'
+    | 'icon'
+    | 'iconSvg'
+    | 'black' = 'primary',
   options: CloudinaryTransformOptions = {}
 ): string {
   const logoMap = {
@@ -365,52 +422,43 @@ export function getLogoUrl(
     square: 'logos/Southland_Primary_Square_Logo_sertzs',
     icon: 'icons/Icon_qgeqxn',
     iconSvg: 'icons/Southland_Icon_Icon_xwytez',
-    black: 'icons/Southland_Logo_-_Black_ajmlea'
-  };
-  return buildBrandingUrl(logoMap[variant], { format: 'auto', ...options });
+    black: 'icons/Southland_Logo_-_Black_ajmlea',
+  }
+  return buildBrandingUrl(logoMap[variant], { format: 'auto', ...options })
 }
 
 /**
  * Generates a podcast episode thumbnail URL (16:9 aspect ratio)
  */
-export function getEpisodeThumbnail(
-  episodeSlug: string,
-  width: number = 400
-): string {
+export function getEpisodeThumbnail(episodeSlug: string, width: number = 400): string {
   return buildSouthlandUrl(`podcast/episodes/${episodeSlug}`, {
     width,
-    height: Math.round(width * 9 / 16),
+    height: Math.round((width * 9) / 16),
     crop: 'fill',
     gravity: 'auto',
     quality: 'auto',
-    format: 'auto'
-  });
+    format: 'auto',
+  })
 }
 
 /**
  * Generates a guest profile image URL (square, face-focused)
  */
-export function getGuestImage(
-  guestSlug: string,
-  size: number = 200
-): string {
+export function getGuestImage(guestSlug: string, size: number = 200): string {
   return buildSouthlandUrl(`podcast/guests/${guestSlug}`, {
     width: size,
     height: size,
     crop: 'thumb',
     gravity: 'face',
     quality: 'auto',
-    format: 'auto'
-  });
+    format: 'auto',
+  })
 }
 
 /**
  * Generates an avatar image URL (circular)
  */
-export function getAvatarUrl(
-  publicId: string,
-  size: number = 64
-): string {
+export function getAvatarUrl(publicId: string, size: number = 64): string {
   return buildCloudinaryUrl(publicId, {
     width: size,
     height: size,
@@ -418,8 +466,8 @@ export function getAvatarUrl(
     gravity: 'face',
     radius: 'max',
     quality: 'auto',
-    format: 'auto'
-  });
+    format: 'auto',
+  })
 }
 
 /**
@@ -428,12 +476,12 @@ export function getAvatarUrl(
 export function getHeroBannerUrl(
   publicId: string,
   options: {
-    width?: number;
-    height?: number;
-    darken?: boolean;
+    width?: number
+    height?: number
+    darken?: boolean
   } = {}
 ): string {
-  const { width = 1920, height = 600, darken = false } = options;
+  const { width = 1920, height = 600, darken = false } = options
 
   return buildCloudinaryUrl(publicId, {
     width,
@@ -442,8 +490,8 @@ export function getHeroBannerUrl(
     gravity: 'auto',
     quality: 'auto:good',
     format: 'auto',
-    effect: darken ? 'brightness:70' : undefined
-  });
+    effect: darken ? 'brightness:70' : undefined,
+  })
 }
 
 // =============================================================================
@@ -455,10 +503,10 @@ export function getHeroBannerUrl(
  */
 export function validatePublicId(publicId: string): boolean {
   if (!publicId || typeof publicId !== 'string' || publicId.trim() === '') {
-    console.error('CloudinaryImage: publicId is required and must be a non-empty string');
-    return false;
+    console.error('CloudinaryImage: publicId is required and must be a non-empty string')
+    return false
   }
-  return true;
+  return true
 }
 
 /**
@@ -466,14 +514,14 @@ export function validatePublicId(publicId: string): boolean {
  */
 export function validateDimensions(width?: number, height?: number): boolean {
   if (width !== undefined && (typeof width !== 'number' || width <= 0)) {
-    console.error('CloudinaryImage: width must be a positive number');
-    return false;
+    console.error('CloudinaryImage: width must be a positive number')
+    return false
   }
   if (height !== undefined && (typeof height !== 'number' || height <= 0)) {
-    console.error('CloudinaryImage: height must be a positive number');
-    return false;
+    console.error('CloudinaryImage: height must be a positive number')
+    return false
   }
-  return true;
+  return true
 }
 
 // =============================================================================
@@ -488,13 +536,13 @@ export function getPreloadLink(
   publicId: string,
   options: CloudinaryTransformOptions = {}
 ): { href: string; as: string; type: string; imagesrcset?: string; imagesizes?: string } {
-  const url = buildCloudinaryUrl(publicId, options);
+  const url = buildCloudinaryUrl(publicId, options)
 
   return {
     href: url,
     as: 'image',
     type: 'image/webp', // Cloudinary auto-serves WebP when f_auto is used
-  };
+  }
 }
 
 /**
@@ -505,12 +553,12 @@ export function getResponsivePreloadLink(
   widths: number[] = [400, 800, 1200, 1600],
   options: CloudinaryTransformOptions = {}
 ): { href: string; as: string; imagesrcset: string; imagesizes: string } {
-  const responsiveSet = getCloudinaryResponsiveSet(publicId, widths, options);
+  const responsiveSet = getCloudinaryResponsiveSet(publicId, widths, options)
 
   return {
     href: responsiveSet.src,
     as: 'image',
     imagesrcset: responsiveSet.srcset,
-    imagesizes: responsiveSet.sizes || '100vw'
-  };
+    imagesizes: responsiveSet.sizes || '100vw',
+  }
 }

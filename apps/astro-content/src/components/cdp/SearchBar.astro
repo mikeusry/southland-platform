@@ -12,13 +12,13 @@
 
 interface Props {
   /** Placeholder text */
-  placeholder?: string;
+  placeholder?: string
   /** Size variant */
-  size?: 'small' | 'medium' | 'large';
+  size?: 'small' | 'medium' | 'large'
   /** Show popular suggestions */
-  showSuggestions?: boolean;
+  showSuggestions?: boolean
   /** Additional CSS classes */
-  class?: string;
+  class?: string
 }
 
 const {
@@ -26,13 +26,13 @@ const {
   size = 'medium',
   showSuggestions = false,
   class: className = '',
-} = Astro.props;
+} = Astro.props
 
 const sizeClasses = {
   small: 'search-bar--small',
   medium: 'search-bar--medium',
   large: 'search-bar--large',
-};
+}
 
 // Popular searches for suggestions
 const popularSearches = [
@@ -41,13 +41,19 @@ const popularSearches = [
   'FCR improvement',
   'gut health',
   'mortality reduction',
-];
+]
 ---
 
 <div class:list={['search-bar', sizeClasses[size], className]}>
   <form class="search-bar__form" action="/search" method="get">
     <div class="search-bar__input-wrapper">
-      <svg class="search-bar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg
+        class="search-bar__icon"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
         <circle cx="11" cy="11" r="8"></circle>
         <path d="M21 21l-4.35-4.35"></path>
       </svg>
@@ -68,16 +74,18 @@ const popularSearches = [
     </div>
   </form>
 
-  {showSuggestions && (
-    <div class="search-bar__suggestions">
-      <span class="search-bar__suggestions-label">Popular:</span>
-      {popularSearches.map((term) => (
-        <a href={`/search?q=${encodeURIComponent(term)}`} class="search-bar__suggestion">
-          {term}
-        </a>
-      ))}
-    </div>
-  )}
+  {
+    showSuggestions && (
+      <div class="search-bar__suggestions">
+        <span class="search-bar__suggestions-label">Popular:</span>
+        {popularSearches.map((term) => (
+          <a href={`/search?q=${encodeURIComponent(term)}`} class="search-bar__suggestion">
+            {term}
+          </a>
+        ))}
+      </div>
+    )
+  }
 </div>
 
 <style>
@@ -98,7 +106,9 @@ const popularSearches = [
     border: 2px solid #e5e7eb;
     border-radius: 9999px;
     overflow: hidden;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
   }
 
   .search-bar__input-wrapper:focus-within {
@@ -209,7 +219,9 @@ const popularSearches = [
     border-radius: 9999px;
     color: #4b5563;
     text-decoration: none;
-    transition: background 0.2s, color 0.2s;
+    transition:
+      background 0.2s,
+      color 0.2s;
   }
 
   .search-bar__suggestion:hover {

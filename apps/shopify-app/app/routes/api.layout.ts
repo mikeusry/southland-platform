@@ -1,5 +1,5 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
-import type { LayoutData, NavItem } from "@southland/ui-schema";
+import type { NavItem } from "@southland/ui-schema";
 
 const SHOPIFY_DOMAIN = "https://southlandorganics.com";
 const PODCAST_PATHS = ["/podcast"];

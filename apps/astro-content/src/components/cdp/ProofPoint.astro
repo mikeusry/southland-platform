@@ -22,19 +22,19 @@
 
 interface Props {
   /** The main statistic (e.g., "87%", "3.2x", "500+") */
-  stat: string;
+  stat: string
   /** Description of what the stat represents */
-  label: string;
+  label: string
   /** Icon type */
-  icon?: 'chart' | 'check' | 'star' | 'users' | 'trending' | 'heart';
+  icon?: 'chart' | 'check' | 'star' | 'users' | 'trending' | 'heart'
   /** Source attribution */
-  source?: string;
+  source?: string
   /** Visual variant */
-  variant?: 'default' | 'highlight' | 'minimal' | 'card';
+  variant?: 'default' | 'highlight' | 'minimal' | 'card'
   /** Persona this applies to (for conditional display) */
-  persona?: 'backyard' | 'commercial' | 'lawn' | 'all';
+  persona?: 'backyard' | 'commercial' | 'lawn' | 'all'
   /** Additional CSS classes */
-  class?: string;
+  class?: string
 }
 
 const {
@@ -45,7 +45,7 @@ const {
   variant = 'default',
   persona = 'all',
   class: className = '',
-} = Astro.props;
+} = Astro.props
 
 const icons = {
   chart: `<path d="M18 20V10M12 20V4M6 20v-6"/>`,
@@ -54,19 +54,19 @@ const icons = {
   users: `<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`,
   trending: `<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>`,
   heart: `<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>`,
-};
+}
 ---
 
-<div
-  class:list={[
-    'proof-point',
-    `proof-point--${variant}`,
-    className,
-  ]}
-  data-persona={persona}
->
+<div class:list={['proof-point', `proof-point--${variant}`, className]} data-persona={persona}>
   <div class="proof-point__icon">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
       <Fragment set:html={icons[icon]} />
     </svg>
   </div>

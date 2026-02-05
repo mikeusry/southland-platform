@@ -9,7 +9,11 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
+    "lint:fix": "turbo lint:fix",
     "typecheck": "turbo typecheck",
+    "format": "turbo format",
+    "format:check": "turbo format:check",
+    "check": "turbo lint && turbo typecheck && turbo format:check",
     "clean": "turbo clean && rm -rf node_modules"
   },
   "devDependencies": {

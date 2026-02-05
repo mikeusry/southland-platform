@@ -17,13 +17,13 @@
  * 10. evangelist - Actively recommending
  */
 
-import type { Signal, JourneyStage, VisitorData } from './types';
+import type { Signal, JourneyStage, VisitorData } from './types'
 
 // Stage detection rules
 interface StageRule {
-  stage: JourneyStage;
-  priority: number;
-  check: (visitor: VisitorData) => boolean;
+  stage: JourneyStage
+  priority: number
+  check: (visitor: VisitorData) => boolean
 }
 
 // Stage detection rules (higher priority = checked first)
@@ -33,11 +33,11 @@ const STAGE_RULES: StageRule[] = [
     stage: 'evangelist',
     priority: 100,
     check: (v) => {
-      const purchases = countSignalType(v.signals, 'purchase');
-      const hasReview = v.signals.some((s) =>
-        s.type === 'content_engagement' && s.metadata?.engagement_type === 'review'
-      );
-      return purchases >= 3 && hasReview;
+      const purchases = countSignalType(v.signals, 'purchase')
+      const hasReview = v.signals.some(
+        (s) => s.type === 'content_engagement' && s.metadata?.engagement_type === 'review'
+      )
+      return purchases >= 3 && hasReview
     },
   },
 
@@ -53,9 +53,9 @@ const STAGE_RULES: StageRule[] = [
     stage: 'success',
     priority: 80,
     check: (v) => {
-      const hasPurchase = countSignalType(v.signals, 'purchase') >= 1;
-      const hasReturnVisit = countSignalType(v.signals, 'return_visit') >= 1;
-      return hasPurchase && hasReturnVisit;
+      const hasPurchase = countSignalType(v.signals, 'purchase') >= 1
+      const hasReturnVisit = countSignalType(v.signals, 'return_visit') >= 1
+      return hasPurchase && hasReturnVisit
     },
   },
 
@@ -71,9 +71,9 @@ const STAGE_RULES: StageRule[] = [
     stage: 'test_prep',
     priority: 60,
     check: (v) => {
-      const hasCart = countSignalType(v.signals, 'add_to_cart') >= 1;
-      const noPurchase = countSignalType(v.signals, 'purchase') === 0;
-      return hasCart && noPurchase;
+      const hasCart = countSignalType(v.signals, 'add_to_cart') >= 1
+      const noPurchase = countSignalType(v.signals, 'purchase') === 0
+      return hasCart && noPurchase
     },
   },
 
@@ -82,10 +82,10 @@ const STAGE_RULES: StageRule[] = [
     stage: 'objections',
     priority: 50,
     check: (v) => {
-      const objectionPages = ['/faq', '/contact', '/returns', '/guarantee', '/compare', '/vs'];
-      return v.signals.some((s) =>
-        s.type === 'page_view' && objectionPages.some((p) => s.value.includes(p))
-      );
+      const objectionPages = ['/faq', '/contact', '/returns', '/guarantee', '/compare', '/vs']
+      return v.signals.some(
+        (s) => s.type === 'page_view' && objectionPages.some((p) => s.value.includes(p))
+      )
     },
   },
 
@@ -94,9 +94,9 @@ const STAGE_RULES: StageRule[] = [
     stage: 'zmot',
     priority: 40,
     check: (v) => {
-      const productViews = countSignalType(v.signals, 'product_view');
-      const hasSearch = countSignalType(v.signals, 'search_query') >= 1;
-      return productViews >= 2 || (hasSearch && productViews >= 1);
+      const productViews = countSignalType(v.signals, 'product_view')
+      const hasSearch = countSignalType(v.signals, 'search_query') >= 1
+      return productViews >= 2 || (hasSearch && productViews >= 1)
     },
   },
 
@@ -105,11 +105,11 @@ const STAGE_RULES: StageRule[] = [
     stage: 'receptive',
     priority: 30,
     check: (v) => {
-      const contentEngagement = countSignalType(v.signals, 'content_engagement');
-      const blogViews = v.signals.filter((s) =>
-        s.type === 'page_view' && (s.value.includes('/blog') || s.value.includes('/podcast'))
-      ).length;
-      return contentEngagement >= 1 || blogViews >= 2;
+      const contentEngagement = countSignalType(v.signals, 'content_engagement')
+      const blogViews = v.signals.filter(
+        (s) => s.type === 'page_view' && (s.value.includes('/blog') || s.value.includes('/podcast'))
+      ).length
+      return contentEngagement >= 1 || blogViews >= 2
     },
   },
 
@@ -118,9 +118,9 @@ const STAGE_RULES: StageRule[] = [
     stage: 'aware',
     priority: 20,
     check: (v) => {
-      const productViews = countSignalType(v.signals, 'product_view');
-      const collectionViews = countSignalType(v.signals, 'collection_view');
-      return productViews >= 1 || collectionViews >= 1;
+      const productViews = countSignalType(v.signals, 'product_view')
+      const collectionViews = countSignalType(v.signals, 'collection_view')
+      return productViews >= 1 || collectionViews >= 1
     },
   },
 
@@ -130,13 +130,13 @@ const STAGE_RULES: StageRule[] = [
     priority: 10,
     check: () => true, // Default fallback
   },
-];
+]
 
 /**
  * Count signals of a specific type
  */
 function countSignalType(signals: Signal[], type: Signal['type']): number {
-  return signals.filter((s) => s.type === type).length;
+  return signals.filter((s) => s.type === type).length
 }
 
 /**
@@ -144,28 +144,25 @@ function countSignalType(signals: Signal[], type: Signal['type']): number {
  */
 export function detectJourneyStage(visitor: VisitorData): JourneyStage {
   // Sort rules by priority (highest first)
-  const sortedRules = [...STAGE_RULES].sort((a, b) => b.priority - a.priority);
+  const sortedRules = [...STAGE_RULES].sort((a, b) => b.priority - a.priority)
 
   for (const rule of sortedRules) {
     if (rule.check(visitor)) {
-      return rule.stage;
+      return rule.stage
     }
   }
 
-  return 'unaware';
+  return 'unaware'
 }
 
 /**
  * Calculate stage confidence
  */
-export function calculateStageConfidence(
-  visitor: VisitorData,
-  stage: JourneyStage
-): number {
-  const signalCount = visitor.signals.length;
+export function calculateStageConfidence(visitor: VisitorData, stage: JourneyStage): number {
+  const signalCount = visitor.signals.length
 
   // Base confidence on signal count
-  let confidence = Math.min(signalCount / 10, 0.5);
+  let confidence = Math.min(signalCount / 10, 0.5)
 
   // Add confidence for stronger stage indicators
   switch (stage) {
@@ -173,20 +170,20 @@ export function calculateStageConfidence(
     case 'commitment':
     case 'success':
     case 'challenge':
-      confidence += 0.4; // Purchase is strong signal
-      break;
+      confidence += 0.4 // Purchase is strong signal
+      break
     case 'test_prep':
-      confidence += 0.3; // Cart is good signal
-      break;
+      confidence += 0.3 // Cart is good signal
+      break
     case 'zmot':
     case 'objections':
-      confidence += 0.2;
-      break;
+      confidence += 0.2
+      break
     default:
-      confidence += 0.1;
+      confidence += 0.1
   }
 
-  return Math.min(confidence, 1);
+  return Math.min(confidence, 1)
 }
 
 /**
@@ -196,18 +193,18 @@ export function updateStageHistory(
   visitor: VisitorData,
   newStage: JourneyStage
 ): VisitorData['stage_history'] {
-  const history = visitor.stage_history || [];
+  const history = visitor.stage_history || []
 
   // Only add if different from last stage
   if (history.length === 0 || history[history.length - 1].stage !== newStage) {
     history.push({
       stage: newStage,
       entered_at: new Date().toISOString(),
-    });
+    })
   }
 
   // Keep last 10 transitions
-  return history.slice(-10);
+  return history.slice(-10)
 }
 
 /**
@@ -225,16 +222,16 @@ export function getStageDisplayName(stage: JourneyStage): string {
     success: 'Seeing Results',
     commitment: 'Loyal Customer',
     evangelist: 'Advocate',
-  };
-  return names[stage];
+  }
+  return names[stage]
 }
 
 /**
  * Get suggested content for stage
  */
 export function getStagedContentSuggestion(stage: JourneyStage): {
-  primaryCta: string;
-  contentFocus: string;
+  primaryCta: string
+  contentFocus: string
 } {
   const suggestions: Record<JourneyStage, { primaryCta: string; contentFocus: string }> = {
     unaware: {
@@ -277,7 +274,7 @@ export function getStagedContentSuggestion(stage: JourneyStage): {
       primaryCta: 'Refer a Friend',
       contentFocus: 'Referral program, review requests',
     },
-  };
+  }
 
-  return suggestions[stage];
+  return suggestions[stage]
 }

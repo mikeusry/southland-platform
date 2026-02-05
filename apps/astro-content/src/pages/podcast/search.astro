@@ -4,13 +4,13 @@
  * Full-text search across all episode transcripts
  */
 
-import PodcastLayout from '../../layouts/PodcastLayout.astro';
-import { getCollection } from 'astro:content';
+import PodcastLayout from '../../layouts/PodcastLayout.astro'
+import { getCollection } from 'astro:content'
 
 // Get all episodes for client-side search
 const allEpisodes = await getCollection('episodes', ({ data }) => {
-  return data.draft !== true;
-});
+  return data.draft !== true
+})
 
 // Build search index
 const searchIndex = allEpisodes.map((episode) => ({
@@ -23,12 +23,13 @@ const searchIndex = allEpisodes.map((episode) => ({
   publishDate: episode.data.publishDate.toISOString(),
   topics: episode.data.topics || [],
   guests: episode.data.guests?.map((g) => g.name) || [],
-  transcript: episode.data.transcript?.map((line) => ({
-    time: line.time,
-    speaker: line.speaker,
-    text: line.text,
-  })) || [],
-}));
+  transcript:
+    episode.data.transcript?.map((line) => ({
+      time: line.time,
+      speaker: line.speaker,
+      text: line.text,
+    })) || [],
+}))
 ---
 
 <PodcastLayout
@@ -36,12 +37,10 @@ const searchIndex = allEpisodes.map((episode) => ({
   description="Search through all Ag & Culture Podcast episode transcripts to find exactly what you're looking for."
   breadcrumbs={[{ label: 'Search', href: '/podcast/search/' }]}
 >
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
     {/* Header */}
-    <header class="text-center mb-12">
-      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-        Search Episodes
-      </h1>
+    <header class="mb-12 text-center">
+      <h1 class="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">Search Episodes</h1>
       <p class="text-lg text-gray-600">
         Search through all episode transcripts to find exactly what you're looking for.
       </p>
@@ -53,210 +52,243 @@ const searchIndex = allEpisodes.map((episode) => ({
         <input
           type="text"
           id="search-input"
-          class="w-full px-6 py-4 pl-14 text-lg border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-southland-green focus:border-transparent"
+          class="w-full rounded-xl border border-gray-200 px-6 py-4 pl-14 text-lg focus:border-transparent focus:outline-none focus:ring-2 focus:ring-southland-green"
           placeholder="Search transcripts, topics, or guest names..."
           autofocus
         />
-        <svg class="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        <svg
+          class="absolute left-5 top-1/2 h-6 w-6 -translate-y-1/2 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
         </svg>
         <button
           id="clear-search"
-          class="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 hidden"
+          class="absolute right-4 top-1/2 hidden -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600"
         >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"></path>
           </svg>
         </button>
       </div>
 
       {/* Search stats */}
-      <div id="search-stats" class="mt-3 text-sm text-gray-500 hidden"></div>
+      <div id="search-stats" class="mt-3 hidden text-sm text-gray-500"></div>
     </div>
 
     {/* Results */}
     <div id="search-results" class="space-y-6">
       {/* Initial state */}
-      <div id="initial-state" class="text-center py-12">
-        <div class="w-20 h-20 mx-auto mb-4 text-gray-200">
+      <div id="initial-state" class="py-12 text-center">
+        <div class="mx-auto mb-4 h-20 w-20 text-gray-200">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
           </svg>
         </div>
-        <p class="text-gray-500">
-          Start typing to search through episode transcripts
-        </p>
+        <p class="text-gray-500">Start typing to search through episode transcripts</p>
       </div>
 
       {/* No results state */}
-      <div id="no-results" class="text-center py-12 hidden">
-        <div class="w-20 h-20 mx-auto mb-4 text-gray-200">
+      <div id="no-results" class="hidden py-12 text-center">
+        <div class="mx-auto mb-4 h-20 w-20 text-gray-200">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
           </svg>
         </div>
-        <p class="text-gray-500">
-          No results found. Try different keywords.
-        </p>
+        <p class="text-gray-500">No results found. Try different keywords.</p>
       </div>
 
-      {/* Results container -->
+      {
+        /* Results container -->
       <div id="results-container" class="hidden"></div>
     </div>
 
-    {/* Recent/Popular Topics */}
-    <div class="mt-12 pt-12 border-t border-gray-100">
-      <h2 class="text-lg font-semibold text-gray-900 mb-4">Popular Topics</h2>
-      <div class="flex flex-wrap gap-2">
-        <button class="topic-quick-search px-4 py-2 bg-gray-100 text-gray-700 rounded-full hover:bg-southland-green hover:text-white transition-colors" data-topic="poultry health">
-          Poultry Health
-        </button>
-        <button class="topic-quick-search px-4 py-2 bg-gray-100 text-gray-700 rounded-full hover:bg-southland-green hover:text-white transition-colors" data-topic="gut microbiome">
-          Gut Microbiome
-        </button>
-        <button class="topic-quick-search px-4 py-2 bg-gray-100 text-gray-700 rounded-full hover:bg-southland-green hover:text-white transition-colors" data-topic="probiotics">
-          Probiotics
-        </button>
-        <button class="topic-quick-search px-4 py-2 bg-gray-100 text-gray-700 rounded-full hover:bg-southland-green hover:text-white transition-colors" data-topic="turf">
-          Turf Care
-        </button>
-        <button class="topic-quick-search px-4 py-2 bg-gray-100 text-gray-700 rounded-full hover:bg-southland-green hover:text-white transition-colors" data-topic="sustainable">
-          Sustainable Farming
-        </button>
+    {/* Recent/Popular Topics */
+      }
+      <div class="mt-12 border-t border-gray-100 pt-12">
+        <h2 class="mb-4 text-lg font-semibold text-gray-900">Popular Topics</h2>
+        <div class="flex flex-wrap gap-2">
+          <button
+            class="topic-quick-search rounded-full bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-southland-green hover:text-white"
+            data-topic="poultry health"
+          >
+            Poultry Health
+          </button>
+          <button
+            class="topic-quick-search rounded-full bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-southland-green hover:text-white"
+            data-topic="gut microbiome"
+          >
+            Gut Microbiome
+          </button>
+          <button
+            class="topic-quick-search rounded-full bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-southland-green hover:text-white"
+            data-topic="probiotics"
+          >
+            Probiotics
+          </button>
+          <button
+            class="topic-quick-search rounded-full bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-southland-green hover:text-white"
+            data-topic="turf"
+          >
+            Turf Care
+          </button>
+          <button
+            class="topic-quick-search rounded-full bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-southland-green hover:text-white"
+            data-topic="sustainable"
+          >
+            Sustainable Farming
+          </button>
+        </div>
       </div>
     </div>
+
+    {/* Search index data */}
+    <script id="search-index-data" type="application/json" set:html={JSON.stringify(searchIndex)} />
   </div>
 
-  {/* Search index data */}
-  <script id="search-index-data" type="application/json" set:html={JSON.stringify(searchIndex)} />
-</PodcastLayout>
+  <script>
+    // Load search index
+    const searchIndexEl = document.getElementById('search-index-data')
+    const searchIndex = searchIndexEl ? JSON.parse(searchIndexEl.textContent || '[]') : []
 
-<script>
-  // Load search index
-  const searchIndexEl = document.getElementById('search-index-data');
-  const searchIndex = searchIndexEl ? JSON.parse(searchIndexEl.textContent || '[]') : [];
+    const searchInput = document.getElementById('search-input') as HTMLInputElement
+    const clearBtn = document.getElementById('clear-search')
+    const searchStats = document.getElementById('search-stats')
+    const initialState = document.getElementById('initial-state')
+    const noResults = document.getElementById('no-results')
+    const resultsContainer = document.getElementById('results-container')
+    const quickSearchBtns = document.querySelectorAll('.topic-quick-search')
 
-  const searchInput = document.getElementById('search-input') as HTMLInputElement;
-  const clearBtn = document.getElementById('clear-search');
-  const searchStats = document.getElementById('search-stats');
-  const initialState = document.getElementById('initial-state');
-  const noResults = document.getElementById('no-results');
-  const resultsContainer = document.getElementById('results-container');
-  const quickSearchBtns = document.querySelectorAll('.topic-quick-search');
-
-  // Format time (seconds to MM:SS)
-  function formatTime(seconds: number): string {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  }
-
-  // Highlight matching text
-  function highlightText(text: string, query: string): string {
-    if (!query) return text;
-    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-    return text.replace(regex, '<mark class="bg-yellow-200">$1</mark>');
-  }
-
-  // Search function
-  function performSearch(query: string) {
-    if (!query || query.length < 2) {
-      initialState?.classList.remove('hidden');
-      noResults?.classList.add('hidden');
-      resultsContainer?.classList.add('hidden');
-      searchStats?.classList.add('hidden');
-      clearBtn?.classList.add('hidden');
-      return;
+    // Format time (seconds to MM:SS)
+    function formatTime(seconds: number): string {
+      const mins = Math.floor(seconds / 60)
+      const secs = Math.floor(seconds % 60)
+      return `${mins}:${secs.toString().padStart(2, '0')}`
     }
 
-    clearBtn?.classList.remove('hidden');
-    initialState?.classList.add('hidden');
+    // Highlight matching text
+    function highlightText(text: string, query: string): string {
+      if (!query) return text
+      const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+      return text.replace(regex, '<mark class="bg-yellow-200">$1</mark>')
+    }
 
-    const lowerQuery = query.toLowerCase();
-    const results: Array<{
-      episode: typeof searchIndex[0];
-      matches: Array<{ time: number; speaker: string; text: string; context: string }>;
-      score: number;
-    }> = [];
-
-    // Search through each episode
-    searchIndex.forEach((episode) => {
-      const matches: Array<{ time: number; speaker: string; text: string; context: string }> = [];
-      let score = 0;
-
-      // Check title
-      if (episode.title.toLowerCase().includes(lowerQuery)) {
-        score += 10;
+    // Search function
+    function performSearch(query: string) {
+      if (!query || query.length < 2) {
+        initialState?.classList.remove('hidden')
+        noResults?.classList.add('hidden')
+        resultsContainer?.classList.add('hidden')
+        searchStats?.classList.add('hidden')
+        clearBtn?.classList.add('hidden')
+        return
       }
 
-      // Check description
-      if (episode.description.toLowerCase().includes(lowerQuery)) {
-        score += 5;
-      }
+      clearBtn?.classList.remove('hidden')
+      initialState?.classList.add('hidden')
 
-      // Check topics
-      episode.topics.forEach((topic) => {
-        if (topic.toLowerCase().includes(lowerQuery)) {
-          score += 3;
+      const lowerQuery = query.toLowerCase()
+      const results: Array<{
+        episode: (typeof searchIndex)[0]
+        matches: Array<{ time: number; speaker: string; text: string; context: string }>
+        score: number
+      }> = []
+
+      // Search through each episode
+      searchIndex.forEach((episode) => {
+        const matches: Array<{ time: number; speaker: string; text: string; context: string }> = []
+        let score = 0
+
+        // Check title
+        if (episode.title.toLowerCase().includes(lowerQuery)) {
+          score += 10
         }
-      });
 
-      // Check guests
-      episode.guests.forEach((guest) => {
-        if (guest.toLowerCase().includes(lowerQuery)) {
-          score += 3;
+        // Check description
+        if (episode.description.toLowerCase().includes(lowerQuery)) {
+          score += 5
         }
-      });
 
-      // Search transcript
-      episode.transcript.forEach((line, index) => {
-        if (line.text.toLowerCase().includes(lowerQuery)) {
-          score += 1;
-          // Get context (previous and next lines if available)
-          const prevLine = episode.transcript[index - 1];
-          const nextLine = episode.transcript[index + 1];
-          const context = [
-            prevLine?.text || '',
-            line.text,
-            nextLine?.text || '',
-          ].join(' ').trim();
+        // Check topics
+        episode.topics.forEach((topic) => {
+          if (topic.toLowerCase().includes(lowerQuery)) {
+            score += 3
+          }
+        })
 
-          matches.push({
-            time: line.time,
-            speaker: line.speaker,
-            text: line.text,
-            context,
-          });
+        // Check guests
+        episode.guests.forEach((guest) => {
+          if (guest.toLowerCase().includes(lowerQuery)) {
+            score += 3
+          }
+        })
+
+        // Search transcript
+        episode.transcript.forEach((line, index) => {
+          if (line.text.toLowerCase().includes(lowerQuery)) {
+            score += 1
+            // Get context (previous and next lines if available)
+            const prevLine = episode.transcript[index - 1]
+            const nextLine = episode.transcript[index + 1]
+            const context = [prevLine?.text || '', line.text, nextLine?.text || ''].join(' ').trim()
+
+            matches.push({
+              time: line.time,
+              speaker: line.speaker,
+              text: line.text,
+              context,
+            })
+          }
+        })
+
+        if (score > 0 || matches.length > 0) {
+          results.push({ episode, matches, score })
         }
-      });
+      })
 
-      if (score > 0 || matches.length > 0) {
-        results.push({ episode, matches, score });
-      }
-    });
+      // Sort by score
+      results.sort((a, b) => b.score - a.score)
 
-    // Sort by score
-    results.sort((a, b) => b.score - a.score);
+      // Render results
+      if (results.length === 0) {
+        noResults?.classList.remove('hidden')
+        resultsContainer?.classList.add('hidden')
+        searchStats?.classList.add('hidden')
+      } else {
+        noResults?.classList.add('hidden')
+        resultsContainer?.classList.remove('hidden')
 
-    // Render results
-    if (results.length === 0) {
-      noResults?.classList.remove('hidden');
-      resultsContainer?.classList.add('hidden');
-      searchStats?.classList.add('hidden');
-    } else {
-      noResults?.classList.add('hidden');
-      resultsContainer?.classList.remove('hidden');
+        // Update stats
+        const totalMatches = results.reduce((sum, r) => sum + Math.max(1, r.matches.length), 0)
+        if (searchStats) {
+          searchStats.textContent = `Found ${totalMatches} result${totalMatches !== 1 ? 's' : ''} in ${results.length} episode${results.length !== 1 ? 's' : ''}`
+          searchStats.classList.remove('hidden')
+        }
 
-      // Update stats
-      const totalMatches = results.reduce((sum, r) => sum + Math.max(1, r.matches.length), 0);
-      if (searchStats) {
-        searchStats.textContent = `Found ${totalMatches} result${totalMatches !== 1 ? 's' : ''} in ${results.length} episode${results.length !== 1 ? 's' : ''}`;
-        searchStats.classList.remove('hidden');
-      }
-
-      // Render
-      if (resultsContainer) {
-        resultsContainer.innerHTML = results.map((result) => `
+        // Render
+        if (resultsContainer) {
+          resultsContainer.innerHTML = results
+            .map(
+              (result) => `
           <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
             <a href="/podcast/${result.episode.slug}/" class="block p-6 hover:bg-gray-50 transition-colors">
               <div class="flex gap-4">
@@ -282,11 +314,16 @@ const searchIndex = allEpisodes.map((episode) => ({
                 </div>
               </div>
             </a>
-            ${result.matches.length > 0 ? `
+            ${
+              result.matches.length > 0
+                ? `
               <div class="border-t border-gray-100 p-4 bg-gray-50">
                 <p class="text-xs font-medium text-gray-500 mb-2">Transcript matches (${result.matches.length}):</p>
                 <div class="space-y-2">
-                  ${result.matches.slice(0, 3).map((match) => `
+                  ${result.matches
+                    .slice(0, 3)
+                    .map(
+                      (match) => `
                     <a
                       href="/podcast/${result.episode.slug}/?t=${match.time}"
                       class="block p-3 bg-white rounded-lg text-sm hover:shadow-sm transition-shadow"
@@ -294,59 +331,70 @@ const searchIndex = allEpisodes.map((episode) => ({
                       <span class="text-xs font-mono text-southland-green mr-2">${formatTime(match.time)}</span>
                       <span class="text-gray-700">${highlightText(match.text, query)}</span>
                     </a>
-                  `).join('')}
-                  ${result.matches.length > 3 ? `
+                  `
+                    )
+                    .join('')}
+                  ${
+                    result.matches.length > 3
+                      ? `
                     <p class="text-xs text-gray-500 pl-3">+ ${result.matches.length - 3} more matches</p>
-                  ` : ''}
+                  `
+                      : ''
+                  }
                 </div>
               </div>
-            ` : ''}
+            `
+                : ''
+            }
           </div>
-        `).join('');
+        `
+            )
+            .join('')
+        }
+      }
+
+      // Track search
+      if (window.pdPixel) {
+        window.pdPixel.track('podcast_search', {
+          query: query,
+          results_count: results.length,
+        })
       }
     }
 
-    // Track search
-    if (window.pdPixel) {
-      window.pdPixel.track('podcast_search', {
-        query: query,
-        results_count: results.length,
-      });
+    // Debounced search
+    let searchTimeout: number
+    searchInput?.addEventListener('input', () => {
+      clearTimeout(searchTimeout)
+      searchTimeout = window.setTimeout(() => {
+        performSearch(searchInput.value.trim())
+      }, 200)
+    })
+
+    // Clear button
+    clearBtn?.addEventListener('click', () => {
+      searchInput.value = ''
+      performSearch('')
+      searchInput.focus()
+    })
+
+    // Quick search buttons
+    quickSearchBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const topic = (btn as HTMLElement).dataset.topic
+        if (topic && searchInput) {
+          searchInput.value = topic
+          performSearch(topic)
+        }
+      })
+    })
+
+    // Check URL for search query
+    const urlParams = new URLSearchParams(window.location.search)
+    const urlQuery = urlParams.get('q')
+    if (urlQuery && searchInput) {
+      searchInput.value = urlQuery
+      performSearch(urlQuery)
     }
-  }
-
-  // Debounced search
-  let searchTimeout: number;
-  searchInput?.addEventListener('input', () => {
-    clearTimeout(searchTimeout);
-    searchTimeout = window.setTimeout(() => {
-      performSearch(searchInput.value.trim());
-    }, 200);
-  });
-
-  // Clear button
-  clearBtn?.addEventListener('click', () => {
-    searchInput.value = '';
-    performSearch('');
-    searchInput.focus();
-  });
-
-  // Quick search buttons
-  quickSearchBtns.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const topic = (btn as HTMLElement).dataset.topic;
-      if (topic && searchInput) {
-        searchInput.value = topic;
-        performSearch(topic);
-      }
-    });
-  });
-
-  // Check URL for search query
-  const urlParams = new URLSearchParams(window.location.search);
-  const urlQuery = urlParams.get('q');
-  if (urlQuery && searchInput) {
-    searchInput.value = urlQuery;
-    performSearch(urlQuery);
-  }
-</script>
+  </script>
+</PodcastLayout>

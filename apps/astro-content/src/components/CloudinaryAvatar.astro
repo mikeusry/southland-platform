@@ -13,29 +13,29 @@
  * />
  */
 
-import { buildCloudinaryUrl } from '../lib/cloudinary';
+import { buildCloudinaryUrl } from '../lib/cloudinary'
 
 export interface Props {
   /** Cloudinary public ID */
-  publicId: string;
+  publicId: string
   /** Alt text for accessibility */
-  alt: string;
+  alt: string
   /** Avatar size in pixels (default: 64) */
-  size?: number;
+  size?: number
   /** Additional CSS classes */
-  class?: string;
+  class?: string
   /** Border color (hex without #) */
-  borderColor?: string;
+  borderColor?: string
   /** Border width in pixels */
-  borderWidth?: number;
+  borderWidth?: number
   /** Show online status indicator */
-  showStatus?: boolean;
+  showStatus?: boolean
   /** Status: online, offline, away, busy */
-  status?: 'online' | 'offline' | 'away' | 'busy';
+  status?: 'online' | 'offline' | 'away' | 'busy'
   /** Fallback initials if image fails */
-  fallbackInitials?: string;
+  fallbackInitials?: string
   /** Loading strategy */
-  loading?: 'lazy' | 'eager';
+  loading?: 'lazy' | 'eager'
 }
 
 const {
@@ -48,8 +48,8 @@ const {
   showStatus = false,
   status = 'offline',
   fallbackInitials,
-  loading = 'lazy'
-} = Astro.props;
+  loading = 'lazy',
+} = Astro.props
 
 // Build avatar URL with face detection
 const src = buildCloudinaryUrl(publicId, {
@@ -59,38 +59,39 @@ const src = buildCloudinaryUrl(publicId, {
   gravity: 'face',
   radius: 'max',
   quality: 'auto',
-  format: 'auto'
-});
+  format: 'auto',
+})
 
 // Srcset for different DPRs
-const srcset = [1, 2, 3].map(dpr => {
-  const url = buildCloudinaryUrl(publicId, {
-    width: size * dpr,
-    height: size * dpr,
-    crop: 'thumb',
-    gravity: 'face',
-    radius: 'max',
-    quality: 'auto',
-    format: 'auto'
-  });
-  return `${url} ${dpr}x`;
-}).join(', ');
+const srcset = [1, 2, 3]
+  .map((dpr) => {
+    const url = buildCloudinaryUrl(publicId, {
+      width: size * dpr,
+      height: size * dpr,
+      crop: 'thumb',
+      gravity: 'face',
+      radius: 'max',
+      quality: 'auto',
+      format: 'auto',
+    })
+    return `${url} ${dpr}x`
+  })
+  .join(', ')
 
 // Border style
-const borderStyle = borderWidth > 0 && borderColor
-  ? `border: ${borderWidth}px solid #${borderColor};`
-  : '';
+const borderStyle =
+  borderWidth > 0 && borderColor ? `border: ${borderWidth}px solid #${borderColor};` : ''
 
 // Status colors
 const statusColors = {
   online: 'bg-green-500',
   offline: 'bg-gray-400',
   away: 'bg-yellow-500',
-  busy: 'bg-red-500'
-};
+  busy: 'bg-red-500',
+}
 
 // Fallback SVG with initials
-const fallbackSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${size} ${size}'%3E%3Ccircle cx='${size/2}' cy='${size/2}' r='${size/2}' fill='%2344883e'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' fill='white' font-family='system-ui' font-size='${size * 0.4}' font-weight='600'%3E${fallbackInitials || '?'}%3C/text%3E%3C/svg%3E`;
+const fallbackSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${size} ${size}'%3E%3Ccircle cx='${size / 2}' cy='${size / 2}' r='${size / 2}' fill='%2344883e'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' fill='white' font-family='system-ui' font-size='${size * 0.4}' font-weight='600'%3E${fallbackInitials || '?'}%3C/text%3E%3C/svg%3E`
 ---
 
 <div
@@ -105,19 +106,21 @@ const fallbackSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg
     height={size}
     loading={loading}
     decoding="async"
-    class="w-full h-full rounded-full object-cover"
+    class="h-full w-full rounded-full object-cover"
     style={borderStyle}
     onerror={`this.src='${fallbackSvg}'`}
   />
 
-  {showStatus && (
-    <span
-      class:list={[
-        'absolute bottom-0 right-0 block rounded-full ring-2 ring-white',
-        statusColors[status]
-      ]}
-      style={`width: ${Math.max(size * 0.25, 8)}px; height: ${Math.max(size * 0.25, 8)}px;`}
-      aria-label={`Status: ${status}`}
-    />
-  )}
+  {
+    showStatus && (
+      <span
+        class:list={[
+          'absolute bottom-0 right-0 block rounded-full ring-2 ring-white',
+          statusColors[status],
+        ]}
+        style={`width: ${Math.max(size * 0.25, 8)}px; height: ${Math.max(size * 0.25, 8)}px;`}
+        aria-label={`Status: ${status}`}
+      />
+    )
+  }
 </div>

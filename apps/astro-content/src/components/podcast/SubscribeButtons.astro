@@ -4,19 +4,19 @@
  */
 
 interface Platform {
-  name: string;
-  url: string;
-  icon: string;
-  color: string;
+  name: string
+  url: string
+  icon: string
+  color: string
 }
 
 interface Props {
-  youtubeUrl?: string;
-  applePodcastUrl?: string;
-  spotifyUrl?: string;
-  rssFeedUrl?: string;
-  variant?: 'default' | 'compact' | 'icons-only' | 'hero';
-  class?: string;
+  youtubeUrl?: string
+  applePodcastUrl?: string
+  spotifyUrl?: string
+  rssFeedUrl?: string
+  variant?: 'default' | 'compact' | 'icons-only' | 'hero'
+  class?: string
 }
 
 const {
@@ -26,7 +26,7 @@ const {
   rssFeedUrl = '/podcast/feed.xml',
   variant = 'default',
   class: className = '',
-} = Astro.props;
+} = Astro.props
 
 const platforms: Platform[] = [
   {
@@ -47,64 +47,70 @@ const platforms: Platform[] = [
     icon: 'spotify',
     color: 'hover:bg-green-500',
   },
-];
+]
 
-const isCompact = variant === 'compact';
-const isIconsOnly = variant === 'icons-only';
-const isHero = variant === 'hero';
+const isCompact = variant === 'compact'
+const isIconsOnly = variant === 'icons-only'
+const isHero = variant === 'hero'
 
 // Button classes based on variant
 const getButtonClasses = (platform: Platform) => {
   if (isHero) {
-    return 'inline-flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-lg font-medium transition-colors';
+    return 'inline-flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-lg font-medium transition-colors'
   }
   if (isIconsOnly) {
-    return `subscribe-btn ${platform.color} hover:text-white transition-colors p-2`;
+    return `subscribe-btn ${platform.color} hover:text-white transition-colors p-2`
   }
-  return `subscribe-btn ${platform.color} hover:text-white transition-colors`;
-};
+  return `subscribe-btn ${platform.color} hover:text-white transition-colors`
+}
 
-const iconSize = isHero ? 'w-5 h-5' : (isCompact || isIconsOnly ? 'w-4 h-4' : 'w-5 h-5');
+const iconSize = isHero ? 'w-5 h-5' : isCompact || isIconsOnly ? 'w-4 h-4' : 'w-5 h-5'
 ---
 
 <div class={`subscribe-buttons flex flex-wrap gap-3 ${className}`}>
-  {platforms.map((platform) => (
-    <a
-      href={platform.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      class={getButtonClasses(platform)}
-      data-platform={platform.name.toLowerCase().replace(' ', '-')}
-      title={`Subscribe on ${platform.name}`}
-    >
-      {platform.icon === 'youtube' && (
-        <svg class={iconSize} fill="currentColor" viewBox="0 0 24 24">
-          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-        </svg>
-      )}
-      {platform.icon === 'apple' && (
-        <svg class={iconSize} fill="currentColor" viewBox="0 0 24 24">
-          <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-        </svg>
-      )}
-      {platform.icon === 'spotify' && (
-        <svg class={iconSize} fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
-        </svg>
-      )}
-      {!isIconsOnly && <span>{isCompact ? platform.name.split(' ')[0] : platform.name}</span>}
-    </a>
-  ))}
+  {
+    platforms.map((platform) => (
+      <a
+        href={platform.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        class={getButtonClasses(platform)}
+        data-platform={platform.name.toLowerCase().replace(' ', '-')}
+        title={`Subscribe on ${platform.name}`}
+      >
+        {platform.icon === 'youtube' && (
+          <svg class={iconSize} fill="currentColor" viewBox="0 0 24 24">
+            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+          </svg>
+        )}
+        {platform.icon === 'apple' && (
+          <svg class={iconSize} fill="currentColor" viewBox="0 0 24 24">
+            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+          </svg>
+        )}
+        {platform.icon === 'spotify' && (
+          <svg class={iconSize} fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" />
+          </svg>
+        )}
+        {!isIconsOnly && <span>{isCompact ? platform.name.split(' ')[0] : platform.name}</span>}
+      </a>
+    ))
+  }
 
   {/* RSS Feed link */}
   <a
     href={rssFeedUrl}
-    class={isHero ? 'inline-flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-lg font-medium transition-colors' : `subscribe-btn hover:bg-orange-500 hover:text-white transition-colors ${isIconsOnly ? 'p-2' : ''}`}
+    class={isHero
+      ? 'inline-flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-lg font-medium transition-colors'
+      : `subscribe-btn hover:bg-orange-500 hover:text-white transition-colors ${isIconsOnly ? 'p-2' : ''}`}
     title="RSS Feed"
     data-platform="rss"
   >
     <svg class={iconSize} fill="currentColor" viewBox="0 0 24 24">
-      <path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1z"/>
+      <path
+        d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1z"
+      ></path>
     </svg>
     {!isIconsOnly && <span>RSS</span>}
   </a>
@@ -114,13 +120,13 @@ const iconSize = isHero ? 'w-5 h-5' : (isCompact || isIconsOnly ? 'w-4 h-4' : 'w
   // Track subscribe clicks
   document.querySelectorAll('.subscribe-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const platform = (btn as HTMLElement).dataset.platform;
+      const platform = (btn as HTMLElement).dataset.platform
       if (window.pdPixel && platform) {
         window.pdPixel.track('subscribe_click', {
           platform: platform,
           page: window.location.pathname,
-        });
+        })
       }
-    });
-  });
+    })
+  })
 </script>

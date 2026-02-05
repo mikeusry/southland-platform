@@ -3,59 +3,73 @@
  *
  * POST /api/content-score
  *
- * Analyzes content for quality scoring:
- * - Persona alignment (via Mothership vectors)
- * - Content gap detection
- * - Originality check (Originality.ai - future)
- * - AI detection (Originality.ai - future)
- * - SEO analysis (DataforSEO - future)
- * - Quality metrics (computed locally)
+ * Two scan modes:
+ * - LIGHT: Mothership persona/gap + local quality (fast, cheap, auto-debounced)
+ * - FULL: Light + Originality.ai + DataForSEO (manual trigger or pre-publish)
+ *
+ * See: docs/MOTHERSHIP-INTEGRATION.md
  */
-import type { APIRoute } from 'astro';
+import type { APIRoute } from 'astro'
 import type {
   ContentScoreRequest,
   ContentScoreResponse,
   ContentScoreError,
-  PersonaScores,
-  GapStatus,
-  OriginalityScore,
-  AIDetectionScore,
-  SEOScore,
   QualityMetrics,
   SCORE_THRESHOLDS,
-} from '../../lib/content-score.types';
+} from '../../lib/content-score.types'
+import { scorePersonas, analyzeContentGap } from '../../lib/services/mothership'
+import { checkOriginality } from '../../lib/services/originality'
+import { analyzeContentSEO, computeLocalSEOMetrics } from '../../lib/services/dataforseo'
+
+// Extended request type with mode
+interface ContentScoreRequestWithMode extends ContentScoreRequest {
+  mode?: 'light' | 'full'
+  brandSlug?: string
+}
 
 // Generate unique request ID
 function generateRequestId(): string {
-  return `cs_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  return `cs_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+}
+
+// Generate content hash for caching
+function generateContentHash(title: string, body: string): string {
+  const content = `${title}::${body}`
+  let hash = 0
+  for (let i = 0; i < content.length; i++) {
+    const char = content.charCodeAt(i)
+    hash = (hash << 5) - hash + char
+    hash = hash & hash
+  }
+  return Math.abs(hash).toString(36)
 }
 
 // Count words in text
 function countWords(text: string): number {
-  return text.trim().split(/\s+/).filter(Boolean).length;
+  return text.trim().split(/\s+/).filter(Boolean).length
 }
 
 // Extract links from MDX content
 function extractLinks(body: string): { internal: number; external: number } {
-  const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
-  let internal = 0;
-  let external = 0;
-  let match;
+  const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g
+  let internal = 0
+  let external = 0
+  let match
 
   while ((match = linkRegex.exec(body)) !== null) {
-    const url = match[2];
+    const url = match[2]
     if (url.startsWith('http://') || url.startsWith('https://')) {
       if (url.includes('southlandorganics.com')) {
-        internal++;
+        internal++
       } else {
-        external++;
+        external++
       }
     } else {
-      internal++; // Relative links are internal
+      internal++ // Relative links are internal
     }
   }
 
-  return { internal, external };
+  return { internal, external }
 }
 
 // Compute local quality metrics
@@ -64,237 +78,150 @@ function computeQualityMetrics(
   description?: string,
   featuredImage?: string
 ): QualityMetrics {
-  const wordCount = countWords(body);
-  const links = extractLinks(body);
-  const descLength = description?.length || 0;
+  const wordCount = countWords(body)
+  const links = extractLinks(body)
+  const descLength = description?.length || 0
 
   return {
     wordCount,
-    readingTime: Math.ceil(wordCount / 200), // ~200 words per minute
+    readingTime: Math.ceil(wordCount / 200),
     hasFeaturedImage: Boolean(featuredImage),
     hasMetaDescription: Boolean(description),
     metaDescriptionOptimal: descLength >= 120 && descLength <= 160,
     hasInternalLinks: links.internal > 0,
     hasExternalLinks: links.external > 0,
     linkCount: links,
-  };
+  }
 }
 
-// Mock persona scoring (will be replaced with Mothership API call)
-function mockPersonaScores(segment?: string): PersonaScores {
-  // Default scores - will be computed via vector similarity
-  const scores = {
-    broilerBill: 0.3,
-    backyardBetty: 0.4,
-    turfTaylor: 0.2,
-  };
-
-  // Adjust based on segment hint
-  if (segment === 'poultry') {
-    scores.broilerBill = 0.7;
-    scores.backyardBetty = 0.6;
-    scores.turfTaylor = 0.1;
-  } else if (segment === 'turf') {
-    scores.turfTaylor = 0.75;
-    scores.broilerBill = 0.1;
-    scores.backyardBetty = 0.2;
-  }
-
-  // Find primary persona
-  const entries = Object.entries(scores) as [keyof typeof scores, number][];
-  const [primaryKey, primaryScore] = entries.reduce((a, b) => a[1] > b[1] ? a : b);
-
-  const nameMap: Record<string, string> = {
-    broilerBill: 'Broiler Bill',
-    backyardBetty: 'Backyard Betty',
-    turfTaylor: 'Turf Taylor',
-  };
-
-  return {
-    primary: {
-      name: nameMap[primaryKey] as PersonaScores['primary']['name'],
-      slug: primaryKey.replace(/([A-Z])/g, '-$1').toLowerCase(),
-      score: primaryScore,
-    },
-    scores,
-    aligned: primaryScore >= 0.6,
-    recommendation: primaryScore < 0.6
-      ? 'Content does not strongly align with any persona. Consider focusing on specific pain points.'
-      : undefined,
-  };
-}
-
-// Mock gap status (will query Mothership SQL)
-function mockGapStatus(): GapStatus {
-  return {
-    status: 'OK',
-    message: 'Content fills an identified gap in the content strategy.',
-    stage: 'aware',
-  };
-}
-
-// Mock originality score (will call Originality.ai API)
-function mockOriginalityScore(wordCount: number): OriginalityScore {
-  if (wordCount < 100) {
-    return {
-      score: 0,
-      passed: false,
-      skipped: true,
-      skipReason: 'Content too short for originality check (minimum 100 words)',
-    };
-  }
-
-  return {
-    score: 95,
-    passed: true,
-    sources: [],
-  };
-}
-
-// Mock AI detection (will call Originality.ai API)
-function mockAIDetection(wordCount: number): AIDetectionScore {
-  if (wordCount < 100) {
-    return {
-      aiProbability: 0,
-      humanProbability: 0,
-      classification: 'human',
-      passed: true,
-      skipped: true,
-      skipReason: 'Content too short for AI detection (minimum 100 words)',
-    };
-  }
-
-  return {
-    aiProbability: 15,
-    humanProbability: 85,
-    classification: 'human',
-    passed: true,
-  };
-}
-
-// Mock SEO score (will call DataforSEO API)
-function mockSEOScore(
-  body: string,
-  wordCount: number,
-  targetKeyword?: string
-): SEOScore {
-  // Count headings
-  const h1Count = (body.match(/^# /gm) || []).length;
-  const h2Count = (body.match(/^## /gm) || []).length;
-  const h3Count = (body.match(/^### /gm) || []).length;
-
-  const recommendations: string[] = [];
-
-  if (wordCount < 300) {
-    recommendations.push('Content is too short. Aim for at least 300 words.');
-  }
-  if (wordCount > 3000) {
-    recommendations.push('Content is very long. Consider breaking into multiple articles.');
-  }
-  if (h1Count > 1) {
-    recommendations.push('Multiple H1 headings found. Use only one H1 per page.');
-  }
-  if (h2Count < 2) {
-    recommendations.push('Add more H2 subheadings to improve structure.');
-  }
-
-  // Calculate base score
-  let score = 70;
-  if (wordCount < 300) score -= 20;
-  if (wordCount > 3000) score -= 10;
-  if (h1Count > 1) score -= 10;
-  if (h2Count < 2) score -= 10;
-
-  return {
-    score: Math.max(0, Math.min(100, score)),
-    wordCount,
-    headings: {
-      h1Count,
-      h2Count,
-      h3Count,
-      hasProperStructure: h1Count <= 1 && h2Count >= 2,
-    },
-    recommendations,
-    keywordDensity: targetKeyword ? {
-      keyword: targetKeyword,
-      density: 1.5,
-      recommendation: 'optimal',
-    } : undefined,
-    readability: {
-      fleschKincaid: 65,
-      gradeLevel: '8th-9th grade',
-    },
-  };
-}
-
-// Calculate overall score from components
+// Calculate overall score and determine blockers
 function calculateOverallScore(
-  persona: PersonaScores,
-  gap: GapStatus,
-  originality: OriginalityScore,
-  aiDetection: AIDetectionScore,
-  seo: SEOScore,
+  response: Partial<ContentScoreResponse>,
   quality: QualityMetrics
-): { score: number; publishable: boolean; blockers: string[] } {
-  const blockers: string[] = [];
+): { score: number; publishable: boolean; blockers: string[]; warnings: string[] } {
+  const blockers: string[] = []
+  const warnings: string[] = []
 
-  // Weight factors
-  const weights = {
-    persona: 0.2,
-    originality: 0.25,
-    aiDetection: 0.15,
-    seo: 0.25,
-    quality: 0.15,
-  };
+  // === HARD BLOCKERS (from MOTHERSHIP-INTEGRATION.md) ===
 
-  // Persona score (0-100 scale)
-  const personaScore = persona.aligned ? persona.primary.score * 100 : persona.primary.score * 60;
-  if (!persona.aligned) {
-    blockers.push('Content does not align with any target persona (score < 60%)');
+  // 1. No persona alignment at all (<40%)
+  if (response.persona && response.persona.primary.score < 0.4) {
+    blockers.push('Content does not align with any target persona (score < 40%)')
   }
 
-  // Originality score
-  let originalityScore = originality.skipped ? 100 : originality.score;
-  if (!originality.passed && !originality.skipped) {
-    blockers.push(`Originality score too low (${originality.score}%, minimum 90%)`);
+  // 2. Orphan + no links + no metadata (triple fail)
+  if (
+    response.gap?.status === 'ORPHAN' &&
+    !quality.hasInternalLinks &&
+    !quality.hasMetaDescription
+  ) {
+    blockers.push('Orphan content: add internal links and meta description')
   }
 
-  // AI detection score (invert - lower AI probability is better)
-  let aiScore = aiDetection.skipped ? 100 : (100 - aiDetection.aiProbability);
-  if (!aiDetection.passed && !aiDetection.skipped) {
-    blockers.push(`AI probability too high (${aiDetection.aiProbability}%, maximum 50%)`);
+  // 3. Title or body missing/too short
+  if (quality.wordCount < 100) {
+    blockers.push('Content too short (minimum 100 characters)')
   }
 
-  // SEO score
-  if (seo.score < 60) {
-    blockers.push(`SEO score too low (${seo.score}%, minimum 60%)`);
+  // === WARNINGS (advisory only) ===
+
+  // Originality
+  if (response.originality && !response.originality.skipped && response.originality.score < 90) {
+    warnings.push(`Originality score ${response.originality.score}% (target: 90%+)`)
   }
 
-  // Quality score
-  let qualityScore = 100;
-  if (quality.wordCount < 300) qualityScore -= 30;
-  if (!quality.hasMetaDescription) qualityScore -= 20;
-  if (!quality.hasInternalLinks) qualityScore -= 10;
+  // AI detection - ADVISORY ONLY per policy
+  if (
+    response.aiDetection &&
+    !response.aiDetection.skipped &&
+    response.aiDetection.aiProbability > 50
+  ) {
+    warnings.push(
+      `AI probability ${response.aiDetection.aiProbability}% (target: <50%) - advisory only`
+    )
+  }
 
-  // Weighted average
-  const overallScore = Math.round(
-    personaScore * weights.persona +
-    originalityScore * weights.originality +
-    aiScore * weights.aiDetection +
-    seo.score * weights.seo +
-    qualityScore * weights.quality
-  );
+  // SEO
+  if (response.seo && response.seo.score < 60) {
+    warnings.push(`SEO score ${response.seo.score}% (target: 60%+)`)
+  }
+
+  // Weak/Confused gap status
+  if (response.gap?.status === 'WEAK') {
+    warnings.push('Content may overlap with existing pages - consider linking')
+  }
+  if (response.gap?.status === 'CONFUSED') {
+    warnings.push(
+      `Content similar to: ${response.gap.existingContent?.[0]?.title || 'existing page'}`
+    )
+  }
+
+  // Persona alignment (40-60% is warning)
+  if (
+    response.persona &&
+    response.persona.primary.score >= 0.4 &&
+    response.persona.primary.score < 0.6
+  ) {
+    warnings.push(
+      `Weak persona alignment (${Math.round(response.persona.primary.score * 100)}%) - consider focusing content`
+    )
+  }
+
+  // Quality warnings
+  if (!quality.hasMetaDescription) {
+    warnings.push('Missing meta description')
+  }
+  if (!quality.hasInternalLinks) {
+    warnings.push('No internal links found')
+  }
+  if (!quality.hasFeaturedImage) {
+    warnings.push('No featured image')
+  }
+  if (quality.wordCount < 300) {
+    warnings.push(`Short content (${quality.wordCount} words) - aim for 300+`)
+  }
+
+  // Calculate weighted score
+  let score = 70 // Base score
+
+  // Persona contribution (20%)
+  if (response.persona) {
+    score += (response.persona.primary.score * 100 - 50) * 0.2
+  }
+
+  // Originality contribution (15%)
+  if (response.originality && !response.originality.skipped) {
+    score += (response.originality.score - 70) * 0.15
+  }
+
+  // SEO contribution (25%)
+  if (response.seo) {
+    score += (response.seo.score - 70) * 0.25
+  }
+
+  // Quality contribution (15%)
+  let qualityScore = 0
+  if (quality.hasMetaDescription) qualityScore += 25
+  if (quality.metaDescriptionOptimal) qualityScore += 10
+  if (quality.hasInternalLinks) qualityScore += 25
+  if (quality.hasExternalLinks) qualityScore += 10
+  if (quality.wordCount >= 300) qualityScore += 15
+  if (quality.wordCount >= 600) qualityScore += 15
+  score += (qualityScore - 50) * 0.15
 
   return {
-    score: overallScore,
+    score: Math.max(0, Math.min(100, Math.round(score))),
     publishable: blockers.length === 0,
     blockers,
-  };
+    warnings,
+  }
 }
 
 export const POST: APIRoute = async ({ request }) => {
+  const startTime = Date.now()
+
   try {
-    const body = await request.json() as ContentScoreRequest;
+    const body = (await request.json()) as ContentScoreRequestWithMode
 
     // Validate required fields
     if (!body.title || !body.body) {
@@ -302,83 +229,153 @@ export const POST: APIRoute = async ({ request }) => {
         error: true,
         code: 'VALIDATION_ERROR',
         message: 'Missing required fields: title and body are required',
-      };
+      }
       return new Response(JSON.stringify(error), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
-      });
+      })
     }
 
-    const requestId = generateRequestId();
+    const requestId = generateRequestId()
+    const contentHash = generateContentHash(body.title, body.body)
+    const mode = body.mode || 'light'
+    const brandSlug = body.brandSlug || import.meta.env.DEFAULT_BRAND_SLUG || 'southland-organics'
 
-    // Compute quality metrics (local, no API needed)
-    const quality = computeQualityMetrics(body.body, body.description);
+    // Compute local quality metrics (always done)
+    const quality = computeQualityMetrics(body.body, body.description)
 
-    // Get scores (currently mocked, will be replaced with real APIs)
-    const persona = mockPersonaScores(body.segment);
-    const gap = mockGapStatus();
-    const originality = mockOriginalityScore(quality.wordCount);
-    const aiDetection = mockAIDetection(quality.wordCount);
-    const seo = mockSEOScore(body.body, quality.wordCount, body.targetKeyword);
-
-    // Calculate overall score
-    const { score, publishable, blockers } = calculateOverallScore(
-      persona,
-      gap,
-      originality,
-      aiDetection,
-      seo,
-      quality
-    );
-
-    const response: ContentScoreResponse = {
+    // Build response object
+    const response: Partial<ContentScoreResponse> = {
       requestId,
       analyzedAt: new Date().toISOString(),
-      overallScore: score,
-      publishable,
-      blockers,
-      persona,
-      gap,
-      originality,
-      aiDetection,
-      seo,
-      quality,
-    };
+      contentHash,
+      mode,
+    }
 
-    return new Response(JSON.stringify(response), {
+    // === LIGHT MODE: Mothership + local SEO ===
+    // Always run these (fast, cheap)
+
+    // 1. Persona scoring via Mothership
+    response.persona = await scorePersonas(`${body.title}\n\n${body.body}`, body.segment, brandSlug)
+
+    // 2. Content gap analysis via Mothership
+    response.gap = await analyzeContentGap(body.title, body.body, body.url, brandSlug)
+
+    // 3. Local SEO metrics (always computed, fast)
+    if (mode === 'light') {
+      response.seo = computeLocalSEOMetrics(body.body, body.targetKeyword)
+    }
+
+    // === FULL MODE: Add external APIs ===
+    if (mode === 'full') {
+      // 4. Originality.ai (plagiarism + AI detection)
+      const originalityResult = await checkOriginality(body.body)
+      response.originality = originalityResult.originality
+      response.aiDetection = originalityResult.aiDetection
+
+      // 5. DataForSEO (content analysis)
+      response.seo = await analyzeContentSEO(body.body, body.targetKeyword)
+
+      // Record full scan timestamp
+      response.fullScanAt = new Date().toISOString()
+    } else {
+      // Light mode: skip expensive APIs
+      response.originality = {
+        score: 100,
+        passed: true,
+        skipped: true,
+        skipReason: 'Originality check only runs in full scan mode',
+      }
+      response.aiDetection = {
+        aiProbability: 0,
+        humanProbability: 100,
+        classification: 'human',
+        passed: true,
+        skipped: true,
+        skipReason: 'AI detection only runs in full scan mode',
+      }
+    }
+
+    // Record light scan timestamp
+    response.lightScanAt = new Date().toISOString()
+
+    // Add quality metrics
+    response.quality = quality
+
+    // Calculate overall score and blockers
+    const { score, publishable, blockers, warnings } = calculateOverallScore(response, quality)
+    response.overallScore = score
+    response.publishable = publishable
+    response.blockers = blockers
+    response.warnings = warnings
+
+    // Log performance
+    const duration = Date.now() - startTime
+    console.log(`[content-score] ${mode} scan completed in ${duration}ms (score: ${score})`)
+
+    return new Response(JSON.stringify(response as ContentScoreResponse), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
-    });
-
+    })
   } catch (err) {
+    console.error('[content-score] Error:', err)
     const error: ContentScoreError = {
       error: true,
       code: 'INTERNAL_ERROR',
       message: err instanceof Error ? err.message : 'Unknown error occurred',
-    };
+    }
     return new Response(JSON.stringify(error), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
-    });
+    })
   }
-};
+}
 
-// Also support GET for testing
+// GET endpoint for documentation
 export const GET: APIRoute = async () => {
-  return new Response(JSON.stringify({
-    endpoint: '/api/content-score',
-    method: 'POST',
-    description: 'Analyze content for quality scoring',
-    requiredFields: ['title', 'body'],
-    optionalFields: ['url', 'description', 'tags', 'segment', 'targetKeyword'],
-    example: {
-      title: 'How to Improve Chicken Health',
-      body: '# Introduction\n\nYour chickens deserve the best...',
-      segment: 'poultry',
-      targetKeyword: 'chicken health',
-    },
-  }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
-};
+  return new Response(
+    JSON.stringify({
+      endpoint: '/api/content-score',
+      method: 'POST',
+      description: 'Analyze content for quality scoring',
+      modes: {
+        light: 'Mothership (persona + gap) + local SEO. Fast, cheap, auto-debounce friendly.',
+        full: 'Light + Originality.ai + DataForSEO. Manual trigger or pre-publish.',
+      },
+      requiredFields: ['title', 'body'],
+      optionalFields: [
+        'url',
+        'description',
+        'tags',
+        'segment',
+        'targetKeyword',
+        'mode',
+        'brandSlug',
+      ],
+      blockers: [
+        'Persona score < 40%',
+        'Orphan content with no links and no meta',
+        'Content too short (<100 words)',
+      ],
+      warnings: [
+        'Originality < 90%',
+        'AI probability > 50% (advisory only)',
+        'SEO score < 60%',
+        'Weak persona alignment (40-60%)',
+        'Missing meta description',
+        'No internal links',
+      ],
+      example: {
+        title: 'How to Improve Chicken Health Naturally',
+        body: '# Introduction\n\nYour chickens deserve the best care...',
+        segment: 'poultry',
+        targetKeyword: 'chicken health',
+        mode: 'light',
+      },
+    }),
+    {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    }
+  )
+}

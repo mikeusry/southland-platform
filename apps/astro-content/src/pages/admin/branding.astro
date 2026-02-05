@@ -5,8 +5,8 @@
  *
  * Cloudinary Folder: Southland Website/Southland Branding/
  */
-import AdminLayout from '../../layouts/AdminLayout.astro';
-import { buildBrandingUrl, BRANDING_FOLDER } from '../../lib/cloudinary';
+import AdminLayout from '../../layouts/AdminLayout.astro'
+import { buildBrandingUrl, BRANDING_FOLDER } from '../../lib/cloudinary'
 
 // Logo URLs from Cloudinary
 // Path: Southland Website/Southland Branding/logos/
@@ -15,7 +15,7 @@ const logos = {
   horizontalSvg: buildBrandingUrl('logos/Southland_Organics_Horizontal_womxky', { width: 400 }),
   horizontalPng: buildBrandingUrl('logos/Southland_Organics_Horizontal_yymno6', { width: 400 }),
   square: buildBrandingUrl('logos/Southland_Primary_Square_Logo_sertzs', { width: 300 }),
-};
+}
 
 // Icons from Cloudinary
 // Path: Southland Website/Southland Branding/icons/
@@ -23,7 +23,7 @@ const icons = {
   iconPng: buildBrandingUrl('icons/Icon_qgeqxn', { width: 100 }),
   iconSvg: buildBrandingUrl('icons/Southland_Icon_Icon_xwytez', { width: 100 }),
   blackSvg: buildBrandingUrl('icons/Southland_Logo_-_Black_ajmlea', { width: 300 }),
-};
+}
 
 // Patterns from Cloudinary
 // Path: Southland Website/Southland Branding/patterns/
@@ -31,9 +31,11 @@ const patterns = {
   bottomMolecules: buildBrandingUrl('patterns/bottom_molecules_krnlk5', { width: 800 }),
   topMoleculesGreen: buildBrandingUrl('patterns/top_molecules_green_zeewhr', { width: 800 }),
   topMolecules: buildBrandingUrl('patterns/top_molecules_nsvuao', { width: 800 }),
-  topMoleculesFilledGreen: buildBrandingUrl('patterns/top_molecules-filled_green_e2fxlb', { width: 800 }),
+  topMoleculesFilledGreen: buildBrandingUrl('patterns/top_molecules-filled_green_e2fxlb', {
+    width: 800,
+  }),
   topMoleculesFilled: buildBrandingUrl('patterns/top_molecules-filled_xzfsv2', { width: 800 }),
-};
+}
 
 // Brand colors from 2021 Brand Guide
 const colors = {
@@ -44,7 +46,7 @@ const colors = {
       rgb: '44, 82, 52',
       cmyk: '74, 18, 81, 62',
       pantone: '350 C',
-      usage: 'Logo dark half, titles, accents'
+      usage: 'Logo dark half, titles, accents',
     },
     {
       name: 'Southland Green',
@@ -52,37 +54,50 @@ const colors = {
       rgb: '68, 136, 62',
       cmyk: '69, 3, 89, 26',
       pantone: '7741 C',
-      usage: 'Logo light half, links, buttons'
-    }
+      usage: 'Logo light half, links, buttons',
+    },
   ],
   neutral: [
     { name: 'White', hex: '#FFFFFF', usage: 'Backgrounds, logo knockout' },
     { name: 'Black', hex: '#191D21', usage: 'Body text' },
-    { name: 'Gray', hex: '#686363', usage: 'Secondary text' }
-  ]
-};
+    { name: 'Gray', hex: '#686363', usage: 'Secondary text' },
+  ],
+}
 
 // Typography from brand guide
 const typography = {
   headings: [
     { name: 'Eveleth Clean Regular', usage: 'Headers & Titles', sample: 'SOUTHLAND' },
     { name: 'Eveleth Dot Regular', usage: 'Headers & Titles (alternate)', sample: 'ORGANICS' },
-    { name: 'Eveleth Clean Thin', usage: 'Subheaders', sample: 'Natural Solutions' }
+    { name: 'Eveleth Clean Thin', usage: 'Subheaders', sample: 'Natural Solutions' },
   ],
   body: [
-    { name: 'Open Sans', usage: 'Body copy, UI text', sample: 'Working with nature, not against it.' },
-    { name: 'Verdana', usage: 'Fallback body text', sample: 'Sustainable agriculture solutions.' }
-  ]
-};
+    {
+      name: 'Open Sans',
+      usage: 'Body copy, UI text',
+      sample: 'Working with nature, not against it.',
+    },
+    { name: 'Verdana', usage: 'Fallback body text', sample: 'Sustainable agriculture solutions.' },
+  ],
+}
 
 const headingSizes = [
   { tag: 'H1', size: '48px', sample: 'Natural Solutions' },
   { tag: 'H2', size: '38px', sample: 'Working with Nature' },
   { tag: 'H3', size: '24px', sample: 'Sustainable Agriculture' },
   { tag: 'H4', size: '20px', sample: 'Organic Products' },
-  { tag: 'Body', size: '16px', sample: 'Southland Organics was founded in 2009 to help growers address natural problems with natural solutions.' },
-  { tag: 'Small', size: '13px', sample: 'Helping thousands of farmers and landscape professionals.' },
-];
+  {
+    tag: 'Body',
+    size: '16px',
+    sample:
+      'Southland Organics was founded in 2009 to help growers address natural problems with natural solutions.',
+  },
+  {
+    tag: 'Small',
+    size: '13px',
+    sample: 'Helping thousands of farmers and landscape professionals.',
+  },
+]
 ---
 
 <AdminLayout title="Brand Guide" activeNav="/admin/branding">
@@ -97,7 +112,8 @@ const headingSizes = [
       <h2 class="card-title">Logo</h2>
     </div>
     <p class="section-desc">
-      The Southland Organics logo features a hexagonal icon with organic "S" leaf shapes, representing our molecular-level approach to natural solutions.
+      The Southland Organics logo features a hexagonal icon with organic "S" leaf shapes,
+      representing our molecular-level approach to natural solutions.
     </p>
 
     <!-- Cloudinary folder info -->
@@ -178,7 +194,11 @@ const headingSizes = [
         <span class="pattern-label">Top Molecules</span>
       </div>
       <div class="pattern-card">
-        <img src={patterns.topMoleculesFilledGreen} alt="Top Molecules Filled Green" class="pattern-img" />
+        <img
+          src={patterns.topMoleculesFilledGreen}
+          alt="Top Molecules Filled Green"
+          class="pattern-img"
+        />
         <span class="pattern-label">Top Filled (Green)</span>
       </div>
       <div class="pattern-card">
@@ -207,21 +227,23 @@ const headingSizes = [
 
     <h3 class="subsection-title">Primary Colors</h3>
     <div class="color-grid">
-      {colors.primary.map((color) => (
-        <div class="color-card">
-          <div class="color-swatch" style={`background-color: ${color.hex};`}></div>
-          <div class="color-info">
-            <span class="color-name">{color.name}</span>
-            <div class="color-values">
-              <code>HEX: {color.hex}</code>
-              <code>RGB: {color.rgb}</code>
-              <code>CMYK: {color.cmyk}</code>
-              <code>Pantone: {color.pantone}</code>
+      {
+        colors.primary.map((color) => (
+          <div class="color-card">
+            <div class="color-swatch" style={`background-color: ${color.hex};`} />
+            <div class="color-info">
+              <span class="color-name">{color.name}</span>
+              <div class="color-values">
+                <code>HEX: {color.hex}</code>
+                <code>RGB: {color.rgb}</code>
+                <code>CMYK: {color.cmyk}</code>
+                <code>Pantone: {color.pantone}</code>
+              </div>
+              <span class="color-usage">{color.usage}</span>
             </div>
-            <span class="color-usage">{color.usage}</span>
           </div>
-        </div>
-      ))}
+        ))
+      }
     </div>
 
     <h3 class="subsection-title">Color Tints</h3>
@@ -250,15 +272,20 @@ const headingSizes = [
 
     <h3 class="subsection-title">Neutral Colors</h3>
     <div class="neutral-grid">
-      {colors.neutral.map((color) => (
-        <div class="neutral-card">
-          <div class="neutral-swatch" style={`background-color: ${color.hex}; ${color.hex === '#FFFFFF' ? 'border: 1px solid var(--border);' : ''}`}></div>
-          <div class="neutral-info">
-            <span class="neutral-name">{color.name}</span>
-            <code>{color.hex}</code>
+      {
+        colors.neutral.map((color) => (
+          <div class="neutral-card">
+            <div
+              class="neutral-swatch"
+              style={`background-color: ${color.hex}; ${color.hex === '#FFFFFF' ? 'border: 1px solid var(--border);' : ''}`}
+            />
+            <div class="neutral-info">
+              <span class="neutral-name">{color.name}</span>
+              <code>{color.hex}</code>
+            </div>
           </div>
-        </div>
-      ))}
+        ))
+      }
     </div>
   </div>
 
@@ -287,15 +314,20 @@ const headingSizes = [
 
     <h3 class="subsection-title">Type Scale</h3>
     <div class="type-scale">
-      {headingSizes.map((h) => (
-        <div class="type-row">
-          <span class="type-tag">{h.tag}</span>
-          <span class="type-preview" style={`font-size: ${h.size === '48px' ? '24px' : h.size === '38px' ? '20px' : h.size};`}>
-            {h.sample}
-          </span>
-          <code class="type-size">{h.size}</code>
-        </div>
-      ))}
+      {
+        headingSizes.map((h) => (
+          <div class="type-row">
+            <span class="type-tag">{h.tag}</span>
+            <span
+              class="type-preview"
+              style={`font-size: ${h.size === '48px' ? '24px' : h.size === '38px' ? '20px' : h.size};`}
+            >
+              {h.sample}
+            </span>
+            <code class="type-size">{h.size}</code>
+          </div>
+        ))
+      }
     </div>
   </div>
 
@@ -343,7 +375,8 @@ const headingSizes = [
     <div class="card-header">
       <h2 class="card-title">CSS Variables</h2>
     </div>
-    <pre class="code-block"><code>:root {'{'}
+    <pre
+      class="code-block"><code>:root {'{'}
   --color-title: #2c5234;
   --color-accent: #44883e;
   --color-accent-hover: #2c5234;

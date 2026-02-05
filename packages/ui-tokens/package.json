@@ -2,6 +2,7 @@
   "name": "@southland/ui-tokens",
   "version": "0.0.1",
   "private": true,
+  "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -15,9 +16,18 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "lint": "eslint src/ *.js",
+    "lint:fix": "eslint src/ *.js --fix",
+    "format": "prettier --write 'src/**/*.ts' '*.js' '*.css'",
+    "format:check": "prettier --check 'src/**/*.ts' '*.js' '*.css'"
   },
   "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "@typescript-eslint/eslint-plugin": "^8.20.0",
+    "@typescript-eslint/parser": "^8.20.0",
+    "eslint": "^9.18.0",
+    "prettier": "^3.4.2",
     "typescript": "^5.7.0"
   }
 }

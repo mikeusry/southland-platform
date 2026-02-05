@@ -12,23 +12,23 @@
  * - null: Unknown (hasn't selected yet)
  */
 
-export type PersonaId = 'backyard' | 'commercial' | 'lawn' | 'general' | null;
+export type PersonaId = 'backyard' | 'commercial' | 'lawn' | 'general' | null
 
 export interface PersonaData {
-  id: PersonaId;
-  selectedAt: string;
-  source: 'decision_engine' | 'url_param' | 'inferred' | 'manual';
+  id: PersonaId
+  selectedAt: string
+  source: 'decision_engine' | 'url_param' | 'inferred' | 'manual'
 }
 
 export interface PersonaConfig {
-  id: PersonaId;
-  label: string;
-  shortLabel: string;
-  color: string;
-  bgColor: string;
-  landingPage: string;
-  ctaText: string;
-  ctaHref: string;
+  id: PersonaId
+  label: string
+  shortLabel: string
+  color: string
+  bgColor: string
+  landingPage: string
+  ctaText: string
+  ctaHref: string
 }
 
 // Persona configurations
@@ -73,131 +73,128 @@ export const PERSONA_CONFIG: Record<Exclude<PersonaId, null>, PersonaConfig> = {
     ctaText: 'Shop All Products',
     ctaHref: '/shop/',
   },
-};
+}
 
 // Storage keys
-const STORAGE_KEY = 'southland_persona';
-const COOKIE_NAME = 'sl_persona';
-const COOKIE_DAYS = 365;
+const STORAGE_KEY = 'southland_persona'
+const COOKIE_NAME = 'sl_persona'
+const COOKIE_DAYS = 365
 
 /**
  * Set a cookie (works on client-side only)
  */
 function setCookie(name: string, value: string, days: number): void {
-  if (typeof document === 'undefined') return;
-  const expires = new Date(Date.now() + days * 864e5).toUTCString();
-  const domain = window.location.hostname.replace(/^www\./, '');
-  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; domain=.${domain}; SameSite=Lax`;
+  if (typeof document === 'undefined') return
+  const expires = new Date(Date.now() + days * 864e5).toUTCString()
+  const domain = window.location.hostname.replace(/^www\./, '')
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; domain=.${domain}; SameSite=Lax`
 }
 
 /**
  * Get a cookie value (works on client-side only)
  */
 function getCookie(name: string): string | null {
-  if (typeof document === 'undefined') return null;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
+  if (typeof document === 'undefined') return null
+  const value = `; ${document.cookie}`
+  const parts = value.split(`; ${name}=`)
   if (parts.length === 2) {
-    return decodeURIComponent(parts.pop()!.split(';').shift()!);
+    return decodeURIComponent(parts.pop()!.split(';').shift()!)
   }
-  return null;
+  return null
 }
 
 /**
  * Get the stored persona data
  */
 export function getPersona(): PersonaData | null {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === 'undefined') return null
 
   // Check localStorage first
-  const stored = localStorage.getItem(STORAGE_KEY);
+  const stored = localStorage.getItem(STORAGE_KEY)
   if (stored) {
     try {
-      return JSON.parse(stored) as PersonaData;
+      return JSON.parse(stored) as PersonaData
     } catch {
-      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(STORAGE_KEY)
     }
   }
 
   // Check cookie fallback
-  const cookieVal = getCookie(COOKIE_NAME);
+  const cookieVal = getCookie(COOKIE_NAME)
   if (cookieVal && isValidPersonaId(cookieVal)) {
     return {
       id: cookieVal as PersonaId,
       selectedAt: '',
       source: 'decision_engine',
-    };
+    }
   }
 
-  return null;
+  return null
 }
 
 /**
  * Get just the persona ID (convenience function)
  */
 export function getPersonaId(): PersonaId {
-  const data = getPersona();
-  return data?.id ?? null;
+  const data = getPersona()
+  return data?.id ?? null
 }
 
 /**
  * Set the persona
  */
-export function setPersona(
-  personaId: PersonaId,
-  source: PersonaData['source'] = 'manual'
-): void {
-  if (typeof window === 'undefined' || !personaId) return;
+export function setPersona(personaId: PersonaId, source: PersonaData['source'] = 'manual'): void {
+  if (typeof window === 'undefined' || !personaId) return
 
   const data: PersonaData = {
     id: personaId,
     selectedAt: new Date().toISOString(),
     source,
-  };
+  }
 
   // Store in localStorage
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
 
   // Store in cookie for cross-subdomain/server access
-  setCookie(COOKIE_NAME, personaId, COOKIE_DAYS);
+  setCookie(COOKIE_NAME, personaId, COOKIE_DAYS)
 
   // Dispatch custom event for other components to react
-  window.dispatchEvent(new CustomEvent('persona-changed', { detail: data }));
+  window.dispatchEvent(new CustomEvent('persona-changed', { detail: data }))
 }
 
 /**
  * Clear the stored persona
  */
 export function clearPersona(): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined') return
 
-  localStorage.removeItem(STORAGE_KEY);
-  setCookie(COOKIE_NAME, '', -1); // Expire the cookie
+  localStorage.removeItem(STORAGE_KEY)
+  setCookie(COOKIE_NAME, '', -1) // Expire the cookie
 
-  window.dispatchEvent(new CustomEvent('persona-changed', { detail: null }));
+  window.dispatchEvent(new CustomEvent('persona-changed', { detail: null }))
 }
 
 /**
  * Check if a string is a valid persona ID
  */
 export function isValidPersonaId(value: string): value is Exclude<PersonaId, null> {
-  return ['backyard', 'commercial', 'lawn', 'general'].includes(value);
+  return ['backyard', 'commercial', 'lawn', 'general'].includes(value)
 }
 
 /**
  * Get the config for a persona
  */
 export function getPersonaConfig(personaId: PersonaId): PersonaConfig | null {
-  if (!personaId || personaId === null) return null;
-  return PERSONA_CONFIG[personaId] ?? null;
+  if (!personaId || personaId === null) return null
+  return PERSONA_CONFIG[personaId] ?? null
 }
 
 /**
  * Check if the current persona matches any of the given IDs
  */
 export function isPersona(...personaIds: PersonaId[]): boolean {
-  const currentId = getPersonaId();
-  return personaIds.includes(currentId);
+  const currentId = getPersonaId()
+  return personaIds.includes(currentId)
 }
 
 /**
@@ -205,16 +202,16 @@ export function isPersona(...personaIds: PersonaId[]): boolean {
  * e.g., ?persona=commercial
  */
 export function getPersonaFromUrl(): PersonaId {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === 'undefined') return null
 
-  const params = new URLSearchParams(window.location.search);
-  const param = params.get('persona');
+  const params = new URLSearchParams(window.location.search)
+  const param = params.get('persona')
 
   if (param && isValidPersonaId(param)) {
-    return param;
+    return param
   }
 
-  return null;
+  return null
 }
 
 /**
@@ -222,12 +219,12 @@ export function getPersonaFromUrl(): PersonaId {
  * Call this on page load to handle tracking links
  */
 export function initPersonaFromUrl(): boolean {
-  const urlPersona = getPersonaFromUrl();
+  const urlPersona = getPersonaFromUrl()
   if (urlPersona) {
-    setPersona(urlPersona, 'url_param');
-    return true;
+    setPersona(urlPersona, 'url_param')
+    return true
   }
-  return false;
+  return false
 }
 
 /**
@@ -243,27 +240,27 @@ export type JourneyStage =
   | 'challenge'
   | 'success'
   | 'commitment'
-  | 'evangelist';
+  | 'evangelist'
 
-const STAGE_COOKIE_NAME = 'sl_stage';
+const STAGE_COOKIE_NAME = 'sl_stage'
 
 /**
  * Get the current journey stage from cookie
  */
 export function getJourneyStage(): JourneyStage {
-  const cookieVal = getCookie(STAGE_COOKIE_NAME);
+  const cookieVal = getCookie(STAGE_COOKIE_NAME)
   if (cookieVal && isValidJourneyStage(cookieVal)) {
-    return cookieVal;
+    return cookieVal
   }
-  return 'unaware';
+  return 'unaware'
 }
 
 /**
  * Set the journey stage
  */
 export function setJourneyStage(stage: JourneyStage): void {
-  if (typeof window === 'undefined') return;
-  setCookie(STAGE_COOKIE_NAME, stage, COOKIE_DAYS);
+  if (typeof window === 'undefined') return
+  setCookie(STAGE_COOKIE_NAME, stage, COOKIE_DAYS)
 }
 
 /**
@@ -281,5 +278,5 @@ export function isValidJourneyStage(value: string): value is JourneyStage {
     'success',
     'commitment',
     'evangelist',
-  ].includes(value);
+  ].includes(value)
 }

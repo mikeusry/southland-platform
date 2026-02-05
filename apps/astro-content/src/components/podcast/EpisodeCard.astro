@@ -3,19 +3,19 @@
  * Episode card component for podcast hub and listings
  */
 
-import TopicTag from '../shared/TopicTag.astro';
+import TopicTag from '../shared/TopicTag.astro'
 
 interface Props {
-  title: string;
-  slug: string;
-  episodeNumber: number;
-  description: string;
-  thumbnail?: string;
-  duration: string;
-  publishDate: Date;
-  topics?: string[];
-  featured?: boolean;
-  class?: string;
+  title: string
+  slug: string
+  episodeNumber: number
+  description: string
+  thumbnail?: string
+  duration: string
+  publishDate: Date
+  topics?: string[]
+  featured?: boolean
+  class?: string
 }
 
 const {
@@ -29,17 +29,17 @@ const {
   topics = [],
   featured = false,
   class: className = '',
-} = Astro.props;
+} = Astro.props
 
-const episodeUrl = `/podcast/${slug}/`;
-const defaultThumbnail = '/images/podcast/episodes/default.jpg';
+const episodeUrl = `/podcast/${slug}/`
+const defaultThumbnail = '/images/podcast/episodes/default.jpg'
 
 // Format date
 const formattedDate = new Intl.DateTimeFormat('en-US', {
   month: 'short',
   day: 'numeric',
   year: 'numeric',
-}).format(publishDate);
+}).format(publishDate)
 ---
 
 <article
@@ -55,30 +55,36 @@ const formattedDate = new Intl.DateTimeFormat('en-US', {
       <img
         src={thumbnail || defaultThumbnail}
         alt={`Episode ${episodeNumber}: ${title}`}
-        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         loading="lazy"
       />
     </div>
 
     {/* Play overlay */}
-    <div class="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
-      <div class="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
-        <svg class="w-6 h-6 text-emerald-700 ml-1" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M8 5v14l11-7z" />
+    <div
+      class="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity group-hover:opacity-100"
+    >
+      <div class="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 shadow-lg">
+        <svg class="ml-1 h-6 w-6 text-emerald-700" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M8 5v14l11-7z"></path>
         </svg>
       </div>
     </div>
 
     {/* Duration badge */}
-    <div class="absolute bottom-3 right-3 px-2.5 py-1 bg-black/80 text-white text-xs font-medium rounded-md">
+    <div
+      class="absolute bottom-3 right-3 rounded-md bg-black/80 px-2.5 py-1 text-xs font-medium text-white"
+    >
       {duration}
     </div>
   </a>
 
   {/* Content */}
-  <div class={`episode-card-content p-5 ${featured ? 'md:flex-1 md:p-6 md:flex md:flex-col md:justify-center' : ''}`}>
+  <div
+    class={`episode-card-content p-5 ${featured ? 'md:flex-1 md:p-6 md:flex md:flex-col md:justify-center' : ''}`}
+  >
     {/* Episode number and date */}
-    <div class="flex items-center gap-2 text-sm text-gray-500 mb-2">
+    <div class="mb-2 flex items-center gap-2 text-sm text-gray-500">
       <span class="font-semibold text-emerald-700">EP {episodeNumber}</span>
       <span>•</span>
       <time datetime={publishDate.toISOString()}>{formattedDate}</time>
@@ -86,7 +92,7 @@ const formattedDate = new Intl.DateTimeFormat('en-US', {
 
     {/* Title */}
     <h3 class={`font-bold text-gray-900 mb-2 line-clamp-2 ${featured ? 'text-2xl' : 'text-lg'}`}>
-      <a href={episodeUrl} class="hover:text-emerald-700 transition-colors">
+      <a href={episodeUrl} class="transition-colors hover:text-emerald-700">
         {title}
       </a>
     </h3>
@@ -97,28 +103,37 @@ const formattedDate = new Intl.DateTimeFormat('en-US', {
     </p>
 
     {/* Topics */}
-    {topics.length > 0 && (
-      <div class="flex flex-wrap gap-2">
-        {topics.slice(0, 3).map((topic) => (
-          <TopicTag topic={topic} size="sm" />
-        ))}
-        {topics.length > 3 && (
-          <span class="text-xs text-gray-500">+{topics.length - 3} more</span>
-        )}
-      </div>
-    )}
+    {
+      topics.length > 0 && (
+        <div class="flex flex-wrap gap-2">
+          {topics.slice(0, 3).map((topic) => (
+            <TopicTag topic={topic} size="sm" />
+          ))}
+          {topics.length > 3 && (
+            <span class="text-xs text-gray-500">+{topics.length - 3} more</span>
+          )}
+        </div>
+      )
+    }
 
     {/* Listen CTA for featured */}
-    {featured && (
-      <a
-        href={episodeUrl}
-        class="inline-flex items-center gap-2 mt-4 text-emerald-700 font-semibold hover:text-emerald-800 transition-colors"
-      >
-        Listen Now
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-      </a>
-    )}
+    {
+      featured && (
+        <a
+          href={episodeUrl}
+          class="mt-4 inline-flex items-center gap-2 font-semibold text-emerald-700 transition-colors hover:text-emerald-800"
+        >
+          Listen Now
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
+        </a>
+      )
+    }
   </div>
 </article>

@@ -4,18 +4,18 @@
  */
 
 interface BreadcrumbItem {
-  label: string;
-  href: string;
+  label: string
+  href: string
 }
 
 interface Props {
-  items: BreadcrumbItem[];
-  class?: string;
+  items: BreadcrumbItem[]
+  class?: string
 }
 
-const { items, class: className = '' } = Astro.props;
+const { items, class: className = '' } = Astro.props
 
-const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com';
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
 
 // Generate BreadcrumbList schema
 const breadcrumbSchema = {
@@ -27,30 +27,34 @@ const breadcrumbSchema = {
     name: item.label,
     item: item.href.startsWith('http') ? item.href : `${siteUrl}${item.href}`,
   })),
-};
+}
 ---
 
 <nav aria-label="Breadcrumb" class={`text-sm ${className}`}>
-  <ol class="flex items-center gap-2 flex-wrap">
-    {items.map((item, index) => (
-      <li class="flex items-center gap-2">
-        {index > 0 && (
-          <span class="text-gray-400" aria-hidden="true">/</span>
-        )}
-        {index === items.length - 1 ? (
-          <span class="text-gray-600" aria-current="page">
-            {item.label}
-          </span>
-        ) : (
-          <a
-            href={item.href}
-            class="text-southland-green hover:text-southland-green-dark transition-colors"
-          >
-            {item.label}
-          </a>
-        )}
-      </li>
-    ))}
+  <ol class="flex flex-wrap items-center gap-2">
+    {
+      items.map((item, index) => (
+        <li class="flex items-center gap-2">
+          {index > 0 && (
+            <span class="text-gray-400" aria-hidden="true">
+              /
+            </span>
+          )}
+          {index === items.length - 1 ? (
+            <span class="text-gray-600" aria-current="page">
+              {item.label}
+            </span>
+          ) : (
+            <a
+              href={item.href}
+              class="text-southland-green transition-colors hover:text-southland-green-dark"
+            >
+              {item.label}
+            </a>
+          )}
+        </li>
+      ))
+    }
   </ol>
 </nav>
 

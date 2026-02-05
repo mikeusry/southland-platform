@@ -9,43 +9,41 @@
  * <BettyHero stage="aware" />
  */
 
-import type { JourneyStage } from '../../../lib/visitor';
+import type { JourneyStage } from '../../../lib/visitor'
 
 interface Props {
   /** Current journey stage for stage-specific messaging */
-  stage?: JourneyStage;
+  stage?: JourneyStage
   /** Override the default headline */
-  headline?: string;
+  headline?: string
   /** Override the default subheadline */
-  subheadline?: string;
+  subheadline?: string
   /** Additional CSS classes */
-  class?: string;
+  class?: string
 }
 
-const {
-  stage = 'aware',
-  headline,
-  subheadline,
-  class: className = '',
-} = Astro.props;
+const { stage = 'aware', headline, subheadline, class: className = '' } = Astro.props
 
 // Stage-specific content variations
 const stageContent = {
   unaware: {
     headline: 'Raising Backyard Chickens?',
-    subheadline: 'Discover how to keep your flock healthy and happy with organic, natural solutions.',
+    subheadline:
+      'Discover how to keep your flock healthy and happy with organic, natural solutions.',
     cta: { text: 'Learn the Basics', href: '/learn/backyard-chickens/' },
     secondaryCta: { text: 'Shop Starter Bundles', href: '/shop/poultry/backyard/bundles/' },
   },
   aware: {
     headline: 'Happy, Healthy Hens Start Here',
-    subheadline: 'Whether you have 5 hens or 50, our organic probiotics make it easy to raise thriving birds naturally.',
+    subheadline:
+      'Whether you have 5 hens or 50, our organic probiotics make it easy to raise thriving birds naturally.',
     cta: { text: 'Shop Backyard Products', href: '/shop/poultry/backyard/' },
     secondaryCta: { text: 'Take the Quiz', href: '/quiz/backyard/' },
   },
   receptive: {
     headline: 'Natural Solutions for Common Flock Problems',
-    subheadline: 'From gut health to egg production, learn how probiotics can help your chickens thrive.',
+    subheadline:
+      'From gut health to egg production, learn how probiotics can help your chickens thrive.',
     cta: { text: 'See How It Works', href: '/learn/probiotics-101/' },
     secondaryCta: { text: 'Browse Products', href: '/shop/poultry/backyard/' },
   },
@@ -57,7 +55,7 @@ const stageContent = {
   },
   objections: {
     headline: 'Questions About Our Products?',
-    subheadline: 'We\'re here to help. See what other backyard chicken keepers are saying.',
+    subheadline: "We're here to help. See what other backyard chicken keepers are saying.",
     cta: { text: 'Read FAQs', href: '/faq/backyard/' },
     secondaryCta: { text: 'See Reviews', href: '/reviews/backyard/' },
   },
@@ -91,19 +89,17 @@ const stageContent = {
     cta: { text: 'Get Your Referral Link', href: '/referral/' },
     secondaryCta: { text: 'Leave a Review', href: '/reviews/submit/' },
   },
-};
+}
 
-const content = stageContent[stage] || stageContent.aware;
-const displayHeadline = headline || content.headline;
-const displaySubheadline = subheadline || content.subheadline;
+const content = stageContent[stage] || stageContent.aware
+const displayHeadline = headline || content.headline
+const displaySubheadline = subheadline || content.subheadline
 ---
 
 <section class:list={['betty-hero', className]}>
   <div class="betty-hero__container">
     <div class="betty-hero__content">
-      <span class="betty-hero__badge">
-        For Backyard Flocks
-      </span>
+      <span class="betty-hero__badge"> For Backyard Flocks </span>
       <h1 class="betty-hero__headline">{displayHeadline}</h1>
       <p class="betty-hero__subheadline">{displaySubheadline}</p>
       <div class="betty-hero__ctas">
@@ -116,15 +112,25 @@ const displaySubheadline = subheadline || content.subheadline;
       </div>
       <div class="betty-hero__trust">
         <span class="betty-hero__trust-item">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"
+            ><path
+              d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+            ></path></svg
+          >
           4.8 Star Rating
         </span>
         <span class="betty-hero__trust-item">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"
+            ><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg
+          >
           OMRI Listed Organic
         </span>
         <span class="betty-hero__trust-item">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"
+            ><path
+              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+            ></path></svg
+          >
           Family Owned
         </span>
       </div>
@@ -281,8 +287,8 @@ const displaySubheadline = subheadline || content.subheadline;
           tunnel: 'betty',
           cta_text: cta.textContent?.trim(),
           cta_href: (cta as HTMLAnchorElement).href,
-        });
+        })
       }
-    });
-  });
+    })
+  })
 </script>

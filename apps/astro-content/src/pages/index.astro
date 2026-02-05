@@ -18,58 +18,59 @@
  * - Tunnel variant: Full personalized experience
  * - Generic variant: Control group (Decision Engine)
  */
-import BaseLayout from '../layouts/BaseLayout.astro';
-import DecisionEngine from '../components/cdp/DecisionEngine.astro';
-import RealityTunnel from '../components/tunnels/RealityTunnel.astro';
-import BettyHero from '../components/tunnels/betty/BettyHero.astro';
-import BettyProducts from '../components/tunnels/betty/BettyProducts.astro';
-import BettyTestimonials from '../components/tunnels/betty/BettyTestimonials.astro';
-import BillHero from '../components/tunnels/bill/BillHero.astro';
-import BillProducts from '../components/tunnels/bill/BillProducts.astro';
-import BillTestimonials from '../components/tunnels/bill/BillTestimonials.astro';
-import TaylorHero from '../components/tunnels/taylor/TaylorHero.astro';
-import TaylorProducts from '../components/tunnels/taylor/TaylorProducts.astro';
-import TaylorTestimonials from '../components/tunnels/taylor/TaylorTestimonials.astro';
-import ABTest from '../components/cdp/ABTest.astro';
+import BaseLayout from '../layouts/BaseLayout.astro'
+import DecisionEngine from '../components/cdp/DecisionEngine.astro'
+import RealityTunnel from '../components/tunnels/RealityTunnel.astro'
+import BettyHero from '../components/tunnels/betty/BettyHero.astro'
+import BettyProducts from '../components/tunnels/betty/BettyProducts.astro'
+import BettyTestimonials from '../components/tunnels/betty/BettyTestimonials.astro'
+import BillHero from '../components/tunnels/bill/BillHero.astro'
+import BillProducts from '../components/tunnels/bill/BillProducts.astro'
+import BillTestimonials from '../components/tunnels/bill/BillTestimonials.astro'
+import TaylorHero from '../components/tunnels/taylor/TaylorHero.astro'
+import TaylorProducts from '../components/tunnels/taylor/TaylorProducts.astro'
+import TaylorTestimonials from '../components/tunnels/taylor/TaylorTestimonials.astro'
+import ABTest from '../components/cdp/ABTest.astro'
 
-const title = "Southland Organics | Organic Solutions for Poultry & Lawn";
-const description = "Organic probiotics and natural solutions for backyard flocks, commercial poultry operations, and lawn care. OMRI Listed, family-owned, made in Georgia.";
+const title = 'Southland Organics | Organic Solutions for Poultry & Lawn'
+const description =
+  'Organic probiotics and natural solutions for backyard flocks, commercial poultry operations, and lawn care. OMRI Listed, family-owned, made in Georgia.'
 
 // Try to read persona from cookie for SSR
-let serverPersona: string | null = null;
-let serverStage: string = 'aware';
+let serverPersona: string | null = null
+let serverStage: string = 'aware'
 
-const personaCookie = Astro.cookies.get('sl_persona');
+const personaCookie = Astro.cookies.get('sl_persona')
 if (personaCookie) {
-  serverPersona = personaCookie.value;
+  serverPersona = personaCookie.value
 }
 
-const stageCookie = Astro.cookies.get('sl_stage');
+const stageCookie = Astro.cookies.get('sl_stage')
 if (stageCookie) {
-  serverStage = stageCookie.value;
+  serverStage = stageCookie.value
 }
 
 // Schema for homepage
 const schema = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "Southland Organics",
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Southland Organics',
   description: description,
-  url: "https://southlandorganics.com",
-  logo: "https://res.cloudinary.com/southland-organics/image/upload/v1/Southland%20Website/Southland%20Branding/logos/southland-logo-primary.png",
+  url: 'https://southlandorganics.com',
+  logo: 'https://res.cloudinary.com/southland-organics/image/upload/v1/Southland%20Website/Southland%20Branding/logos/southland-logo-primary.png',
   contactPoint: {
-    "@type": "ContactPoint",
-    telephone: "+1-800-608-3755",
-    contactType: "customer service",
-    areaServed: "US",
-    availableLanguage: "English"
+    '@type': 'ContactPoint',
+    telephone: '+1-800-608-3755',
+    contactType: 'customer service',
+    areaServed: 'US',
+    availableLanguage: 'English',
   },
   sameAs: [
-    "https://www.facebook.com/southlandorganics",
-    "https://www.instagram.com/southlandorganics",
-    "https://www.youtube.com/southlandorganics"
-  ]
-};
+    'https://www.facebook.com/southlandorganics',
+    'https://www.instagram.com/southlandorganics',
+    'https://www.youtube.com/southlandorganics',
+  ],
+}
 ---
 
 <BaseLayout title={title} description={description} schema={schema}>
@@ -121,12 +122,20 @@ const schema = {
       <section class="betty-cta-banner">
         <div class="betty-cta-banner__container">
           <h2 class="betty-cta-banner__heading">Ready to Give Your Flock the Best?</h2>
-          <p class="betty-cta-banner__text">Join thousands of backyard chicken keepers who trust Southland Organics.</p>
+          <p class="betty-cta-banner__text">
+            Join thousands of backyard chicken keepers who trust Southland Organics.
+          </p>
           <div class="betty-cta-banner__buttons">
-            <a href="/shop/poultry/backyard/" class="betty-cta-banner__btn betty-cta-banner__btn--primary">
+            <a
+              href="/shop/poultry/backyard/"
+              class="betty-cta-banner__btn betty-cta-banner__btn--primary"
+            >
               Shop Backyard Products
             </a>
-            <a href="/quiz/backyard/" class="betty-cta-banner__btn betty-cta-banner__btn--secondary">
+            <a
+              href="/quiz/backyard/"
+              class="betty-cta-banner__btn betty-cta-banner__btn--secondary"
+            >
               Take the Flock Quiz
             </a>
           </div>
@@ -168,7 +177,9 @@ const schema = {
       <section class="bill-cta-banner">
         <div class="bill-cta-banner__container">
           <h2 class="bill-cta-banner__heading">Ready to Improve Your Flock Performance?</h2>
-          <p class="bill-cta-banner__text">Join 500+ commercial growers seeing measurable ROI with Southland Organics.</p>
+          <p class="bill-cta-banner__text">
+            Join 500+ commercial growers seeing measurable ROI with Southland Organics.
+          </p>
           <div class="bill-cta-banner__buttons">
             <a href="/contact/quote/" class="bill-cta-banner__btn bill-cta-banner__btn--primary">
               Request a Quote
@@ -215,12 +226,17 @@ const schema = {
       <section class="taylor-cta-banner">
         <div class="taylor-cta-banner__container">
           <h2 class="taylor-cta-banner__heading">Ready to Go Organic?</h2>
-          <p class="taylor-cta-banner__text">Join thousands of lawn care professionals getting better results with healthier soil.</p>
+          <p class="taylor-cta-banner__text">
+            Join thousands of lawn care professionals getting better results with healthier soil.
+          </p>
           <div class="taylor-cta-banner__buttons">
             <a href="/shop/lawn/" class="taylor-cta-banner__btn taylor-cta-banner__btn--primary">
               Shop Lawn Products
             </a>
-            <a href="/contact/sample/" class="taylor-cta-banner__btn taylor-cta-banner__btn--secondary">
+            <a
+              href="/contact/sample/"
+              class="taylor-cta-banner__btn taylor-cta-banner__btn--secondary"
+            >
               Request Free Samples
             </a>
           </div>
@@ -231,18 +247,18 @@ const schema = {
     <!-- Default: Decision Engine for new/unknown visitors -->
     <Fragment slot="default">
       <!-- Hero Section with Decision Engine -->
-      <section class="min-h-[80vh] flex items-center bg-gradient-to-b from-white to-gray-50">
+      <section class="flex min-h-[80vh] items-center bg-gradient-to-b from-white to-gray-50">
         <div class="w-full">
           <!-- Logo & Tagline -->
-          <div class="text-center py-8 md:py-12">
+          <div class="py-8 text-center md:py-12">
             <img
               src="https://res.cloudinary.com/southland-organics/image/upload/c_scale,w_300/v1/Southland%20Website/Southland%20Branding/logos/southland-logo-primary.png"
               alt="Southland Organics"
-              class="h-20 md:h-24 mx-auto mb-4"
+              class="mx-auto mb-4 h-20 md:h-24"
               width="300"
               height="96"
             />
-            <p class="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto px-4">
+            <p class="mx-auto max-w-2xl px-4 text-lg text-gray-600 md:text-xl">
               Organic solutions for healthier birds, better soil, and a cleaner planet.
             </p>
           </div>
@@ -253,23 +269,23 @@ const schema = {
       </section>
 
       <!-- Trust Badges -->
-      <section class="py-12 bg-white border-t border-gray-100">
-        <div class="max-w-4xl mx-auto px-4">
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+      <section class="border-t border-gray-100 bg-white py-12">
+        <div class="mx-auto max-w-4xl px-4">
+          <div class="grid grid-cols-2 gap-8 text-center md:grid-cols-4">
             <div>
-              <div class="text-3xl font-bold text-green-700 mb-1">15+</div>
+              <div class="mb-1 text-3xl font-bold text-green-700">15+</div>
               <div class="text-sm text-gray-600">Years in Business</div>
             </div>
             <div>
-              <div class="text-3xl font-bold text-green-700 mb-1">OMRI</div>
+              <div class="mb-1 text-3xl font-bold text-green-700">OMRI</div>
               <div class="text-sm text-gray-600">Listed Organic</div>
             </div>
             <div>
-              <div class="text-3xl font-bold text-green-700 mb-1">USA</div>
+              <div class="mb-1 text-3xl font-bold text-green-700">USA</div>
               <div class="text-sm text-gray-600">Made in Georgia</div>
             </div>
             <div>
-              <div class="text-3xl font-bold text-green-700 mb-1">100%</div>
+              <div class="mb-1 text-3xl font-bold text-green-700">100%</div>
               <div class="text-sm text-gray-600">Natural Ingredients</div>
             </div>
           </div>
@@ -277,22 +293,34 @@ const schema = {
       </section>
 
       <!-- Quick Links for Returning Visitors -->
-      <section class="py-12 bg-gray-50">
-        <div class="max-w-6xl mx-auto px-4">
-          <h2 class="text-2xl font-bold text-center mb-8" style="color: var(--color-title);">
+      <section class="bg-gray-50 py-12">
+        <div class="mx-auto max-w-6xl px-4">
+          <h2 class="mb-8 text-center text-2xl font-bold" style="color: var(--color-title);">
             Quick Links
           </h2>
-          <div class="grid md:grid-cols-4 gap-4">
-            <a href="/shop/" class="block p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow text-center">
+          <div class="grid gap-4 md:grid-cols-4">
+            <a
+              href="/shop/"
+              class="block rounded-lg bg-white p-4 text-center shadow-sm transition-shadow hover:shadow-md"
+            >
               <span class="text-lg font-semibold text-gray-800">Shop All Products</span>
             </a>
-            <a href="/podcast/" class="block p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow text-center">
+            <a
+              href="/podcast/"
+              class="block rounded-lg bg-white p-4 text-center shadow-sm transition-shadow hover:shadow-md"
+            >
               <span class="text-lg font-semibold text-gray-800">Ag & Culture Podcast</span>
             </a>
-            <a href="/about/" class="block p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow text-center">
+            <a
+              href="/about/"
+              class="block rounded-lg bg-white p-4 text-center shadow-sm transition-shadow hover:shadow-md"
+            >
               <span class="text-lg font-semibold text-gray-800">About Us</span>
             </a>
-            <a href="/contact/" class="block p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow text-center">
+            <a
+              href="/contact/"
+              class="block rounded-lg bg-white p-4 text-center shadow-sm transition-shadow hover:shadow-md"
+            >
               <span class="text-lg font-semibold text-gray-800">Contact</span>
             </a>
           </div>
@@ -356,7 +384,11 @@ const schema = {
 
   /* Betty CTA Banner */
   .betty-cta-banner {
-    background: linear-gradient(135deg, var(--color-accent, #44883e) 0%, var(--color-title, #2c5234) 100%);
+    background: linear-gradient(
+      135deg,
+      var(--color-accent, #44883e) 0%,
+      var(--color-title, #2c5234) 100%
+    );
     padding: 60px 20px;
     text-align: center;
   }
@@ -633,11 +665,11 @@ const schema = {
 
 <script>
   // Client-side persona detection for dynamic updates
-  import { getPersonaId, getJourneyStage } from '../lib/persona';
+  import { getPersonaId, getJourneyStage } from '../lib/persona'
 
   function updateRealityTunnel() {
-    const personaId = getPersonaId();
-    const stage = getJourneyStage();
+    const personaId = getPersonaId()
+    const stage = getJourneyStage()
 
     // Track homepage view with persona context
     if (window.pdPixel) {
@@ -646,16 +678,16 @@ const schema = {
         stage: stage || 'unaware',
         has_persona: Boolean(personaId),
         is_personalized: Boolean(personaId && personaId !== 'general'),
-      });
+      })
     }
   }
 
   // Run on load
-  document.addEventListener('DOMContentLoaded', updateRealityTunnel);
+  document.addEventListener('DOMContentLoaded', updateRealityTunnel)
   if (document.readyState !== 'loading') {
-    updateRealityTunnel();
+    updateRealityTunnel()
   }
 
   // Re-run on Astro View Transitions
-  document.addEventListener('astro:page-load', updateRealityTunnel);
+  document.addEventListener('astro:page-load', updateRealityTunnel)
 </script>

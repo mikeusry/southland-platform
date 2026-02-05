@@ -1,0 +1,18 @@
+node_modules/
+dist/
+.astro/
+.vercel/
+*.min.js
+tina/__generated__/
+
+# Files with HTML comments in JSX that Prettier Astro parser struggles with
+src/pages/search.astro
+src/components/blog/AuthorCard.astro
+src/components/blog/BlogCard.astro
+src/components/cdp/DecisionEngine.astro
+src/components/CloudinaryGallery.astro
+src/components/CloudinaryHero.astro
+src/components/CloudinaryImage.astro
+src/components/team/TeamCard.astro
+src/components/tunnels/RealityTunnel.astro
+src/layouts/BaseLayout.astro

@@ -9,43 +9,41 @@
  * <TaylorHero stage="aware" />
  */
 
-import type { JourneyStage } from '../../../lib/visitor';
+import type { JourneyStage } from '../../../lib/visitor'
 
 interface Props {
   /** Current journey stage for stage-specific messaging */
-  stage?: JourneyStage;
+  stage?: JourneyStage
   /** Override the default headline */
-  headline?: string;
+  headline?: string
   /** Override the default subheadline */
-  subheadline?: string;
+  subheadline?: string
   /** Additional CSS classes */
-  class?: string;
+  class?: string
 }
 
-const {
-  stage = 'aware',
-  headline,
-  subheadline,
-  class: className = '',
-} = Astro.props;
+const { stage = 'aware', headline, subheadline, class: className = '' } = Astro.props
 
 // Stage-specific content variations for lawn care professionals
 const stageContent = {
   unaware: {
     headline: 'Looking for Better Turf Results?',
-    subheadline: 'Discover how organic soil biology is transforming professional lawn care and turf management.',
+    subheadline:
+      'Discover how organic soil biology is transforming professional lawn care and turf management.',
     cta: { text: 'Learn the Science', href: '/learn/soil-biology/' },
     secondaryCta: { text: 'View Products', href: '/shop/lawn/' },
   },
   aware: {
     headline: 'Healthier Soil. Greener Turf. Happier Clients.',
-    subheadline: 'Our organic soil amendments restore microbial balance for naturally resilient, beautiful lawns.',
+    subheadline:
+      'Our organic soil amendments restore microbial balance for naturally resilient, beautiful lawns.',
     cta: { text: 'Shop Lawn Products', href: '/shop/lawn/' },
     secondaryCta: { text: 'Take the Soil Quiz', href: '/quiz/lawn/' },
   },
   receptive: {
     headline: 'The Soil Biology Advantage',
-    subheadline: 'Learn how probiotics and humic acids work together to create self-sustaining turf systems.',
+    subheadline:
+      'Learn how probiotics and humic acids work together to create self-sustaining turf systems.',
     cta: { text: 'How It Works', href: '/learn/soil-biology-101/' },
     secondaryCta: { text: 'Browse Products', href: '/shop/lawn/' },
   },
@@ -57,19 +55,22 @@ const stageContent = {
   },
   objections: {
     headline: 'Questions About Organic Lawn Care?',
-    subheadline: 'See how professionals are achieving better results while reducing chemical inputs.',
+    subheadline:
+      'See how professionals are achieving better results while reducing chemical inputs.',
     cta: { text: 'Read FAQs', href: '/faq/lawn/' },
     secondaryCta: { text: 'See Results', href: '/case-studies/lawn/' },
   },
   test_prep: {
     headline: 'Ready to Try Organic?',
-    subheadline: 'Start with a small area or single client. Our sample program makes it easy to test.',
+    subheadline:
+      'Start with a small area or single client. Our sample program makes it easy to test.',
     cta: { text: 'Get Samples', href: '/contact/sample/' },
     secondaryCta: { text: 'View Starter Kits', href: '/shop/lawn/kits/' },
   },
   challenge: {
     headline: 'Welcome to the Pro Program',
-    subheadline: 'Access application guides, mixing ratios, and seasonal protocols for best results.',
+    subheadline:
+      'Access application guides, mixing ratios, and seasonal protocols for best results.',
     cta: { text: 'Application Guides', href: '/guides/lawn/' },
     secondaryCta: { text: 'Contact Support', href: '/contact/' },
   },
@@ -91,19 +92,17 @@ const stageContent = {
     cta: { text: 'Share Your Results', href: '/case-studies/submit/' },
     secondaryCta: { text: 'Referral Program', href: '/referral/lawn/' },
   },
-};
+}
 
-const content = stageContent[stage] || stageContent.aware;
-const displayHeadline = headline || content.headline;
-const displaySubheadline = subheadline || content.subheadline;
+const content = stageContent[stage] || stageContent.aware
+const displayHeadline = headline || content.headline
+const displaySubheadline = subheadline || content.subheadline
 ---
 
 <section class:list={['taylor-hero', className]}>
   <div class="taylor-hero__container">
     <div class="taylor-hero__content">
-      <span class="taylor-hero__badge">
-        For Lawn Care Professionals
-      </span>
+      <span class="taylor-hero__badge"> For Lawn Care Professionals </span>
       <h1 class="taylor-hero__headline">{displayHeadline}</h1>
       <p class="taylor-hero__subheadline">{displaySubheadline}</p>
       <div class="taylor-hero__ctas">
@@ -116,15 +115,25 @@ const displaySubheadline = subheadline || content.subheadline;
       </div>
       <div class="taylor-hero__trust">
         <span class="taylor-hero__trust-item">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"
+            ><path
+              d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+            ></path></svg
+          >
           Trusted by 1,000+ Pros
         </span>
         <span class="taylor-hero__trust-item">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"
+            ><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg
+          >
           OMRI Listed Organic
         </span>
         <span class="taylor-hero__trust-item">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"
+            ><path
+              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+            ></path></svg
+          >
           Made in USA
         </span>
       </div>
@@ -281,8 +290,8 @@ const displaySubheadline = subheadline || content.subheadline;
           tunnel: 'taylor',
           cta_text: cta.textContent?.trim(),
           cta_href: (cta as HTMLAnchorElement).href,
-        });
+        })
       }
-    });
-  });
+    })
+  })
 </script>

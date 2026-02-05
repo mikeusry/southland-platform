@@ -5,28 +5,28 @@
  * intent-aware search across content and products.
  */
 
-import { generateEmbedding } from './embeddings';
-import { supabase, type WebsiteContent, type Product } from './supabase';
+import { generateEmbedding } from './embeddings'
+import { supabase, type WebsiteContent, type Product } from './supabase'
 
 export interface SearchResult {
-  type: 'content' | 'product';
-  id: string;
-  title: string;
-  description: string;
-  url: string;
-  imageUrl?: string;
-  similarity: number;
-  pageType?: string;
-  segment?: string;
+  type: 'content' | 'product'
+  id: string
+  title: string
+  description: string
+  url: string
+  imageUrl?: string
+  similarity: number
+  pageType?: string
+  segment?: string
 }
 
 export interface SearchResponse {
-  query: string;
-  results: SearchResult[];
-  content: SearchResult[];
-  products: SearchResult[];
-  totalCount: number;
-  searchId: string;
+  query: string
+  results: SearchResult[]
+  content: SearchResult[]
+  products: SearchResult[]
+  totalCount: number
+  searchId: string
 }
 
 /**
@@ -35,10 +35,10 @@ export interface SearchResponse {
 export async function semanticSearch(
   query: string,
   options: {
-    contentTypes?: string[];
-    matchThreshold?: number;
-    maxContentResults?: number;
-    maxProductResults?: number;
+    contentTypes?: string[]
+    matchThreshold?: number
+    maxContentResults?: number
+    maxProductResults?: number
   } = {}
 ): Promise<SearchResponse> {
   const {
@@ -46,13 +46,13 @@ export async function semanticSearch(
     matchThreshold = 0.65,
     maxContentResults = 5,
     maxProductResults = 3,
-  } = options;
+  } = options
 
   // Generate unique search ID for tracking
-  const searchId = `search_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  const searchId = `search_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
 
   if (!supabase) {
-    console.warn('Supabase not configured - returning empty search results');
+    console.warn('Supabase not configured - returning empty search results')
     return {
       query,
       results: [],
@@ -60,23 +60,23 @@ export async function semanticSearch(
       products: [],
       totalCount: 0,
       searchId,
-    };
+    }
   }
 
   try {
     // Generate embedding for the search query
-    const embedding = await generateEmbedding(query);
+    const embedding = await generateEmbedding(query)
 
     // Search content and products in parallel
     const [contentResults, productResults] = await Promise.all([
       searchContent(embedding, contentTypes, matchThreshold, maxContentResults),
       searchProducts(embedding, matchThreshold, maxProductResults),
-    ]);
+    ])
 
     // Combine and sort by similarity
     const allResults = [...contentResults, ...productResults].sort(
       (a, b) => b.similarity - a.similarity
-    );
+    )
 
     return {
       query,
@@ -85,9 +85,9 @@ export async function semanticSearch(
       products: productResults,
       totalCount: allResults.length,
       searchId,
-    };
+    }
   } catch (error) {
-    console.error('Semantic search failed:', error);
+    console.error('Semantic search failed:', error)
     return {
       query,
       results: [],
@@ -95,7 +95,7 @@ export async function semanticSearch(
       products: [],
       totalCount: 0,
       searchId,
-    };
+    }
   }
 }
 
@@ -108,7 +108,7 @@ async function searchContent(
   matchThreshold: number,
   matchCount: number
 ): Promise<SearchResult[]> {
-  if (!supabase) return [];
+  if (!supabase) return []
 
   try {
     const { data, error } = await supabase.rpc('search_website_content', {
@@ -116,11 +116,11 @@ async function searchContent(
       page_types: pageTypes,
       match_threshold: matchThreshold,
       match_count: matchCount,
-    });
+    })
 
     if (error) {
-      console.error('Content search error:', error);
-      return [];
+      console.error('Content search error:', error)
+      return []
     }
 
     return (data || []).map((item: WebsiteContent & { similarity: number }) => ({
@@ -132,10 +132,10 @@ async function searchContent(
       similarity: item.similarity,
       pageType: item.page_type,
       segment: item.segment || undefined,
-    }));
+    }))
   } catch (err) {
-    console.error('Content search failed:', err);
-    return [];
+    console.error('Content search failed:', err)
+    return []
   }
 }
 
@@ -147,18 +147,18 @@ async function searchProducts(
   matchThreshold: number,
   matchCount: number
 ): Promise<SearchResult[]> {
-  if (!supabase) return [];
+  if (!supabase) return []
 
   try {
     const { data, error } = await supabase.rpc('find_products_for_content', {
       content_embedding: embedding,
       match_threshold: matchThreshold,
       match_count: matchCount,
-    });
+    })
 
     if (error) {
-      console.error('Product search error:', error);
-      return [];
+      console.error('Product search error:', error)
+      return []
     }
 
     return (data || []).map((item: Product & { similarity: number }) => ({
@@ -170,10 +170,10 @@ async function searchProducts(
       imageUrl: item.image_url || undefined,
       similarity: item.similarity,
       segment: item.segment,
-    }));
+    }))
   } catch (err) {
-    console.error('Product search failed:', err);
-    return [];
+    console.error('Product search failed:', err)
+    return []
   }
 }
 
@@ -183,5 +183,5 @@ async function searchProducts(
  */
 export async function getSearchSuggestions(query: string): Promise<string[]> {
   // TODO: Implement with popular queries or content titles
-  return [];
+  return []
 }

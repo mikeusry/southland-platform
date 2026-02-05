@@ -4,60 +4,60 @@
  * Shows full article content with E-E-A-T author/reviewer attribution and SEO schema
  */
 
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import BlogCard from '../../components/blog/BlogCard.astro';
-import AuthorCard from '../../components/blog/AuthorCard.astro';
-import { getCollection, getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import BlogCard from '../../components/blog/BlogCard.astro'
+import AuthorCard from '../../components/blog/AuthorCard.astro'
+import { getCollection, getEntry, render } from 'astro:content'
 
-export const prerender = true;
+export const prerender = true
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => {
-    return data.draft !== true;
-  });
+    return data.draft !== true
+  })
 
   return posts.map((post) => {
-    const slug = post.id.replace(/\.mdx?$/, '');
+    const slug = post.id.replace(/\.mdx?$/, '')
     return {
       params: { slug },
       props: { post, slug },
-    };
-  });
+    }
+  })
 }
 
-const { post, slug: postSlug } = Astro.props;
-const { Content } = await render(post);
+const { post, slug: postSlug } = Astro.props
+const { Content } = await render(post)
 
-const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com';
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
 
 // Fetch author from team collection (if it's a slug reference)
-let author = null;
+let author = null
 if (post.data.author) {
   try {
     // Try to get as team member slug
-    const teamMember = await getEntry('team', post.data.author);
+    const teamMember = await getEntry('team', post.data.author)
     if (teamMember) {
       author = {
         ...teamMember.data,
         slug: post.data.author,
-      };
+      }
     }
   } catch {
     // Fallback: author is just a name string (legacy data)
-    author = { name: post.data.author, slug: null };
+    author = { name: post.data.author, slug: null }
   }
 }
 
 // Fetch reviewer from team collection
-let reviewer = null;
+let reviewer = null
 if (post.data.reviewer) {
   try {
-    const teamMember = await getEntry('team', post.data.reviewer);
+    const teamMember = await getEntry('team', post.data.reviewer)
     if (teamMember) {
       reviewer = {
         ...teamMember.data,
         slug: post.data.reviewer,
-      };
+      }
     }
   } catch {
     // Reviewer not found
@@ -69,7 +69,7 @@ const formattedDate = new Date(post.data.publishDate).toLocaleDateString('en-US'
   year: 'numeric',
   month: 'long',
   day: 'numeric',
-});
+})
 
 const formattedUpdatedDate = post.data.updatedDate
   ? new Date(post.data.updatedDate).toLocaleDateString('en-US', {
@@ -77,14 +77,14 @@ const formattedUpdatedDate = post.data.updatedDate
       month: 'long',
       day: 'numeric',
     })
-  : null;
+  : null
 
 // Get related posts (same segment)
-const allPosts = await getCollection('blog', ({ data }) => data.draft !== true);
+const allPosts = await getCollection('blog', ({ data }) => data.draft !== true)
 const relatedPosts = allPosts
-  .filter(p => p.id !== post.id && p.data.segment === post.data.segment)
+  .filter((p) => p.id !== post.id && p.data.segment === post.data.segment)
   .sort((a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime())
-  .slice(0, 3);
+  .slice(0, 3)
 
 // Segment labels
 const segmentLabels: Record<string, string> = {
@@ -92,11 +92,11 @@ const segmentLabels: Record<string, string> = {
   turf: 'Turf & Lawn',
   agriculture: 'Agriculture',
   general: 'General',
-};
+}
 
 // Build E-E-A-T optimized schema markup
 const buildPersonSchema = (person: any, role: string) => {
-  if (!person || !person.slug) return null;
+  if (!person || !person.slug) return null
   return {
     '@type': 'Person',
     name: person.name,
@@ -108,15 +108,19 @@ const buildPersonSchema = (person: any, role: string) => {
       url: siteUrl,
     },
     ...(person.links?.linkedin && { sameAs: [person.links.linkedin] }),
-    ...(person.photo && { image: `https://res.cloudinary.com/southland-organics/image/upload/w_400/${person.photo}` }),
-  };
-};
+    ...(person.photo && {
+      image: `https://res.cloudinary.com/southland-organics/image/upload/w_400/${person.photo}`,
+    }),
+  }
+}
 
-const authorSchema = author?.slug ? buildPersonSchema(author, 'author') : {
-  '@type': 'Organization',
-  name: author?.name || 'Southland Organics',
-  url: siteUrl,
-};
+const authorSchema = author?.slug
+  ? buildPersonSchema(author, 'author')
+  : {
+      '@type': 'Organization',
+      name: author?.name || 'Southland Organics',
+      url: siteUrl,
+    }
 
 const articleSchema = {
   '@context': 'https://schema.org',
@@ -145,7 +149,7 @@ const articleSchema = {
     '@id': `${siteUrl}/blog/${postSlug}/`,
   },
   keywords: post.data.tags?.join(', '),
-};
+}
 ---
 
 <BaseLayout
@@ -155,28 +159,32 @@ const articleSchema = {
   schema={articleSchema}
 >
   <!-- Article Header -->
-  <header class="bg-gradient-to-br from-southland-green-dark via-southland-green-dark to-[#1f3d24] py-16 md:py-24">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+  <header
+    class="bg-gradient-to-br from-southland-green-dark via-southland-green-dark to-[#1f3d24] py-16 md:py-24"
+  >
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
       <!-- Breadcrumb -->
       <nav class="mb-8">
         <ol class="flex items-center gap-2 text-sm text-white/60">
           <li>
-            <a href="/" class="hover:text-white transition-colors">Home</a>
+            <a href="/" class="transition-colors hover:text-white">Home</a>
           </li>
           <li>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"
+              ></path>
             </svg>
           </li>
           <li>
-            <a href="/blog/" class="hover:text-white transition-colors">Blog</a>
+            <a href="/blog/" class="transition-colors hover:text-white">Blog</a>
           </li>
           <li>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"
+              ></path>
             </svg>
           </li>
-          <li class="text-white truncate max-w-[200px]">{post.data.title}</li>
+          <li class="max-w-[200px] truncate text-white">{post.data.title}</li>
         </ol>
       </nav>
 
@@ -184,14 +192,14 @@ const articleSchema = {
       <div class="mb-4">
         <a
           href={`/blog/category/${post.data.segment}/`}
-          class="inline-block px-3 py-1 bg-white/10 rounded-full text-sm text-southland-green hover:bg-white/20 transition-colors"
+          class="inline-block rounded-full bg-white/10 px-3 py-1 text-sm text-southland-green transition-colors hover:bg-white/20"
         >
           {segmentLabels[post.data.segment || 'general']}
         </a>
       </div>
 
       <!-- Title -->
-      <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
+      <h1 class="mb-6 text-3xl font-bold leading-tight text-white md:text-4xl lg:text-5xl">
         {post.data.title}
       </h1>
 
@@ -200,142 +208,148 @@ const articleSchema = {
         <time datetime={new Date(post.data.publishDate).toISOString()}>
           {formattedDate}
         </time>
-        {formattedUpdatedDate && formattedUpdatedDate !== formattedDate && (
-          <>
-            <span>•</span>
-            <span>Updated {formattedUpdatedDate}</span>
-          </>
-        )}
-        {author && (
-          <>
-            <span>•</span>
-            {author.slug ? (
-              <a href={`/team/${author.slug}/`} class="hover:text-white transition-colors">
-                By {author.name}
-              </a>
-            ) : (
-              <span>By {author.name}</span>
-            )}
-          </>
-        )}
+        {
+          formattedUpdatedDate && formattedUpdatedDate !== formattedDate && (
+            <>
+              <span>•</span>
+              <span>Updated {formattedUpdatedDate}</span>
+            </>
+          )
+        }
+        {
+          author && (
+            <>
+              <span>•</span>
+              {author.slug ? (
+                <a href={`/team/${author.slug}/`} class="transition-colors hover:text-white">
+                  By {author.name}
+                </a>
+              ) : (
+                <span>By {author.name}</span>
+              )}
+            </>
+          )
+        }
       </div>
     </div>
   </header>
 
   <!-- Featured Image -->
-  {post.data.featuredImage && (
-    <div class="bg-white border-b border-gray-100">
-      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
-        <img
-          src={post.data.featuredImage}
-          alt={post.data.title}
-          class="w-full rounded-xl shadow-lg aspect-video object-cover"
-          loading="eager"
-        />
+  {
+    post.data.featuredImage && (
+      <div class="border-b border-gray-100 bg-white">
+        <div class="mx-auto -mt-8 max-w-5xl px-4 sm:px-6 lg:px-8">
+          <img
+            src={post.data.featuredImage}
+            alt={post.data.title}
+            class="aspect-video w-full rounded-xl object-cover shadow-lg"
+            loading="eager"
+          />
+        </div>
       </div>
-    </div>
-  )}
+    )
+  }
 
   <!-- Article Content -->
   <article class="bg-white py-12 md:py-16">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="prose prose-lg max-w-none
-        prose-headings:text-shopify-title prose-headings:font-bold
-        prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-6
-        prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-4
-        prose-p:text-shopify-secondary-text prose-p:leading-relaxed
-        prose-a:text-southland-green prose-a:no-underline hover:prose-a:underline
-        prose-strong:text-shopify-title
-        prose-ul:my-6 prose-li:text-shopify-secondary-text
-        prose-img:rounded-lg prose-img:shadow-md
-        prose-blockquote:border-l-4 prose-blockquote:border-southland-green prose-blockquote:bg-gray-50 prose-blockquote:py-2 prose-blockquote:px-6 prose-blockquote:rounded-r-lg
-      ">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+      <div
+        class="prose prose-lg prose-headings:text-shopify-title prose-headings:font-bold prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-6 prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-4 prose-p:text-shopify-secondary-text prose-p:leading-relaxed prose-a:text-southland-green prose-a:no-underline hover:prose-a:underline prose-strong:text-shopify-title prose-ul:my-6 prose-li:text-shopify-secondary-text prose-img:rounded-lg prose-img:shadow-md prose-blockquote:border-l-4 prose-blockquote:border-southland-green prose-blockquote:bg-gray-50 prose-blockquote:py-2 prose-blockquote:px-6 prose-blockquote:rounded-r-lg max-w-none"
+      >
         <Content />
       </div>
 
       <!-- Author & Reviewer Cards (E-E-A-T) -->
-      {(author?.slug || reviewer?.slug) && (
-        <div class="mt-12 pt-8 border-t border-gray-200 space-y-6">
-          {author?.slug && (
-            <AuthorCard
-              name={author.name}
-              slug={author.slug}
-              role={author.role}
-              bio={author.bio}
-              photo={author.photo}
-              credentials={author.credentials}
-              yearsExperience={author.yearsExperience}
-              links={author.links}
-              variant="full"
-              label="Written by"
-            />
-          )}
-          {reviewer?.slug && (
-            <AuthorCard
-              name={reviewer.name}
-              slug={reviewer.slug}
-              role={reviewer.role}
-              bio={reviewer.bio}
-              photo={reviewer.photo}
-              credentials={reviewer.credentials}
-              yearsExperience={reviewer.yearsExperience}
-              links={reviewer.links}
-              variant="full"
-              label="Reviewed by"
-            />
-          )}
-        </div>
-      )}
+      {
+        (author?.slug || reviewer?.slug) && (
+          <div class="mt-12 space-y-6 border-t border-gray-200 pt-8">
+            {author?.slug && (
+              <AuthorCard
+                name={author.name}
+                slug={author.slug}
+                role={author.role}
+                bio={author.bio}
+                photo={author.photo}
+                credentials={author.credentials}
+                yearsExperience={author.yearsExperience}
+                links={author.links}
+                variant="full"
+                label="Written by"
+              />
+            )}
+            {reviewer?.slug && (
+              <AuthorCard
+                name={reviewer.name}
+                slug={reviewer.slug}
+                role={reviewer.role}
+                bio={reviewer.bio}
+                photo={reviewer.photo}
+                credentials={reviewer.credentials}
+                yearsExperience={reviewer.yearsExperience}
+                links={reviewer.links}
+                variant="full"
+                label="Reviewed by"
+              />
+            )}
+          </div>
+        )
+      }
 
       <!-- Tags -->
-      {post.data.tags && post.data.tags.length > 0 && (
-        <div class="mt-12 pt-8 border-t border-gray-200">
-          <h4 class="text-sm font-medium text-gray-500 mb-3">Topics</h4>
-          <div class="flex flex-wrap gap-2">
-            {post.data.tags.map((tag) => (
-              <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
-                {tag}
-              </span>
-            ))}
+      {
+        post.data.tags && post.data.tags.length > 0 && (
+          <div class="mt-12 border-t border-gray-200 pt-8">
+            <h4 class="mb-3 text-sm font-medium text-gray-500">Topics</h4>
+            <div class="flex flex-wrap gap-2">
+              {post.data.tags.map((tag) => (
+                <span class="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">{tag}</span>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       <!-- Share -->
-      <div class="mt-8 pt-8 border-t border-gray-200">
-        <h4 class="text-sm font-medium text-gray-500 mb-3">Share this article</h4>
+      <div class="mt-8 border-t border-gray-200 pt-8">
+        <h4 class="mb-3 text-sm font-medium text-gray-500">Share this article</h4>
         <div class="flex gap-3">
           <a
             href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.data.title)}&url=${encodeURIComponent(`${siteUrl}/blog/${postSlug}/`)}`}
             target="_blank"
             rel="noopener noreferrer"
-            class="p-2 bg-gray-100 rounded-lg text-gray-600 hover:bg-gray-200 transition-colors"
+            class="rounded-lg bg-gray-100 p-2 text-gray-600 transition-colors hover:bg-gray-200"
             title="Share on X"
           >
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+              ></path>
             </svg>
           </a>
           <a
             href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${siteUrl}/blog/${postSlug}/`)}`}
             target="_blank"
             rel="noopener noreferrer"
-            class="p-2 bg-gray-100 rounded-lg text-gray-600 hover:bg-gray-200 transition-colors"
+            class="rounded-lg bg-gray-100 p-2 text-gray-600 transition-colors hover:bg-gray-200"
             title="Share on Facebook"
           >
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
+              ></path>
             </svg>
           </a>
           <a
             href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(`${siteUrl}/blog/${postSlug}/`)}&title=${encodeURIComponent(post.data.title)}`}
             target="_blank"
             rel="noopener noreferrer"
-            class="p-2 bg-gray-100 rounded-lg text-gray-600 hover:bg-gray-200 transition-colors"
+            class="rounded-lg bg-gray-100 p-2 text-gray-600 transition-colors hover:bg-gray-200"
             title="Share on LinkedIn"
           >
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"
+              ></path>
             </svg>
           </a>
         </div>
@@ -344,45 +358,44 @@ const articleSchema = {
   </article>
 
   <!-- Related Posts -->
-  {relatedPosts.length > 0 && (
-    <section class="bg-brand-gray py-16">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-2xl font-bold text-shopify-title mb-8">Related Articles</h2>
-        <div class="grid md:grid-cols-3 gap-6">
-          {relatedPosts.map((relatedPost) => (
-            <BlogCard
-              title={relatedPost.data.title}
-              slug={relatedPost.id.replace(/\.mdx?$/, '')}
-              description={relatedPost.data.description}
-              publishDate={relatedPost.data.publishDate}
-              featuredImage={relatedPost.data.featuredImage}
-              segment={relatedPost.data.segment}
-            />
-          ))}
+  {
+    relatedPosts.length > 0 && (
+      <section class="bg-brand-gray py-16">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h2 class="mb-8 text-2xl font-bold text-shopify-title">Related Articles</h2>
+          <div class="grid gap-6 md:grid-cols-3">
+            {relatedPosts.map((relatedPost) => (
+              <BlogCard
+                title={relatedPost.data.title}
+                slug={relatedPost.id.replace(/\.mdx?$/, '')}
+                description={relatedPost.data.description}
+                publishDate={relatedPost.data.publishDate}
+                featuredImage={relatedPost.data.featuredImage}
+                segment={relatedPost.data.segment}
+              />
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
-  )}
+      </section>
+    )
+  }
 
   <!-- CTA -->
   <section class="bg-white py-16">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h2 class="text-3xl font-bold text-shopify-title mb-4">
-        Need Help With Your Operation?
-      </h2>
-      <p class="text-shopify-secondary-text text-lg mb-8 max-w-2xl mx-auto">
+    <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+      <h2 class="mb-4 text-3xl font-bold text-shopify-title">Need Help With Your Operation?</h2>
+      <p class="mx-auto mb-8 max-w-2xl text-lg text-shopify-secondary-text">
         Our team of experts is here to help you find the right organic solutions for your needs.
       </p>
       <div class="flex flex-wrap justify-center gap-4">
         <a href="/contact/" class="btn-primary inline-flex items-center gap-2">
           Contact Us
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"
+            ></path>
           </svg>
         </a>
-        <a href="/blog/" class="btn-secondary inline-flex items-center gap-2">
-          More Articles
-        </a>
+        <a href="/blog/" class="btn-secondary inline-flex items-center gap-2"> More Articles </a>
       </div>
     </div>
   </section>

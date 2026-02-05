@@ -4,35 +4,29 @@
  */
 
 interface Props {
-  topic: string;
-  href?: string;
-  size?: 'sm' | 'md' | 'lg';
-  variant?: 'default' | 'outline' | 'solid';
-  class?: string;
+  topic: string
+  href?: string
+  size?: 'sm' | 'md' | 'lg'
+  variant?: 'default' | 'outline' | 'solid'
+  class?: string
 }
 
-const {
-  topic,
-  href,
-  size = 'md',
-  variant = 'default',
-  class: className = '',
-} = Astro.props;
+const { topic, href, size = 'md', variant = 'default', class: className = '' } = Astro.props
 
 // Generate href if not provided - link to topics index with hash anchor
-const topicHref = href || `/podcast/topics/#${topic.toLowerCase().replace(/\s+/g, '-')}`;
+const topicHref = href || `/podcast/topics/#${topic.toLowerCase().replace(/\s+/g, '-')}`
 
 const sizeClasses = {
   sm: 'px-2 py-0.5 text-xs',
   md: 'px-3 py-1 text-sm',
   lg: 'px-4 py-1.5 text-base',
-};
+}
 
 const variantClasses = {
   default: 'bg-southland-green/10 text-southland-green hover:bg-southland-green/20',
   outline: 'border border-southland-green text-southland-green hover:bg-southland-green/10',
   solid: 'bg-southland-green text-white hover:bg-southland-green-dark',
-};
+}
 ---
 
 <a

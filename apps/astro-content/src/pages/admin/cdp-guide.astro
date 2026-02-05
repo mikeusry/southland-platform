@@ -5,57 +5,76 @@
  * Human-readable guide for the sales and marketing team on how to use
  * the CDP outcome tracking tools.
  */
-import AdminLayout from '../../layouts/AdminLayout.astro';
+import AdminLayout from '../../layouts/AdminLayout.astro'
 
-const title = "CDP Tools Guide | Admin";
+const title = 'CDP Tools Guide | Admin'
 ---
 
 <AdminLayout title={title}>
-  <div class="max-w-4xl mx-auto">
+  <div class="mx-auto max-w-4xl">
     <!-- Header -->
     <div class="mb-12">
-      <h1 class="text-4xl font-bold mb-4" style="color: var(--color-title);">
-        CDP Tools Guide
-      </h1>
+      <h1 class="mb-4 text-4xl font-bold" style="color: var(--color-title);">CDP Tools Guide</h1>
       <p class="text-xl text-gray-600">
-        How to use Southland's Customer Data Platform tools for tracking customer outcomes and improving marketing.
+        How to use Southland's Customer Data Platform tools for tracking customer outcomes and
+        improving marketing.
       </p>
     </div>
 
     <!-- Table of Contents -->
-    <nav class="bg-gray-50 rounded-xl p-6 mb-12">
-      <h2 class="text-lg font-bold mb-4" style="color: var(--color-title);">On This Page</h2>
+    <nav class="mb-12 rounded-xl bg-gray-50 p-6">
+      <h2 class="mb-4 text-lg font-bold" style="color: var(--color-title);">On This Page</h2>
       <ul class="space-y-2">
-        <li><a href="#overview" class="text-green-600 hover:underline">Overview: What is the CDP?</a></li>
-        <li><a href="#sales-log" class="text-green-600 hover:underline">Sales Outcome Log (for Sales Team)</a></li>
-        <li><a href="#surveys" class="text-green-600 hover:underline">Customer Outcome Surveys (for Marketing)</a></li>
-        <li><a href="#decision-engine" class="text-green-600 hover:underline">Decision Engine (Homepage)</a></li>
-        <li><a href="#personas" class="text-green-600 hover:underline">Understanding Personas</a></li>
+        <li>
+          <a href="#overview" class="text-green-600 hover:underline">Overview: What is the CDP?</a>
+        </li>
+        <li>
+          <a href="#sales-log" class="text-green-600 hover:underline"
+            >Sales Outcome Log (for Sales Team)</a
+          >
+        </li>
+        <li>
+          <a href="#surveys" class="text-green-600 hover:underline"
+            >Customer Outcome Surveys (for Marketing)</a
+          >
+        </li>
+        <li>
+          <a href="#decision-engine" class="text-green-600 hover:underline"
+            >Decision Engine (Homepage)</a
+          >
+        </li>
+        <li>
+          <a href="#personas" class="text-green-600 hover:underline">Understanding Personas</a>
+        </li>
         <li><a href="#faq" class="text-green-600 hover:underline">FAQ</a></li>
       </ul>
     </nav>
 
     <!-- Content Sections -->
     <div class="prose prose-lg max-w-none">
-
       <!-- Overview Section -->
       <section id="overview" class="mb-16">
-        <h2 class="text-2xl font-bold mb-4" style="color: var(--color-title);">
+        <h2 class="mb-4 text-2xl font-bold" style="color: var(--color-title);">
           Overview: What is the CDP?
         </h2>
-        <p class="text-gray-600 mb-4">
+        <p class="mb-4 text-gray-600">
           The CDP (Customer Data Platform) helps us understand our customers better by tracking:
         </p>
-        <ul class="list-disc pl-6 space-y-2 text-gray-600 mb-6">
+        <ul class="mb-6 list-disc space-y-2 pl-6 text-gray-600">
           <li><strong>Who they are</strong> — Backyard Betty, Broiler Bill, or Turf Taylor</li>
-          <li><strong>What problems they're solving</strong> — FCR improvement, mortality reduction, flock health</li>
-          <li><strong>What results they're getting</strong> — Real outcomes from using our products</li>
+          <li>
+            <strong>What problems they're solving</strong> — FCR improvement, mortality reduction, flock
+            health
+          </li>
+          <li>
+            <strong>What results they're getting</strong> — Real outcomes from using our products
+          </li>
         </ul>
-        <div class="bg-green-50 border border-green-200 rounded-xl p-6">
-          <h3 class="font-bold text-green-800 mb-2">Why This Matters</h3>
+        <div class="rounded-xl border border-green-200 bg-green-50 p-6">
+          <h3 class="mb-2 font-bold text-green-800">Why This Matters</h3>
           <p class="text-green-700">
-            When we can prove our products work (with real data from real customers), we can:
-            charge premium prices, win over skeptical buyers, and create better marketing.
+            When we can prove our products work (with real data from real customers), we can: charge
+            premium prices, win over skeptical buyers, and create better marketing.
             <strong>Proof points are our competitive moat.</strong>
           </p>
         </div>
@@ -63,27 +82,31 @@ const title = "CDP Tools Guide | Admin";
 
       <!-- Sales Log Section -->
       <section id="sales-log" class="mb-16">
-        <h2 class="text-2xl font-bold mb-4" style="color: var(--color-title);">
+        <h2 class="mb-4 text-2xl font-bold" style="color: var(--color-title);">
           Sales Outcome Log
         </h2>
-        <p class="text-gray-600 mb-4">
+        <p class="mb-4 text-gray-600">
           <strong>Who uses this:</strong> Sales team (Allen, Brad, Matt)
         </p>
-        <p class="text-gray-600 mb-6">
-          <strong>When to use:</strong> After any phone call where a customer shares results or places a reorder.
+        <p class="mb-6 text-gray-600">
+          <strong>When to use:</strong> After any phone call where a customer shares results or places
+          a reorder.
         </p>
 
-        <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-6">
-          <h3 class="font-bold text-amber-800 mb-2">Why This Is Critical</h3>
+        <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-6">
+          <h3 class="mb-2 font-bold text-amber-800">Why This Is Critical</h3>
           <p class="text-amber-700">
-            34% of our revenue comes through phone orders — and right now, we have NO DATA on those customers' outcomes.
-            Every time a customer calls and says "my FCR improved by 3 points," that's gold. We need to capture it.
+            34% of our revenue comes through phone orders — and right now, we have NO DATA on those
+            customers' outcomes. Every time a customer calls and says "my FCR improved by 3 points,"
+            that's gold. We need to capture it.
           </p>
         </div>
 
-        <h3 class="text-xl font-bold mb-4" style="color: var(--color-title);">How to Use the Sales Log</h3>
+        <h3 class="mb-4 text-xl font-bold" style="color: var(--color-title);">
+          How to Use the Sales Log
+        </h3>
 
-        <ol class="list-decimal pl-6 space-y-4 text-gray-600 mb-6">
+        <ol class="mb-6 list-decimal space-y-4 pl-6 text-gray-600">
           <li>
             <strong>Go to the Sales Log:</strong>
             <a href="/admin/sales-log" class="text-green-600 hover:underline">/admin/sales-log</a>
@@ -92,11 +115,12 @@ const title = "CDP Tools Guide | Admin";
             <strong>Fill in the call info:</strong> Your name, date, inbound/outbound
           </li>
           <li>
-            <strong>Add customer details:</strong> Name, farm, email (if you have it), phone, operation type
+            <strong>Add customer details:</strong> Name, farm, email (if you have it), phone, operation
+            type
           </li>
           <li>
             <strong>Select the outcome type:</strong>
-            <ul class="list-disc pl-6 mt-2 space-y-1">
+            <ul class="mt-2 list-disc space-y-1 pl-6">
               <li><strong>FCR Improvement</strong> — Customer reported better feed conversion</li>
               <li><strong>Mortality Reduction</strong> — Customer reported fewer bird losses</li>
               <li><strong>Reorder</strong> — Customer placed an order (log the $ amount!)</li>
@@ -105,18 +129,24 @@ const title = "CDP Tools Guide | Admin";
             </ul>
           </li>
           <li>
-            <strong>Add specifics:</strong> If they gave you numbers (FCR went from 1.85 to 1.78), enter them!
+            <strong>Add specifics:</strong> If they gave you numbers (FCR went from 1.85 to 1.78), enter
+            them!
           </li>
           <li>
             <strong>Submit:</strong> The data goes to our analytics system automatically.
           </li>
         </ol>
 
-        <div class="bg-blue-50 border border-blue-200 rounded-xl p-6">
-          <h3 class="font-bold text-blue-800 mb-2">Pro Tips</h3>
-          <ul class="list-disc pl-6 text-blue-700 space-y-1">
-            <li>Log outcomes <strong>immediately after the call</strong> while details are fresh</li>
-            <li>Get email addresses when possible — this helps us link phone customers to their online activity</li>
+        <div class="rounded-xl border border-blue-200 bg-blue-50 p-6">
+          <h3 class="mb-2 font-bold text-blue-800">Pro Tips</h3>
+          <ul class="list-disc space-y-1 pl-6 text-blue-700">
+            <li>
+              Log outcomes <strong>immediately after the call</strong> while details are fresh
+            </li>
+            <li>
+              Get email addresses when possible — this helps us link phone customers to their online
+              activity
+            </li>
             <li>If a customer shares specific numbers, those are worth 10x vague feedback</li>
             <li>Mark "Testimonial Offered" whenever someone seems willing to share their story</li>
           </ul>
@@ -125,103 +155,120 @@ const title = "CDP Tools Guide | Admin";
 
       <!-- Surveys Section -->
       <section id="surveys" class="mb-16">
-        <h2 class="text-2xl font-bold mb-4" style="color: var(--color-title);">
+        <h2 class="mb-4 text-2xl font-bold" style="color: var(--color-title);">
           Customer Outcome Surveys
         </h2>
-        <p class="text-gray-600 mb-4">
+        <p class="mb-4 text-gray-600">
           <strong>Who manages this:</strong> Marketing team
         </p>
-        <p class="text-gray-600 mb-6">
-          <strong>How it works:</strong> Automated emails sent via Klaviyo at 30, 60, and 90 days after purchase.
+        <p class="mb-6 text-gray-600">
+          <strong>How it works:</strong> Automated emails sent via Klaviyo at 30, 60, and 90 days after
+          purchase.
         </p>
 
-        <h3 class="text-xl font-bold mb-4" style="color: var(--color-title);">Two Survey Types</h3>
+        <h3 class="mb-4 text-xl font-bold" style="color: var(--color-title);">Two Survey Types</h3>
 
-        <div class="grid md:grid-cols-2 gap-6 mb-6">
-          <div class="bg-amber-50 border border-amber-200 rounded-xl p-6">
-            <h4 class="font-bold text-amber-800 mb-2">Backyard Survey (Betty)</h4>
-            <p class="text-amber-700 text-sm mb-3">
+        <div class="mb-6 grid gap-6 md:grid-cols-2">
+          <div class="rounded-xl border border-amber-200 bg-amber-50 p-6">
+            <h4 class="mb-2 font-bold text-amber-800">Backyard Survey (Betty)</h4>
+            <p class="mb-3 text-sm text-amber-700">
               <a href="/survey/backyard" class="underline">/survey/backyard</a>
             </p>
-            <p class="text-amber-700 text-sm">
-              Asks about flock health, egg production, problem resolution. Simple 1-5 ratings and checkboxes.
-              Takes ~2 minutes.
+            <p class="text-sm text-amber-700">
+              Asks about flock health, egg production, problem resolution. Simple 1-5 ratings and
+              checkboxes. Takes ~2 minutes.
             </p>
           </div>
-          <div class="bg-green-50 border border-green-200 rounded-xl p-6">
-            <h4 class="font-bold text-green-800 mb-2">Commercial Survey (Bill)</h4>
-            <p class="text-green-700 text-sm mb-3">
+          <div class="rounded-xl border border-green-200 bg-green-50 p-6">
+            <h4 class="mb-2 font-bold text-green-800">Commercial Survey (Bill)</h4>
+            <p class="mb-3 text-sm text-green-700">
               <a href="/survey/commercial" class="underline">/survey/commercial</a>
             </p>
-            <p class="text-green-700 text-sm">
-              Asks about FCR, mortality, ROI, settlement impact. Collects actual numbers when possible.
-              Takes ~4 minutes.
+            <p class="text-sm text-green-700">
+              Asks about FCR, mortality, ROI, settlement impact. Collects actual numbers when
+              possible. Takes ~4 minutes.
             </p>
           </div>
         </div>
 
-        <h3 class="text-xl font-bold mb-4" style="color: var(--color-title);">Setting Up Klaviyo Flows</h3>
+        <h3 class="mb-4 text-xl font-bold" style="color: var(--color-title);">
+          Setting Up Klaviyo Flows
+        </h3>
 
-        <p class="text-gray-600 mb-4">
+        <p class="mb-4 text-gray-600">
           To trigger surveys automatically, create Klaviyo flows with these settings:
         </p>
 
-        <div class="bg-gray-50 rounded-xl p-6 mb-6">
-          <h4 class="font-bold mb-3">Flow 1: 30-Day Post-Purchase (Betty)</h4>
-          <ul class="list-disc pl-6 text-gray-600 space-y-1 text-sm">
+        <div class="mb-6 rounded-xl bg-gray-50 p-6">
+          <h4 class="mb-3 font-bold">Flow 1: 30-Day Post-Purchase (Betty)</h4>
+          <ul class="list-disc space-y-1 pl-6 text-sm text-gray-600">
             <li><strong>Trigger:</strong> Placed Order</li>
             <li><strong>Filter:</strong> Order contains "Backyard" product category</li>
             <li><strong>Delay:</strong> 30 days</li>
-            <li><strong>Email CTA Link:</strong> <code class="bg-gray-200 px-2 py-1 rounded">https://southlandorganics.com/survey/backyard?order_id=&#123;&#123;event.order_id&#125;&#125;&email=&#123;&#123;person.email&#125;&#125;</code></li>
+            <li>
+              <strong>Email CTA Link:</strong>
+              <code class="rounded bg-gray-200 px-2 py-1"
+                >https://southlandorganics.com/survey/backyard?order_id=&#123;&#123;event.order_id&#125;&#125;&email=&#123;&#123;person.email&#125;&#125;</code
+              >
+            </li>
           </ul>
         </div>
 
-        <div class="bg-gray-50 rounded-xl p-6 mb-6">
-          <h4 class="font-bold mb-3">Flow 2: 30-Day Post-Purchase (Bill)</h4>
-          <ul class="list-disc pl-6 text-gray-600 space-y-1 text-sm">
+        <div class="mb-6 rounded-xl bg-gray-50 p-6">
+          <h4 class="mb-3 font-bold">Flow 2: 30-Day Post-Purchase (Bill)</h4>
+          <ul class="list-disc space-y-1 pl-6 text-sm text-gray-600">
             <li><strong>Trigger:</strong> Placed Order</li>
-            <li><strong>Filter:</strong> Order contains "Commercial" product category OR order value > $500</li>
+            <li>
+              <strong>Filter:</strong> Order contains "Commercial" product category OR order value > $500
+            </li>
             <li><strong>Delay:</strong> 30 days</li>
-            <li><strong>Email CTA Link:</strong> <code class="bg-gray-200 px-2 py-1 rounded">https://southlandorganics.com/survey/commercial?order_id=&#123;&#123;event.order_id&#125;&#125;&email=&#123;&#123;person.email&#125;&#125;</code></li>
+            <li>
+              <strong>Email CTA Link:</strong>
+              <code class="rounded bg-gray-200 px-2 py-1"
+                >https://southlandorganics.com/survey/commercial?order_id=&#123;&#123;event.order_id&#125;&#125;&email=&#123;&#123;person.email&#125;&#125;</code
+              >
+            </li>
           </ul>
         </div>
 
         <p class="text-gray-600">
-          Repeat for 60-day and 90-day flows. You can also create a one-time campaign to survey existing customers.
+          Repeat for 60-day and 90-day flows. You can also create a one-time campaign to survey
+          existing customers.
         </p>
       </section>
 
       <!-- Decision Engine Section -->
       <section id="decision-engine" class="mb-16">
-        <h2 class="text-2xl font-bold mb-4" style="color: var(--color-title);">
+        <h2 class="mb-4 text-2xl font-bold" style="color: var(--color-title);">
           Decision Engine (Homepage)
         </h2>
-        <p class="text-gray-600 mb-4">
-          <strong>What it is:</strong> The homepage now asks visitors "What best describes you?" and routes them to persona-specific landing pages.
+        <p class="mb-4 text-gray-600">
+          <strong>What it is:</strong> The homepage now asks visitors "What best describes you?" and routes
+          them to persona-specific landing pages.
         </p>
 
-        <div class="grid md:grid-cols-3 gap-4 mb-6">
-          <div class="bg-amber-50 rounded-xl p-4 text-center">
-            <div class="text-2xl mb-2">🐔</div>
+        <div class="mb-6 grid gap-4 md:grid-cols-3">
+          <div class="rounded-xl bg-amber-50 p-4 text-center">
+            <div class="mb-2 text-2xl">🐔</div>
             <div class="font-bold text-amber-800">Backyard Flock</div>
             <div class="text-sm text-amber-600">→ /poultry/backyard/</div>
           </div>
-          <div class="bg-green-50 rounded-xl p-4 text-center">
-            <div class="text-2xl mb-2">🏠</div>
+          <div class="rounded-xl bg-green-50 p-4 text-center">
+            <div class="mb-2 text-2xl">🏠</div>
             <div class="font-bold text-green-800">Commercial Poultry</div>
             <div class="text-sm text-green-600">→ /poultry/commercial/</div>
           </div>
-          <div class="bg-emerald-50 rounded-xl p-4 text-center">
-            <div class="text-2xl mb-2">🌱</div>
+          <div class="rounded-xl bg-emerald-50 p-4 text-center">
+            <div class="mb-2 text-2xl">🌱</div>
             <div class="font-bold text-emerald-800">Lawn & Garden</div>
             <div class="text-sm text-emerald-600">→ /lawn/</div>
           </div>
         </div>
 
-        <p class="text-gray-600 mb-4">
+        <p class="mb-4 text-gray-600">
           <strong>How it works:</strong>
         </p>
-        <ol class="list-decimal pl-6 space-y-2 text-gray-600 mb-6">
+        <ol class="mb-6 list-decimal space-y-2 pl-6 text-gray-600">
           <li>Visitor clicks their persona</li>
           <li>Choice is saved in a cookie (persists for 1 year)</li>
           <li>Event fires to analytics (persona_path_selected)</li>
@@ -229,20 +276,21 @@ const title = "CDP Tools Guide | Admin";
         </ol>
 
         <p class="text-gray-600">
-          <strong>Future enhancement:</strong> Returning visitors will see personalized content throughout the site based on their stored persona.
+          <strong>Future enhancement:</strong> Returning visitors will see personalized content throughout
+          the site based on their stored persona.
         </p>
       </section>
 
       <!-- Personas Section -->
       <section id="personas" class="mb-16">
-        <h2 class="text-2xl font-bold mb-4" style="color: var(--color-title);">
+        <h2 class="mb-4 text-2xl font-bold" style="color: var(--color-title);">
           Understanding Our Personas
         </h2>
 
         <div class="space-y-6">
-          <div class="bg-amber-50 border border-amber-200 rounded-xl p-6">
-            <h3 class="font-bold text-amber-800 text-xl mb-2">Backyard Betty (42% of customers)</h3>
-            <ul class="list-disc pl-6 text-amber-700 space-y-1">
+          <div class="rounded-xl border border-amber-200 bg-amber-50 p-6">
+            <h3 class="mb-2 text-xl font-bold text-amber-800">Backyard Betty (42% of customers)</h3>
+            <ul class="list-disc space-y-1 pl-6 text-amber-700">
               <li><strong>Who:</strong> Hobby chicken keepers, 5-50 birds at home</li>
               <li><strong>Avg LTV:</strong> $77</li>
               <li><strong>Buys:</strong> Small quantities, values "safe & natural"</li>
@@ -251,9 +299,9 @@ const title = "CDP Tools Guide | Admin";
             </ul>
           </div>
 
-          <div class="bg-green-50 border border-green-200 rounded-xl p-6">
-            <h3 class="font-bold text-green-800 text-xl mb-2">Broiler Bill (44% of customers)</h3>
-            <ul class="list-disc pl-6 text-green-700 space-y-1">
+          <div class="rounded-xl border border-green-200 bg-green-50 p-6">
+            <h3 class="mb-2 text-xl font-bold text-green-800">Broiler Bill (44% of customers)</h3>
+            <ul class="list-disc space-y-1 pl-6 text-green-700">
               <li><strong>Who:</strong> Commercial poultry farmers, contract growers</li>
               <li><strong>Avg LTV:</strong> $903</li>
               <li><strong>Buys:</strong> Bulk quantities, needs proven ROI</li>
@@ -262,9 +310,11 @@ const title = "CDP Tools Guide | Admin";
             </ul>
           </div>
 
-          <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-6">
-            <h3 class="font-bold text-emerald-800 text-xl mb-2">Turf Pro Taylor (8% of customers)</h3>
-            <ul class="list-disc pl-6 text-emerald-700 space-y-1">
+          <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-6">
+            <h3 class="mb-2 text-xl font-bold text-emerald-800">
+              Turf Pro Taylor (8% of customers)
+            </h3>
+            <ul class="list-disc space-y-1 pl-6 text-emerald-700">
               <li><strong>Who:</strong> Lawn care enthusiasts, landscapers</li>
               <li><strong>Buys:</strong> Soil amendments, organic lawn products</li>
               <li><strong>Outcome we track:</strong> Lawn health improvement</li>
@@ -276,28 +326,32 @@ const title = "CDP Tools Guide | Admin";
 
       <!-- FAQ Section -->
       <section id="faq" class="mb-16">
-        <h2 class="text-2xl font-bold mb-4" style="color: var(--color-title);">
+        <h2 class="mb-4 text-2xl font-bold" style="color: var(--color-title);">
           Frequently Asked Questions
         </h2>
 
         <div class="space-y-6">
           <div>
-            <h3 class="font-bold text-gray-900 mb-2">Where does the data go?</h3>
+            <h3 class="mb-2 font-bold text-gray-900">Where does the data go?</h3>
             <p class="text-gray-600">
-              All data flows to BigQuery (our data warehouse) where it's combined with Shopify orders,
-              website analytics, and email engagement to build a complete picture of each customer.
+              All data flows to BigQuery (our data warehouse) where it's combined with Shopify
+              orders, website analytics, and email engagement to build a complete picture of each
+              customer.
             </p>
           </div>
 
           <div>
-            <h3 class="font-bold text-gray-900 mb-2">How do I see the results?</h3>
+            <h3 class="mb-2 font-bold text-gray-900">How do I see the results?</h3>
             <p class="text-gray-600">
-              Dashboards coming soon. For now, ask Mike or check the BigQuery console if you have access.
+              Dashboards coming soon. For now, ask Mike or check the BigQuery console if you have
+              access.
             </p>
           </div>
 
           <div>
-            <h3 class="font-bold text-gray-900 mb-2">What if a customer doesn't want to fill out a survey?</h3>
+            <h3 class="mb-2 font-bold text-gray-900">
+              What if a customer doesn't want to fill out a survey?
+            </h3>
             <p class="text-gray-600">
               That's fine — surveys are optional. But if you're on the phone and they share results,
               log it in the Sales Outcome Log. Every data point helps.
@@ -305,46 +359,58 @@ const title = "CDP Tools Guide | Admin";
           </div>
 
           <div>
-            <h3 class="font-bold text-gray-900 mb-2">Can I see what persona a specific customer is?</h3>
+            <h3 class="mb-2 font-bold text-gray-900">
+              Can I see what persona a specific customer is?
+            </h3>
             <p class="text-gray-600">
-              Not yet in a user-friendly way. This is coming. For now, you can infer from their purchase history
-              (commercial products = Bill, backyard products = Betty).
+              Not yet in a user-friendly way. This is coming. For now, you can infer from their
+              purchase history (commercial products = Bill, backyard products = Betty).
             </p>
           </div>
 
           <div>
-            <h3 class="font-bold text-gray-900 mb-2">What should I do if I find a great testimonial candidate?</h3>
+            <h3 class="mb-2 font-bold text-gray-900">
+              What should I do if I find a great testimonial candidate?
+            </h3>
             <p class="text-gray-600">
-              Mark "Testimonial Offered" in the Sales Log, add their contact info, and let Marketing know.
-              We'll follow up to get a proper case study.
+              Mark "Testimonial Offered" in the Sales Log, add their contact info, and let Marketing
+              know. We'll follow up to get a proper case study.
             </p>
           </div>
         </div>
       </section>
 
       <!-- Quick Links -->
-      <section class="bg-gray-100 rounded-xl p-6">
-        <h2 class="text-xl font-bold mb-4" style="color: var(--color-title);">Quick Links</h2>
-        <div class="grid md:grid-cols-2 gap-4">
-          <a href="/admin/sales-log" class="block p-4 bg-white rounded-lg hover:shadow-md transition-shadow">
+      <section class="rounded-xl bg-gray-100 p-6">
+        <h2 class="mb-4 text-xl font-bold" style="color: var(--color-title);">Quick Links</h2>
+        <div class="grid gap-4 md:grid-cols-2">
+          <a
+            href="/admin/sales-log"
+            class="block rounded-lg bg-white p-4 transition-shadow hover:shadow-md"
+          >
             <span class="font-semibold text-green-600">Sales Outcome Log →</span>
             <span class="block text-sm text-gray-500">Log phone call outcomes</span>
           </a>
-          <a href="/survey/backyard" class="block p-4 bg-white rounded-lg hover:shadow-md transition-shadow">
+          <a
+            href="/survey/backyard"
+            class="block rounded-lg bg-white p-4 transition-shadow hover:shadow-md"
+          >
             <span class="font-semibold text-green-600">Backyard Survey →</span>
             <span class="block text-sm text-gray-500">Preview Betty's survey</span>
           </a>
-          <a href="/survey/commercial" class="block p-4 bg-white rounded-lg hover:shadow-md transition-shadow">
+          <a
+            href="/survey/commercial"
+            class="block rounded-lg bg-white p-4 transition-shadow hover:shadow-md"
+          >
             <span class="font-semibold text-green-600">Commercial Survey →</span>
             <span class="block text-sm text-gray-500">Preview Bill's survey</span>
           </a>
-          <a href="/" class="block p-4 bg-white rounded-lg hover:shadow-md transition-shadow">
+          <a href="/" class="block rounded-lg bg-white p-4 transition-shadow hover:shadow-md">
             <span class="font-semibold text-green-600">Homepage (Decision Engine) →</span>
             <span class="block text-sm text-gray-500">See the persona selector</span>
           </a>
         </div>
       </section>
-
     </div>
   </div>
 </AdminLayout>

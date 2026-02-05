@@ -12,25 +12,26 @@
 
 interface Props {
   /** Heading text */
-  heading?: string;
+  heading?: string
   /** Show bundles first */
-  showBundles?: boolean;
+  showBundles?: boolean
   /** Additional CSS classes */
-  class?: string;
+  class?: string
 }
 
 const {
   heading = 'Perfect for Your Backyard Flock',
   showBundles = true,
   class: className = '',
-} = Astro.props;
+} = Astro.props
 
 // Betty-recommended products (smaller sizes, bundles, beginner-friendly)
 const products = [
   {
     id: 'starter-bundle',
     name: 'Backyard Starter Bundle',
-    description: 'Everything you need to get started with a healthy flock. Includes Hen Helper, Big Ole Bird, and a getting-started guide.',
+    description:
+      'Everything you need to get started with a healthy flock. Includes Hen Helper, Big Ole Bird, and a getting-started guide.',
     price: '$59.99',
     originalPrice: '$74.99',
     savings: 'Save 20%',
@@ -42,7 +43,8 @@ const products = [
   {
     id: 'hen-helper-16oz',
     name: 'Hen Helper (16 oz)',
-    description: 'Our #1 bestseller for backyard flocks. Supports gut health, feather quality, and egg production naturally.',
+    description:
+      'Our #1 bestseller for backyard flocks. Supports gut health, feather quality, and egg production naturally.',
     price: '$24.99',
     image: '/images/products/hen-helper-16oz.jpg',
     href: '/products/hen-helper/',
@@ -52,7 +54,8 @@ const products = [
   {
     id: 'big-ole-bird-16oz',
     name: 'Big Ole Bird (16 oz)',
-    description: 'Probiotic supplement for overall health and vitality. Perfect for maintaining a thriving backyard flock.',
+    description:
+      'Probiotic supplement for overall health and vitality. Perfect for maintaining a thriving backyard flock.',
     price: '$22.99',
     image: '/images/products/big-ole-bird-16oz.jpg',
     href: '/products/big-ole-bird/',
@@ -62,19 +65,20 @@ const products = [
   {
     id: 'coop-care-kit',
     name: 'Coop Care Kit',
-    description: 'Keep your coop clean and fresh with our organic coop treatment bundle. Reduces odors and promotes a healthy environment.',
+    description:
+      'Keep your coop clean and fresh with our organic coop treatment bundle. Reduces odors and promotes a healthy environment.',
     price: '$34.99',
     image: '/images/products/coop-care-kit.jpg',
     href: '/products/coop-care-kit/',
     badge: 'Popular',
     isBundle: true,
   },
-];
+]
 
 // Sort bundles first if enabled
 const sortedProducts = showBundles
   ? [...products].sort((a, b) => (b.isBundle ? 1 : 0) - (a.isBundle ? 1 : 0))
-  : products;
+  : products
 ---
 
 <section class:list={['betty-products', className]}>
@@ -87,38 +91,34 @@ const sortedProducts = showBundles
     </div>
 
     <div class="betty-products__grid">
-      {sortedProducts.map((product) => (
-        <a href={product.href} class="product-card" data-product-id={product.id}>
-          <div class="product-card__image">
-            {product.badge && (
-              <span class="product-card__badge">{product.badge}</span>
-            )}
-            <div class="product-card__image-placeholder">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <polyline points="21 15 16 10 5 21"/>
-              </svg>
+      {
+        sortedProducts.map((product) => (
+          <a href={product.href} class="product-card" data-product-id={product.id}>
+            <div class="product-card__image">
+              {product.badge && <span class="product-card__badge">{product.badge}</span>}
+              <div class="product-card__image-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21 15 16 10 5 21" />
+                </svg>
+              </div>
             </div>
-          </div>
-          <div class="product-card__content">
-            <h3 class="product-card__name">{product.name}</h3>
-            <p class="product-card__description">{product.description}</p>
-            <div class="product-card__pricing">
-              <span class="product-card__price">{product.price}</span>
-              {product.originalPrice && (
-                <span class="product-card__original-price">{product.originalPrice}</span>
-              )}
-              {product.savings && (
-                <span class="product-card__savings">{product.savings}</span>
-              )}
+            <div class="product-card__content">
+              <h3 class="product-card__name">{product.name}</h3>
+              <p class="product-card__description">{product.description}</p>
+              <div class="product-card__pricing">
+                <span class="product-card__price">{product.price}</span>
+                {product.originalPrice && (
+                  <span class="product-card__original-price">{product.originalPrice}</span>
+                )}
+                {product.savings && <span class="product-card__savings">{product.savings}</span>}
+              </div>
+              <span class="product-card__cta">View Product →</span>
             </div>
-            <span class="product-card__cta">
-              View Product →
-            </span>
-          </div>
-        </a>
-      ))}
+          </a>
+        ))
+      }
     </div>
 
     <div class="betty-products__footer">
@@ -301,14 +301,14 @@ const sortedProducts = showBundles
   // Track product card clicks
   document.querySelectorAll('.product-card').forEach((card) => {
     card.addEventListener('click', () => {
-      const productId = card.getAttribute('data-product-id');
+      const productId = card.getAttribute('data-product-id')
       if (window.pdPixel && productId) {
         window.pdPixel.track('product_clicked', {
           tunnel: 'betty',
           product_id: productId,
           source: 'betty_products_section',
-        });
+        })
       }
-    });
-  });
+    })
+  })
 </script>
