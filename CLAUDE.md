@@ -249,9 +249,58 @@ southland-platform/
 pnpm install              # Install all dependencies
 pnpm dev                  # Start all apps in dev mode
 pnpm build                # Build all packages and apps
+pnpm lint                 # Lint all apps/packages
+pnpm format               # Format all code
+pnpm check                # Full quality check (lint + typecheck + format)
 pnpm --filter @southland/astro-content dev    # Start just Astro
 pnpm --filter @southland/ui-schema build      # Build just ui-schema
 ```
+
+---
+
+## Developer Tooling (Feb 2026)
+
+### ESLint
+
+- **Config**: ESLint 9 flat config per app/package
+- **Files**: `eslint.config.js` in each app/package
+- **TypeScript**: `@typescript-eslint/eslint-plugin`
+- **Astro files**: Excluded from ESLint (use `astro check` instead)
+
+### Prettier
+
+- **Style**: No semicolons, single quotes, trailing commas
+- **Plugins**: `prettier-plugin-astro`, `prettier-plugin-tailwindcss`
+- **Root config**: `.prettierrc`
+- **Astro config**: `apps/astro-content/.prettierrc` (local plugins)
+
+### Files Excluded from Prettier
+
+Some Astro files have HTML comments in JSX expressions that the parser can't handle:
+- `CloudinaryImage.astro`, `CloudinaryHero.astro`, `CloudinaryGallery.astro`
+- `BaseLayout.astro`, `DecisionEngine.astro`, `RealityTunnel.astro`
+- `AuthorCard.astro`, `BlogCard.astro`, `TeamCard.astro`, `search.astro`
+
+Listed in `apps/astro-content/.prettierignore`
+
+### CI Quality Gate
+
+`.github/workflows/quality.yml` runs on push/PR to main:
+1. `pnpm lint` - ESLint all packages
+2. `pnpm typecheck` - TypeScript + Astro check
+3. `pnpm format:check` - Prettier verification
+
+### Turbo Tasks
+
+| Task | Caching | Description |
+|------|---------|-------------|
+| `build` | ✅ | Build all packages |
+| `lint` | ✅ | ESLint all packages |
+| `typecheck` | ✅ | Type checking |
+| `format` | ❌ | Prettier write |
+| `format:check` | ✅ | Prettier check |
+
+---
 
 ## Apps
 
