@@ -1,6 +1,6 @@
 # Architecture
 
-Technical architecture for the Southland Content layer.
+Technical architecture for the Southland Platform astro-content app.
 
 ## Hybrid Architecture
 
@@ -43,16 +43,17 @@ This repo is part of a "fake headless" approach where Cloudflare sits in front o
 | Layer | Technology |
 |-------|------------|
 | Framework | Astro 5 (static site generation) |
-| Content | MDX with content collections |
+| Content CMS | TinaCMS (Git-backed, migrated from Keystatic Feb 2026) |
+| Content Format | MDX with content collections |
 | Styling | Tailwind CSS 3 with brand tokens |
 | Types | TypeScript |
 | Hosting | Cloudflare Pages |
-| Routing | Cloudflare Worker (future) |
+| Routing | Cloudflare Pages middleware (`functions/_middleware.ts`) |
 
 ## Project Structure
 
 ```
-southland-content/
+apps/astro-content/
 ├── .claude-context.md        # Quick reference for Claude
 ├── astro.config.mjs          # Astro configuration
 ├── tailwind.config.mjs       # Tailwind with brand tokens
@@ -159,16 +160,15 @@ const products = await findRelatedProducts(episodeEmbedding, { matchCount: 3 });
 
 ## Content Collections
 
-Six collections defined in `src/content/config.ts`:
+Five collections defined in TinaCMS (`tina/config.ts`):
 
 | Collection | Purpose | Status |
 |------------|---------|--------|
-| `episodes` | Podcast episodes with full metadata | Active |
+| `episodes` | Podcast episodes with full metadata | Active (1 episode) |
 | `guests` | Guest directory | Active |
 | `topics` | Shared taxonomy | Active |
-| `blog` | Blog posts | Future |
-| `team` | Team members | Future |
-| `products` | Shopify product enrichment | Future |
+| `blog` | Blog posts (287 migrated from Shopify) | Active |
+| `team` | Team member profiles | Active |
 
 ### Episode Schema
 
@@ -182,7 +182,7 @@ Six collections defined in `src/content/config.ts`:
   longDescription?: string,
 
   // Media
-  gumletId?: string,        // Video embed
+  muxPlaybackId?: string,   // Mux video playback ID
   audioUrl?: string,        // For RSS
   youtubeUrl?: string,
   applePodcastUrl?: string,
@@ -238,7 +238,7 @@ Six collections defined in `src/content/config.ts`:
 }
 ```
 
-### Blog Schema (Future)
+### Blog Schema (Active — 287 posts)
 
 ```typescript
 {
@@ -255,7 +255,7 @@ Six collections defined in `src/content/config.ts`:
 }
 ```
 
-### Team Schema (Future)
+### Team Schema (Active)
 
 ```typescript
 {

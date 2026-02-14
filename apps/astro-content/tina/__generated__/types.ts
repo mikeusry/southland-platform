@@ -247,6 +247,7 @@ export type Blog = Node & Document & {
   reviewer?: Maybe<Scalars['String']['output']>;
   tags?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   segment?: Maybe<Scalars['String']['output']>;
+  targetKeyword?: Maybe<Scalars['String']['output']>;
   featuredImage?: Maybe<Scalars['String']['output']>;
   draft?: Maybe<Scalars['Boolean']['output']>;
   shopifyId?: Maybe<Scalars['Float']['output']>;
@@ -302,6 +303,7 @@ export type BlogFilter = {
   reviewer?: InputMaybe<StringFilter>;
   tags?: InputMaybe<StringFilter>;
   segment?: InputMaybe<StringFilter>;
+  targetKeyword?: InputMaybe<StringFilter>;
   featuredImage?: InputMaybe<StringFilter>;
   draft?: InputMaybe<BooleanFilter>;
   shopifyId?: InputMaybe<NumberFilter>;
@@ -398,7 +400,7 @@ export type Episodes = Node & Document & {
   publishDate: Scalars['String']['output'];
   description: Scalars['String']['output'];
   longDescription?: Maybe<Scalars['String']['output']>;
-  gumletId?: Maybe<Scalars['String']['output']>;
+  muxPlaybackId?: Maybe<Scalars['String']['output']>;
   audioUrl?: Maybe<Scalars['String']['output']>;
   youtubeUrl?: Maybe<Scalars['String']['output']>;
   applePodcastUrl?: Maybe<Scalars['String']['output']>;
@@ -421,7 +423,7 @@ export type EpisodesFilter = {
   publishDate?: InputMaybe<DatetimeFilter>;
   description?: InputMaybe<StringFilter>;
   longDescription?: InputMaybe<StringFilter>;
-  gumletId?: InputMaybe<StringFilter>;
+  muxPlaybackId?: InputMaybe<StringFilter>;
   audioUrl?: InputMaybe<StringFilter>;
   youtubeUrl?: InputMaybe<StringFilter>;
   applePodcastUrl?: InputMaybe<StringFilter>;
@@ -672,6 +674,7 @@ export type BlogMutation = {
   reviewer?: InputMaybe<Scalars['String']['input']>;
   tags?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   segment?: InputMaybe<Scalars['String']['input']>;
+  targetKeyword?: InputMaybe<Scalars['String']['input']>;
   featuredImage?: InputMaybe<Scalars['String']['input']>;
   draft?: InputMaybe<Scalars['Boolean']['input']>;
   shopifyId?: InputMaybe<Scalars['Float']['input']>;
@@ -711,7 +714,7 @@ export type EpisodesMutation = {
   publishDate?: InputMaybe<Scalars['String']['input']>;
   description?: InputMaybe<Scalars['String']['input']>;
   longDescription?: InputMaybe<Scalars['String']['input']>;
-  gumletId?: InputMaybe<Scalars['String']['input']>;
+  muxPlaybackId?: InputMaybe<Scalars['String']['input']>;
   audioUrl?: InputMaybe<Scalars['String']['input']>;
   youtubeUrl?: InputMaybe<Scalars['String']['input']>;
   applePodcastUrl?: InputMaybe<Scalars['String']['input']>;
@@ -750,11 +753,11 @@ export type TopicsMutation = {
   body?: InputMaybe<Scalars['JSON']['input']>;
 };
 
-export type BlogPartsFragment = { __typename: 'Blog', title: string, publishDate: string, updatedDate?: string | null, description: string, author?: string | null, reviewer?: string | null, tags?: Array<string | null> | null, segment?: string | null, featuredImage?: string | null, draft?: boolean | null, shopifyId?: number | null, shopifyHandle?: string | null, body?: any | null };
+export type BlogPartsFragment = { __typename: 'Blog', title: string, publishDate: string, updatedDate?: string | null, description: string, author?: string | null, reviewer?: string | null, tags?: Array<string | null> | null, segment?: string | null, targetKeyword?: string | null, featuredImage?: string | null, draft?: boolean | null, shopifyId?: number | null, shopifyHandle?: string | null, body?: any | null };
 
 export type TeamPartsFragment = { __typename: 'Team', name: string, role: string, bio: string, photo?: string | null, email?: string | null, phone?: string | null, credentials?: Array<string | null> | null, expertiseAreas?: Array<string | null> | null, yearsExperience?: number | null, isAuthor?: boolean | null, isReviewer?: boolean | null, order?: number | null, featured?: boolean | null, active?: boolean | null, body?: any | null, links?: { __typename: 'TeamLinks', linkedin?: string | null, twitter?: string | null, website?: string | null } | null };
 
-export type EpisodesPartsFragment = { __typename: 'Episodes', title: string, episodeNumber: number, season?: number | null, publishDate: string, description: string, longDescription?: string | null, gumletId?: string | null, audioUrl?: string | null, youtubeUrl?: string | null, applePodcastUrl?: string | null, spotifyUrl?: string | null, thumbnail?: string | null, duration: string, durationSeconds: number, topics?: Array<string | null> | null, draft?: boolean | null, body?: any | null };
+export type EpisodesPartsFragment = { __typename: 'Episodes', title: string, episodeNumber: number, season?: number | null, publishDate: string, description: string, longDescription?: string | null, muxPlaybackId?: string | null, audioUrl?: string | null, youtubeUrl?: string | null, applePodcastUrl?: string | null, spotifyUrl?: string | null, thumbnail?: string | null, duration: string, durationSeconds: number, topics?: Array<string | null> | null, draft?: boolean | null, body?: any | null };
 
 export type GuestsPartsFragment = { __typename: 'Guests', name: string, role?: string | null, company?: string | null, bio: string, photo?: string | null, featured?: boolean | null, body?: any | null, links?: { __typename: 'GuestsLinks', website?: string | null, linkedin?: string | null, twitter?: string | null, instagram?: string | null } | null };
 
@@ -765,7 +768,7 @@ export type BlogQueryVariables = Exact<{
 }>;
 
 
-export type BlogQuery = { __typename?: 'Query', blog: { __typename: 'Blog', id: string, title: string, publishDate: string, updatedDate?: string | null, description: string, author?: string | null, reviewer?: string | null, tags?: Array<string | null> | null, segment?: string | null, featuredImage?: string | null, draft?: boolean | null, shopifyId?: number | null, shopifyHandle?: string | null, body?: any | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } };
+export type BlogQuery = { __typename?: 'Query', blog: { __typename: 'Blog', id: string, title: string, publishDate: string, updatedDate?: string | null, description: string, author?: string | null, reviewer?: string | null, tags?: Array<string | null> | null, segment?: string | null, targetKeyword?: string | null, featuredImage?: string | null, draft?: boolean | null, shopifyId?: number | null, shopifyHandle?: string | null, body?: any | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } };
 
 export type BlogConnectionQueryVariables = Exact<{
   before?: InputMaybe<Scalars['String']['input']>;
@@ -777,7 +780,7 @@ export type BlogConnectionQueryVariables = Exact<{
 }>;
 
 
-export type BlogConnectionQuery = { __typename?: 'Query', blogConnection: { __typename?: 'BlogConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'BlogConnectionEdges', cursor: string, node?: { __typename: 'Blog', id: string, title: string, publishDate: string, updatedDate?: string | null, description: string, author?: string | null, reviewer?: string | null, tags?: Array<string | null> | null, segment?: string | null, featuredImage?: string | null, draft?: boolean | null, shopifyId?: number | null, shopifyHandle?: string | null, body?: any | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } };
+export type BlogConnectionQuery = { __typename?: 'Query', blogConnection: { __typename?: 'BlogConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'BlogConnectionEdges', cursor: string, node?: { __typename: 'Blog', id: string, title: string, publishDate: string, updatedDate?: string | null, description: string, author?: string | null, reviewer?: string | null, tags?: Array<string | null> | null, segment?: string | null, targetKeyword?: string | null, featuredImage?: string | null, draft?: boolean | null, shopifyId?: number | null, shopifyHandle?: string | null, body?: any | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } };
 
 export type TeamQueryVariables = Exact<{
   relativePath: Scalars['String']['input'];
@@ -803,7 +806,7 @@ export type EpisodesQueryVariables = Exact<{
 }>;
 
 
-export type EpisodesQuery = { __typename?: 'Query', episodes: { __typename: 'Episodes', id: string, title: string, episodeNumber: number, season?: number | null, publishDate: string, description: string, longDescription?: string | null, gumletId?: string | null, audioUrl?: string | null, youtubeUrl?: string | null, applePodcastUrl?: string | null, spotifyUrl?: string | null, thumbnail?: string | null, duration: string, durationSeconds: number, topics?: Array<string | null> | null, draft?: boolean | null, body?: any | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } };
+export type EpisodesQuery = { __typename?: 'Query', episodes: { __typename: 'Episodes', id: string, title: string, episodeNumber: number, season?: number | null, publishDate: string, description: string, longDescription?: string | null, muxPlaybackId?: string | null, audioUrl?: string | null, youtubeUrl?: string | null, applePodcastUrl?: string | null, spotifyUrl?: string | null, thumbnail?: string | null, duration: string, durationSeconds: number, topics?: Array<string | null> | null, draft?: boolean | null, body?: any | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } };
 
 export type EpisodesConnectionQueryVariables = Exact<{
   before?: InputMaybe<Scalars['String']['input']>;
@@ -815,7 +818,7 @@ export type EpisodesConnectionQueryVariables = Exact<{
 }>;
 
 
-export type EpisodesConnectionQuery = { __typename?: 'Query', episodesConnection: { __typename?: 'EpisodesConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'EpisodesConnectionEdges', cursor: string, node?: { __typename: 'Episodes', id: string, title: string, episodeNumber: number, season?: number | null, publishDate: string, description: string, longDescription?: string | null, gumletId?: string | null, audioUrl?: string | null, youtubeUrl?: string | null, applePodcastUrl?: string | null, spotifyUrl?: string | null, thumbnail?: string | null, duration: string, durationSeconds: number, topics?: Array<string | null> | null, draft?: boolean | null, body?: any | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } };
+export type EpisodesConnectionQuery = { __typename?: 'Query', episodesConnection: { __typename?: 'EpisodesConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'EpisodesConnectionEdges', cursor: string, node?: { __typename: 'Episodes', id: string, title: string, episodeNumber: number, season?: number | null, publishDate: string, description: string, longDescription?: string | null, muxPlaybackId?: string | null, audioUrl?: string | null, youtubeUrl?: string | null, applePodcastUrl?: string | null, spotifyUrl?: string | null, thumbnail?: string | null, duration: string, durationSeconds: number, topics?: Array<string | null> | null, draft?: boolean | null, body?: any | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } };
 
 export type GuestsQueryVariables = Exact<{
   relativePath: Scalars['String']['input'];
@@ -866,6 +869,7 @@ export const BlogPartsFragmentDoc = gql`
   reviewer
   tags
   segment
+  targetKeyword
   featuredImage
   draft
   shopifyId
@@ -908,7 +912,7 @@ export const EpisodesPartsFragmentDoc = gql`
   publishDate
   description
   longDescription
-  gumletId
+  muxPlaybackId
   audioUrl
   youtubeUrl
   applePodcastUrl

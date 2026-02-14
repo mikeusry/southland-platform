@@ -115,6 +115,12 @@ export default defineConfig({
           },
           {
             type: "string",
+            name: "targetKeyword",
+            label: "Target Keyword",
+            description: "Primary SEO keyword for this post (used by content quality scoring)",
+          },
+          {
+            type: "string",
             name: "featuredImage",
             label: "Featured Image URL",
           },
@@ -335,8 +341,8 @@ export default defineConfig({
           },
           {
             type: "string",
-            name: "gumletId",
-            label: "Gumlet Video ID",
+            name: "muxPlaybackId",
+            label: "Mux Playback ID",
           },
           {
             type: "string",

@@ -32,7 +32,8 @@ const {
 } = Astro.props
 
 const episodeUrl = `/podcast/${slug}/`
-const defaultThumbnail = '/images/podcast/episodes/default.jpg'
+// SVG data URI fallback — no external file dependency
+const defaultThumbnail = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" fill="none"><rect width="640" height="360" fill="%23f3f4f6"/><circle cx="320" cy="150" r="40" fill="%2344883e" opacity="0.2"/><path d="M308 130v40l30-20z" fill="%2344883e"/><text x="320" y="230" text-anchor="middle" fill="%2344883e" font-family="system-ui" font-size="16" font-weight="600">Southland Podcast</text></svg>')}`
 
 // Format date
 const formattedDate = new Intl.DateTimeFormat('en-US', {
@@ -43,7 +44,7 @@ const formattedDate = new Intl.DateTimeFormat('en-US', {
 ---
 
 <article
-  class={`episode-card bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden ${featured ? 'md:flex md:gap-0' : ''} ${className}`}
+  class={`episode-card bg-white rounded-xl shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden ${featured ? 'md:flex md:gap-0' : ''} ${className}`}
   data-episode-number={episodeNumber}
 >
   {/* Thumbnail */}
@@ -65,7 +66,7 @@ const formattedDate = new Intl.DateTimeFormat('en-US', {
       class="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity group-hover:opacity-100"
     >
       <div class="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 shadow-lg">
-        <svg class="ml-1 h-6 w-6 text-emerald-700" fill="currentColor" viewBox="0 0 24 24">
+        <svg class="ml-1 h-6 w-6 text-southland-green" fill="currentColor" viewBox="0 0 24 24">
           <path d="M8 5v14l11-7z"></path>
         </svg>
       </div>
@@ -85,14 +86,14 @@ const formattedDate = new Intl.DateTimeFormat('en-US', {
   >
     {/* Episode number and date */}
     <div class="mb-2 flex items-center gap-2 text-sm text-gray-500">
-      <span class="font-semibold text-emerald-700">EP {episodeNumber}</span>
+      <span class="font-semibold text-southland-green">EP {episodeNumber}</span>
       <span>•</span>
       <time datetime={publishDate.toISOString()}>{formattedDate}</time>
     </div>
 
     {/* Title */}
     <h3 class={`font-bold text-gray-900 mb-2 line-clamp-2 ${featured ? 'text-2xl' : 'text-lg'}`}>
-      <a href={episodeUrl} class="transition-colors hover:text-emerald-700">
+      <a href={episodeUrl} class="transition-colors hover:text-southland-green">
         {title}
       </a>
     </h3>
@@ -121,7 +122,7 @@ const formattedDate = new Intl.DateTimeFormat('en-US', {
       featured && (
         <a
           href={episodeUrl}
-          class="mt-4 inline-flex items-center gap-2 font-semibold text-emerald-700 transition-colors hover:text-emerald-800"
+          class="mt-4 inline-flex items-center gap-2 font-semibold text-southland-green transition-colors hover:text-southland-green-dark"
         >
           Listen Now
           <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -61,7 +61,7 @@ function formatTime(seconds: number): string {
         <label class="mb-1 block text-xs font-medium text-gray-500">Start Time</label>
         <input
           type="text"
-          class="start-time-input w-full rounded-lg border border-gray-200 px-3 py-2 text-center font-mono text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          class="start-time-input w-full rounded-lg border border-gray-200 px-3 py-2 text-center font-mono text-sm focus:border-southland-green focus:outline-none focus:ring-2 focus:ring-southland-green"
           placeholder="0:00"
           value="0:00"
         />
@@ -70,7 +70,7 @@ function formatTime(seconds: number): string {
         <label class="mb-1 block text-xs font-medium text-gray-500">End Time</label>
         <input
           type="text"
-          class="end-time-input w-full rounded-lg border border-gray-200 px-3 py-2 text-center font-mono text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          class="end-time-input w-full rounded-lg border border-gray-200 px-3 py-2 text-center font-mono text-sm focus:border-southland-green focus:outline-none focus:ring-2 focus:ring-southland-green"
           placeholder="0:30"
           value="0:30"
         />
@@ -100,7 +100,7 @@ function formatTime(seconds: number): string {
       />
       <button
         type="button"
-        class="copy-url-btn rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+        class="copy-url-btn rounded-lg bg-southland-green px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-southland-green-dark"
       >
         Copy
       </button>
@@ -225,7 +225,7 @@ function formatTime(seconds: number): string {
         setTimeout(() => successToast?.classList.add('hidden'), 2000)
 
         // Track share clip
-        if (window.pdPixel) {
+        if (window.pdPixel?.track) {
           window.pdPixel.track('podcast_share_clip', {
             episode_slug: episodeSlug,
             episode_number: episodeNumber,
@@ -259,7 +259,7 @@ function formatTime(seconds: number): string {
     })
 
     function trackShare(platform: string) {
-      if (window.pdPixel) {
+      if (window.pdPixel?.track) {
         window.pdPixel.track('podcast_share_clip', {
           episode_slug: episodeSlug,
           episode_number: episodeNumber,

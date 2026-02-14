@@ -1,5 +1,5 @@
 {
-  "name": "southland-platform",
+  "name": "@southland/shopify-app",
   "private": true,
   "scripts": {
     "build": "remix vite:build",

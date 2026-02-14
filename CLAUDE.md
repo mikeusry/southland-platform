@@ -22,7 +22,7 @@ Monorepo for Southland Organics digital platform.
 | Layer | Technology |
 |-------|------------|
 | Frontend | Astro (static site generation) |
-| Content CMS | Keystatic (Git-backed, visual Markdown editor) |
+| Content CMS | TinaCMS (Git-backed, visual editor) |
 | Commerce Backend | Shopify Storefront API (products, cart, checkout) |
 | Images | Cloudinary CDN |
 | Hosting | Cloudflare Pages |
@@ -44,7 +44,7 @@ Monorepo for Southland Organics digital platform.
 │                                                                     │
 │  ┌─────────────────────────────────────────────────────────────┐   │
 │  │                    /collections/[slug]/                      │   │
-│  │         SEO Content (Keystatic) + Products (Shopify)         │   │
+│  │         SEO Content (TinaCMS) + Products (Shopify)           │   │
 │  └─────────────────────────────────────────────────────────────┘   │
 │                                                                     │
 │  ┌─────────────────────────────────────────────────────────────┐   │
@@ -63,8 +63,8 @@ Monorepo for Southland Organics digital platform.
         │                   │                   │
         ▼                   ▼                   ▼
 ┌───────────────┐   ┌───────────────┐   ┌───────────────┐
-│   KEYSTATIC   │   │   SHOPIFY     │   │  CLOUDINARY   │
-│   /keystatic  │   │  Storefront   │   │     CDN       │
+│   TINACMS     │   │   SHOPIFY     │   │  CLOUDINARY   │
+│   /admin      │   │  Storefront   │   │     CDN       │
 │               │   │     API       │   │               │
 │  • Blog       │   │  • Products   │   │  • Images     │
 │  • Episodes   │   │  • Cart       │   │  • Podcast    │
@@ -89,11 +89,11 @@ Monorepo for Southland Organics digital platform.
 | Inventory | Shopify | Shopify Admin | Operations |
 | Orders | Shopify | Shopify Admin | Operations |
 | Collections (products) | Shopify | Shopify Admin | Operations |
-| Collection SEO content | Keystatic | /keystatic | Marketing |
-| Blog posts | Keystatic | /keystatic | Marketing |
-| Podcast episodes | Keystatic | /keystatic | Marketing |
-| Static pages | Keystatic | /keystatic | Marketing |
-| Team bios | Keystatic | /keystatic | Marketing |
+| Collection SEO content | TinaCMS | /admin | Marketing |
+| Blog posts | TinaCMS | /admin | Marketing |
+| Podcast episodes | TinaCMS | /admin | Marketing |
+| Static pages | TinaCMS | /admin | Marketing |
+| Team bios | TinaCMS | /admin | Marketing |
 | Navigation menus | Shopify | Shopify Admin | Operations |
 | Images | Cloudinary | Cloudinary | Anyone |
 
@@ -101,18 +101,19 @@ Monorepo for Southland Organics digital platform.
 
 | URL Pattern | Source | Notes |
 |-------------|--------|-------|
-| `/` | Astro + Keystatic | Homepage |
-| `/podcast/` | Astro + Keystatic | Podcast hub |
-| `/podcast/[slug]/` | Astro + Keystatic | Episode pages |
-| `/blog/` | Astro + Keystatic | Blog index |
-| `/blog/[slug]/` | Astro + Keystatic | Blog posts |
+| `/` | Astro + TinaCMS | Homepage |
+| `/podcast/` | Astro + TinaCMS | Podcast hub |
+| `/podcast/[slug]/` | Astro + TinaCMS | Episode pages |
+| `/blog/` | Astro + TinaCMS | Blog index (287 posts migrated) |
+| `/blog/[slug]/` | Astro + TinaCMS | Blog posts |
 | `/collections/` | Astro | Collections index |
-| `/collections/[slug]/` | Astro + Keystatic + Shopify | Collection pages |
+| `/collections/[slug]/` | Astro + TinaCMS + Shopify | Collection pages |
 | `/products/[handle]/` | Astro + Shopify | Product pages |
+| `/build-a-case/` | Astro + Shopify Storefront API | Mix & Match gallon case builder |
 | `/cart/` | Astro (client-side) | Cart page |
-| `/about/` | Astro + Keystatic | About page |
-| `/contact/` | Astro + Keystatic | Contact page |
-| `/keystatic/` | Keystatic | Admin UI |
+| `/about/` | Astro + TinaCMS | About page |
+| `/contact/` | Astro + TinaCMS | Contact page |
+| `/admin/` | TinaCMS | Content admin UI |
 
 ### Current Phase: Phase 1 (Podcast Launch)
 
@@ -235,8 +236,10 @@ setPersona('commercial', 'decision_engine');
 southland-platform/
 ├── apps/
 │   ├── astro-content/     # Content site (podcast, blog, branding)
+│   ├── persona-worker/    # Cloudflare Worker for CDP persona scoring
 │   └── shopify-app/       # Shopify embedded app (Remix)
 ├── packages/
+│   ├── shopify-storefront/ # Shopify Storefront API client + queries
 │   ├── ui-react/          # Shared React components
 │   ├── ui-schema/         # TypeScript types/schemas
 │   └── ui-tokens/         # Design tokens
@@ -312,6 +315,12 @@ Astro 5 content site for:
 - `/admin/branding/` - Brand guidelines
 
 See [apps/astro-content/.claude-context.md](apps/astro-content/.claude-context.md) for details.
+
+### persona-worker
+
+Cloudflare Worker for real-time CDP persona scoring. Receives pixel events, computes persona probability scores, caches in KV, forwards to BigQuery.
+
+See [apps/persona-worker/.claude-context.md](apps/persona-worker/.claude-context.md) for details.
 
 ### shopify-app
 

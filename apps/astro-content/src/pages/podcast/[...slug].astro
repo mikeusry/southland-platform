@@ -12,12 +12,14 @@ import InteractiveTranscript from '../../components/podcast/InteractiveTranscrip
 import ShareClipTool from '../../components/podcast/ShareClipTool.astro'
 import SubscribeButtons from '../../components/podcast/SubscribeButtons.astro'
 import GuestCard from '../../components/podcast/GuestCard.astro'
+import AuthorCard from '../../components/blog/AuthorCard.astro'
 import RelatedEpisodes from '../../components/podcast/RelatedEpisodes.astro'
 import EpisodeNav from '../../components/podcast/EpisodeNav.astro'
 import EmailCapture from '../../components/shared/EmailCapture.astro'
 import ProductCard from '../../components/shared/ProductCard.astro'
 import TopicTag from '../../components/shared/TopicTag.astro'
-import { getCollection } from 'astro:content'
+import { getCollection, getEntry } from 'astro:content'
+import { buildPersonSchema } from '../../lib/schema'
 
 export async function getStaticPaths() {
   const episodes = await getCollection('episodes')
@@ -40,6 +42,37 @@ const allEpisodes = await getCollection('episodes', ({ data }) => {
 })
 
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+
+// Resolve guest slugs to team member entries for E-E-A-T
+const resolvedGuests = await Promise.all(
+  (episode.data.guests || []).map(async (guest) => {
+    let teamMember = null
+    if (guest.slug) {
+      try {
+        teamMember = await getEntry('team', guest.slug)
+      } catch {
+        // Guest not in team collection — use inline data
+      }
+    }
+    return { ...guest, teamMember }
+  })
+)
+
+// Hosts are guests with team profiles (for AuthorCard display)
+const hosts = resolvedGuests.filter((g) => g.teamMember)
+
+// Resolve related blog posts (cross-promotion)
+const relatedBlogPosts = episode.data.relatedBlogPosts?.length
+  ? await Promise.all(
+      episode.data.relatedBlogPosts.map(async (ref) => {
+        try {
+          return await getEntry('blog', ref.slug)
+        } catch {
+          return null
+        }
+      })
+    ).then((posts) => posts.filter(Boolean))
+  : []
 
 // Format date
 const formattedDate = new Intl.DateTimeFormat('en-US', {
@@ -84,17 +117,17 @@ const episodeSchema = {
       contentUrl: episode.data.audioUrl,
     },
   }),
-  ...(episode.data.guests &&
-    episode.data.guests.length > 0 && {
-      actor: episode.data.guests.map((guest) => ({
-        '@type': 'Person',
-        name: guest.name,
-      })),
+  ...(resolvedGuests.length > 0 && {
+      actor: resolvedGuests.map((g) =>
+        g.teamMember
+          ? buildPersonSchema(g.teamMember)
+          : { '@type': 'Person', name: g.name }
+      ),
     }),
 }
 
 // Determine if we have video or audio
-const hasVideo = episode.data.gumletId || episode.data.youtubeUrl
+const hasVideo = episode.data.muxPlaybackId || episode.data.youtubeUrl
 const hasAudio = episode.data.audioUrl
 ---
 
@@ -142,6 +175,7 @@ const hasAudio = episode.data.audioUrl
           applePodcastUrl={episode.data.applePodcastUrl}
           spotifyUrl={episode.data.spotifyUrl}
           variant="compact"
+          utmContext={`episode-${episodeSlug}`}
         />
       </header>
 
@@ -153,7 +187,7 @@ const hasAudio = episode.data.audioUrl
           {
             hasVideo && (
               <VideoEmbed
-                gumletId={episode.data.gumletId}
+                muxPlaybackId={episode.data.muxPlaybackId}
                 youtubeUrl={episode.data.youtubeUrl}
                 title={episode.data.title}
                 episodeNumber={episode.data.episodeNumber}
@@ -176,6 +210,28 @@ const hasAudio = episode.data.audioUrl
                 chapters={episode.data.chapters}
                 thumbnail={episode.data.thumbnail}
               />
+            )
+          }
+
+          {/* Hosts (E-E-A-T AuthorCards) */}
+          {
+            hosts.length > 0 && (
+              <div class="space-y-3">
+                {hosts.map((host) => (
+                  <AuthorCard
+                    name={host.teamMember!.data.name}
+                    slug={host.teamMember!.id.replace(/\.mdx?$/, '')}
+                    role={host.teamMember!.data.role}
+                    bio={host.teamMember!.data.bio}
+                    photo={host.teamMember!.data.photo}
+                    credentials={host.teamMember!.data.credentials}
+                    yearsExperience={host.teamMember!.data.yearsExperience}
+                    links={host.teamMember!.data.links}
+                    variant="compact"
+                    label="Host"
+                  />
+                ))}
+              </div>
             )
           }
 
@@ -210,6 +266,28 @@ const hasAudio = episode.data.audioUrl
                   episodeNumber={episode.data.episodeNumber}
                   maxHeight="600px"
                 />
+              </div>
+            )
+          }
+
+          {/* Related Blog Posts (Cross-Promotion) */}
+          {
+            relatedBlogPosts.length > 0 && (
+              <div class="rounded-xl border border-gray-100 bg-white p-6">
+                <h2 class="mb-4 text-xl font-semibold text-gray-900">Related Articles</h2>
+                <div class="space-y-3">
+                  {relatedBlogPosts.map((post) => post && (
+                    <a
+                      href={`/blog/${post.id.replace(/\.mdx?$/, '')}/`}
+                      class="block rounded-lg border border-gray-100 p-4 transition-shadow hover:shadow-md"
+                    >
+                      <h3 class="font-medium text-shopify-title">{post.data.title}</h3>
+                      <p class="mt-1 line-clamp-2 text-sm text-shopify-secondary-text">
+                        {post.data.description}
+                      </p>
+                    </a>
+                  ))}
+                </div>
               </div>
             )
           }

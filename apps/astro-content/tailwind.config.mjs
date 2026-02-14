@@ -36,6 +36,7 @@ export default {
       fontFamily: {
         'sans': ['"Open Sans"', 'system-ui', '-apple-system', 'sans-serif'],
         'heading': ['"Eveleth Dot"', 'system-ui', 'sans-serif'],
+        'serif': ['"Lora"', 'Georgia', 'Cambria', '"Times New Roman"', 'serif'],
       },
       fontSize: {
         'shopify-sm': '13px',

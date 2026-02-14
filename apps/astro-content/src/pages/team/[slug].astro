@@ -62,6 +62,12 @@ const blogPosts = await getCollection('blog', ({ data }) => {
   return data.author === memberSlug && data.draft !== true
 })
 
+// Get podcast episodes featuring this team member (cross-link for E-E-A-T)
+const allEpisodes = await getCollection('episodes', ({ data }) => data.draft !== true)
+const memberEpisodes = allEpisodes
+  .filter((ep) => ep.data.guests?.some((g) => g.slug === memberSlug))
+  .sort((a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime())
+
 // Get other team members for "Meet the Team" section
 const allMembers = await getCollection('team', ({ data }) => {
   return data.active !== false
@@ -267,6 +273,55 @@ const personSchema = {
                 class="font-medium text-southland-green hover:underline"
               >
                 View all articles by {member.data.name.split(' ')[0]} →
+              </a>
+            </div>
+          )}
+        </div>
+      </section>
+    )
+  }
+
+  <!-- Podcast Episodes featuring this member -->
+  {
+    memberEpisodes.length > 0 && (
+      <section class="bg-white py-16 md:py-20">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h2 class="mb-8 text-3xl font-bold text-shopify-title">
+            Podcast Episodes with {member.data.name.split(' ')[0]}
+          </h2>
+          <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {memberEpisodes.slice(0, 6).map((ep) => (
+              <a
+                href={`/podcast/${ep.id.replace(/\.mdx?$/, '')}/`}
+                class="group rounded-xl border border-gray-100 bg-brand-gray p-6 shadow-sm transition-shadow hover:shadow-md"
+              >
+                {ep.data.thumbnail && (
+                  <img
+                    src={ep.data.thumbnail}
+                    alt={ep.data.title}
+                    class="mb-4 aspect-video w-full rounded-lg object-cover"
+                    loading="lazy"
+                  />
+                )}
+                <div class="mb-2 flex items-center gap-2 text-xs text-gray-500">
+                  <span class="font-medium text-southland-green">Episode {ep.data.episodeNumber}</span>
+                  <span>&bull;</span>
+                  <span>{ep.data.duration}</span>
+                </div>
+                <h3 class="font-bold text-shopify-title group-hover:text-southland-green transition-colors">{ep.data.title}</h3>
+                <p class="mt-2 line-clamp-2 text-sm text-shopify-secondary-text">
+                  {ep.data.description}
+                </p>
+              </a>
+            ))}
+          </div>
+          {memberEpisodes.length > 6 && (
+            <div class="mt-8 text-center">
+              <a
+                href="/podcast/"
+                class="font-medium text-southland-green hover:underline"
+              >
+                View all episodes &rarr;
               </a>
             </div>
           )}

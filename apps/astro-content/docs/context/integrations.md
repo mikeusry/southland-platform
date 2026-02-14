@@ -53,11 +53,11 @@ curl -X GET "https://southland-organics.myshopify.com/admin/api/2024-04/themes.j
 
 ### Cloudflare Pages (Hosting)
 
-**Status:** Staging deployment pending
+**Status:** Implemented — middleware routing active
 
 | Setting | Value |
 |---------|-------|
-| Build command | `npm run build` |
+| Build command | `pnpm build` (via TinaCMS + Astro) |
 | Build output | `dist` |
 | Staging URL | `podcast-staging.southlandorganics.com` |
 | Production URL | `southlandorganics.com/podcast/*` (via Worker) |
@@ -255,58 +255,58 @@ type ImageEffect =
 PUBLIC_CLOUDINARY_CLOUD_NAME=southland-organics
 ```
 
-### Gumlet (Video Hosting)
+### Mux (Video Hosting)
 
-**Status:** Ready for integration
+**Status:** Active — 6 episodes live in environment `v1au3d`
 
-Video embeds use Gumlet player via `gumletId` in episode frontmatter:
+Video embeds use `@mux/mux-player` web component via `muxPlaybackId` in episode frontmatter:
 
 ```astro
 <!-- src/components/podcast/VideoEmbed.astro -->
-<iframe
-  src={`https://play.gumlet.io/embed/${gumletId}`}
-  allowfullscreen
+<mux-player
+  playback-id={muxPlaybackId}
+  accent-color="#44883e"
+  metadata-video-title={title}
+  default-hidden-captions
+  style="width:100%;height:100%;"
 />
 ```
 
 **Episode frontmatter:**
 ```yaml
-gumletId: "abc123xyz"
+muxPlaybackId: "5QJ01eBw11CKsXey3I6nKXFpda1EqMiPySDj5NmA7uyQ"
+thumbnail: "https://image.mux.com/{PLAYBACK_ID}/thumbnail.jpg"
 ```
+
+**Required env vars:**
+```bash
+MUX_TOKEN_ID=your_mux_token_id
+MUX_TOKEN_SECRET=your_mux_token_secret
+MUX_ENVIRONMENT_ID=v1au3d
+```
+
+**Dashboard:** https://dashboard.mux.com/organizations/mkfsqt/environments/v1au3d/video/assets
 
 ---
 
-## Planned Integrations
+## Implemented Integrations
 
-### Cloudflare Worker (Routing)
+### Cloudflare Pages Middleware (Routing)
 
-**Status:** Not yet implemented
+**Status:** Implemented via `functions/_middleware.ts`
 
-Worker will route requests based on path:
+Middleware routes requests based on path:
+- `/podcast/*`, `/admin/*`, `/_astro/*` → Astro static files
+- `/*` (everything else) → Proxied to Shopify
 
-```javascript
-// Pseudocode
-addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
-
-  if (url.pathname.startsWith('/podcast')) {
-    // Proxy to Cloudflare Pages
-    return fetch(`https://southland-content.pages.dev${url.pathname}`);
-  }
-
-  // Default: proxy to Shopify
-  return fetch(`https://southland-organics.myshopify.com${url.pathname}`);
-});
-```
-
-**Setup steps:**
-1. Create Worker in Cloudflare dashboard
-2. Configure routes for `southlandorganics.com/podcast/*`
-3. Test with staging before production cutover
+**Config files:**
+- `functions/_middleware.ts` - Route proxy logic
+- `wrangler.toml` - Cloudflare Pages config
+- `public/_routes.json` - Static route optimization
 
 ### Klaviyo (Email Capture)
 
-**Status:** ✅ Active - Podcast subscriber capture live
+**Status:** Active — Podcast subscriber capture live
 
 Email capture component at `src/components/shared/EmailCapture.astro`.
 
@@ -377,22 +377,21 @@ Create a segment for podcast subscribers:
 
 ### point.dog (Tracking/CDP)
 
-**Status:** Not yet implemented
+**Status:** Implemented — pixel tracking active, persona worker deployed
 
-Will integrate with the point.dog platform for:
-- Page view tracking
-- Event tracking (video plays, email signups)
-- Persona attribution
+Integrated with point.dog platform for:
+- Page view tracking (pixel in `BaseLayout.astro`)
+- Event tracking (video plays, email signups) via client-side JS
+- Persona attribution via `apps/persona-worker/`
 
-**Required env vars:**
+**Env vars:**
 ```bash
+PUBLIC_PIXEL_BRAND_ID=southland
+PUBLIC_PIXEL_ENDPOINT=https://pixel.southlandorganics.com/collect
+PUBLIC_PERSONA_WORKER_URL=https://southland-persona-worker.workers.dev
 SUPABASE_URL=https://zpjvhvyersytloyykylf.supabase.co
 SUPABASE_SERVICE_KEY=your_service_key
 ```
-
-**Integration approach:**
-- Tracking pixel in `BaseLayout.astro`
-- Event calls via client-side JavaScript
 
 ---
 

@@ -21,6 +21,8 @@
     "@astrojs/react": "^4.2.1",
     "@astrojs/tailwind": "^6.0.2",
     "@cloudinary/url-gen": "^1.22.0",
+    "@mux/mux-player": "^3.11.4",
+    "@southland/shopify-storefront": "workspace:*",
     "@southland/ui-react": "workspace:*",
     "@southland/ui-schema": "workspace:*",
     "@southland/ui-tokens": "workspace:*",

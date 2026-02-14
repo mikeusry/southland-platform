@@ -251,7 +251,7 @@ const defaultThumbnail = getLogoUrl('square', { width: 200 })
         playPauseBtn.setAttribute('title', 'Pause')
 
         // Track play event
-        if (window.pdPixel && audio.currentTime < 1) {
+        if (window.pdPixel?.track && audio.currentTime < 1) {
           window.pdPixel.track('podcast_play', {
             episode_slug: episodeSlug,
             episode_number: episodeNumber,
@@ -310,7 +310,7 @@ const defaultThumbnail = getLogoUrl('square', { width: 200 })
       milestones.forEach((milestone) => {
         if (progress >= milestone && !trackedMilestones.has(milestone)) {
           trackedMilestones.add(milestone)
-          if (window.pdPixel) {
+          if (window.pdPixel?.track) {
             window.pdPixel.track('podcast_progress', {
               episode_slug: episodeSlug,
               episode_number: episodeNumber,
@@ -341,7 +341,7 @@ const defaultThumbnail = getLogoUrl('square', { width: 200 })
       pauseIcon?.classList.add('hidden')
       playPauseBtn?.setAttribute('title', 'Play')
 
-      if (window.pdPixel) {
+      if (window.pdPixel?.track) {
         window.pdPixel.track('podcast_complete', {
           episode_slug: episodeSlug,
           episode_number: episodeNumber,

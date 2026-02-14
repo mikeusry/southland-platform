@@ -454,7 +454,7 @@
 
 **File:** `src/components/podcast/VideoEmbed.astro`
 
-**Purpose:** Gumlet video player embed with lazy loading.
+**Purpose:** Mux video player embed with tracking and lazy loading.
 
 ---
 

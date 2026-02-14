@@ -169,7 +169,7 @@ const groupedTranscript = groupBySpeaker(transcript)
         seekToTime(time)
 
         // Track transcript click
-        if (window.pdPixel) {
+        if (window.pdPixel?.track) {
           window.pdPixel.track('podcast_transcript_click', {
             episode_slug: episodeSlug,
             episode_number: episodeNumber,

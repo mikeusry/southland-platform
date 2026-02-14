@@ -17,8 +17,8 @@ longDescription: |
   2-3 paragraph expanded description for episode page.
   Include what viewers will learn and why it matters.
 
-gumletId: "abc123xyz"  # From Gumlet embed URL
-thumbnail: "https://video.gumlet.io/.../thumbnail-1-0.png"
+muxPlaybackId: "abc123xyz"  # From Mux dashboard → Assets → Playback ID
+thumbnail: "https://image.mux.com/abc123xyz/thumbnail.jpg"
 duration: "MM:SS"
 durationSeconds: XXXX
 
@@ -68,13 +68,13 @@ Explanation...
 ## Release Checklist
 
 ### Pre-Release
-- [ ] Video uploaded to Gumlet
+- [ ] Video uploaded to Mux
 - [ ] Prep notes/interview questions ready
 - [ ] SEO keywords identified
 
 ### Content Creation
-- [ ] Get Gumlet embed ID from `play.gumlet.io/embed/{ID}`
-- [ ] Fetch video metadata (duration, thumbnail)
+- [ ] Get Mux Playback ID from dashboard (Assets → Playback IDs)
+- [ ] Fetch video metadata (duration from Mux, thumbnail auto-generated)
 - [ ] Write description from prep notes
 - [ ] Map chapters to interview structure
 - [ ] Add topics and related products
@@ -93,11 +93,14 @@ Explanation...
 
 ## Episode Roadmap
 
-| Ep | Title | Status | Gumlet ID | Notes |
-|----|-------|--------|-----------|-------|
-| 1 | The Invisible Economy Under Your Feet | **LIVE** | `695d22fea618434ceeb0e84a` | Soil biology intro |
-| 2 | TBD | Planning | — | — |
-| 3 | TBD | Planning | — | — |
+| Ep | Title | Status | Mux Playback ID | Notes |
+|----|-------|--------|-----------------|-------|
+| 1 | The Invisible Economy Under Your Feet | **LIVE** | `5QJ01eBw11CKsXey3I6nKXFpda1EqMiPySDj5NmA7uyQ` | Soil biology intro |
+| 2 | Humic vs. Fulvic: The Difference That Actually Matters | **LIVE** | `FiKRkXWNINnIC400z02tqEiY02o9JFa8ddz1HWUEABWNhs` | Humic/fulvic acid |
+| 3 | Why Your Fertilizer Isn't Working | **LIVE** | `VdxQA3Mdt02nO02LTvkiGMP8P9msVbx54Wf7I3UqJcpiY` | Fertilizer + soil biology |
+| 4 | Carbon: The Most Misunderstood Element | **LIVE** | `H4g01qTbnQxqs01kdMhxF8zj025JPK17OZMvT8O4ctC834` | Carbon in agriculture |
+| 5 | Healthy Soil Starts at Home | **LIVE** | `W6OPMUQfTof00nVGEFFPk4MjXrpH9t029Bpi02T027qBHpE` | Lawn & garden |
+| 6 | From Backyard to Commercial | **LIVE** | `DzMjTY0247e48Tjk01015W1XPmK3ekivbtzeP7yCOe4k34` | Scaling soil health |
 
 ## Content from Prep Notes
 

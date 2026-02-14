@@ -98,7 +98,7 @@ function formatTime(seconds: number): string {
   }
 
   .chapter-marker.active .chapter-title {
-    color: #166534;
+    color: var(--color-accent-hover);
     font-weight: 500;
   }
 
@@ -106,8 +106,8 @@ function formatTime(seconds: number): string {
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 0.8125rem;
     font-weight: 500;
-    color: #44883e;
-    background-color: #f0fdf4;
+    color: var(--color-accent);
+    background-color: rgba(68, 136, 62, 0.08);
     padding: 0.25rem 0.5rem;
     border-radius: 0.25rem;
     min-width: 3.5rem;
@@ -165,20 +165,18 @@ function formatTime(seconds: number): string {
         // Find players and seek
         const audioPlayer = document.querySelector('.audio-player') as any
         const videoEmbed = document.querySelector('.video-embed video') as HTMLVideoElement
-        const gumletIframe = document.querySelector('.gumlet-iframe') as HTMLIFrameElement
+        const muxPlayer = document.querySelector('mux-player') as any
 
         if (audioPlayer?.seekTo) {
           audioPlayer.seekTo(time)
+        } else if (muxPlayer) {
+          // Seek Mux player to chapter time
+          muxPlayer.currentTime = time
+          muxPlayer.play()
         } else if (videoEmbed) {
           videoEmbed.currentTime = time
           if (videoEmbed.paused) {
             videoEmbed.play()
-          }
-        } else if (gumletIframe) {
-          // Update Gumlet iframe src with timestamp parameter
-          const gumletId = gumletIframe.dataset.gumletId
-          if (gumletId) {
-            gumletIframe.src = `https://play.gumlet.io/embed/${gumletId}?preload=metadata&autoplay=true&t=${time}`
           }
         }
 
@@ -193,7 +191,7 @@ function formatTime(seconds: number): string {
         }
 
         // Track chapter click
-        if (window.pdPixel) {
+        if (window.pdPixel?.track) {
           window.pdPixel.track('podcast_chapter_click', {
             episode_slug: episodeSlug,
             episode_number: episodeNumber,
@@ -205,15 +203,13 @@ function formatTime(seconds: number): string {
     })
   })
 
-  // Listen for Gumlet player time updates
-  window.addEventListener('message', (event) => {
-    if (event.origin !== 'https://play.gumlet.io') return
-
-    const data = event.data
-    if (data?.type === 'timeupdate' && typeof data.currentTime === 'number') {
-      updateActiveChapterByTime(data.currentTime)
-    }
-  })
+  // Listen for Mux player time updates
+  const muxPlayerEl = document.querySelector('mux-player') as any
+  if (muxPlayerEl) {
+    muxPlayerEl.addEventListener('timeupdate', () => {
+      updateActiveChapterByTime(muxPlayerEl.currentTime)
+    })
+  }
 
   // Update active chapter based on current time
   function updateActiveChapterByTime(currentTime: number) {
@@ -246,7 +242,7 @@ function formatTime(seconds: number): string {
     updateActiveChapterByTime(currentTime)
   }
 
-  // Listen to timeupdate events for non-Gumlet players
+  // Listen to timeupdate events for non-Mux players
   const audioElement = document.querySelector('.audio-element')
   const videoElement = document.querySelector('.video-embed video')
 

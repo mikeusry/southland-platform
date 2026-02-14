@@ -1,0 +1,109 @@
+/**
+ * Storefront API response types for Southland Platform.
+ *
+ * These types represent the shapes returned by our GraphQL queries/mutations.
+ * They are intentionally minimal — only the fields we actually query.
+ */
+
+// ─── Money ───────────────────────────────────────────────────────────────────
+
+export interface Money {
+  amount: string
+  currencyCode: string
+}
+
+// ─── Products ────────────────────────────────────────────────────────────────
+
+export interface ProductImage {
+  url: string
+  altText: string | null
+  width: number
+  height: number
+}
+
+export interface ProductVariant {
+  id: string
+  title: string
+  price: Money
+  availableForSale: boolean
+  image: ProductImage | null
+}
+
+export interface Product {
+  id: string
+  title: string
+  handle: string
+  description: string
+  tags: string[]
+  priceRange: {
+    minVariantPrice: Money
+  }
+  images: ProductImage[]
+  variants: ProductVariant[]
+}
+
+export interface Collection {
+  title: string
+  handle: string
+  products: Product[]
+}
+
+// ─── Cart ────────────────────────────────────────────────────────────────────
+
+export interface CartLineAttribute {
+  key: string
+  value: string
+}
+
+export interface CartLineMerchandise {
+  id: string
+  title: string
+  price: Money
+  product: {
+    title: string
+    handle: string
+    images: ProductImage[]
+  }
+}
+
+export interface CartLine {
+  id: string
+  quantity: number
+  attributes: CartLineAttribute[]
+  merchandise: CartLineMerchandise
+  cost: {
+    totalAmount: Money
+  }
+}
+
+export interface CartDiscountAllocation {
+  discountedAmount: Money
+}
+
+export interface Cart {
+  id: string
+  checkoutUrl: string
+  totalQuantity: number
+  cost: {
+    totalAmount: Money
+    subtotalAmount: Money
+  }
+  lines: CartLine[]
+  discountCodes: { code: string; applicable: boolean }[]
+  discountAllocations: CartDiscountAllocation[]
+}
+
+// ─── Inputs ──────────────────────────────────────────────────────────────────
+
+export interface CartLineInput {
+  merchandiseId: string
+  quantity: number
+  attributes?: CartLineAttribute[]
+}
+
+export interface CartLineUpdateInput {
+  id: string
+  merchandiseId?: string
+  quantity?: number
+  attributes?: CartLineAttribute[]
+}

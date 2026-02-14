@@ -108,6 +108,7 @@ type Blog implements Node & Document {
   reviewer: String
   tags: [String]
   segment: String
+  targetKeyword: String
   featuredImage: String
   draft: Boolean
   shopifyId: Float
@@ -163,6 +164,7 @@ input BlogFilter {
   reviewer: StringFilter
   tags: StringFilter
   segment: StringFilter
+  targetKeyword: StringFilter
   featuredImage: StringFilter
   draft: BooleanFilter
   shopifyId: NumberFilter
@@ -252,7 +254,7 @@ type Episodes implements Node & Document {
   publishDate: String!
   description: String!
   longDescription: String
-  gumletId: String
+  muxPlaybackId: String
   audioUrl: String
   youtubeUrl: String
   applePodcastUrl: String
@@ -275,7 +277,7 @@ input EpisodesFilter {
   publishDate: DatetimeFilter
   description: StringFilter
   longDescription: StringFilter
-  gumletId: StringFilter
+  muxPlaybackId: StringFilter
   audioUrl: StringFilter
   youtubeUrl: StringFilter
   applePodcastUrl: StringFilter
@@ -423,6 +425,7 @@ input BlogMutation {
   reviewer: String
   tags: [String]
   segment: String
+  targetKeyword: String
   featuredImage: String
   draft: Boolean
   shopifyId: Float
@@ -462,7 +465,7 @@ input EpisodesMutation {
   publishDate: String
   description: String
   longDescription: String
-  gumletId: String
+  muxPlaybackId: String
   audioUrl: String
   youtubeUrl: String
   applePodcastUrl: String

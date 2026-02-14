@@ -19,6 +19,7 @@ const ASTRO_ROUTES = [
   '/blog',
   '/team',
   '/admin',
+  '/build-a-case',
   '/keystatic',
   '/_astro',
   '/fonts',

@@ -82,6 +82,9 @@ export const GET: APIRoute = async () => {
     <podcast:locked>no</podcast:locked>
     <podcast:guid>${siteUrl}/podcast/</podcast:guid>
 
+    <podcast:person role="host" href="${siteUrl}/team/mike-usry/">Mike Usry</podcast:person>
+    <podcast:person role="host" href="${siteUrl}/team/joseph-boehm/">Joseph Boehm</podcast:person>
+
     ${sortedEpisodes
       .map((episode) => {
         const slug = episode.id.replace(/\.mdx?$/, '')
@@ -106,6 +109,17 @@ export const GET: APIRoute = async () => {
       <itunes:explicit>false</itunes:explicit>
       ${episode.data.thumbnail ? `<itunes:image href="${siteUrl}${episode.data.thumbnail}"/>` : ''}
       <itunes:summary><![CDATA[${episode.data.description}]]></itunes:summary>
+      ${episode.data.guests && episode.data.guests.length > 0
+        ? `<itunes:author>${episode.data.guests.map((g) => g.name).join(', ')}</itunes:author>`
+        : '<itunes:author>Southland Organics</itunes:author>'}
+      ${episode.data.guests
+        ? episode.data.guests
+            .map(
+              (g) =>
+                `<podcast:person role="host" href="${siteUrl}/team/${g.slug}/">${escapeXml(g.name)}</podcast:person>`
+            )
+            .join('\n      ')
+        : ''}
 
       ${
         episode.data.transcript && episode.data.transcript.length > 0

@@ -13,7 +13,7 @@ const episodesCollection = defineCollection({
     longDescription: z.string().optional(),
 
     // Media
-    gumletId: z.string().optional(),
+    muxPlaybackId: z.string().optional(),
     audioUrl: z.string().optional(),
     youtubeUrl: z.string().optional(),
     applePodcastUrl: z.string().optional(),

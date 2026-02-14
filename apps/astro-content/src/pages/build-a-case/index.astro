@@ -1,0 +1,89 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import CaseBuilder from '../../components/bundle/CaseBuilder'
+
+const title = 'Build Your Own Gallon Case | Southland Organics'
+const description =
+  'Pick any 4 gallon products and save on both price and shipping. Mix and match our organic poultry, lawn, and garden products.'
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: 'Build Your Own Gallon Case',
+  description,
+  url: `${import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'}/build-a-case/`,
+  isPartOf: {
+    '@type': 'WebSite',
+    name: 'Southland Organics',
+    url: import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com',
+  },
+}
+---
+
+<BaseLayout title={title} description={description} schema={schema}>
+  <main class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+    <!-- Hero -->
+    <div class="mb-8 text-center">
+      <h1 class="font-heading text-3xl text-shopify-title sm:text-4xl">
+        Build Your Own Case
+      </h1>
+      <p class="mx-auto mt-3 max-w-2xl text-lg text-brand-gray-dark">
+        Pick any 4 gallon products and save on both price and shipping.
+        Mix and match to build the perfect case for your operation.
+      </p>
+    </div>
+
+    <!-- Bundle picker (React island — hydrates immediately) -->
+    <CaseBuilder client:load />
+
+    <!-- SEO content -->
+    <section class="mx-auto mt-16 max-w-3xl">
+      <h2 class="font-heading text-xl text-shopify-title">How It Works</h2>
+      <div class="mt-4 space-y-4 text-shopify-text">
+        <div class="flex gap-4">
+          <div
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-shopify-link text-sm font-bold text-white"
+          >
+            1
+          </div>
+          <div>
+            <h3 class="font-medium">Choose your products</h3>
+            <p class="mt-1 text-sm text-brand-gray-dark">
+              Browse our full line of gallon-sized products — poultry probiotics,
+              soil conditioners, lawn treatments, and more.
+            </p>
+          </div>
+        </div>
+        <div class="flex gap-4">
+          <div
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-shopify-link text-sm font-bold text-white"
+          >
+            2
+          </div>
+          <div>
+            <h3 class="font-medium">Fill your case</h3>
+            <p class="mt-1 text-sm text-brand-gray-dark">
+              Select any 4 gallon products. You can pick 4 different products
+              or multiples of the same one — it's your call.
+            </p>
+          </div>
+        </div>
+        <div class="flex gap-4">
+          <div
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-shopify-link text-sm font-bold text-white"
+          >
+            3
+          </div>
+          <div>
+            <h3 class="font-medium">Save on price and shipping</h3>
+            <p class="mt-1 text-sm text-brand-gray-dark">
+              Your case discount applies automatically at checkout. Plus, 4
+              gallons ship as a single case instead of 4 individual packages —
+              saving you on freight.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</BaseLayout>

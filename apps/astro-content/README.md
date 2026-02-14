@@ -29,24 +29,24 @@ southlandorganics.com
 ## Tech Stack
 
 - **Astro 5** - Static site generation with content collections
-- **Tailwind CSS 3** - Utility-first styling with brand colors
+- **TinaCMS** - Git-backed visual content editor (migrated from Keystatic Feb 2026)
+- **Tailwind CSS 3** - Utility-first styling with brand tokens
 - **MDX** - Rich content with components
 - **TypeScript** - Type safety throughout
 
-## Brand Colors
+## Brand Colors (Synced from Shopify)
 
 ```css
---brand-green: #1a5f3c
---white: #ffffff
---light-gray: #f5f5f5
---dark-gray: #727272
---black: #1a1a1a
+--color-accent: #44883e      /* Primary green, links */
+--color-title: #2c5234       /* Dark green, headings */
+--color-text: #191d21        /* Body text */
+--color-secondary-text: #686363  /* Muted text */
 ```
 
 ## Project Structure
 
 ```
-southland-content/
+apps/astro-content/
 ├── astro.config.mjs          # Astro configuration
 ├── tailwind.config.mjs       # Tailwind with brand tokens
 ├── tsconfig.json             # TypeScript config
@@ -119,7 +119,7 @@ title: "Episode Title"
 episodeNumber: 1
 publishDate: 2026-01-05
 description: "Short description"
-gumletId: "abc123xyz"           # Video embed ID
+muxPlaybackId: "abc123xyz"      # Mux video playback ID
 audioUrl: "https://..."         # For RSS/audio player
 youtubeUrl: "https://..."
 applePodcastUrl: "https://..."
@@ -155,22 +155,23 @@ Episode show notes in markdown...
 ## Commands
 
 ```bash
-# Install dependencies
-npm install
+# Install dependencies (from monorepo root)
+pnpm install
 
-# Development server
-npm run dev
+# Development server (TinaCMS + Astro on port 4400)
+pnpm dev
 
-# Build for production
-npm run build
+# Build for production (TinaCMS + Astro)
+pnpm build
 
 # Preview built site
-npm run preview
-# or
-npx serve dist
+pnpm preview
 
 # Type checking
-npm run astro check
+pnpm astro check
+
+# Or run from monorepo root:
+pnpm --filter @southland/astro-content dev
 ```
 
 ## Environment Variables
@@ -245,14 +246,17 @@ Generated at `/podcast/feed.xml` with:
 
 ## TODO
 
-- [ ] Deploy to Cloudflare Pages staging
-- [ ] Add real episode content
-- [ ] Improve footer styling to closer match Shopify
-- [ ] Add podcast cover image
-- [ ] Add episode thumbnails
-- [ ] Connect Klaviyo email capture
-- [ ] Add tracking pixel integration
-- [ ] Set up Cloudflare Worker routing for production
+- [x] Add real episode content (Ep 1 live)
+- [x] Connect Klaviyo email capture (podcast subscriber properties live)
+- [x] Shopify theme token sync + brand colors
+- [x] Header/Footer React components matching Shopify
+- [x] Cloudflare Pages middleware for hybrid routing
+- [x] Migrate 287 blog posts from Shopify to MDX
+- [x] Migrate from Keystatic to TinaCMS (Feb 2026)
+- [ ] Deploy to Cloudflare Pages production
+- [ ] DNS routing (southlandorganics.com/podcast/* → CF Pages)
+- [ ] Add point.dog tracking pixel
+- [ ] Add Episode 2 when ready
 
 ## Related Repos
 

@@ -1,11 +1,11 @@
 ---
 /**
- * Video embed component - supports Gumlet, YouTube, and direct video
+ * Video embed component - supports Mux, YouTube, and direct video
  * Tracks play events via Southland pixel
  */
 
 interface Props {
-  gumletId?: string
+  muxPlaybackId?: string
   youtubeUrl?: string
   videoUrl?: string
   title: string
@@ -17,7 +17,7 @@ interface Props {
 }
 
 const {
-  gumletId,
+  muxPlaybackId,
   youtubeUrl,
   videoUrl,
   title,
@@ -32,7 +32,12 @@ const {
 const youtubeId = youtubeUrl?.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/)?.[1]
 
 // Determine embed source
-const embedSource = gumletId ? 'gumlet' : youtubeId ? 'youtube' : videoUrl ? 'direct' : null
+const embedSource = muxPlaybackId ? 'mux' : youtubeId ? 'youtube' : videoUrl ? 'direct' : null
+
+// Mux thumbnail URL
+const muxThumbnail = muxPlaybackId
+  ? `https://image.mux.com/${muxPlaybackId}/thumbnail.jpg`
+  : undefined
 ---
 
 <div
@@ -42,16 +47,13 @@ const embedSource = gumletId ? 'gumlet' : youtubeId ? 'youtube' : videoUrl ? 'di
   data-embed-source={embedSource}
 >
   {
-    embedSource === 'gumlet' && gumletId && (
-      <iframe
-        id="gumlet-player"
-        src={`https://play.gumlet.io/embed/${gumletId}?autoplay=${autoplay ? 1 : 0}`}
-        class="gumlet-iframe absolute inset-0 h-full w-full"
-        frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen
-        title={title}
-        data-gumlet-id={gumletId}
+    embedSource === 'mux' && muxPlaybackId && (
+      <mux-player
+        playback-id={muxPlaybackId}
+        accent-color="#44883e"
+        metadata-video-title={title}
+        default-hidden-captions
+        style="width:100%;height:100%;--media-object-fit:cover;"
       />
     )
   }
@@ -73,7 +75,7 @@ const embedSource = gumletId ? 'gumlet' : youtubeId ? 'youtube' : videoUrl ? 'di
     embedSource === 'direct' && videoUrl && (
       <video
         class="video-player absolute inset-0 h-full w-full"
-        poster={poster}
+        poster={poster || muxThumbnail}
         controls
         preload="metadata"
       >
@@ -107,6 +109,12 @@ const embedSource = gumletId ? 'gumlet' : youtubeId ? 'youtube' : videoUrl ? 'di
   }
 </div>
 
+{embedSource === 'mux' && (
+  <script>
+    import '@mux/mux-player';
+  </script>
+)}
+
 <script>
   // Video tracking
   document.querySelectorAll('.video-embed').forEach((container) => {
@@ -114,13 +122,58 @@ const embedSource = gumletId ? 'gumlet' : youtubeId ? 'youtube' : videoUrl ? 'di
     const episodeNumber = parseInt((container as HTMLElement).dataset.episodeNumber || '0')
     const embedSource = (container as HTMLElement).dataset.embedSource
 
+    // Track Mux player events
+    const muxPlayer = container.querySelector('mux-player') as any
+    if (muxPlayer) {
+      let trackedMilestones = new Set<number>()
+
+      muxPlayer.addEventListener('play', () => {
+        if (window.pdPixel?.track) {
+          window.pdPixel.track('podcast_play', {
+            episode_slug: episodeSlug,
+            episode_number: episodeNumber,
+            source: 'mux',
+          })
+        }
+      })
+
+      muxPlayer.addEventListener('timeupdate', () => {
+        const progress = (muxPlayer.currentTime / muxPlayer.duration) * 100
+        const milestones = [25, 50, 75, 100]
+
+        milestones.forEach((milestone: number) => {
+          if (progress >= milestone && !trackedMilestones.has(milestone)) {
+            trackedMilestones.add(milestone)
+            if (window.pdPixel?.track) {
+              window.pdPixel.track('podcast_progress', {
+                episode_slug: episodeSlug,
+                episode_number: episodeNumber,
+                progress_percent: milestone,
+                current_time: Math.floor(muxPlayer.currentTime),
+              })
+            }
+          }
+        })
+      })
+
+      muxPlayer.addEventListener('ended', () => {
+        if (window.pdPixel?.track) {
+          window.pdPixel.track('podcast_complete', {
+            episode_slug: episodeSlug,
+            episode_number: episodeNumber,
+            duration_seconds: Math.floor(muxPlayer.duration),
+          })
+        }
+      })
+    }
+
     // Track direct video player
     const videoPlayer = container.querySelector('.video-player') as HTMLVideoElement
     if (videoPlayer) {
       let trackedMilestones = new Set<number>()
 
       videoPlayer.addEventListener('play', () => {
-        if (window.pdPixel) {
+        if (window.pdPixel?.track) {
           window.pdPixel.track('podcast_play', {
             episode_slug: episodeSlug,
             episode_number: episodeNumber,
@@ -136,7 +189,7 @@ const embedSource = gumletId ? 'gumlet' : youtubeId ? 'youtube' : videoUrl ? 'di
         milestones.forEach((milestone) => {
           if (progress >= milestone && !trackedMilestones.has(milestone)) {
             trackedMilestones.add(milestone)
-            if (window.pdPixel) {
+            if (window.pdPixel?.track) {
               window.pdPixel.track('podcast_progress', {
                 episode_slug: episodeSlug,
                 episode_number: episodeNumber,
@@ -149,7 +202,7 @@ const embedSource = gumletId ? 'gumlet' : youtubeId ? 'youtube' : videoUrl ? 'di
       })
 
       videoPlayer.addEventListener('ended', () => {
-        if (window.pdPixel) {
+        if (window.pdPixel?.track) {
           window.pdPixel.track('podcast_complete', {
             episode_slug: episodeSlug,
             episode_number: episodeNumber,
@@ -159,14 +212,12 @@ const embedSource = gumletId ? 'gumlet' : youtubeId ? 'youtube' : videoUrl ? 'di
       })
     }
 
-    // For embedded players (YouTube, Gumlet), we rely on their APIs
-    // or manual interaction tracking
-    if (embedSource === 'youtube' || embedSource === 'gumlet') {
-      // Track when iframe is clicked/focused
+    // For YouTube embeds, track iframe load
+    if (embedSource === 'youtube') {
       const iframe = container.querySelector('iframe')
       if (iframe) {
         iframe.addEventListener('load', () => {
-          if (window.pdPixel) {
+          if (window.pdPixel?.track) {
             window.pdPixel.track('podcast_embed_loaded', {
               episode_slug: episodeSlug,
               episode_number: episodeNumber,
