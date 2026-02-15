@@ -18,28 +18,23 @@ import EpisodeNav from '../../components/podcast/EpisodeNav.astro'
 import EmailCapture from '../../components/shared/EmailCapture.astro'
 import ProductCard from '../../components/shared/ProductCard.astro'
 import TopicTag from '../../components/shared/TopicTag.astro'
-import { getCollection, getEntry } from 'astro:content'
+import { getCollection, getEntry, render } from 'astro:content'
 import { buildPersonSchema } from '../../lib/schema'
 
-export async function getStaticPaths() {
-  const episodes = await getCollection('episodes')
-  return episodes.map((episode) => {
-    // Remove file extension from id for clean URLs
-    const slug = episode.id.replace(/\.mdx?$/, '')
-    return {
-      params: { slug },
-      props: { episode, slug },
-    }
-  })
-}
+const { slug: episodeSlug } = Astro.params
 
-const { episode, slug: episodeSlug } = Astro.props
-const { Content } = await episode.render()
-
-// Get all episodes for navigation and related
+// Get all published episodes (reused for current episode lookup + navigation)
 const allEpisodes = await getCollection('episodes', ({ data }) => {
   return data.draft !== true
 })
+
+const episode = allEpisodes.find(
+  (e) => e.id === episodeSlug || e.id.replace(/\.mdx?$/, '') === episodeSlug
+)
+if (!episode) {
+  return Astro.redirect('/podcast/')
+}
+const { Content } = await render(episode)
 
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
 
