@@ -38,8 +38,18 @@ function sortByPersona(products: Product[], persona: string | null): Product[] {
   })
 }
 
+/** Find the "1 Gallon" variant for a product. */
+function getGallonVariant(product: Product): Product['variants'][number] | null {
+  return (
+    product.variants.find(
+      (v) =>
+        v.selectedOptions.some((o) => o.name === 'Size' && o.value === '1 Gallon'),
+    ) ?? null
+  )
+}
+
 function getVariantPrice(product: Product): number {
-  const variant = product.variants.find((v) => v.availableForSale) ?? product.variants[0]
+  const variant = getGallonVariant(product)
   return variant ? parseFloat(variant.price.amount) : 0
 }
 
@@ -58,7 +68,10 @@ export default function CaseBuilder() {
   useEffect(() => {
     async function fetchProducts() {
       try {
-        const client = createClient()
+        const client = createClient({
+          storeDomain: import.meta.env.PUBLIC_SHOPIFY_STORE_DOMAIN,
+          publicAccessToken: import.meta.env.PUBLIC_SHOPIFY_STOREFRONT_TOKEN,
+        })
         const gallonProducts = await getGallonProducts(client)
         const persona = getPersonaId()
         setProducts(sortByPersona(gallonProducts, persona))
@@ -260,13 +273,14 @@ export default function CaseBuilder() {
       {/* Product grid */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {products.map((product) => {
-          const variant = product.variants.find((v) => v.availableForSale) ?? product.variants[0]
+          const variant = getGallonVariant(product)
           if (!variant) return null
           const sel = selections.get(variant.id)
           return (
             <ProductSelector
               key={product.id}
               product={product}
+              variant={variant}
               quantity={sel?.quantity ?? 0}
               maxAdd={remainingSlots}
               onAdd={(variantId) => handleAdd(variantId, product)}

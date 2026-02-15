@@ -79,7 +79,10 @@ let _client: StorefrontClient | null = null
 
 function getClient(): StorefrontClient {
   if (!_client) {
-    _client = createClient()
+    _client = createClient({
+      storeDomain: import.meta.env.PUBLIC_SHOPIFY_STORE_DOMAIN,
+      publicAccessToken: import.meta.env.PUBLIC_SHOPIFY_STOREFRONT_TOKEN,
+    })
   }
   return _client
 }

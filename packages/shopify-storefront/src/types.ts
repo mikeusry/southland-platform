@@ -21,12 +21,18 @@ export interface ProductImage {
   height: number
 }
 
+export interface VariantOption {
+  name: string
+  value: string
+}
+
 export interface ProductVariant {
   id: string
   title: string
   price: Money
   availableForSale: boolean
   image: ProductImage | null
+  selectedOptions: VariantOption[]
 }
 
 export interface Product {

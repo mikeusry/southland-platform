@@ -7,14 +7,11 @@ import type { Product, ProductVariant } from '@southland/shopify-storefront'
 
 interface Props {
   product: Product
+  variant: ProductVariant
   quantity: number
   maxAdd: number
   onAdd: (variantId: string) => void
   onRemove: (variantId: string) => void
-}
-
-function getDefaultVariant(product: Product): ProductVariant | null {
-  return product.variants.find((v) => v.availableForSale) ?? product.variants[0] ?? null
 }
 
 function formatPrice(amount: string): string {
@@ -23,15 +20,13 @@ function formatPrice(amount: string): string {
 
 export default function ProductSelector({
   product,
+  variant,
   quantity,
   maxAdd,
   onAdd,
   onRemove,
 }: Props) {
-  const variant = getDefaultVariant(product)
-  if (!variant) return null
-
-  const image = product.images[0] ?? variant.image
+  const image = variant.image ?? product.images[0]
   const canAdd = maxAdd > 0 && variant.availableForSale
   const canRemove = quantity > 0
 

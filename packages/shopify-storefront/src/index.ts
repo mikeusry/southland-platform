@@ -2,7 +2,7 @@ export { createClient } from './client'
 export type { StorefrontClient } from './client'
 
 // Product / collection queries
-export { getCollectionProducts, getGallonProducts } from './queries/products'
+export { getCollectionProducts, getAllProducts, getGallonProducts } from './queries/products'
 
 // Cart operations
 export {
@@ -19,6 +19,7 @@ export type {
   Product,
   ProductImage,
   ProductVariant,
+  VariantOption,
   Collection,
   Cart,
   CartLine,
