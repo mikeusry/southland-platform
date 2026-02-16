@@ -114,6 +114,8 @@ Monorepo for Southland Organics digital platform.
 | `/about/` | Astro + TinaCMS | About page |
 | `/contact/` | Astro + TinaCMS | Contact page |
 | `/admin/` | TinaCMS | Content admin UI |
+| `/admin/videos/` | Astro + Mothership Supabase | Mux video library browser + transcript search |
+| `/api/video-search` | Astro API | Transcript text search for video library |
 
 ### Current Phase: Phase 1 (Podcast Launch)
 

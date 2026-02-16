@@ -1,0 +1,59 @@
+---
+/**
+ * Video Library Admin
+ * Browse, filter, and search all Mux videos from voice_videos table
+ */
+import AdminLayout from '../../../layouts/AdminLayout.astro'
+import VideoLibrary from '../../../components/admin/VideoLibrary'
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = import.meta.env.MOTHERSHIP_SUPABASE_URL
+const supabaseKey = import.meta.env.MOTHERSHIP_SUPABASE_SERVICE_KEY
+
+let videos: any[] = []
+let error: string | null = null
+
+if (supabaseUrl && supabaseKey) {
+  const supabase = createClient(supabaseUrl, supabaseKey)
+  const { data, error: fetchError } = await supabase
+    .from('voice_videos')
+    .select(
+      'id, title, business_unit, external_id, source_platform, url, thumbnail_url, duration_seconds, topics, transcript_status, project_name',
+    )
+    .eq('source_platform', 'mux')
+    .order('title', { ascending: true })
+
+  if (fetchError) {
+    error = fetchError.message
+  } else {
+    videos = data || []
+  }
+} else {
+  error = 'Mothership Supabase credentials not configured'
+}
+
+const businessUnits = [...new Set(videos.map((v) => v.business_unit))].sort()
+---
+
+<AdminLayout title="Video Library" activeNav="/admin/videos">
+  <header class="page-header">
+    <h1 class="page-title">Video Library</h1>
+    <p class="page-subtitle">
+      {videos.length} videos in Mux &middot; Browse, filter, and search transcripts
+    </p>
+  </header>
+
+  {
+    error ? (
+      <div class="card" style="border-color: var(--error);">
+        <p style="color: var(--error);">Error: {error}</p>
+      </div>
+    ) : (
+      <VideoLibrary
+        client:load
+        videos={videos}
+        businessUnits={businessUnits}
+      />
+    )
+  }
+</AdminLayout>
