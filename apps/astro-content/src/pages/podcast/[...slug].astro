@@ -20,12 +20,14 @@ import ProductCard from '../../components/shared/ProductCard.astro'
 import TopicTag from '../../components/shared/TopicTag.astro'
 import { getCollection, getEntry, render } from 'astro:content'
 import { buildPersonSchema } from '../../lib/schema'
+import { buildSouthlandUrl, resolveEpisodeCover } from '../../lib/cloudinary'
 
 const { slug: episodeSlug } = Astro.params
 
-// Get all published episodes (reused for current episode lookup + navigation)
+// Get all published episodes (exclude future dates + drafts)
+const now = new Date()
 const allEpisodes = await getCollection('episodes', ({ data }) => {
-  return data.draft !== true
+  return data.draft !== true && new Date(data.publishDate) <= now
 })
 
 const episode = allEpisodes.find(
@@ -98,9 +100,7 @@ const episodeSchema = {
   datePublished: episode.data.publishDate.toISOString(),
   episodeNumber: episode.data.episodeNumber,
   duration: durationToISO(episode.data.duration),
-  image: episode.data.thumbnail
-    ? `${siteUrl}${episode.data.thumbnail}`
-    : `${siteUrl}/images/podcast/og-default.jpg`,
+  image: resolveEpisodeCover(episode.data, 1200) || `${siteUrl}/images/podcast/og-default.jpg`,
   partOfSeries: {
     '@type': 'PodcastSeries',
     name: 'Ag & Culture Podcast',
@@ -129,7 +129,7 @@ const hasAudio = episode.data.audioUrl
 <PodcastLayout
   title={episode.data.title}
   description={episode.data.description}
-  ogImage={episode.data.thumbnail || '/images/podcast/og-default.jpg'}
+  ogImage={resolveEpisodeCover(episode.data, 1200) || '/images/podcast/og-default.jpg'}
   schema={episodeSchema}
   breadcrumbs={[
     { label: `Episode ${episode.data.episodeNumber}`, href: `/podcast/${episodeSlug}/` },
@@ -187,7 +187,7 @@ const hasAudio = episode.data.audioUrl
                 title={episode.data.title}
                 episodeNumber={episode.data.episodeNumber}
                 episodeSlug={episodeSlug}
-                poster={episode.data.thumbnail}
+                poster={resolveEpisodeCover(episode.data, 1200)}
               />
             )
           }
@@ -203,7 +203,7 @@ const hasAudio = episode.data.audioUrl
                 duration={episode.data.duration}
                 durationSeconds={episode.data.durationSeconds}
                 chapters={episode.data.chapters}
-                thumbnail={episode.data.thumbnail}
+                thumbnail={resolveEpisodeCover(episode.data, 200)}
               />
             )
           }
@@ -297,23 +297,31 @@ const hasAudio = episode.data.audioUrl
         <aside class="space-y-6">
           {/* Guests */}
           {
-            episode.data.guests && episode.data.guests.length > 0 && (
+            resolvedGuests.length > 0 && (
               <div class="rounded-xl border border-gray-100 bg-white p-6">
                 <h3 class="mb-4 font-semibold text-gray-900">
-                  {episode.data.guests.length === 1 ? 'Guest' : 'Guests'}
+                  {resolvedGuests.length === 1 ? 'Guest' : 'Guests'}
                 </h3>
                 <div class="space-y-4">
-                  {episode.data.guests.map((guest) => (
-                    <GuestCard
-                      name={guest.name}
-                      slug={guest.slug}
-                      role={guest.role}
-                      bio={guest.bio}
-                      photo={guest.photo}
-                      links={guest.links}
-                      variant="sidebar"
-                    />
-                  ))}
+                  {resolvedGuests.map((guest) => {
+                    const photoUrl = guest.teamMember?.data.photo
+                      ? buildSouthlandUrl(guest.teamMember.data.photo, { width: 128, height: 128, crop: 'fill', gravity: 'face' })
+                      : guest.photo
+                    const guestSlug = guest.teamMember
+                      ? `/team/${guest.teamMember.id.replace(/\.mdx?$/, '')}/`
+                      : undefined
+                    return (
+                      <GuestCard
+                        name={guest.teamMember?.data.name || guest.name}
+                        slug={guest.slug}
+                        role={guest.teamMember?.data.role || guest.role}
+                        bio={guest.bio}
+                        photo={photoUrl}
+                        links={guest.teamMember?.data.links || guest.links}
+                        variant="sidebar"
+                      />
+                    )
+                  })}
                 </div>
               </div>
             )

@@ -4,6 +4,7 @@
  */
 
 import EpisodeCard from './EpisodeCard.astro'
+import { resolveEpisodeCover } from '../../lib/cloudinary'
 import type { CollectionEntry } from 'astro:content'
 
 interface Props {
@@ -37,10 +38,10 @@ const gridClasses =
           slug={featuredEpisode.id.replace(/\.mdx?$/, '')}
           episodeNumber={featuredEpisode.data.episodeNumber}
           description={featuredEpisode.data.description}
-          thumbnail={featuredEpisode.data.thumbnail}
+          thumbnail={resolveEpisodeCover(featuredEpisode.data, 800)}
           duration={featuredEpisode.data.duration}
           publishDate={featuredEpisode.data.publishDate}
-          topics={featuredEpisode.data.topics}
+          hook={featuredEpisode.data.hook}
           featured={true}
         />
       </div>
@@ -56,10 +57,10 @@ const gridClasses =
           slug={episode.id.replace(/\.mdx?$/, '')}
           episodeNumber={episode.data.episodeNumber}
           description={episode.data.description}
-          thumbnail={episode.data.thumbnail}
+          thumbnail={resolveEpisodeCover(episode.data, 640)}
           duration={episode.data.duration}
           publishDate={episode.data.publishDate}
-          topics={episode.data.topics}
+          hook={episode.data.hook}
         />
       ))
     }

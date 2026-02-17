@@ -5,6 +5,7 @@
  */
 
 import PodcastLayout from '../../layouts/PodcastLayout.astro'
+import { resolveEpisodeCover } from '../../lib/cloudinary'
 import { getCollection } from 'astro:content'
 
 // Get all episodes for client-side search
@@ -18,7 +19,7 @@ const searchIndex = allEpisodes.map((episode) => ({
   title: episode.data.title,
   episodeNumber: episode.data.episodeNumber,
   description: episode.data.description,
-  thumbnail: episode.data.thumbnail,
+  thumbnail: resolveEpisodeCover(episode.data, 200) || episode.data.thumbnail,
   duration: episode.data.duration,
   publishDate: episode.data.publishDate.toISOString(),
   topics: episode.data.topics || [],
@@ -117,13 +118,11 @@ const searchIndex = allEpisodes.map((episode) => ({
         <p class="text-gray-500">No results found. Try different keywords.</p>
       </div>
 
-      {
-        /* Results container -->
+      {/* Results container */}
       <div id="results-container" class="hidden"></div>
     </div>
 
-    {/* Recent/Popular Topics */
-      }
+    {/* Recent/Popular Topics */}
       <div class="mt-12 border-t border-gray-100 pt-12">
         <h2 class="mb-4 text-lg font-semibold text-gray-900">Popular Topics</h2>
         <div class="flex flex-wrap gap-2">

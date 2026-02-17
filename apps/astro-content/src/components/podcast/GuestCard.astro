@@ -20,6 +20,7 @@ interface Props {
   links?: GuestLink
   episodeCount?: number
   variant?: 'default' | 'compact' | 'sidebar'
+  href?: string
   class?: string
 }
 
@@ -33,10 +34,11 @@ const {
   links,
   episodeCount,
   variant = 'default',
+  href,
   class: className = '',
 } = Astro.props
 
-const guestUrl = `/podcast/guests/${slug}/`
+const guestUrl = href || `/team/${slug}/`
 const defaultPhoto = '/images/podcast/guests/default-avatar.jpg'
 
 const isCompact = variant === 'compact'

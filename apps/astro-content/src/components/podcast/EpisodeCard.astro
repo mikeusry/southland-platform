@@ -3,8 +3,6 @@
  * Episode card component for podcast hub and listings
  */
 
-import TopicTag from '../shared/TopicTag.astro'
-
 interface Props {
   title: string
   slug: string
@@ -13,7 +11,7 @@ interface Props {
   thumbnail?: string
   duration: string
   publishDate: Date
-  topics?: string[]
+  hook?: string
   featured?: boolean
   class?: string
 }
@@ -26,7 +24,7 @@ const {
   thumbnail,
   duration,
   publishDate,
-  topics = [],
+  hook,
   featured = false,
   class: className = '',
 } = Astro.props
@@ -52,7 +50,7 @@ const formattedDate = new Intl.DateTimeFormat('en-US', {
     href={episodeUrl}
     class={`episode-card-thumbnail block relative group ${featured ? 'md:w-2/5 md:flex-shrink-0' : ''}`}
   >
-    <div class={`aspect-video bg-gray-100 overflow-hidden ${featured ? '' : ''}`}>
+    <div class={`bg-gray-100 overflow-hidden ${featured ? 'aspect-video md:aspect-auto md:h-full' : 'aspect-video'}`}>
       <img
         src={thumbnail || defaultThumbnail}
         alt={`Episode ${episodeNumber}: ${title}`}
@@ -71,24 +69,19 @@ const formattedDate = new Intl.DateTimeFormat('en-US', {
         </svg>
       </div>
     </div>
-
-    {/* Duration badge */}
-    <div
-      class="absolute bottom-3 right-3 rounded-md bg-black/80 px-2.5 py-1 text-xs font-medium text-white"
-    >
-      {duration}
-    </div>
   </a>
 
   {/* Content */}
   <div
     class={`episode-card-content p-5 ${featured ? 'md:flex-1 md:p-6 md:flex md:flex-col md:justify-center' : ''}`}
   >
-    {/* Episode number and date */}
+    {/* Episode number, date, and duration */}
     <div class="mb-2 flex items-center gap-2 text-sm text-gray-500">
       <span class="font-semibold text-southland-green">EP {episodeNumber}</span>
       <span>•</span>
       <time datetime={publishDate.toISOString()}>{formattedDate}</time>
+      <span>•</span>
+      <span>{duration}</span>
     </div>
 
     {/* Title */}
@@ -99,21 +92,16 @@ const formattedDate = new Intl.DateTimeFormat('en-US', {
     </h3>
 
     {/* Description */}
-    <p class={`text-gray-600 mb-4 ${featured ? 'line-clamp-3 text-base' : 'line-clamp-2 text-sm'}`}>
+    <p class={`text-gray-600 ${featured ? 'line-clamp-3 text-base' : 'line-clamp-2 text-sm'} ${hook ? 'mb-3' : 'mb-4'}`}>
       {description}
     </p>
 
-    {/* Topics */}
+    {/* Hook — compelling one-liner */}
     {
-      topics.length > 0 && (
-        <div class="flex flex-wrap gap-2">
-          {topics.slice(0, 3).map((topic) => (
-            <TopicTag topic={topic} size="sm" />
-          ))}
-          {topics.length > 3 && (
-            <span class="text-xs text-gray-500">+{topics.length - 3} more</span>
-          )}
-        </div>
+      hook && (
+        <p class={`mb-4 font-medium italic text-southland-green-dark ${featured ? 'text-base' : 'text-sm'}`}>
+          {hook}
+        </p>
       )
     }
 
@@ -122,7 +110,7 @@ const formattedDate = new Intl.DateTimeFormat('en-US', {
       featured && (
         <a
           href={episodeUrl}
-          class="mt-4 inline-flex items-center gap-2 font-semibold text-southland-green transition-colors hover:text-southland-green-dark"
+          class="mt-auto inline-flex items-center gap-2 font-semibold text-southland-green transition-colors hover:text-southland-green-dark"
         >
           Listen Now
           <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

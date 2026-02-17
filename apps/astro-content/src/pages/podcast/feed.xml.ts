@@ -5,7 +5,7 @@
 
 import type { APIRoute } from 'astro'
 import { getCollection } from 'astro:content'
-import { getLogoUrl } from '../../lib/cloudinary'
+import { getLogoUrl, resolveEpisodeCover } from '../../lib/cloudinary'
 
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
 
@@ -32,8 +32,9 @@ function escapeXml(text: string): string {
 }
 
 export const GET: APIRoute = async () => {
+  const now = new Date()
   const episodes = await getCollection('episodes', ({ data }) => {
-    return data.draft !== true
+    return data.draft !== true && new Date(data.publishDate) <= now
   })
 
   // Sort by publish date (newest first)
@@ -100,14 +101,14 @@ export const GET: APIRoute = async () => {
       <description><![CDATA[${episode.data.description}]]></description>
       ${episode.data.longDescription ? `<content:encoded><![CDATA[${episode.data.longDescription}]]></content:encoded>` : ''}
 
-      ${episode.data.audioUrl ? `<enclosure url="${episode.data.audioUrl}" type="audio/mpeg" length="0"/>` : ''}
+      ${episode.data.audioUrl ? `<enclosure url="${episode.data.audioUrl}" type="audio/mpeg" length="${episode.data.audioFileSize || 0}"/>` : ''}
 
       <itunes:title>${escapeXml(episode.data.title)}</itunes:title>
       <itunes:episode>${episode.data.episodeNumber}</itunes:episode>
       ${episode.data.season ? `<itunes:season>${episode.data.season}</itunes:season>` : ''}
       <itunes:duration>${formatDuration(episode.data.duration)}</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
-      ${episode.data.thumbnail ? `<itunes:image href="${siteUrl}${episode.data.thumbnail}"/>` : ''}
+      ${(() => { const cover = resolveEpisodeCover(episode.data, 1400); return cover ? `<itunes:image href="${escapeXml(cover)}"/>` : '' })()}
       <itunes:summary><![CDATA[${episode.data.description}]]></itunes:summary>
       ${episode.data.guests && episode.data.guests.length > 0
         ? `<itunes:author>${episode.data.guests.map((g) => g.name).join(', ')}</itunes:author>`
@@ -121,19 +122,6 @@ export const GET: APIRoute = async () => {
             .join('\n      ')
         : ''}
 
-      ${
-        episode.data.transcript && episode.data.transcript.length > 0
-          ? `
-      <podcast:transcript url="${episodeUrl}transcript.vtt" type="text/vtt"/>`
-          : ''
-      }
-
-      ${
-        episode.data.chapters && episode.data.chapters.length > 0
-          ? `
-      <podcast:chapters url="${episodeUrl}chapters.json" type="application/json+chapters"/>`
-          : ''
-      }
     </item>`
       })
       .join('')}

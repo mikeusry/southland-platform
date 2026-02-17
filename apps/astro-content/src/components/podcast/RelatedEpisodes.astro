@@ -4,6 +4,7 @@
  */
 
 import EpisodeCard from './EpisodeCard.astro'
+import { resolveEpisodeCover } from '../../lib/cloudinary'
 import type { CollectionEntry } from 'astro:content'
 
 interface Props {
@@ -30,10 +31,10 @@ const relatedEpisodes = episodes.filter((ep) => ep.id !== currentSlug).slice(0, 
             slug={episode.id.replace(/\.mdx?$/, '')}
             episodeNumber={episode.data.episodeNumber}
             description={episode.data.description}
-            thumbnail={episode.data.thumbnail}
+            thumbnail={resolveEpisodeCover(episode.data, 400)}
             duration={episode.data.duration}
             publishDate={episode.data.publishDate}
-            topics={episode.data.topics}
+            hook={episode.data.hook}
             class="!border-0 bg-gray-50 !shadow-none"
           />
         ))}

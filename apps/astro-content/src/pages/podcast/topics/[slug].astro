@@ -8,7 +8,10 @@
 import PodcastLayout from '../../../layouts/PodcastLayout.astro'
 import EpisodeCard from '../../../components/podcast/EpisodeCard.astro'
 import TopicTag from '../../../components/shared/TopicTag.astro'
-import { getCollection } from 'astro:content'
+import { resolveEpisodeCover } from '../../../lib/cloudinary'
+import { getCollection, render } from 'astro:content'
+
+export const prerender = true
 
 export async function getStaticPaths() {
   const topics = await getCollection('topics')
@@ -19,7 +22,7 @@ export async function getStaticPaths() {
 }
 
 const { topic } = Astro.props
-const { Content } = await topic.render()
+const { Content } = await render(topic)
 
 // Get the slug without extension
 const topicSlug = topic.id.replace(/\.mdx?$/, '')
@@ -149,7 +152,7 @@ const schema = {
                     slug={episode.id.replace(/\.mdx?$/, '')}
                     episodeNumber={episode.data.episodeNumber}
                     description={episode.data.description}
-                    thumbnail={episode.data.thumbnail}
+                    thumbnail={resolveEpisodeCover(episode.data, 640)}
                     duration={episode.data.duration}
                     publishDate={episode.data.publishDate}
                     topics={episode.data.topics}
