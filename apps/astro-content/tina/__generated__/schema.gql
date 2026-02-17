@@ -187,6 +187,12 @@ type TeamLinks {
   linkedin: String
   twitter: String
   website: String
+  youtube: String
+}
+
+type TeamPrimaryCta {
+  label: String!
+  url: String!
 }
 
 type Team implements Node & Document {
@@ -205,6 +211,17 @@ type Team implements Node & Document {
   order: Float
   featured: Boolean
   active: Boolean
+  subtitle: String
+  hook: String
+  portraitBadge: String
+  credibilityStats: [String]
+  storySectionTitle: String
+  storyParagraphs: [String]
+  tieInHeading: String
+  tieInPoints: [String]
+  primaryCta: TeamPrimaryCta
+  blogSectionTitle: String
+  heroImage: String
   body: JSON
   id: ID!
   _sys: SystemInfo!
@@ -215,6 +232,12 @@ input TeamLinksFilter {
   linkedin: StringFilter
   twitter: StringFilter
   website: StringFilter
+  youtube: StringFilter
+}
+
+input TeamPrimaryCtaFilter {
+  label: StringFilter
+  url: StringFilter
 }
 
 input TeamFilter {
@@ -233,6 +256,17 @@ input TeamFilter {
   order: NumberFilter
   featured: BooleanFilter
   active: BooleanFilter
+  subtitle: StringFilter
+  hook: StringFilter
+  portraitBadge: StringFilter
+  credibilityStats: StringFilter
+  storySectionTitle: StringFilter
+  storyParagraphs: StringFilter
+  tieInHeading: StringFilter
+  tieInPoints: StringFilter
+  primaryCta: TeamPrimaryCtaFilter
+  blogSectionTitle: StringFilter
+  heroImage: StringFilter
   body: RichTextFilter
 }
 
@@ -260,6 +294,7 @@ type Episodes implements Node & Document {
   applePodcastUrl: String
   spotifyUrl: String
   thumbnail: String
+  coverImage: String
   duration: String!
   durationSeconds: Float!
   topics: [String]
@@ -283,6 +318,7 @@ input EpisodesFilter {
   applePodcastUrl: StringFilter
   spotifyUrl: StringFilter
   thumbnail: StringFilter
+  coverImage: StringFilter
   duration: StringFilter
   durationSeconds: NumberFilter
   topics: StringFilter
@@ -437,6 +473,12 @@ input TeamLinksMutation {
   linkedin: String
   twitter: String
   website: String
+  youtube: String
+}
+
+input TeamPrimaryCtaMutation {
+  label: String
+  url: String
 }
 
 input TeamMutation {
@@ -455,6 +497,17 @@ input TeamMutation {
   order: Float
   featured: Boolean
   active: Boolean
+  subtitle: String
+  hook: String
+  portraitBadge: String
+  credibilityStats: [String]
+  storySectionTitle: String
+  storyParagraphs: [String]
+  tieInHeading: String
+  tieInPoints: [String]
+  primaryCta: TeamPrimaryCtaMutation
+  blogSectionTitle: String
+  heroImage: String
   body: JSON
 }
 
@@ -471,6 +524,7 @@ input EpisodesMutation {
   applePodcastUrl: String
   spotifyUrl: String
   thumbnail: String
+  coverImage: String
   duration: String
   durationSeconds: Float
   topics: [String]

@@ -329,6 +329,13 @@ export type TeamLinks = {
   linkedin?: Maybe<Scalars['String']['output']>;
   twitter?: Maybe<Scalars['String']['output']>;
   website?: Maybe<Scalars['String']['output']>;
+  youtube?: Maybe<Scalars['String']['output']>;
+};
+
+export type TeamPrimaryCta = {
+  __typename?: 'TeamPrimaryCta';
+  label: Scalars['String']['output'];
+  url: Scalars['String']['output'];
 };
 
 export type Team = Node & Document & {
@@ -348,6 +355,17 @@ export type Team = Node & Document & {
   order?: Maybe<Scalars['Float']['output']>;
   featured?: Maybe<Scalars['Boolean']['output']>;
   active?: Maybe<Scalars['Boolean']['output']>;
+  subtitle?: Maybe<Scalars['String']['output']>;
+  hook?: Maybe<Scalars['String']['output']>;
+  portraitBadge?: Maybe<Scalars['String']['output']>;
+  credibilityStats?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  storySectionTitle?: Maybe<Scalars['String']['output']>;
+  storyParagraphs?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  tieInHeading?: Maybe<Scalars['String']['output']>;
+  tieInPoints?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  primaryCta?: Maybe<TeamPrimaryCta>;
+  blogSectionTitle?: Maybe<Scalars['String']['output']>;
+  heroImage?: Maybe<Scalars['String']['output']>;
   body?: Maybe<Scalars['JSON']['output']>;
   id: Scalars['ID']['output'];
   _sys: SystemInfo;
@@ -358,6 +376,12 @@ export type TeamLinksFilter = {
   linkedin?: InputMaybe<StringFilter>;
   twitter?: InputMaybe<StringFilter>;
   website?: InputMaybe<StringFilter>;
+  youtube?: InputMaybe<StringFilter>;
+};
+
+export type TeamPrimaryCtaFilter = {
+  label?: InputMaybe<StringFilter>;
+  url?: InputMaybe<StringFilter>;
 };
 
 export type TeamFilter = {
@@ -376,6 +400,17 @@ export type TeamFilter = {
   order?: InputMaybe<NumberFilter>;
   featured?: InputMaybe<BooleanFilter>;
   active?: InputMaybe<BooleanFilter>;
+  subtitle?: InputMaybe<StringFilter>;
+  hook?: InputMaybe<StringFilter>;
+  portraitBadge?: InputMaybe<StringFilter>;
+  credibilityStats?: InputMaybe<StringFilter>;
+  storySectionTitle?: InputMaybe<StringFilter>;
+  storyParagraphs?: InputMaybe<StringFilter>;
+  tieInHeading?: InputMaybe<StringFilter>;
+  tieInPoints?: InputMaybe<StringFilter>;
+  primaryCta?: InputMaybe<TeamPrimaryCtaFilter>;
+  blogSectionTitle?: InputMaybe<StringFilter>;
+  heroImage?: InputMaybe<StringFilter>;
   body?: InputMaybe<RichTextFilter>;
 };
 
@@ -406,6 +441,7 @@ export type Episodes = Node & Document & {
   applePodcastUrl?: Maybe<Scalars['String']['output']>;
   spotifyUrl?: Maybe<Scalars['String']['output']>;
   thumbnail?: Maybe<Scalars['String']['output']>;
+  coverImage?: Maybe<Scalars['String']['output']>;
   duration: Scalars['String']['output'];
   durationSeconds: Scalars['Float']['output'];
   topics?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
@@ -429,6 +465,7 @@ export type EpisodesFilter = {
   applePodcastUrl?: InputMaybe<StringFilter>;
   spotifyUrl?: InputMaybe<StringFilter>;
   thumbnail?: InputMaybe<StringFilter>;
+  coverImage?: InputMaybe<StringFilter>;
   duration?: InputMaybe<StringFilter>;
   durationSeconds?: InputMaybe<NumberFilter>;
   topics?: InputMaybe<StringFilter>;
@@ -686,6 +723,12 @@ export type TeamLinksMutation = {
   linkedin?: InputMaybe<Scalars['String']['input']>;
   twitter?: InputMaybe<Scalars['String']['input']>;
   website?: InputMaybe<Scalars['String']['input']>;
+  youtube?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type TeamPrimaryCtaMutation = {
+  label?: InputMaybe<Scalars['String']['input']>;
+  url?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type TeamMutation = {
@@ -704,6 +747,17 @@ export type TeamMutation = {
   order?: InputMaybe<Scalars['Float']['input']>;
   featured?: InputMaybe<Scalars['Boolean']['input']>;
   active?: InputMaybe<Scalars['Boolean']['input']>;
+  subtitle?: InputMaybe<Scalars['String']['input']>;
+  hook?: InputMaybe<Scalars['String']['input']>;
+  portraitBadge?: InputMaybe<Scalars['String']['input']>;
+  credibilityStats?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  storySectionTitle?: InputMaybe<Scalars['String']['input']>;
+  storyParagraphs?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  tieInHeading?: InputMaybe<Scalars['String']['input']>;
+  tieInPoints?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  primaryCta?: InputMaybe<TeamPrimaryCtaMutation>;
+  blogSectionTitle?: InputMaybe<Scalars['String']['input']>;
+  heroImage?: InputMaybe<Scalars['String']['input']>;
   body?: InputMaybe<Scalars['JSON']['input']>;
 };
 
@@ -720,6 +774,7 @@ export type EpisodesMutation = {
   applePodcastUrl?: InputMaybe<Scalars['String']['input']>;
   spotifyUrl?: InputMaybe<Scalars['String']['input']>;
   thumbnail?: InputMaybe<Scalars['String']['input']>;
+  coverImage?: InputMaybe<Scalars['String']['input']>;
   duration?: InputMaybe<Scalars['String']['input']>;
   durationSeconds?: InputMaybe<Scalars['Float']['input']>;
   topics?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
@@ -755,9 +810,9 @@ export type TopicsMutation = {
 
 export type BlogPartsFragment = { __typename: 'Blog', title: string, publishDate: string, updatedDate?: string | null, description: string, author?: string | null, reviewer?: string | null, tags?: Array<string | null> | null, segment?: string | null, targetKeyword?: string | null, featuredImage?: string | null, draft?: boolean | null, shopifyId?: number | null, shopifyHandle?: string | null, body?: any | null };
 
-export type TeamPartsFragment = { __typename: 'Team', name: string, role: string, bio: string, photo?: string | null, email?: string | null, phone?: string | null, credentials?: Array<string | null> | null, expertiseAreas?: Array<string | null> | null, yearsExperience?: number | null, isAuthor?: boolean | null, isReviewer?: boolean | null, order?: number | null, featured?: boolean | null, active?: boolean | null, body?: any | null, links?: { __typename: 'TeamLinks', linkedin?: string | null, twitter?: string | null, website?: string | null } | null };
+export type TeamPartsFragment = { __typename: 'Team', name: string, role: string, bio: string, photo?: string | null, email?: string | null, phone?: string | null, credentials?: Array<string | null> | null, expertiseAreas?: Array<string | null> | null, yearsExperience?: number | null, isAuthor?: boolean | null, isReviewer?: boolean | null, order?: number | null, featured?: boolean | null, active?: boolean | null, subtitle?: string | null, hook?: string | null, portraitBadge?: string | null, credibilityStats?: Array<string | null> | null, storySectionTitle?: string | null, storyParagraphs?: Array<string | null> | null, tieInHeading?: string | null, tieInPoints?: Array<string | null> | null, blogSectionTitle?: string | null, heroImage?: string | null, body?: any | null, links?: { __typename: 'TeamLinks', linkedin?: string | null, twitter?: string | null, website?: string | null, youtube?: string | null } | null, primaryCta?: { __typename: 'TeamPrimaryCta', label: string, url: string } | null };
 
-export type EpisodesPartsFragment = { __typename: 'Episodes', title: string, episodeNumber: number, season?: number | null, publishDate: string, description: string, longDescription?: string | null, muxPlaybackId?: string | null, audioUrl?: string | null, youtubeUrl?: string | null, applePodcastUrl?: string | null, spotifyUrl?: string | null, thumbnail?: string | null, duration: string, durationSeconds: number, topics?: Array<string | null> | null, draft?: boolean | null, body?: any | null };
+export type EpisodesPartsFragment = { __typename: 'Episodes', title: string, episodeNumber: number, season?: number | null, publishDate: string, description: string, longDescription?: string | null, muxPlaybackId?: string | null, audioUrl?: string | null, youtubeUrl?: string | null, applePodcastUrl?: string | null, spotifyUrl?: string | null, thumbnail?: string | null, coverImage?: string | null, duration: string, durationSeconds: number, topics?: Array<string | null> | null, draft?: boolean | null, body?: any | null };
 
 export type GuestsPartsFragment = { __typename: 'Guests', name: string, role?: string | null, company?: string | null, bio: string, photo?: string | null, featured?: boolean | null, body?: any | null, links?: { __typename: 'GuestsLinks', website?: string | null, linkedin?: string | null, twitter?: string | null, instagram?: string | null } | null };
 
@@ -787,7 +842,7 @@ export type TeamQueryVariables = Exact<{
 }>;
 
 
-export type TeamQuery = { __typename?: 'Query', team: { __typename: 'Team', id: string, name: string, role: string, bio: string, photo?: string | null, email?: string | null, phone?: string | null, credentials?: Array<string | null> | null, expertiseAreas?: Array<string | null> | null, yearsExperience?: number | null, isAuthor?: boolean | null, isReviewer?: boolean | null, order?: number | null, featured?: boolean | null, active?: boolean | null, body?: any | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, links?: { __typename: 'TeamLinks', linkedin?: string | null, twitter?: string | null, website?: string | null } | null } };
+export type TeamQuery = { __typename?: 'Query', team: { __typename: 'Team', id: string, name: string, role: string, bio: string, photo?: string | null, email?: string | null, phone?: string | null, credentials?: Array<string | null> | null, expertiseAreas?: Array<string | null> | null, yearsExperience?: number | null, isAuthor?: boolean | null, isReviewer?: boolean | null, order?: number | null, featured?: boolean | null, active?: boolean | null, subtitle?: string | null, hook?: string | null, portraitBadge?: string | null, credibilityStats?: Array<string | null> | null, storySectionTitle?: string | null, storyParagraphs?: Array<string | null> | null, tieInHeading?: string | null, tieInPoints?: Array<string | null> | null, blogSectionTitle?: string | null, heroImage?: string | null, body?: any | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, links?: { __typename: 'TeamLinks', linkedin?: string | null, twitter?: string | null, website?: string | null, youtube?: string | null } | null, primaryCta?: { __typename: 'TeamPrimaryCta', label: string, url: string } | null } };
 
 export type TeamConnectionQueryVariables = Exact<{
   before?: InputMaybe<Scalars['String']['input']>;
@@ -799,14 +854,14 @@ export type TeamConnectionQueryVariables = Exact<{
 }>;
 
 
-export type TeamConnectionQuery = { __typename?: 'Query', teamConnection: { __typename?: 'TeamConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'TeamConnectionEdges', cursor: string, node?: { __typename: 'Team', id: string, name: string, role: string, bio: string, photo?: string | null, email?: string | null, phone?: string | null, credentials?: Array<string | null> | null, expertiseAreas?: Array<string | null> | null, yearsExperience?: number | null, isAuthor?: boolean | null, isReviewer?: boolean | null, order?: number | null, featured?: boolean | null, active?: boolean | null, body?: any | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, links?: { __typename: 'TeamLinks', linkedin?: string | null, twitter?: string | null, website?: string | null } | null } | null } | null> | null } };
+export type TeamConnectionQuery = { __typename?: 'Query', teamConnection: { __typename?: 'TeamConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'TeamConnectionEdges', cursor: string, node?: { __typename: 'Team', id: string, name: string, role: string, bio: string, photo?: string | null, email?: string | null, phone?: string | null, credentials?: Array<string | null> | null, expertiseAreas?: Array<string | null> | null, yearsExperience?: number | null, isAuthor?: boolean | null, isReviewer?: boolean | null, order?: number | null, featured?: boolean | null, active?: boolean | null, subtitle?: string | null, hook?: string | null, portraitBadge?: string | null, credibilityStats?: Array<string | null> | null, storySectionTitle?: string | null, storyParagraphs?: Array<string | null> | null, tieInHeading?: string | null, tieInPoints?: Array<string | null> | null, blogSectionTitle?: string | null, heroImage?: string | null, body?: any | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, links?: { __typename: 'TeamLinks', linkedin?: string | null, twitter?: string | null, website?: string | null, youtube?: string | null } | null, primaryCta?: { __typename: 'TeamPrimaryCta', label: string, url: string } | null } | null } | null> | null } };
 
 export type EpisodesQueryVariables = Exact<{
   relativePath: Scalars['String']['input'];
 }>;
 
 
-export type EpisodesQuery = { __typename?: 'Query', episodes: { __typename: 'Episodes', id: string, title: string, episodeNumber: number, season?: number | null, publishDate: string, description: string, longDescription?: string | null, muxPlaybackId?: string | null, audioUrl?: string | null, youtubeUrl?: string | null, applePodcastUrl?: string | null, spotifyUrl?: string | null, thumbnail?: string | null, duration: string, durationSeconds: number, topics?: Array<string | null> | null, draft?: boolean | null, body?: any | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } };
+export type EpisodesQuery = { __typename?: 'Query', episodes: { __typename: 'Episodes', id: string, title: string, episodeNumber: number, season?: number | null, publishDate: string, description: string, longDescription?: string | null, muxPlaybackId?: string | null, audioUrl?: string | null, youtubeUrl?: string | null, applePodcastUrl?: string | null, spotifyUrl?: string | null, thumbnail?: string | null, coverImage?: string | null, duration: string, durationSeconds: number, topics?: Array<string | null> | null, draft?: boolean | null, body?: any | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } };
 
 export type EpisodesConnectionQueryVariables = Exact<{
   before?: InputMaybe<Scalars['String']['input']>;
@@ -818,7 +873,7 @@ export type EpisodesConnectionQueryVariables = Exact<{
 }>;
 
 
-export type EpisodesConnectionQuery = { __typename?: 'Query', episodesConnection: { __typename?: 'EpisodesConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'EpisodesConnectionEdges', cursor: string, node?: { __typename: 'Episodes', id: string, title: string, episodeNumber: number, season?: number | null, publishDate: string, description: string, longDescription?: string | null, muxPlaybackId?: string | null, audioUrl?: string | null, youtubeUrl?: string | null, applePodcastUrl?: string | null, spotifyUrl?: string | null, thumbnail?: string | null, duration: string, durationSeconds: number, topics?: Array<string | null> | null, draft?: boolean | null, body?: any | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } };
+export type EpisodesConnectionQuery = { __typename?: 'Query', episodesConnection: { __typename?: 'EpisodesConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'EpisodesConnectionEdges', cursor: string, node?: { __typename: 'Episodes', id: string, title: string, episodeNumber: number, season?: number | null, publishDate: string, description: string, longDescription?: string | null, muxPlaybackId?: string | null, audioUrl?: string | null, youtubeUrl?: string | null, applePodcastUrl?: string | null, spotifyUrl?: string | null, thumbnail?: string | null, coverImage?: string | null, duration: string, durationSeconds: number, topics?: Array<string | null> | null, draft?: boolean | null, body?: any | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } };
 
 export type GuestsQueryVariables = Exact<{
   relativePath: Scalars['String']['input'];
@@ -891,6 +946,7 @@ export const TeamPartsFragmentDoc = gql`
     linkedin
     twitter
     website
+    youtube
   }
   credentials
   expertiseAreas
@@ -900,6 +956,21 @@ export const TeamPartsFragmentDoc = gql`
   order
   featured
   active
+  subtitle
+  hook
+  portraitBadge
+  credibilityStats
+  storySectionTitle
+  storyParagraphs
+  tieInHeading
+  tieInPoints
+  primaryCta {
+    __typename
+    label
+    url
+  }
+  blogSectionTitle
+  heroImage
   body
 }
     `;
@@ -918,6 +989,7 @@ export const EpisodesPartsFragmentDoc = gql`
   applePodcastUrl
   spotifyUrl
   thumbnail
+  coverImage
   duration
   durationSeconds
   topics

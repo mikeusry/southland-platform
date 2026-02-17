@@ -15,10 +15,12 @@ const episodesCollection = defineCollection({
     // Media
     muxPlaybackId: z.string().optional(),
     audioUrl: z.string().optional(),
+    audioFileSize: z.number().optional(), // bytes, for RSS enclosure length
     youtubeUrl: z.string().optional(),
     applePodcastUrl: z.string().optional(),
     spotifyUrl: z.string().optional(),
     thumbnail: z.string().optional(),
+    coverImage: z.string().optional(), // Cloudinary public ID (relative to Southland Website/)
     duration: z.string(), // "45:32" format
     durationSeconds: z.number(),
 
@@ -56,6 +58,9 @@ const episodesCollection = defineCollection({
 
     // Topics/Tags
     topics: z.array(z.string()).optional().default([]),
+
+    // Hook - curiosity-inducing one-liner for episode cards
+    hook: z.string().optional(),
 
     // Related content
     relatedProducts: z
@@ -186,6 +191,7 @@ const teamCollection = defineCollection({
         linkedin: z.string().optional(),
         twitter: z.string().optional(),
         website: z.string().optional(),
+        youtube: z.string().optional(),
       })
       .optional(),
     // E-E-A-T fields for author credibility
@@ -210,6 +216,24 @@ const teamCollection = defineCollection({
     order: z.number().optional().default(99),
     featured: z.boolean().optional().default(false), // Show on homepage/contact
     active: z.boolean().optional().default(true), // Still with company
+
+    // Extended Profile Fields (optional, for rich team pages)
+    subtitle: z.string().optional(),
+    hook: z.string().optional(),
+    portraitBadge: z.string().optional(),
+    credibilityStats: z.array(z.string()).optional().default([]),
+    storySectionTitle: z.string().optional(),
+    storyParagraphs: z.array(z.string()).optional().default([]),
+    tieInHeading: z.string().optional(),
+    tieInPoints: z.array(z.string()).optional().default([]),
+    primaryCta: z
+      .object({
+        label: z.string(),
+        url: z.string(),
+      })
+      .optional(),
+    blogSectionTitle: z.string().optional(),
+    heroImage: z.string().optional(), // Full Cloudinary public ID for wide hero background
   }),
 })
 

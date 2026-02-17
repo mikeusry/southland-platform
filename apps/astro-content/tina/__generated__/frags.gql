@@ -29,6 +29,7 @@ fragment TeamParts on Team {
     linkedin
     twitter
     website
+    youtube
   }
   credentials
   expertiseAreas
@@ -38,6 +39,21 @@ fragment TeamParts on Team {
   order
   featured
   active
+  subtitle
+  hook
+  portraitBadge
+  credibilityStats
+  storySectionTitle
+  storyParagraphs
+  tieInHeading
+  tieInPoints
+  primaryCta {
+    __typename
+    label
+    url
+  }
+  blogSectionTitle
+  heroImage
   body
 }
 
@@ -55,6 +71,7 @@ fragment EpisodesParts on Episodes {
   applePodcastUrl
   spotifyUrl
   thumbnail
+  coverImage
   duration
   durationSeconds
   topics

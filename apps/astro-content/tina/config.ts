@@ -212,6 +212,7 @@ export default defineConfig({
               { type: "string", name: "linkedin", label: "LinkedIn URL" },
               { type: "string", name: "twitter", label: "Twitter/X URL" },
               { type: "string", name: "website", label: "Personal Website" },
+              { type: "string", name: "youtube", label: "YouTube URL" },
             ],
           },
           {
@@ -272,11 +273,94 @@ export default defineConfig({
             label: "Active",
             description: "Currently with the company",
           },
+          // --- Extended Profile Fields (for rich team pages) ---
+          {
+            type: "string",
+            name: "subtitle",
+            label: "Subtitle",
+            description: 'e.g., "Founder, Southland Organics · Host, AG & Culture Podcast"',
+          },
+          {
+            type: "string",
+            name: "hook",
+            label: "Hook",
+            description: "One-liner that answers 'Why should I listen to this person?'",
+            ui: {
+              component: "textarea",
+            },
+          },
+          {
+            type: "string",
+            name: "portraitBadge",
+            label: "Portrait Badge",
+            description: 'Pill text overlaid on portrait (e.g., "Host of the AG & Culture Podcast")',
+          },
+          {
+            type: "string",
+            name: "credibilityStats",
+            label: "Credibility Stats",
+            description: "Short credibility bullets for the snapshot band",
+            list: true,
+          },
+          {
+            type: "string",
+            name: "storySectionTitle",
+            label: "Story Section Title",
+            description: 'e.g., "From humate deposits to field results"',
+          },
+          {
+            type: "string",
+            name: "storyParagraphs",
+            label: "Story Paragraphs",
+            description: "Long-form story paragraphs (each item = one paragraph)",
+            list: true,
+            ui: {
+              component: "textarea",
+            },
+          },
+          {
+            type: "string",
+            name: "tieInHeading",
+            label: "Tie-In Heading",
+            description: 'e.g., "What Mike brings to the mic"',
+          },
+          {
+            type: "string",
+            name: "tieInPoints",
+            label: "Tie-In Points",
+            description: "Bullet points for what this person brings (no trailing periods)",
+            list: true,
+            ui: {
+              component: "textarea",
+            },
+          },
+          {
+            type: "object",
+            name: "primaryCta",
+            label: "Primary CTA",
+            description: "Main call-to-action button on extended profile",
+            fields: [
+              { type: "string", name: "label", label: "Button Label", required: true },
+              { type: "string", name: "url", label: "Button URL", required: true },
+            ],
+          },
+          {
+            type: "string",
+            name: "blogSectionTitle",
+            label: "Blog Section Title",
+            description: 'Override for blog section heading (e.g., "From Mike\'s notebook")',
+          },
+          {
+            type: "string",
+            name: "heroImage",
+            label: "Hero Background Image",
+            description: "Full Cloudinary public ID for wide contextual hero background (e.g., Soul Miner's/Summer 2022/...)",
+          },
           {
             type: "rich-text",
             name: "body",
             label: "Extended Bio",
-            description: "Full bio content for individual page",
+            description: "Personal note or full bio for individual page",
             isBody: true,
           },
         ],
@@ -367,7 +451,12 @@ export default defineConfig({
           {
             type: "string",
             name: "thumbnail",
-            label: "Thumbnail (Cloudinary ID)",
+            label: "Thumbnail (Mux fallback URL)",
+          },
+          {
+            type: "string",
+            name: "coverImage",
+            label: "Cover Image (Cloudinary public ID, e.g. podcast/episodes/ep-001-invisible-economy)",
           },
           {
             type: "string",
