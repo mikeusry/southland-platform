@@ -1,0 +1,2140 @@
+[
+  {
+    "name": "Georgia Poultry - Chancellor, AL",
+    "slug": "georgia-chancellor-al",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "7940 County Road 636",
+    "city": "Chancellor",
+    "state": "AL",
+    "zip": "36316",
+    "phone": "(334) 347-7579",
+    "lat": 31.2613538,
+    "lng": -85.90716259999999,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Holly Pond, AL",
+    "slug": "georgia-cullman-al",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "85 Lick Creek Rd.",
+    "city": "Cullman",
+    "state": "AL",
+    "zip": "35055",
+    "phone": "(855)675-0505",
+    "lat": 34.1729789,
+    "lng": -86.61977569999999,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Ider, AL",
+    "slug": "georgia-ider-al",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "19576 AL Highway 117",
+    "city": "Ider",
+    "state": "AL",
+    "zip": "35981",
+    "phone": "(888)394-7458",
+    "lat": 34.69309974229485,
+    "lng": -85.66698789596558,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Petrey, AL",
+    "slug": "georgia-luverne-al",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "10560 Petrey Hwy",
+    "city": "Luverne",
+    "state": "AL",
+    "zip": "36049",
+    "phone": "(334) 335-2294",
+    "lat": 31.852811313315627,
+    "lng": -86.20756920304109,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Ozark, AL",
+    "slug": "georgia-ozark-al",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "193 Campus Dr.",
+    "city": "Ozark",
+    "state": "AL",
+    "zip": "36360",
+    "phone": "(334) 443-0240",
+    "lat": 31.42819963365128,
+    "lng": -85.6210762611664,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Spruce Pine, AL",
+    "slug": "georgia-spruce-pine-al",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "6561 Hwy 43",
+    "city": "Spruce Pine",
+    "state": "AL",
+    "zip": "35585",
+    "phone": "(256) 331-2817",
+    "lat": 34.399186348336144,
+    "lng": -87.75292179947508,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Berryville, AR",
+    "slug": "georgia-berryville-ar",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "808 Highway 62 Spur",
+    "city": "Berryville",
+    "state": "AR",
+    "zip": "72616",
+    "phone": "(870) 929-6283",
+    "lat": 36.37825503254791,
+    "lng": -93.57942938804626,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Clarksville, AR",
+    "slug": "georgia-clarksville-ar",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "911 S. Rogers Street",
+    "city": "Clarksville",
+    "state": "AR",
+    "zip": "72830",
+    "phone": "(479) 705-0602",
+    "lat": 35.4617561,
+    "lng": -93.45876420000002,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Hindsville, AR",
+    "slug": "georgia-hindsville-ar",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "124 Madison 7373",
+    "city": "Hindsville",
+    "state": "AR",
+    "zip": "72738",
+    "phone": "(479) 789-2449",
+    "lat": 36.160770137247404,
+    "lng": -93.86803008551942,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Hope, AR",
+    "slug": "georgia-hope-ar",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "402 W. Compress St.",
+    "city": "Hope",
+    "state": "AR",
+    "zip": "71801",
+    "phone": "(870) 474-5077",
+    "lat": 33.678121,
+    "lng": -93.5990283,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Mansfield, AR",
+    "slug": "georgia-mansfield-ar",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "1723 South Hwy 71 E",
+    "city": "Mansfield",
+    "state": "AR",
+    "zip": "72944",
+    "phone": "",
+    "lat": 35.06591659070586,
+    "lng": -94.23209073623465,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Siloam Springs, AR",
+    "slug": "georgia-siloam-springs-ar",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "2282 Hwy 412 West",
+    "city": "Siloam Springs",
+    "state": "AR",
+    "zip": "72761",
+    "phone": "(479) 373-6655",
+    "lat": 36.1758462,
+    "lng": -94.56439110000002,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Eastern Shore Poultry - Harrington, DE",
+    "slug": "eastern-harrington-de",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "515 Smith Ave.",
+    "city": "Harrington",
+    "state": "DE",
+    "zip": "19952",
+    "phone": "(302) 398-0690",
+    "lat": 38.9293518079848,
+    "lng": -75.5672557401283,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Eastern Shore Poultry- Laurel, DE",
+    "slug": "eastern-laurel-de",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "30709 Sussex Highway",
+    "city": "Laurel",
+    "state": "DE",
+    "zip": "19956",
+    "phone": "(302) 875-0889",
+    "lat": 38.5621113,
+    "lng": -75.55681609999999,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Live Oak, FL",
+    "slug": "georgia-live-oak-fl",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "706-A W Howard Street",
+    "city": "Live Oak",
+    "state": "FL",
+    "zip": "32064",
+    "phone": "(386) 362-4590",
+    "lat": 30.29945730438538,
+    "lng": -82.99090254637986,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Southland Organics HQ",
+    "slug": "southland-hq-bogart",
+    "dealerType": "headquarters",
+    "chain": "southland",
+    "address": "189 Luke Road",
+    "city": "Bogart",
+    "state": "GA",
+    "zip": "30622",
+    "phone": "800-608-3755",
+    "lat": 33.9468,
+    "lng": -83.5344,
+    "categories": [
+      "poultry",
+      "lawn-garden",
+      "waste"
+    ],
+    "website": "https://www.southlandorganics.com",
+    "hours": "Mon-Fri 8:00 AM - 5:00 PM",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Bowdon, GA",
+    "slug": "georgia-bowdon-ga",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "824 East College Street",
+    "city": "Bowdon",
+    "state": "GA",
+    "zip": "30108",
+    "phone": "(770) 258-4700",
+    "lat": 33.549196,
+    "lng": -85.23835700000001,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Calhoun, GA",
+    "slug": "georgia-calhoun-ga",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "2270 Rome Road SW",
+    "city": "Calhoun",
+    "state": "GA",
+    "zip": "30701",
+    "phone": "(706) 624-4244",
+    "lat": 34.44456042624971,
+    "lng": -84.99437324921263,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Douglas, GA",
+    "slug": "georgia-douglas-ga",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "175 Brantley Blvd",
+    "city": "Douglas",
+    "state": "GA",
+    "zip": "31535",
+    "phone": "(912) 383-0105",
+    "lat": 31.485211,
+    "lng": -82.83917029999998,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Ellijay, GA",
+    "slug": "georgia-ellijay-ga",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "2216 Highway 52 E",
+    "city": "Ellijay",
+    "state": "GA",
+    "zip": "30536",
+    "phone": "(706) 698-3200",
+    "lat": 34.68016235863157,
+    "lng": -84.4580102669342,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Glennville, GA",
+    "slug": "georgia-glennville-ga",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "317 N. Veterans Blvd.",
+    "city": "Glennville",
+    "state": "GA",
+    "zip": "30427",
+    "phone": "(912) 654-2879",
+    "lat": 31.93948949061981,
+    "lng": -81.92738184841005,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Lexington, GA",
+    "slug": "georgia-lexington-ga",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "816 Washington Rd",
+    "city": "Lexington",
+    "state": "GA",
+    "zip": "30648",
+    "phone": "(706) 743-5883",
+    "lat": 33.8522251,
+    "lng": -83.0939861,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Lula, GA",
+    "slug": "georgia-lula-ga",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "5287 Mountain Center Plaza",
+    "city": "Lula",
+    "state": "GA",
+    "zip": "30554",
+    "phone": "(770) 869-1113",
+    "lat": 34.41867660197679,
+    "lng": -83.65321113806914,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Montezuma, GA",
+    "slug": "georgia-montezuma-ga",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "904 Travelers Rest Rd.",
+    "city": "Montezuma",
+    "state": "GA",
+    "zip": "31063",
+    "phone": "(478) 458-7840",
+    "lat": 32.2914247,
+    "lng": -84.0081988,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Moultrie, GA",
+    "slug": "georgia-moultrie-ga",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "",
+    "city": "Moultrie",
+    "state": "GA",
+    "zip": "31768",
+    "phone": "(229) 616-4267",
+    "lat": 31.1842741,
+    "lng": -83.77729010000002,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Roberta, GA",
+    "slug": "georgia-roberta-ga",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "603 East Crusselle Street",
+    "city": "Roberta",
+    "state": "GA",
+    "zip": "31078",
+    "phone": "(478) 836-5072",
+    "lat": 32.72635291535,
+    "lng": -84.00376794166414,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Royston, GA",
+    "slug": "georgia-royston-ga",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "5570 Highway 29 South",
+    "city": "Royston",
+    "state": "GA",
+    "zip": "30662",
+    "phone": "(706) 245-6486",
+    "lat": 34.25003050518312,
+    "lng": -83.17308591327514,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Algona, IA",
+    "slug": "hog-algona-ia",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "304 Hwy 18 East&nbsp;",
+    "city": "Algona",
+    "state": "IA",
+    "zip": "50511",
+    "phone": "(515) 295-6169",
+    "lat": 43.08203999999999,
+    "lng": -94.23387159999999,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Bloomfield, IA",
+    "slug": "hog-bloomfield-ia",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "905 South West Street",
+    "city": "Bloomfield",
+    "state": "IA",
+    "zip": "52537",
+    "phone": "(641) 664-1475",
+    "lat": 40.740736760147705,
+    "lng": -92.41883917909854,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Carroll, IA",
+    "slug": "hog-carroll-ia",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "19280 Highway 30 West",
+    "city": "Carroll",
+    "state": "IA",
+    "zip": "51401",
+    "phone": "(712) 792-0590",
+    "lat": 42.077744030280186,
+    "lng": -94.91423606872559,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Charles City, IA",
+    "slug": "hog-charles-city-ia",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "805 Boulder Ave",
+    "city": "Charles City",
+    "state": "IA",
+    "zip": "50616",
+    "phone": "(855) 228-2700",
+    "lat": 43.042191,
+    "lng": -92.671719,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Decatur, IA",
+    "slug": "hog-decatur-ia",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "200 SE 4th Street",
+    "city": "Decatur",
+    "state": "IA",
+    "zip": "50067",
+    "phone": "(641) 446-3940",
+    "lat": 40.738486610095606,
+    "lng": -93.83227386850888,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Hartley, IA",
+    "slug": "hog-hartley-ia",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "140 3rd Street NW",
+    "city": "Hartley",
+    "state": "IA",
+    "zip": "51346",
+    "phone": "(712) 728-2420",
+    "lat": 43.18525548255208,
+    "lng": -95.47914933998106,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Humboldt, IA",
+    "slug": "hog-humboldt-ia",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "1112 20th Street North",
+    "city": "Humboldt",
+    "state": "IA",
+    "zip": "50548",
+    "phone": "(515) 332-4014",
+    "lat": 42.73456089890577,
+    "lng": -94.23843814498292,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Independence, IA",
+    "slug": "hog-independence-ia",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "401 Enterprise Drive SW",
+    "city": "Independence",
+    "state": "IA",
+    "zip": "50644",
+    "phone": "(319) 332-1400",
+    "lat": 42.450385210201155,
+    "lng": -91.89524664141697,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Iowa Falls, IA",
+    "slug": "hog-iowa-falls-ia",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "605 Greenfield Ave",
+    "city": "Iowa Falls",
+    "state": "IA",
+    "zip": "50126",
+    "phone": "(641) 648-3560",
+    "lat": 42.497678210421896,
+    "lng": -93.26316932327882,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Le Mars, IA",
+    "slug": "hog-le-mars-ia",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "1803 34th Street SW",
+    "city": "Le Mars",
+    "state": "IA",
+    "zip": "",
+    "phone": "(855)573-9366",
+    "lat": 42.752811224753344,
+    "lng": -96.19613589161374,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Marcus, IA",
+    "slug": "hog-marcus-ia",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "205 Eagle Avenue",
+    "city": "Marcus",
+    "state": "IA",
+    "zip": "51035",
+    "phone": "(712) 376-2558",
+    "lat": 42.80853958382878,
+    "lng": -95.79655396501238,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Monticello, IA",
+    "slug": "hog-monticello-ia",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "22409 Hwy 151 North",
+    "city": "Monticello",
+    "state": "IA",
+    "zip": "52310",
+    "phone": "(319) 465-9100",
+    "lat": 42.25930227462907,
+    "lng": -91.15566730499268,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Rock Rapids, IA",
+    "slug": "hog-rock-rapids-ia",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "1201 N 2nd Ave E",
+    "city": "Rock Rapids",
+    "state": "IA",
+    "zip": "51246",
+    "phone": "(712) 472-4229",
+    "lat": 43.4324126,
+    "lng": -96.14994480000001,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Sac City, IA",
+    "slug": "hog-sac-city-ia",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "1902 W Main St.",
+    "city": "Sac City",
+    "state": "IA",
+    "zip": "50583",
+    "phone": "(712) 662-5019",
+    "lat": 42.42274927772523,
+    "lng": -95.00718636137695,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Sibley, IA",
+    "slug": "hog-sibley-ia",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "5419 AG Street",
+    "city": "Sibley",
+    "state": "IA",
+    "zip": "51249",
+    "phone": "(712) 754-4500",
+    "lat": 43.399658721245494,
+    "lng": -95.71895979231262,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Sigourney, IA",
+    "slug": "hog-sigourney-ia",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "1401 SADC Ave.",
+    "city": "Sigourney",
+    "state": "IA",
+    "zip": "52591",
+    "phone": "(641) 622-6503",
+    "lat": 41.33183807691224,
+    "lng": -92.18044320196617,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Sioux Center, IA",
+    "slug": "hog-sioux-center-ia",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "4211 US 75 Ave",
+    "city": "Sioux Center",
+    "state": "IA",
+    "zip": "51250",
+    "phone": "(712) 722-3770",
+    "lat": 43.04058269999999,
+    "lng": -96.17633869999997,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Storm Lake, IA",
+    "slug": "hog-storm-lake-ia",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "126 Prairie Rd",
+    "city": "Storm Lake",
+    "state": "IA",
+    "zip": "50588",
+    "phone": "(712) 732-0144",
+    "lat": 42.663898,
+    "lng": -95.2037239,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Washington, IA",
+    "slug": "hog-washington-ia",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "302 S Airport Road",
+    "city": "Washington",
+    "state": "IA",
+    "zip": "52353",
+    "phone": "(319) 863-7124",
+    "lat": 41.2969315,
+    "lng": -91.66827289999998,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Newton, IL",
+    "slug": "hog-newton-il",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "8865 IL-130",
+    "city": "Newton",
+    "state": "IL",
+    "zip": "62448",
+    "phone": "(618) 783-2200",
+    "lat": 38.9772244,
+    "lng": -88.1604705,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Pittsfield, IL",
+    "slug": "hog-pittsfield-il",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "1350 West Washington Street",
+    "city": "Pittsfield",
+    "state": "IL",
+    "zip": "62363",
+    "phone": "(217) 285-4144",
+    "lat": 39.60508795042856,
+    "lng": -90.84435040067751,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Rochelle, IL",
+    "slug": "hog-rochelle-il",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "951 S 7th Street",
+    "city": "Rochelle",
+    "state": "IL",
+    "zip": "61068",
+    "phone": "(815) 561-6062",
+    "lat": 41.910357,
+    "lng": -89.0674009,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Flora, IN",
+    "slug": "hog-flora-in",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "",
+    "city": "Flora",
+    "state": "IN",
+    "zip": "",
+    "phone": "(574) 967-3776",
+    "lat": 40.5612194,
+    "lng": -86.5255292,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Seneca, KS",
+    "slug": "hog-seneca-ks",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "619 Neptune Dr",
+    "city": "Seneca",
+    "state": "KS",
+    "zip": "66538",
+    "phone": "(785) 336-0082",
+    "lat": 39.840329697327014,
+    "lng": -96.05447621534427,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Calhoun, KY",
+    "slug": "georgia-calhoun-ky",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "544 State Route 136 East",
+    "city": "Calhoun",
+    "state": "KY",
+    "zip": "42327",
+    "phone": "(270) 499-5021",
+    "lat": 37.5490911,
+    "lng": -87.2540136,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Mayfield, KY",
+    "slug": "georgia-mayfield-ky",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "1 Cardinal Road",
+    "city": "Mayfield",
+    "state": "KY",
+    "zip": "42066",
+    "phone": "(270) 804-7375",
+    "lat": 36.7203727,
+    "lng": -88.6691802,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Dubach, LA",
+    "slug": "georgia-dubach-la",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "3201 Hwy 167",
+    "city": "Dubach",
+    "state": "LA",
+    "zip": "71235",
+    "phone": "(318) 777-1212",
+    "lat": 32.6542287,
+    "lng": -92.65012709999999,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Eastern Shore Poultry- Pocomoke City, MD",
+    "slug": "eastern-pocomoke-city-md",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "1510 Market St.",
+    "city": "Pocomoke City",
+    "state": "MD",
+    "zip": "21851",
+    "phone": "(410) 957-6800",
+    "lat": 38.06364,
+    "lng": -75.55241000000001,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Three Rivers, MI",
+    "slug": "hog-three-rivers-mi",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "1200 William R. Monroe Blvd.",
+    "city": "Three Rivers",
+    "state": "MI",
+    "zip": "49093",
+    "phone": "(269) 273-7277",
+    "lat": 41.9264586,
+    "lng": -85.6491699,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Blooming Prairie, MN",
+    "slug": "hog-blooming-prairie-mn",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "633 6th Street SE",
+    "city": "Blooming Prairie",
+    "state": "MN",
+    "zip": "55917",
+    "phone": "(507) 583-0142",
+    "lat": 43.86016645187427,
+    "lng": -93.04784886917267,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Fairmont, MN",
+    "slug": "hog-fairmont-mn",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "710 Cory Lane",
+    "city": "Fairmont",
+    "state": "MN",
+    "zip": "56031",
+    "phone": "(507) 238-4448",
+    "lat": 43.65917358760943,
+    "lng": -94.50740263491821,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Mankato, MN",
+    "slug": "hog-mankato-mn",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "53908 208th Lane",
+    "city": "Mankato",
+    "state": "MN",
+    "zip": "56001",
+    "phone": "(507) 388-8733",
+    "lat": 44.14506646160943,
+    "lng": -94.11787460688475,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Pipestone, MN",
+    "slug": "hog-pipestone-mn",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "810 Industrial Road",
+    "city": "Pipestone",
+    "state": "MN",
+    "zip": "56164",
+    "phone": "(507) 562-4203",
+    "lat": 43.99010512368736,
+    "lng": -96.29679345428394,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Redwood Falls, MN",
+    "slug": "hog-redwood-falls-mn",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "36281 US Hwy 71",
+    "city": "Redwood Falls",
+    "state": "MN",
+    "zip": "56283",
+    "phone": "(507) 644-1170",
+    "lat": 44.54197962041713,
+    "lng": -95.06290243470994,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Sauk Centre, MN",
+    "slug": "hog-sauk-centre-mn",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "519 Lincoln Rd.",
+    "city": "Sauk Centre",
+    "state": "MN",
+    "zip": "56378",
+    "phone": "(320) 351-9202",
+    "lat": 45.73394223964461,
+    "lng": -94.96239676219176,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Waseca, MN",
+    "slug": "hog-waseca-mn",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "11191 Old Hwy 14",
+    "city": "Waseca",
+    "state": "MN",
+    "zip": "56093",
+    "phone": "(507) 835-8015",
+    "lat": 44.08485036150756,
+    "lng": -93.54374922586133,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Worthington, MN",
+    "slug": "hog-worthington-mn",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "1290 27th St.",
+    "city": "Worthington",
+    "state": "MN",
+    "zip": "56187",
+    "phone": "",
+    "lat": 43.645491909071936,
+    "lng": -95.5952149625656,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Wheaton/Exeter, MO",
+    "slug": "georgia-exeter-mo",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "13014 Farm Road 1005",
+    "city": "Exeter",
+    "state": "MO",
+    "zip": "65647",
+    "phone": "(417) 652-3080",
+    "lat": 36.7471124,
+    "lng": -94.0577543,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Bay Springs, MS",
+    "slug": "georgia-bay-springs-ms",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "2510 Mississippi 15",
+    "city": "Bay Springs",
+    "state": "MS",
+    "zip": "39422",
+    "phone": "(601) 764-4671",
+    "lat": 31.95499399999999,
+    "lng": -89.28948679999996,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Brookhaven, MS",
+    "slug": "georgia-brookhaven-ms",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "1636 Caleb Drive SE",
+    "city": "Brookhaven",
+    "state": "MS",
+    "zip": "39601",
+    "phone": "",
+    "lat": 31.55078701542992,
+    "lng": -90.38771350370483,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Forest, MS",
+    "slug": "georgia-forest-ms",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "811 W. Third Street",
+    "city": "Forest",
+    "state": "MS",
+    "zip": "39074",
+    "phone": "(601) 469-4165",
+    "lat": 32.36519295818952,
+    "lng": -89.4824278269405,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Kokomo, MS",
+    "slug": "georgia-kokomo-ms",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "545 US-98 West",
+    "city": "Kokomo",
+    "state": "MS",
+    "zip": "39643",
+    "phone": "(601) 731-3003",
+    "lat": 31.1942862394966,
+    "lng": -89.98808758227842,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Magee, MS",
+    "slug": "georgia-magee-ms",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "2029 Simpson Highway 49",
+    "city": "Magee",
+    "state": "MS",
+    "zip": "39111",
+    "phone": "(601) 849-4755",
+    "lat": 31.886928240689738,
+    "lng": -89.76413759945831,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Philadelphia, MS",
+    "slug": "georgia-philadelphia-ms",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "11780 Highway 15 N",
+    "city": "Philadelphia",
+    "state": "MS",
+    "zip": "39350",
+    "phone": "(601) 656-3666",
+    "lat": 32.80909663474689,
+    "lng": -89.11287392572558,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Waynesboro, MS",
+    "slug": "georgia-waynesboro-ms",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "412 Wayne Street",
+    "city": "Waynesboro",
+    "state": "MS",
+    "zip": "39367",
+    "phone": "(601) 735-2002",
+    "lat": 31.6702829,
+    "lng": -88.64943919999996,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Aulander, NC",
+    "slug": "hog-aulander-nc",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "440 NC Highway 561 W",
+    "city": "Aulander",
+    "state": "NC",
+    "zip": "27805",
+    "phone": "(252) 209-0092",
+    "lat": 36.307142800935196,
+    "lng": -77.03106253372954,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Bethel, NC",
+    "slug": "hog-bethel-nc",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "7160 South Main Street",
+    "city": "Bethel",
+    "state": "NC",
+    "zip": "27812",
+    "phone": "(252) 818-0882",
+    "lat": 35.7991598,
+    "lng": -77.3728362,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Beulaville, NC",
+    "slug": "hog-beulaville-nc",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "246 N NC Highway 41",
+    "city": "Beulaville",
+    "state": "NC",
+    "zip": "28518",
+    "phone": "(910) 298-4321",
+    "lat": 34.9304648,
+    "lng": -77.7650137,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Biscoe, NC",
+    "slug": "hog-biscoe-nc",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "221 Shady Oak Dr",
+    "city": "Biscoe",
+    "state": "NC",
+    "zip": "27209",
+    "phone": "(910) 428-5218",
+    "lat": 35.3694498,
+    "lng": -79.7844311,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Clinton, NC",
+    "slug": "hog-clinton-nc",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "906 Southeast Blvd",
+    "city": "Clinton",
+    "state": "NC",
+    "zip": "28328",
+    "phone": "(910) 592-2426",
+    "lat": 34.987786,
+    "lng": -78.30737599999998,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Elizabethtown, NC",
+    "slug": "hog-elizabethtown-nc",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "2406 US Highway 701 N",
+    "city": "Elizabethtown",
+    "state": "NC",
+    "zip": "28337",
+    "phone": "(910) 862-7081",
+    "lat": 34.64753049999999,
+    "lng": -78.57323339999999,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Goldsboro, NC",
+    "slug": "hog-goldsboro-nc",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "5377 US Highway 70 East",
+    "city": "Goldsboro",
+    "state": "NC",
+    "zip": "27534",
+    "phone": "(919) 778-5800",
+    "lat": 35.32839509999999,
+    "lng": -77.87515339999999,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Laurinburg, NC",
+    "slug": "hog-laurinburg-nc",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "1705 US HWY 15-401 Bypass S",
+    "city": "Laurinburg",
+    "state": "NC",
+    "zip": "28352",
+    "phone": "(910) 405-7515",
+    "lat": 34.75203414093234,
+    "lng": -79.48246930489347,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Newton Grove, NC",
+    "slug": "hog-newton-grove-nc",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "400 Clinton Street",
+    "city": "Newton Grove",
+    "state": "NC",
+    "zip": "28366",
+    "phone": "(910) 594-0247",
+    "lat": 35.24307393443952,
+    "lng": -78.35282356552887,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Rose Hill, NC",
+    "slug": "hog-rose-hill-nc",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "615 North Sycamore St",
+    "city": "Rose Hill",
+    "state": "NC",
+    "zip": "28458",
+    "phone": "(910) 289-4740",
+    "lat": 34.8320119,
+    "lng": -78.0250921,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Siler City, NC",
+    "slug": "hog-siler-city-nc",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "17404 US Highway 64 W",
+    "city": "Siler City",
+    "state": "NC",
+    "zip": "27344",
+    "phone": "(919) 663-3321",
+    "lat": 35.73364199392136,
+    "lng": -79.4837110912323,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Taylorsville, NC",
+    "slug": "hog-taylorsville-nc",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "810 Old Wilkesboro Rd. Extension",
+    "city": "Taylorsville",
+    "state": "NC",
+    "zip": "28681",
+    "phone": "(828) 352-7078",
+    "lat": 35.96546070000001,
+    "lng": -81.19220689999997,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Yadkinville, NC",
+    "slug": "hog-yadkinville-nc",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "406 West Maple Street",
+    "city": "Yadkinville",
+    "state": "NC",
+    "zip": "27055",
+    "phone": "(336) 849-4219",
+    "lat": 36.12330368363814,
+    "lng": -80.66742712007675,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Columbus, NE",
+    "slug": "hog-columbus-ne",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "5440 East 23 Street",
+    "city": "Columbus",
+    "state": "NE",
+    "zip": "68601",
+    "phone": "(402) 563-4533",
+    "lat": 41.43889612473505,
+    "lng": -97.25835497224118,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - West Point, NE",
+    "slug": "hog-west-point-ne",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "1480 South Lincoln",
+    "city": "West Point",
+    "state": "NE",
+    "zip": "68788",
+    "phone": "(402) 372-6988",
+    "lat": 41.8246597572422,
+    "lng": -96.70876789203494,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Union City, OH",
+    "slug": "hog-union-city-oh",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "200 North Grandview St",
+    "city": "Union City",
+    "state": "OH",
+    "zip": "45390",
+    "phone": "(937) 968-3890",
+    "lat": 40.2033271,
+    "lng": -84.7933246,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Guymon, OK",
+    "slug": "hog-guymon-ok",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "3231 US Hwy 54",
+    "city": "Guymon",
+    "state": "OK",
+    "zip": "73942",
+    "phone": "(580) 338-5003",
+    "lat": 36.7002439,
+    "lng": -101.45187609999999,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Spiro, OK",
+    "slug": "georgia-spiro-ok",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "907 West Broadway",
+    "city": "Spiro",
+    "state": "OK",
+    "zip": "74959",
+    "phone": "(918) 962-8036",
+    "lat": 35.2391705,
+    "lng": -94.638699,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Hartsville, SC",
+    "slug": "hog-hartsville-sc",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "454 West Bobo Newsom Hwy",
+    "city": "Hartsville",
+    "state": "SC",
+    "zip": "29550",
+    "phone": "(843) 309-9255",
+    "lat": 34.3400435,
+    "lng": -80.08302709999998,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Hog Slat - Mitchell, SD",
+    "slug": "hog-mitchell-sd",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "1222 West Havens Ave",
+    "city": "Mitchell",
+    "state": "SD",
+    "zip": "",
+    "phone": "(844) 831-0457",
+    "lat": 43.702112882996616,
+    "lng": -98.04163866997527,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Shelbyville, TN",
+    "slug": "georgia-shelbyville-tn",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "105 Anthony Lane",
+    "city": "Shelbyville",
+    "state": "TN",
+    "zip": "37160",
+    "phone": "(931) 680-0742",
+    "lat": 35.4781093,
+    "lng": -86.43518660000001,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Marquez, TX",
+    "slug": "georgia-marquez-tx",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "17296 Hwy 79 West",
+    "city": "Marquez",
+    "state": "TX",
+    "zip": "77865",
+    "phone": "(903) 529-1175",
+    "lat": 31.253491101410514,
+    "lng": -96.25300630935351,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Nacogdoches, TX",
+    "slug": "georgia-nacogdoches-tx",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "2308 SE Stallings Drive",
+    "city": "Nacogdoches",
+    "state": "TX",
+    "zip": "75961",
+    "phone": "(936) 569-8770",
+    "lat": 31.57909671110176,
+    "lng": -94.64784448577501,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Georgia Poultry - Pittsburg, TX",
+    "slug": "georgia-pittsburg-tx",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "2045 US Hwy 271",
+    "city": "Pittsburg",
+    "state": "TX",
+    "zip": "75686",
+    "phone": "(844) 320-5511",
+    "lat": 33.0203628519556,
+    "lng": -94.96547927354123,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Shenandoah Ag Supply - Bridgewater, VA",
+    "slug": "shenandoah-bridgewater-va",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "221 Old River Road",
+    "city": "Bridgewater",
+    "state": "VA",
+    "zip": "22812",
+    "phone": "(540) 879-9901",
+    "lat": 38.3929345,
+    "lng": -78.9699198,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Shenandoah Ag Supply - Harrisonburg, VA",
+    "slug": "shenandoah-harrisonburg-va",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "340 Mt. Clinton Pike",
+    "city": "Harrisonburg",
+    "state": "VA",
+    "zip": "22802",
+    "phone": "(540) 434-4423",
+    "lat": 38.4681083,
+    "lng": -78.86369859999999,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Shenandoah Ag Supply - Moorefield, WV",
+    "slug": "shenandoah-moorefield-wv",
+    "dealerType": "farm_store",
+    "chain": "hog-slat",
+    "address": "255 S. Main Street",
+    "city": "Moorefield",
+    "state": "WV",
+    "zip": "26836",
+    "phone": "",
+    "lat": 39.0568276,
+    "lng": -78.9699302,
+    "categories": [
+      "poultry"
+    ],
+    "website": "https://www.hogslat.com",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "JFF Organics",
+    "slug": "jff-organics-horton-al",
+    "dealerType": "farm_store",
+    "chain": "independent",
+    "address": "1317 Bright Star Rd",
+    "city": "Horton",
+    "state": "AL",
+    "zip": "35980",
+    "phone": "",
+    "lat": 34.200928,
+    "lng": -86.296925,
+    "categories": ["poultry"],
+    "website": "",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Fields Poultry",
+    "slug": "fields-poultry-williston-sc",
+    "dealerType": "farm_store",
+    "chain": "independent",
+    "address": "47 Loose Rock Rd",
+    "city": "Williston",
+    "state": "SC",
+    "zip": "29853",
+    "phone": "",
+    "lat": 33.402239,
+    "lng": -81.42323,
+    "categories": ["poultry"],
+    "website": "",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "South State Poultry",
+    "slug": "south-state-poultry-alcolu-sc",
+    "dealerType": "farm_store",
+    "chain": "independent",
+    "address": "4695 Sumter Hwy",
+    "city": "Alcolu",
+    "state": "SC",
+    "zip": "29001",
+    "phone": "",
+    "lat": 33.75118,
+    "lng": -80.212737,
+    "categories": ["poultry"],
+    "website": "",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Farm Systems - Ozark",
+    "slug": "farm-systems-ozark-al",
+    "dealerType": "farm_store",
+    "chain": "farm-systems",
+    "address": "918 US-231",
+    "city": "Ozark",
+    "state": "AL",
+    "zip": "36360",
+    "phone": "",
+    "lat": 31.440548,
+    "lng": -85.645684,
+    "categories": ["poultry"],
+    "website": "",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Farm Systems - Oxford",
+    "slug": "farm-systems-oxford-al",
+    "dealerType": "farm_store",
+    "chain": "farm-systems",
+    "address": "1900 Barry St",
+    "city": "Oxford",
+    "state": "AL",
+    "zip": "36203",
+    "phone": "",
+    "lat": 33.603973,
+    "lng": -85.839636,
+    "categories": ["poultry"],
+    "website": "",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Farm Systems - Luverne",
+    "slug": "farm-systems-luverne-al",
+    "dealerType": "farm_store",
+    "chain": "farm-systems",
+    "address": "105 Lee Street",
+    "city": "Luverne",
+    "state": "AL",
+    "zip": "36049",
+    "phone": "",
+    "lat": 31.716545,
+    "lng": -86.263849,
+    "categories": ["poultry"],
+    "website": "",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Mississippi Farm & Garden",
+    "slug": "mississippi-farm-garden-hattiesburg-ms",
+    "dealerType": "farm_store",
+    "chain": "independent",
+    "address": "39 Rivers Dr",
+    "city": "Hattiesburg",
+    "state": "MS",
+    "zip": "39401",
+    "phone": "",
+    "lat": 31.327119,
+    "lng": -89.290339,
+    "categories": ["poultry"],
+    "website": "",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "P Bradley & Sons",
+    "slug": "p-bradley-sons-dayton-va",
+    "dealerType": "farm_store",
+    "chain": "independent",
+    "address": "2955 John Wayland Hwy",
+    "city": "Dayton",
+    "state": "VA",
+    "zip": "22821",
+    "phone": "",
+    "lat": 38.427128,
+    "lng": -78.92157,
+    "categories": ["poultry"],
+    "website": "",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Lovewell Farm Supply",
+    "slug": "lovewell-farm-supply-idabel-ok",
+    "dealerType": "farm_store",
+    "chain": "independent",
+    "address": "301 S Indian Rd",
+    "city": "Idabel",
+    "state": "OK",
+    "zip": "74745",
+    "phone": "",
+    "lat": 33.903892,
+    "lng": -94.791693,
+    "categories": ["poultry"],
+    "website": "",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Rosebud Supply",
+    "slug": "rosebud-supply-salem-in",
+    "dealerType": "farm_store",
+    "chain": "independent",
+    "address": "6149 SW Washington School Rd",
+    "city": "Salem",
+    "state": "IN",
+    "zip": "47167",
+    "phone": "",
+    "lat": 38.605613,
+    "lng": -86.101089,
+    "categories": ["poultry"],
+    "website": "",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Smithco",
+    "slug": "smithco-siler-city-nc",
+    "dealerType": "farm_store",
+    "chain": "independent",
+    "address": "2200 Edwards Hill Church Rd",
+    "city": "Siler City",
+    "state": "NC",
+    "zip": "27344",
+    "phone": "",
+    "lat": 35.616878,
+    "lng": -79.438879,
+    "categories": ["poultry"],
+    "website": "",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Farmer's Choice Feed Mill",
+    "slug": "farmers-choice-feed-mill-kirksey-ky",
+    "dealerType": "farm_store",
+    "chain": "independent",
+    "address": "4777 Kirksey Rd",
+    "city": "Kirksey",
+    "state": "KY",
+    "zip": "42054",
+    "phone": "",
+    "lat": 36.710364,
+    "lng": -88.395633,
+    "categories": ["poultry"],
+    "website": "",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "DeChem",
+    "slug": "dechem-salisbury-md",
+    "dealerType": "farm_store",
+    "chain": "independent",
+    "address": "6465 Hobbs Rd",
+    "city": "Salisbury",
+    "state": "MD",
+    "zip": "21804",
+    "phone": "",
+    "lat": 38.371416,
+    "lng": -75.527856,
+    "categories": ["poultry"],
+    "website": "",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Dalyn Enterprises LLC",
+    "slug": "dalyn-enterprises-sugarcreek-oh",
+    "dealerType": "farm_store",
+    "chain": "independent",
+    "address": "2645 State Route 93",
+    "city": "Sugarcreek",
+    "state": "OH",
+    "zip": "44681",
+    "phone": "",
+    "lat": 40.517235,
+    "lng": -81.648294,
+    "categories": ["poultry"],
+    "website": "",
+    "hours": "",
+    "active": true
+  },
+  {
+    "name": "Sevier Co Farmers CO-OP",
+    "slug": "sevier-co-farmers-coop-de-queen-ar",
+    "dealerType": "farm_store",
+    "chain": "independent",
+    "address": "220 N 1st St",
+    "city": "De Queen",
+    "state": "AR",
+    "zip": "71832",
+    "phone": "",
+    "lat": 34.038516,
+    "lng": -94.337802,
+    "categories": ["poultry"],
+    "website": "",
+    "hours": "",
+    "active": true
+  }
+]
