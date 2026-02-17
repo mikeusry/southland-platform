@@ -1,0 +1,19 @@
+[
+  {
+    "name": "Southland Organics HQ",
+    "slug": "southland-hq-bogart",
+    "dealerType": "headquarters",
+    "chain": "southland",
+    "address": "189 Luke Road",
+    "city": "Bogart",
+    "state": "GA",
+    "zip": "30622",
+    "phone": "800-608-3755",
+    "lat": 33.9468,
+    "lng": -83.5344,
+    "categories": ["poultry", "lawn-garden", "waste"],
+    "website": "https://www.southlandorganics.com",
+    "hours": "Mon-Fri 8:00 AM - 5:00 PM",
+    "active": true
+  }
+]

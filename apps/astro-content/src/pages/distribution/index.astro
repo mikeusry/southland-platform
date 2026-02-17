@@ -1,0 +1,533 @@
+---
+/**
+ * Distribution Page - /distribution/
+ * Dealer/distribution info for wholesale and retail partners
+ */
+
+export const prerender = true
+
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { getLogoUrl, buildSouthlandUrl } from '../../lib/cloudinary'
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+
+const distributionSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: 'Distribution & Dealer Program | Southland Organics',
+  description:
+    'Become a Southland Organics dealer or distributor. Wholesale pricing on organic agriculture, poultry, turf, and waste treatment products.',
+  url: `${siteUrl}/distribution/`,
+}
+---
+
+<BaseLayout
+  title="Distribution & Dealer Program | Southland Organics"
+  description="Become a Southland Organics dealer or distributor. Wholesale pricing on organic agriculture, poultry, turf, and waste treatment products."
+  ogImage={getLogoUrl('square', { width: 800 })}
+  schema={distributionSchema}
+>
+  <!-- Hero -->
+  <section class="bg-southland-green-dark py-16 md:py-24">
+    <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+      <p class="mb-3 text-sm font-medium uppercase tracking-widest text-southland-green">
+        Partner With Us
+      </p>
+      <h1 class="mb-6 font-heading text-4xl text-white md:text-5xl lg:text-6xl">
+        Distribution & Dealer Program
+      </h1>
+      <p class="mx-auto max-w-3xl text-lg text-white/80 md:text-xl">
+        Carry Southland Organics products in your store or recommend them to your clients. We
+        support our dealers with training, marketing materials, and competitive wholesale pricing.
+      </p>
+    </div>
+  </section>
+
+  <!-- Why Partner -->
+  <section class="bg-white py-16 md:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-12 text-center">
+        <h2 class="mb-4 text-3xl font-bold text-shopify-title md:text-4xl">Why Carry Our Products</h2>
+        <p class="mx-auto max-w-2xl text-lg text-shopify-secondary-text">
+          Southland Organics products solve real problems for growers. That's why our dealers see
+          strong repeat business.
+        </p>
+      </div>
+
+      <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div class="rounded-2xl border border-gray-100 bg-white p-8">
+          <div
+            class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-southland-green/10"
+          >
+            <svg
+              class="h-6 w-6 text-southland-green"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+            </svg>
+          </div>
+          <h3 class="mb-2 text-xl font-bold text-shopify-title">Repeat Customers</h3>
+          <p class="text-shopify-secondary-text">
+            Growers who try our products come back. Biology-first solutions create results people can
+            see — and they reorder season after season.
+          </p>
+        </div>
+
+        <div class="rounded-2xl border border-gray-100 bg-white p-8">
+          <div
+            class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-southland-green/10"
+          >
+            <svg
+              class="h-6 w-6 text-southland-green"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+              ></path>
+            </svg>
+          </div>
+          <h3 class="mb-2 text-xl font-bold text-shopify-title">Training & Support</h3>
+          <p class="text-shopify-secondary-text">
+            We train your team on the science behind every product. When your staff understands the
+            "why," they sell with confidence.
+          </p>
+        </div>
+
+        <div class="rounded-2xl border border-gray-100 bg-white p-8">
+          <div
+            class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-southland-green/10"
+          >
+            <svg
+              class="h-6 w-6 text-southland-green"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+          </div>
+          <h3 class="mb-2 text-xl font-bold text-shopify-title">Competitive Margins</h3>
+          <p class="text-shopify-secondary-text">
+            Wholesale pricing that gives you healthy margins while keeping products accessible to
+            growers.
+          </p>
+        </div>
+
+        <div class="rounded-2xl border border-gray-100 bg-white p-8">
+          <div
+            class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-southland-green/10"
+          >
+            <svg
+              class="h-6 w-6 text-southland-green"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              ></path>
+            </svg>
+          </div>
+          <h3 class="mb-2 text-xl font-bold text-shopify-title">Marketing Materials</h3>
+          <p class="text-shopify-secondary-text">
+            Product sheets, signage, and digital assets to help you promote Southland Organics in
+            your store and online.
+          </p>
+        </div>
+
+        <div class="rounded-2xl border border-gray-100 bg-white p-8">
+          <div
+            class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-southland-green/10"
+          >
+            <svg
+              class="h-6 w-6 text-southland-green"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+          </div>
+          <h3 class="mb-2 text-xl font-bold text-shopify-title">Drop Ship Available</h3>
+          <p class="text-shopify-secondary-text">
+            Don't want to carry inventory? We can ship directly to your customers on your behalf.
+          </p>
+        </div>
+
+        <div class="rounded-2xl border border-gray-100 bg-white p-8">
+          <div
+            class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-southland-green/10"
+          >
+            <svg
+              class="h-6 w-6 text-southland-green"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+          </div>
+          <h3 class="mb-2 text-xl font-bold text-shopify-title">Nationwide Reach</h3>
+          <p class="text-shopify-secondary-text">
+            We ship across the US via UPS. Whether you're in Georgia or Oregon, we can get product to
+            you.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Product Lines -->
+  <section class="bg-brand-gray py-16 md:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-12 text-center">
+        <h2 class="mb-4 text-3xl font-bold text-shopify-title md:text-4xl">Product Lines Available</h2>
+        <p class="mx-auto max-w-2xl text-lg text-shopify-secondary-text">
+          Our product catalog spans multiple categories, each backed by soil biology science.
+        </p>
+      </div>
+
+      <div class="grid gap-6 md:grid-cols-2">
+        <div class="flex items-start gap-6 rounded-2xl bg-white p-6 shadow-sm">
+          <div
+            class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-southland-green/10 text-2xl"
+          >
+            🐔
+          </div>
+          <div>
+            <h3 class="mb-1 text-lg font-bold text-shopify-title">Poultry</h3>
+            <p class="text-sm text-shopify-secondary-text">
+              Litter treatments (Big Ole Bird, Litter Life), water line solutions, and biosecurity
+              products for commercial broiler and layer operations.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-6 rounded-2xl bg-white p-6 shadow-sm">
+          <div
+            class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-southland-green/10 text-2xl"
+          >
+            🌱
+          </div>
+          <div>
+            <h3 class="mb-1 text-lg font-bold text-shopify-title">Lawn & Garden</h3>
+            <p class="text-sm text-shopify-secondary-text">
+              Humic acid, fulvic acid, Genesis soil conditioner, and organic lawn care programs for
+              homeowners and professionals.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-6 rounded-2xl bg-white p-6 shadow-sm">
+          <div
+            class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-southland-green/10 text-2xl"
+          >
+            🐖
+          </div>
+          <div>
+            <h3 class="mb-1 text-lg font-bold text-shopify-title">Swine</h3>
+            <p class="text-sm text-shopify-secondary-text">
+              Supplements and health solutions for hog operations focused on natural, antibiotic-free
+              production.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-6 rounded-2xl bg-white p-6 shadow-sm">
+          <div
+            class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-southland-green/10 text-2xl"
+          >
+            ♻️
+          </div>
+          <div>
+            <h3 class="mb-1 text-lg font-bold text-shopify-title">Septic & Waste Treatment</h3>
+            <p class="text-sm text-shopify-secondary-text">
+              Biological waste treatment products for residential septic systems and commercial waste
+              management.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Distribution Inquiry Form -->
+  <section id="inquiry" class="bg-southland-green-dark py-16 md:py-24">
+    <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-10 text-center">
+        <h2 class="mb-4 font-heading text-3xl text-white md:text-4xl">Ready to Partner?</h2>
+        <p class="mx-auto max-w-2xl text-lg text-white/70">
+          Tell us about your business and we'll reach out to discuss dealer pricing, minimum orders,
+          and how we can support you.
+        </p>
+      </div>
+
+      <div class="rounded-2xl bg-white p-8 shadow-lg md:p-10">
+        <form id="distribution-form" class="space-y-6">
+          <div class="grid gap-6 sm:grid-cols-2">
+            <div>
+              <label for="dist-first-name" class="mb-1.5 block text-sm font-medium text-shopify-title"
+                >First Name <span class="text-red-500">*</span></label
+              >
+              <input
+                type="text"
+                id="dist-first-name"
+                name="firstName"
+                required
+                class="w-full rounded-lg border border-gray-300 px-4 py-3 text-shopify-title transition-colors focus:border-southland-green focus:outline-none focus:ring-2 focus:ring-southland-green/20"
+                placeholder="First name"
+              />
+            </div>
+            <div>
+              <label for="dist-last-name" class="mb-1.5 block text-sm font-medium text-shopify-title"
+                >Last Name <span class="text-red-500">*</span></label
+              >
+              <input
+                type="text"
+                id="dist-last-name"
+                name="lastName"
+                required
+                class="w-full rounded-lg border border-gray-300 px-4 py-3 text-shopify-title transition-colors focus:border-southland-green focus:outline-none focus:ring-2 focus:ring-southland-green/20"
+                placeholder="Last name"
+              />
+            </div>
+          </div>
+
+          <div class="grid gap-6 sm:grid-cols-2">
+            <div>
+              <label for="dist-email" class="mb-1.5 block text-sm font-medium text-shopify-title"
+                >Email <span class="text-red-500">*</span></label
+              >
+              <input
+                type="email"
+                id="dist-email"
+                name="email"
+                required
+                class="w-full rounded-lg border border-gray-300 px-4 py-3 text-shopify-title transition-colors focus:border-southland-green focus:outline-none focus:ring-2 focus:ring-southland-green/20"
+                placeholder="you@company.com"
+              />
+            </div>
+            <div>
+              <label for="dist-phone" class="mb-1.5 block text-sm font-medium text-shopify-title"
+                >Phone <span class="text-red-500">*</span></label
+              >
+              <input
+                type="tel"
+                id="dist-phone"
+                name="phone"
+                required
+                class="w-full rounded-lg border border-gray-300 px-4 py-3 text-shopify-title transition-colors focus:border-southland-green focus:outline-none focus:ring-2 focus:ring-southland-green/20"
+                placeholder="(555) 555-5555"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label for="dist-company" class="mb-1.5 block text-sm font-medium text-shopify-title"
+              >Company / Store Name <span class="text-red-500">*</span></label
+            >
+            <input
+              type="text"
+              id="dist-company"
+              name="company"
+              required
+              class="w-full rounded-lg border border-gray-300 px-4 py-3 text-shopify-title transition-colors focus:border-southland-green focus:outline-none focus:ring-2 focus:ring-southland-green/20"
+              placeholder="Your business name"
+            />
+          </div>
+
+          <div class="grid gap-6 sm:grid-cols-2">
+            <div>
+              <label for="dist-type" class="mb-1.5 block text-sm font-medium text-shopify-title"
+                >Business Type <span class="text-red-500">*</span></label
+              >
+              <select
+                id="dist-type"
+                name="businessType"
+                required
+                class="w-full rounded-lg border border-gray-300 px-4 py-3 text-shopify-title transition-colors focus:border-southland-green focus:outline-none focus:ring-2 focus:ring-southland-green/20"
+              >
+                <option value="">Select type</option>
+                <option value="farm-store">Farm Supply Store</option>
+                <option value="garden-center">Garden Center / Nursery</option>
+                <option value="distributor">Distributor</option>
+                <option value="co-op">Co-op</option>
+                <option value="turf-pro">Turf Professional / Landscaper</option>
+                <option value="consultant">Agricultural Consultant</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label for="dist-interest" class="mb-1.5 block text-sm font-medium text-shopify-title"
+                >Product Interest <span class="text-red-500">*</span></label
+              >
+              <select
+                id="dist-interest"
+                name="productInterest"
+                required
+                class="w-full rounded-lg border border-gray-300 px-4 py-3 text-shopify-title transition-colors focus:border-southland-green focus:outline-none focus:ring-2 focus:ring-southland-green/20"
+              >
+                <option value="">Select products</option>
+                <option value="poultry">Poultry Products</option>
+                <option value="lawn-garden">Lawn & Garden</option>
+                <option value="waste">Septic & Waste Treatment</option>
+                <option value="swine">Swine Products</option>
+                <option value="multiple">Multiple Product Lines</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label for="dist-location" class="mb-1.5 block text-sm font-medium text-shopify-title"
+              >Location (City, State)</label
+            >
+            <input
+              type="text"
+              id="dist-location"
+              name="location"
+              class="w-full rounded-lg border border-gray-300 px-4 py-3 text-shopify-title transition-colors focus:border-southland-green focus:outline-none focus:ring-2 focus:ring-southland-green/20"
+              placeholder="e.g. Athens, GA"
+            />
+          </div>
+
+          <div>
+            <label for="dist-message" class="mb-1.5 block text-sm font-medium text-shopify-title"
+              >Tell us about your business</label
+            >
+            <textarea
+              id="dist-message"
+              name="message"
+              rows="4"
+              class="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 text-shopify-title transition-colors focus:border-southland-green focus:outline-none focus:ring-2 focus:ring-southland-green/20"
+              placeholder="How many locations, current product mix, anything else we should know..."></textarea>
+          </div>
+
+          <button
+            type="submit"
+            class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-southland-green px-8 py-4 text-base font-bold text-white shadow-sm transition-all hover:bg-[#3a7534] hover:shadow-md active:scale-[0.98]"
+          >
+            Submit Inquiry
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </button>
+        </form>
+
+        <!-- Success Message (hidden by default) -->
+        <div id="dist-form-success" class="hidden py-12 text-center">
+          <div
+            class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-southland-green/10"
+          >
+            <svg
+              class="h-8 w-8 text-southland-green"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <h3 class="mb-2 text-2xl font-bold text-shopify-title">Inquiry Received!</h3>
+          <p class="text-shopify-secondary-text">
+            We'll review your information and reach out within 1-2 business days. For immediate
+            assistance, call us at
+            <a href="tel:+18006083755" class="font-semibold text-southland-green">800-608-3755</a>.
+          </p>
+        </div>
+
+        <!-- Error Message (hidden by default) -->
+        <div
+          id="dist-form-error"
+          class="mt-4 hidden rounded-lg bg-red-50 p-4 text-sm text-red-700"
+        >
+          Something went wrong. Please try again or call us directly at
+          <a href="tel:+18006083755" class="font-semibold underline">800-608-3755</a>.
+        </div>
+      </div>
+
+      <p class="mt-6 text-center text-sm text-white/50">
+        Or call us directly at
+        <a href="tel:+18006083755" class="font-medium text-white/70 hover:text-white">800-608-3755</a>
+        — Mon-Fri, 8am-5pm EST
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const form = document.getElementById('distribution-form') as HTMLFormElement | null
+  const successEl = document.getElementById('dist-form-success')
+  const errorEl = document.getElementById('dist-form-error')
+
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+
+      const formData = new FormData(form)
+      const data = Object.fromEntries(formData.entries())
+
+      const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement
+      if (submitBtn) {
+        submitBtn.disabled = true
+        submitBtn.textContent = 'Sending...'
+      }
+
+      try {
+        const res = await fetch('/api/form/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...data, formType: 'distribution' }),
+        })
+
+        if (!res.ok) throw new Error('Send failed')
+
+        // Show success state
+        form.classList.add('hidden')
+        if (successEl) successEl.classList.remove('hidden')
+        if (errorEl) errorEl.classList.add('hidden')
+      } catch {
+        if (errorEl) errorEl.classList.remove('hidden')
+        if (submitBtn) {
+          submitBtn.disabled = false
+          submitBtn.textContent = 'Submit Inquiry'
+        }
+      }
+    })
+  }
+</script>
