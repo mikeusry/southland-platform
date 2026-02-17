@@ -321,7 +321,7 @@ Email capture component at `src/components/shared/EmailCapture.astro`.
 **Env vars (in .env):**
 ```bash
 PUBLIC_KLAVIYO_COMPANY_ID=p8XW7D
-PUBLIC_KLAVIYO_LIST_ID=QQxdLS
+PUBLIC_KLAVIYO_LIST_ID=XuehAp
 ```
 
 **Podcast Subscriber Properties:**

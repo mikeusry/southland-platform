@@ -47,8 +47,10 @@ export type ImageEffect =
   | 'grayscale'
   | 'sepia'
   | 'saturation:50'
+  | 'saturation:60'
   | 'saturation:150'
   | 'brightness:50'
+  | 'brightness:80'
   | 'brightness:150'
   | 'contrast:50'
   | 'contrast:150'
@@ -207,7 +209,7 @@ export function buildCloudinaryUrl(
 
   const transformString = transformations.length > 0 ? `${transformations.join(',')}/` : ''
 
-  const encodedPublicId = publicId.replace(/ /g, '%20')
+  const encodedPublicId = publicId.replace(/ /g, '%20').replace(/'/g, '%27').replace(/!/g, '%21')
   return `${baseUrl}/${transformString}${encodedPublicId}`
 }
 
@@ -439,6 +441,31 @@ export function getEpisodeThumbnail(episodeSlug: string, width: number = 400): s
     quality: 'auto',
     format: 'auto',
   })
+}
+
+/**
+ * Resolves the best cover image URL for an episode.
+ * Prefers Cloudinary coverImage (optimized, responsive) over Mux thumbnail.
+ *
+ * @param data - Episode data with optional coverImage and thumbnail
+ * @param width - Desired width (height auto-calculated at 16:9)
+ * @returns Optimized Cloudinary URL, Mux thumbnail URL, or undefined
+ */
+export function resolveEpisodeCover(
+  data: { coverImage?: string; thumbnail?: string },
+  width: number = 640,
+): string | undefined {
+  if (data.coverImage) {
+    return buildSouthlandUrl(data.coverImage, {
+      width,
+      height: Math.round((width * 9) / 16),
+      crop: 'fill',
+      gravity: 'auto',
+      quality: 'auto',
+      format: 'auto',
+    })
+  }
+  return data.thumbnail
 }
 
 /**

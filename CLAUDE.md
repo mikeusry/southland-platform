@@ -119,7 +119,15 @@ Monorepo for Southland Organics digital platform.
 
 ### Current Phase: Phase 1 (Podcast Launch)
 
-**Status:** Deploying `/podcast/*` routes via Cloudflare Pages
+**Status:** Deploying Phase 1 routes via Cloudflare Pages
+
+**Phase 1 Routes Going Live:**
+- `/podcast/*` — Hub, episodes, topics, search, RSS feed
+- `/about/` — About page
+- `/contact/` — Contact page
+- `/distribution/` — Distribution info
+- `/store-locator/` — Dealer locator
+- `/team/*` — Team member pages
 
 **Header/Footer Strategy (Phase 1):**
 - TWO codebases temporarily: React (Astro) + Liquid (Shopify)
@@ -134,7 +142,7 @@ Monorepo for Southland Organics digital platform.
 
 | Phase | Routes | Status |
 |-------|--------|--------|
-| 1 | `/podcast/*` | IN PROGRESS |
+| 1 | `/podcast/*`, `/about/`, `/contact/`, `/distribution/`, `/store-locator/`, `/team/*` | IN PROGRESS |
 | 2 | `/blog/*` | Planned |
 | 3 | `/collections/*` | Planned |
 | 4 | `/products/*` | Planned |

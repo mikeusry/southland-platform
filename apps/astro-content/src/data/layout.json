@@ -1,7 +1,8 @@
 {
   "_meta": {
     "synced": "2026-02-01T23:14:08.485Z",
-    "source": "Shopify Storefront API"
+    "source": "Shopify Storefront API",
+    "note": "Phase 1: Only /podcast/* routes live in Astro. All other routes point to Shopify."
   },
   "header": {
     "logoUrl": "https://cdn.shopify.com/s/files/1/0794/9519/files/Southland_Orgnaics_Horizontal_a76ce835-f89f-43e6-8a16-9bcf122d4922.png?v=1730460323",
@@ -9,19 +10,19 @@
     "navigation": [
       {
         "label": "Home",
-        "href": "/"
+        "href": "https://www.southlandorganics.com/"
       },
       {
         "label": "Poultry",
-        "href": "/poultry/",
+        "href": "https://www.southlandorganics.com/collections/poultry",
         "children": [
           {
             "label": "Backyard Poultry",
-            "href": "/poultry/backyard/"
+            "href": "https://www.southlandorganics.com/collections/backyard-poultry"
           },
           {
             "label": "Commercial Poultry",
-            "href": "/poultry/commercial/"
+            "href": "https://www.southlandorganics.com/collections/commercial-poultry"
           },
           {
             "label": "Shop Products",
@@ -35,11 +36,11 @@
       },
       {
         "label": "Lawn & Garden",
-        "href": "/lawn/",
+        "href": "https://www.southlandorganics.com/collections/turf",
         "children": [
           {
             "label": "Lawn Care",
-            "href": "/lawn/"
+            "href": "https://www.southlandorganics.com/collections/turf"
           },
           {
             "label": "Shop Products",
@@ -83,11 +84,15 @@
       },
       {
         "label": "About",
-        "href": "/team/",
+        "href": "/about/",
         "children": [
           {
+            "label": "About Us",
+            "href": "/about/"
+          },
+          {
             "label": "Our Team",
-            "href": "/team/"
+            "href": "/about/#team"
           },
           {
             "label": "Podcast",
@@ -95,15 +100,19 @@
           },
           {
             "label": "Blog",
-            "href": "/blog/"
+            "href": "https://www.southlandorganics.com/blogs/news"
           },
           {
             "label": "Contact",
-            "href": "https://www.southlandorganics.com/pages/contact"
+            "href": "/contact/"
           },
           {
-            "label": "Why Southland?",
-            "href": "https://www.southlandorganics.com/pages/why-southland"
+            "label": "Find a Dealer",
+            "href": "/store-locator/"
+          },
+          {
+            "label": "Distribution",
+            "href": "/distribution/"
           }
         ]
       }

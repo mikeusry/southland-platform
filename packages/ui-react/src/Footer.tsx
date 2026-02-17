@@ -78,7 +78,7 @@ export function Footer({
         <div className="mx-auto max-w-[1400px] px-4 py-12 sm:px-6 md:py-16 lg:px-8">
           {/* Centered Logo */}
           <div className="mb-12 flex justify-center">
-            <a href="/" className="inline-block">
+            <a href="https://www.southlandorganics.com/" className="inline-block">
               <img src={logoUrl} alt="Southland Organics" className="h-20 w-auto" />
             </a>
           </div>
@@ -130,15 +130,15 @@ export function Footer({
                 </li>
                 <li>
                   <a
-                    href="/team/"
+                    href="/about/"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
-                    Our Team
+                    About Us
                   </a>
                 </li>
                 <li>
                   <a
-                    href="/blog/"
+                    href="https://www.southlandorganics.com/blogs/news"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Blog Posts
@@ -154,7 +154,7 @@ export function Footer({
                 </li>
                 <li>
                   <a
-                    href="/search"
+                    href="https://www.southlandorganics.com/search"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Search
@@ -162,7 +162,7 @@ export function Footer({
                 </li>
                 <li>
                   <a
-                    href="https://www.southlandorganics.com/pages/contact"
+                    href="/contact/"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Contact
@@ -170,10 +170,18 @@ export function Footer({
                 </li>
                 <li>
                   <a
-                    href="https://www.southlandorganics.com/pages/store-locator"
+                    href="/store-locator/"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
-                    Store Locator
+                    Find a Dealer
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/distribution/"
+                    className="text-sm text-white/90 transition-colors hover:text-white"
+                  >
+                    Distribution
                   </a>
                 </li>
               </ul>
@@ -184,13 +192,13 @@ export function Footer({
               <h3 className="mb-4 text-lg font-semibold">Product Specialties</h3>
               <ul className="space-y-2">
                 <li>
-                  <a href="/" className="text-sm text-white/90 transition-colors hover:text-white">
+                  <a href="https://www.southlandorganics.com/" className="text-sm text-white/90 transition-colors hover:text-white">
                     Home
                   </a>
                 </li>
                 <li>
                   <a
-                    href="/poultry/"
+                    href="https://www.southlandorganics.com/collections/poultry"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Poultry
@@ -198,7 +206,7 @@ export function Footer({
                 </li>
                 <li>
                   <a
-                    href="/poultry/backyard/"
+                    href="https://www.southlandorganics.com/collections/backyard-poultry"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Backyard Poultry
@@ -206,7 +214,7 @@ export function Footer({
                 </li>
                 <li>
                   <a
-                    href="/poultry/commercial/"
+                    href="https://www.southlandorganics.com/collections/commercial-poultry"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Commercial Poultry
@@ -214,7 +222,7 @@ export function Footer({
                 </li>
                 <li>
                   <a
-                    href="/lawn/"
+                    href="https://www.southlandorganics.com/collections/turf"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Lawn & Garden

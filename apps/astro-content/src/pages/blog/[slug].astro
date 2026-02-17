@@ -9,6 +9,7 @@ import BlogCard from '../../components/blog/BlogCard.astro'
 import AuthorCard from '../../components/blog/AuthorCard.astro'
 import { getCollection, getEntry, render } from 'astro:content'
 import { buildPersonSchema, buildOrganizationSchema } from '../../lib/schema'
+import { resolveEpisodeCover } from '../../lib/cloudinary'
 
 export const prerender = true
 
@@ -310,9 +311,9 @@ const articleSchema = {
                   href={`/podcast/${ep.id.replace(/\.mdx?$/, '')}/`}
                   class="group flex items-start gap-4 rounded-xl border border-gray-100 bg-brand-gray p-4 transition-shadow hover:shadow-md"
                 >
-                  {ep.data.thumbnail && (
+                  {(ep.data.coverImage || ep.data.thumbnail) && (
                     <img
-                      src={ep.data.thumbnail}
+                      src={resolveEpisodeCover(ep.data, 256)}
                       alt={ep.data.title}
                       class="h-20 w-32 flex-shrink-0 rounded-lg object-cover"
                       loading="lazy"
