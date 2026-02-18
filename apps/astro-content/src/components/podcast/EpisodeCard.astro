@@ -50,7 +50,7 @@ const formattedDate = new Intl.DateTimeFormat('en-US', {
     href={episodeUrl}
     class={`episode-card-thumbnail block relative group ${featured ? 'md:w-2/5 md:flex-shrink-0' : ''}`}
   >
-    <div class={`bg-gray-100 overflow-hidden ${featured ? 'aspect-video md:aspect-auto md:h-full' : 'aspect-video'}`}>
+    <div class="bg-gray-100 overflow-hidden aspect-video">
       <img
         src={thumbnail || defaultThumbnail}
         alt={`Episode ${episodeNumber}: ${title}`}

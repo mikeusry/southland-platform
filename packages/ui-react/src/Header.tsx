@@ -65,7 +65,7 @@ export function Header({ logoUrl, logoAlt, navigation, currentPath }: HeaderProp
       <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
         <div className="flex h-[75px] items-center justify-between">
           {/* Logo */}
-          <a href="https://southlandorganics.com" className="flex-shrink-0">
+          <a href="/" className="flex-shrink-0">
             <img src={logoUrl} alt={logoAlt} className="h-12 w-auto" />
           </a>
 
@@ -80,7 +80,7 @@ export function Header({ logoUrl, logoAlt, navigation, currentPath }: HeaderProp
           <div className="flex items-center space-x-2">
             {/* Account */}
             <a
-              href="https://southlandorganics.com/account/login"
+              href="/account/login"
               className="text-shopify-text hover:text-shopify-accent p-2 transition-colors"
               aria-label="Account"
             >
@@ -96,7 +96,7 @@ export function Header({ logoUrl, logoAlt, navigation, currentPath }: HeaderProp
 
             {/* Search */}
             <a
-              href="https://southlandorganics.com/search"
+              href="/search"
               className="text-shopify-text hover:text-shopify-accent p-2 transition-colors"
               aria-label="Search"
             >
@@ -112,7 +112,7 @@ export function Header({ logoUrl, logoAlt, navigation, currentPath }: HeaderProp
 
             {/* Cart */}
             <a
-              href="https://southlandorganics.com/cart"
+              href="/cart"
               className="text-shopify-text hover:text-shopify-accent relative p-2 transition-colors"
               aria-label="Cart"
             >

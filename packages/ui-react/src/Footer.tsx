@@ -78,7 +78,7 @@ export function Footer({
         <div className="mx-auto max-w-[1400px] px-4 py-12 sm:px-6 md:py-16 lg:px-8">
           {/* Centered Logo */}
           <div className="mb-12 flex justify-center">
-            <a href="https://www.southlandorganics.com/" className="inline-block">
+            <a href="/" className="inline-block">
               <img src={logoUrl} alt="Southland Organics" className="h-20 w-auto" />
             </a>
           </div>
@@ -122,7 +122,7 @@ export function Footer({
               <ul className="space-y-2">
                 <li>
                   <a
-                    href="https://www.southlandorganics.com/pages/why-southland"
+                    href="/pages/why-southland"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Why Choose Southland
@@ -138,7 +138,7 @@ export function Footer({
                 </li>
                 <li>
                   <a
-                    href="https://www.southlandorganics.com/blogs/news"
+                    href="/blogs/news"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Blog Posts
@@ -154,7 +154,7 @@ export function Footer({
                 </li>
                 <li>
                   <a
-                    href="https://www.southlandorganics.com/search"
+                    href="/search"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Search
@@ -192,13 +192,13 @@ export function Footer({
               <h3 className="mb-4 text-lg font-semibold">Product Specialties</h3>
               <ul className="space-y-2">
                 <li>
-                  <a href="https://www.southlandorganics.com/" className="text-sm text-white/90 transition-colors hover:text-white">
+                  <a href="/" className="text-sm text-white/90 transition-colors hover:text-white">
                     Home
                   </a>
                 </li>
                 <li>
                   <a
-                    href="https://www.southlandorganics.com/collections/poultry"
+                    href="/collections/poultry"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Poultry
@@ -206,7 +206,7 @@ export function Footer({
                 </li>
                 <li>
                   <a
-                    href="https://www.southlandorganics.com/collections/backyard-poultry"
+                    href="/collections/backyard-poultry"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Backyard Poultry
@@ -214,7 +214,7 @@ export function Footer({
                 </li>
                 <li>
                   <a
-                    href="https://www.southlandorganics.com/collections/commercial-poultry"
+                    href="/collections/commercial-poultry"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Commercial Poultry
@@ -222,7 +222,7 @@ export function Footer({
                 </li>
                 <li>
                   <a
-                    href="https://www.southlandorganics.com/collections/turf"
+                    href="/collections/turf"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Lawn & Garden
@@ -230,7 +230,7 @@ export function Footer({
                 </li>
                 <li>
                   <a
-                    href="https://www.southlandorganics.com/collections/waste"
+                    href="/collections/waste"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Septic & Waste
@@ -567,21 +567,21 @@ export function Footer({
               <span>{copyright}</span>
               <span className="hidden sm:inline">|</span>
               <a
-                href="https://southlandorganics.com/pages/terms-of-service"
+                href="/pages/terms-of-service"
                 className="transition-colors hover:text-white"
               >
                 Terms Of Use
               </a>
               <span>|</span>
               <a
-                href="https://southlandorganics.com/pages/privacy-policy"
+                href="/pages/privacy-policy"
                 className="transition-colors hover:text-white"
               >
                 Privacy Policy
               </a>
               <span>|</span>
               <a
-                href="https://southlandorganics.com/pages/shipping-policy"
+                href="/pages/shipping-policy"
                 className="transition-colors hover:text-white"
               >
                 Shipping & Returns

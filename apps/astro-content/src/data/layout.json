@@ -2,7 +2,7 @@
   "_meta": {
     "synced": "2026-02-01T23:14:08.485Z",
     "source": "Shopify Storefront API",
-    "note": "Phase 1: Only /podcast/* routes live in Astro. All other routes point to Shopify."
+    "note": "All nav links are relative paths. Middleware routes Astro pages to Astro, everything else to Shopify."
   },
   "header": {
     "logoUrl": "https://cdn.shopify.com/s/files/1/0794/9519/files/Southland_Orgnaics_Horizontal_a76ce835-f89f-43e6-8a16-9bcf122d4922.png?v=1730460323",
@@ -10,77 +10,77 @@
     "navigation": [
       {
         "label": "Home",
-        "href": "https://www.southlandorganics.com/"
+        "href": "/"
       },
       {
         "label": "Poultry",
-        "href": "https://www.southlandorganics.com/collections/poultry",
+        "href": "/collections/poultry",
         "children": [
           {
             "label": "Backyard Poultry",
-            "href": "https://www.southlandorganics.com/collections/backyard-poultry"
+            "href": "/collections/backyard-poultry"
           },
           {
             "label": "Commercial Poultry",
-            "href": "https://www.southlandorganics.com/collections/commercial-poultry"
+            "href": "/collections/commercial-poultry"
           },
           {
             "label": "Shop Products",
-            "href": "https://www.southlandorganics.com/collections/poultry"
+            "href": "/collections/poultry"
           },
           {
             "label": "Poultry Biosecurity",
-            "href": "https://www.southlandorganics.com/blogs/poultry-biosecurity"
+            "href": "/blogs/poultry-biosecurity"
           }
         ]
       },
       {
         "label": "Lawn & Garden",
-        "href": "https://www.southlandorganics.com/collections/turf",
+        "href": "/collections/turf",
         "children": [
           {
             "label": "Lawn Care",
-            "href": "https://www.southlandorganics.com/collections/turf"
+            "href": "/collections/turf"
           },
           {
             "label": "Shop Products",
-            "href": "https://www.southlandorganics.com/collections/turf"
+            "href": "/collections/turf"
           },
           {
             "label": "Golf Courses",
-            "href": "https://www.southlandorganics.com/collections/golf-courses"
+            "href": "/collections/golf-courses"
           },
           {
             "label": "Landscapers",
-            "href": "https://www.southlandorganics.com/collections/landscapers"
+            "href": "/collections/landscapers"
           }
         ]
       },
       {
         "label": "Septic & Waste",
-        "href": "https://www.southlandorganics.com/collections/waste",
+        "href": "/collections/waste",
         "children": [
           {
             "label": "Products",
-            "href": "https://www.southlandorganics.com/collections/all?filter.p.product_type=Waste"
+            "href": "/collections/all?filter.p.product_type=Waste"
           },
           {
             "label": "Septic Care",
-            "href": "https://www.southlandorganics.com/products/pour-the-port-septic-tank-treatment"
+            "href": "/products/pour-the-port-septic-tank-treatment"
           },
           {
             "label": "Odor Control",
-            "href": "https://www.southlandorganics.com/collections/waste"
+            "href": "/collections/waste"
           },
           {
             "label": "Sanitizers",
-            "href": "https://www.southlandorganics.com/collections/sanitizers"
+            "href": "/collections/sanitizers"
           }
         ]
       },
       {
         "label": "Swine",
-        "href": "https://www.southlandorganics.com/collections/pig-and-swine-supplements"
+        "href": "/collections/pig-and-swine-supplements"
       },
       {
         "label": "About",
@@ -100,7 +100,7 @@
           },
           {
             "label": "Blog",
-            "href": "https://www.southlandorganics.com/blogs/news"
+            "href": "/blogs/news"
           },
           {
             "label": "Contact",

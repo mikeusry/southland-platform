@@ -49,9 +49,6 @@ loadEnv(join(__dirname, '../../shopify-app/.env'));
 const SHOP_DOMAIN = process.env.SHOP_DOMAIN || 'southland-organics.myshopify.com';
 const STOREFRONT_TOKEN = process.env.STOREFRONT_TOKEN;
 const LAYOUT_API_URL = process.env.LAYOUT_API_URL;
-const SHOPIFY_DOMAIN = 'https://southlandorganics.com';
-const PODCAST_PATHS = ['/podcast'];
-
 const LAYOUT_QUERY = `
   query GetLayoutData {
     menu(handle: "main-menu") {
@@ -87,17 +84,28 @@ const LAYOUT_QUERY = `
   }
 `;
 
+/**
+ * Convert all Shopify URLs to relative paths.
+ * The middleware handles routing — Astro routes go to Astro,
+ * everything else gets proxied to Shopify. All links must be
+ * relative so they go through the middleware.
+ */
 function normalizeUrl(url) {
   if (!url) return '#';
   if (url.startsWith('http')) {
-    const podcastMatch = url.match(/southlandorganics\.com(\/podcast.*)/);
-    if (podcastMatch) return podcastMatch[1];
+    try {
+      const parsed = new URL(url);
+      // Strip domain from any southlandorganics.com URL (www or non-www)
+      if (parsed.hostname.includes('southlandorganics.com') ||
+          parsed.hostname.includes('myshopify.com')) {
+        return parsed.pathname + parsed.search + parsed.hash;
+      }
+    } catch {
+      // Not a valid URL, return as-is
+    }
     return url;
   }
-  if (url.startsWith('/')) {
-    if (PODCAST_PATHS.some(p => url.startsWith(p))) return url;
-    return `${SHOPIFY_DOMAIN}${url}`;
-  }
+  // Already relative — keep as-is
   return url;
 }
 
