@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "tinacms dev -c \"astro dev --port 4400\"",
     "dev:astro": "astro dev --port 4400",
-    "build": "tinacms build && node scripts/fetch-layout.js || true && astro build",
+    "build": "tinacms build && node scripts/fetch-layout.js || true && npx tsx --tsconfig scripts/tsconfig.json scripts/build-partials.ts && astro build",
+    "build-partials": "npx tsx --tsconfig scripts/tsconfig.json scripts/build-partials.ts",
     "preview": "astro preview",
     "astro": "astro",
     "fetch-layout": "node scripts/fetch-layout.js",

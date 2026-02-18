@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { NavItem } from '@southland/ui-schema'
+import type { NavItem, NavChild } from '@southland/ui-schema'
 
 interface HeaderProps {
   logoUrl: string
@@ -8,9 +8,78 @@ interface HeaderProps {
   currentPath?: string
 }
 
+function groupChildren(children: NavChild[]) {
+  const hasGroups = children.some((c) => c.group)
+  if (!hasGroups) return null
+  const groups: Record<string, NavChild[]> = {}
+  for (const child of children) {
+    const key = child.group || ''
+    if (!groups[key]) groups[key] = []
+    groups[key].push(child)
+  }
+  return Object.entries(groups)
+}
+
+const isPrimary = (label: string) => label.startsWith('Shop All')
+
+const megaStyles = {
+  panel: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '0 3rem',
+    padding: '1rem 1.5rem',
+    borderRadius: '0.5rem',
+    boxShadow: '0 18px 45px rgba(15, 23, 42, 0.15)',
+    background: '#fff',
+    minWidth: '420px',
+  } as const,
+  label: {
+    fontSize: '0.75rem',
+    textTransform: 'uppercase',
+    letterSpacing: '0.08em',
+    color: '#6b7280',
+    marginBottom: '0.75rem',
+    display: 'block',
+  } as const,
+  link: {
+    display: 'block',
+    padding: '0.3rem 0.5rem',
+    margin: '0 -0.5rem',
+    fontSize: '0.9375rem',
+    color: '#111827',
+    textDecoration: 'none',
+    borderRadius: '0.25rem',
+    transition: 'color 0.15s, background 0.15s',
+  } as const,
+  linkPrimary: {
+    fontWeight: 600,
+    color: '#2c5234',
+  } as const,
+}
+
+function MegaLink({ child }: { child: NavChild }) {
+  const [hovered, setHovered] = useState(false)
+  const primary = isPrimary(child.label)
+  return (
+    <a
+      href={child.href}
+      style={{
+        ...megaStyles.link,
+        ...(primary ? megaStyles.linkPrimary : {}),
+        ...(hovered ? { color: '#2c5234', background: '#f3f4f6' } : {}),
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {child.label}
+    </a>
+  )
+}
+
 function NavDropdown({ item, isActive }: { item: NavItem; isActive: boolean }) {
   const [isOpen, setIsOpen] = useState(false)
   const hasChildren = item.children && item.children.length > 0
+  const grouped = hasChildren ? groupChildren(item.children!) : null
 
   return (
     <div
@@ -20,30 +89,68 @@ function NavDropdown({ item, isActive }: { item: NavItem; isActive: boolean }) {
     >
       <a
         href={item.href}
-        className={`inline-flex items-center px-4 py-3 text-base font-semibold transition-colors ${
-          isActive ? 'text-shopify-accent' : 'text-shopify-text hover:text-shopify-accent'
-        }`}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          padding: '0.75rem 1rem',
+          fontSize: '1rem',
+          fontWeight: 600,
+          transition: 'color 0.15s',
+          color: isActive ? '#44883e' : '#191d21',
+        }}
+        onMouseEnter={(e) => {
+          if (!isActive) e.currentTarget.style.color = '#44883e'
+        }}
+        onMouseLeave={(e) => {
+          if (!isActive) e.currentTarget.style.color = '#191d21'
+        }}
       >
         {item.label}
         {hasChildren && (
-          <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            style={{
+              marginLeft: '0.25rem',
+              width: '1rem',
+              height: '1rem',
+              transition: 'transform 0.2s',
+              transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+            }}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         )}
       </a>
       {hasChildren && isOpen && (
-        <div className="absolute left-0 top-full z-50 pt-1">
-          <div className="min-w-[220px] rounded border border-gray-200 bg-white py-2 shadow-lg">
-            {item.children!.map((child) => (
-              <a
-                key={child.label}
-                href={child.href}
-                className="text-shopify-text hover:text-shopify-accent block px-4 py-2.5 text-sm transition-colors hover:bg-gray-50"
-              >
-                {child.label}
-              </a>
-            ))}
-          </div>
+        <div style={{ position: 'absolute', left: 0, top: '100%', zIndex: 50, paddingTop: '0.25rem' }}>
+          {grouped ? (
+            <div style={megaStyles.panel}>
+              {grouped.map(([groupName, children]) => (
+                <div key={groupName}>
+                  <span style={megaStyles.label}>{groupName}</span>
+                  {children.map((child) => (
+                    <MegaLink key={child.label} child={child} />
+                  ))}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div
+              style={{
+                minWidth: '220px',
+                borderRadius: '0.5rem',
+                boxShadow: '0 18px 45px rgba(15, 23, 42, 0.15)',
+                background: '#fff',
+                padding: '1rem 1.5rem',
+              }}
+            >
+              {item.children!.map((child) => (
+                <MegaLink key={child.label} child={child} />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -70,7 +177,7 @@ export function Header({ logoUrl, logoAlt, navigation, currentPath }: HeaderProp
           </a>
 
           {/* Desktop Navigation - centered */}
-          <nav className="hidden items-center space-x-2 md:flex">
+          <nav className="hidden items-center md:flex">
             {navigation.map((item) => (
               <NavDropdown key={item.label} item={item} isActive={isItemActive(item)} />
             ))}
@@ -81,7 +188,7 @@ export function Header({ logoUrl, logoAlt, navigation, currentPath }: HeaderProp
             {/* Account */}
             <a
               href="/account/login"
-              className="text-shopify-text hover:text-shopify-accent p-2 transition-colors"
+              className="p-2 text-shopify-text transition-colors hover:text-shopify-accent"
               aria-label="Account"
             >
               <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -97,7 +204,7 @@ export function Header({ logoUrl, logoAlt, navigation, currentPath }: HeaderProp
             {/* Search */}
             <a
               href="/search"
-              className="text-shopify-text hover:text-shopify-accent p-2 transition-colors"
+              className="p-2 text-shopify-text transition-colors hover:text-shopify-accent"
               aria-label="Search"
             >
               <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,7 +220,7 @@ export function Header({ logoUrl, logoAlt, navigation, currentPath }: HeaderProp
             {/* Cart */}
             <a
               href="/cart"
-              className="text-shopify-text hover:text-shopify-accent relative p-2 transition-colors"
+              className="relative p-2 text-shopify-text transition-colors hover:text-shopify-accent"
               aria-label="Cart"
             >
               <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,7 +236,7 @@ export function Header({ logoUrl, logoAlt, navigation, currentPath }: HeaderProp
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-shopify-text hover:text-shopify-title p-2 transition-colors md:hidden"
+              className="p-2 text-shopify-text transition-colors hover:text-shopify-title md:hidden"
               aria-label="Menu"
               aria-expanded={mobileMenuOpen}
             >
@@ -161,31 +268,67 @@ export function Header({ logoUrl, logoAlt, navigation, currentPath }: HeaderProp
       {mobileMenuOpen && (
         <nav className="max-h-[calc(100vh-75px)] overflow-y-auto border-t border-gray-100 bg-white md:hidden">
           <div className="px-4 py-4">
-            {navigation.map((item) => (
-              <div key={item.label} className="border-b border-gray-100 last:border-0">
-                <a
-                  href={item.href}
-                  className={`block py-3 text-base font-semibold ${
-                    isItemActive(item) ? 'text-shopify-accent' : 'text-shopify-text'
-                  }`}
-                >
-                  {item.label}
-                </a>
-                {item.children && (
-                  <div className="pb-3 pl-4">
-                    {item.children.map((child) => (
-                      <a
-                        key={child.label}
-                        href={child.href}
-                        className="text-shopify-secondary-text hover:text-shopify-accent block py-2 text-sm transition-colors"
-                      >
-                        {child.label}
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+            {navigation.map((item) => {
+              const grouped = item.children ? groupChildren(item.children) : null
+              return (
+                <div key={item.label} className="border-b border-gray-100 last:border-0">
+                  <a
+                    href={item.href}
+                    className={`block py-3 text-base font-semibold ${
+                      isItemActive(item) ? 'text-shopify-accent' : 'text-shopify-text'
+                    }`}
+                  >
+                    {item.label}
+                  </a>
+                  {item.children && (
+                    <div className="pb-3 pl-4">
+                      {grouped
+                        ? grouped.map(([groupName, children]) => (
+                            <div key={groupName} className="mb-3">
+                              <span
+                                style={{
+                                  fontSize: '0.75rem',
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '0.08em',
+                                  color: '#6b7280',
+                                  marginBottom: '0.25rem',
+                                  display: 'block',
+                                }}
+                              >
+                                {groupName}
+                              </span>
+                              {children.map((child) => (
+                                <a
+                                  key={child.label}
+                                  href={child.href}
+                                  style={{
+                                    display: 'block',
+                                    padding: '0.375rem 0',
+                                    fontSize: '0.875rem',
+                                    color: isPrimary(child.label) ? '#2c5234' : '#686363',
+                                    fontWeight: isPrimary(child.label) ? 600 : 400,
+                                    textDecoration: 'none',
+                                  }}
+                                >
+                                  {child.label}
+                                </a>
+                              ))}
+                            </div>
+                          ))
+                        : item.children.map((child) => (
+                            <a
+                              key={child.label}
+                              href={child.href}
+                              className="block py-2 text-sm text-shopify-secondary-text transition-colors hover:text-shopify-accent"
+                            >
+                              {child.label}
+                            </a>
+                          ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
         </nav>
       )}

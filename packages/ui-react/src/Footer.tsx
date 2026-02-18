@@ -184,6 +184,22 @@ export function Footer({
                     Distribution
                   </a>
                 </li>
+                <li>
+                  <a
+                    href="/pages/faqs"
+                    className="text-sm text-white/90 transition-colors hover:text-white"
+                  >
+                    FAQs
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/pages/southland-organics-rewards"
+                    className="text-sm text-white/90 transition-colors hover:text-white"
+                  >
+                    Rewards Program
+                  </a>
+                </li>
               </ul>
             </div>
 
@@ -191,11 +207,6 @@ export function Footer({
             <div className="text-center sm:text-left">
               <h3 className="mb-4 text-lg font-semibold">Product Specialties</h3>
               <ul className="space-y-2">
-                <li>
-                  <a href="/" className="text-sm text-white/90 transition-colors hover:text-white">
-                    Home
-                  </a>
-                </li>
                 <li>
                   <a
                     href="/collections/poultry"
@@ -206,18 +217,26 @@ export function Footer({
                 </li>
                 <li>
                   <a
-                    href="/collections/backyard-poultry"
+                    href="/collections/poultry-broilers"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
-                    Backyard Poultry
+                    Broilers
                   </a>
                 </li>
                 <li>
                   <a
-                    href="/collections/commercial-poultry"
+                    href="/collections/backyard-birds"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
-                    Commercial Poultry
+                    Backyard Birds
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/collections/turkey"
+                    className="text-sm text-white/90 transition-colors hover:text-white"
+                  >
+                    Turkey
                   </a>
                 </li>
                 <li>
@@ -230,10 +249,26 @@ export function Footer({
                 </li>
                 <li>
                   <a
+                    href="/collections/crops"
+                    className="text-sm text-white/90 transition-colors hover:text-white"
+                  >
+                    Crops
+                  </a>
+                </li>
+                <li>
+                  <a
                     href="/collections/waste"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Septic & Waste
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/collections/pig-and-swine-supplements"
+                    className="text-sm text-white/90 transition-colors hover:text-white"
+                  >
+                    Swine
                   </a>
                 </li>
               </ul>

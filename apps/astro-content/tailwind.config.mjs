@@ -2,6 +2,8 @@
 export default {
   content: [
     './src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}',
+    // Shared UI components (workspace packages)
+    '../../packages/ui-react/src/**/*.{ts,tsx}',
     // Tremor.so components
     './node_modules/@tremor/**/*.{js,ts,jsx,tsx}',
   ],

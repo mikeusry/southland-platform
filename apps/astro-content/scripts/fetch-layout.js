@@ -113,10 +113,12 @@ function transformMenuItem(item) {
   return {
     label: item.title,
     href: normalizeUrl(item.url),
+    group: item.group || undefined,
     children: item.items?.length
       ? item.items.map(child => ({
           label: child.title,
           href: normalizeUrl(child.url),
+          group: child.group || undefined,
         }))
       : undefined,
   };

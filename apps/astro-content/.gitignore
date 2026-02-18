@@ -17,6 +17,9 @@ pnpm-debug.log*
 .env
 .env.production
 
+# generated header/footer partials (built by build-partials.mjs)
+public/_partials/
+
 # extracted podcast audio (uploaded to R2, not committed)
 podcast-audio/
 

@@ -1,6 +1,7 @@
 export interface NavChild {
   label: string
   href: string
+  group?: string
 }
 
 export interface NavItem {

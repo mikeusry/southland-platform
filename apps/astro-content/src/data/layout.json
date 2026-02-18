@@ -16,66 +16,36 @@
         "label": "Poultry",
         "href": "/collections/poultry",
         "children": [
-          {
-            "label": "Backyard Poultry",
-            "href": "/collections/backyard-poultry"
-          },
-          {
-            "label": "Commercial Poultry",
-            "href": "/collections/commercial-poultry"
-          },
-          {
-            "label": "Shop Products",
-            "href": "/collections/poultry"
-          },
-          {
-            "label": "Poultry Biosecurity",
-            "href": "/blogs/poultry-biosecurity"
-          }
+          { "label": "Broilers", "href": "/collections/poultry-broilers", "group": "By Bird" },
+          { "label": "Breeders", "href": "/collections/poultry-breeders", "group": "By Bird" },
+          { "label": "Backyard Birds", "href": "/collections/backyard-birds", "group": "By Bird" },
+          { "label": "Game Birds", "href": "/collections/game-birds", "group": "By Bird" },
+          { "label": "Turkey", "href": "/collections/turkey", "group": "By Bird" },
+          { "label": "Poultry Biosecurity", "href": "/blogs/poultry-biosecurity", "group": "Resources" },
+          { "label": "Case Studies", "href": "/blogs/case-studies", "group": "Resources" },
+          { "label": "Shop All Poultry", "href": "/collections/poultry", "group": "Resources" }
         ]
       },
       {
         "label": "Lawn & Garden",
         "href": "/collections/turf",
         "children": [
-          {
-            "label": "Lawn Care",
-            "href": "/collections/turf"
-          },
-          {
-            "label": "Shop Products",
-            "href": "/collections/turf"
-          },
-          {
-            "label": "Golf Courses",
-            "href": "/collections/golf-courses"
-          },
-          {
-            "label": "Landscapers",
-            "href": "/collections/landscapers"
-          }
+          { "label": "Homeowners", "href": "/collections/homeowners", "group": "By Customer" },
+          { "label": "Golf Courses", "href": "/collections/golf-courses", "group": "By Customer" },
+          { "label": "Landscapers", "href": "/collections/landscapers", "group": "By Customer" },
+          { "label": "Crops", "href": "/collections/crops", "group": "Specialty" },
+          { "label": "Hydroseeders", "href": "/collections/hydroseeders", "group": "Specialty" },
+          { "label": "Hydroseeding", "href": "/pages/hydroseeding", "group": "Specialty" },
+          { "label": "Shop All Lawn & Garden", "href": "/collections/turf", "group": "Specialty" }
         ]
       },
       {
         "label": "Septic & Waste",
         "href": "/collections/waste",
         "children": [
-          {
-            "label": "Products",
-            "href": "/collections/all?filter.p.product_type=Waste"
-          },
-          {
-            "label": "Septic Care",
-            "href": "/products/pour-the-port-septic-tank-treatment"
-          },
-          {
-            "label": "Odor Control",
-            "href": "/collections/waste"
-          },
-          {
-            "label": "Sanitizers",
-            "href": "/collections/sanitizers"
-          }
+          { "label": "Septic Care", "href": "/products/pour-the-port-septic-tank-treatment" },
+          { "label": "Odor Control", "href": "/collections/waste" },
+          { "label": "Sanitizers", "href": "/collections/sanitizers" }
         ]
       },
       {
@@ -86,34 +56,16 @@
         "label": "About",
         "href": "/about/",
         "children": [
-          {
-            "label": "About Us",
-            "href": "/about/"
-          },
-          {
-            "label": "Our Team",
-            "href": "/about/#team"
-          },
-          {
-            "label": "Podcast",
-            "href": "/podcast/"
-          },
-          {
-            "label": "Blog",
-            "href": "/blogs/news"
-          },
-          {
-            "label": "Contact",
-            "href": "/contact/"
-          },
-          {
-            "label": "Find a Dealer",
-            "href": "/store-locator/"
-          },
-          {
-            "label": "Distribution",
-            "href": "/distribution/"
-          }
+          { "label": "About Us", "href": "/about/", "group": "Company" },
+          { "label": "Our Team", "href": "/about/#team", "group": "Company" },
+          { "label": "Contact", "href": "/contact/", "group": "Company" },
+          { "label": "Find a Dealer", "href": "/store-locator/", "group": "Company" },
+          { "label": "Distribution", "href": "/distribution/", "group": "Company" },
+          { "label": "Rewards Program", "href": "/pages/southland-organics-rewards", "group": "Company" },
+          { "label": "Podcast", "href": "/podcast/", "group": "Learn" },
+          { "label": "Blog", "href": "/blogs/news", "group": "Learn" },
+          { "label": "Humate Hub", "href": "/blogs/humate-hub", "group": "Learn" },
+          { "label": "FAQs", "href": "/pages/faqs", "group": "Learn" }
         ]
       }
     ]
