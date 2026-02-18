@@ -1,5 +1,11 @@
 import type { StorefrontClient } from '../client'
-import type { Collection, Product, ProductImage, ProductVariant } from '../types'
+import type {
+  Collection,
+  CollectionSummary,
+  Product,
+  ProductImage,
+  ProductVariant,
+} from '../types'
 
 // ─── GraphQL fragments ──────────────────────────────────────────────────────
 
@@ -42,10 +48,32 @@ const COLLECTION_PRODUCTS_QUERY = `
     collection(handle: $handle) {
       title
       handle
+      description
       products(first: $first) {
         edges {
           node {
             ${PRODUCT_FIELDS}
+          }
+        }
+      }
+    }
+  }
+`
+
+const ALL_COLLECTIONS_QUERY = `
+  query AllCollections($first: Int!) {
+    collections(first: $first) {
+      edges {
+        node {
+          id
+          title
+          handle
+          description
+          image {
+            url
+            altText
+            width
+            height
           }
         }
       }
@@ -139,8 +167,45 @@ export async function getCollectionProducts(
   return {
     title: collection.title as string,
     handle: collection.handle as string,
+    description: (collection.description as string) ?? '',
     products: products.edges.map((e) => parseProduct(e.node)),
   }
+}
+
+/**
+ * Fetch all collections from the store (summaries only, no products).
+ */
+export async function getAllCollections(
+  client: StorefrontClient,
+  first = 50,
+): Promise<CollectionSummary[]> {
+  const { data, errors } = await client.request(ALL_COLLECTIONS_QUERY, {
+    variables: { first },
+  })
+
+  if (errors) {
+    console.error('[shopify-storefront] getAllCollections errors:', errors)
+    return []
+  }
+
+  const collections = data?.collections as {
+    edges: { node: Record<string, unknown> }[]
+  }
+  if (!collections) return []
+
+  return collections.edges.map((e) => {
+    const node = e.node
+    const image = node.image
+      ? parseImage(node.image as Record<string, unknown>)
+      : null
+    return {
+      id: node.id as string,
+      title: node.title as string,
+      handle: node.handle as string,
+      description: (node.description as string) ?? '',
+      image,
+    }
+  })
 }
 
 /**

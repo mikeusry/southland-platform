@@ -1,0 +1,96 @@
+---
+/**
+ * CollectionGrid — Product grid with persona-aware sorting.
+ *
+ * Sorts products based on persona:
+ * - Betty (backyard): Small sizes first, bundles highlighted
+ * - Bill (commercial): Bulk/gallon first
+ * - Taylor (lawn): Programs/bundles first
+ * - Default: Shopify sort order
+ */
+import type { Product } from '@southland/shopify-storefront'
+import type { PersonaId } from '../../lib/persona'
+import CollectionProductCard from './CollectionProductCard.astro'
+
+interface Props {
+  products: Product[]
+  persona?: PersonaId
+}
+
+const { products, persona } = Astro.props
+
+/**
+ * Sort products based on persona preferences.
+ */
+function sortByPersona(items: Product[], p: PersonaId): Product[] {
+  if (!p || p === 'general') return items
+
+  return [...items].sort((a, b) => {
+    const aScore = getPersonaScore(a, p)
+    const bScore = getPersonaScore(b, p)
+    return bScore - aScore // Higher score = more relevant
+  })
+}
+
+function getPersonaScore(product: Product, p: NonNullable<PersonaId>): number {
+  let score = 0
+  const tags = product.tags.map((t) => t.toLowerCase())
+  const hasBundle = tags.includes('bundle')
+  const hasBestseller = tags.includes('bestseller') || tags.includes('best-seller')
+
+  if (p === 'backyard') {
+    // Prefer bundles and smaller sizes
+    if (hasBundle) score += 10
+    if (hasBestseller) score += 5
+    // Check for small size variants (16oz, quart)
+    const hasSmall = product.variants.some((v) =>
+      v.selectedOptions.some(
+        (opt) =>
+          opt.name === 'Size' &&
+          (opt.value.includes('16') || opt.value.includes('Quart') || opt.value.includes('quart'))
+      )
+    )
+    if (hasSmall) score += 3
+  }
+
+  if (p === 'commercial') {
+    // Prefer gallon/bulk sizes
+    if (hasBestseller) score += 5
+    const hasBulk = product.variants.some((v) =>
+      v.selectedOptions.some(
+        (opt) =>
+          opt.name === 'Size' &&
+          (opt.value.includes('Gallon') ||
+            opt.value.includes('gallon') ||
+            opt.value.includes('5'))
+      )
+    )
+    if (hasBulk) score += 10
+    if (hasBundle) score += 3
+  }
+
+  if (p === 'lawn') {
+    // Prefer programs and bundles
+    if (hasBundle) score += 10
+    if (hasBestseller) score += 5
+    const hasProgram = tags.includes('program') || tags.includes('subscription')
+    if (hasProgram) score += 8
+  }
+
+  return score
+}
+
+const sortedProducts = sortByPersona(products, persona ?? null)
+---
+
+{sortedProducts.length > 0 ? (
+  <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
+    {sortedProducts.map((product) => (
+      <CollectionProductCard product={product} persona={persona} />
+    ))}
+  </div>
+) : (
+  <div class="py-16 text-center">
+    <p class="text-lg text-gray-500">No products found in this collection.</p>
+  </div>
+)}

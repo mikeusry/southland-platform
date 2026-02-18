@@ -64,6 +64,8 @@ type Query {
   guestsConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: GuestsFilter): GuestsConnection!
   topics(relativePath: String): Topics!
   topicsConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: TopicsFilter): TopicsConnection!
+  shopCollections(relativePath: String): ShopCollections!
+  shopCollectionsConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: ShopCollectionsFilter): ShopCollectionsConnection!
 }
 
 input DocumentFilter {
@@ -72,6 +74,7 @@ input DocumentFilter {
   episodes: EpisodesFilter
   guests: GuestsFilter
   topics: TopicsFilter
+  shopCollections: ShopCollectionsFilter
 }
 
 type DocumentConnectionEdges {
@@ -97,7 +100,7 @@ type Collection {
   documents(before: String, after: String, first: Float, last: Float, sort: String, filter: DocumentFilter, folder: String): DocumentConnection!
 }
 
-union DocumentNode = Blog | Team | Episodes | Guests | Topics | Folder
+union DocumentNode = Blog | Team | Episodes | Guests | Topics | ShopCollections | Folder
 
 type Blog implements Node & Document {
   title: String!
@@ -417,6 +420,54 @@ type TopicsConnection implements Connection {
   edges: [TopicsConnectionEdges]
 }
 
+type ShopCollectionsFaq {
+  question: String!
+  answer: String!
+}
+
+type ShopCollections implements Node & Document {
+  title: String!
+  handle: String!
+  persona: String
+  seoDescription: String
+  heroHeadline: String
+  heroSubheadline: String
+  heroImage: String
+  faq: [ShopCollectionsFaq]
+  body: JSON
+  id: ID!
+  _sys: SystemInfo!
+  _values: JSON!
+}
+
+input ShopCollectionsFaqFilter {
+  question: StringFilter
+  answer: StringFilter
+}
+
+input ShopCollectionsFilter {
+  title: StringFilter
+  handle: StringFilter
+  persona: StringFilter
+  seoDescription: StringFilter
+  heroHeadline: StringFilter
+  heroSubheadline: StringFilter
+  heroImage: StringFilter
+  faq: ShopCollectionsFaqFilter
+  body: RichTextFilter
+}
+
+type ShopCollectionsConnectionEdges {
+  cursor: String!
+  node: ShopCollections
+}
+
+type ShopCollectionsConnection implements Connection {
+  pageInfo: PageInfo!
+  totalCount: Float!
+  edges: [ShopCollectionsConnectionEdges]
+}
+
 type Mutation {
   addPendingDocument(collection: String!, relativePath: String!, template: String): DocumentNode!
   updateDocument(collection: String, relativePath: String!, params: DocumentUpdateMutation!): DocumentNode!
@@ -433,6 +484,8 @@ type Mutation {
   createGuests(relativePath: String!, params: GuestsMutation!): Guests!
   updateTopics(relativePath: String!, params: TopicsMutation!): Topics!
   createTopics(relativePath: String!, params: TopicsMutation!): Topics!
+  updateShopCollections(relativePath: String!, params: ShopCollectionsMutation!): ShopCollections!
+  createShopCollections(relativePath: String!, params: ShopCollectionsMutation!): ShopCollections!
 }
 
 input DocumentUpdateMutation {
@@ -441,6 +494,7 @@ input DocumentUpdateMutation {
   episodes: EpisodesMutation
   guests: GuestsMutation
   topics: TopicsMutation
+  shopCollections: ShopCollectionsMutation
   relativePath: String
 }
 
@@ -450,6 +504,7 @@ input DocumentMutation {
   episodes: EpisodesMutation
   guests: GuestsMutation
   topics: TopicsMutation
+  shopCollections: ShopCollectionsMutation
 }
 
 input BlogMutation {
@@ -555,6 +610,23 @@ input TopicsMutation {
   description: String
   icon: String
   segment: String
+  body: JSON
+}
+
+input ShopCollectionsFaqMutation {
+  question: String
+  answer: String
+}
+
+input ShopCollectionsMutation {
+  title: String
+  handle: String
+  persona: String
+  seoDescription: String
+  heroHeadline: String
+  heroSubheadline: String
+  heroImage: String
+  faq: [ShopCollectionsFaqMutation]
   body: JSON
 }
 

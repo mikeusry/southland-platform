@@ -92,6 +92,8 @@ export type Query = {
   guestsConnection: GuestsConnection;
   topics: Topics;
   topicsConnection: TopicsConnection;
+  shopCollections: ShopCollections;
+  shopCollectionsConnection: ShopCollectionsConnection;
 };
 
 
@@ -190,12 +192,28 @@ export type QueryTopicsConnectionArgs = {
   filter?: InputMaybe<TopicsFilter>;
 };
 
+
+export type QueryShopCollectionsArgs = {
+  relativePath?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryShopCollectionsConnectionArgs = {
+  before?: InputMaybe<Scalars['String']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Float']['input']>;
+  last?: InputMaybe<Scalars['Float']['input']>;
+  sort?: InputMaybe<Scalars['String']['input']>;
+  filter?: InputMaybe<ShopCollectionsFilter>;
+};
+
 export type DocumentFilter = {
   blog?: InputMaybe<BlogFilter>;
   team?: InputMaybe<TeamFilter>;
   episodes?: InputMaybe<EpisodesFilter>;
   guests?: InputMaybe<GuestsFilter>;
   topics?: InputMaybe<TopicsFilter>;
+  shopCollections?: InputMaybe<ShopCollectionsFilter>;
 };
 
 export type DocumentConnectionEdges = {
@@ -235,7 +253,7 @@ export type CollectionDocumentsArgs = {
   folder?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type DocumentNode = Blog | Team | Episodes | Guests | Topics | Folder;
+export type DocumentNode = Blog | Team | Episodes | Guests | Topics | ShopCollections | Folder;
 
 export type Blog = Node & Document & {
   __typename?: 'Blog';
@@ -573,6 +591,58 @@ export type TopicsConnection = Connection & {
   edges?: Maybe<Array<Maybe<TopicsConnectionEdges>>>;
 };
 
+export type ShopCollectionsFaq = {
+  __typename?: 'ShopCollectionsFaq';
+  question: Scalars['String']['output'];
+  answer: Scalars['String']['output'];
+};
+
+export type ShopCollections = Node & Document & {
+  __typename?: 'ShopCollections';
+  title: Scalars['String']['output'];
+  handle: Scalars['String']['output'];
+  persona?: Maybe<Scalars['String']['output']>;
+  seoDescription?: Maybe<Scalars['String']['output']>;
+  heroHeadline?: Maybe<Scalars['String']['output']>;
+  heroSubheadline?: Maybe<Scalars['String']['output']>;
+  heroImage?: Maybe<Scalars['String']['output']>;
+  faq?: Maybe<Array<Maybe<ShopCollectionsFaq>>>;
+  body?: Maybe<Scalars['JSON']['output']>;
+  id: Scalars['ID']['output'];
+  _sys: SystemInfo;
+  _values: Scalars['JSON']['output'];
+};
+
+export type ShopCollectionsFaqFilter = {
+  question?: InputMaybe<StringFilter>;
+  answer?: InputMaybe<StringFilter>;
+};
+
+export type ShopCollectionsFilter = {
+  title?: InputMaybe<StringFilter>;
+  handle?: InputMaybe<StringFilter>;
+  persona?: InputMaybe<StringFilter>;
+  seoDescription?: InputMaybe<StringFilter>;
+  heroHeadline?: InputMaybe<StringFilter>;
+  heroSubheadline?: InputMaybe<StringFilter>;
+  heroImage?: InputMaybe<StringFilter>;
+  faq?: InputMaybe<ShopCollectionsFaqFilter>;
+  body?: InputMaybe<RichTextFilter>;
+};
+
+export type ShopCollectionsConnectionEdges = {
+  __typename?: 'ShopCollectionsConnectionEdges';
+  cursor: Scalars['String']['output'];
+  node?: Maybe<ShopCollections>;
+};
+
+export type ShopCollectionsConnection = Connection & {
+  __typename?: 'ShopCollectionsConnection';
+  pageInfo: PageInfo;
+  totalCount: Scalars['Float']['output'];
+  edges?: Maybe<Array<Maybe<ShopCollectionsConnectionEdges>>>;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   addPendingDocument: DocumentNode;
@@ -590,6 +660,8 @@ export type Mutation = {
   createGuests: Guests;
   updateTopics: Topics;
   createTopics: Topics;
+  updateShopCollections: ShopCollections;
+  createShopCollections: ShopCollections;
 };
 
 
@@ -685,12 +757,25 @@ export type MutationCreateTopicsArgs = {
   params: TopicsMutation;
 };
 
+
+export type MutationUpdateShopCollectionsArgs = {
+  relativePath: Scalars['String']['input'];
+  params: ShopCollectionsMutation;
+};
+
+
+export type MutationCreateShopCollectionsArgs = {
+  relativePath: Scalars['String']['input'];
+  params: ShopCollectionsMutation;
+};
+
 export type DocumentUpdateMutation = {
   blog?: InputMaybe<BlogMutation>;
   team?: InputMaybe<TeamMutation>;
   episodes?: InputMaybe<EpisodesMutation>;
   guests?: InputMaybe<GuestsMutation>;
   topics?: InputMaybe<TopicsMutation>;
+  shopCollections?: InputMaybe<ShopCollectionsMutation>;
   relativePath?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -700,6 +785,7 @@ export type DocumentMutation = {
   episodes?: InputMaybe<EpisodesMutation>;
   guests?: InputMaybe<GuestsMutation>;
   topics?: InputMaybe<TopicsMutation>;
+  shopCollections?: InputMaybe<ShopCollectionsMutation>;
 };
 
 export type BlogMutation = {
@@ -808,6 +894,23 @@ export type TopicsMutation = {
   body?: InputMaybe<Scalars['JSON']['input']>;
 };
 
+export type ShopCollectionsFaqMutation = {
+  question?: InputMaybe<Scalars['String']['input']>;
+  answer?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type ShopCollectionsMutation = {
+  title?: InputMaybe<Scalars['String']['input']>;
+  handle?: InputMaybe<Scalars['String']['input']>;
+  persona?: InputMaybe<Scalars['String']['input']>;
+  seoDescription?: InputMaybe<Scalars['String']['input']>;
+  heroHeadline?: InputMaybe<Scalars['String']['input']>;
+  heroSubheadline?: InputMaybe<Scalars['String']['input']>;
+  heroImage?: InputMaybe<Scalars['String']['input']>;
+  faq?: InputMaybe<Array<InputMaybe<ShopCollectionsFaqMutation>>>;
+  body?: InputMaybe<Scalars['JSON']['input']>;
+};
+
 export type BlogPartsFragment = { __typename: 'Blog', title: string, publishDate: string, updatedDate?: string | null, description: string, author?: string | null, reviewer?: string | null, tags?: Array<string | null> | null, segment?: string | null, targetKeyword?: string | null, featuredImage?: string | null, draft?: boolean | null, shopifyId?: number | null, shopifyHandle?: string | null, body?: any | null };
 
 export type TeamPartsFragment = { __typename: 'Team', name: string, role: string, bio: string, photo?: string | null, email?: string | null, phone?: string | null, credentials?: Array<string | null> | null, expertiseAreas?: Array<string | null> | null, yearsExperience?: number | null, isAuthor?: boolean | null, isReviewer?: boolean | null, order?: number | null, featured?: boolean | null, active?: boolean | null, subtitle?: string | null, hook?: string | null, portraitBadge?: string | null, credibilityStats?: Array<string | null> | null, storySectionTitle?: string | null, storyParagraphs?: Array<string | null> | null, tieInHeading?: string | null, tieInPoints?: Array<string | null> | null, blogSectionTitle?: string | null, heroImage?: string | null, body?: any | null, links?: { __typename: 'TeamLinks', linkedin?: string | null, twitter?: string | null, website?: string | null, youtube?: string | null } | null, primaryCta?: { __typename: 'TeamPrimaryCta', label: string, url: string } | null };
@@ -817,6 +920,8 @@ export type EpisodesPartsFragment = { __typename: 'Episodes', title: string, epi
 export type GuestsPartsFragment = { __typename: 'Guests', name: string, role?: string | null, company?: string | null, bio: string, photo?: string | null, featured?: boolean | null, body?: any | null, links?: { __typename: 'GuestsLinks', website?: string | null, linkedin?: string | null, twitter?: string | null, instagram?: string | null } | null };
 
 export type TopicsPartsFragment = { __typename: 'Topics', name: string, description: string, icon?: string | null, segment?: string | null, body?: any | null };
+
+export type ShopCollectionsPartsFragment = { __typename: 'ShopCollections', title: string, handle: string, persona?: string | null, seoDescription?: string | null, heroHeadline?: string | null, heroSubheadline?: string | null, heroImage?: string | null, body?: any | null, faq?: Array<{ __typename: 'ShopCollectionsFaq', question: string, answer: string } | null> | null };
 
 export type BlogQueryVariables = Exact<{
   relativePath: Scalars['String']['input'];
@@ -912,6 +1017,25 @@ export type TopicsConnectionQueryVariables = Exact<{
 
 
 export type TopicsConnectionQuery = { __typename?: 'Query', topicsConnection: { __typename?: 'TopicsConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'TopicsConnectionEdges', cursor: string, node?: { __typename: 'Topics', id: string, name: string, description: string, icon?: string | null, segment?: string | null, body?: any | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } };
+
+export type ShopCollectionsQueryVariables = Exact<{
+  relativePath: Scalars['String']['input'];
+}>;
+
+
+export type ShopCollectionsQuery = { __typename?: 'Query', shopCollections: { __typename: 'ShopCollections', id: string, title: string, handle: string, persona?: string | null, seoDescription?: string | null, heroHeadline?: string | null, heroSubheadline?: string | null, heroImage?: string | null, body?: any | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, faq?: Array<{ __typename: 'ShopCollectionsFaq', question: string, answer: string } | null> | null } };
+
+export type ShopCollectionsConnectionQueryVariables = Exact<{
+  before?: InputMaybe<Scalars['String']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Float']['input']>;
+  last?: InputMaybe<Scalars['Float']['input']>;
+  sort?: InputMaybe<Scalars['String']['input']>;
+  filter?: InputMaybe<ShopCollectionsFilter>;
+}>;
+
+
+export type ShopCollectionsConnectionQuery = { __typename?: 'Query', shopCollectionsConnection: { __typename?: 'ShopCollectionsConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'ShopCollectionsConnectionEdges', cursor: string, node?: { __typename: 'ShopCollections', id: string, title: string, handle: string, persona?: string | null, seoDescription?: string | null, heroHeadline?: string | null, heroSubheadline?: string | null, heroImage?: string | null, body?: any | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, faq?: Array<{ __typename: 'ShopCollectionsFaq', question: string, answer: string } | null> | null } | null } | null> | null } };
 
 export const BlogPartsFragmentDoc = gql`
     fragment BlogParts on Blog {
@@ -1023,6 +1147,24 @@ export const TopicsPartsFragmentDoc = gql`
   description
   icon
   segment
+  body
+}
+    `;
+export const ShopCollectionsPartsFragmentDoc = gql`
+    fragment ShopCollectionsParts on ShopCollections {
+  __typename
+  title
+  handle
+  persona
+  seoDescription
+  heroHeadline
+  heroSubheadline
+  heroImage
+  faq {
+    __typename
+    question
+    answer
+  }
   body
 }
     `;
@@ -1311,6 +1453,63 @@ export const TopicsConnectionDocument = gql`
   }
 }
     ${TopicsPartsFragmentDoc}`;
+export const ShopCollectionsDocument = gql`
+    query shopCollections($relativePath: String!) {
+  shopCollections(relativePath: $relativePath) {
+    ... on Document {
+      _sys {
+        filename
+        basename
+        hasReferences
+        breadcrumbs
+        path
+        relativePath
+        extension
+      }
+      id
+    }
+    ...ShopCollectionsParts
+  }
+}
+    ${ShopCollectionsPartsFragmentDoc}`;
+export const ShopCollectionsConnectionDocument = gql`
+    query shopCollectionsConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $filter: ShopCollectionsFilter) {
+  shopCollectionsConnection(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    sort: $sort
+    filter: $filter
+  ) {
+    pageInfo {
+      hasPreviousPage
+      hasNextPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        ... on Document {
+          _sys {
+            filename
+            basename
+            hasReferences
+            breadcrumbs
+            path
+            relativePath
+            extension
+          }
+          id
+        }
+        ...ShopCollectionsParts
+      }
+    }
+  }
+}
+    ${ShopCollectionsPartsFragmentDoc}`;
 export type Requester<C= {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R>
   export function getSdk<C>(requester: Requester<C>) {
     return {
@@ -1343,6 +1542,12 @@ export type Requester<C= {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) 
       },
     topicsConnection(variables?: TopicsConnectionQueryVariables, options?: C): Promise<{data: TopicsConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: TopicsConnectionQueryVariables, query: string}> {
         return requester<{data: TopicsConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: TopicsConnectionQueryVariables, query: string}, TopicsConnectionQueryVariables>(TopicsConnectionDocument, variables, options);
+      },
+    shopCollections(variables: ShopCollectionsQueryVariables, options?: C): Promise<{data: ShopCollectionsQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: ShopCollectionsQueryVariables, query: string}> {
+        return requester<{data: ShopCollectionsQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: ShopCollectionsQueryVariables, query: string}, ShopCollectionsQueryVariables>(ShopCollectionsDocument, variables, options);
+      },
+    shopCollectionsConnection(variables?: ShopCollectionsConnectionQueryVariables, options?: C): Promise<{data: ShopCollectionsConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: ShopCollectionsConnectionQueryVariables, query: string}> {
+        return requester<{data: ShopCollectionsConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: ShopCollectionsConnectionQueryVariables, query: string}, ShopCollectionsConnectionQueryVariables>(ShopCollectionsConnectionDocument, variables, options);
       }
     };
   }

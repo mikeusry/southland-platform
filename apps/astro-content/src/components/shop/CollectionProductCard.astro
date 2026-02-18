@@ -1,0 +1,141 @@
+---
+/**
+ * CollectionProductCard — Persona-aware product card for collection grids.
+ *
+ * Displays a Shopify product with subtle persona adaptation:
+ * - Badge text changes by persona
+ * - Price display format adapts (simple vs per-unit)
+ * - Universal "View Product" CTA (no persona-specific CTAs on cards)
+ */
+import type { Product } from '@southland/shopify-storefront'
+
+interface Props {
+  product: Product
+  persona?: 'backyard' | 'commercial' | 'lawn' | 'general' | null
+  class?: string
+}
+
+const { product, persona, class: className } = Astro.props
+
+// Get the first available image
+const image = product.images[0] ?? null
+
+// Get the lowest price for display
+const price = product.priceRange.minVariantPrice
+const priceFormatted = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: price.currencyCode || 'USD',
+}).format(Number(price.amount))
+
+// Persona-aware badge
+function getPersonaBadge(): string | null {
+  if (!persona || persona === 'general') return null
+
+  // Check product tags for persona-specific badges
+  const tags = product.tags.map((t) => t.toLowerCase())
+
+  if (persona === 'backyard') {
+    if (tags.includes('bundle')) return 'Starter Bundle'
+    if (tags.includes('bestseller') || tags.includes('best-seller')) return 'Flock Favorite'
+    return null
+  }
+
+  if (persona === 'commercial') {
+    if (tags.includes('bundle')) return 'Value Pack'
+    if (tags.includes('bestseller') || tags.includes('best-seller'))
+      return 'Commercial Favorite'
+    return null
+  }
+
+  if (persona === 'lawn') {
+    if (tags.includes('bundle')) return 'Program Bundle'
+    if (tags.includes('bestseller') || tags.includes('best-seller')) return "Pro's Choice"
+    return null
+  }
+
+  return null
+}
+
+const badge = getPersonaBadge()
+
+// Check if product has a gallon/bulk variant for per-unit pricing (Bill)
+function getPerUnitPrice(): string | null {
+  if (persona !== 'commercial') return null
+  const gallonVariant = product.variants.find((v) =>
+    v.selectedOptions.some(
+      (opt) => opt.name === 'Size' && (opt.value.includes('Gallon') || opt.value.includes('gallon'))
+    )
+  )
+  if (!gallonVariant) return null
+  const amount = Number(gallonVariant.price.amount)
+  // 1 gallon = 128 oz
+  const perOz = amount / 128
+  return `$${perOz.toFixed(2)}/oz`
+}
+
+const perUnit = getPerUnitPrice()
+---
+
+<a
+  href={`/products/${product.handle}/`}
+  class:list={[
+    'group block overflow-hidden rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-md',
+    className,
+  ]}
+>
+  {/* Product Image */}
+  <div class="relative aspect-square overflow-hidden bg-gray-50">
+    {image ? (
+      <img
+        src={image.url}
+        alt={image.altText || product.title}
+        width={image.width}
+        height={image.height}
+        loading="lazy"
+        class="h-full w-full object-contain transition-transform group-hover:scale-105"
+      />
+    ) : (
+      <div class="flex h-full w-full items-center justify-center text-gray-300">
+        <svg class="h-16 w-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      </div>
+    )}
+
+    {/* Persona Badge */}
+    {badge && (
+      <span
+        class:list={[
+          'absolute left-3 top-3 rounded-full px-2.5 py-0.5 text-xs font-semibold',
+          persona === 'backyard' && 'bg-amber-100 text-amber-800',
+          persona === 'commercial' && 'bg-green-100 text-green-800',
+          persona === 'lawn' && 'bg-emerald-100 text-emerald-800',
+        ]}
+      >
+        {badge}
+      </span>
+    )}
+  </div>
+
+  {/* Product Info */}
+  <div class="p-4">
+    <h3 class="line-clamp-2 text-sm font-semibold text-gray-900 group-hover:text-brand-green-dark">
+      {product.title}
+    </h3>
+
+    {product.description && (
+      <p class="mt-1 line-clamp-2 text-xs text-gray-500">{product.description}</p>
+    )}
+
+    <div class="mt-3 flex items-baseline gap-2">
+      <span class="text-base font-bold text-gray-900">{priceFormatted}</span>
+      {perUnit && (
+        <span class="text-xs text-gray-500">{perUnit}</span>
+      )}
+    </div>
+
+    <span class="mt-3 inline-block text-sm font-medium text-brand-green-light group-hover:underline">
+      View Product &rarr;
+    </span>
+  </div>
+</a>

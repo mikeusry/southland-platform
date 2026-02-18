@@ -51,7 +51,16 @@ export interface Product {
 export interface Collection {
   title: string
   handle: string
+  description: string
   products: Product[]
+}
+
+export interface CollectionSummary {
+  id: string
+  title: string
+  handle: string
+  description: string
+  image: ProductImage | null
 }
 
 // ─── Cart ────────────────────────────────────────────────────────────────────

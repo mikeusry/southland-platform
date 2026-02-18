@@ -237,6 +237,34 @@ const teamCollection = defineCollection({
   }),
 })
 
+// Shop Collections schema - SEO content for Shopify collection pages
+// Note: slug is auto-generated from filename in Astro v5
+const shopCollectionsCollection = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),
+    handle: z.string(),
+    persona: z
+      .enum(['backyard', 'commercial', 'lawn'])
+      .nullable()
+      .optional()
+      .default(null),
+    seoDescription: z.string().optional(),
+    heroHeadline: z.string().optional(),
+    heroSubheadline: z.string().optional(),
+    heroImage: z.string().optional(),
+    faq: z
+      .array(
+        z.object({
+          question: z.string(),
+          answer: z.string(),
+        })
+      )
+      .optional()
+      .default([]),
+  }),
+})
+
 // Products schema - links to Shopify products with content enrichment
 // Note: slug is auto-generated from filename in Astro v5
 const productsCollection = defineCollection({
@@ -260,4 +288,5 @@ export const collections = {
   blog: blogCollection,
   team: teamCollection,
   products: productsCollection,
+  shopCollections: shopCollectionsCollection,
 }

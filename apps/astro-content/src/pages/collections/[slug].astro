@@ -1,0 +1,187 @@
+---
+/**
+ * /collections/[slug] — Collection detail page (SSR)
+ *
+ * Combines TinaCMS SEO content with Shopify product data.
+ * Persona-aware: reads sl_persona cookie for product sorting,
+ * CTA adaptation, and (Phase 2) full themed layouts.
+ */
+import { getCollection } from 'astro:content'
+import {
+  createClient,
+  getCollectionProducts,
+} from '@southland/shopify-storefront'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import CollectionHero from '../../components/shop/CollectionHero.astro'
+import CollectionGrid from '../../components/shop/CollectionGrid.astro'
+import type { PersonaId } from '../../lib/persona'
+
+// SSR — do not prerender
+const { slug } = Astro.params
+
+if (!slug) {
+  return Astro.redirect('/collections/')
+}
+
+// ── Read persona from cookie (server-side) ──────────────────────────────────
+const personaCookie = Astro.cookies.get('sl_persona')?.value ?? null
+const validPersonas = ['backyard', 'commercial', 'lawn', 'general']
+const persona: PersonaId = personaCookie && validPersonas.includes(personaCookie)
+  ? (personaCookie as PersonaId)
+  : null
+
+// ── Fetch TinaCMS content ───────────────────────────────────────────────────
+const allCollections = await getCollection('shopCollections')
+const tinaDoc = allCollections.find(
+  (c) => c.data.handle === slug || c.id.replace(/\.mdx?$/, '') === slug
+) ?? null
+
+// ── Fetch Shopify collection ────────────────────────────────────────────────
+const client = createClient({
+  storeDomain: import.meta.env.PUBLIC_SHOPIFY_STORE_DOMAIN,
+  publicAccessToken: import.meta.env.PUBLIC_SHOPIFY_STOREFRONT_TOKEN,
+})
+
+const shopifyCollection = await getCollectionProducts(client, slug)
+
+if (!shopifyCollection) {
+  return Astro.redirect('/collections/')
+}
+
+// ── Merge data ──────────────────────────────────────────────────────────────
+const title = tinaDoc?.data.title || shopifyCollection.title
+const seoDescription = tinaDoc?.data.seoDescription || shopifyCollection.description || `Shop ${title} from Southland Organics.`
+const heroHeadline = tinaDoc?.data.heroHeadline || undefined
+const heroSubheadline = tinaDoc?.data.heroSubheadline || undefined
+const collectionPersona = tinaDoc?.data.persona ?? null
+const faq = tinaDoc?.data.faq ?? []
+
+// Use the collection's persona tag if set, otherwise fall back to visitor cookie
+const activePersona = collectionPersona || persona
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+const canonicalUrl = `${siteUrl}/collections/${slug}/`
+
+// ── JSON-LD Schema ──────────────────────────────────────────────────────────
+const schema: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: title,
+  description: seoDescription,
+  url: canonicalUrl,
+  mainEntity: {
+    '@type': 'ItemList',
+    numberOfItems: shopifyCollection.products.length,
+    itemListElement: shopifyCollection.products.map((product, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      url: `${siteUrl}/products/${product.handle}/`,
+      name: product.title,
+    })),
+  },
+}
+
+// Add FAQ schema if present
+const faqSchema = faq.length > 0 ? {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((item) => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.answer,
+    },
+  })),
+} : null
+
+const fullSchema = faqSchema
+  ? [schema, faqSchema]
+  : schema
+
+// ── Persona CTA config ──────────────────────────────────────────────────────
+const ctaConfig: Record<string, { text: string; href: string }> = {
+  backyard: { text: 'Need help choosing?', href: '/contact/' },
+  commercial: { text: 'Request Volume Quote', href: '/contact/commercial/' },
+  lawn: { text: 'Get Seasonal Program', href: '/contact/' },
+}
+const cta = activePersona && activePersona !== 'general'
+  ? ctaConfig[activePersona]
+  : null
+---
+
+<BaseLayout
+  title={`${title} | Southland Organics`}
+  description={seoDescription}
+  canonicalUrl={canonicalUrl}
+  schema={fullSchema}
+>
+  {/* Breadcrumbs */}
+  <nav class="bg-gray-50 px-4 py-3" aria-label="Breadcrumb">
+    <ol class="mx-auto flex max-w-6xl items-center gap-2 text-sm text-gray-500">
+      <li><a href="/" class="hover:text-brand-green-light">Home</a></li>
+      <li class="text-gray-300">/</li>
+      <li><a href="/collections/" class="hover:text-brand-green-light">Collections</a></li>
+      <li class="text-gray-300">/</li>
+      <li class="font-medium text-gray-900">{title}</li>
+    </ol>
+  </nav>
+
+  {/* Hero */}
+  <CollectionHero
+    title={title}
+    description={seoDescription}
+    headline={heroHeadline}
+    subheadline={heroSubheadline}
+    persona={activePersona}
+    productCount={shopifyCollection.products.length}
+  />
+
+  {/* Product Grid */}
+  <section class="mx-auto max-w-6xl px-4 py-8 sm:py-12">
+    <CollectionGrid
+      products={shopifyCollection.products}
+      persona={activePersona}
+    />
+  </section>
+
+  {/* Below-grid CTA */}
+  {cta && (
+    <section class="border-t border-gray-100 bg-gray-50 px-4 py-8">
+      <div class="mx-auto max-w-2xl text-center">
+        <a
+          href={cta.href}
+          class:list={[
+            'inline-flex items-center gap-2 rounded-lg px-6 py-3 font-semibold text-white transition-colors',
+            activePersona === 'backyard' && 'bg-amber-700 hover:bg-amber-800',
+            activePersona === 'commercial' && 'bg-green-700 hover:bg-green-800',
+            activePersona === 'lawn' && 'bg-emerald-700 hover:bg-emerald-800',
+            !activePersona || activePersona === 'general' ? 'bg-brand-green-dark hover:bg-green-800' : '',
+          ]}
+        >
+          {cta.text}
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </a>
+      </div>
+    </section>
+  )}
+
+  {/* FAQ Section */}
+  {faq.length > 0 && (
+    <section class="mx-auto max-w-3xl px-4 py-8 sm:py-12">
+      <h2 class="font-heading text-2xl text-brand-green-dark">
+        Frequently Asked Questions
+      </h2>
+      <dl class="mt-6 space-y-6">
+        {faq.map((item) => (
+          <div>
+            <dt class="text-base font-semibold text-gray-900">{item.question}</dt>
+            <dd class="mt-2 text-sm leading-relaxed text-gray-600">{item.answer}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  )}
+</BaseLayout>

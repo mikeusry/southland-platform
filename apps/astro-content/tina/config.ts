@@ -618,6 +618,105 @@ export default defineConfig({
           },
         ],
       },
+      {
+        name: "shopCollections",
+        label: "Shop Collections",
+        path: "src/content/collections",
+        format: "mdx",
+        ui: {
+          filename: {
+            readonly: true,
+            slugify: (values) => {
+              return values?.handle
+                ?.toLowerCase()
+                .replace(/[^a-z0-9-]+/g, "-")
+                .replace(/(^-|-$)/g, "") || "";
+            },
+          },
+        },
+        fields: [
+          {
+            type: "string",
+            name: "title",
+            label: "Title",
+            isTitle: true,
+            required: true,
+          },
+          {
+            type: "string",
+            name: "handle",
+            label: "Shopify Handle",
+            description: "Must match the collection handle in Shopify (e.g., backyard-birds)",
+            required: true,
+          },
+          {
+            type: "string",
+            name: "persona",
+            label: "Persona",
+            description: "Assign a persona for full themed layout. Leave empty for standard layout.",
+            options: [
+              { label: "Backyard Betty", value: "backyard" },
+              { label: "Broiler Bill", value: "commercial" },
+              { label: "Turf Pro Taylor", value: "lawn" },
+            ],
+          },
+          {
+            type: "string",
+            name: "seoDescription",
+            label: "SEO Description",
+            description: "Meta description for search engines (150-160 chars)",
+            ui: {
+              component: "textarea",
+            },
+          },
+          {
+            type: "string",
+            name: "heroHeadline",
+            label: "Hero Headline",
+          },
+          {
+            type: "string",
+            name: "heroSubheadline",
+            label: "Hero Subheadline",
+          },
+          {
+            type: "string",
+            name: "heroImage",
+            label: "Hero Image (Cloudinary Public ID)",
+            description: "Optional hero background image",
+          },
+          {
+            type: "object",
+            name: "faq",
+            label: "FAQ",
+            list: true,
+            fields: [
+              {
+                type: "string",
+                name: "question",
+                label: "Question",
+                required: true,
+              },
+              {
+                type: "string",
+                name: "answer",
+                label: "Answer",
+                required: true,
+                ui: {
+                  component: "textarea",
+                },
+              },
+            ],
+          },
+          {
+            type: "rich-text",
+            name: "body",
+            label: "Below-the-fold Content",
+            description: "Rich content displayed below the product grid (education, guides, etc.)",
+            isBody: true,
+          },
+        ],
+      },
     ],
   },
 });

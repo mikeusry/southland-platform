@@ -105,3 +105,20 @@ fragment TopicsParts on Topics {
   segment
   body
 }
+
+fragment ShopCollectionsParts on ShopCollections {
+  __typename
+  title
+  handle
+  persona
+  seoDescription
+  heroHeadline
+  heroSubheadline
+  heroImage
+  faq {
+    __typename
+    question
+    answer
+  }
+  body
+}

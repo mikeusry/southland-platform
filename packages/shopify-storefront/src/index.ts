@@ -2,7 +2,12 @@ export { createClient } from './client'
 export type { StorefrontClient } from './client'
 
 // Product / collection queries
-export { getCollectionProducts, getAllProducts, getGallonProducts } from './queries/products'
+export {
+  getCollectionProducts,
+  getAllCollections,
+  getAllProducts,
+  getGallonProducts,
+} from './queries/products'
 
 // Cart operations
 export {
@@ -21,6 +26,7 @@ export type {
   ProductVariant,
   VariantOption,
   Collection,
+  CollectionSummary,
   Cart,
   CartLine,
   CartLineAttribute,

@@ -1,192 +1,103 @@
 ---
 /**
  * Site Audit Dashboard
- * Design checklist and content audit for all pages
- * Integrates with Mothership quality scoring
+ * Design checklist + Mothership persona scoring + content quality
  */
 import AdminLayout from '../../layouts/AdminLayout.astro'
 
-// Page inventory - all pages in the site
-const pageGroups = [
+// Content types: dynamic = collection-backed (scannable), index/non-content = skip
+type ContentType = 'dynamic' | 'index' | 'non-content'
+
+interface AuditPage {
+  route: string
+  name: string
+  template: string
+  priority: 'high' | 'medium' | 'low'
+  contentType: ContentType
+}
+
+const pageGroups: { name: string; id: string; pages: AuditPage[] }[] = [
   {
     name: 'Homepage',
     id: 'homepage',
-    pages: [{ route: '/', name: 'Homepage', template: 'index.astro', priority: 'high' }],
+    pages: [
+      { route: '/', name: 'Homepage', template: 'index.astro', priority: 'high', contentType: 'non-content' },
+    ],
   },
   {
     name: 'Podcast',
     id: 'podcast',
     pages: [
-      {
-        route: '/podcast/',
-        name: 'Podcast Hub',
-        template: 'podcast/index.astro',
-        priority: 'high',
-      },
-      {
-        route: '/podcast/[slug]',
-        name: 'Episode Detail',
-        template: 'podcast/[...slug].astro',
-        priority: 'high',
-      },
-      {
-        route: '/podcast/search',
-        name: 'Podcast Search',
-        template: 'podcast/search.astro',
-        priority: 'medium',
-      },
-      {
-        route: '/podcast/topics/',
-        name: 'Topics Index',
-        template: 'podcast/topics/index.astro',
-        priority: 'medium',
-      },
-      {
-        route: '/podcast/topics/[slug]',
-        name: 'Topic Detail',
-        template: 'podcast/topics/[slug].astro',
-        priority: 'medium',
-      },
-      {
-        route: '/podcast/guests/',
-        name: 'Guests Index',
-        template: 'podcast/guests/index.astro',
-        priority: 'low',
-      },
+      { route: '/podcast/', name: 'Podcast Hub', template: 'podcast/index.astro', priority: 'high', contentType: 'index' },
+      { route: '/podcast/[slug]', name: 'Episode Detail', template: 'podcast/[...slug].astro', priority: 'high', contentType: 'dynamic' },
+      { route: '/podcast/search', name: 'Podcast Search', template: 'podcast/search.astro', priority: 'medium', contentType: 'non-content' },
+      { route: '/podcast/topics/', name: 'Topics Index', template: 'podcast/topics/index.astro', priority: 'medium', contentType: 'index' },
+      { route: '/podcast/topics/[slug]', name: 'Topic Detail', template: 'podcast/topics/[slug].astro', priority: 'medium', contentType: 'dynamic' },
+      { route: '/podcast/guests/', name: 'Guests Index', template: 'podcast/guests/index.astro', priority: 'low', contentType: 'index' },
     ],
   },
   {
     name: 'Blog',
     id: 'blog',
     pages: [
-      { route: '/blog/', name: 'Blog Index', template: 'blog/index.astro', priority: 'high' },
-      { route: '/blog/[slug]', name: 'Blog Post', template: 'blog/[slug].astro', priority: 'high' },
-      {
-        route: '/blog/category/[segment]',
-        name: 'Category Archive',
-        template: 'blog/category/[segment].astro',
-        priority: 'medium',
-      },
+      { route: '/blog/', name: 'Blog Index', template: 'blog/index.astro', priority: 'high', contentType: 'index' },
+      { route: '/blog/[slug]', name: 'Blog Post', template: 'blog/[slug].astro', priority: 'high', contentType: 'dynamic' },
+      { route: '/blog/category/[segment]', name: 'Category Archive', template: 'blog/category/[segment].astro', priority: 'medium', contentType: 'non-content' },
     ],
   },
   {
     name: 'Team',
     id: 'team',
     pages: [
-      { route: '/team/', name: 'Team Index', template: 'team/index.astro', priority: 'medium' },
-      {
-        route: '/team/[slug]',
-        name: 'Team Member',
-        template: 'team/[slug].astro',
-        priority: 'medium',
-      },
+      { route: '/team/', name: 'Team Index', template: 'team/index.astro', priority: 'medium', contentType: 'index' },
+      { route: '/team/[slug]', name: 'Team Member', template: 'team/[slug].astro', priority: 'medium', contentType: 'dynamic' },
+    ],
+  },
+  {
+    name: 'Shop Collections',
+    id: 'collections',
+    pages: [
+      { route: '/collections/', name: 'Collections Index', template: 'collections/index.astro', priority: 'high', contentType: 'index' },
+      { route: '/collections/[slug]', name: 'Collection Detail', template: 'collections/[slug].astro', priority: 'high', contentType: 'dynamic' },
     ],
   },
   {
     name: 'Persona Landings',
     id: 'persona',
     pages: [
-      {
-        route: '/poultry/',
-        name: 'Poultry Hub',
-        template: 'poultry/index.astro',
-        priority: 'high',
-      },
-      {
-        route: '/poultry/backyard/',
-        name: 'Backyard Betty Landing',
-        template: 'poultry/backyard/index.astro',
-        priority: 'high',
-      },
-      {
-        route: '/poultry/commercial/',
-        name: 'Broiler Bill Landing',
-        template: 'poultry/commercial/index.astro',
-        priority: 'high',
-      },
-      {
-        route: '/lawn/',
-        name: 'Lawn & Garden Hub',
-        template: 'lawn/index.astro',
-        priority: 'high',
-      },
+      { route: '/poultry/', name: 'Poultry Hub', template: 'poultry/index.astro', priority: 'high', contentType: 'non-content' },
+      { route: '/poultry/backyard/', name: 'Backyard Betty Landing', template: 'poultry/backyard/index.astro', priority: 'high', contentType: 'non-content' },
+      { route: '/poultry/commercial/', name: 'Broiler Bill Landing', template: 'poultry/commercial/index.astro', priority: 'high', contentType: 'non-content' },
+      { route: '/lawn/', name: 'Lawn & Garden Hub', template: 'lawn/index.astro', priority: 'high', contentType: 'non-content' },
     ],
   },
   {
     name: 'Surveys (CDP)',
     id: 'surveys',
     pages: [
-      {
-        route: '/survey/backyard',
-        name: 'Betty Outcome Survey',
-        template: 'survey/backyard.astro',
-        priority: 'medium',
-      },
-      {
-        route: '/survey/commercial',
-        name: 'Bill Outcome Survey',
-        template: 'survey/commercial.astro',
-        priority: 'medium',
-      },
+      { route: '/survey/backyard', name: 'Betty Outcome Survey', template: 'survey/backyard.astro', priority: 'medium', contentType: 'non-content' },
+      { route: '/survey/commercial', name: 'Bill Outcome Survey', template: 'survey/commercial.astro', priority: 'medium', contentType: 'non-content' },
     ],
   },
   {
     name: 'Utility',
     id: 'utility',
-    pages: [{ route: '/search', name: 'Global Search', template: 'search.astro', priority: 'low' }],
+    pages: [
+      { route: '/search', name: 'Global Search', template: 'search.astro', priority: 'low', contentType: 'non-content' },
+    ],
   },
   {
     name: 'Admin',
     id: 'admin',
     pages: [
-      {
-        route: '/admin/',
-        name: 'Admin Dashboard',
-        template: 'admin/index.astro',
-        priority: 'medium',
-      },
-      {
-        route: '/admin/branding',
-        name: 'Brand Guidelines',
-        template: 'admin/branding.astro',
-        priority: 'low',
-      },
-      {
-        route: '/admin/images',
-        name: 'Image Docs',
-        template: 'admin/images.astro',
-        priority: 'low',
-      },
-      {
-        route: '/admin/cdp/',
-        name: 'CDP Analytics',
-        template: 'admin/cdp/index.astro',
-        priority: 'medium',
-      },
-      {
-        route: '/admin/cdp-guide',
-        name: 'CDP Guide',
-        template: 'admin/cdp-guide.astro',
-        priority: 'low',
-      },
-      {
-        route: '/admin/sales-log',
-        name: 'Sales Log',
-        template: 'admin/sales-log.astro',
-        priority: 'medium',
-      },
-      {
-        route: '/admin/content-quality',
-        name: 'Content Quality',
-        template: 'admin/content-quality.astro',
-        priority: 'medium',
-      },
-      {
-        route: '/admin/site-audit',
-        name: 'Site Audit (this page)',
-        template: 'admin/site-audit.astro',
-        priority: 'low',
-      },
+      { route: '/admin/', name: 'Admin Dashboard', template: 'admin/index.astro', priority: 'medium', contentType: 'non-content' },
+      { route: '/admin/branding', name: 'Brand Guidelines', template: 'admin/branding.astro', priority: 'low', contentType: 'non-content' },
+      { route: '/admin/images', name: 'Image Docs', template: 'admin/images.astro', priority: 'low', contentType: 'non-content' },
+      { route: '/admin/cdp/', name: 'CDP Analytics', template: 'admin/cdp/index.astro', priority: 'medium', contentType: 'non-content' },
+      { route: '/admin/cdp-guide', name: 'CDP Guide', template: 'admin/cdp-guide.astro', priority: 'low', contentType: 'non-content' },
+      { route: '/admin/sales-log', name: 'Sales Log', template: 'admin/sales-log.astro', priority: 'medium', contentType: 'non-content' },
+      { route: '/admin/content-quality', name: 'Content Quality', template: 'admin/content-quality.astro', priority: 'medium', contentType: 'non-content' },
+      { route: '/admin/site-audit', name: 'Site Audit (this page)', template: 'admin/site-audit.astro', priority: 'low', contentType: 'non-content' },
     ],
   },
 ]
@@ -197,7 +108,7 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
 <AdminLayout title="Site Audit" activeNav="/admin/site-audit">
   <header class="page-header">
     <h1 class="page-title">Site Audit</h1>
-    <p class="page-subtitle">Design checklist and content quality tracking</p>
+    <p class="page-subtitle">Design checklist + Mothership persona scoring</p>
   </header>
 
   <!-- Progress Overview -->
@@ -218,21 +129,23 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
         </div>
       </div>
       <div class="progress-actions">
+        <button class="btn btn-primary" id="scan-all-btn" title="Score all scannable pages via Mothership">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22" />
+          </svg>
+          Scan All
+        </button>
         <button class="btn btn-secondary" id="export-btn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path
-              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            ></path>
+            <path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
           </svg>
           Export
         </button>
         <button class="btn btn-secondary" id="reset-btn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-            ></path>
+            <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
           </svg>
-          Reset All
+          Reset
         </button>
       </div>
     </div>
@@ -278,66 +191,73 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
             <div class="col-status">Status</div>
             <div class="col-page">Page</div>
             <div class="col-route">Route</div>
+            <div class="col-score">Score</div>
             <div class="col-design">Design</div>
             <div class="col-content">Content</div>
             <div class="col-notes">Notes</div>
             <div class="col-actions">Actions</div>
           </div>
           {group.pages.map((page) => (
-            <div class="table-row" data-route={page.route}>
-              <div class="col-status">
-                <span class="status-dot not-started" data-status-dot />
+            <div>
+              <div class="table-row" data-route={page.route} data-content-type={page.contentType}>
+                <div class="col-status">
+                  <span class="status-dot not-started" data-status-dot />
+                </div>
+                <div class="col-page">
+                  <span class="page-name">{page.name}</span>
+                  <span class={`priority-badge ${page.priority}`}>{page.priority}</span>
+                </div>
+                <div class="col-route">
+                  <code>{page.route}</code>
+                  <a
+                    href={page.route
+                      .replace('[slug]', 'example')
+                      .replace('[segment]', 'poultry')
+                      .replace('[...slug]', 'episode-1')}
+                    target="_blank"
+                    class="view-link"
+                    title="Open page"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </div>
+                <div class="col-score">
+                  {page.contentType === 'dynamic' ? (
+                    <button class="scan-btn" data-action="scan" title="Score via Mothership">Scan</button>
+                  ) : (
+                    <span class="score-na">N/A</span>
+                  )}
+                </div>
+                <div class="col-design">
+                  <select class="design-select" data-field="design">
+                    <option value="not-started">Not Started</option>
+                    <option value="in-review">In Review</option>
+                    <option value="approved">Approved</option>
+                  </select>
+                </div>
+                <div class="col-content">
+                  <select class="content-select" data-field="content">
+                    <option value="not-started">Not Started</option>
+                    <option value="needs-persona">Needs Persona</option>
+                    <option value="needs-quality">Needs Quality Check</option>
+                    <option value="approved">Approved</option>
+                  </select>
+                </div>
+                <div class="col-notes">
+                  <input type="text" class="notes-input" data-field="notes" placeholder="Add notes..." />
+                </div>
+                <div class="col-actions">
+                  <button class="action-btn" data-action="clear" title="Clear row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
               </div>
-              <div class="col-page">
-                <span class="page-name">{page.name}</span>
-                <span class={`priority-badge ${page.priority}`}>{page.priority}</span>
-              </div>
-              <div class="col-route">
-                <code>{page.route}</code>
-                <a
-                  href={page.route
-                    .replace('[slug]', 'example')
-                    .replace('[segment]', 'poultry')
-                    .replace('[...slug]', 'episode-1')}
-                  target="_blank"
-                  class="view-link"
-                  title="Open page"
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </a>
-              </div>
-              <div class="col-design">
-                <select class="design-select" data-field="design">
-                  <option value="not-started">Not Started</option>
-                  <option value="in-review">In Review</option>
-                  <option value="approved">Approved</option>
-                </select>
-              </div>
-              <div class="col-content">
-                <select class="content-select" data-field="content">
-                  <option value="not-started">Not Started</option>
-                  <option value="needs-persona">Needs Persona</option>
-                  <option value="needs-quality">Needs Quality Check</option>
-                  <option value="approved">Approved</option>
-                </select>
-              </div>
-              <div class="col-notes">
-                <input
-                  type="text"
-                  class="notes-input"
-                  data-field="notes"
-                  placeholder="Add notes..."
-                />
-              </div>
-              <div class="col-actions">
-                <button class="action-btn" data-action="clear" title="Clear row">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
+              <!-- Expandable scan detail panel -->
+              <div class="scan-details" data-details-for={page.route}></div>
             </div>
           ))}
         </div>
@@ -345,27 +265,48 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     ))
   }
 
-  <!-- Mothership Integration Note -->
-  <div class="card integration-note">
+  <!-- Mothership Integration Status -->
+  <div class="card integration-status">
     <div class="card-header">
       <h2 class="card-title">Mothership Integration</h2>
-      <span class="badge badge-warning">Planned</span>
+      <span class="badge badge-success">Live</span>
     </div>
-    <p>When Mothership API is connected, content status will auto-update based on:</p>
-    <ul>
-      <li>
-        <strong>Persona Fit</strong> — Does the page align with target persona? (&gt;60% = pass)
-      </li>
-      <li><strong>Content Gap</strong> — Is this page an orphan or duplicate?</li>
-      <li><strong>Quality Score</strong> — Word count, internal links, meta description</li>
-    </ul>
+    <p>Content scoring powered by Mothership persona vectors + OpenAI embeddings (light mode).</p>
+    <div class="integration-stats">
+      <div class="stat">
+        <span class="stat-value" id="scanned-count">0</span>
+        <span class="stat-label">Routes Scanned</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="avg-score">--</span>
+        <span class="stat-label">Avg Score</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="aligned-count">0</span>
+        <span class="stat-label">Persona-Aligned</span>
+      </div>
+    </div>
     <p style="margin-top: 12px; color: var(--text-secondary); font-size: 13px;">
-      See <a href="/admin/content-quality">Content Quality</a> for the full integration roadmap.
+      Scan individual routes or use "Scan All" for a full audit pass.
+      See <a href="/admin/content-quality">Content Quality</a> for the scoring methodology.
     </p>
+  </div>
+
+  <!-- Scan progress bar (sticky bottom, hidden by default) -->
+  <div class="scan-progress" id="scan-progress" style="display: none;">
+    <div class="scan-progress-inner">
+      <span class="scan-progress-label" id="scan-progress-label">Scanning...</span>
+      <div class="scan-progress-bar-container">
+        <div class="scan-progress-bar" id="scan-progress-bar" style="width: 0%"></div>
+      </div>
+      <span class="scan-progress-count" id="scan-progress-count">0/0</span>
+      <button class="btn btn-secondary btn-sm" id="scan-cancel-btn">Cancel</button>
+    </div>
   </div>
 </AdminLayout>
 
 <style>
+  /* ========== Progress Card ========== */
   .progress-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -373,7 +314,6 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     padding: 24px;
     margin-bottom: 24px;
   }
-
   .progress-header {
     display: flex;
     justify-content: space-between;
@@ -382,16 +322,8 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     flex-wrap: wrap;
     gap: 16px;
   }
-
-  .progress-stats {
-    display: flex;
-    gap: 32px;
-  }
-
-  .stat {
-    text-align: center;
-  }
-
+  .progress-stats { display: flex; gap: 32px; }
+  .stat { text-align: center; }
   .stat-value {
     display: block;
     font-size: 28px;
@@ -399,44 +331,33 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     color: var(--text);
     line-height: 1;
   }
-
   .stat-label {
     font-size: 12px;
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
-
-  .progress-actions {
-    display: flex;
-    gap: 8px;
-  }
-
+  .progress-actions { display: flex; gap: 8px; }
   .progress-bar-container {
     height: 8px;
     background: var(--surface-alt);
     border-radius: 4px;
     overflow: hidden;
   }
-
   .progress-bar {
     height: 100%;
     background: var(--accent);
     border-radius: 4px;
     transition: width 0.3s ease;
   }
-
   .progress-label {
     margin-top: 8px;
     font-size: 13px;
     color: var(--text-secondary);
   }
+  #progress-percent { font-weight: 600; color: var(--accent); }
 
-  #progress-percent {
-    font-weight: 600;
-    color: var(--accent);
-  }
-
+  /* ========== Legend ========== */
   .legend {
     display: flex;
     gap: 24px;
@@ -444,7 +365,6 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     flex-wrap: wrap;
     align-items: center;
   }
-
   .legend-item {
     display: flex;
     align-items: center;
@@ -452,28 +372,18 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     font-size: 13px;
     color: var(--text-secondary);
   }
+  .legend-item.priority { margin-left: auto; gap: 8px; }
 
-  .legend-item.priority {
-    margin-left: auto;
-    gap: 8px;
-  }
-
+  /* ========== Status & Priority ========== */
   .status-dot {
     width: 10px;
     height: 10px;
     border-radius: 50%;
     flex-shrink: 0;
   }
-
-  .status-dot.not-started {
-    background: var(--border);
-  }
-  .status-dot.in-review {
-    background: var(--warning);
-  }
-  .status-dot.approved {
-    background: var(--success);
-  }
+  .status-dot.not-started { background: var(--border); }
+  .status-dot.in-review { background: var(--warning); }
+  .status-dot.approved { background: var(--success); }
 
   .priority-badge {
     display: inline-block;
@@ -483,20 +393,11 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     font-weight: 600;
     text-transform: uppercase;
   }
+  .priority-badge.high { background: #fee2e2; color: #991b1b; }
+  .priority-badge.medium { background: #fef3c7; color: #92400e; }
+  .priority-badge.low { background: #f3f4f6; color: #6b7280; }
 
-  .priority-badge.high {
-    background: #fee2e2;
-    color: #991b1b;
-  }
-  .priority-badge.medium {
-    background: #fef3c7;
-    color: #92400e;
-  }
-  .priority-badge.low {
-    background: #f3f4f6;
-    color: #6b7280;
-  }
-
+  /* ========== Audit Table ========== */
   .audit-group {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -504,7 +405,6 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     margin-bottom: 20px;
     overflow: hidden;
   }
-
   .group-header {
     display: flex;
     justify-content: space-between;
@@ -513,27 +413,19 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     background: var(--surface-alt);
     border-bottom: 1px solid var(--border);
   }
+  .group-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .group-count { font-size: 12px; color: var(--text-secondary); }
+  .audit-table { font-size: 13px; }
 
-  .group-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .group-count {
-    font-size: 12px;
-    color: var(--text-secondary);
-  }
-
-  .audit-table {
-    font-size: 13px;
-  }
-
-  .table-header {
+  .table-header,
+  .table-row {
     display: grid;
-    grid-template-columns: 50px 180px 1fr 120px 140px 1fr 50px;
+    grid-template-columns: 50px 160px 1fr 80px 120px 140px 1fr 50px;
     gap: 12px;
     padding: 12px 20px;
+    align-items: center;
+  }
+  .table-header {
     background: var(--bg);
     border-bottom: 1px solid var(--border);
     font-size: 11px;
@@ -542,46 +434,15 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
-
   .table-row {
-    display: grid;
-    grid-template-columns: 50px 180px 1fr 120px 140px 1fr 50px;
-    gap: 12px;
-    padding: 12px 20px;
     border-bottom: 1px solid var(--border-subtle);
-    align-items: center;
   }
+  .table-row:hover { background: var(--bg); }
 
-  .table-row:last-child {
-    border-bottom: none;
-  }
-
-  .table-row:hover {
-    background: var(--bg);
-  }
-
-  .col-status {
-    display: flex;
-    justify-content: center;
-  }
-
-  .col-page {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .page-name {
-    font-weight: 500;
-    color: var(--text);
-  }
-
-  .col-route {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
+  .col-status { display: flex; justify-content: center; }
+  .col-page { display: flex; align-items: center; gap: 8px; }
+  .page-name { font-weight: 500; color: var(--text); }
+  .col-route { display: flex; align-items: center; gap: 8px; }
   .col-route code {
     font-family: var(--font-mono);
     font-size: 12px;
@@ -590,20 +451,10 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     padding: 2px 6px;
     border-radius: 3px;
   }
-
-  .view-link {
-    color: var(--text-tertiary);
-    transition: color 0.15s;
-  }
-
-  .view-link:hover {
-    color: var(--accent);
-  }
-
-  .view-link svg {
-    width: 14px;
-    height: 14px;
-  }
+  .col-score { display: flex; justify-content: center; }
+  .view-link { color: var(--text-tertiary); transition: color 0.15s; }
+  .view-link:hover { color: var(--accent); }
+  .view-link svg { width: 14px; height: 14px; }
 
   .design-select,
   .content-select {
@@ -615,13 +466,11 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     background: var(--surface);
     cursor: pointer;
   }
-
   .design-select:focus,
   .content-select:focus {
     outline: none;
     border-color: var(--accent);
   }
-
   .notes-input {
     width: 100%;
     padding: 6px 8px;
@@ -630,11 +479,7 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     font-size: 12px;
     background: var(--surface);
   }
-
-  .notes-input:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
+  .notes-input:focus { outline: none; border-color: var(--accent); }
 
   .action-btn {
     width: 28px;
@@ -649,193 +494,719 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     cursor: pointer;
     transition: all 0.15s;
   }
+  .action-btn:hover { background: var(--error-light); color: var(--error); }
+  .action-btn svg { width: 14px; height: 14px; }
 
-  .action-btn:hover {
-    background: var(--error-light);
-    color: var(--error);
-  }
-
-  .action-btn svg {
-    width: 14px;
-    height: 14px;
-  }
-
-  .integration-note {
+  /* ========== Score Column ========== */
+  .scan-btn {
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
     background: var(--surface);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .scan-btn:hover { background: var(--accent); color: white; }
+  .scan-btn:disabled { opacity: 0.5; cursor: wait; }
+  .scan-btn.scanning { animation: pulse 1.5s infinite; }
+
+  .score-na {
+    font-size: 11px;
+    color: var(--text-tertiary);
   }
 
-  .integration-note p {
+  .score-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 28px;
+    padding: 0 8px;
+    border-radius: 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s;
+    border: none;
+  }
+  .score-badge:hover { transform: scale(1.1); }
+  .score-badge.score-high { background: #dcfce7; color: #166534; }
+  .score-badge.score-mid { background: #fef3c7; color: #92400e; }
+  .score-badge.score-low { background: #fee2e2; color: #991b1b; }
+  .score-badge.score-confused { background: #ede9fe; color: #5b21b6; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  /* ========== Scan Detail Panel ========== */
+  .scan-details {
+    display: none;
+    padding: 16px 20px;
+    background: var(--surface-alt);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .scan-details.open { display: block; }
+
+  .scan-details-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+
+  .detail-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+  }
+  .detail-card-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-tertiary);
+    margin-bottom: 6px;
+  }
+  .detail-card-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+  }
+  .detail-card-sub {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
+  .persona-bar-group { margin-top: 8px; }
+  .persona-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .persona-bar-label {
+    font-size: 10px;
+    font-weight: 600;
+    width: 50px;
+    flex-shrink: 0;
+    color: var(--text-secondary);
+  }
+  .persona-bar-track {
+    flex: 1;
+    height: 8px;
+    background: var(--surface-alt);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .persona-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+  }
+  .persona-bar-fill.high { background: #16a34a; }
+  .persona-bar-fill.mid { background: #eab308; }
+  .persona-bar-fill.low { background: #dc2626; }
+  .persona-bar-pct {
+    font-size: 10px;
+    font-weight: 600;
+    width: 30px;
+    text-align: right;
+    color: var(--text-secondary);
+  }
+
+  .detail-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .detail-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 600;
+  }
+  .detail-badge.blocker { background: #fee2e2; color: #991b1b; }
+  .detail-badge.warning { background: #fef3c7; color: #92400e; }
+  .detail-badge.ok { background: #dcfce7; color: #166534; }
+  .detail-badge.info { background: #dbeafe; color: #1e40af; }
+
+  .detail-distribution {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+  }
+
+  .detail-fallback-warning {
+    font-size: 11px;
+    color: #92400e;
+    background: #fef3c7;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    margin-top: 8px;
+  }
+
+  /* ========== Integration Status Card ========== */
+  .integration-status { background: var(--surface); }
+  .integration-status p {
     font-size: 14px;
     color: var(--text);
     margin-bottom: 12px;
   }
-
-  .integration-note ul {
-    list-style: none;
-    padding: 0;
+  .integration-stats {
+    display: flex;
+    gap: 32px;
+    margin-top: 16px;
   }
+  .integration-status a { color: var(--accent); }
 
-  .integration-note li {
-    font-size: 13px;
-    color: var(--text-secondary);
-    padding: 6px 0;
-    padding-left: 20px;
-    position: relative;
-  }
-
-  .integration-note li::before {
-    content: '→';
-    position: absolute;
+  /* ========== Scan Progress Bar (Sticky Bottom) ========== */
+  .scan-progress {
+    position: fixed;
+    bottom: 0;
     left: 0;
-    color: var(--accent);
+    right: 0;
+    z-index: 100;
+    background: var(--surface);
+    border-top: 2px solid var(--accent);
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
   }
-
-  .integration-note a {
-    color: var(--accent);
+  .scan-progress-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
   }
+  .scan-progress-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .scan-progress-bar-container {
+    flex: 1;
+    height: 8px;
+    background: var(--surface-alt);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .scan-progress-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+  }
+  .scan-progress-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .btn-sm { padding: 4px 12px; font-size: 12px; }
 
-  /* Responsive */
+  /* ========== Responsive ========== */
   @media (max-width: 1100px) {
     .table-header,
     .table-row {
-      grid-template-columns: 40px 140px 1fr 100px 120px 50px;
+      grid-template-columns: 40px 140px 1fr 70px 100px 120px 50px;
     }
-
-    .col-notes {
-      display: none;
-    }
+    .col-notes { display: none; }
+    .scan-details-grid { grid-template-columns: repeat(2, 1fr); }
   }
 
   @media (max-width: 800px) {
     .table-header,
     .table-row {
-      grid-template-columns: 40px 1fr 100px 100px 40px;
+      grid-template-columns: 40px 1fr 60px 100px 100px 40px;
     }
-
-    .col-route {
-      display: none;
-    }
+    .col-route { display: none; }
+    .scan-details-grid { grid-template-columns: 1fr; }
   }
 </style>
 
 <script is:inline>
-  // Storage key
-  const STORAGE_KEY = 'southland_site_audit'
+  // =========================================================================
+  // CONFIG
+  // =========================================================================
 
-  // Load saved state
+  var STORAGE_KEY = 'southland_site_audit'
+  var CURRENT_SCAN_VERSION = 1
+
+  // =========================================================================
+  // STATE
+  // =========================================================================
+
+  var scanCancelled = false
+  var sessionScanCount = 0
+
   function loadState() {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY)
+      var saved = localStorage.getItem(STORAGE_KEY)
       return saved ? JSON.parse(saved) : {}
-    } catch {
+    } catch (e) {
       return {}
     }
   }
 
-  // Save state
   function saveState(state) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
   }
 
-  // Get overall status for a row
+  // =========================================================================
+  // ROW STATUS
+  // =========================================================================
+
   function getRowStatus(design, content) {
-    if (design === 'approved' && (content === 'approved' || content === 'not-started')) {
-      return 'approved'
-    }
-    if (design === 'in-review' || content === 'needs-persona' || content === 'needs-quality') {
-      return 'in-review'
-    }
+    if (design === 'approved' && (content === 'approved' || content === 'not-started')) return 'approved'
+    if (design === 'in-review' || content === 'needs-persona' || content === 'needs-quality') return 'in-review'
     return 'not-started'
   }
 
-  // Update progress display
   function updateProgress() {
-    const state = loadState()
-    const rows = document.querySelectorAll('.table-row')
-    let approved = 0
-    let inReview = 0
-    let notStarted = 0
+    var state = loadState()
+    var rows = document.querySelectorAll('.table-row')
+    var approved = 0, inReview = 0, notStarted = 0
 
-    rows.forEach((row) => {
-      const route = row.dataset.route
-      const data = state[route] || {}
-      const status = getRowStatus(data.design || 'not-started', data.content || 'not-started')
-
-      // Update status dot
-      const dot = row.querySelector('[data-status-dot]')
-      dot.className = `status-dot ${status}`
-
+    rows.forEach(function(row) {
+      var route = row.dataset.route
+      var data = state[route] || {}
+      var status = getRowStatus(data.design || 'not-started', data.content || 'not-started')
+      var dot = row.querySelector('[data-status-dot]')
+      if (dot) dot.className = 'status-dot ' + status
       if (status === 'approved') approved++
       else if (status === 'in-review') inReview++
       else notStarted++
     })
 
-    const total = rows.length
-    const percent = total > 0 ? Math.round((approved / total) * 100) : 0
-
+    var total = rows.length
+    var percent = total > 0 ? Math.round((approved / total) * 100) : 0
     document.getElementById('approved-count').textContent = approved
     document.getElementById('review-count').textContent = inReview
     document.getElementById('pending-count').textContent = notStarted
     document.getElementById('progress-bar').style.width = percent + '%'
     document.getElementById('progress-percent').textContent = percent + '%'
+
+    updateIntegrationStats()
   }
 
-  // Initialize
-  function init() {
-    const state = loadState()
+  // =========================================================================
+  // INTEGRATION STATS
+  // =========================================================================
 
-    // Populate fields from saved state
-    document.querySelectorAll('.table-row').forEach((row) => {
-      const route = row.dataset.route
-      const data = state[route] || {}
+  function updateIntegrationStats() {
+    var state = loadState()
+    var scanned = 0, totalScore = 0, aligned = 0
 
-      const designSelect = row.querySelector('[data-field="design"]')
-      const contentSelect = row.querySelector('[data-field="content"]')
-      const notesInput = row.querySelector('[data-field="notes"]')
-
-      if (data.design) designSelect.value = data.design
-      if (data.content) contentSelect.value = data.content
-      if (data.notes) notesInput.value = data.notes
+    Object.values(state).forEach(function(data) {
+      if (data.scan && data.scan.overallScore !== undefined) {
+        scanned++
+        totalScore += data.scan.overallScore
+        if (data.scan.personaAligned) aligned++
+      }
     })
 
-    // Add change listeners
-    document.querySelectorAll('.design-select, .content-select, .notes-input').forEach((el) => {
-      el.addEventListener('change', function () {
-        const row = this.closest('.table-row')
-        const route = row.dataset.route
-        const field = this.dataset.field
-        const state = loadState()
+    document.getElementById('scanned-count').textContent = scanned
+    document.getElementById('avg-score').textContent = scanned > 0 ? Math.round(totalScore / scanned) : '--'
+    document.getElementById('aligned-count').textContent = aligned
+  }
 
-        if (!state[route]) state[route] = {}
-        state[route][field] = this.value
-        saveState(state)
+  // =========================================================================
+  // SCAN ROUTE
+  // =========================================================================
+
+  function scanRoute(route) {
+    return fetch('/api/site-audit/scan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ route: route }),
+    })
+    .then(function(res) { return res.json() })
+    .then(function(result) {
+      sessionScanCount++
+      return result
+    })
+  }
+
+  // =========================================================================
+  // RENDER SCAN RESULT
+  // =========================================================================
+
+  function getScoreClass(score) {
+    if (score >= 70) return 'score-high'
+    if (score >= 50) return 'score-mid'
+    return 'score-low'
+  }
+
+  function getBarClass(pct) {
+    if (pct >= 60) return 'high'
+    if (pct >= 40) return 'mid'
+    return 'low'
+  }
+
+  function renderScoreBadge(row, result) {
+    var scoreCol = row.querySelector('.col-score')
+    if (!result.scannable) return
+
+    var agg = result.aggregate
+    var score = agg.overallScore
+    var confused = agg.persona && agg.persona.primary.score < 0.3
+    var cls = confused ? 'score-confused' : getScoreClass(score)
+
+    scoreCol.innerHTML = '<button class="score-badge ' + cls + '" data-action="toggle-details" title="Click to expand">' +
+      (confused ? '?' : score) +
+      '</button>'
+  }
+
+  function renderDetailPanel(route, result) {
+    var panel = document.querySelector('[data-details-for="' + route + '"]')
+    if (!panel || !result.scannable) return
+
+    var agg = result.aggregate
+    var p = agg.persona
+    var pScores = p.scores
+    var dist = agg.distribution
+    var q = agg.quality
+
+    var confusedAll = p.primary.score < 0.3
+    var personaLabel = confusedAll
+      ? '<span class="detail-badge warning">Confused — no clear persona</span>'
+      : (p.aligned
+        ? '<span class="detail-badge ok">' + p.primary.name + ' (' + Math.round(p.primary.score * 100) + '%)</span>'
+        : '<span class="detail-badge warning">' + p.primary.name + ' (' + Math.round(p.primary.score * 100) + '%) — weak alignment</span>'
+      )
+
+    var gapBadges = ''
+    if (agg.gap.orphanCount > 0) gapBadges += '<span class="detail-badge blocker">' + agg.gap.orphanCount + ' orphan</span>'
+    if (agg.gap.weakCount > 0) gapBadges += '<span class="detail-badge warning">' + agg.gap.weakCount + ' weak</span>'
+    if (agg.gap.confusedCount > 0) gapBadges += '<span class="detail-badge warning">' + agg.gap.confusedCount + ' confused</span>'
+    if (agg.gap.okCount > 0) gapBadges += '<span class="detail-badge ok">' + agg.gap.okCount + ' OK</span>'
+
+    var qualityIssues = []
+    if (q.missingMeta > 0) qualityIssues.push(q.missingMeta + ' missing meta')
+    if (q.noInternalLinks > 0) qualityIssues.push(q.noInternalLinks + ' no links')
+    var qualitySummary = qualityIssues.length > 0
+      ? qualityIssues.map(function(i) { return '<span class="detail-badge warning">' + i + '</span>' }).join('')
+      : '<span class="detail-badge ok">All good</span>'
+
+    var html = '<div class="scan-details-grid">' +
+      // Overall Score
+      '<div class="detail-card">' +
+        '<div class="detail-card-label">Overall Score</div>' +
+        '<div class="detail-card-value">' + agg.overallScore + '</div>' +
+        '<div class="detail-card-sub">Scored ' + result.scoredCount + ' of ' + result.entryCount + ' entries</div>' +
+        '<div class="detail-distribution">' +
+          'avg ' + dist.avg + ', ' + dist.belowThreshold + ' below 60, lowest ' + dist.lowestScore +
+        '</div>' +
+      '</div>' +
+      // Persona
+      '<div class="detail-card">' +
+        '<div class="detail-card-label">Primary Persona</div>' +
+        personaLabel +
+        '<div class="persona-bar-group">' +
+          renderPersonaBar('Bill', pScores.broilerBill) +
+          renderPersonaBar('Betty', pScores.backyardBetty) +
+          renderPersonaBar('Taylor', pScores.turfTaylor) +
+        '</div>' +
+      '</div>' +
+      // Gap Status
+      '<div class="detail-card">' +
+        '<div class="detail-card-label">Content Gap</div>' +
+        '<div class="detail-badges">' + gapBadges + '</div>' +
+      '</div>' +
+      // Quality
+      '<div class="detail-card">' +
+        '<div class="detail-card-label">Quality</div>' +
+        '<div class="detail-card-sub">Avg ' + q.avgWordCount + ' words</div>' +
+        '<div class="detail-badges">' + qualitySummary + '</div>' +
+      '</div>' +
+    '</div>'
+
+    if (result.fallbackMode) {
+      html += '<div class="detail-fallback-warning">Fallback scoring — Mothership was unreachable. Scores are estimates.</div>'
+    }
+
+    panel.innerHTML = html
+  }
+
+  function renderPersonaBar(label, score) {
+    var pct = Math.round(score * 100)
+    var cls = getBarClass(pct)
+    return '<div class="persona-bar-row">' +
+      '<span class="persona-bar-label">' + label + '</span>' +
+      '<div class="persona-bar-track"><div class="persona-bar-fill ' + cls + '" style="width:' + pct + '%"></div></div>' +
+      '<span class="persona-bar-pct">' + pct + '%</span>' +
+    '</div>'
+  }
+
+  // =========================================================================
+  // AUTO-SET CONTENT STATUS
+  // =========================================================================
+
+  function autoSetContentStatus(route, result) {
+    if (!result || !result.scannable) return
+
+    var agg = result.aggregate
+    var persona = agg.persona
+    var confusedAll = persona.primary.score < 0.3
+    var contentStatus = 'not-started'
+
+    if (agg.overallScore >= 70 && persona.aligned && !confusedAll) {
+      contentStatus = 'approved'
+    } else if (confusedAll || persona.primary.score < 0.4) {
+      contentStatus = 'needs-persona'
+    } else if (agg.overallScore < 60 || agg.quality.avgWordCount < 300) {
+      contentStatus = 'needs-quality'
+    }
+
+    var row = document.querySelector('.table-row[data-route="' + route + '"]')
+    if (!row) return
+
+    var contentSelect = row.querySelector('[data-field="content"]')
+    if (contentSelect) {
+      contentSelect.value = contentStatus
+      contentSelect.dispatchEvent(new Event('change'))
+    }
+  }
+
+  // =========================================================================
+  // CACHE SCAN RESULT
+  // =========================================================================
+
+  function cacheScanResult(route, result) {
+    if (!result.scannable) return
+    var state = loadState()
+    if (!state[route]) state[route] = {}
+    state[route].scan = {
+      scannedAt: result.scannedAt,
+      scanVersion: result.scanVersion,
+      overallScore: result.aggregate.overallScore,
+      personaAligned: result.aggregate.persona.aligned,
+      personaPrimary: result.aggregate.persona.primary.name,
+      personaScore: result.aggregate.persona.primary.score,
+      scoredCount: result.scoredCount,
+      totalEntries: result.entryCount,
+      lowestScore: result.aggregate.distribution.lowestScore,
+      belowThreshold: result.aggregate.distribution.belowThreshold,
+    }
+    saveState(state)
+  }
+
+  // =========================================================================
+  // RESTORE CACHED SCANS ON LOAD
+  // =========================================================================
+
+  function restoreCachedScans() {
+    var state = loadState()
+    Object.keys(state).forEach(function(route) {
+      var data = state[route]
+      if (!data.scan) return
+
+      var row = document.querySelector('.table-row[data-route="' + route + '"]')
+      if (!row) return
+
+      var scoreCol = row.querySelector('.col-score')
+      if (!scoreCol) return
+
+      var scan = data.scan
+      var confused = scan.personaScore < 0.3
+      var cls = confused ? 'score-confused' : getScoreClass(scan.overallScore)
+      var stale = scan.scanVersion < CURRENT_SCAN_VERSION
+
+      scoreCol.innerHTML = '<button class="score-badge ' + cls + '" data-action="toggle-details" title="' +
+        (stale ? 'Stale — re-scan available' : 'Click to expand') + '">' +
+        (confused ? '?' : scan.overallScore) +
+        (stale ? '*' : '') +
+        '</button>'
+    })
+  }
+
+  // =========================================================================
+  // SCAN ALL
+  // =========================================================================
+
+  function scanAll() {
+    var rows = document.querySelectorAll('.table-row[data-content-type="dynamic"]')
+    var routes = []
+    rows.forEach(function(row) { routes.push(row.dataset.route) })
+
+    if (routes.length === 0) return
+
+    scanCancelled = false
+    var progressEl = document.getElementById('scan-progress')
+    var progressBar = document.getElementById('scan-progress-bar')
+    var progressCount = document.getElementById('scan-progress-count')
+    var progressLabel = document.getElementById('scan-progress-label')
+    var scanAllBtn = document.getElementById('scan-all-btn')
+
+    progressEl.style.display = ''
+    scanAllBtn.disabled = true
+    var completed = 0
+
+    function next() {
+      if (scanCancelled || completed >= routes.length) {
+        progressEl.style.display = 'none'
+        scanAllBtn.disabled = false
+        updateProgress()
+        return
+      }
+
+      if (sessionScanCount >= 50 && sessionScanCount % 10 === 0) {
+        progressLabel.textContent = 'Scanning (' + sessionScanCount + ' scans this session)...'
+      } else {
+        progressLabel.textContent = 'Scanning ' + routes[completed] + '...'
+      }
+
+      var route = routes[completed]
+      var row = document.querySelector('.table-row[data-route="' + route + '"]')
+      var scanBtn = row ? row.querySelector('.scan-btn, .score-badge') : null
+      if (scanBtn) scanBtn.classList.add('scanning')
+
+      scanRoute(route)
+        .then(function(result) {
+          if (result && result.scannable) {
+            renderScoreBadge(row, result)
+            renderDetailPanel(route, result)
+            autoSetContentStatus(route, result)
+            cacheScanResult(route, result)
+          }
+        })
+        .catch(function(err) {
+          console.error('Scan failed for ' + route + ':', err)
+        })
+        .finally(function() {
+          if (scanBtn) scanBtn.classList.remove('scanning')
+          completed++
+          var pct = Math.round((completed / routes.length) * 100)
+          progressBar.style.width = pct + '%'
+          progressCount.textContent = completed + '/' + routes.length
+          setTimeout(next, 500)
+        })
+    }
+
+    progressCount.textContent = '0/' + routes.length
+    next()
+  }
+
+  // =========================================================================
+  // INIT
+  // =========================================================================
+
+  function init() {
+    var state = loadState()
+
+    // Populate fields from saved state
+    document.querySelectorAll('.table-row').forEach(function(row) {
+      var route = row.dataset.route
+      var data = state[route] || {}
+      var designSelect = row.querySelector('[data-field="design"]')
+      var contentSelect = row.querySelector('[data-field="content"]')
+      var notesInput = row.querySelector('[data-field="notes"]')
+      if (data.design && designSelect) designSelect.value = data.design
+      if (data.content && contentSelect) contentSelect.value = data.content
+      if (data.notes && notesInput) notesInput.value = data.notes
+    })
+
+    // Change listeners for dropdowns and notes
+    document.querySelectorAll('.design-select, .content-select, .notes-input').forEach(function(el) {
+      el.addEventListener('change', function() {
+        var row = this.closest('.table-row')
+        var route = row.dataset.route
+        var field = this.dataset.field
+        var st = loadState()
+        if (!st[route]) st[route] = {}
+        st[route][field] = this.value
+        saveState(st)
         updateProgress()
       })
     })
 
     // Clear row button
-    document.querySelectorAll('[data-action="clear"]').forEach((btn) => {
-      btn.addEventListener('click', function () {
-        const row = this.closest('.table-row')
-        const route = row.dataset.route
-        const state = loadState()
-
-        delete state[route]
-        saveState(state)
-
+    document.querySelectorAll('[data-action="clear"]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var row = this.closest('.table-row')
+        var route = row.dataset.route
+        var st = loadState()
+        delete st[route]
+        saveState(st)
         row.querySelector('[data-field="design"]').value = 'not-started'
         row.querySelector('[data-field="content"]').value = 'not-started'
         row.querySelector('[data-field="notes"]').value = ''
+        // Reset score column
+        if (row.dataset.contentType === 'dynamic') {
+          row.querySelector('.col-score').innerHTML = '<button class="scan-btn" data-action="scan" title="Score via Mothership">Scan</button>'
+        }
+        // Close detail panel
+        var panel = document.querySelector('[data-details-for="' + route + '"]')
+        if (panel) { panel.classList.remove('open'); panel.innerHTML = '' }
         updateProgress()
       })
     })
 
+    // Scan button (per-row) — delegated
+    document.addEventListener('click', function(e) {
+      var scanBtn = e.target.closest('[data-action="scan"]')
+      if (scanBtn) {
+        var row = scanBtn.closest('.table-row')
+        var route = row.dataset.route
+        scanBtn.disabled = true
+        scanBtn.classList.add('scanning')
+        scanBtn.textContent = '...'
+
+        scanRoute(route)
+          .then(function(result) {
+            if (result && result.scannable) {
+              renderScoreBadge(row, result)
+              renderDetailPanel(route, result)
+              autoSetContentStatus(route, result)
+              cacheScanResult(route, result)
+            }
+          })
+          .catch(function(err) {
+            console.error('Scan error:', err)
+            scanBtn.textContent = 'Err'
+            scanBtn.disabled = false
+            scanBtn.classList.remove('scanning')
+          })
+          .finally(function() {
+            updateProgress()
+          })
+      }
+
+      // Toggle detail panel
+      var toggleBtn = e.target.closest('[data-action="toggle-details"]')
+      if (toggleBtn) {
+        var row2 = toggleBtn.closest('.table-row')
+        var route2 = row2.dataset.route
+        var panel = document.querySelector('[data-details-for="' + route2 + '"]')
+        if (panel) panel.classList.toggle('open')
+      }
+    })
+
+    // Scan All button
+    document.getElementById('scan-all-btn').addEventListener('click', scanAll)
+
+    // Cancel scan
+    document.getElementById('scan-cancel-btn').addEventListener('click', function() {
+      scanCancelled = true
+    })
+
     // Export button
-    document.getElementById('export-btn').addEventListener('click', function () {
-      const state = loadState()
-      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
+    document.getElementById('export-btn').addEventListener('click', function() {
+      var st = loadState()
+      var blob = new Blob([JSON.stringify(st, null, 2)], { type: 'application/json' })
+      var url = URL.createObjectURL(blob)
+      var a = document.createElement('a')
       a.href = url
       a.download = 'site-audit-' + new Date().toISOString().split('T')[0] + '.json'
       a.click()
@@ -843,16 +1214,17 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     })
 
     // Reset button
-    document.getElementById('reset-btn').addEventListener('click', function () {
+    document.getElementById('reset-btn').addEventListener('click', function() {
       if (confirm('Reset all audit progress? This cannot be undone.')) {
         localStorage.removeItem(STORAGE_KEY)
         location.reload()
       }
     })
 
+    // Restore cached scans and update progress
+    restoreCachedScans()
     updateProgress()
   }
 
-  // Run on load
   init()
 </script>
