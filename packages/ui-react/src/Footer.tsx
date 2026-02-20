@@ -71,7 +71,6 @@ export function Footer({
           backgroundImage: `url("${patternUrl}")`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundAttachment: 'fixed', // Parallax effect
           backgroundRepeat: 'no-repeat',
         }}
       >
