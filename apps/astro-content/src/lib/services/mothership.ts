@@ -15,7 +15,13 @@ function getSupabaseClient(): SupabaseClient | null {
   const key = import.meta.env.MOTHERSHIP_SUPABASE_SERVICE_KEY
 
   if (!url || !key) {
-    console.warn('Mothership credentials not configured')
+    console.error(
+      '[mothership] MISSING ENV VARS:',
+      'MOTHERSHIP_SUPABASE_URL=',
+      url ? 'SET' : 'MISSING',
+      'MOTHERSHIP_SUPABASE_SERVICE_KEY=',
+      key ? 'SET' : 'MISSING',
+    )
     return null
   }
 
@@ -27,7 +33,7 @@ function getSupabaseClient(): SupabaseClient | null {
 async function generateEmbedding(text: string): Promise<number[] | null> {
   const apiKey = import.meta.env.OPENAI_API_KEY
   if (!apiKey) {
-    console.warn('OpenAI API key not configured')
+    console.error('[mothership] MISSING OPENAI_API_KEY env var')
     return null
   }
 
@@ -45,39 +51,53 @@ async function generateEmbedding(text: string): Promise<number[] | null> {
     })
 
     if (!response.ok) {
-      const error = await response.text()
-      console.error('OpenAI embedding error:', error)
+      const errorBody = await response.text()
+      console.error(
+        '[mothership] OpenAI embedding HTTP error:',
+        response.status,
+        errorBody,
+      )
       return null
     }
 
     const data = await response.json()
     return data.data[0].embedding
   } catch (error) {
-    console.error('Failed to generate embedding:', error)
+    console.error('[mothership] OpenAI embedding exception:', error)
     return null
   }
 }
 
 /**
- * Score content against personas using vector similarity
+ * Score content against personas using vector similarity.
+ * Returns null if scoring fails — caller must handle.
  */
 export async function scorePersonas(
   content: string,
   segment?: string,
-  brandSlug: string = 'southland-organics'
-): Promise<PersonaScores> {
+  brandSlug: string = 'southland-organics',
+): Promise<PersonaScores | null> {
   const supabase = getSupabaseClient()
 
-  // Fallback if Mothership not available
-  if (!supabase || !import.meta.env.ENABLE_MOTHERSHIP) {
-    return getFallbackPersonaScores(segment)
+  if (!supabase) {
+    console.error('[mothership] scorePersonas: Supabase client is null (env vars missing)')
+    return null
+  }
+
+  if (!import.meta.env.ENABLE_MOTHERSHIP) {
+    console.error(
+      '[mothership] scorePersonas: ENABLE_MOTHERSHIP is falsy:',
+      import.meta.env.ENABLE_MOTHERSHIP,
+    )
+    return null
   }
 
   try {
     // Generate embedding for content
     const embedding = await generateEmbedding(content)
     if (!embedding) {
-      return getFallbackPersonaScores(segment)
+      console.error('[mothership] scorePersonas: embedding generation failed (see above)')
+      return null
     }
 
     // Query personas with vector similarity
@@ -89,12 +109,17 @@ export async function scorePersonas(
     })
 
     if (error) {
-      console.error('Persona match error:', error)
-      return getFallbackPersonaScores(segment)
+      console.error('[mothership] match_personas RPC error:', error)
+      return null
     }
 
     if (!personas || personas.length === 0) {
-      return getFallbackPersonaScores(segment)
+      console.error(
+        '[mothership] match_personas returned 0 results for brand:',
+        brandSlug,
+        '— personas may not be seeded',
+      )
+      return null
     }
 
     // Map results to our persona structure
@@ -144,89 +169,39 @@ export async function scorePersonas(
           : undefined,
     }
   } catch (error) {
-    console.error('Persona scoring failed:', error)
-    return getFallbackPersonaScores(segment)
+    console.error('[mothership] scorePersonas exception:', error)
+    return null
   }
 }
 
 /**
- * Fallback persona scores when Mothership is unavailable
- */
-function getFallbackPersonaScores(segment?: string): PersonaScores {
-  const scores = {
-    broilerBill: 0.3,
-    backyardBetty: 0.4,
-    turfTaylor: 0.2,
-  }
-
-  // Adjust based on segment hint
-  if (segment === 'poultry') {
-    scores.broilerBill = 0.65
-    scores.backyardBetty = 0.55
-    scores.turfTaylor = 0.1
-  } else if (segment === 'turf') {
-    scores.turfTaylor = 0.7
-    scores.broilerBill = 0.1
-    scores.backyardBetty = 0.15
-  } else if (segment === 'agriculture') {
-    scores.broilerBill = 0.5
-    scores.backyardBetty = 0.4
-    scores.turfTaylor = 0.3
-  }
-
-  const entries = Object.entries(scores) as [keyof typeof scores, number][]
-  const [primaryKey, primaryScore] = entries.reduce((a, b) => (a[1] > b[1] ? a : b))
-
-  const nameMap: Record<string, PersonaScores['primary']['name']> = {
-    broilerBill: 'Broiler Bill',
-    backyardBetty: 'Backyard Betty',
-    turfTaylor: 'Turf Taylor',
-  }
-
-  return {
-    primary: {
-      name: nameMap[primaryKey],
-      slug: primaryKey.replace(/([A-Z])/g, '-$1').toLowerCase(),
-      score: primaryScore,
-    },
-    scores,
-    aligned: primaryScore >= 0.6,
-    recommendation:
-      primaryScore < 0.6
-        ? 'Content does not strongly align with any persona. (Fallback scoring - Mothership unavailable)'
-        : '(Fallback scoring - Mothership unavailable)',
-  }
-}
-
-/**
- * Analyze content for gap status
+ * Analyze content for gap status.
+ * Returns null if analysis fails — caller must handle.
  */
 export async function analyzeContentGap(
   title: string,
   content: string,
   url?: string,
-  brandSlug: string = 'southland-organics'
-): Promise<GapStatus> {
+  brandSlug: string = 'southland-organics',
+): Promise<GapStatus | null> {
   const supabase = getSupabaseClient()
 
-  // Fallback if Mothership not available
-  if (!supabase || !import.meta.env.ENABLE_MOTHERSHIP) {
-    return {
-      status: 'OK',
-      message: 'Content gap analysis unavailable (Mothership not configured)',
-      stage: 'aware',
-    }
+  if (!supabase) {
+    console.error('[mothership] analyzeContentGap: Supabase client is null')
+    return null
+  }
+
+  if (!import.meta.env.ENABLE_MOTHERSHIP) {
+    console.error('[mothership] analyzeContentGap: ENABLE_MOTHERSHIP is falsy')
+    return null
   }
 
   try {
     // Generate embedding for content
     const embedding = await generateEmbedding(`${title}\n\n${content.slice(0, 4000)}`)
     if (!embedding) {
-      return {
-        status: 'OK',
-        message: 'Could not generate embedding for gap analysis',
-        stage: 'aware',
-      }
+      console.error('[mothership] analyzeContentGap: embedding generation failed')
+      return null
     }
 
     // Find similar existing content
@@ -238,12 +213,8 @@ export async function analyzeContentGap(
     })
 
     if (error) {
-      console.error('Content gap analysis error:', error)
-      return {
-        status: 'OK',
-        message: 'Gap analysis query failed',
-        stage: 'aware',
-      }
+      console.error('[mothership] match_content RPC error:', error)
+      return null
     }
 
     // Analyze results
@@ -289,12 +260,8 @@ export async function analyzeContentGap(
       stage: inferBuyerStage(content),
     }
   } catch (error) {
-    console.error('Content gap analysis failed:', error)
-    return {
-      status: 'OK',
-      message: 'Gap analysis failed',
-      stage: 'aware',
-    }
+    console.error('[mothership] analyzeContentGap exception:', error)
+    return null
   }
 }
 

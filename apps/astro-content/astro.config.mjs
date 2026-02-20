@@ -16,7 +16,23 @@ export default defineConfig({
     mdx(),
   ],
   output: 'server',
-  adapter: cloudflare(),
+  adapter: cloudflare({
+    routes: {
+      extend: {
+        exclude: [
+          // Prerendered Phase 1 pages — serve as static files (fastest)
+          { pattern: '/blog/*' },
+          { pattern: '/team/*' },
+          { pattern: '/about/*' },
+          { pattern: '/contact/*' },
+          { pattern: '/distribution/*' },
+          { pattern: '/store-locator/*' },
+          // Partials for HTMLRewriter
+          { pattern: '/_partials/*' },
+        ],
+      },
+    },
+  }),
   build: {
     format: 'directory'
   },

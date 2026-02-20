@@ -256,10 +256,30 @@ export const POST: APIRoute = async ({ request }) => {
     // Always run these (fast, cheap)
 
     // 1. Persona scoring via Mothership
-    response.persona = await scorePersonas(`${body.title}\n\n${body.body}`, body.segment, brandSlug)
+    const personaResult = await scorePersonas(`${body.title}\n\n${body.body}`, body.segment, brandSlug)
+    if (personaResult) {
+      response.persona = personaResult
+    } else {
+      // Persona scoring failed — don't fake it
+      response.persona = {
+        primary: { name: 'Unknown', slug: 'unknown', score: 0 },
+        scores: { broilerBill: 0, backyardBetty: 0, turfTaylor: 0 },
+        aligned: false,
+        recommendation: 'Persona scoring unavailable — check Mothership connection',
+      }
+    }
 
     // 2. Content gap analysis via Mothership
-    response.gap = await analyzeContentGap(body.title, body.body, body.url, brandSlug)
+    const gapResult = await analyzeContentGap(body.title, body.body, body.url, brandSlug)
+    if (gapResult) {
+      response.gap = gapResult
+    } else {
+      response.gap = {
+        status: 'OK',
+        message: 'Gap analysis unavailable — check Mothership connection',
+        stage: 'aware',
+      }
+    }
 
     // 3. Local SEO metrics (always computed, fast)
     if (mode === 'light') {

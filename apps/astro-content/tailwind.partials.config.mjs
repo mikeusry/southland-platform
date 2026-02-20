@@ -9,6 +9,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./public/_partials/header.html', './public/_partials/footer.html'],
+  important: '.sl-hf',
   corePlugins: {
     preflight: false,
   },

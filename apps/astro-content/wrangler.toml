@@ -1,5 +1,5 @@
 # Cloudflare Pages configuration for Southland Platform
-name = "southland-content"
+name = "southland-website"
 pages_build_output_dir = "dist"
 compatibility_date = "2024-01-01"
 

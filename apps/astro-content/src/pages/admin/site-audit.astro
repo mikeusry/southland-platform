@@ -271,24 +271,23 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
       <h2 class="card-title">Mothership Integration</h2>
       <span class="badge badge-success">Live</span>
     </div>
-    <p>Content scoring powered by Mothership persona vectors + OpenAI embeddings (light mode).</p>
+    <p>Content scoring powered by Mothership persona vectors + OpenAI embeddings.</p>
     <div class="integration-stats">
       <div class="stat">
         <span class="stat-value" id="scanned-count">0</span>
         <span class="stat-label">Routes Scanned</span>
       </div>
       <div class="stat">
-        <span class="stat-value" id="avg-score">--</span>
-        <span class="stat-label">Avg Score</span>
+        <span class="stat-value" id="avg-alignment">--</span>
+        <span class="stat-label">Avg Alignment</span>
       </div>
       <div class="stat">
-        <span class="stat-value" id="aligned-count">0</span>
-        <span class="stat-label">Persona-Aligned</span>
+        <span class="stat-value" id="total-entries">0</span>
+        <span class="stat-label">Entries Scored</span>
       </div>
     </div>
     <p style="margin-top: 12px; color: var(--text-secondary); font-size: 13px;">
-      Scan individual routes or use "Scan All" for a full audit pass.
-      See <a href="/admin/content-quality">Content Quality</a> for the scoring methodology.
+      Two-axis evaluation: <strong>Persona</strong> (WHO does content speak to?) and <strong>Quality</strong> (is it structurally sound?). Never blended.
     </p>
   </div>
 
@@ -640,19 +639,102 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
   .detail-badge.ok { background: #dcfce7; color: #166534; }
   .detail-badge.info { background: #dbeafe; color: #1e40af; }
 
-  .detail-distribution {
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin-top: 8px;
+  /* ========== Detail Panel: Summary ========== */
+  .detail-summary {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 16px;
+    line-height: 1.5;
   }
 
-  .detail-fallback-warning {
-    font-size: 11px;
-    color: #92400e;
-    background: #fef3c7;
-    padding: 6px 10px;
+  /* ========== Detail Panel: Fixes List ========== */
+  .detail-fixes {
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
     border-radius: var(--radius-sm);
-    margin-top: 8px;
+  }
+  .detail-fixes-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #92400e;
+    margin-bottom: 8px;
+  }
+  .detail-fixes ol {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 13px;
+    color: #78350f;
+    line-height: 1.6;
+  }
+  .detail-fixes li { margin-bottom: 2px; }
+
+  /* ========== Detail Panel: Entry Table ========== */
+  .entry-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-bottom: 16px;
+  }
+  .entry-table th {
+    text-align: left;
+    padding: 8px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-tertiary);
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+  }
+  .entry-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--text);
+    vertical-align: middle;
+  }
+  .entry-table tr:hover td { background: var(--bg); }
+  .entry-table .entry-title a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .entry-table .entry-title a:hover { text-decoration: underline; }
+  .entry-table .cell-red { color: #dc2626; font-weight: 600; }
+  .entry-table .cell-amber { color: #d97706; font-weight: 600; }
+  .entry-table .cell-green { color: #16a34a; }
+  .entry-table .cell-muted { color: var(--text-tertiary); }
+  .entry-table .gap-badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 600;
+  }
+  .entry-table .gap-orphan { background: #fee2e2; color: #991b1b; }
+  .entry-table .gap-weak { background: #fef3c7; color: #92400e; }
+  .entry-table .gap-confused { background: #ede9fe; color: #5b21b6; }
+  .entry-table .gap-ok { background: #dcfce7; color: #166534; }
+
+  /* ========== Detail Panel: Persona Chart ========== */
+  .persona-chart {
+    margin-top: 12px;
+    padding: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+  .persona-chart-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-tertiary);
+    margin-bottom: 10px;
   }
 
   /* ========== Integration Status Card ========== */
@@ -741,7 +823,7 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
   // =========================================================================
 
   var STORAGE_KEY = 'southland_site_audit'
-  var CURRENT_SCAN_VERSION = 1
+  var CURRENT_SCAN_VERSION = 2
 
   // =========================================================================
   // STATE
@@ -749,6 +831,8 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
 
   var scanCancelled = false
   var sessionScanCount = 0
+  // Full scan results cached in memory for detail panel rendering
+  var scanResults = {}
 
   function loadState() {
     try {
@@ -806,19 +890,19 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
 
   function updateIntegrationStats() {
     var state = loadState()
-    var scanned = 0, totalScore = 0, aligned = 0
+    var scanned = 0, totalAlignment = 0, totalEntries = 0
 
     Object.values(state).forEach(function(data) {
-      if (data.scan && data.scan.overallScore !== undefined) {
+      if (data.scan && data.scan.avgAlignment !== undefined) {
         scanned++
-        totalScore += data.scan.overallScore
-        if (data.scan.personaAligned) aligned++
+        totalAlignment += data.scan.avgAlignment
+        totalEntries += data.scan.scoredCount || 0
       }
     })
 
     document.getElementById('scanned-count').textContent = scanned
-    document.getElementById('avg-score').textContent = scanned > 0 ? Math.round(totalScore / scanned) : '--'
-    document.getElementById('aligned-count').textContent = aligned
+    document.getElementById('avg-alignment').textContent = scanned > 0 ? Math.round(totalAlignment / scanned) + '%' : '--'
+    document.getElementById('total-entries').textContent = totalEntries
   }
 
   // =========================================================================
@@ -834,19 +918,16 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     .then(function(res) { return res.json() })
     .then(function(result) {
       sessionScanCount++
+      if (result && result.entries) {
+        scanResults[route] = result
+      }
       return result
     })
   }
 
   // =========================================================================
-  // RENDER SCAN RESULT
+  // HELPERS
   // =========================================================================
-
-  function getScoreClass(score) {
-    if (score >= 70) return 'score-high'
-    if (score >= 50) return 'score-mid'
-    return 'score-low'
-  }
 
   function getBarClass(pct) {
     if (pct >= 60) return 'high'
@@ -854,93 +935,216 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     return 'low'
   }
 
-  function renderScoreBadge(row, result) {
-    var scoreCol = row.querySelector('.col-score')
-    if (!result.scannable) return
-
-    var agg = result.aggregate
-    var score = agg.overallScore
-    var confused = agg.persona && agg.persona.primary.score < 0.3
-    var cls = confused ? 'score-confused' : getScoreClass(score)
-
-    scoreCol.innerHTML = '<button class="score-badge ' + cls + '" data-action="toggle-details" title="Click to expand">' +
-      (confused ? '?' : score) +
-      '</button>'
+  function personaInitial(name) {
+    if (!name) return '?'
+    return name.split(' ').pop().charAt(0).toUpperCase()
   }
 
-  function renderDetailPanel(route, result) {
-    var panel = document.querySelector('[data-details-for="' + route + '"]')
-    if (!panel || !result.scannable) return
+  function badgeColor(alignment) {
+    if (alignment >= 60) return 'score-high'
+    if (alignment >= 40) return 'score-mid'
+    return 'score-low'
+  }
+
+  // =========================================================================
+  // RENDER SCORE BADGE — "B 68%" format
+  // =========================================================================
+
+  function renderScoreBadge(row, result) {
+    var scoreCol = row.querySelector('.col-score')
+    if (!result || result.scannable === false) return
 
     var agg = result.aggregate
     var p = agg.persona
-    var pScores = p.scores
-    var dist = agg.distribution
+    var label, cls
+
+    if (!p) {
+      label = '--'
+      cls = 'score-low'
+    } else if (p.unclearCount === result.scoredCount) {
+      // All entries unclear
+      label = '?'
+      cls = 'score-confused'
+    } else {
+      var initial = personaInitial(p.primaryAudience)
+      label = initial + ' ' + p.avgAlignment + '%'
+      cls = badgeColor(p.avgAlignment)
+    }
+
+    scoreCol.innerHTML = '<button class="score-badge ' + cls + '" data-action="toggle-details" title="Click to expand">' +
+      label + '</button>'
+  }
+
+  // =========================================================================
+  // RENDER DETAIL PANEL — Summary → Fixes → Entry Table → Persona Chart
+  // =========================================================================
+
+  function renderDetailPanel(route, result) {
+    var panel = document.querySelector('[data-details-for="' + route + '"]')
+    if (!panel || result.scannable === false) return
+
+    var entries = result.entries || []
+    var agg = result.aggregate
+    var p = agg.persona
     var q = agg.quality
+    var g = agg.gap
+    var html = ''
 
-    var confusedAll = p.primary.score < 0.3
-    var personaLabel = confusedAll
-      ? '<span class="detail-badge warning">Confused — no clear persona</span>'
-      : (p.aligned
-        ? '<span class="detail-badge ok">' + p.primary.name + ' (' + Math.round(p.primary.score * 100) + '%)</span>'
-        : '<span class="detail-badge warning">' + p.primary.name + ' (' + Math.round(p.primary.score * 100) + '%) — weak alignment</span>'
-      )
+    // === 1. SUMMARY SENTENCE ===
+    var summary = result.scoredCount + ' entries scanned.'
+    if (p) {
+      if (p.unclearCount === result.scoredCount) {
+        summary += ' No clear audience — content is too generic for any persona.'
+      } else {
+        summary += ' Speaks to <strong>' + p.primaryAudience + '</strong> at ' + p.avgAlignment + '% avg alignment.'
+        // Top quality issue
+        if (q.noInternalLinks > 0) {
+          summary += ' ' + q.noInternalLinks + ' of ' + result.scoredCount + ' have zero internal links.'
+        } else if (q.stubbedCount > 0) {
+          summary += ' ' + q.stubbedCount + ' are stubs (< 150 words).'
+        } else if (q.missingMeta > 0) {
+          summary += ' ' + q.missingMeta + ' missing meta descriptions.'
+        }
+      }
+    } else {
+      summary += ' Persona scoring unavailable.'
+    }
+    html += '<div class="detail-summary">' + summary + '</div>'
 
-    var gapBadges = ''
-    if (agg.gap.orphanCount > 0) gapBadges += '<span class="detail-badge blocker">' + agg.gap.orphanCount + ' orphan</span>'
-    if (agg.gap.weakCount > 0) gapBadges += '<span class="detail-badge warning">' + agg.gap.weakCount + ' weak</span>'
-    if (agg.gap.confusedCount > 0) gapBadges += '<span class="detail-badge warning">' + agg.gap.confusedCount + ' confused</span>'
-    if (agg.gap.okCount > 0) gapBadges += '<span class="detail-badge ok">' + agg.gap.okCount + ' OK</span>'
+    // === 2. TOP FIXES (max 4, auto-derived from entries) ===
+    var fixes = generateFixes(entries, result.scoredCount)
+    if (fixes.length > 0) {
+      html += '<div class="detail-fixes">'
+      html += '<div class="detail-fixes-title">Top Fixes</div>'
+      html += '<ol>'
+      fixes.forEach(function(fix) { html += '<li>' + fix + '</li>' })
+      html += '</ol></div>'
+    }
 
-    var qualityIssues = []
-    if (q.missingMeta > 0) qualityIssues.push(q.missingMeta + ' missing meta')
-    if (q.noInternalLinks > 0) qualityIssues.push(q.noInternalLinks + ' no links')
-    var qualitySummary = qualityIssues.length > 0
-      ? qualityIssues.map(function(i) { return '<span class="detail-badge warning">' + i + '</span>' }).join('')
-      : '<span class="detail-badge ok">All good</span>'
+    // === 3. PER-ENTRY TABLE (weakest first) ===
+    if (entries.length > 0) {
+      // Sort: most issues first (unclear persona, stub, no links, no meta)
+      var sorted = entries.slice().sort(function(a, b) {
+        return issueCount(b) - issueCount(a)
+      })
 
-    var html = '<div class="scan-details-grid">' +
-      // Overall Score
-      '<div class="detail-card">' +
-        '<div class="detail-card-label">Overall Score</div>' +
-        '<div class="detail-card-value">' + agg.overallScore + '</div>' +
-        '<div class="detail-card-sub">Scored ' + result.scoredCount + ' of ' + result.entryCount + ' entries</div>' +
-        '<div class="detail-distribution">' +
-          'avg ' + dist.avg + ', ' + dist.belowThreshold + ' below 60, lowest ' + dist.lowestScore +
-        '</div>' +
-      '</div>' +
-      // Persona
-      '<div class="detail-card">' +
-        '<div class="detail-card-label">Primary Persona</div>' +
-        personaLabel +
-        '<div class="persona-bar-group">' +
-          renderPersonaBar('Bill', pScores.broilerBill) +
-          renderPersonaBar('Betty', pScores.backyardBetty) +
-          renderPersonaBar('Taylor', pScores.turfTaylor) +
-        '</div>' +
-      '</div>' +
-      // Gap Status
-      '<div class="detail-card">' +
-        '<div class="detail-card-label">Content Gap</div>' +
-        '<div class="detail-badges">' + gapBadges + '</div>' +
-      '</div>' +
-      // Quality
-      '<div class="detail-card">' +
-        '<div class="detail-card-label">Quality</div>' +
-        '<div class="detail-card-sub">Avg ' + q.avgWordCount + ' words</div>' +
-        '<div class="detail-badges">' + qualitySummary + '</div>' +
-      '</div>' +
-    '</div>'
+      html += '<table class="entry-table">'
+      html += '<thead><tr>' +
+        '<th>Entry</th>' +
+        '<th>Audience</th>' +
+        '<th>Align</th>' +
+        '<th>Words</th>' +
+        '<th>Read.</th>' +
+        '<th>Links</th>' +
+        '<th>H2s</th>' +
+        '<th>Gap</th>' +
+        '</tr></thead><tbody>'
 
-    if (result.fallbackMode) {
-      html += '<div class="detail-fallback-warning">Fallback scoring — Mothership was unreachable. Scores are estimates.</div>'
+      sorted.forEach(function(entry) {
+        var ep = entry.persona
+        var eq = entry.quality
+        var eg = entry.gap
+
+        // Audience cell
+        var audienceCell, alignCell
+        if (!ep) {
+          audienceCell = '<span class="cell-muted">--</span>'
+          alignCell = '<span class="cell-muted">--</span>'
+        } else if (ep.unclear) {
+          audienceCell = '<span class="cell-amber">unclear</span>'
+          alignCell = '<span class="cell-muted">--</span>'
+        } else {
+          audienceCell = ep.audience
+          var alignCls = ep.alignment >= 60 ? 'cell-green' : (ep.alignment >= 40 ? 'cell-amber' : 'cell-red')
+          alignCell = '<span class="' + alignCls + '">' + ep.alignment + '%</span>'
+        }
+
+        // Words
+        var wordsCls = eq.stubbed ? 'cell-red' : (eq.wordCount < 300 ? 'cell-amber' : '')
+        var wordsCell = '<span class="' + wordsCls + '">' + eq.wordCount + '</span>'
+
+        // Readability
+        var readCell = eq.readability.gradeLevel !== 'unknown'
+          ? eq.readability.gradeLevel
+          : '<span class="cell-muted">--</span>'
+
+        // Links
+        var linkTotal = eq.internalLinks + eq.externalLinks
+        var linksCls = linkTotal === 0 ? 'cell-red' : ''
+        var linksCell = '<span class="' + linksCls + '">' + linkTotal + '</span>'
+
+        // Headings
+        var h2Cell = eq.headings.h2 > 0
+          ? eq.headings.h2 + ' H2'
+          : '<span class="cell-muted">--</span>'
+        if (!eq.headings.properStructure && eq.headings.h2 > 0) {
+          h2Cell = '<span class="cell-amber">' + h2Cell + '</span>'
+        }
+
+        // Gap
+        var gapCell = '<span class="cell-muted">--</span>'
+        if (eg) {
+          var gapCls = 'gap-' + eg.status.toLowerCase()
+          gapCell = '<span class="gap-badge ' + gapCls + '">' + eg.status + '</span>'
+        }
+
+        html += '<tr>' +
+          '<td class="entry-title"><a href="' + entry.url + '" target="_blank">' + entry.title + '</a></td>' +
+          '<td>' + audienceCell + '</td>' +
+          '<td>' + alignCell + '</td>' +
+          '<td>' + wordsCell + '</td>' +
+          '<td>' + readCell + '</td>' +
+          '<td>' + linksCell + '</td>' +
+          '<td>' + h2Cell + '</td>' +
+          '<td>' + gapCell + '</td>' +
+          '</tr>'
+      })
+
+      html += '</tbody></table>'
+    }
+
+    // === 4. PERSONA CHART ===
+    if (p && p.unclearCount < result.scoredCount) {
+      // Compute average scores across all entries that have persona data
+      var billTotal = 0, bettyTotal = 0, taylorTotal = 0, personaCount = 0
+      entries.forEach(function(e) {
+        if (e.persona) {
+          billTotal += e.persona.scores.bill
+          bettyTotal += e.persona.scores.betty
+          taylorTotal += e.persona.scores.taylor
+          personaCount++
+        }
+      })
+      if (personaCount > 0) {
+        var avgBill = Math.round(billTotal / personaCount)
+        var avgBetty = Math.round(bettyTotal / personaCount)
+        var avgTaylor = Math.round(taylorTotal / personaCount)
+
+        html += '<div class="persona-chart">'
+        html += '<div class="persona-chart-title">Persona Alignment (avg across ' + personaCount + ' entries)</div>'
+        html += '<div class="persona-bar-group">'
+        html += renderPersonaBar('Bill', avgBill)
+        html += renderPersonaBar('Betty', avgBetty)
+        html += renderPersonaBar('Taylor', avgTaylor)
+        html += '</div>'
+
+        // List unclear entries
+        var unclearEntries = entries.filter(function(e) { return e.persona && e.persona.unclear })
+        if (unclearEntries.length > 0) {
+          html += '<div style="margin-top:8px;font-size:12px;color:var(--text-secondary);">'
+          html += '<strong>Unclear audience:</strong> '
+          html += unclearEntries.map(function(e) { return e.title }).join(', ')
+          html += '</div>'
+        }
+
+        html += '</div>'
+      }
     }
 
     panel.innerHTML = html
   }
 
-  function renderPersonaBar(label, score) {
-    var pct = Math.round(score * 100)
+  function renderPersonaBar(label, pct) {
     var cls = getBarClass(pct)
     return '<div class="persona-bar-row">' +
       '<span class="persona-bar-label">' + label + '</span>' +
@@ -950,22 +1154,98 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
   }
 
   // =========================================================================
-  // AUTO-SET CONTENT STATUS
+  // ISSUE COUNTING (for sort order)
+  // =========================================================================
+
+  function issueCount(entry) {
+    var count = 0
+    var q = entry.quality
+    if (q.stubbed) count += 2
+    if (q.internalLinks + q.externalLinks === 0) count += 2
+    if (!q.hasMetaDescription) count++
+    if (!q.headings.properStructure) count++
+    if (entry.persona && entry.persona.unclear) count += 2
+    if (!entry.persona) count++
+    if (entry.gap && entry.gap.status === 'ORPHAN') count++
+    return count
+  }
+
+  // =========================================================================
+  // FIX GENERATION — auto-derived from entry data
+  // =========================================================================
+
+  function generateFixes(entries, scoredCount) {
+    var fixes = []
+
+    // 1. Entries with 0 links
+    var noLinks = entries.filter(function(e) {
+      return e.quality.internalLinks + e.quality.externalLinks === 0
+    })
+    if (noLinks.length > 0) {
+      var names = noLinks.slice(0, 4).map(function(e) { return e.title })
+      var suffix = noLinks.length > 4 ? ' + ' + (noLinks.length - 4) + ' more' : ''
+      fixes.push('Add internal links to <strong>' + names.join('</strong>, <strong>') + '</strong>' + suffix + ' — zero links to hub or product pages.')
+    }
+
+    // 2. Stubs (< 150 words)
+    var stubs = entries.filter(function(e) { return e.quality.stubbed })
+    if (stubs.length > 0) {
+      var names2 = stubs.slice(0, 3).map(function(e) { return e.title + ' (' + e.quality.wordCount + ' words)' })
+      fixes.push('Expand <strong>' + names2.join('</strong>, <strong>') + '</strong> — under 150 words, flagged as stub.')
+    }
+
+    // 3. Missing meta descriptions
+    var noMeta = entries.filter(function(e) { return !e.quality.hasMetaDescription })
+    if (noMeta.length > 0) {
+      var names3 = noMeta.slice(0, 4).map(function(e) { return e.title })
+      fixes.push('Add meta descriptions to <strong>' + names3.join('</strong>, <strong>') + '</strong> — missing entirely.')
+    }
+
+    // 4. Bad heading structure
+    var badHeadings = entries.filter(function(e) {
+      return !e.quality.headings.properStructure && e.quality.wordCount >= 150
+    })
+    if (badHeadings.length > 0) {
+      var names4 = badHeadings.slice(0, 3).map(function(e) { return e.title })
+      fixes.push('Fix heading structure in <strong>' + names4.join('</strong>, <strong>') + '</strong> — missing H2s or multiple H1s.')
+    }
+
+    // 5. Unclear persona (all < 30%)
+    var unclear = entries.filter(function(e) { return e.persona && e.persona.unclear })
+    if (unclear.length > 0 && fixes.length < 4) {
+      var names5 = unclear.slice(0, 3).map(function(e) { return e.title })
+      fixes.push('<strong>' + names5.join('</strong>, <strong>') + '</strong> have no clear audience (all personas < 30%). Rewrite to target a specific persona.')
+    }
+
+    return fixes.slice(0, 4)
+  }
+
+  // =========================================================================
+  // AUTO-SET CONTENT STATUS — two-axis rules
   // =========================================================================
 
   function autoSetContentStatus(route, result) {
-    if (!result || !result.scannable) return
+    if (!result || result.scannable === false) return
 
     var agg = result.aggregate
-    var persona = agg.persona
-    var confusedAll = persona.primary.score < 0.3
+    var p = agg.persona
+    var q = agg.quality
     var contentStatus = 'not-started'
 
-    if (agg.overallScore >= 70 && persona.aligned && !confusedAll) {
+    // Count quality checks passed (6 total)
+    var qualityPassed = 0
+    if (q.avgWordCount >= 300) qualityPassed++
+    if (q.missingMeta === 0) qualityPassed++
+    if (q.noInternalLinks === 0) qualityPassed++
+    if (q.badHeadingsCount === 0) qualityPassed++
+    if (q.avgReadability >= 50) qualityPassed++
+    if (q.stubbedCount === 0) qualityPassed++
+
+    if (p && p.avgAlignment >= 60 && qualityPassed >= 4) {
       contentStatus = 'approved'
-    } else if (confusedAll || persona.primary.score < 0.4) {
+    } else if (!p || p.avgAlignment < 40 || p.unclearCount > 0) {
       contentStatus = 'needs-persona'
-    } else if (agg.overallScore < 60 || agg.quality.avgWordCount < 300) {
+    } else if (qualityPassed <= 2) {
       contentStatus = 'needs-quality'
     }
 
@@ -980,24 +1260,36 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
   }
 
   // =========================================================================
-  // CACHE SCAN RESULT
+  // CACHE SCAN RESULT — two-axis format
   // =========================================================================
 
   function cacheScanResult(route, result) {
-    if (!result.scannable) return
+    if (result.scannable === false) return
     var state = loadState()
     if (!state[route]) state[route] = {}
+
+    var p = result.aggregate.persona
+    var q = result.aggregate.quality
+    var g = result.aggregate.gap
+
     state[route].scan = {
       scannedAt: result.scannedAt,
       scanVersion: result.scanVersion,
-      overallScore: result.aggregate.overallScore,
-      personaAligned: result.aggregate.persona.aligned,
-      personaPrimary: result.aggregate.persona.primary.name,
-      personaScore: result.aggregate.persona.primary.score,
       scoredCount: result.scoredCount,
       totalEntries: result.entryCount,
-      lowestScore: result.aggregate.distribution.lowestScore,
-      belowThreshold: result.aggregate.distribution.belowThreshold,
+      // Persona axis
+      primaryAudience: p ? p.primaryAudience : null,
+      avgAlignment: p ? p.avgAlignment : null,
+      unclearCount: p ? p.unclearCount : null,
+      // Quality axis
+      avgWordCount: q.avgWordCount,
+      missingMeta: q.missingMeta,
+      noInternalLinks: q.noInternalLinks,
+      stubbedCount: q.stubbedCount,
+      // Gap
+      gap: g,
+      // Full entries for detail panel restore
+      entries: result.entries,
     }
     saveState(state)
   }
@@ -1019,15 +1311,52 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
       if (!scoreCol) return
 
       var scan = data.scan
-      var confused = scan.personaScore < 0.3
-      var cls = confused ? 'score-confused' : getScoreClass(scan.overallScore)
       var stale = scan.scanVersion < CURRENT_SCAN_VERSION
+      var label, cls
+
+      if (!scan.primaryAudience) {
+        label = '--'
+        cls = 'score-low'
+      } else if (scan.unclearCount === scan.scoredCount) {
+        label = '?'
+        cls = 'score-confused'
+      } else {
+        var initial = personaInitial(scan.primaryAudience)
+        label = initial + ' ' + scan.avgAlignment + '%'
+        cls = badgeColor(scan.avgAlignment)
+      }
+
+      if (stale) label += '*'
 
       scoreCol.innerHTML = '<button class="score-badge ' + cls + '" data-action="toggle-details" title="' +
         (stale ? 'Stale — re-scan available' : 'Click to expand') + '">' +
-        (confused ? '?' : scan.overallScore) +
-        (stale ? '*' : '') +
-        '</button>'
+        label + '</button>'
+
+      // Restore full result for detail panel
+      if (scan.entries) {
+        scanResults[route] = {
+          scannable: true,
+          scoredCount: scan.scoredCount,
+          entryCount: scan.totalEntries,
+          entries: scan.entries,
+          aggregate: {
+            persona: scan.primaryAudience ? {
+              primaryAudience: scan.primaryAudience,
+              avgAlignment: scan.avgAlignment,
+              unclearCount: scan.unclearCount,
+            } : null,
+            quality: {
+              avgWordCount: scan.avgWordCount,
+              missingMeta: scan.missingMeta,
+              noInternalLinks: scan.noInternalLinks,
+              stubbedCount: scan.stubbedCount,
+              avgReadability: 0,
+              badHeadingsCount: 0,
+            },
+            gap: scan.gap,
+          },
+        }
+      }
     })
   }
 
@@ -1061,11 +1390,7 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
         return
       }
 
-      if (sessionScanCount >= 50 && sessionScanCount % 10 === 0) {
-        progressLabel.textContent = 'Scanning (' + sessionScanCount + ' scans this session)...'
-      } else {
-        progressLabel.textContent = 'Scanning ' + routes[completed] + '...'
-      }
+      progressLabel.textContent = 'Scanning ' + routes[completed] + '...'
 
       var route = routes[completed]
       var row = document.querySelector('.table-row[data-route="' + route + '"]')
@@ -1074,7 +1399,7 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
 
       scanRoute(route)
         .then(function(result) {
-          if (result && result.scannable) {
+          if (result && result.scannable !== false && result.entries) {
             renderScoreBadge(row, result)
             renderDetailPanel(route, result)
             autoSetContentStatus(route, result)
@@ -1149,11 +1474,12 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
         // Close detail panel
         var panel = document.querySelector('[data-details-for="' + route + '"]')
         if (panel) { panel.classList.remove('open'); panel.innerHTML = '' }
+        delete scanResults[route]
         updateProgress()
       })
     })
 
-    // Scan button (per-row) — delegated
+    // Scan button (per-row) and toggle — delegated
     document.addEventListener('click', function(e) {
       var scanBtn = e.target.closest('[data-action="scan"]')
       if (scanBtn) {
@@ -1165,11 +1491,14 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
 
         scanRoute(route)
           .then(function(result) {
-            if (result && result.scannable) {
+            if (result && result.scannable !== false && result.entries) {
               renderScoreBadge(row, result)
               renderDetailPanel(route, result)
               autoSetContentStatus(route, result)
               cacheScanResult(route, result)
+              // Auto-open detail panel
+              var panel = document.querySelector('[data-details-for="' + route + '"]')
+              if (panel) panel.classList.add('open')
             }
           })
           .catch(function(err) {
@@ -1189,7 +1518,13 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
         var row2 = toggleBtn.closest('.table-row')
         var route2 = row2.dataset.route
         var panel = document.querySelector('[data-details-for="' + route2 + '"]')
-        if (panel) panel.classList.toggle('open')
+        if (panel) {
+          // Re-render from cached result if panel is empty
+          if (!panel.innerHTML && scanResults[route2]) {
+            renderDetailPanel(route2, scanResults[route2])
+          }
+          panel.classList.toggle('open')
+        }
       }
     })
 
@@ -1217,6 +1552,7 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     document.getElementById('reset-btn').addEventListener('click', function() {
       if (confirm('Reset all audit progress? This cannot be undone.')) {
         localStorage.removeItem(STORAGE_KEY)
+        scanResults = {}
         location.reload()
       }
     })
