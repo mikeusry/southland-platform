@@ -64,7 +64,7 @@ export function Footer({
 
   return (
     <footer>
-      {/* Main footer - Green with background pattern + parallax */}
+      {/* Main footer - Green with background pattern */}
       <div
         className="relative"
         style={{

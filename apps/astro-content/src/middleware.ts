@@ -163,7 +163,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
         element.append(
           '<link rel="stylesheet" href="/_partials/partials.css">' +
             '<link rel="preconnect" href="https://fonts.googleapis.com">' +
-            '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
+            '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
+            '<style>.wrapper--bottom{flex:none!important}</style>',
           { html: true },
         )
       },
