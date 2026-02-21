@@ -88,7 +88,7 @@
   }
 
   .episode-card-thumbnail {
-    @apply aspect-video bg-gray-100 relative overflow-hidden;
+    @apply bg-gray-100 relative overflow-hidden;
   }
 
   .episode-card-content {

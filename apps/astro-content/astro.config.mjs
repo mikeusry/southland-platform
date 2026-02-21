@@ -39,6 +39,11 @@ export default defineConfig({
   vite: {
     define: {
       'import.meta.env.PUBLIC_SITE_URL': JSON.stringify(process.env.PUBLIC_SITE_URL || 'https://southlandorganics.com')
-    }
+    },
+    resolve: {
+      alias: {
+        'react-dom/server': 'react-dom/server.edge',
+      },
+    },
   }
 });

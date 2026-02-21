@@ -1,7 +1,8 @@
 # Cloudflare Pages configuration for Southland Platform
 name = "southland-website"
 pages_build_output_dir = "dist"
-compatibility_date = "2024-01-01"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat_v2"]
 
 # Environment variables for all environments (dev/preview default)
 # NOTE: *.myshopify.com always 301-redirects to the primary domain — can't proxy to it.
