@@ -7,11 +7,16 @@
  */
 import { defineMiddleware } from 'astro:middleware'
 
-// For testing on pages.dev: proxy to the live www domain.
-// For production cutover: will need a CNAME origin subdomain
-// (e.g. shopify-origin.southlandorganics.com → shops.myshopify.com)
-// to avoid a loop when DNS points to Cloudflare Pages.
-const SHOPIFY_ORIGIN = 'https://www.southlandorganics.com'
+// Shopify origin — read from Cloudflare env (wrangler.toml) at request time.
+//
+// DEV (pages.dev):  www.southlandorganics.com works because DNS still points to Shopify.
+// PRODUCTION:       Needs a dedicated origin subdomain to avoid redirect loop:
+//                   1. Create DNS: shopify-proxy.southlandorganics.com → CNAME shops.myshopify.com
+//                   2. Add shopify-proxy.southlandorganics.com as domain in Shopify Admin (NOT primary)
+//                   3. Set SHOPIFY_ORIGIN=https://shopify-proxy.southlandorganics.com in wrangler.toml [env.production]
+//
+// NOTE: *.myshopify.com always 301s to the primary domain — can't be used as proxy origin.
+const SHOPIFY_ORIGIN_DEFAULT = 'https://www.southlandorganics.com'
 
 // Phase 1 routes served by Astro
 const ASTRO_ROUTES = [
@@ -70,6 +75,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
   if (isAstroRoute(pathname)) {
     return next()
   }
+
+  // Resolve Shopify origin from Cloudflare env (wrangler.toml) or fallback
+  const runtime = (context.locals as any).runtime
+  const SHOPIFY_ORIGIN = runtime?.env?.SHOPIFY_ORIGIN || SHOPIFY_ORIGIN_DEFAULT
 
   // Static assets that leaked past _routes.json — let Astro serve them
   if (
@@ -137,7 +146,6 @@ export const onRequest = defineMiddleware(async (context, next) => {
     }
 
     // HTML response — apply HTMLRewriter to replace Shopify header/footer
-    const runtime = (context.locals as any).runtime
     const assets = runtime?.env?.ASSETS
     if (!assets) {
       return new Response(response.body, {

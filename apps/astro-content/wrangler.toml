@@ -3,16 +3,22 @@ name = "southland-website"
 pages_build_output_dir = "dist"
 compatibility_date = "2024-01-01"
 
-# Environment variables for all environments
+# Environment variables for all environments (dev/preview default)
+# NOTE: *.myshopify.com always 301-redirects to the primary domain — can't proxy to it.
+# Dev works with www because DNS still points to Shopify.
 [vars]
-SHOPIFY_ORIGIN = "https://southland-organics.myshopify.com"
+SHOPIFY_ORIGIN = "https://www.southlandorganics.com"
 
-# Production environment
+# Production environment — REQUIRES origin subdomain setup before DNS cutover:
+#   1. DNS: shopify-proxy.southlandorganics.com → CNAME shops.myshopify.com
+#   2. Shopify Admin → Settings → Domains → Add shopify-proxy.southlandorganics.com
+#   3. Uncomment the correct SHOPIFY_ORIGIN below
 [env.production.vars]
 PUBLIC_SITE_URL = "https://southlandorganics.com"
-SHOPIFY_ORIGIN = "https://southland-organics.myshopify.com"
+# SHOPIFY_ORIGIN = "https://shopify-proxy.southlandorganics.com"  # Enable after DNS setup
+SHOPIFY_ORIGIN = "https://www.southlandorganics.com"  # Temporary — loops after DNS cutover
 
 # Preview/staging environment
 [env.preview.vars]
 PUBLIC_SITE_URL = "https://preview.southlandorganics.com"
-SHOPIFY_ORIGIN = "https://southland-organics.myshopify.com"
+SHOPIFY_ORIGIN = "https://www.southlandorganics.com"
