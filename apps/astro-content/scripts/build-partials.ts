@@ -215,9 +215,10 @@ const scopingCss = `
   color: inherit;
 }
 
-/* Reset Shopify's .grid (12x12 grid-template) — our grid-cols-* handle column count */
+/* Reset Shopify's .grid (12x12 grid-template) — only kill rows, let our grid-cols-* handle columns */
 .sl-hf .grid {
-  grid-template: none !important;
+  grid-template-rows: none !important;
+  grid-template-areas: none !important;
 }
 
 /* Override Shopify's sticky header z-index if needed */
