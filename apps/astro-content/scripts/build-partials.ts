@@ -215,6 +215,11 @@ const scopingCss = `
   color: inherit;
 }
 
+/* Reset Shopify's .grid (12x12 grid-template) — our grid-cols-* handle column count */
+.sl-hf .grid {
+  grid-template: none !important;
+}
+
 /* Override Shopify's sticky header z-index if needed */
 .sl-hf .sl-header {
   position: sticky;
