@@ -157,14 +157,17 @@ export const onRequest = defineMiddleware(async (context, next) => {
     // HTMLRewriter is a global in Cloudflare Workers runtime
     const rewriter = new HTMLRewriter()
 
-    // Inject our CSS into <head>
+    // Inject our CSS + tracking into <head>
     rewriter.on('head', {
       element(element) {
         element.append(
           '<link rel="stylesheet" href="/_partials/partials.css">' +
             '<link rel="preconnect" href="https://fonts.googleapis.com">' +
             '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
-            '<style>.wrapper--bottom{flex:none!important}</style>',
+            '<style>.wrapper--bottom{flex:none!important}</style>' +
+            // point.dog pixel — fires on Shopify-proxied pages (Astro pages load it via BaseLayout)
+            '<script>window.pdPixelConfig={brandId:"southland",endpoint:"https://pixel.southlandorganics.com/collect"};</script>' +
+            '<script src="https://cdn.point.dog/pixel/pd-pixel.min.js" async></script>',
           { html: true },
         )
       },
