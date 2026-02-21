@@ -16,7 +16,7 @@ import { defineMiddleware } from 'astro:middleware'
 //                   3. Set SHOPIFY_ORIGIN=https://shopify-proxy.southlandorganics.com in wrangler.toml [env.production]
 //
 // NOTE: *.myshopify.com always 301s to the primary domain — can't be used as proxy origin.
-const SHOPIFY_ORIGIN_DEFAULT = 'https://www.southlandorganics.com'
+const SHOPIFY_ORIGIN_DEFAULT = 'https://shopify-proxy.southlandorganics.com'
 
 // Phase 1 routes served by Astro
 const ASTRO_ROUTES = [
@@ -117,8 +117,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
         const redirectUrl = new URL(location, SHOPIFY_ORIGIN)
         if (
           redirectUrl.hostname.includes('myshopify.com') ||
-          redirectUrl.hostname === 'southlandorganics.com' ||
-          redirectUrl.hostname === 'www.southlandorganics.com'
+          redirectUrl.hostname.includes('southlandorganics.com')
         ) {
           redirectUrl.hostname = context.url.hostname
           redirectUrl.protocol = context.url.protocol
