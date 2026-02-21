@@ -152,7 +152,7 @@ const footerElement = createElement(Footer, {
 })
 
 const footerMarkup = renderToStaticMarkup(footerElement)
-const footerHtml = `<div class="sl-hf">${footerMarkup}</div>`
+const footerHtml = `<div class="sl-hf" style="flex:none">${footerMarkup}</div>`
 
 writeFileSync(join(partialsDir, 'footer.html'), footerHtml)
 console.log('  footer.html written')
@@ -200,6 +200,11 @@ const scopingCss = `
 }
 .sl-hf *, .sl-hf *::before, .sl-hf *::after {
   box-sizing: border-box;
+}
+.sl-hf ul, .sl-hf ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 .sl-hf img {
   max-width: 100%;
