@@ -38,6 +38,12 @@ function isAstroRoute(pathname: string): boolean {
   )
 }
 
+// Permanent redirects — old Shopify pages → new Astro routes
+const REDIRECTS: Record<string, string> = {
+  '/pages/why-southland': '/about/',
+}
+
+
 // Module-level cache for partials (persists across requests in same isolate)
 let cachedHeaderHtml: string | null = null
 let cachedFooterHtml: string | null = null
@@ -70,6 +76,15 @@ async function getPartials(
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url
+
+  // Permanent redirects (old Shopify pages → new Astro routes)
+  const redirect = REDIRECTS[pathname]
+  if (redirect) {
+    return new Response(null, {
+      status: 301,
+      headers: { location: redirect },
+    })
+  }
 
   // Astro routes — let Astro handle them
   if (isAstroRoute(pathname)) {

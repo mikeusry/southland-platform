@@ -45,6 +45,9 @@ export default [
         Event: 'readonly',
         btoa: 'readonly',
         atob: 'readonly',
+        React: 'readonly',
+        RequestInfo: 'readonly',
+        HTMLRewriter: 'readonly',
       },
     },
     plugins: {

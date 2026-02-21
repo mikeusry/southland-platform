@@ -121,18 +121,10 @@ export function Footer({
               <ul className="space-y-2">
                 <li>
                   <a
-                    href="/pages/why-southland"
-                    className="text-sm text-white/90 transition-colors hover:text-white"
-                  >
-                    Why Choose Southland
-                  </a>
-                </li>
-                <li>
-                  <a
                     href="/about/"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
-                    About Us
+                    Why Choose Southland
                   </a>
                 </li>
                 <li>
