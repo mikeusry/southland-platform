@@ -179,6 +179,34 @@ export const onRequest = defineMiddleware(async (context, next) => {
     // HTMLRewriter is a global in Cloudflare Workers runtime
     const rewriter = new HTMLRewriter()
 
+    // Derive the proxy hostname from SHOPIFY_ORIGIN so we can scrub it from HTML
+    const proxyHost = new URL(SHOPIFY_ORIGIN).hostname // e.g. "shopify-proxy.southlandorganics.com"
+    const publicHost = context.url.hostname             // e.g. "southlandorganics.com" or "www.southlandorganics.com"
+
+    // Rewrite proxy hostname in href, src, action, content attributes on ALL elements
+    // This catches <link rel="canonical">, <meta og:url>, <a>, <form>, <img>, etc.
+    rewriter.on('*', {
+      element(element) {
+        for (const attr of ['href', 'src', 'action', 'content', 'srcset']) {
+          const val = element.getAttribute(attr)
+          if (val?.includes(proxyHost)) {
+            element.setAttribute(attr, val.replaceAll(proxyHost, publicHost))
+          }
+        }
+      },
+    })
+
+    // Rewrite proxy hostname inside inline <script> and <style> blocks
+    for (const tag of ['script', 'style'] as const) {
+      rewriter.on(tag, {
+        text(chunk) {
+          if (chunk.text.includes(proxyHost)) {
+            chunk.replace(chunk.text.replaceAll(proxyHost, publicHost), { html: false })
+          }
+        },
+      })
+    }
+
     // Inject our CSS + tracking into <head>
     rewriter.on('head', {
       element(element) {
