@@ -42,7 +42,7 @@ export interface VisitorData {
 
 // Worker endpoint (configure via env)
 const WORKER_URL =
-  import.meta.env.PUBLIC_PERSONA_WORKER_URL || 'https://southland-persona-worker.workers.dev'
+  import.meta.env.PUBLIC_PERSONA_WORKER_URL || 'https://southland-persona-worker.point-dog-digital.workers.dev'
 
 /**
  * Get the visitor's anonymous ID from the pixel cookie
