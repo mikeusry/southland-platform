@@ -217,7 +217,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
             '<style>.wrapper--bottom{flex:none!important}</style>' +
             // point.dog pixel — fires on Shopify-proxied pages (Astro pages load it via BaseLayout)
             '<script>window.pdPixelConfig={brandId:"southland",endpoint:"https://pixel.southlandorganics.com/collect"};</script>' +
-            '<script src="https://cdn.point.dog/pixel/pd-pixel.min.js" async></script>',
+            '<script src="https://cdn.point.dog/pixel/pd-pixel.min.js" async></script>' +
+            // Cart shipping warning — self-gates on /cart, uses CF geolocation for ZIP hint
+            '<script data-cf-zip="' + ((runtime?.cf as any)?.postalCode || '') + '" src="/_partials/cart-warning.js" defer></script>',
           { html: true },
         )
       },
