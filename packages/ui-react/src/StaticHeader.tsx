@@ -181,9 +181,9 @@ export function StaticHeader({ logoUrl, logoAlt, navigation }: StaticHeaderProps
 
           {/* Right side icons */}
           <div className="flex items-center space-x-2">
-            {/* Account */}
+            {/* Account — redirects to Shopify-hosted customer account */}
             <a
-              href="/account/login"
+              href="https://shop.southlandorganics.com/account"
               className="p-2 text-shopify-text transition-colors hover:text-shopify-accent"
               aria-label="Account"
             >

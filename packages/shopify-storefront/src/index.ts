@@ -7,6 +7,8 @@ export {
   getAllCollections,
   getAllProducts,
   getGallonProducts,
+  getProductByHandle,
+  searchProducts,
 } from './queries/products'
 
 // Cart operations
@@ -22,6 +24,7 @@ export {
 export type {
   Money,
   Product,
+  ProductDetail,
   ProductImage,
   ProductVariant,
   VariantOption,

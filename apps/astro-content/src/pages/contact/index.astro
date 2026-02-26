@@ -280,6 +280,9 @@ const contactSchema = {
                   placeholder="Tell us how we can help..."></textarea>
               </div>
 
+              <!-- Honeypot — hidden from humans, bots fill it -->
+              <input name="website" type="text" style="display:none" tabindex="-1" autocomplete="off" />
+
               <button
                 type="submit"
                 class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-southland-green px-8 py-4 text-base font-bold text-white shadow-sm transition-all hover:bg-[#3a7534] hover:shadow-md active:scale-[0.98] sm:w-auto"
@@ -531,6 +534,32 @@ const contactSchema = {
 </BaseLayout>
 
 <script>
+  // Capture attribution params on page load → sessionStorage
+  ;(function captureAttribution() {
+    const params = new URLSearchParams(window.location.search)
+    const keys = ['gclid', 'utm_source', 'utm_medium', 'utm_campaign']
+    keys.forEach((k) => {
+      const v = params.get(k)
+      if (v) sessionStorage.setItem(`sl_${k}`, v)
+    })
+    // Landing page — only store on first page load (don't overwrite on nav)
+    if (!sessionStorage.getItem('sl_landing_page')) {
+      sessionStorage.setItem('sl_landing_page', window.location.pathname)
+    }
+  })()
+
+  function getAttribution(): Record<string, string | null> {
+    return {
+      gclid: sessionStorage.getItem('sl_gclid'),
+      utm_source: sessionStorage.getItem('sl_utm_source'),
+      utm_medium: sessionStorage.getItem('sl_utm_medium'),
+      utm_campaign: sessionStorage.getItem('sl_utm_campaign'),
+      landing_page: sessionStorage.getItem('sl_landing_page'),
+    }
+  }
+
+  const NEXUS_API = 'https://nexus.southlandorganics.com/api/leads'
+
   const form = document.getElementById('contact-form') as HTMLFormElement | null
   const successEl = document.getElementById('form-success')
   const errorEl = document.getElementById('form-error')
@@ -549,6 +578,7 @@ const contactSchema = {
       }
 
       try {
+        // 1. Send branded email via internal API (primary)
         const res = await fetch('/api/form/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -556,6 +586,28 @@ const contactSchema = {
         })
 
         if (!res.ok) throw new Error('Send failed')
+
+        // 2. Dual-write to Nexus for lead tracking (non-blocking)
+        const attr = getAttribution()
+        fetch(NEXUS_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            source: 'website_form',
+            form_type: 'contact',
+            first_name: data.firstName || null,
+            last_name: data.lastName || null,
+            email: data.email || null,
+            phone: data.phone || null,
+            message: data.message || null,
+            gclid: attr.gclid,
+            utm_source: attr.utm_source,
+            utm_medium: attr.utm_medium,
+            utm_campaign: attr.utm_campaign,
+            landing_page: attr.landing_page,
+            website: data.website || '',
+          }),
+        }).catch(() => {}) // Fire-and-forget — email is the primary path
 
         // Show success state
         form.classList.add('hidden')

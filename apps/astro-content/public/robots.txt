@@ -1,12 +1,13 @@
-# Robots.txt for Ag & Culture Podcast
-# https://southlandorganics.com/podcast/
+# Robots.txt for Southland Organics
+# https://southlandorganics.com
 
 User-agent: *
 Allow: /
 
 # Sitemaps
-Sitemap: https://southlandorganics.com/podcast/sitemap.xml
+Sitemap: https://southlandorganics.com/sitemap-index.xml
 
-# Disallow admin/staging areas (if any)
+# Disallow non-content paths
 Disallow: /api/
 Disallow: /_astro/
+Disallow: /_partials/

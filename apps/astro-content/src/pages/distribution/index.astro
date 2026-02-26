@@ -430,6 +430,9 @@ const distributionSchema = {
               placeholder="How many locations, current product mix, anything else we should know..."></textarea>
           </div>
 
+          <!-- Honeypot — hidden from humans, bots fill it -->
+          <input name="website" type="text" style="display:none" tabindex="-1" autocomplete="off" />
+
           <button
             type="submit"
             class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-southland-green px-8 py-4 text-base font-bold text-white shadow-sm transition-all hover:bg-[#3a7534] hover:shadow-md active:scale-[0.98]"
@@ -491,6 +494,31 @@ const distributionSchema = {
 </BaseLayout>
 
 <script>
+  // --- Attribution capture (runs on page load) ---
+  ;(function captureAttribution() {
+    const params = new URLSearchParams(window.location.search)
+    const keys = ['gclid', 'utm_source', 'utm_medium', 'utm_campaign'] as const
+    keys.forEach((k) => {
+      const v = params.get(k)
+      if (v) sessionStorage.setItem('sl_' + k, v)
+    })
+    if (!sessionStorage.getItem('sl_landing_page')) {
+      sessionStorage.setItem('sl_landing_page', window.location.pathname)
+    }
+  })()
+
+  function getAttribution() {
+    return {
+      gclid: sessionStorage.getItem('sl_gclid') || null,
+      utm_source: sessionStorage.getItem('sl_utm_source') || null,
+      utm_medium: sessionStorage.getItem('sl_utm_medium') || null,
+      utm_campaign: sessionStorage.getItem('sl_utm_campaign') || null,
+      landing_page: sessionStorage.getItem('sl_landing_page') || null,
+    }
+  }
+
+  const NEXUS_API = 'https://nexus.southlandorganics.com/api/leads'
+
   const form = document.getElementById('distribution-form') as HTMLFormElement | null
   const successEl = document.getElementById('dist-form-success')
   const errorEl = document.getElementById('dist-form-error')
@@ -500,7 +528,8 @@ const distributionSchema = {
       e.preventDefault()
 
       const formData = new FormData(form)
-      const data = Object.fromEntries(formData.entries())
+      const data: Record<string, string> = {}
+      formData.forEach((v, k) => { data[k] = v as string })
 
       const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement
       if (submitBtn) {
@@ -516,6 +545,30 @@ const distributionSchema = {
         })
 
         if (!res.ok) throw new Error('Send failed')
+
+        // Fire-and-forget: dual-write to Nexus for lead tracking
+        const attr = getAttribution()
+        fetch(NEXUS_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            source: 'website_form',
+            form_type: 'distribution',
+            first_name: data.firstName || null,
+            last_name: data.lastName || null,
+            email: data.email || null,
+            phone: data.phone || null,
+            company: data.company || null,
+            state: data.location ? data.location.split(',').pop()?.trim() || null : null,
+            message: data.message || null,
+            gclid: attr.gclid,
+            utm_source: attr.utm_source,
+            utm_medium: attr.utm_medium,
+            utm_campaign: attr.utm_campaign,
+            landing_page: attr.landing_page,
+            website: data.website || '',
+          }),
+        }).catch(() => {}) // Fire-and-forget — don't affect user experience
 
         // Show success state
         form.classList.add('hidden')

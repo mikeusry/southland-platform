@@ -70,6 +70,8 @@ export function clearCartId(): void {
 
 function dispatchCartEvent(cart: Cart | null): void {
   if (typeof window === 'undefined') return
+  // Persist count for Header badge (read on next page load)
+  try { localStorage.setItem('southland_cart_count', String(cart?.totalQuantity ?? 0)) } catch {}
   window.dispatchEvent(new CustomEvent('cart-changed', { detail: cart }))
 }
 

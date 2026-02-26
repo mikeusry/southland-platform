@@ -30,6 +30,7 @@ export interface ProductVariant {
   id: string
   title: string
   price: Money
+  compareAtPrice: Money | null
   availableForSale: boolean
   image: ProductImage | null
   selectedOptions: VariantOption[]
@@ -46,6 +47,20 @@ export interface Product {
   }
   images: ProductImage[]
   variants: ProductVariant[]
+}
+
+/**
+ * Extended product type for Product Detail Pages.
+ * Includes HTML description, all images, SEO metadata, and compareAtPrice.
+ */
+export interface ProductDetail extends Product {
+  descriptionHtml: string
+  vendor: string
+  productType: string
+  seo: {
+    title: string | null
+    description: string | null
+  }
 }
 
 export interface Collection {

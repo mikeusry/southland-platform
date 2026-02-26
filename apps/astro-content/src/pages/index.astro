@@ -1,62 +1,78 @@
 ---
 /**
- * Homepage - Decision Engine + Reality Tunnels
+ * Homepage — Full e-commerce homepage with persona-aware Reality Tunnels.
  *
- * CDP Week 1-8: 3-way branch to route visitors into persona-specific reality tunnels
- *
- * Visitor Flow:
- * 1. New visitor arrives → Decision Engine asks "What best describes you?"
- * 2. Selection stored in localStorage + cookie + event fired
- * 3. Returning visitors with known persona → Personalized Reality Tunnel
- *
- * Reality Tunnels:
- * - Betty (backyard): BettyHero, BettyProducts, BettyTestimonials
- * - Bill (commercial): BillHero, BillProducts, BillTestimonials
- * - Taylor (lawn): TaylorHero, TaylorProducts, TaylorTestimonials
- *
- * A/B Testing:
- * - Tunnel variant: Full personalized experience
- * - Generic variant: Control group (Decision Engine)
+ * Architecture:
+ * - SSR: Fetches products from Shopify Storefront API on every request
+ * - Default: Strong e-commerce homepage for new/unknown visitors
+ * - Persona tunnels: Filtered product grids for Betty/Bill/Taylor
+ * - Decision Engine: Below fold for persona selection
  */
 import BaseLayout from '../layouts/BaseLayout.astro'
 import DecisionEngine from '../components/cdp/DecisionEngine.astro'
 import RealityTunnel from '../components/tunnels/RealityTunnel.astro'
-import BettyHero from '../components/tunnels/betty/BettyHero.astro'
-import BettyProducts from '../components/tunnels/betty/BettyProducts.astro'
-import BettyTestimonials from '../components/tunnels/betty/BettyTestimonials.astro'
-import BillHero from '../components/tunnels/bill/BillHero.astro'
-import BillProducts from '../components/tunnels/bill/BillProducts.astro'
-import BillTestimonials from '../components/tunnels/bill/BillTestimonials.astro'
-import TaylorHero from '../components/tunnels/taylor/TaylorHero.astro'
-import TaylorProducts from '../components/tunnels/taylor/TaylorProducts.astro'
-import TaylorTestimonials from '../components/tunnels/taylor/TaylorTestimonials.astro'
-import ABTest from '../components/cdp/ABTest.astro'
+import CollectionProductCard from '../components/shop/CollectionProductCard.astro'
+import {
+  createClient,
+  getAllProducts,
+  getAllCollections,
+} from '@southland/shopify-storefront'
+import type { Product, CollectionSummary } from '@southland/shopify-storefront'
 
 const title = 'Southland Organics | Organic Solutions for Poultry & Lawn'
 const description =
   'Organic probiotics and natural solutions for backyard flocks, commercial poultry operations, and lawn care. OMRI Listed, family-owned, made in Georgia.'
 
-// Try to read persona from cookie for SSR
-let serverPersona: string | null = null
-let serverStage: string = 'aware'
+// ── Persona from cookie (SSR) ───────────────────────────────────────────────
+// Persona cookie is read by RealityTunnel component server-side
 
-const personaCookie = Astro.cookies.get('sl_persona')
-if (personaCookie) {
-  serverPersona = personaCookie.value
+// ── Fetch Shopify data ──────────────────────────────────────────────────────
+const client = createClient({
+  storeDomain: import.meta.env.PUBLIC_SHOPIFY_STORE_DOMAIN,
+  publicAccessToken: import.meta.env.PUBLIC_SHOPIFY_STOREFRONT_TOKEN,
+})
+
+let allProducts: Product[] = []
+let collections: CollectionSummary[] = []
+
+try {
+  ;[allProducts, collections] = await Promise.all([
+    getAllProducts(client),
+    getAllCollections(client),
+  ])
+} catch (err) {
+  console.error('[homepage] Failed to fetch Shopify data:', err)
 }
 
-const stageCookie = Astro.cookies.get('sl_stage')
-if (stageCookie) {
-  serverStage = stageCookie.value
-}
+// ── Filter products by persona/category ─────────────────────────────────────
+const tagIncludes = (product: Product, terms: string[]) =>
+  terms.some(term =>
+    product.tags.some(t => t.toLowerCase().includes(term)) ||
+    product.title.toLowerCase().includes(term)
+  )
 
-// Schema for homepage
+const poultryProducts = allProducts.filter(p =>
+  tagIncludes(p, ['poultry', 'chicken', 'hen', 'bird', 'flock', 'big ole bird', 'hen helper'])
+)
+const lawnProducts = allProducts.filter(p =>
+  tagIncludes(p, ['lawn', 'turf', 'grass', 'soil', 'garden'])
+)
+
+// Featured: first 8 products (Shopify returns them in storefront order)
+const featuredProducts = allProducts.slice(0, 8)
+
+// Category collections to display
+const skipHandles = new Set(['frontpage', 'all', 'flowers', 'lavender-and-eucalyptus-bundles'])
+const categoryCollections = collections.filter(c => !skipHandles.has(c.handle)).slice(0, 6)
+
+// ── SEO Schema ──────────────────────────────────────────────────────────────
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
 const schema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'Southland Organics',
-  description: description,
-  url: 'https://southlandorganics.com',
+  description,
+  url: siteUrl,
   logo: 'https://res.cloudinary.com/southland-organics/image/upload/v1/Southland%20Website/Southland%20Branding/logos/southland-logo-primary.png',
   contactPoint: {
     '@type': 'ContactPoint',
@@ -71,258 +87,464 @@ const schema = {
     'https://www.youtube.com/southlandorganics',
   ],
 }
+
 ---
 
 <BaseLayout title={title} description={description} schema={schema}>
-  <!-- Reality Tunnel Container - Shows personalized content based on persona -->
   <RealityTunnel enableABTest={true}>
-    <!-- Betty (Backyard) Tunnel -->
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- BACKYARD (Betty) TUNNEL                                               -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
     <Fragment slot="backyard">
-      <BettyHero stage={serverStage as any} />
-      <BettyProducts />
-      <BettyTestimonials limit={3} />
-
-      <!-- Trust Section (Betty-styled) -->
-      <section class="betty-trust">
-        <div class="betty-trust__container">
-          <div class="betty-trust__grid">
-            <div class="betty-trust__item">
-              <div class="betty-trust__icon">🐔</div>
-              <div class="betty-trust__text">
-                <span class="betty-trust__value">10,000+</span>
-                <span class="betty-trust__label">Happy Flocks</span>
-              </div>
-            </div>
-            <div class="betty-trust__item">
-              <div class="betty-trust__icon">⭐</div>
-              <div class="betty-trust__text">
-                <span class="betty-trust__value">4.8/5</span>
-                <span class="betty-trust__label">Star Rating</span>
-              </div>
-            </div>
-            <div class="betty-trust__item">
-              <div class="betty-trust__icon">🌿</div>
-              <div class="betty-trust__text">
-                <span class="betty-trust__value">OMRI</span>
-                <span class="betty-trust__label">Listed Organic</span>
-              </div>
-            </div>
-            <div class="betty-trust__item">
-              <div class="betty-trust__icon">🇺🇸</div>
-              <div class="betty-trust__text">
-                <span class="betty-trust__value">USA</span>
-                <span class="betty-trust__label">Made in Georgia</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- CTA Banner -->
-      <section class="betty-cta-banner">
-        <div class="betty-cta-banner__container">
-          <h2 class="betty-cta-banner__heading">Ready to Give Your Flock the Best?</h2>
-          <p class="betty-cta-banner__text">
-            Join thousands of backyard chicken keepers who trust Southland Organics.
-          </p>
-          <div class="betty-cta-banner__buttons">
-            <a
-              href="/shop/poultry/backyard/"
-              class="betty-cta-banner__btn betty-cta-banner__btn--primary"
-            >
-              Shop Backyard Products
-            </a>
-            <a
-              href="/quiz/backyard/"
-              class="betty-cta-banner__btn betty-cta-banner__btn--secondary"
-            >
-              Take the Flock Quiz
-            </a>
-          </div>
-        </div>
-      </section>
-    </Fragment>
-
-    <!-- Bill (Commercial) Tunnel -->
-    <Fragment slot="commercial">
-      <BillHero stage={serverStage as any} />
-      <BillProducts />
-      <BillTestimonials limit={3} />
-
-      <!-- Trust Section (Bill-styled) -->
-      <section class="bill-trust">
-        <div class="bill-trust__container">
-          <div class="bill-trust__grid">
-            <div class="bill-trust__item">
-              <div class="bill-trust__value">500+</div>
-              <div class="bill-trust__label">Growers Nationwide</div>
-            </div>
-            <div class="bill-trust__item">
-              <div class="bill-trust__value">1-2%</div>
-              <div class="bill-trust__label">Mortality Reduction</div>
-            </div>
-            <div class="bill-trust__item">
-              <div class="bill-trust__value">OMRI</div>
-              <div class="bill-trust__label">Listed Organic</div>
-            </div>
-            <div class="bill-trust__item">
-              <div class="bill-trust__value">24/7</div>
-              <div class="bill-trust__label">Technical Support</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- CTA Banner -->
-      <section class="bill-cta-banner">
-        <div class="bill-cta-banner__container">
-          <h2 class="bill-cta-banner__heading">Ready to Improve Your Flock Performance?</h2>
-          <p class="bill-cta-banner__text">
-            Join 500+ commercial growers seeing measurable ROI with Southland Organics.
-          </p>
-          <div class="bill-cta-banner__buttons">
-            <a href="/contact/quote/" class="bill-cta-banner__btn bill-cta-banner__btn--primary">
-              Request a Quote
-            </a>
-            <a href="/trial/" class="bill-cta-banner__btn bill-cta-banner__btn--secondary">
-              Start a Trial
-            </a>
-          </div>
-        </div>
-      </section>
-    </Fragment>
-
-    <!-- Taylor (Lawn) Tunnel -->
-    <Fragment slot="lawn">
-      <TaylorHero stage={serverStage as any} />
-      <TaylorProducts />
-      <TaylorTestimonials limit={3} />
-
-      <!-- Trust Section (Taylor-styled) -->
-      <section class="taylor-trust">
-        <div class="taylor-trust__container">
-          <div class="taylor-trust__grid">
-            <div class="taylor-trust__item">
-              <div class="taylor-trust__value">1,000+</div>
-              <div class="taylor-trust__label">Lawn Pros</div>
-            </div>
-            <div class="taylor-trust__item">
-              <div class="taylor-trust__value">50</div>
-              <div class="taylor-trust__label">States Served</div>
-            </div>
-            <div class="taylor-trust__item">
-              <div class="taylor-trust__value">OMRI</div>
-              <div class="taylor-trust__label">Listed Organic</div>
-            </div>
-            <div class="taylor-trust__item">
-              <div class="taylor-trust__value">15+</div>
-              <div class="taylor-trust__label">Years Experience</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- CTA Banner -->
-      <section class="taylor-cta-banner">
-        <div class="taylor-cta-banner__container">
-          <h2 class="taylor-cta-banner__heading">Ready to Go Organic?</h2>
-          <p class="taylor-cta-banner__text">
-            Join thousands of lawn care professionals getting better results with healthier soil.
-          </p>
-          <div class="taylor-cta-banner__buttons">
-            <a href="/shop/lawn/" class="taylor-cta-banner__btn taylor-cta-banner__btn--primary">
-              Shop Lawn Products
-            </a>
-            <a
-              href="/contact/sample/"
-              class="taylor-cta-banner__btn taylor-cta-banner__btn--secondary"
-            >
-              Request Free Samples
-            </a>
-          </div>
-        </div>
-      </section>
-    </Fragment>
-
-    <!-- Default: Decision Engine for new/unknown visitors -->
-    <Fragment slot="default">
-      <!-- Hero Section with Decision Engine -->
-      <section class="flex min-h-[80vh] items-center bg-gradient-to-b from-white to-gray-50">
-        <div class="w-full">
-          <!-- Logo & Tagline -->
-          <div class="py-8 text-center md:py-12">
-            <img
-              src="https://res.cloudinary.com/southland-organics/image/upload/c_scale,w_300/v1/Southland%20Website/Southland%20Branding/logos/southland-logo-primary.png"
-              alt="Southland Organics"
-              class="mx-auto mb-4 h-20 md:h-24"
-              width="300"
-              height="96"
-            />
-            <p class="mx-auto max-w-2xl px-4 text-lg text-gray-600 md:text-xl">
-              Organic solutions for healthier birds, better soil, and a cleaner planet.
+      <!-- Betty Hero -->
+      <section class="bg-gradient-to-br from-amber-50 via-amber-100 to-yellow-100 px-5 py-16 md:py-24">
+        <div class="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-2">
+          <div>
+            <span class="mb-4 inline-block rounded-full bg-amber-800 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-white">
+              For Backyard Flocks
+            </span>
+            <h1 class="font-heading text-4xl leading-tight md:text-5xl" style="color: var(--color-title);">
+              Happy, Healthy Hens Start Here
+            </h1>
+            <p class="mt-4 max-w-lg text-lg leading-relaxed text-amber-900/80">
+              Whether you have 5 hens or 50, our organic probiotics make it easy to raise thriving birds naturally.
             </p>
+            <div class="mt-8 flex flex-wrap gap-3">
+              <a href="/products/" class="inline-flex items-center rounded-lg bg-brand-green-dark px-6 py-3.5 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:bg-green-800">
+                Shop Backyard Products
+              </a>
+              <a href="/podcast/" class="inline-flex items-center rounded-lg border-2 border-brand-green-dark px-6 py-3.5 text-base font-semibold transition hover:bg-brand-green-dark hover:text-white" style="color: var(--color-title);">
+                Listen to Podcast
+              </a>
+            </div>
+            <div class="mt-6 flex flex-wrap gap-5 text-sm font-medium text-amber-900/70">
+              <span class="flex items-center gap-1.5">
+                <svg class="h-4 w-4 text-amber-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                4.8 Star Rating
+              </span>
+              <span class="flex items-center gap-1.5">
+                <svg class="h-4 w-4 text-green-600" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                OMRI Listed Organic
+              </span>
+              <span class="flex items-center gap-1.5">
+                <svg class="h-4 w-4 text-green-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                Family Owned
+              </span>
+            </div>
           </div>
-
-          <!-- Decision Engine -->
-          <DecisionEngine />
+          <!-- Featured product images from Betty's products -->
+          <div class="hidden md:grid md:grid-cols-2 md:gap-4">
+            {poultryProducts.slice(0, 4).map((product) => (
+              <a href={`/products/${product.handle}/`} class="group overflow-hidden rounded-xl bg-white shadow-sm transition hover:shadow-md">
+                {product.images[0] ? (
+                  <img
+                    src={product.images[0].url}
+                    alt={product.images[0].altText || product.title}
+                    width={300}
+                    height={300}
+                    loading="eager"
+                    class="aspect-square w-full object-contain p-4 transition group-hover:scale-105"
+                  />
+                ) : (
+                  <div class="flex aspect-square items-center justify-center bg-amber-50 text-amber-300">
+                    <svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" stroke-width="1.5"/></svg>
+                  </div>
+                )}
+              </a>
+            ))}
+          </div>
         </div>
       </section>
+
+      <!-- Betty Products (live from Storefront API) -->
+      <section class="bg-white px-5 py-16">
+        <div class="mx-auto max-w-6xl">
+          <div class="mb-10 text-center">
+            <h2 class="font-heading text-3xl" style="color: var(--color-title);">Perfect for Your Backyard Flock</h2>
+            <p class="mt-3 text-gray-500">Trusted by thousands of backyard chicken keepers. OMRI Listed organic.</p>
+          </div>
+          <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
+            {(poultryProducts.length > 0 ? poultryProducts : featuredProducts).slice(0, 8).map((product) => (
+              <CollectionProductCard product={product} persona="backyard" />
+            ))}
+          </div>
+          <div class="mt-10 text-center">
+            <a href="/products/" class="inline-flex items-center gap-2 rounded-lg bg-brand-green-dark px-8 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-green-800">
+              View All Products
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Betty Trust -->
+      <section class="border-t border-gray-100 bg-white px-5 py-12">
+        <div class="mx-auto grid max-w-4xl grid-cols-2 gap-8 text-center md:grid-cols-4">
+          <div><div class="mb-1 text-3xl font-bold" style="color: var(--color-title);">10,000+</div><div class="text-sm text-gray-600">Happy Flocks</div></div>
+          <div><div class="mb-1 text-3xl font-bold" style="color: var(--color-title);">4.8/5</div><div class="text-sm text-gray-600">Star Rating</div></div>
+          <div><div class="mb-1 text-3xl font-bold" style="color: var(--color-title);">OMRI</div><div class="text-sm text-gray-600">Listed Organic</div></div>
+          <div><div class="mb-1 text-3xl font-bold" style="color: var(--color-title);">USA</div><div class="text-sm text-gray-600">Made in Georgia</div></div>
+        </div>
+      </section>
+
+      <!-- Betty CTA -->
+      <section class="bg-gradient-to-br from-brand-green-light to-brand-green-dark px-5 py-16 text-center">
+        <div class="mx-auto max-w-2xl">
+          <h2 class="font-heading text-3xl text-white md:text-4xl">Ready to Give Your Flock the Best?</h2>
+          <p class="mt-4 text-lg text-white/90">Join thousands of backyard chicken keepers who trust Southland Organics.</p>
+          <div class="mt-8 flex flex-wrap justify-center gap-3">
+            <a href="/products/" class="rounded-lg bg-white px-7 py-3.5 font-semibold transition hover:-translate-y-0.5" style="color: var(--color-title);">Shop Products</a>
+            <a href="/contact/" class="rounded-lg border-2 border-white px-7 py-3.5 font-semibold text-white transition hover:bg-white/10">Contact Us</a>
+          </div>
+        </div>
+      </section>
+    </Fragment>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- COMMERCIAL (Bill) TUNNEL                                              -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <Fragment slot="commercial">
+      <!-- Bill Hero -->
+      <section class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-5 py-16 md:py-24">
+        <div class="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-2">
+          <div>
+            <span class="mb-4 inline-block rounded-full bg-green-600 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-white">
+              Commercial Poultry
+            </span>
+            <h1 class="font-heading text-4xl leading-tight text-white md:text-5xl">
+              Measurable ROI for Your Operation
+            </h1>
+            <p class="mt-4 max-w-lg text-lg leading-relaxed text-slate-300">
+              500+ commercial growers trust Southland Organics to reduce mortality, improve performance, and boost profitability.
+            </p>
+            <div class="mt-8 flex flex-wrap gap-3">
+              <a href="/contact/" class="inline-flex items-center rounded-lg bg-brand-green-light px-6 py-3.5 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:bg-green-600">
+                Request a Quote
+              </a>
+              <a href="/products/" class="inline-flex items-center rounded-lg border-2 border-white/40 px-6 py-3.5 text-base font-semibold text-white transition hover:border-white hover:bg-white/10">
+                Browse Products
+              </a>
+            </div>
+          </div>
+          <div class="hidden md:grid md:grid-cols-2 md:gap-4">
+            {poultryProducts.slice(0, 4).map((product) => (
+              <a href={`/products/${product.handle}/`} class="group overflow-hidden rounded-xl bg-slate-800 shadow-sm transition hover:shadow-md">
+                {product.images[0] ? (
+                  <img src={product.images[0].url} alt={product.images[0].altText || product.title} width={300} height={300} loading="eager" class="aspect-square w-full object-contain p-4 transition group-hover:scale-105" />
+                ) : (
+                  <div class="flex aspect-square items-center justify-center bg-slate-700 text-slate-500">
+                    <svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" stroke-width="1.5"/></svg>
+                  </div>
+                )}
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <!-- Bill Products -->
+      <section class="bg-white px-5 py-16">
+        <div class="mx-auto max-w-6xl">
+          <div class="mb-10 text-center">
+            <h2 class="font-heading text-3xl" style="color: var(--color-title);">Proven Solutions for Commercial Operations</h2>
+            <p class="mt-3 text-gray-500">Bulk sizes and programs designed for maximum ROI.</p>
+          </div>
+          <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
+            {(poultryProducts.length > 0 ? poultryProducts : featuredProducts).slice(0, 8).map((product) => (
+              <CollectionProductCard product={product} persona="commercial" />
+            ))}
+          </div>
+          <div class="mt-10 text-center">
+            <a href="/products/" class="inline-flex items-center gap-2 rounded-lg bg-brand-green-dark px-8 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-green-800">
+              View All Products
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bill Trust -->
+      <section class="bg-slate-900 px-5 py-12">
+        <div class="mx-auto grid max-w-4xl grid-cols-2 gap-8 text-center md:grid-cols-4">
+          <div><div class="mb-1 text-3xl font-bold text-green-400">500+</div><div class="text-sm text-slate-400 uppercase tracking-wide">Growers Nationwide</div></div>
+          <div><div class="mb-1 text-3xl font-bold text-green-400">1-2%</div><div class="text-sm text-slate-400 uppercase tracking-wide">Mortality Reduction</div></div>
+          <div><div class="mb-1 text-3xl font-bold text-green-400">OMRI</div><div class="text-sm text-slate-400 uppercase tracking-wide">Listed Organic</div></div>
+          <div><div class="mb-1 text-3xl font-bold text-green-400">24/7</div><div class="text-sm text-slate-400 uppercase tracking-wide">Technical Support</div></div>
+        </div>
+      </section>
+
+      <!-- Bill CTA -->
+      <section class="bg-gradient-to-br from-slate-800 to-slate-900 px-5 py-16 text-center">
+        <div class="mx-auto max-w-2xl">
+          <h2 class="font-heading text-3xl text-white md:text-4xl">Ready to Improve Your Flock Performance?</h2>
+          <p class="mt-4 text-lg text-slate-300">Join 500+ commercial growers seeing measurable ROI with Southland Organics.</p>
+          <div class="mt-8 flex flex-wrap justify-center gap-3">
+            <a href="/contact/" class="rounded-lg bg-brand-green-light px-7 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-green-600">Request a Quote</a>
+            <a href="/products/" class="rounded-lg border-2 border-white/40 px-7 py-3.5 font-semibold text-white transition hover:border-white hover:bg-white/10">Browse Products</a>
+          </div>
+        </div>
+      </section>
+    </Fragment>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- LAWN (Taylor) TUNNEL                                                  -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <Fragment slot="lawn">
+      <!-- Taylor Hero -->
+      <section class="bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 px-5 py-16 md:py-24">
+        <div class="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-2">
+          <div>
+            <span class="mb-4 inline-block rounded-full bg-emerald-500 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-white">
+              Lawn & Turf
+            </span>
+            <h1 class="font-heading text-4xl leading-tight text-white md:text-5xl">
+              Healthier Soil, Better Results
+            </h1>
+            <p class="mt-4 max-w-lg text-lg leading-relaxed text-green-200">
+              Join thousands of lawn care professionals getting better results with organic soil biology.
+            </p>
+            <div class="mt-8 flex flex-wrap gap-3">
+              <a href="/products/" class="inline-flex items-center rounded-lg bg-white px-6 py-3.5 text-base font-semibold text-green-900 transition hover:-translate-y-0.5">
+                Shop Lawn Products
+              </a>
+              <a href="/contact/" class="inline-flex items-center rounded-lg border-2 border-white/40 px-6 py-3.5 text-base font-semibold text-white transition hover:border-white hover:bg-white/10">
+                Request Samples
+              </a>
+            </div>
+          </div>
+          <div class="hidden md:grid md:grid-cols-2 md:gap-4">
+            {(lawnProducts.length > 0 ? lawnProducts : featuredProducts).slice(0, 4).map((product) => (
+              <a href={`/products/${product.handle}/`} class="group overflow-hidden rounded-xl bg-green-800/50 shadow-sm transition hover:shadow-md">
+                {product.images[0] ? (
+                  <img src={product.images[0].url} alt={product.images[0].altText || product.title} width={300} height={300} loading="eager" class="aspect-square w-full object-contain p-4 transition group-hover:scale-105" />
+                ) : (
+                  <div class="flex aspect-square items-center justify-center bg-green-800 text-green-600">
+                    <svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" stroke-width="1.5"/></svg>
+                  </div>
+                )}
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <!-- Taylor Products -->
+      <section class="bg-white px-5 py-16">
+        <div class="mx-auto max-w-6xl">
+          <div class="mb-10 text-center">
+            <h2 class="font-heading text-3xl" style="color: var(--color-title);">Organic Lawn & Turf Solutions</h2>
+            <p class="mt-3 text-gray-500">Professional-grade organic products for healthier soil and greener turf.</p>
+          </div>
+          <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
+            {(lawnProducts.length > 0 ? lawnProducts : featuredProducts).slice(0, 8).map((product) => (
+              <CollectionProductCard product={product} persona="lawn" />
+            ))}
+          </div>
+          <div class="mt-10 text-center">
+            <a href="/products/" class="inline-flex items-center gap-2 rounded-lg bg-brand-green-dark px-8 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-green-800">
+              View All Products
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Taylor Trust -->
+      <section class="bg-green-900 px-5 py-12">
+        <div class="mx-auto grid max-w-4xl grid-cols-2 gap-8 text-center md:grid-cols-4">
+          <div><div class="mb-1 text-3xl font-bold text-green-300">1,000+</div><div class="text-sm text-green-400 uppercase tracking-wide">Lawn Pros</div></div>
+          <div><div class="mb-1 text-3xl font-bold text-green-300">50</div><div class="text-sm text-green-400 uppercase tracking-wide">States Served</div></div>
+          <div><div class="mb-1 text-3xl font-bold text-green-300">OMRI</div><div class="text-sm text-green-400 uppercase tracking-wide">Listed Organic</div></div>
+          <div><div class="mb-1 text-3xl font-bold text-green-300">15+</div><div class="text-sm text-green-400 uppercase tracking-wide">Years Experience</div></div>
+        </div>
+      </section>
+
+      <!-- Taylor CTA -->
+      <section class="bg-gradient-to-br from-green-800 to-green-900 px-5 py-16 text-center">
+        <div class="mx-auto max-w-2xl">
+          <h2 class="font-heading text-3xl text-white md:text-4xl">Ready to Go Organic?</h2>
+          <p class="mt-4 text-lg text-green-200">Join thousands of lawn care professionals getting better results with healthier soil.</p>
+          <div class="mt-8 flex flex-wrap justify-center gap-3">
+            <a href="/products/" class="rounded-lg bg-white px-7 py-3.5 font-semibold text-green-900 transition hover:-translate-y-0.5">Shop Lawn Products</a>
+            <a href="/contact/" class="rounded-lg border-2 border-white/40 px-7 py-3.5 font-semibold text-white transition hover:border-white hover:bg-white/10">Request Samples</a>
+          </div>
+        </div>
+      </section>
+    </Fragment>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- DEFAULT: Full e-commerce homepage for new/unknown visitors             -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <Fragment slot="default">
+      <!-- Hero Section -->
+      <section class="bg-gradient-to-br from-brand-green-dark via-green-800 to-green-900 px-5 py-20 md:py-28">
+        <div class="mx-auto max-w-6xl text-center">
+          <img
+            src="https://res.cloudinary.com/southland-organics/image/upload/c_scale,w_280/v1/Southland%20Website/Southland%20Branding/logos/southland-logo-primary.png"
+            alt="Southland Organics"
+            class="mx-auto mb-6 h-16 brightness-0 invert md:h-20"
+            width="280"
+            height="80"
+          />
+          <h1 class="font-heading text-4xl leading-tight text-white md:text-5xl lg:text-6xl">
+            Organic Solutions for <br class="hidden sm:block" />Healthier Birds &amp; Better Soil
+          </h1>
+          <p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-green-200 md:text-xl">
+            OMRI Listed probiotics and natural products trusted by thousands of farmers, growers, and homeowners. Family-owned, made in Georgia.
+          </p>
+          <div class="mt-10 flex flex-wrap justify-center gap-4">
+            <a href="/products/" class="inline-flex items-center rounded-lg bg-white px-8 py-4 text-base font-semibold transition hover:-translate-y-0.5 hover:shadow-lg" style="color: var(--color-title);">
+              Shop All Products
+            </a>
+            <a href="/store-locator/" class="inline-flex items-center rounded-lg border-2 border-white/50 px-8 py-4 text-base font-semibold text-white transition hover:border-white hover:bg-white/10">
+              Find a Dealer
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Featured Products -->
+      {featuredProducts.length > 0 && (
+        <section class="bg-white px-5 py-16">
+          <div class="mx-auto max-w-6xl">
+            <div class="mb-10 text-center">
+              <h2 class="font-heading text-3xl" style="color: var(--color-title);">Featured Products</h2>
+              <p class="mt-3 text-gray-500">
+                {allProducts.length} scientifically-proven organic products for poultry, lawn, and more.
+              </p>
+            </div>
+            <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
+              {featuredProducts.map((product) => (
+                <CollectionProductCard product={product} />
+              ))}
+            </div>
+            <div class="mt-10 text-center">
+              <a href="/products/" class="inline-flex items-center gap-2 rounded-lg bg-brand-green-dark px-8 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-green-800">
+                View All {allProducts.length} Products
+              </a>
+            </div>
+          </div>
+        </section>
+      )}
+
+      <!-- Category Cards -->
+      {categoryCollections.length > 0 && (
+        <section class="bg-gray-50 px-5 py-16">
+          <div class="mx-auto max-w-6xl">
+            <div class="mb-10 text-center">
+              <h2 class="font-heading text-3xl" style="color: var(--color-title);">Shop by Category</h2>
+            </div>
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {categoryCollections.map((collection) => (
+                <a
+                  href={`/collections/${collection.handle}/`}
+                  class="group flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-5 transition-shadow hover:shadow-md"
+                >
+                  {collection.image ? (
+                    <img
+                      src={collection.image.url}
+                      alt={collection.image.altText || collection.title}
+                      width={80}
+                      height={80}
+                      loading="lazy"
+                      class="h-20 w-20 rounded-lg object-cover"
+                    />
+                  ) : (
+                    <div class="flex h-20 w-20 items-center justify-center rounded-lg bg-green-50">
+                      <svg class="h-8 w-8 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="1.5"/>
+                      </svg>
+                    </div>
+                  )}
+                  <div class="flex-1">
+                    <h3 class="font-semibold text-gray-900 group-hover:text-brand-green-dark">{collection.title}</h3>
+                    {collection.description && (
+                      <p class="mt-1 line-clamp-2 text-sm text-gray-500">{collection.description}</p>
+                    )}
+                  </div>
+                  <svg class="h-5 w-5 flex-shrink-0 text-gray-300 transition group-hover:text-brand-green-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                  </svg>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <!-- Decision Engine -->
+      <DecisionEngine
+        headline="Personalize Your Experience"
+        subheadline="Tell us about yourself and we'll show you the most relevant products"
+      />
 
       <!-- Trust Badges -->
-      <section class="border-t border-gray-100 bg-white py-12">
-        <div class="mx-auto max-w-4xl px-4">
-          <div class="grid grid-cols-2 gap-8 text-center md:grid-cols-4">
-            <div>
-              <div class="mb-1 text-3xl font-bold text-green-700">15+</div>
-              <div class="text-sm text-gray-600">Years in Business</div>
-            </div>
-            <div>
-              <div class="mb-1 text-3xl font-bold text-green-700">OMRI</div>
-              <div class="text-sm text-gray-600">Listed Organic</div>
-            </div>
-            <div>
-              <div class="mb-1 text-3xl font-bold text-green-700">USA</div>
-              <div class="text-sm text-gray-600">Made in Georgia</div>
-            </div>
-            <div>
-              <div class="mb-1 text-3xl font-bold text-green-700">100%</div>
-              <div class="text-sm text-gray-600">Natural Ingredients</div>
-            </div>
+      <section class="border-t border-gray-100 bg-white px-5 py-12">
+        <div class="mx-auto grid max-w-4xl grid-cols-2 gap-8 text-center md:grid-cols-4">
+          <div>
+            <div class="mb-1 text-3xl font-bold text-green-700">15+</div>
+            <div class="text-sm text-gray-600">Years in Business</div>
+          </div>
+          <div>
+            <div class="mb-1 text-3xl font-bold text-green-700">OMRI</div>
+            <div class="text-sm text-gray-600">Listed Organic</div>
+          </div>
+          <div>
+            <div class="mb-1 text-3xl font-bold text-green-700">USA</div>
+            <div class="text-sm text-gray-600">Made in Georgia</div>
+          </div>
+          <div>
+            <div class="mb-1 text-3xl font-bold text-green-700">100%</div>
+            <div class="text-sm text-gray-600">Natural Ingredients</div>
           </div>
         </div>
       </section>
 
-      <!-- Quick Links for Returning Visitors -->
-      <section class="bg-gray-50 py-12">
-        <div class="mx-auto max-w-6xl px-4">
-          <h2 class="mb-8 text-center text-2xl font-bold" style="color: var(--color-title);">
-            Quick Links
-          </h2>
-          <div class="grid gap-4 md:grid-cols-4">
-            <a
-              href="/shop/"
-              class="block rounded-lg bg-white p-4 text-center shadow-sm transition-shadow hover:shadow-md"
-            >
-              <span class="text-lg font-semibold text-gray-800">Shop All Products</span>
+      <!-- Resources + Podcast -->
+      <section class="bg-gray-50 px-5 py-16">
+        <div class="mx-auto max-w-6xl">
+          <div class="mb-10 text-center">
+            <h2 class="font-heading text-3xl" style="color: var(--color-title);">Learn &amp; Connect</h2>
+          </div>
+          <div class="grid gap-6 md:grid-cols-3">
+            <a href="/podcast/" class="group rounded-xl border border-gray-200 bg-white p-6 transition-shadow hover:shadow-md">
+              <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-50">
+                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m-4 0h8m-8-8a3 3 0 016 0v1a3 3 0 01-6 0v-1z"/>
+                </svg>
+              </div>
+              <h3 class="font-semibold text-gray-900 group-hover:text-brand-green-dark">Ag &amp; Culture Podcast</h3>
+              <p class="mt-2 text-sm text-gray-500">Learn from industry experts about organic farming, soil health, and sustainable agriculture.</p>
             </a>
-            <a
-              href="/podcast/"
-              class="block rounded-lg bg-white p-4 text-center shadow-sm transition-shadow hover:shadow-md"
-            >
-              <span class="text-lg font-semibold text-gray-800">Ag & Culture Podcast</span>
+            <a href="/blog/" class="group rounded-xl border border-gray-200 bg-white p-6 transition-shadow hover:shadow-md">
+              <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-50">
+                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>
+                </svg>
+              </div>
+              <h3 class="font-semibold text-gray-900 group-hover:text-brand-green-dark">Blog</h3>
+              <p class="mt-2 text-sm text-gray-500">Tips, guides, and research on organic poultry care, lawn health, and sustainability.</p>
             </a>
-            <a
-              href="/about/"
-              class="block rounded-lg bg-white p-4 text-center shadow-sm transition-shadow hover:shadow-md"
-            >
-              <span class="text-lg font-semibold text-gray-800">About Us</span>
+            <a href="/store-locator/" class="group rounded-xl border border-gray-200 bg-white p-6 transition-shadow hover:shadow-md">
+              <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-50">
+                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 0115 0z"/>
+                </svg>
+              </div>
+              <h3 class="font-semibold text-gray-900 group-hover:text-brand-green-dark">Find a Dealer</h3>
+              <p class="mt-2 text-sm text-gray-500">114 dealers nationwide. Find Southland Organics products near you.</p>
             </a>
-            <a
-              href="/contact/"
-              class="block rounded-lg bg-white p-4 text-center shadow-sm transition-shadow hover:shadow-md"
-            >
-              <span class="text-lg font-semibold text-gray-800">Contact</span>
-            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Final CTA -->
+      <section class="bg-gradient-to-br from-brand-green-light to-brand-green-dark px-5 py-16 text-center">
+        <div class="mx-auto max-w-2xl">
+          <h2 class="font-heading text-3xl text-white md:text-4xl">Ready to Go Organic?</h2>
+          <p class="mt-4 text-lg text-white/90">Browse our full catalog or get in touch — we're here to help.</p>
+          <div class="mt-8 flex flex-wrap justify-center gap-4">
+            <a href="/products/" class="rounded-lg bg-white px-8 py-3.5 font-semibold transition hover:-translate-y-0.5 hover:shadow-lg" style="color: var(--color-title);">Shop All Products</a>
+            <a href="/contact/" class="rounded-lg border-2 border-white/50 px-8 py-3.5 font-semibold text-white transition hover:border-white hover:bg-white/10">Contact Us</a>
           </div>
         </div>
       </section>
@@ -330,348 +552,13 @@ const schema = {
   </RealityTunnel>
 </BaseLayout>
 
-<style>
-  /* Betty Trust Section */
-  .betty-trust {
-    background: white;
-    padding: 48px 20px;
-    border-top: 1px solid #e5e7eb;
-  }
-
-  .betty-trust__container {
-    max-width: 1000px;
-    margin: 0 auto;
-  }
-
-  .betty-trust__grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 24px;
-  }
-
-  @media (min-width: 768px) {
-    .betty-trust__grid {
-      grid-template-columns: repeat(4, 1fr);
-    }
-  }
-
-  .betty-trust__item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    justify-content: center;
-  }
-
-  .betty-trust__icon {
-    font-size: 32px;
-  }
-
-  .betty-trust__text {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .betty-trust__value {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--color-title, #2c5234);
-  }
-
-  .betty-trust__label {
-    font-size: 13px;
-    color: #6b7280;
-  }
-
-  /* Betty CTA Banner */
-  .betty-cta-banner {
-    background: linear-gradient(
-      135deg,
-      var(--color-accent, #44883e) 0%,
-      var(--color-title, #2c5234) 100%
-    );
-    padding: 60px 20px;
-    text-align: center;
-  }
-
-  .betty-cta-banner__container {
-    max-width: 700px;
-    margin: 0 auto;
-  }
-
-  .betty-cta-banner__heading {
-    font-family: var(--font-heading, 'Eveleth Dot', serif);
-    font-size: clamp(24px, 4vw, 36px);
-    color: white;
-    margin-bottom: 12px;
-  }
-
-  .betty-cta-banner__text {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 18px;
-    margin-bottom: 28px;
-  }
-
-  .betty-cta-banner__buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    justify-content: center;
-  }
-
-  .betty-cta-banner__btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 14px 28px;
-    font-size: 16px;
-    font-weight: 600;
-    border-radius: 8px;
-    text-decoration: none;
-    transition: all 0.2s;
-  }
-
-  .betty-cta-banner__btn--primary {
-    background: white;
-    color: var(--color-title, #2c5234);
-  }
-
-  .betty-cta-banner__btn--primary:hover {
-    background: #fef3c7;
-    transform: translateY(-2px);
-  }
-
-  .betty-cta-banner__btn--secondary {
-    background: transparent;
-    color: white;
-    border: 2px solid white;
-  }
-
-  .betty-cta-banner__btn--secondary:hover {
-    background: rgba(255, 255, 255, 0.1);
-  }
-
-  /* Bill Trust Section */
-  .bill-trust {
-    background: #0f172a;
-    padding: 48px 20px;
-  }
-
-  .bill-trust__container {
-    max-width: 1000px;
-    margin: 0 auto;
-  }
-
-  .bill-trust__grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 32px;
-  }
-
-  @media (min-width: 768px) {
-    .bill-trust__grid {
-      grid-template-columns: repeat(4, 1fr);
-    }
-  }
-
-  .bill-trust__item {
-    text-align: center;
-  }
-
-  .bill-trust__value {
-    font-size: 28px;
-    font-weight: 700;
-    color: #4ade80;
-    margin-bottom: 4px;
-  }
-
-  .bill-trust__label {
-    font-size: 13px;
-    color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  /* Bill CTA Banner */
-  .bill-cta-banner {
-    background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
-    padding: 60px 20px;
-    text-align: center;
-  }
-
-  .bill-cta-banner__container {
-    max-width: 700px;
-    margin: 0 auto;
-  }
-
-  .bill-cta-banner__heading {
-    font-family: var(--font-heading, 'Eveleth Dot', serif);
-    font-size: clamp(24px, 4vw, 36px);
-    color: white;
-    margin-bottom: 12px;
-  }
-
-  .bill-cta-banner__text {
-    color: #cbd5e1;
-    font-size: 18px;
-    margin-bottom: 28px;
-  }
-
-  .bill-cta-banner__buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    justify-content: center;
-  }
-
-  .bill-cta-banner__btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 14px 28px;
-    font-size: 16px;
-    font-weight: 600;
-    border-radius: 8px;
-    text-decoration: none;
-    transition: all 0.2s;
-  }
-
-  .bill-cta-banner__btn--primary {
-    background: var(--color-accent, #44883e);
-    color: white;
-  }
-
-  .bill-cta-banner__btn--primary:hover {
-    background: var(--color-accent-hover, #2c5234);
-    transform: translateY(-2px);
-  }
-
-  .bill-cta-banner__btn--secondary {
-    background: transparent;
-    color: white;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-  }
-
-  .bill-cta-banner__btn--secondary:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: white;
-  }
-
-  /* Taylor Trust Section */
-  .taylor-trust {
-    background: #14532d;
-    padding: 48px 20px;
-  }
-
-  .taylor-trust__container {
-    max-width: 1000px;
-    margin: 0 auto;
-  }
-
-  .taylor-trust__grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 32px;
-  }
-
-  @media (min-width: 768px) {
-    .taylor-trust__grid {
-      grid-template-columns: repeat(4, 1fr);
-    }
-  }
-
-  .taylor-trust__item {
-    text-align: center;
-  }
-
-  .taylor-trust__value {
-    font-size: 28px;
-    font-weight: 700;
-    color: #86efac;
-    margin-bottom: 4px;
-  }
-
-  .taylor-trust__label {
-    font-size: 13px;
-    color: #bbf7d0;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  /* Taylor CTA Banner */
-  .taylor-cta-banner {
-    background: linear-gradient(135deg, #166534 0%, #14532d 100%);
-    padding: 60px 20px;
-    text-align: center;
-  }
-
-  .taylor-cta-banner__container {
-    max-width: 700px;
-    margin: 0 auto;
-  }
-
-  .taylor-cta-banner__heading {
-    font-family: var(--font-heading, 'Eveleth Dot', serif);
-    font-size: clamp(24px, 4vw, 36px);
-    color: white;
-    margin-bottom: 12px;
-  }
-
-  .taylor-cta-banner__text {
-    color: #bbf7d0;
-    font-size: 18px;
-    margin-bottom: 28px;
-  }
-
-  .taylor-cta-banner__buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    justify-content: center;
-  }
-
-  .taylor-cta-banner__btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 14px 28px;
-    font-size: 16px;
-    font-weight: 600;
-    border-radius: 8px;
-    text-decoration: none;
-    transition: all 0.2s;
-  }
-
-  .taylor-cta-banner__btn--primary {
-    background: white;
-    color: #166534;
-  }
-
-  .taylor-cta-banner__btn--primary:hover {
-    background: #f0fdf4;
-    transform: translateY(-2px);
-  }
-
-  .taylor-cta-banner__btn--secondary {
-    background: transparent;
-    color: white;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-  }
-
-  .taylor-cta-banner__btn--secondary:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: white;
-  }
-</style>
-
 <script>
-  // Client-side persona detection for dynamic updates
   import { getPersonaId, getJourneyStage } from '../lib/persona'
 
   function updateRealityTunnel() {
     const personaId = getPersonaId()
     const stage = getJourneyStage()
 
-    // Track homepage view with persona context
     if (window.pdPixel) {
       window.pdPixel.track('homepage_view', {
         persona: personaId || 'unknown',
@@ -682,12 +569,9 @@ const schema = {
     }
   }
 
-  // Run on load
   document.addEventListener('DOMContentLoaded', updateRealityTunnel)
   if (document.readyState !== 'loading') {
     updateRealityTunnel()
   }
-
-  // Re-run on Astro View Transitions
   document.addEventListener('astro:page-load', updateRealityTunnel)
 </script>

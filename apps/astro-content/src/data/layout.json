@@ -13,6 +13,15 @@
         "href": "/"
       },
       {
+        "label": "Shop",
+        "href": "/products/",
+        "children": [
+          { "label": "All Products", "href": "/products/", "group": "Browse" },
+          { "label": "Collections", "href": "/collections/", "group": "Browse" },
+          { "label": "Build a Case", "href": "/build-a-case/", "group": "Browse" }
+        ]
+      },
+      {
         "label": "Poultry",
         "href": "/collections/poultry",
         "children": [

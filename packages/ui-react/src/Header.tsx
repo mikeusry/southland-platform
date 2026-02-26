@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { NavItem, NavChild } from '@southland/ui-schema'
 
 interface HeaderProps {
@@ -159,6 +159,26 @@ function NavDropdown({ item, isActive }: { item: NavItem; isActive: boolean }) {
 
 export function Header({ logoUrl, logoAlt, navigation, currentPath }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [cartCount, setCartCount] = useState(0)
+
+  // Read cart count from localStorage on mount + listen for cart-changed events
+  useEffect(() => {
+    // Read persisted count (set by cart.ts on every mutation)
+    try {
+      const stored = localStorage.getItem('southland_cart_count')
+      if (stored) setCartCount(parseInt(stored, 10) || 0)
+    } catch {}
+
+    function handleCartChanged(e: Event) {
+      const cart = (e as CustomEvent).detail as { totalQuantity?: number } | null
+      const count = cart?.totalQuantity ?? 0
+      setCartCount(count)
+      try { localStorage.setItem('southland_cart_count', String(count)) } catch {}
+    }
+
+    window.addEventListener('cart-changed', handleCartChanged)
+    return () => window.removeEventListener('cart-changed', handleCartChanged)
+  }, [])
 
   const isItemActive = (item: NavItem) => {
     if (!currentPath) return false
@@ -185,9 +205,9 @@ export function Header({ logoUrl, logoAlt, navigation, currentPath }: HeaderProp
 
           {/* Right side icons */}
           <div className="flex items-center space-x-2">
-            {/* Account */}
+            {/* Account — redirects to Shopify-hosted customer account */}
             <a
-              href="/account/login"
+              href="https://shop.southlandorganics.com/account"
               className="p-2 text-shopify-text transition-colors hover:text-shopify-accent"
               aria-label="Account"
             >
@@ -221,7 +241,7 @@ export function Header({ logoUrl, logoAlt, navigation, currentPath }: HeaderProp
             <a
               href="/cart"
               className="relative p-2 text-shopify-text transition-colors hover:text-shopify-accent"
-              aria-label="Cart"
+              aria-label={cartCount > 0 ? `Cart (${cartCount} items)` : 'Cart'}
             >
               <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -231,6 +251,13 @@ export function Header({ logoUrl, logoAlt, navigation, currentPath }: HeaderProp
                   d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
                 />
               </svg>
+              {cartCount > 0 && (
+                <span
+                  className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-brand-green-dark text-[10px] font-bold text-white"
+                >
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
+              )}
             </a>
 
             {/* Mobile menu button */}

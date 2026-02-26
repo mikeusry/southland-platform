@@ -20,6 +20,7 @@
     "@astrojs/cloudflare": "^12.6.12",
     "@astrojs/mdx": "^4.3.13",
     "@astrojs/react": "^4.2.1",
+    "@astrojs/sitemap": "^3.7.0",
     "@astrojs/tailwind": "^6.0.2",
     "@cloudinary/url-gen": "^1.22.0",
     "@mux/mux-player": "^3.11.4",
