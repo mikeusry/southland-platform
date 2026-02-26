@@ -18,7 +18,7 @@ import { defineMiddleware } from 'astro:middleware'
 // NOTE: *.myshopify.com always 301s to the primary domain — can't be used as proxy origin.
 const SHOPIFY_ORIGIN_DEFAULT = 'https://shopify-proxy.southlandorganics.com'
 
-// Phase 1 routes served by Astro
+// Routes served by Astro (Phase 1 content + Phase 1b storefront)
 const ASTRO_ROUTES = [
   '/podcast',
   '/blog',
@@ -30,9 +30,21 @@ const ASTRO_ROUTES = [
   '/admin',
   '/api',
   '/build-a-case',
+  '/survey',
+  // Phase 1b — Astro storefront (Shopify Storefront API)
+  '/products',
+  '/collections',
+  '/cart',
+  '/account',
+  // Persona hubs
+  '/poultry',
+  '/lawn',
+  '/turf',
 ]
 
 function isAstroRoute(pathname: string): boolean {
+  // Homepage is Astro-owned
+  if (pathname === '/' || pathname === '') return true
   return ASTRO_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(route + '/'),
   )
