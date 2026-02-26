@@ -517,7 +517,7 @@ export function getHeroBannerUrl(
     gravity: 'auto',
     quality: 'auto:good',
     format: 'auto',
-    effect: darken ? 'brightness:70' : undefined,
+    effect: darken ? ('brightness:70' as any) : undefined,
   })
 }
 

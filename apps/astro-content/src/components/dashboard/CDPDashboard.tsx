@@ -92,8 +92,8 @@ export default function CDPDashboard() {
     }
 
     fetchData()
-    const interval = setInterval(fetchData, 120000)
-    return () => clearInterval(interval)
+    const interval = window.setInterval(fetchData, 120000)
+    return () => window.clearInterval(interval)
   }, [range])
 
   const formatCurrency = (v: number) =>
@@ -467,7 +467,7 @@ export default function CDPDashboard() {
             data={searchData.slice(0, 6)}
             className="mt-4"
             color="blue"
-            valueFormatter={(v) => `${v}`}
+            valueFormatter={(v: number) => `${v}`}
           />
         </Card>
       </Grid>

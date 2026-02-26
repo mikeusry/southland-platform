@@ -22,7 +22,8 @@ import { getCollection, getEntry, render } from 'astro:content'
 import { buildPersonSchema } from '../../lib/schema'
 import { buildSouthlandUrl, resolveEpisodeCover } from '../../lib/cloudinary'
 
-const { slug: episodeSlug } = Astro.params
+const { slug } = Astro.params
+const episodeSlug = slug as string
 
 // Get all published episodes (exclude future dates + drafts)
 const now = new Date()

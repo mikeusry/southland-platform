@@ -239,7 +239,7 @@ export default function CartPage() {
       lastEstimateZip.current = '' // force re-fetch
       fetchShippingEstimate(zip, cart)
     }
-  }, [cart?.totalQuantity]) // eslint-disable-line
+  }, [cart?.totalQuantity])
 
   // Fetch cart on mount
   useEffect(() => {

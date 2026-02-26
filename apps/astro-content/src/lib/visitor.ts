@@ -169,11 +169,11 @@ export function subscribeToVisitorUpdates(
   poll()
 
   // Set up interval
-  const interval = setInterval(poll, intervalMs)
+  const interval = window.setInterval(poll, intervalMs)
 
   // Return unsubscribe function
   return () => {
     active = false
-    clearInterval(interval)
+    window.clearInterval(interval)
   }
 }

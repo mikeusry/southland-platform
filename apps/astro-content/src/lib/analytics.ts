@@ -3,17 +3,7 @@
  * Integrates with Southland's point.dog pixel
  */
 
-// Type for the pixel instance
-declare global {
-  interface Window {
-    pdPixel?: {
-      track: (event: string, properties?: Record<string, unknown>) => void
-      identify: (userId: string, traits?: Record<string, unknown>) => void
-      page: (name?: string, properties?: Record<string, unknown>) => void
-    }
-    dataLayer?: unknown[]
-  }
-}
+// Window types for pdPixel and dataLayer are declared in src/env.d.ts
 
 /**
  * Track a podcast-specific event

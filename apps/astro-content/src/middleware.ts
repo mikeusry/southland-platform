@@ -7,6 +7,12 @@
  */
 import { defineMiddleware } from 'astro:middleware'
 
+// Cloudflare Workers runtime globals (not in @types/cloudflare-workers)
+declare class HTMLRewriter {
+  on(selector: string, handlers: any): HTMLRewriter
+  transform(response: Response): Response
+}
+
 // Shopify origin — read from Cloudflare env (wrangler.toml) at request time.
 //
 // DEV (pages.dev):  www.southlandorganics.com works because DNS still points to Shopify.
@@ -66,7 +72,7 @@ async function getPartials(
   if (!cachedHeaderHtml) {
     try {
       const res = await assets.fetch(
-        new URL('https://fake-host/_partials/header.html'),
+        new URL('https://fake-host/_partials/header.html').toString(),
       )
       cachedHeaderHtml = res.ok ? await res.text() : ''
     } catch {
@@ -76,7 +82,7 @@ async function getPartials(
   if (!cachedFooterHtml) {
     try {
       const res = await assets.fetch(
-        new URL('https://fake-host/_partials/footer.html'),
+        new URL('https://fake-host/_partials/footer.html').toString(),
       )
       cachedFooterHtml = res.ok ? await res.text() : ''
     } catch {
@@ -198,7 +204,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     // Rewrite proxy hostname in href, src, action, content attributes on ALL elements
     // This catches <link rel="canonical">, <meta og:url>, <a>, <form>, <img>, etc.
     rewriter.on('*', {
-      element(element) {
+      element(element: any) {
         for (const attr of ['href', 'src', 'action', 'content', 'srcset']) {
           const val = element.getAttribute(attr)
           if (val?.includes(proxyHost)) {
@@ -211,7 +217,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     // Rewrite proxy hostname inside inline <script> and <style> blocks
     for (const tag of ['script', 'style'] as const) {
       rewriter.on(tag, {
-        text(chunk) {
+        text(chunk: any) {
           if (chunk.text.includes(proxyHost)) {
             chunk.replace(chunk.text.replaceAll(proxyHost, publicHost), { html: false })
           }
@@ -221,7 +227,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
     // Inject our CSS + tracking into <head>
     rewriter.on('head', {
-      element(element) {
+      element(element: any) {
         element.append(
           '<link rel="stylesheet" href="/_partials/partials.css">' +
             '<link rel="preconnect" href="https://fonts.googleapis.com">' +
@@ -243,7 +249,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     // CSS rules inside display:none elements still apply globally.
     if (partials.headerHtml) {
       rewriter.on('#shopify-section-header--default', {
-        element(element) {
+        element(element: any) {
           element.before(partials.headerHtml, { html: true })
           element.setAttribute(
             'style',
@@ -256,7 +262,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     // Hide Shopify footer and insert ours after it
     if (partials.footerHtml) {
       rewriter.on('#shopify-section-footer', {
-        element(element) {
+        element(element: any) {
           element.after(partials.footerHtml, { html: true })
           element.setAttribute(
             'style',
@@ -268,7 +274,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
     // Hide Shopify subfooter (our footer includes the bottom bar)
     rewriter.on('#shopify-section-subfooter', {
-      element(element) {
+      element(element: any) {
         element.setAttribute('style', 'display:none!important')
       },
     })

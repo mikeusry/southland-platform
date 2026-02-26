@@ -213,7 +213,7 @@ const searchIndex = allEpisodes.map((episode) => ({
       }> = []
 
       // Search through each episode
-      searchIndex.forEach((episode) => {
+      searchIndex.forEach((episode: any) => {
         const matches: Array<{ time: number; speaker: string; text: string; context: string }> = []
         let score = 0
 
@@ -228,21 +228,21 @@ const searchIndex = allEpisodes.map((episode) => ({
         }
 
         // Check topics
-        episode.topics.forEach((topic) => {
+        episode.topics.forEach((topic: string) => {
           if (topic.toLowerCase().includes(lowerQuery)) {
             score += 3
           }
         })
 
         // Check guests
-        episode.guests.forEach((guest) => {
+        episode.guests.forEach((guest: string) => {
           if (guest.toLowerCase().includes(lowerQuery)) {
             score += 3
           }
         })
 
         // Search transcript
-        episode.transcript.forEach((line, index) => {
+        episode.transcript.forEach((line: any, index: number) => {
           if (line.text.toLowerCase().includes(lowerQuery)) {
             score += 1
             // Get context (previous and next lines if available)
