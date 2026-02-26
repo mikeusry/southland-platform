@@ -158,10 +158,7 @@ interface UserError {
   message: string
 }
 
-function checkUserErrors(
-  operation: string,
-  userErrors: UserError[] | undefined,
-): void {
+function checkUserErrors(operation: string, userErrors: UserError[] | undefined): void {
   if (userErrors?.length) {
     const msg = userErrors.map((e) => e.message).join(', ')
     console.error(`[shopify-storefront] ${operation} user errors:`, msg)
@@ -177,7 +174,7 @@ function checkUserErrors(
 export async function createCart(
   client: StorefrontClient,
   lines?: CartLineInput[],
-  attributes?: CartLineAttribute[],
+  attributes?: CartLineAttribute[]
 ): Promise<Cart> {
   const input: Record<string, unknown> = {}
   if (lines) input.lines = lines
@@ -202,7 +199,7 @@ export async function createCart(
 export async function addToCart(
   client: StorefrontClient,
   cartId: string,
-  lines: CartLineInput[],
+  lines: CartLineInput[]
 ): Promise<Cart> {
   const { data, errors } = await client.request(ADD_TO_CART_MUTATION, {
     variables: { cartId, lines },
@@ -223,7 +220,7 @@ export async function addToCart(
 export async function updateCartLines(
   client: StorefrontClient,
   cartId: string,
-  lines: CartLineUpdateInput[],
+  lines: CartLineUpdateInput[]
 ): Promise<Cart> {
   const { data, errors } = await client.request(UPDATE_CART_LINES_MUTATION, {
     variables: { cartId, lines },
@@ -244,7 +241,7 @@ export async function updateCartLines(
 export async function removeFromCart(
   client: StorefrontClient,
   cartId: string,
-  lineIds: string[],
+  lineIds: string[]
 ): Promise<Cart> {
   const { data, errors } = await client.request(REMOVE_FROM_CART_MUTATION, {
     variables: { cartId, lineIds },
@@ -263,10 +260,7 @@ export async function removeFromCart(
  * Fetch an existing cart by ID.
  * Returns null if the cart no longer exists (expired, completed checkout, etc.)
  */
-export async function getCart(
-  client: StorefrontClient,
-  cartId: string,
-): Promise<Cart | null> {
+export async function getCart(client: StorefrontClient, cartId: string): Promise<Cart | null> {
   const { data, errors } = await client.request(GET_CART_QUERY, {
     variables: { cartId },
   })

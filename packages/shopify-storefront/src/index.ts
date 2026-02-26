@@ -12,13 +12,7 @@ export {
 } from './queries/products'
 
 // Cart operations
-export {
-  createCart,
-  addToCart,
-  updateCartLines,
-  removeFromCart,
-  getCart,
-} from './queries/cart'
+export { createCart, addToCart, updateCartLines, removeFromCart, getCart } from './queries/cart'
 
 // Types
 export type {

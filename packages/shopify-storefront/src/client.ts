@@ -23,14 +23,9 @@ export function createClient(options?: {
   publicAccessToken?: string
   apiVersion?: string
 }) {
-  const storeDomain =
-    options?.storeDomain ??
-    process.env.PUBLIC_SHOPIFY_STORE_DOMAIN ??
-    ''
+  const storeDomain = options?.storeDomain ?? process.env.PUBLIC_SHOPIFY_STORE_DOMAIN ?? ''
   const publicAccessToken =
-    options?.publicAccessToken ??
-    process.env.PUBLIC_SHOPIFY_STOREFRONT_TOKEN ??
-    ''
+    options?.publicAccessToken ?? process.env.PUBLIC_SHOPIFY_STOREFRONT_TOKEN ?? ''
   const apiVersion = options?.apiVersion ?? '2026-01'
 
   if (!storeDomain || !publicAccessToken) {

@@ -208,7 +208,7 @@ function parseProduct(node: Record<string, unknown>): Product {
 export async function getCollectionProducts(
   client: StorefrontClient,
   handle: string,
-  first = 50,
+  first = 50
 ): Promise<Collection | null> {
   const { data, errors } = await client.request(COLLECTION_PRODUCTS_QUERY, {
     variables: { handle, first },
@@ -239,7 +239,7 @@ export async function getCollectionProducts(
  */
 export async function getAllCollections(
   client: StorefrontClient,
-  first = 50,
+  first = 50
 ): Promise<CollectionSummary[]> {
   const { data, errors } = await client.request(ALL_COLLECTIONS_QUERY, {
     variables: { first },
@@ -257,9 +257,7 @@ export async function getAllCollections(
 
   return collections.edges.map((e) => {
     const node = e.node
-    const image = node.image
-      ? parseImage(node.image as Record<string, unknown>)
-      : null
+    const image = node.image ? parseImage(node.image as Record<string, unknown>) : null
     return {
       id: node.id as string,
       title: node.title as string,
@@ -273,9 +271,7 @@ export async function getAllCollections(
 /**
  * Fetch all products from the store, paginating through results.
  */
-export async function getAllProducts(
-  client: StorefrontClient,
-): Promise<Product[]> {
+export async function getAllProducts(client: StorefrontClient): Promise<Product[]> {
   const allProducts: Product[] = []
   let after: string | null = null
 
@@ -319,16 +315,12 @@ export async function getAllProducts(
  * component is responsible for selecting the "1 Gallon" variant for display
  * and add-to-cart.
  */
-export async function getGallonProducts(
-  client: StorefrontClient,
-): Promise<Product[]> {
+export async function getGallonProducts(client: StorefrontClient): Promise<Product[]> {
   const allProducts = await getAllProducts(client)
   return allProducts.filter((product) =>
     product.variants.some((variant) =>
-      variant.selectedOptions.some(
-        (opt) => opt.name === 'Size' && opt.value === '1 Gallon',
-      ),
-    ),
+      variant.selectedOptions.some((opt) => opt.name === 'Size' && opt.value === '1 Gallon')
+    )
   )
 }
 
@@ -338,7 +330,7 @@ export async function getGallonProducts(
  */
 export async function getProductByHandle(
   client: StorefrontClient,
-  handle: string,
+  handle: string
 ): Promise<ProductDetail | null> {
   const { data, errors } = await client.request(PRODUCT_BY_HANDLE_QUERY, {
     variables: { handle },
@@ -382,8 +374,13 @@ export async function searchProducts(
   client: StorefrontClient,
   query: string,
   first = 20,
-  after?: string,
-): Promise<{ products: Product[]; totalCount: number; hasNextPage: boolean; endCursor: string | null }> {
+  after?: string
+): Promise<{
+  products: Product[]
+  totalCount: number
+  hasNextPage: boolean
+  endCursor: string | null
+}> {
   const { data, errors } = await client.request(SEARCH_PRODUCTS_QUERY, {
     variables: { query, first, after: after ?? null },
   })
