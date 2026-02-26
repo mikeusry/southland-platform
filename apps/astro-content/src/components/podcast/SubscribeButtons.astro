@@ -66,9 +66,7 @@ const allPlatforms: Platform[] = [
 ]
 
 // Only show platforms with real URLs (not placeholders)
-const platforms = allPlatforms.filter(
-  (p) => p.url && !p.url.includes('placeholder')
-)
+const platforms = allPlatforms.filter((p) => p.url && !p.url.includes('placeholder'))
 
 const isCompact = variant === 'compact'
 const isIconsOnly = variant === 'icons-only'

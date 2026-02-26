@@ -110,11 +110,7 @@ const muxThumbnail = muxPlaybackId
   }
 </div>
 
-{embedSource === 'mux' && (
-  <script>
-    import '@mux/mux-player';
-  </script>
-)}
+{embedSource === 'mux' && <script>import '@mux/mux-player';</script>}
 
 <script>
   // Video tracking

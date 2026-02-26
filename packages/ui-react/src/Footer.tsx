@@ -592,24 +592,15 @@ export function Footer({
             <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-white/90 sm:justify-end">
               <span>{copyright}</span>
               <span className="hidden sm:inline">|</span>
-              <a
-                href="/pages/terms-of-service"
-                className="transition-colors hover:text-white"
-              >
+              <a href="/pages/terms-of-service" className="transition-colors hover:text-white">
                 Terms Of Use
               </a>
               <span>|</span>
-              <a
-                href="/pages/privacy-policy"
-                className="transition-colors hover:text-white"
-              >
+              <a href="/pages/privacy-policy" className="transition-colors hover:text-white">
                 Privacy Policy
               </a>
               <span>|</span>
-              <a
-                href="/pages/shipping-policy"
-                className="transition-colors hover:text-white"
-              >
+              <a href="/pages/shipping-policy" className="transition-colors hover:text-white">
                 Shipping & Returns
               </a>
             </div>

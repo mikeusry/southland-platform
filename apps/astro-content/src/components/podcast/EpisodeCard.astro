@@ -92,14 +92,18 @@ const formattedDate = new Intl.DateTimeFormat('en-US', {
     </h3>
 
     {/* Description */}
-    <p class={`text-gray-600 ${featured ? 'line-clamp-3 text-base' : 'line-clamp-2 text-sm'} ${hook ? 'mb-3' : 'mb-4'}`}>
+    <p
+      class={`text-gray-600 ${featured ? 'line-clamp-3 text-base' : 'line-clamp-2 text-sm'} ${hook ? 'mb-3' : 'mb-4'}`}
+    >
       {description}
     </p>
 
     {/* Hook — compelling one-liner */}
     {
       hook && (
-        <p class={`mb-4 font-medium italic text-southland-green-dark ${featured ? 'text-base' : 'text-sm'}`}>
+        <p
+          class={`mb-4 font-medium italic text-southland-green-dark ${featured ? 'text-base' : 'text-sm'}`}
+        >
           {hook}
         </p>
       )

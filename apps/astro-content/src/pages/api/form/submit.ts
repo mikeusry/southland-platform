@@ -85,11 +85,15 @@ function buildContactEmail(data: FormPayload): string {
       ${row('Phone', data.phone || 'N/A')}
       ${row('Topic', formatDepartment(data.department))}
     </table>
-    ${data.message ? `
+    ${
+      data.message
+        ? `
     <div style="margin-top:24px;padding:16px 20px;background:${BRAND.bgLight};border-left:4px solid ${BRAND.lightGreen};border-radius:0 8px 8px 0;">
       <p style="margin:0 0 4px;font-size:12px;font-weight:600;color:${BRAND.secondary};text-transform:uppercase;letter-spacing:0.5px;">Message</p>
       <p style="margin:0;color:${BRAND.text};white-space:pre-wrap;line-height:1.6;">${escapeHtml(data.message)}</p>
-    </div>` : ''}`
+    </div>`
+        : ''
+    }`
   return brandWrap('Contact', body)
 }
 
@@ -106,11 +110,15 @@ function buildDistributionEmail(data: FormPayload): string {
       ${row('Product Interest', formatProductInterest(data.productInterest))}
       ${row('Location', escapeHtml(data.location || 'N/A'))}
     </table>
-    ${data.message ? `
+    ${
+      data.message
+        ? `
     <div style="margin-top:24px;padding:16px 20px;background:${BRAND.bgLight};border-left:4px solid ${BRAND.lightGreen};border-radius:0 8px 8px 0;">
       <p style="margin:0 0 4px;font-size:12px;font-weight:600;color:${BRAND.secondary};text-transform:uppercase;letter-spacing:0.5px;">About Their Business</p>
       <p style="margin:0;color:${BRAND.text};white-space:pre-wrap;line-height:1.6;">${escapeHtml(data.message)}</p>
-    </div>` : ''}`
+    </div>`
+        : ''
+    }`
   return brandWrap('Dealer Inquiry', body)
 }
 
@@ -206,9 +214,7 @@ export const POST: APIRoute = async ({ request }) => {
     ? `[Dealer Inquiry] ${data.company || data.firstName + ' ' + data.lastName} — ${formatBusinessType(data.businessType)}`
     : `[Contact] ${data.firstName} ${data.lastName} — ${formatDepartment(data.department)}`
 
-  const htmlContent = isDistribution
-    ? buildDistributionEmail(data)
-    : buildContactEmail(data)
+  const htmlContent = isDistribution ? buildDistributionEmail(data) : buildContactEmail(data)
 
   const sendgridPayload = {
     personalizations: [

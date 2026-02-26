@@ -453,7 +453,7 @@ export function getEpisodeThumbnail(episodeSlug: string, width: number = 400): s
  */
 export function resolveEpisodeCover(
   data: { coverImage?: string; thumbnail?: string },
-  width: number = 640,
+  width: number = 640
 ): string | undefined {
   if (data.coverImage) {
     return buildSouthlandUrl(data.coverImage, {

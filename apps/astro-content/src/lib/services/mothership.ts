@@ -20,7 +20,7 @@ function getSupabaseClient(): SupabaseClient | null {
       'MOTHERSHIP_SUPABASE_URL=',
       url ? 'SET' : 'MISSING',
       'MOTHERSHIP_SUPABASE_SERVICE_KEY=',
-      key ? 'SET' : 'MISSING',
+      key ? 'SET' : 'MISSING'
     )
     return null
   }
@@ -52,11 +52,7 @@ async function generateEmbedding(text: string): Promise<number[] | null> {
 
     if (!response.ok) {
       const errorBody = await response.text()
-      console.error(
-        '[mothership] OpenAI embedding HTTP error:',
-        response.status,
-        errorBody,
-      )
+      console.error('[mothership] OpenAI embedding HTTP error:', response.status, errorBody)
       return null
     }
 
@@ -75,7 +71,7 @@ async function generateEmbedding(text: string): Promise<number[] | null> {
 export async function scorePersonas(
   content: string,
   segment?: string,
-  brandSlug: string = 'southland-organics',
+  brandSlug: string = 'southland-organics'
 ): Promise<PersonaScores | null> {
   const supabase = getSupabaseClient()
 
@@ -87,7 +83,7 @@ export async function scorePersonas(
   if (!import.meta.env.ENABLE_MOTHERSHIP) {
     console.error(
       '[mothership] scorePersonas: ENABLE_MOTHERSHIP is falsy:',
-      import.meta.env.ENABLE_MOTHERSHIP,
+      import.meta.env.ENABLE_MOTHERSHIP
     )
     return null
   }
@@ -117,7 +113,7 @@ export async function scorePersonas(
       console.error(
         '[mothership] match_personas returned 0 results for brand:',
         brandSlug,
-        '— personas may not be seeded',
+        '— personas may not be seeded'
       )
       return null
     }
@@ -182,7 +178,7 @@ export async function analyzeContentGap(
   title: string,
   content: string,
   url?: string,
-  brandSlug: string = 'southland-organics',
+  brandSlug: string = 'southland-organics'
 ): Promise<GapStatus | null> {
   const supabase = getSupabaseClient()
 

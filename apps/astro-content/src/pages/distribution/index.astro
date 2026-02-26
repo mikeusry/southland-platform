@@ -47,7 +47,9 @@ const distributionSchema = {
   <section class="bg-white py-16 md:py-24">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="mb-12 text-center">
-        <h2 class="mb-4 text-3xl font-bold text-shopify-title md:text-4xl">Why Carry Our Products</h2>
+        <h2 class="mb-4 text-3xl font-bold text-shopify-title md:text-4xl">
+          Why Carry Our Products
+        </h2>
         <p class="mx-auto max-w-2xl text-lg text-shopify-secondary-text">
           Southland Organics products solve real problems for growers. That's why our dealers see
           strong repeat business.
@@ -74,8 +76,8 @@ const distributionSchema = {
           </div>
           <h3 class="mb-2 text-xl font-bold text-shopify-title">Repeat Customers</h3>
           <p class="text-shopify-secondary-text">
-            Growers who try our products come back. Biology-first solutions create results people can
-            see — and they reorder season after season.
+            Growers who try our products come back. Biology-first solutions create results people
+            can see — and they reorder season after season.
           </p>
         </div>
 
@@ -197,8 +199,8 @@ const distributionSchema = {
           </div>
           <h3 class="mb-2 text-xl font-bold text-shopify-title">Nationwide Reach</h3>
           <p class="text-shopify-secondary-text">
-            We ship across the US via UPS. Whether you're in Georgia or Oregon, we can get product to
-            you.
+            We ship across the US via UPS. Whether you're in Georgia or Oregon, we can get product
+            to you.
           </p>
         </div>
       </div>
@@ -209,7 +211,9 @@ const distributionSchema = {
   <section class="bg-brand-gray py-16 md:py-24">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="mb-12 text-center">
-        <h2 class="mb-4 text-3xl font-bold text-shopify-title md:text-4xl">Product Lines Available</h2>
+        <h2 class="mb-4 text-3xl font-bold text-shopify-title md:text-4xl">
+          Product Lines Available
+        </h2>
         <p class="mx-auto max-w-2xl text-lg text-shopify-secondary-text">
           Our product catalog spans multiple categories, each backed by soil biology science.
         </p>
@@ -255,8 +259,8 @@ const distributionSchema = {
           <div>
             <h3 class="mb-1 text-lg font-bold text-shopify-title">Swine</h3>
             <p class="text-sm text-shopify-secondary-text">
-              Supplements and health solutions for hog operations focused on natural, antibiotic-free
-              production.
+              Supplements and health solutions for hog operations focused on natural,
+              antibiotic-free production.
             </p>
           </div>
         </div>
@@ -270,8 +274,8 @@ const distributionSchema = {
           <div>
             <h3 class="mb-1 text-lg font-bold text-shopify-title">Septic & Waste Treatment</h3>
             <p class="text-sm text-shopify-secondary-text">
-              Biological waste treatment products for residential septic systems and commercial waste
-              management.
+              Biological waste treatment products for residential septic systems and commercial
+              waste management.
             </p>
           </div>
         </div>
@@ -294,7 +298,9 @@ const distributionSchema = {
         <form id="distribution-form" class="space-y-6">
           <div class="grid gap-6 sm:grid-cols-2">
             <div>
-              <label for="dist-first-name" class="mb-1.5 block text-sm font-medium text-shopify-title"
+              <label
+                for="dist-first-name"
+                class="mb-1.5 block text-sm font-medium text-shopify-title"
                 >First Name <span class="text-red-500">*</span></label
               >
               <input
@@ -307,7 +313,9 @@ const distributionSchema = {
               />
             </div>
             <div>
-              <label for="dist-last-name" class="mb-1.5 block text-sm font-medium text-shopify-title"
+              <label
+                for="dist-last-name"
+                class="mb-1.5 block text-sm font-medium text-shopify-title"
                 >Last Name <span class="text-red-500">*</span></label
               >
               <input
@@ -427,7 +435,8 @@ const distributionSchema = {
               name="message"
               rows="4"
               class="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 text-shopify-title transition-colors focus:border-southland-green focus:outline-none focus:ring-2 focus:ring-southland-green/20"
-              placeholder="How many locations, current product mix, anything else we should know..."></textarea>
+              placeholder="How many locations, current product mix, anything else we should know..."
+            ></textarea>
           </div>
 
           <!-- Honeypot — hidden from humans, bots fill it -->
@@ -475,10 +484,7 @@ const distributionSchema = {
         </div>
 
         <!-- Error Message (hidden by default) -->
-        <div
-          id="dist-form-error"
-          class="mt-4 hidden rounded-lg bg-red-50 p-4 text-sm text-red-700"
-        >
+        <div id="dist-form-error" class="mt-4 hidden rounded-lg bg-red-50 p-4 text-sm text-red-700">
           Something went wrong. Please try again or call us directly at
           <a href="tel:+18006083755" class="font-semibold underline">800-608-3755</a>.
         </div>
@@ -486,7 +492,9 @@ const distributionSchema = {
 
       <p class="mt-6 text-center text-sm text-white/50">
         Or call us directly at
-        <a href="tel:+18006083755" class="font-medium text-white/70 hover:text-white">800-608-3755</a>
+        <a href="tel:+18006083755" class="font-medium text-white/70 hover:text-white"
+          >800-608-3755</a
+        >
         — Mon-Fri, 8am-5pm EST
       </p>
     </div>
@@ -529,7 +537,9 @@ const distributionSchema = {
 
       const formData = new FormData(form)
       const data: Record<string, string> = {}
-      formData.forEach((v, k) => { data[k] = v as string })
+      formData.forEach((v, k) => {
+        data[k] = v as string
+      })
 
       const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement
       if (submitBtn) {

@@ -60,9 +60,7 @@ function getPersonaScore(product: Product, p: NonNullable<PersonaId>): number {
       v.selectedOptions.some(
         (opt) =>
           opt.name === 'Size' &&
-          (opt.value.includes('Gallon') ||
-            opt.value.includes('gallon') ||
-            opt.value.includes('5'))
+          (opt.value.includes('Gallon') || opt.value.includes('gallon') || opt.value.includes('5'))
       )
     )
     if (hasBulk) score += 10
@@ -83,14 +81,16 @@ function getPersonaScore(product: Product, p: NonNullable<PersonaId>): number {
 const sortedProducts = sortByPersona(products, persona ?? null)
 ---
 
-{sortedProducts.length > 0 ? (
-  <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
-    {sortedProducts.map((product) => (
-      <CollectionProductCard product={product} persona={persona} />
-    ))}
-  </div>
-) : (
-  <div class="py-16 text-center">
-    <p class="text-lg text-gray-500">No products found in this collection.</p>
-  </div>
-)}
+{
+  sortedProducts.length > 0 ? (
+    <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
+      {sortedProducts.map((product) => (
+        <CollectionProductCard product={product} persona={persona} />
+      ))}
+    </div>
+  ) : (
+    <div class="py-16 text-center">
+      <p class="text-lg text-gray-500">No products found in this collection.</p>
+    </div>
+  )
+}

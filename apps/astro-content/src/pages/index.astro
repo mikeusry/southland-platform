@@ -12,11 +12,7 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import DecisionEngine from '../components/cdp/DecisionEngine.astro'
 import RealityTunnel from '../components/tunnels/RealityTunnel.astro'
 import CollectionProductCard from '../components/shop/CollectionProductCard.astro'
-import {
-  createClient,
-  getAllProducts,
-  getAllCollections,
-} from '@southland/shopify-storefront'
+import { createClient, getAllProducts, getAllCollections } from '@southland/shopify-storefront'
 import type { Product, CollectionSummary } from '@southland/shopify-storefront'
 
 const title = 'Southland Organics | Organic Solutions for Poultry & Lawn'
@@ -46,15 +42,16 @@ try {
 
 // ── Filter products by persona/category ─────────────────────────────────────
 const tagIncludes = (product: Product, terms: string[]) =>
-  terms.some(term =>
-    product.tags.some(t => t.toLowerCase().includes(term)) ||
-    product.title.toLowerCase().includes(term)
+  terms.some(
+    (term) =>
+      product.tags.some((t) => t.toLowerCase().includes(term)) ||
+      product.title.toLowerCase().includes(term)
   )
 
-const poultryProducts = allProducts.filter(p =>
+const poultryProducts = allProducts.filter((p) =>
   tagIncludes(p, ['poultry', 'chicken', 'hen', 'bird', 'flock', 'big ole bird', 'hen helper'])
 )
-const lawnProducts = allProducts.filter(p =>
+const lawnProducts = allProducts.filter((p) =>
   tagIncludes(p, ['lawn', 'turf', 'grass', 'soil', 'garden'])
 )
 
@@ -63,7 +60,7 @@ const featuredProducts = allProducts.slice(0, 8)
 
 // Category collections to display
 const skipHandles = new Set(['frontpage', 'all', 'flowers', 'lavender-and-eucalyptus-bundles'])
-const categoryCollections = collections.filter(c => !skipHandles.has(c.handle)).slice(0, 6)
+const categoryCollections = collections.filter((c) => !skipHandles.has(c.handle)).slice(0, 6)
 
 // ── SEO Schema ──────────────────────────────────────────────────────────────
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
@@ -87,72 +84,102 @@ const schema = {
     'https://www.youtube.com/southlandorganics',
   ],
 }
-
 ---
 
 <BaseLayout title={title} description={description} schema={schema}>
   <RealityTunnel enableABTest={true}>
-
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
     <!-- BACKYARD (Betty) TUNNEL                                               -->
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
     <Fragment slot="backyard">
       <!-- Betty Hero -->
-      <section class="bg-gradient-to-br from-amber-50 via-amber-100 to-yellow-100 px-5 py-16 md:py-24">
+      <section
+        class="bg-gradient-to-br from-amber-50 via-amber-100 to-yellow-100 px-5 py-16 md:py-24"
+      >
         <div class="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-2">
           <div>
-            <span class="mb-4 inline-block rounded-full bg-amber-800 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-white">
+            <span
+              class="mb-4 inline-block rounded-full bg-amber-800 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-white"
+            >
               For Backyard Flocks
             </span>
-            <h1 class="font-heading text-4xl leading-tight md:text-5xl" style="color: var(--color-title);">
+            <h1
+              class="font-heading text-4xl leading-tight md:text-5xl"
+              style="color: var(--color-title);"
+            >
               Happy, Healthy Hens Start Here
             </h1>
             <p class="mt-4 max-w-lg text-lg leading-relaxed text-amber-900/80">
-              Whether you have 5 hens or 50, our organic probiotics make it easy to raise thriving birds naturally.
+              Whether you have 5 hens or 50, our organic probiotics make it easy to raise thriving
+              birds naturally.
             </p>
             <div class="mt-8 flex flex-wrap gap-3">
-              <a href="/products/" class="inline-flex items-center rounded-lg bg-brand-green-dark px-6 py-3.5 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:bg-green-800">
+              <a
+                href="/products/"
+                class="bg-brand-green-dark inline-flex items-center rounded-lg px-6 py-3.5 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:bg-green-800"
+              >
                 Shop Backyard Products
               </a>
-              <a href="/podcast/" class="inline-flex items-center rounded-lg border-2 border-brand-green-dark px-6 py-3.5 text-base font-semibold transition hover:bg-brand-green-dark hover:text-white" style="color: var(--color-title);">
+              <a
+                href="/podcast/"
+                class="border-brand-green-dark hover:bg-brand-green-dark inline-flex items-center rounded-lg border-2 px-6 py-3.5 text-base font-semibold transition hover:text-white"
+                style="color: var(--color-title);"
+              >
                 Listen to Podcast
               </a>
             </div>
             <div class="mt-6 flex flex-wrap gap-5 text-sm font-medium text-amber-900/70">
               <span class="flex items-center gap-1.5">
-                <svg class="h-4 w-4 text-amber-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <svg class="h-4 w-4 text-amber-600" viewBox="0 0 24 24" fill="currentColor"
+                  ><path
+                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                  ></path></svg
+                >
                 4.8 Star Rating
               </span>
               <span class="flex items-center gap-1.5">
-                <svg class="h-4 w-4 text-green-600" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                <svg class="h-4 w-4 text-green-600" viewBox="0 0 24 24" fill="currentColor"
+                  ><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg
+                >
                 OMRI Listed Organic
               </span>
               <span class="flex items-center gap-1.5">
-                <svg class="h-4 w-4 text-green-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                <svg class="h-4 w-4 text-green-600" viewBox="0 0 24 24" fill="currentColor"
+                  ><path
+                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                  ></path></svg
+                >
                 Family Owned
               </span>
             </div>
           </div>
           <!-- Featured product images from Betty's products -->
           <div class="hidden md:grid md:grid-cols-2 md:gap-4">
-            {poultryProducts.slice(0, 4).map((product) => (
-              <a href={`/products/${product.handle}/`} class="group overflow-hidden rounded-xl bg-white shadow-sm transition hover:shadow-md">
-                {product.images[0] ? (
-                  <img
-                    src={product.images[0].url}
-                    alt={product.images[0].altText || product.title}
-                    width={300}
-                    height={300}
-                    loading="eager"
-                    class="aspect-square w-full object-contain p-4 transition group-hover:scale-105"
-                  />
-                ) : (
-                  <div class="flex aspect-square items-center justify-center bg-amber-50 text-amber-300">
-                    <svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" stroke-width="1.5"/></svg>
-                  </div>
-                )}
-              </a>
-            ))}
+            {
+              poultryProducts.slice(0, 4).map((product) => (
+                <a
+                  href={`/products/${product.handle}/`}
+                  class="group overflow-hidden rounded-xl bg-white shadow-sm transition hover:shadow-md"
+                >
+                  {product.images[0] ? (
+                    <img
+                      src={product.images[0].url}
+                      alt={product.images[0].altText || product.title}
+                      width={300}
+                      height={300}
+                      loading="eager"
+                      class="aspect-square w-full object-contain p-4 transition group-hover:scale-105"
+                    />
+                  ) : (
+                    <div class="flex aspect-square items-center justify-center bg-amber-50 text-amber-300">
+                      <svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="1.5" />
+                      </svg>
+                    </div>
+                  )}
+                </a>
+              ))
+            }
           </div>
         </div>
       </section>
@@ -161,16 +188,25 @@ const schema = {
       <section class="bg-white px-5 py-16">
         <div class="mx-auto max-w-6xl">
           <div class="mb-10 text-center">
-            <h2 class="font-heading text-3xl" style="color: var(--color-title);">Perfect for Your Backyard Flock</h2>
-            <p class="mt-3 text-gray-500">Trusted by thousands of backyard chicken keepers. OMRI Listed organic.</p>
+            <h2 class="font-heading text-3xl" style="color: var(--color-title);">
+              Perfect for Your Backyard Flock
+            </h2>
+            <p class="mt-3 text-gray-500">
+              Trusted by thousands of backyard chicken keepers. OMRI Listed organic.
+            </p>
           </div>
           <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
-            {(poultryProducts.length > 0 ? poultryProducts : featuredProducts).slice(0, 8).map((product) => (
-              <CollectionProductCard product={product} persona="backyard" />
-            ))}
+            {
+              (poultryProducts.length > 0 ? poultryProducts : featuredProducts)
+                .slice(0, 8)
+                .map((product) => <CollectionProductCard product={product} persona="backyard" />)
+            }
           </div>
           <div class="mt-10 text-center">
-            <a href="/products/" class="inline-flex items-center gap-2 rounded-lg bg-brand-green-dark px-8 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-green-800">
+            <a
+              href="/products/"
+              class="bg-brand-green-dark inline-flex items-center gap-2 rounded-lg px-8 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-green-800"
+            >
               View All Products
             </a>
           </div>
@@ -180,21 +216,57 @@ const schema = {
       <!-- Betty Trust -->
       <section class="border-t border-gray-100 bg-white px-5 py-12">
         <div class="mx-auto grid max-w-4xl grid-cols-2 gap-8 text-center md:grid-cols-4">
-          <div><div class="mb-1 text-3xl font-bold" style="color: var(--color-title);">10,000+</div><div class="text-sm text-gray-600">Happy Flocks</div></div>
-          <div><div class="mb-1 text-3xl font-bold" style="color: var(--color-title);">4.8/5</div><div class="text-sm text-gray-600">Star Rating</div></div>
-          <div><div class="mb-1 text-3xl font-bold" style="color: var(--color-title);">OMRI</div><div class="text-sm text-gray-600">Listed Organic</div></div>
-          <div><div class="mb-1 text-3xl font-bold" style="color: var(--color-title);">USA</div><div class="text-sm text-gray-600">Made in Georgia</div></div>
+          <div>
+            <div class="mb-1 text-3xl font-bold" style="color: var(--color-title);">
+              10,000+
+            </div><div class="text-sm text-gray-600">Happy Flocks</div>
+          </div>
+          <div>
+            <div class="mb-1 text-3xl font-bold" style="color: var(--color-title);">4.8/5</div><div
+              class="text-sm text-gray-600"
+            >
+              Star Rating
+            </div>
+          </div>
+          <div>
+            <div class="mb-1 text-3xl font-bold" style="color: var(--color-title);">OMRI</div><div
+              class="text-sm text-gray-600"
+            >
+              Listed Organic
+            </div>
+          </div>
+          <div>
+            <div class="mb-1 text-3xl font-bold" style="color: var(--color-title);">USA</div><div
+              class="text-sm text-gray-600"
+            >
+              Made in Georgia
+            </div>
+          </div>
         </div>
       </section>
 
       <!-- Betty CTA -->
-      <section class="bg-gradient-to-br from-brand-green-light to-brand-green-dark px-5 py-16 text-center">
+      <section
+        class="from-brand-green-light to-brand-green-dark bg-gradient-to-br px-5 py-16 text-center"
+      >
         <div class="mx-auto max-w-2xl">
-          <h2 class="font-heading text-3xl text-white md:text-4xl">Ready to Give Your Flock the Best?</h2>
-          <p class="mt-4 text-lg text-white/90">Join thousands of backyard chicken keepers who trust Southland Organics.</p>
+          <h2 class="font-heading text-3xl text-white md:text-4xl">
+            Ready to Give Your Flock the Best?
+          </h2>
+          <p class="mt-4 text-lg text-white/90">
+            Join thousands of backyard chicken keepers who trust Southland Organics.
+          </p>
           <div class="mt-8 flex flex-wrap justify-center gap-3">
-            <a href="/products/" class="rounded-lg bg-white px-7 py-3.5 font-semibold transition hover:-translate-y-0.5" style="color: var(--color-title);">Shop Products</a>
-            <a href="/contact/" class="rounded-lg border-2 border-white px-7 py-3.5 font-semibold text-white transition hover:bg-white/10">Contact Us</a>
+            <a
+              href="/products/"
+              class="rounded-lg bg-white px-7 py-3.5 font-semibold transition hover:-translate-y-0.5"
+              style="color: var(--color-title);">Shop Products</a
+            >
+            <a
+              href="/contact/"
+              class="rounded-lg border-2 border-white px-7 py-3.5 font-semibold text-white transition hover:bg-white/10"
+              >Contact Us</a
+            >
           </div>
         </div>
       </section>
@@ -205,39 +277,64 @@ const schema = {
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
     <Fragment slot="commercial">
       <!-- Bill Hero -->
-      <section class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-5 py-16 md:py-24">
+      <section
+        class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-5 py-16 md:py-24"
+      >
         <div class="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-2">
           <div>
-            <span class="mb-4 inline-block rounded-full bg-green-600 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-white">
+            <span
+              class="mb-4 inline-block rounded-full bg-green-600 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-white"
+            >
               Commercial Poultry
             </span>
             <h1 class="font-heading text-4xl leading-tight text-white md:text-5xl">
               Measurable ROI for Your Operation
             </h1>
             <p class="mt-4 max-w-lg text-lg leading-relaxed text-slate-300">
-              500+ commercial growers trust Southland Organics to reduce mortality, improve performance, and boost profitability.
+              500+ commercial growers trust Southland Organics to reduce mortality, improve
+              performance, and boost profitability.
             </p>
             <div class="mt-8 flex flex-wrap gap-3">
-              <a href="/contact/" class="inline-flex items-center rounded-lg bg-brand-green-light px-6 py-3.5 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:bg-green-600">
+              <a
+                href="/contact/"
+                class="bg-brand-green-light inline-flex items-center rounded-lg px-6 py-3.5 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:bg-green-600"
+              >
                 Request a Quote
               </a>
-              <a href="/products/" class="inline-flex items-center rounded-lg border-2 border-white/40 px-6 py-3.5 text-base font-semibold text-white transition hover:border-white hover:bg-white/10">
+              <a
+                href="/products/"
+                class="inline-flex items-center rounded-lg border-2 border-white/40 px-6 py-3.5 text-base font-semibold text-white transition hover:border-white hover:bg-white/10"
+              >
                 Browse Products
               </a>
             </div>
           </div>
           <div class="hidden md:grid md:grid-cols-2 md:gap-4">
-            {poultryProducts.slice(0, 4).map((product) => (
-              <a href={`/products/${product.handle}/`} class="group overflow-hidden rounded-xl bg-slate-800 shadow-sm transition hover:shadow-md">
-                {product.images[0] ? (
-                  <img src={product.images[0].url} alt={product.images[0].altText || product.title} width={300} height={300} loading="eager" class="aspect-square w-full object-contain p-4 transition group-hover:scale-105" />
-                ) : (
-                  <div class="flex aspect-square items-center justify-center bg-slate-700 text-slate-500">
-                    <svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" stroke-width="1.5"/></svg>
-                  </div>
-                )}
-              </a>
-            ))}
+            {
+              poultryProducts.slice(0, 4).map((product) => (
+                <a
+                  href={`/products/${product.handle}/`}
+                  class="group overflow-hidden rounded-xl bg-slate-800 shadow-sm transition hover:shadow-md"
+                >
+                  {product.images[0] ? (
+                    <img
+                      src={product.images[0].url}
+                      alt={product.images[0].altText || product.title}
+                      width={300}
+                      height={300}
+                      loading="eager"
+                      class="aspect-square w-full object-contain p-4 transition group-hover:scale-105"
+                    />
+                  ) : (
+                    <div class="flex aspect-square items-center justify-center bg-slate-700 text-slate-500">
+                      <svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="1.5" />
+                      </svg>
+                    </div>
+                  )}
+                </a>
+              ))
+            }
           </div>
         </div>
       </section>
@@ -246,16 +343,23 @@ const schema = {
       <section class="bg-white px-5 py-16">
         <div class="mx-auto max-w-6xl">
           <div class="mb-10 text-center">
-            <h2 class="font-heading text-3xl" style="color: var(--color-title);">Proven Solutions for Commercial Operations</h2>
+            <h2 class="font-heading text-3xl" style="color: var(--color-title);">
+              Proven Solutions for Commercial Operations
+            </h2>
             <p class="mt-3 text-gray-500">Bulk sizes and programs designed for maximum ROI.</p>
           </div>
           <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
-            {(poultryProducts.length > 0 ? poultryProducts : featuredProducts).slice(0, 8).map((product) => (
-              <CollectionProductCard product={product} persona="commercial" />
-            ))}
+            {
+              (poultryProducts.length > 0 ? poultryProducts : featuredProducts)
+                .slice(0, 8)
+                .map((product) => <CollectionProductCard product={product} persona="commercial" />)
+            }
           </div>
           <div class="mt-10 text-center">
-            <a href="/products/" class="inline-flex items-center gap-2 rounded-lg bg-brand-green-dark px-8 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-green-800">
+            <a
+              href="/products/"
+              class="bg-brand-green-dark inline-flex items-center gap-2 rounded-lg px-8 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-green-800"
+            >
               View All Products
             </a>
           </div>
@@ -265,21 +369,57 @@ const schema = {
       <!-- Bill Trust -->
       <section class="bg-slate-900 px-5 py-12">
         <div class="mx-auto grid max-w-4xl grid-cols-2 gap-8 text-center md:grid-cols-4">
-          <div><div class="mb-1 text-3xl font-bold text-green-400">500+</div><div class="text-sm text-slate-400 uppercase tracking-wide">Growers Nationwide</div></div>
-          <div><div class="mb-1 text-3xl font-bold text-green-400">1-2%</div><div class="text-sm text-slate-400 uppercase tracking-wide">Mortality Reduction</div></div>
-          <div><div class="mb-1 text-3xl font-bold text-green-400">OMRI</div><div class="text-sm text-slate-400 uppercase tracking-wide">Listed Organic</div></div>
-          <div><div class="mb-1 text-3xl font-bold text-green-400">24/7</div><div class="text-sm text-slate-400 uppercase tracking-wide">Technical Support</div></div>
+          <div>
+            <div class="mb-1 text-3xl font-bold text-green-400">500+</div><div
+              class="text-sm uppercase tracking-wide text-slate-400"
+            >
+              Growers Nationwide
+            </div>
+          </div>
+          <div>
+            <div class="mb-1 text-3xl font-bold text-green-400">1-2%</div><div
+              class="text-sm uppercase tracking-wide text-slate-400"
+            >
+              Mortality Reduction
+            </div>
+          </div>
+          <div>
+            <div class="mb-1 text-3xl font-bold text-green-400">OMRI</div><div
+              class="text-sm uppercase tracking-wide text-slate-400"
+            >
+              Listed Organic
+            </div>
+          </div>
+          <div>
+            <div class="mb-1 text-3xl font-bold text-green-400">24/7</div><div
+              class="text-sm uppercase tracking-wide text-slate-400"
+            >
+              Technical Support
+            </div>
+          </div>
         </div>
       </section>
 
       <!-- Bill CTA -->
       <section class="bg-gradient-to-br from-slate-800 to-slate-900 px-5 py-16 text-center">
         <div class="mx-auto max-w-2xl">
-          <h2 class="font-heading text-3xl text-white md:text-4xl">Ready to Improve Your Flock Performance?</h2>
-          <p class="mt-4 text-lg text-slate-300">Join 500+ commercial growers seeing measurable ROI with Southland Organics.</p>
+          <h2 class="font-heading text-3xl text-white md:text-4xl">
+            Ready to Improve Your Flock Performance?
+          </h2>
+          <p class="mt-4 text-lg text-slate-300">
+            Join 500+ commercial growers seeing measurable ROI with Southland Organics.
+          </p>
           <div class="mt-8 flex flex-wrap justify-center gap-3">
-            <a href="/contact/" class="rounded-lg bg-brand-green-light px-7 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-green-600">Request a Quote</a>
-            <a href="/products/" class="rounded-lg border-2 border-white/40 px-7 py-3.5 font-semibold text-white transition hover:border-white hover:bg-white/10">Browse Products</a>
+            <a
+              href="/contact/"
+              class="bg-brand-green-light rounded-lg px-7 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-green-600"
+              >Request a Quote</a
+            >
+            <a
+              href="/products/"
+              class="rounded-lg border-2 border-white/40 px-7 py-3.5 font-semibold text-white transition hover:border-white hover:bg-white/10"
+              >Browse Products</a
+            >
           </div>
         </div>
       </section>
@@ -290,39 +430,71 @@ const schema = {
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
     <Fragment slot="lawn">
       <!-- Taylor Hero -->
-      <section class="bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 px-5 py-16 md:py-24">
+      <section
+        class="bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 px-5 py-16 md:py-24"
+      >
         <div class="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-2">
           <div>
-            <span class="mb-4 inline-block rounded-full bg-emerald-500 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-white">
+            <span
+              class="mb-4 inline-block rounded-full bg-emerald-500 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-white"
+            >
               Lawn & Turf
             </span>
             <h1 class="font-heading text-4xl leading-tight text-white md:text-5xl">
               Healthier Soil, Better Results
             </h1>
             <p class="mt-4 max-w-lg text-lg leading-relaxed text-green-200">
-              Join thousands of lawn care professionals getting better results with organic soil biology.
+              Join thousands of lawn care professionals getting better results with organic soil
+              biology.
             </p>
             <div class="mt-8 flex flex-wrap gap-3">
-              <a href="/products/" class="inline-flex items-center rounded-lg bg-white px-6 py-3.5 text-base font-semibold text-green-900 transition hover:-translate-y-0.5">
+              <a
+                href="/products/"
+                class="inline-flex items-center rounded-lg bg-white px-6 py-3.5 text-base font-semibold text-green-900 transition hover:-translate-y-0.5"
+              >
                 Shop Lawn Products
               </a>
-              <a href="/contact/" class="inline-flex items-center rounded-lg border-2 border-white/40 px-6 py-3.5 text-base font-semibold text-white transition hover:border-white hover:bg-white/10">
+              <a
+                href="/contact/"
+                class="inline-flex items-center rounded-lg border-2 border-white/40 px-6 py-3.5 text-base font-semibold text-white transition hover:border-white hover:bg-white/10"
+              >
                 Request Samples
               </a>
             </div>
           </div>
           <div class="hidden md:grid md:grid-cols-2 md:gap-4">
-            {(lawnProducts.length > 0 ? lawnProducts : featuredProducts).slice(0, 4).map((product) => (
-              <a href={`/products/${product.handle}/`} class="group overflow-hidden rounded-xl bg-green-800/50 shadow-sm transition hover:shadow-md">
-                {product.images[0] ? (
-                  <img src={product.images[0].url} alt={product.images[0].altText || product.title} width={300} height={300} loading="eager" class="aspect-square w-full object-contain p-4 transition group-hover:scale-105" />
-                ) : (
-                  <div class="flex aspect-square items-center justify-center bg-green-800 text-green-600">
-                    <svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" stroke-width="1.5"/></svg>
-                  </div>
-                )}
-              </a>
-            ))}
+            {
+              (lawnProducts.length > 0 ? lawnProducts : featuredProducts)
+                .slice(0, 4)
+                .map((product) => (
+                  <a
+                    href={`/products/${product.handle}/`}
+                    class="group overflow-hidden rounded-xl bg-green-800/50 shadow-sm transition hover:shadow-md"
+                  >
+                    {product.images[0] ? (
+                      <img
+                        src={product.images[0].url}
+                        alt={product.images[0].altText || product.title}
+                        width={300}
+                        height={300}
+                        loading="eager"
+                        class="aspect-square w-full object-contain p-4 transition group-hover:scale-105"
+                      />
+                    ) : (
+                      <div class="flex aspect-square items-center justify-center bg-green-800 text-green-600">
+                        <svg
+                          class="h-12 w-12"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="1.5" />
+                        </svg>
+                      </div>
+                    )}
+                  </a>
+                ))
+            }
           </div>
         </div>
       </section>
@@ -331,16 +503,25 @@ const schema = {
       <section class="bg-white px-5 py-16">
         <div class="mx-auto max-w-6xl">
           <div class="mb-10 text-center">
-            <h2 class="font-heading text-3xl" style="color: var(--color-title);">Organic Lawn & Turf Solutions</h2>
-            <p class="mt-3 text-gray-500">Professional-grade organic products for healthier soil and greener turf.</p>
+            <h2 class="font-heading text-3xl" style="color: var(--color-title);">
+              Organic Lawn & Turf Solutions
+            </h2>
+            <p class="mt-3 text-gray-500">
+              Professional-grade organic products for healthier soil and greener turf.
+            </p>
           </div>
           <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
-            {(lawnProducts.length > 0 ? lawnProducts : featuredProducts).slice(0, 8).map((product) => (
-              <CollectionProductCard product={product} persona="lawn" />
-            ))}
+            {
+              (lawnProducts.length > 0 ? lawnProducts : featuredProducts)
+                .slice(0, 8)
+                .map((product) => <CollectionProductCard product={product} persona="lawn" />)
+            }
           </div>
           <div class="mt-10 text-center">
-            <a href="/products/" class="inline-flex items-center gap-2 rounded-lg bg-brand-green-dark px-8 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-green-800">
+            <a
+              href="/products/"
+              class="bg-brand-green-dark inline-flex items-center gap-2 rounded-lg px-8 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-green-800"
+            >
               View All Products
             </a>
           </div>
@@ -350,10 +531,34 @@ const schema = {
       <!-- Taylor Trust -->
       <section class="bg-green-900 px-5 py-12">
         <div class="mx-auto grid max-w-4xl grid-cols-2 gap-8 text-center md:grid-cols-4">
-          <div><div class="mb-1 text-3xl font-bold text-green-300">1,000+</div><div class="text-sm text-green-400 uppercase tracking-wide">Lawn Pros</div></div>
-          <div><div class="mb-1 text-3xl font-bold text-green-300">50</div><div class="text-sm text-green-400 uppercase tracking-wide">States Served</div></div>
-          <div><div class="mb-1 text-3xl font-bold text-green-300">OMRI</div><div class="text-sm text-green-400 uppercase tracking-wide">Listed Organic</div></div>
-          <div><div class="mb-1 text-3xl font-bold text-green-300">15+</div><div class="text-sm text-green-400 uppercase tracking-wide">Years Experience</div></div>
+          <div>
+            <div class="mb-1 text-3xl font-bold text-green-300">1,000+</div><div
+              class="text-sm uppercase tracking-wide text-green-400"
+            >
+              Lawn Pros
+            </div>
+          </div>
+          <div>
+            <div class="mb-1 text-3xl font-bold text-green-300">50</div><div
+              class="text-sm uppercase tracking-wide text-green-400"
+            >
+              States Served
+            </div>
+          </div>
+          <div>
+            <div class="mb-1 text-3xl font-bold text-green-300">OMRI</div><div
+              class="text-sm uppercase tracking-wide text-green-400"
+            >
+              Listed Organic
+            </div>
+          </div>
+          <div>
+            <div class="mb-1 text-3xl font-bold text-green-300">15+</div><div
+              class="text-sm uppercase tracking-wide text-green-400"
+            >
+              Years Experience
+            </div>
+          </div>
         </div>
       </section>
 
@@ -361,10 +566,20 @@ const schema = {
       <section class="bg-gradient-to-br from-green-800 to-green-900 px-5 py-16 text-center">
         <div class="mx-auto max-w-2xl">
           <h2 class="font-heading text-3xl text-white md:text-4xl">Ready to Go Organic?</h2>
-          <p class="mt-4 text-lg text-green-200">Join thousands of lawn care professionals getting better results with healthier soil.</p>
+          <p class="mt-4 text-lg text-green-200">
+            Join thousands of lawn care professionals getting better results with healthier soil.
+          </p>
           <div class="mt-8 flex flex-wrap justify-center gap-3">
-            <a href="/products/" class="rounded-lg bg-white px-7 py-3.5 font-semibold text-green-900 transition hover:-translate-y-0.5">Shop Lawn Products</a>
-            <a href="/contact/" class="rounded-lg border-2 border-white/40 px-7 py-3.5 font-semibold text-white transition hover:border-white hover:bg-white/10">Request Samples</a>
+            <a
+              href="/products/"
+              class="rounded-lg bg-white px-7 py-3.5 font-semibold text-green-900 transition hover:-translate-y-0.5"
+              >Shop Lawn Products</a
+            >
+            <a
+              href="/contact/"
+              class="rounded-lg border-2 border-white/40 px-7 py-3.5 font-semibold text-white transition hover:border-white hover:bg-white/10"
+              >Request Samples</a
+            >
           </div>
         </div>
       </section>
@@ -375,7 +590,9 @@ const schema = {
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
     <Fragment slot="default">
       <!-- Hero Section -->
-      <section class="bg-gradient-to-br from-brand-green-dark via-green-800 to-green-900 px-5 py-20 md:py-28">
+      <section
+        class="from-brand-green-dark bg-gradient-to-br via-green-800 to-green-900 px-5 py-20 md:py-28"
+      >
         <div class="mx-auto max-w-6xl text-center">
           <img
             src="https://res.cloudinary.com/southland-organics/image/upload/c_scale,w_280/v1/Southland%20Website/Southland%20Branding/logos/southland-logo-primary.png"
@@ -388,13 +605,21 @@ const schema = {
             Organic Solutions for <br class="hidden sm:block" />Healthier Birds &amp; Better Soil
           </h1>
           <p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-green-200 md:text-xl">
-            OMRI Listed probiotics and natural products trusted by thousands of farmers, growers, and homeowners. Family-owned, made in Georgia.
+            OMRI Listed probiotics and natural products trusted by thousands of farmers, growers,
+            and homeowners. Family-owned, made in Georgia.
           </p>
           <div class="mt-10 flex flex-wrap justify-center gap-4">
-            <a href="/products/" class="inline-flex items-center rounded-lg bg-white px-8 py-4 text-base font-semibold transition hover:-translate-y-0.5 hover:shadow-lg" style="color: var(--color-title);">
+            <a
+              href="/products/"
+              class="inline-flex items-center rounded-lg bg-white px-8 py-4 text-base font-semibold transition hover:-translate-y-0.5 hover:shadow-lg"
+              style="color: var(--color-title);"
+            >
               Shop All Products
             </a>
-            <a href="/store-locator/" class="inline-flex items-center rounded-lg border-2 border-white/50 px-8 py-4 text-base font-semibold text-white transition hover:border-white hover:bg-white/10">
+            <a
+              href="/store-locator/"
+              class="inline-flex items-center rounded-lg border-2 border-white/50 px-8 py-4 text-base font-semibold text-white transition hover:border-white hover:bg-white/10"
+            >
               Find a Dealer
             </a>
           </div>
@@ -402,73 +627,104 @@ const schema = {
       </section>
 
       <!-- Featured Products -->
-      {featuredProducts.length > 0 && (
-        <section class="bg-white px-5 py-16">
-          <div class="mx-auto max-w-6xl">
-            <div class="mb-10 text-center">
-              <h2 class="font-heading text-3xl" style="color: var(--color-title);">Featured Products</h2>
-              <p class="mt-3 text-gray-500">
-                {allProducts.length} scientifically-proven organic products for poultry, lawn, and more.
-              </p>
+      {
+        featuredProducts.length > 0 && (
+          <section class="bg-white px-5 py-16">
+            <div class="mx-auto max-w-6xl">
+              <div class="mb-10 text-center">
+                <h2 class="font-heading text-3xl" style="color: var(--color-title);">
+                  Featured Products
+                </h2>
+                <p class="mt-3 text-gray-500">
+                  {allProducts.length} scientifically-proven organic products for poultry, lawn, and
+                  more.
+                </p>
+              </div>
+              <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
+                {featuredProducts.map((product) => (
+                  <CollectionProductCard product={product} />
+                ))}
+              </div>
+              <div class="mt-10 text-center">
+                <a
+                  href="/products/"
+                  class="bg-brand-green-dark inline-flex items-center gap-2 rounded-lg px-8 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-green-800"
+                >
+                  View All {allProducts.length} Products
+                </a>
+              </div>
             </div>
-            <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
-              {featuredProducts.map((product) => (
-                <CollectionProductCard product={product} />
-              ))}
-            </div>
-            <div class="mt-10 text-center">
-              <a href="/products/" class="inline-flex items-center gap-2 rounded-lg bg-brand-green-dark px-8 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-green-800">
-                View All {allProducts.length} Products
-              </a>
-            </div>
-          </div>
-        </section>
-      )}
+          </section>
+        )
+      }
 
       <!-- Category Cards -->
-      {categoryCollections.length > 0 && (
-        <section class="bg-gray-50 px-5 py-16">
-          <div class="mx-auto max-w-6xl">
-            <div class="mb-10 text-center">
-              <h2 class="font-heading text-3xl" style="color: var(--color-title);">Shop by Category</h2>
-            </div>
-            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {categoryCollections.map((collection) => (
-                <a
-                  href={`/collections/${collection.handle}/`}
-                  class="group flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-5 transition-shadow hover:shadow-md"
-                >
-                  {collection.image ? (
-                    <img
-                      src={collection.image.url}
-                      alt={collection.image.altText || collection.title}
-                      width={80}
-                      height={80}
-                      loading="lazy"
-                      class="h-20 w-20 rounded-lg object-cover"
-                    />
-                  ) : (
-                    <div class="flex h-20 w-20 items-center justify-center rounded-lg bg-green-50">
-                      <svg class="h-8 w-8 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="1.5"/>
-                      </svg>
-                    </div>
-                  )}
-                  <div class="flex-1">
-                    <h3 class="font-semibold text-gray-900 group-hover:text-brand-green-dark">{collection.title}</h3>
-                    {collection.description && (
-                      <p class="mt-1 line-clamp-2 text-sm text-gray-500">{collection.description}</p>
+      {
+        categoryCollections.length > 0 && (
+          <section class="bg-gray-50 px-5 py-16">
+            <div class="mx-auto max-w-6xl">
+              <div class="mb-10 text-center">
+                <h2 class="font-heading text-3xl" style="color: var(--color-title);">
+                  Shop by Category
+                </h2>
+              </div>
+              <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {categoryCollections.map((collection) => (
+                  <a
+                    href={`/collections/${collection.handle}/`}
+                    class="group flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-5 transition-shadow hover:shadow-md"
+                  >
+                    {collection.image ? (
+                      <img
+                        src={collection.image.url}
+                        alt={collection.image.altText || collection.title}
+                        width={80}
+                        height={80}
+                        loading="lazy"
+                        class="h-20 w-20 rounded-lg object-cover"
+                      />
+                    ) : (
+                      <div class="flex h-20 w-20 items-center justify-center rounded-lg bg-green-50">
+                        <svg
+                          class="h-8 w-8 text-green-300"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="1.5" />
+                        </svg>
+                      </div>
                     )}
-                  </div>
-                  <svg class="h-5 w-5 flex-shrink-0 text-gray-300 transition group-hover:text-brand-green-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                  </svg>
-                </a>
-              ))}
+                    <div class="flex-1">
+                      <h3 class="group-hover:text-brand-green-dark font-semibold text-gray-900">
+                        {collection.title}
+                      </h3>
+                      {collection.description && (
+                        <p class="mt-1 line-clamp-2 text-sm text-gray-500">
+                          {collection.description}
+                        </p>
+                      )}
+                    </div>
+                    <svg
+                      class="group-hover:text-brand-green-light h-5 w-5 flex-shrink-0 text-gray-300 transition"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </a>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
-      )}
+          </section>
+        )
+      }
 
       <!-- Decision Engine -->
       <DecisionEngine
@@ -502,49 +758,116 @@ const schema = {
       <section class="bg-gray-50 px-5 py-16">
         <div class="mx-auto max-w-6xl">
           <div class="mb-10 text-center">
-            <h2 class="font-heading text-3xl" style="color: var(--color-title);">Learn &amp; Connect</h2>
+            <h2 class="font-heading text-3xl" style="color: var(--color-title);">
+              Learn &amp; Connect
+            </h2>
           </div>
           <div class="grid gap-6 md:grid-cols-3">
-            <a href="/podcast/" class="group rounded-xl border border-gray-200 bg-white p-6 transition-shadow hover:shadow-md">
+            <a
+              href="/podcast/"
+              class="group rounded-xl border border-gray-200 bg-white p-6 transition-shadow hover:shadow-md"
+            >
               <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-50">
-                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m-4 0h8m-8-8a3 3 0 016 0v1a3 3 0 01-6 0v-1z"/>
+                <svg
+                  class="h-6 w-6 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m-4 0h8m-8-8a3 3 0 016 0v1a3 3 0 01-6 0v-1z"
+                  ></path>
                 </svg>
               </div>
-              <h3 class="font-semibold text-gray-900 group-hover:text-brand-green-dark">Ag &amp; Culture Podcast</h3>
-              <p class="mt-2 text-sm text-gray-500">Learn from industry experts about organic farming, soil health, and sustainable agriculture.</p>
+              <h3 class="group-hover:text-brand-green-dark font-semibold text-gray-900">
+                Ag &amp; Culture Podcast
+              </h3>
+              <p class="mt-2 text-sm text-gray-500">
+                Learn from industry experts about organic farming, soil health, and sustainable
+                agriculture.
+              </p>
             </a>
-            <a href="/blog/" class="group rounded-xl border border-gray-200 bg-white p-6 transition-shadow hover:shadow-md">
+            <a
+              href="/blog/"
+              class="group rounded-xl border border-gray-200 bg-white p-6 transition-shadow hover:shadow-md"
+            >
               <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-50">
-                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>
+                <svg
+                  class="h-6 w-6 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"
+                  ></path>
                 </svg>
               </div>
-              <h3 class="font-semibold text-gray-900 group-hover:text-brand-green-dark">Blog</h3>
-              <p class="mt-2 text-sm text-gray-500">Tips, guides, and research on organic poultry care, lawn health, and sustainability.</p>
+              <h3 class="group-hover:text-brand-green-dark font-semibold text-gray-900">Blog</h3>
+              <p class="mt-2 text-sm text-gray-500">
+                Tips, guides, and research on organic poultry care, lawn health, and sustainability.
+              </p>
             </a>
-            <a href="/store-locator/" class="group rounded-xl border border-gray-200 bg-white p-6 transition-shadow hover:shadow-md">
+            <a
+              href="/store-locator/"
+              class="group rounded-xl border border-gray-200 bg-white p-6 transition-shadow hover:shadow-md"
+            >
               <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-50">
-                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 0115 0z"/>
+                <svg
+                  class="h-6 w-6 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 0115 0z"
+                  ></path>
                 </svg>
               </div>
-              <h3 class="font-semibold text-gray-900 group-hover:text-brand-green-dark">Find a Dealer</h3>
-              <p class="mt-2 text-sm text-gray-500">114 dealers nationwide. Find Southland Organics products near you.</p>
+              <h3 class="group-hover:text-brand-green-dark font-semibold text-gray-900">
+                Find a Dealer
+              </h3>
+              <p class="mt-2 text-sm text-gray-500">
+                114 dealers nationwide. Find Southland Organics products near you.
+              </p>
             </a>
           </div>
         </div>
       </section>
 
       <!-- Final CTA -->
-      <section class="bg-gradient-to-br from-brand-green-light to-brand-green-dark px-5 py-16 text-center">
+      <section
+        class="from-brand-green-light to-brand-green-dark bg-gradient-to-br px-5 py-16 text-center"
+      >
         <div class="mx-auto max-w-2xl">
           <h2 class="font-heading text-3xl text-white md:text-4xl">Ready to Go Organic?</h2>
-          <p class="mt-4 text-lg text-white/90">Browse our full catalog or get in touch — we're here to help.</p>
+          <p class="mt-4 text-lg text-white/90">
+            Browse our full catalog or get in touch — we're here to help.
+          </p>
           <div class="mt-8 flex flex-wrap justify-center gap-4">
-            <a href="/products/" class="rounded-lg bg-white px-8 py-3.5 font-semibold transition hover:-translate-y-0.5 hover:shadow-lg" style="color: var(--color-title);">Shop All Products</a>
-            <a href="/contact/" class="rounded-lg border-2 border-white/50 px-8 py-3.5 font-semibold text-white transition hover:border-white hover:bg-white/10">Contact Us</a>
+            <a
+              href="/products/"
+              class="rounded-lg bg-white px-8 py-3.5 font-semibold transition hover:-translate-y-0.5 hover:shadow-lg"
+              style="color: var(--color-title);">Shop All Products</a
+            >
+            <a
+              href="/contact/"
+              class="rounded-lg border-2 border-white/50 px-8 py-3.5 font-semibold text-white transition hover:border-white hover:bg-white/10"
+              >Contact Us</a
+            >
           </div>
         </div>
       </section>

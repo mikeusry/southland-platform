@@ -86,14 +86,24 @@ const contactSchema = {
       fetchpriority="high"
     />
     <script is:inline define:vars={{ heroImages }}>
-      var pick = heroImages[Math.floor(Math.random() * heroImages.length)];
-      var el = document.getElementById('hero-bg');
-      if (el) { el.src = pick.src; el.srcset = pick.srcset; el.sizes = '100vw'; }
+      var pick = heroImages[Math.floor(Math.random() * heroImages.length)]
+      var el = document.getElementById('hero-bg')
+      if (el) {
+        el.src = pick.src
+        el.srcset = pick.srcset
+        el.sizes = '100vw'
+      }
     </script>
     <!-- Dark gradient overlay -->
     <div class="absolute inset-0" aria-hidden="true">
-      <div class="absolute inset-0 bg-gradient-to-b from-[#1a3a21]/80 via-[#2c5234]/70 to-[#1a2f1e]/85"></div>
-      <div class="absolute inset-0 bg-gradient-to-br from-[#3d2b1f]/15 via-transparent to-[#2c1810]/10"></div>
+      <div
+        class="absolute inset-0 bg-gradient-to-b from-[#1a3a21]/80 via-[#2c5234]/70 to-[#1a2f1e]/85"
+      >
+      </div>
+      <div
+        class="absolute inset-0 bg-gradient-to-br from-[#3d2b1f]/15 via-transparent to-[#2c1810]/10"
+      >
+      </div>
     </div>
     <div class="relative z-10 mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 md:py-20 lg:px-8">
       <p class="mb-3 text-sm font-medium uppercase tracking-widest text-southland-green">
@@ -110,7 +120,7 @@ const contactSchema = {
   <!-- Quick Contact Cards -->
   <section class="relative -mt-8 pb-8">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="grid gap-4 md:grid-cols-2 md:max-w-2xl md:mx-auto">
+      <div class="grid gap-4 md:mx-auto md:max-w-2xl md:grid-cols-2">
         <!-- Call -->
         <a
           href="tel:+18006083755"
@@ -191,7 +201,9 @@ const contactSchema = {
             <form id="contact-form" class="space-y-6">
               <div class="grid gap-6 sm:grid-cols-2">
                 <div>
-                  <label for="first-name" class="mb-1.5 block text-sm font-medium text-shopify-title"
+                  <label
+                    for="first-name"
+                    class="mb-1.5 block text-sm font-medium text-shopify-title"
                     >First Name <span class="text-red-500">*</span></label
                   >
                   <input
@@ -281,7 +293,13 @@ const contactSchema = {
               </div>
 
               <!-- Honeypot — hidden from humans, bots fill it -->
-              <input name="website" type="text" style="display:none" tabindex="-1" autocomplete="off" />
+              <input
+                name="website"
+                type="text"
+                style="display:none"
+                tabindex="-1"
+                autocomplete="off"
+              />
 
               <button
                 type="submit"
@@ -319,7 +337,8 @@ const contactSchema = {
               <h3 class="mb-2 text-2xl font-bold text-shopify-title">Message Sent!</h3>
               <p class="text-shopify-secondary-text">
                 We'll get back to you within 24 hours. If your matter is urgent, call us at
-                <a href="tel:+18006083755" class="font-semibold text-southland-green">800-608-3755</a
+                <a href="tel:+18006083755" class="font-semibold text-southland-green"
+                  >800-608-3755</a
                 >.
               </p>
             </div>
@@ -411,7 +430,11 @@ const contactSchema = {
             >
               Learn about our dealer program
               <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"></path>
               </svg>
             </a>
           </div>
@@ -459,7 +482,10 @@ const contactSchema = {
             Southland Organics is headquartered in Bogart, Georgia.
           </p>
           <p class="mb-6 text-lg text-shopify-secondary-text">
-            We ship nationwide and have a strong <a href="/store-locator/" class="font-semibold text-southland-green hover:underline">dealer network</a>.
+            We ship nationwide and have a strong <a
+              href="/store-locator/"
+              class="font-semibold text-southland-green hover:underline">dealer network</a
+            >.
           </p>
           <div class="space-y-3 text-shopify-secondary-text">
             <div class="flex items-start gap-3">
@@ -525,8 +551,7 @@ const contactSchema = {
             allowfullscreen=""
             loading="lazy"
             referrerpolicy="no-referrer-when-downgrade"
-            title="Southland Organics Location"
-          ></iframe>
+            title="Southland Organics Location"></iframe>
         </div>
       </div>
     </div>

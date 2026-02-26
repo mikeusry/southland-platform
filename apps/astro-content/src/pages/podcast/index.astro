@@ -8,7 +8,12 @@ import PodcastLayout from '../../layouts/PodcastLayout.astro'
 import EpisodeGrid from '../../components/podcast/EpisodeGrid.astro'
 import SubscribeButtons from '../../components/podcast/SubscribeButtons.astro'
 import EmailCapture from '../../components/shared/EmailCapture.astro'
-import { buildSouthlandUrl, buildBrandingUrl, getSouthlandImageId, getCloudinaryResponsiveSet } from '../../lib/cloudinary'
+import {
+  buildSouthlandUrl,
+  buildBrandingUrl,
+  getSouthlandImageId,
+  getCloudinaryResponsiveSet,
+} from '../../lib/cloudinary'
 import { getCollection, getEntry } from 'astro:content'
 import { buildPersonSchema, buildOrganizationSchema } from '../../lib/schema'
 
@@ -59,10 +64,10 @@ const ogImageUrl = buildBrandingUrl('logos/southland-logo-primary', { width: 120
 // Hero background photos — curated pool, randomly selected on each page load
 // Color-graded with reduced saturation to normalize under the green overlay
 const heroImagePaths = [
-  'heroes/Farm_Athens_GA_7_jbdjik',   // tractor in autumn field with dog
-  'heroes/Farm_Athens_GA_4_qaishv',   // sepia tractor under barn shelter
-  'heroes/Farm_Athens_GA_11_pntmj0',  // wide farm landscape with barn
-  'heroes/DSC_0137_dco2wk',          // lettuce harvest in raised beds
+  'heroes/Farm_Athens_GA_7_jbdjik', // tractor in autumn field with dog
+  'heroes/Farm_Athens_GA_4_qaishv', // sepia tractor under barn shelter
+  'heroes/Farm_Athens_GA_11_pntmj0', // wide farm landscape with barn
+  'heroes/DSC_0137_dco2wk', // lettuce harvest in raised beds
 ]
 const heroImages = heroImagePaths.map((path) =>
   getCloudinaryResponsiveSet(getSouthlandImageId(path), [800, 1200, 1600, 1920], {
@@ -119,22 +124,35 @@ const podcastSchema = {
       fetchpriority="high"
     />
     <script is:inline define:vars={{ heroImages }}>
-      var pick = heroImages[Math.floor(Math.random() * heroImages.length)];
-      var el = document.getElementById('hero-bg');
-      if (el) { el.src = pick.src; el.srcset = pick.srcset; el.sizes = '100vw'; }
+      var pick = heroImages[Math.floor(Math.random() * heroImages.length)]
+      var el = document.getElementById('hero-bg')
+      if (el) {
+        el.src = pick.src
+        el.srcset = pick.srcset
+        el.sizes = '100vw'
+      }
     </script>
     {/* Dark gradient overlay for text readability */}
     <div class="absolute inset-0" aria-hidden="true">
-      <div class="absolute inset-0 bg-gradient-to-b from-[#1a3a21]/80 via-[#2c5234]/70 to-[#1a2f1e]/85"></div>
-      <div class="absolute inset-0 bg-gradient-to-br from-[#3d2b1f]/15 via-transparent to-[#2c1810]/10"></div>
+      <div
+        class="absolute inset-0 bg-gradient-to-b from-[#1a3a21]/80 via-[#2c5234]/70 to-[#1a2f1e]/85"
+      >
+      </div>
+      <div
+        class="absolute inset-0 bg-gradient-to-br from-[#3d2b1f]/15 via-transparent to-[#2c1810]/10"
+      >
+      </div>
     </div>
     {/* Centered vignette — ensures consistent text readability across all rotating photos */}
     <div class="hero-vignette absolute inset-0" aria-hidden="true"></div>
     {/* Grain texture overlay */}
-    <div class="hero-grain absolute inset-0 opacity-[0.03] mix-blend-overlay" aria-hidden="true"></div>
+    <div class="hero-grain absolute inset-0 opacity-[0.03] mix-blend-overlay" aria-hidden="true">
+    </div>
 
     {/* Content */}
-    <div class="relative z-10 mx-auto max-w-4xl px-4 py-20 text-center sm:px-6 md:py-28 lg:py-32 lg:px-8">
+    <div
+      class="relative z-10 mx-auto max-w-4xl px-4 py-20 text-center sm:px-6 md:py-28 lg:px-8 lg:py-32"
+    >
       {/* Authority line */}
       <p class="hero-fade-in mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-white/60">
         A Southland Organics Production
@@ -142,23 +160,30 @@ const podcastSchema = {
 
       {/* Title lockup — tightly grouped */}
       <div class="hero-fade-in mb-3" style="animation-delay: 0.1s">
-        <h1 class="font-heading text-5xl font-bold leading-[1.05] text-white sm:text-6xl lg:text-7xl">
+        <h1
+          class="font-heading text-5xl font-bold leading-[1.05] text-white sm:text-6xl lg:text-7xl"
+        >
           Ag & Culture
         </h1>
-        <span class="mt-2 inline-block rounded-full border border-southland-green/60 bg-southland-green/15 px-4 py-1 text-sm font-bold uppercase tracking-[0.15em] text-southland-green/90 sm:text-base">
+        <span
+          class="mt-2 inline-block rounded-full border border-southland-green/60 bg-southland-green/15 px-4 py-1 text-sm font-bold uppercase tracking-[0.15em] text-southland-green/90 sm:text-base"
+        >
           Podcast
         </span>
       </div>
 
       {/* Host attribution — small caps, light green */}
-      {(mikeUsryEntry || josephBoehmEntry) && (
-        <p
-          class="hero-fade-in mb-5 text-xs font-semibold uppercase tracking-[0.18em] text-[#6ab564]/70 sm:text-sm"
-          style="animation-delay: 0.15s"
-        >
-          with {[mikeUsryEntry?.data.name, josephBoehmEntry?.data.name].filter(Boolean).join(' & ')}
-        </p>
-      )}
+      {
+        (mikeUsryEntry || josephBoehmEntry) && (
+          <p
+            class="hero-fade-in mb-5 text-xs font-semibold uppercase tracking-[0.18em] text-[#6ab564]/70 sm:text-sm"
+            style="animation-delay: 0.15s"
+          >
+            with{' '}
+            {[mikeUsryEntry?.data.name, josephBoehmEntry?.data.name].filter(Boolean).join(' & ')}
+          </p>
+        )
+      }
 
       {/* Tagline — THE STAR */}
       <p
@@ -173,7 +198,8 @@ const podcastSchema = {
         class="hero-fade-in mx-auto mb-10 max-w-xl text-lg leading-relaxed text-white/75 md:text-xl"
         style="animation-delay: 0.3s"
       >
-        Deep dives into soil biology, poultry health, and the science that actually works on real farms.
+        Deep dives into soil biology, poultry health, and the science that actually works on real
+        farms.
       </p>
 
       {/* CTAs */}
@@ -181,25 +207,39 @@ const podcastSchema = {
         class="hero-fade-in flex flex-col items-center justify-center gap-4 sm:flex-row"
         style="animation-delay: 0.4s"
       >
-        {latestEpisode && (
-          <a
-            href={`/podcast/${latestEpisode.id.replace(/\.mdx?$/, '')}/`}
-            class="group inline-flex items-center justify-center gap-3 rounded-lg bg-southland-green px-8 py-4 text-base font-bold text-white shadow-lg shadow-black/20 transition-all duration-200 hover:bg-[#3a7534] hover:shadow-xl active:scale-[0.98] sm:min-w-[260px]"
-          >
-            <svg aria-hidden="true" class="h-5 w-5 transition-transform duration-200 group-hover:scale-110" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z" />
-            </svg>
-            Listen to Latest Episode
-          </a>
-        )}
+        {
+          latestEpisode && (
+            <a
+              href={`/podcast/${latestEpisode.id.replace(/\.mdx?$/, '')}/`}
+              class="group inline-flex items-center justify-center gap-3 rounded-lg bg-southland-green px-8 py-4 text-base font-bold text-white shadow-lg shadow-black/20 transition-all duration-200 hover:bg-[#3a7534] hover:shadow-xl active:scale-[0.98] sm:min-w-[260px]"
+            >
+              <svg
+                aria-hidden="true"
+                class="h-5 w-5 transition-transform duration-200 group-hover:scale-110"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M8 5v14l11-7z" />
+              </svg>
+              Listen to Latest Episode
+            </a>
+          )
+        }
         <a
           href="#episodes"
           class="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-white/30 px-8 py-4 text-base font-bold text-white/90 transition-all duration-200 hover:border-white/70 hover:bg-white/20 hover:text-white active:scale-[0.98] sm:min-w-[260px]"
           onclick="event.preventDefault(); document.getElementById('episodes')?.scrollIntoView({ behavior: 'smooth', block: 'start' })"
         >
           Browse All Episodes
-          <svg aria-hidden="true" class="h-4 w-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          <svg
+            aria-hidden="true"
+            class="h-4 w-4 transition-transform duration-200"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"
+            ></path>
           </svg>
         </a>
       </div>
@@ -260,9 +300,7 @@ const podcastSchema = {
       <p class="mb-2 text-sm font-medium uppercase tracking-wide text-shopify-secondary-text">
         Join the conversation
       </p>
-      <h2 class="mb-3 text-2xl font-bold text-shopify-title md:text-3xl">
-        Never miss an episode
-      </h2>
+      <h2 class="mb-3 text-2xl font-bold text-shopify-title md:text-3xl">Never miss an episode</h2>
       <p class="mb-8 font-serif text-lg text-shopify-secondary-text">
         Join farmers, agronomists, and soil nerds who get weekly insights delivered to their inbox.
       </p>
@@ -276,7 +314,9 @@ const podcastSchema = {
         />
       </div>
       <div class="mt-8 border-t border-gray-100 pt-6">
-        <p class="mb-3 text-xs text-shopify-secondary-text">Or subscribe on your favorite platform:</p>
+        <p class="mb-3 text-xs text-shopify-secondary-text">
+          Or subscribe on your favorite platform:
+        </p>
         <div class="flex justify-center">
           <SubscribeButtons variant="compact" utmContext="podcast-hub" />
         </div>
@@ -294,30 +334,64 @@ const podcastSchema = {
 
           {/* Host Cards — resolved from team collection */}
           <div class="mb-8 space-y-6">
-            {mikeUsryEntry && (
-              <div class="flex items-start gap-6">
-                <a href={`/team/mike-usry/`} class="h-24 w-24 flex-shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-southland-green/10 to-southland-green/20">
-                  {mikeUsryPhoto && <img src={mikeUsryPhoto} alt={mikeUsryEntry.data.name} class="h-full w-full object-cover" />}
-                </a>
-                <div>
-                  <a href="/team/mike-usry/" class="text-xl font-bold text-shopify-text hover:text-southland-green transition-colors">{mikeUsryEntry.data.name}</a>
-                  <p class="mb-2 font-medium text-southland-green">{mikeUsryEntry.data.role}</p>
-                  <p class="text-shopify-secondary-text">{mikeUsryEntry.data.bio}</p>
+            {
+              mikeUsryEntry && (
+                <div class="flex items-start gap-6">
+                  <a
+                    href={`/team/mike-usry/`}
+                    class="h-24 w-24 flex-shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-southland-green/10 to-southland-green/20"
+                  >
+                    {mikeUsryPhoto && (
+                      <img
+                        src={mikeUsryPhoto}
+                        alt={mikeUsryEntry.data.name}
+                        class="h-full w-full object-cover"
+                      />
+                    )}
+                  </a>
+                  <div>
+                    <a
+                      href="/team/mike-usry/"
+                      class="text-xl font-bold text-shopify-text transition-colors hover:text-southland-green"
+                    >
+                      {mikeUsryEntry.data.name}
+                    </a>
+                    <p class="mb-2 font-medium text-southland-green">{mikeUsryEntry.data.role}</p>
+                    <p class="text-shopify-secondary-text">{mikeUsryEntry.data.bio}</p>
+                  </div>
                 </div>
-              </div>
-            )}
-            {josephBoehmEntry && (
-              <div class="flex items-start gap-6">
-                <a href={`/team/joseph-boehm/`} class="h-24 w-24 flex-shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-southland-green/10 to-southland-green/20">
-                  {josephBoehmPhoto && <img src={josephBoehmPhoto} alt={josephBoehmEntry.data.name} class="h-full w-full object-cover" />}
-                </a>
-                <div>
-                  <a href="/team/joseph-boehm/" class="text-xl font-bold text-shopify-text hover:text-southland-green transition-colors">{josephBoehmEntry.data.name}</a>
-                  <p class="mb-2 font-medium text-southland-green">{josephBoehmEntry.data.role}</p>
-                  <p class="text-shopify-secondary-text">{josephBoehmEntry.data.bio}</p>
+              )
+            }
+            {
+              josephBoehmEntry && (
+                <div class="flex items-start gap-6">
+                  <a
+                    href={`/team/joseph-boehm/`}
+                    class="h-24 w-24 flex-shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-southland-green/10 to-southland-green/20"
+                  >
+                    {josephBoehmPhoto && (
+                      <img
+                        src={josephBoehmPhoto}
+                        alt={josephBoehmEntry.data.name}
+                        class="h-full w-full object-cover"
+                      />
+                    )}
+                  </a>
+                  <div>
+                    <a
+                      href="/team/joseph-boehm/"
+                      class="text-xl font-bold text-shopify-text transition-colors hover:text-southland-green"
+                    >
+                      {josephBoehmEntry.data.name}
+                    </a>
+                    <p class="mb-2 font-medium text-southland-green">
+                      {josephBoehmEntry.data.role}
+                    </p>
+                    <p class="text-shopify-secondary-text">{josephBoehmEntry.data.bio}</p>
+                  </div>
                 </div>
-              </div>
-            )}
+              )
+            }
           </div>
 
           <div class="prose prose-lg max-w-none text-shopify-secondary-text">

@@ -22,7 +22,7 @@ function formatPrice(money: Money): string {
 
 export default function AddToCartButton({ variants }: Props) {
   const [selectedVariantId, setSelectedVariantId] = useState(
-    variants.find((v) => v.availableForSale)?.id ?? variants[0]?.id ?? '',
+    variants.find((v) => v.availableForSale)?.id ?? variants[0]?.id ?? ''
   )
   const [quantity, setQuantity] = useState(1)
   const [adding, setAdding] = useState(false)
@@ -34,7 +34,7 @@ export default function AddToCartButton({ variants }: Props) {
 
   // Group variant options by name for selector UI
   const optionNames = Array.from(
-    new Set(variants.flatMap((v) => v.selectedOptions.map((o) => o.name))),
+    new Set(variants.flatMap((v) => v.selectedOptions.map((o) => o.name)))
   )
   const hasMultipleVariants = variants.length > 1
 
@@ -71,13 +71,11 @@ export default function AddToCartButton({ variants }: Props) {
           {optionNames.length === 1 ? (
             // Single option dimension — render as buttons
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                {optionNames[0]}
-              </label>
+              <label className="block text-sm font-medium text-gray-700">{optionNames[0]}</label>
               <div className="mt-2 flex flex-wrap gap-2">
                 {variants.map((variant) => {
                   const optionValue = variant.selectedOptions.find(
-                    (o) => o.name === optionNames[0],
+                    (o) => o.name === optionNames[0]
                   )?.value
                   const isSelected = variant.id === selectedVariantId
                   const isDisabled = !variant.availableForSale
@@ -96,7 +94,7 @@ export default function AddToCartButton({ variants }: Props) {
                           ? 'border-brand-green-dark bg-brand-green-dark text-white'
                           : isDisabled
                             ? 'cursor-not-allowed border-gray-200 bg-gray-50 text-gray-400 line-through'
-                            : 'border-gray-300 bg-white text-gray-700 hover:border-brand-green-light'
+                            : 'hover:border-brand-green-light border-gray-300 bg-white text-gray-700'
                       }`}
                     >
                       {optionValue ?? variant.title}
@@ -108,10 +106,7 @@ export default function AddToCartButton({ variants }: Props) {
           ) : (
             // Multiple option dimensions — render as dropdown
             <div>
-              <label
-                htmlFor="variant-select"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="variant-select" className="block text-sm font-medium text-gray-700">
                 Option
               </label>
               <select
@@ -121,14 +116,10 @@ export default function AddToCartButton({ variants }: Props) {
                   setSelectedVariantId(e.target.value)
                   setAdded(false)
                 }}
-                className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-sm focus:border-brand-green-light focus:ring-brand-green-light"
+                className="focus:border-brand-green-light focus:ring-brand-green-light mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-sm"
               >
                 {variants.map((variant) => (
-                  <option
-                    key={variant.id}
-                    value={variant.id}
-                    disabled={!variant.availableForSale}
-                  >
+                  <option key={variant.id} value={variant.id} disabled={!variant.availableForSale}>
                     {variant.title}
                     {!variant.availableForSale ? ' — Sold Out' : ''}
                     {' — '}
@@ -147,8 +138,7 @@ export default function AddToCartButton({ variants }: Props) {
           {formatPrice(selectedVariant.price)}
         </span>
         {selectedVariant.compareAtPrice &&
-          Number(selectedVariant.compareAtPrice.amount) >
-            Number(selectedVariant.price.amount) && (
+          Number(selectedVariant.compareAtPrice.amount) > Number(selectedVariant.price.amount) && (
             <span className="text-base text-gray-500 line-through">
               {formatPrice(selectedVariant.compareAtPrice)}
             </span>
@@ -166,9 +156,7 @@ export default function AddToCartButton({ variants }: Props) {
           >
             -
           </button>
-          <span className="min-w-[3rem] py-2 text-center text-sm font-medium">
-            {quantity}
-          </span>
+          <span className="min-w-[3rem] py-2 text-center text-sm font-medium">{quantity}</span>
           <button
             type="button"
             onClick={() => setQuantity((q) => q + 1)}
@@ -202,9 +190,7 @@ export default function AddToCartButton({ variants }: Props) {
       </div>
 
       {/* Error */}
-      {error && (
-        <p className="text-sm text-red-600">{error}</p>
-      )}
+      {error && <p className="text-sm text-red-600">{error}</p>}
     </div>
   )
 }

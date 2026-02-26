@@ -33,9 +33,7 @@ export default function ProductSelector({
   return (
     <div
       className={`relative overflow-hidden rounded-lg border-2 transition-colors ${
-        quantity > 0
-          ? 'border-shopify-link bg-green-50/50'
-          : 'border-gray-200 bg-white'
+        quantity > 0 ? 'border-shopify-link bg-green-50/50' : 'border-gray-200 bg-white'
       }`}
     >
       {/* Quantity badge */}
@@ -63,17 +61,13 @@ export default function ProductSelector({
 
       {/* Product info */}
       <div className="p-3">
-        <h3 className="text-sm font-medium leading-tight text-shopify-title">
-          {product.title}
-        </h3>
+        <h3 className="text-sm font-medium leading-tight text-shopify-title">{product.title}</h3>
         <p className="mt-1 text-sm font-medium text-shopify-text">
           {formatPrice(variant.price.amount)}
         </p>
 
         {!variant.availableForSale && (
-          <p className="mt-1 text-xs font-medium text-shopify-alert">
-            Out of stock
-          </p>
+          <p className="mt-1 text-xs font-medium text-shopify-alert">Out of stock</p>
         )}
 
         {/* Quantity controls */}
@@ -87,9 +81,7 @@ export default function ProductSelector({
           >
             -
           </button>
-          <span className="w-6 text-center text-sm font-medium text-shopify-text">
-            {quantity}
-          </span>
+          <span className="w-6 text-center text-sm font-medium text-shopify-text">{quantity}</span>
           <button
             type="button"
             onClick={() => onAdd(variant.id)}

@@ -7,11 +7,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import type { Cart, CartLine } from '@southland/shopify-storefront'
-import {
-  getCart,
-  updateCartLines,
-  removeFromCart,
-} from '../../lib/cart'
+import { getCart, updateCartLines, removeFromCart } from '../../lib/cart'
 
 const NEXUS_API = 'https://nexus.southlandorganics.com/api/public/shipping-estimate'
 
@@ -66,10 +62,7 @@ function CartLineItem({
   return (
     <div className="flex gap-4 border-b border-gray-200 py-6 last:border-b-0">
       {/* Product image */}
-      <a
-        href={`/products/${merchandise.product.handle}/`}
-        className="flex-shrink-0"
-      >
+      <a href={`/products/${merchandise.product.handle}/`} className="flex-shrink-0">
         {image ? (
           <img
             src={image.url}
@@ -104,21 +97,16 @@ function CartLineItem({
           <div>
             <a
               href={`/products/${merchandise.product.handle}/`}
-              className="text-sm font-semibold text-gray-900 hover:text-brand-green-dark"
+              className="hover:text-brand-green-dark text-sm font-semibold text-gray-900"
             >
               {merchandise.product.title}
             </a>
             {merchandise.title !== 'Default Title' && (
-              <p className="mt-0.5 text-sm text-gray-500">
-                {merchandise.title}
-              </p>
+              <p className="mt-0.5 text-sm text-gray-500">{merchandise.title}</p>
             )}
           </div>
           <span className="ml-4 text-sm font-semibold text-gray-900">
-            {formatPrice(
-              line.cost.totalAmount.amount,
-              line.cost.totalAmount.currencyCode,
-            )}
+            {formatPrice(line.cost.totalAmount.amount, line.cost.totalAmount.currencyCode)}
           </span>
         </div>
 
@@ -134,9 +122,7 @@ function CartLineItem({
           <div className="flex items-center rounded-md border border-gray-300">
             <button
               type="button"
-              onClick={() =>
-                onUpdateQuantity(line.id, Math.max(1, line.quantity - 1))
-              }
+              onClick={() => onUpdateQuantity(line.id, Math.max(1, line.quantity - 1))}
               disabled={updating || line.quantity <= 1}
               className="px-2.5 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-40"
               aria-label="Decrease quantity"
@@ -169,11 +155,7 @@ function CartLineItem({
           {/* Per-unit price when qty > 1 */}
           {line.quantity > 1 && (
             <span className="text-xs text-gray-400">
-              {formatPrice(
-                merchandise.price.amount,
-                merchandise.price.currencyCode,
-              )}{' '}
-              each
+              {formatPrice(merchandise.price.amount, merchandise.price.currencyCode)} each
             </span>
           )}
         </div>
@@ -194,44 +176,41 @@ export default function CartPage() {
   const [estimateError, setEstimateError] = useState<string | null>(null)
   const lastEstimateZip = useRef<string>('')
 
-  const fetchShippingEstimate = useCallback(
-    async (zipCode: string, currentCart: Cart) => {
-      if (!/^\d{5}$/.test(zipCode)) return
-      if (zipCode === lastEstimateZip.current) return
-      lastEstimateZip.current = zipCode
-      setEstimateLoading(true)
-      setEstimateError(null)
+  const fetchShippingEstimate = useCallback(async (zipCode: string, currentCart: Cart) => {
+    if (!/^\d{5}$/.test(zipCode)) return
+    if (zipCode === lastEstimateZip.current) return
+    lastEstimateZip.current = zipCode
+    setEstimateLoading(true)
+    setEstimateError(null)
 
-      try {
-        const items = currentCart.lines.map((line) => ({
-          sku: line.merchandise.product.handle,
-          quantity: line.quantity,
-          grams: 0,
-        }))
-        const cartSubtotal = Number(currentCart.cost.subtotalAmount.amount)
+    try {
+      const items = currentCart.lines.map((line) => ({
+        sku: line.merchandise.product.handle,
+        quantity: line.quantity,
+        grams: 0,
+      }))
+      const cartSubtotal = Number(currentCart.cost.subtotalAmount.amount)
 
-        const res = await fetch(NEXUS_API, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ items, destinationZip: zipCode, cartSubtotal }),
-        })
+      const res = await fetch(NEXUS_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items, destinationZip: zipCode, cartSubtotal }),
+      })
 
-        if (!res.ok) {
-          throw new Error(`Estimate failed (${res.status})`)
-        }
-
-        const data: ShippingEstimate = await res.json()
-        setShippingEstimate(data)
-      } catch (err) {
-        console.error('Shipping estimate failed:', err)
-        setEstimateError('Could not estimate shipping')
-        setShippingEstimate(null)
-      } finally {
-        setEstimateLoading(false)
+      if (!res.ok) {
+        throw new Error(`Estimate failed (${res.status})`)
       }
-    },
-    [],
-  )
+
+      const data: ShippingEstimate = await res.json()
+      setShippingEstimate(data)
+    } catch (err) {
+      console.error('Shipping estimate failed:', err)
+      setEstimateError('Could not estimate shipping')
+      setShippingEstimate(null)
+    } finally {
+      setEstimateLoading(false)
+    }
+  }, [])
 
   // Re-fetch estimate when cart changes (if ZIP is entered)
   useEffect(() => {
@@ -259,20 +238,17 @@ export default function CartPage() {
     return () => window.removeEventListener('cart-changed', handleCartChanged)
   }, [])
 
-  const handleUpdateQuantity = useCallback(
-    async (lineId: string, quantity: number) => {
-      setUpdating(true)
-      try {
-        const updated = await updateCartLines([{ id: lineId, quantity }])
-        if (updated) setCart(updated)
-      } catch (err) {
-        console.error('Failed to update quantity:', err)
-      } finally {
-        setUpdating(false)
-      }
-    },
-    [],
-  )
+  const handleUpdateQuantity = useCallback(async (lineId: string, quantity: number) => {
+    setUpdating(true)
+    try {
+      const updated = await updateCartLines([{ id: lineId, quantity }])
+      if (updated) setCart(updated)
+    } catch (err) {
+      console.error('Failed to update quantity:', err)
+    } finally {
+      setUpdating(false)
+    }
+  }, [])
 
   const handleRemove = useCallback(async (lineId: string) => {
     setUpdating(true)
@@ -292,7 +268,7 @@ export default function CartPage() {
     return (
       <div className="flex min-h-[300px] items-center justify-center">
         <div className="text-center">
-          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-brand-green-dark" />
+          <div className="border-t-brand-green-dark mx-auto h-8 w-8 animate-spin rounded-full border-4 border-gray-200" />
           <p className="mt-3 text-sm text-gray-500">Loading your cart...</p>
         </div>
       </div>
@@ -317,15 +293,13 @@ export default function CartPage() {
             d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"
           />
         </svg>
-        <h2 className="mt-4 font-heading text-xl text-gray-900">
-          Your cart is empty
-        </h2>
+        <h2 className="mt-4 font-heading text-xl text-gray-900">Your cart is empty</h2>
         <p className="mt-2 text-sm text-gray-500">
           Browse our products and add something you love.
         </p>
         <a
           href="/products/"
-          className="mt-6 inline-block rounded-md bg-brand-green-dark px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-green-800"
+          className="bg-brand-green-dark mt-6 inline-block rounded-md px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-green-800"
         >
           Browse Products
         </a>
@@ -364,13 +338,12 @@ export default function CartPage() {
           <dl className="mt-4 space-y-3 text-sm">
             <div className="flex justify-between">
               <dt className="text-gray-600">
-                Subtotal ({cart.totalQuantity}{' '}
-                {cart.totalQuantity === 1 ? 'item' : 'items'})
+                Subtotal ({cart.totalQuantity} {cart.totalQuantity === 1 ? 'item' : 'items'})
               </dt>
               <dd className="font-medium text-gray-900">
                 {formatPrice(
                   cart.cost.subtotalAmount.amount,
-                  cart.cost.subtotalAmount.currencyCode,
+                  cart.cost.subtotalAmount.currencyCode
                 )}
               </dd>
             </div>
@@ -381,16 +354,14 @@ export default function CartPage() {
                 <dt>
                   Discount
                   {cart.discountCodes.length > 0 && (
-                    <span className="ml-1 text-xs">
-                      ({cart.discountCodes[0].code})
-                    </span>
+                    <span className="ml-1 text-xs">({cart.discountCodes[0].code})</span>
                   )}
                 </dt>
                 <dd className="font-medium">
                   -
                   {formatPrice(
                     cart.discountAllocations[0].discountedAmount.amount,
-                    cart.discountAllocations[0].discountedAmount.currencyCode,
+                    cart.discountAllocations[0].discountedAmount.currencyCode
                   )}
                 </dd>
               </div>
@@ -404,7 +375,7 @@ export default function CartPage() {
                   <dd className="text-right">
                     {estimateLoading ? (
                       <span className="inline-flex items-center gap-1.5 text-xs">
-                        <span className="h-3 w-3 animate-spin rounded-full border-2 border-gray-300 border-t-brand-green-dark" />
+                        <span className="border-t-brand-green-dark h-3 w-3 animate-spin rounded-full border-2 border-gray-300" />
                         Estimating...
                       </span>
                     ) : shippingEstimate?.estimate ? (
@@ -438,7 +409,7 @@ export default function CartPage() {
                       setZip(v)
                       if (v.length === 5 && cart) fetchShippingEstimate(v, cart)
                     }}
-                    className="w-full rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-900 placeholder-gray-400 focus:border-brand-green-light focus:outline-none focus:ring-1 focus:ring-brand-green-light"
+                    className="focus:border-brand-green-light focus:ring-brand-green-light w-full rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1"
                   />
                   <button
                     type="submit"
@@ -483,13 +454,9 @@ export default function CartPage() {
                       <li key={dealer.name} className="text-xs">
                         <span className="font-medium">{dealer.name}</span>
                         {' — '}
-                        {dealer.city}, {dealer.state}
-                        {' '}({dealer.distance_miles} mi)
+                        {dealer.city}, {dealer.state} ({dealer.distance_miles} mi)
                         {dealer.phone && (
-                          <a
-                            href={`tel:${dealer.phone}`}
-                            className="ml-1 underline"
-                          >
+                          <a href={`tel:${dealer.phone}`} className="ml-1 underline">
                             {dealer.phone}
                           </a>
                         )}
@@ -511,10 +478,7 @@ export default function CartPage() {
               <div className="flex justify-between">
                 <dt className="text-base font-semibold text-gray-900">Total</dt>
                 <dd className="text-base font-semibold text-gray-900">
-                  {formatPrice(
-                    cart.cost.totalAmount.amount,
-                    cart.cost.totalAmount.currencyCode,
-                  )}
+                  {formatPrice(cart.cost.totalAmount.amount, cart.cost.totalAmount.currencyCode)}
                 </dd>
               </div>
             </div>
@@ -523,7 +487,7 @@ export default function CartPage() {
           {/* Checkout button */}
           <a
             href={cart.checkoutUrl}
-            className="mt-6 block w-full rounded-md bg-brand-green-dark px-6 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-green-800"
+            className="bg-brand-green-dark mt-6 block w-full rounded-md px-6 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-green-800"
           >
             Proceed to Checkout
           </a>
@@ -531,7 +495,7 @@ export default function CartPage() {
           {/* Continue shopping */}
           <a
             href="/products/"
-            className="mt-3 block text-center text-sm text-brand-green-light hover:underline"
+            className="text-brand-green-light mt-3 block text-center text-sm hover:underline"
           >
             Continue Shopping
           </a>

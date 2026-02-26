@@ -184,7 +184,7 @@ export function StaticHeader({ logoUrl, logoAlt, navigation }: StaticHeaderProps
             {/* Account — redirects to Shopify-hosted customer account */}
             <a
               href="https://shop.southlandorganics.com/account"
-              className="p-2 text-shopify-text transition-colors hover:text-shopify-accent"
+              className="text-shopify-text hover:text-shopify-accent p-2 transition-colors"
               aria-label="Account"
             >
               <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -200,7 +200,7 @@ export function StaticHeader({ logoUrl, logoAlt, navigation }: StaticHeaderProps
             {/* Search */}
             <a
               href="/search"
-              className="p-2 text-shopify-text transition-colors hover:text-shopify-accent"
+              className="text-shopify-text hover:text-shopify-accent p-2 transition-colors"
               aria-label="Search"
             >
               <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -216,7 +216,7 @@ export function StaticHeader({ logoUrl, logoAlt, navigation }: StaticHeaderProps
             {/* Cart */}
             <a
               href="/cart"
-              className="relative p-2 text-shopify-text transition-colors hover:text-shopify-accent"
+              className="text-shopify-text hover:text-shopify-accent relative p-2 transition-colors"
               aria-label="Cart"
             >
               <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -232,7 +232,7 @@ export function StaticHeader({ logoUrl, logoAlt, navigation }: StaticHeaderProps
             {/* Mobile menu button */}
             <button
               data-sl-menu-toggle
-              className="p-2 text-shopify-text transition-colors hover:text-shopify-title md:hidden"
+              className="text-shopify-text hover:text-shopify-title p-2 transition-colors md:hidden"
               aria-label="Menu"
             >
               <svg
@@ -281,7 +281,7 @@ export function StaticHeader({ logoUrl, logoAlt, navigation }: StaticHeaderProps
                 <a
                   href={item.href}
                   data-sl-nav-href={item.href}
-                  className="block py-3 text-base font-semibold text-shopify-text"
+                  className="text-shopify-text block py-3 text-base font-semibold"
                 >
                   {item.label}
                 </a>
@@ -324,7 +324,7 @@ export function StaticHeader({ logoUrl, logoAlt, navigation }: StaticHeaderProps
                           <a
                             key={child.label}
                             href={child.href}
-                            className="block py-2 text-sm text-shopify-secondary-text transition-colors hover:text-shopify-accent"
+                            className="text-shopify-secondary-text hover:text-shopify-accent block py-2 text-sm transition-colors"
                           >
                             {child.label}
                           </a>

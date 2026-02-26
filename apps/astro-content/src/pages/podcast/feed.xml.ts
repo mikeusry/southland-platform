@@ -108,19 +108,26 @@ export const GET: APIRoute = async () => {
       ${episode.data.season ? `<itunes:season>${episode.data.season}</itunes:season>` : ''}
       <itunes:duration>${formatDuration(episode.data.duration)}</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
-      ${(() => { const cover = resolveEpisodeCover(episode.data, 1400); return cover ? `<itunes:image href="${escapeXml(cover)}"/>` : '' })()}
+      ${(() => {
+        const cover = resolveEpisodeCover(episode.data, 1400)
+        return cover ? `<itunes:image href="${escapeXml(cover)}"/>` : ''
+      })()}
       <itunes:summary><![CDATA[${episode.data.description}]]></itunes:summary>
-      ${episode.data.guests && episode.data.guests.length > 0
-        ? `<itunes:author>${episode.data.guests.map((g) => g.name).join(', ')}</itunes:author>`
-        : '<itunes:author>Southland Organics</itunes:author>'}
-      ${episode.data.guests
-        ? episode.data.guests
-            .map(
-              (g) =>
-                `<podcast:person role="host" href="${siteUrl}/team/${g.slug}/">${escapeXml(g.name)}</podcast:person>`
-            )
-            .join('\n      ')
-        : ''}
+      ${
+        episode.data.guests && episode.data.guests.length > 0
+          ? `<itunes:author>${episode.data.guests.map((g) => g.name).join(', ')}</itunes:author>`
+          : '<itunes:author>Southland Organics</itunes:author>'
+      }
+      ${
+        episode.data.guests
+          ? episode.data.guests
+              .map(
+                (g) =>
+                  `<podcast:person role="host" href="${siteUrl}/team/${g.slug}/">${escapeXml(g.name)}</podcast:person>`
+              )
+              .join('\n      ')
+          : ''
+      }
 
     </item>`
       })

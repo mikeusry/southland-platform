@@ -124,7 +124,9 @@ function NavDropdown({ item, isActive }: { item: NavItem; isActive: boolean }) {
         )}
       </a>
       {hasChildren && isOpen && (
-        <div style={{ position: 'absolute', left: 0, top: '100%', zIndex: 50, paddingTop: '0.25rem' }}>
+        <div
+          style={{ position: 'absolute', left: 0, top: '100%', zIndex: 50, paddingTop: '0.25rem' }}
+        >
           {grouped ? (
             <div style={megaStyles.panel}>
               {grouped.map(([groupName, children]) => (
@@ -167,13 +169,19 @@ export function Header({ logoUrl, logoAlt, navigation, currentPath }: HeaderProp
     try {
       const stored = localStorage.getItem('southland_cart_count')
       if (stored) setCartCount(parseInt(stored, 10) || 0)
-    } catch { /* SSR or private browsing */ }
+    } catch {
+      /* SSR or private browsing */
+    }
 
     function handleCartChanged(e: Event) {
       const cart = (e as CustomEvent).detail as { totalQuantity?: number } | null
       const count = cart?.totalQuantity ?? 0
       setCartCount(count)
-      try { localStorage.setItem('southland_cart_count', String(count)) } catch { /* ignore */ }
+      try {
+        localStorage.setItem('southland_cart_count', String(count))
+      } catch {
+        /* ignore */
+      }
     }
 
     window.addEventListener('cart-changed', handleCartChanged)
@@ -208,7 +216,7 @@ export function Header({ logoUrl, logoAlt, navigation, currentPath }: HeaderProp
             {/* Account — redirects to Shopify-hosted customer account */}
             <a
               href="https://shop.southlandorganics.com/account"
-              className="p-2 text-shopify-text transition-colors hover:text-shopify-accent"
+              className="text-shopify-text hover:text-shopify-accent p-2 transition-colors"
               aria-label="Account"
             >
               <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -224,7 +232,7 @@ export function Header({ logoUrl, logoAlt, navigation, currentPath }: HeaderProp
             {/* Search */}
             <a
               href="/search"
-              className="p-2 text-shopify-text transition-colors hover:text-shopify-accent"
+              className="text-shopify-text hover:text-shopify-accent p-2 transition-colors"
               aria-label="Search"
             >
               <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -240,7 +248,7 @@ export function Header({ logoUrl, logoAlt, navigation, currentPath }: HeaderProp
             {/* Cart */}
             <a
               href="/cart"
-              className="relative p-2 text-shopify-text transition-colors hover:text-shopify-accent"
+              className="text-shopify-text hover:text-shopify-accent relative p-2 transition-colors"
               aria-label={cartCount > 0 ? `Cart (${cartCount} items)` : 'Cart'}
             >
               <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -252,9 +260,7 @@ export function Header({ logoUrl, logoAlt, navigation, currentPath }: HeaderProp
                 />
               </svg>
               {cartCount > 0 && (
-                <span
-                  className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-brand-green-dark text-[10px] font-bold text-white"
-                >
+                <span className="bg-brand-green-dark absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white">
                   {cartCount > 99 ? '99+' : cartCount}
                 </span>
               )}
@@ -263,7 +269,7 @@ export function Header({ logoUrl, logoAlt, navigation, currentPath }: HeaderProp
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-shopify-text transition-colors hover:text-shopify-title md:hidden"
+              className="text-shopify-text hover:text-shopify-title p-2 transition-colors md:hidden"
               aria-label="Menu"
               aria-expanded={mobileMenuOpen}
             >
@@ -346,7 +352,7 @@ export function Header({ logoUrl, logoAlt, navigation, currentPath }: HeaderProp
                             <a
                               key={child.label}
                               href={child.href}
-                              className="block py-2 text-sm text-shopify-secondary-text transition-colors hover:text-shopify-accent"
+                              className="text-shopify-secondary-text hover:text-shopify-accent block py-2 text-sm transition-colors"
                             >
                               {child.label}
                             </a>

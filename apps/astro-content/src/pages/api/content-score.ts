@@ -256,7 +256,11 @@ export const POST: APIRoute = async ({ request }) => {
     // Always run these (fast, cheap)
 
     // 1. Persona scoring via Mothership
-    const personaResult = await scorePersonas(`${body.title}\n\n${body.body}`, body.segment, brandSlug)
+    const personaResult = await scorePersonas(
+      `${body.title}\n\n${body.body}`,
+      body.segment,
+      brandSlug
+    )
     if (personaResult) {
       response.persona = personaResult
     } else {

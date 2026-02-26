@@ -104,9 +104,7 @@ export default function VideoLibrary({ videos, businessUnits }: Props) {
     }
     setTranscriptLoading(true)
     try {
-      const res = await fetch(
-        `/api/video-search?q=${encodeURIComponent(transcriptQuery.trim())}`,
-      )
+      const res = await fetch(`/api/video-search?q=${encodeURIComponent(transcriptQuery.trim())}`)
       if (res.ok) {
         const data = await res.json()
         setTranscriptResults(data.results)
@@ -155,8 +153,7 @@ export default function VideoLibrary({ videos, businessUnits }: Props) {
             <option value="all">All Categories ({videos.length})</option>
             {businessUnits.map((u) => (
               <option key={u} value={u}>
-                {UNIT_LABELS[u] || u} (
-                {videos.filter((v) => v.business_unit === u).length})
+                {UNIT_LABELS[u] || u} ({videos.filter((v) => v.business_unit === u).length})
               </option>
             ))}
           </select>
@@ -169,7 +166,14 @@ export default function VideoLibrary({ videos, businessUnits }: Props) {
               }}
               title="Grid view"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
                 <rect x="3" y="3" width="7" height="7" />
                 <rect x="14" y="3" width="7" height="7" />
                 <rect x="3" y="14" width="7" height="7" />
@@ -184,7 +188,14 @@ export default function VideoLibrary({ videos, businessUnits }: Props) {
               }}
               title="List view"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
                 <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
               </svg>
             </button>
@@ -195,17 +206,13 @@ export default function VideoLibrary({ videos, businessUnits }: Props) {
         <div style={styles.transcriptRow}>
           <input
             type="text"
-            placeholder="Search transcripts... (e.g. &quot;water lines&quot;, &quot;biosecurity&quot;)"
+            placeholder='Search transcripts... (e.g. "water lines", "biosecurity")'
             value={transcriptQuery}
             onChange={(e) => setTranscriptQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && searchTranscripts()}
             style={{ ...styles.input, flex: 1 }}
           />
-          <button
-            onClick={searchTranscripts}
-            disabled={transcriptLoading}
-            style={styles.searchBtn}
-          >
+          <button onClick={searchTranscripts} disabled={transcriptLoading} style={styles.searchBtn}>
             {transcriptLoading ? 'Searching...' : 'Search Transcripts'}
           </button>
           {transcriptResults && (
@@ -227,48 +234,34 @@ export default function VideoLibrary({ videos, businessUnits }: Props) {
       {view === 'grid' ? (
         <div style={styles.grid}>
           {visible.map((video) => (
-            <VideoCard
-              key={video.id}
-              video={video}
-              snippet={snippetMap.get(video.id)}
-            />
+            <VideoCard key={video.id} video={video} snippet={snippetMap.get(video.id)} />
           ))}
         </div>
       ) : (
         <div style={styles.list}>
           {visible.map((video) => (
-            <VideoRow
-              key={video.id}
-              video={video}
-              snippet={snippetMap.get(video.id)}
-            />
+            <VideoRow key={video.id} video={video} snippet={snippetMap.get(video.id)} />
           ))}
         </div>
       )}
 
       {hasMore && (
         <div style={styles.loadMore}>
-          <button
-            onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-            style={styles.loadMoreBtn}
-          >
+          <button onClick={() => setVisibleCount((c) => c + PAGE_SIZE)} style={styles.loadMoreBtn}>
             Load more ({filtered.length - visibleCount} remaining)
           </button>
         </div>
       )}
 
       {filtered.length === 0 && (
-        <div style={styles.empty}>
-          No videos found. Try adjusting your filters.
-        </div>
+        <div style={styles.empty}>No videos found. Try adjusting your filters.</div>
       )}
     </div>
   )
 }
 
 function VideoCard({ video, snippet }: { video: Video; snippet?: string }) {
-  const playbackId = video.thumbnail_url
-    ?.match(/image\.mux\.com\/([^/]+)/)?.[1]
+  const playbackId = video.thumbnail_url?.match(/image\.mux\.com\/([^/]+)/)?.[1]
 
   return (
     <div style={styles.card}>
@@ -289,9 +282,7 @@ function VideoCard({ video, snippet }: { video: Video; snippet?: string }) {
           ) : (
             <div style={styles.thumbPlaceholder}>No thumbnail</div>
           )}
-          <span style={styles.duration}>
-            {formatDuration(video.duration_seconds)}
-          </span>
+          <span style={styles.duration}>{formatDuration(video.duration_seconds)}</span>
         </div>
       </a>
       <div style={styles.cardBody}>
@@ -314,21 +305,16 @@ function VideoCard({ video, snippet }: { video: Video; snippet?: string }) {
           >
             {UNIT_LABELS[video.business_unit] || video.business_unit}
           </span>
-          {video.project_name && (
-            <span style={styles.projectName}>{video.project_name}</span>
-          )}
+          {video.project_name && <span style={styles.projectName}>{video.project_name}</span>}
         </div>
-        {snippet && (
-          <p style={styles.snippet}>...{snippet}...</p>
-        )}
+        {snippet && <p style={styles.snippet}>...{snippet}...</p>}
       </div>
     </div>
   )
 }
 
 function VideoRow({ video, snippet }: { video: Video; snippet?: string }) {
-  const playbackId = video.thumbnail_url
-    ?.match(/image\.mux\.com\/([^/]+)/)?.[1]
+  const playbackId = video.thumbnail_url?.match(/image\.mux\.com\/([^/]+)/)?.[1]
 
   return (
     <div style={styles.row}>
@@ -346,9 +332,7 @@ function VideoRow({ video, snippet }: { video: Video; snippet?: string }) {
             loading="lazy"
           />
         ) : (
-          <div style={{ ...styles.thumbPlaceholder, width: 120, height: 68 }}>
-            No thumb
-          </div>
+          <div style={{ ...styles.thumbPlaceholder, width: 120, height: 68 }}>No thumb</div>
         )}
       </a>
       <div style={styles.rowBody}>
@@ -372,9 +356,7 @@ function VideoRow({ video, snippet }: { video: Video; snippet?: string }) {
       >
         {UNIT_LABELS[video.business_unit] || video.business_unit}
       </span>
-      <span style={styles.rowDuration}>
-        {formatDuration(video.duration_seconds)}
-      </span>
+      <span style={styles.rowDuration}>{formatDuration(video.duration_seconds)}</span>
     </div>
   )
 }
@@ -519,8 +501,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 500,
     padding: '2px 6px',
     borderRadius: 3,
-    fontFamily:
-      'SF Mono, SFMono-Regular, ui-monospace, monospace',
+    fontFamily: 'SF Mono, SFMono-Regular, ui-monospace, monospace',
   },
   cardBody: {
     padding: '10px 12px 12px',

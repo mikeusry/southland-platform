@@ -115,14 +115,24 @@ const aboutSchema = {
       fetchpriority="high"
     />
     <script is:inline define:vars={{ heroImages }}>
-      var pick = heroImages[Math.floor(Math.random() * heroImages.length)];
-      var el = document.getElementById('hero-bg');
-      if (el) { el.src = pick.src; el.srcset = pick.srcset; el.sizes = '100vw'; }
+      var pick = heroImages[Math.floor(Math.random() * heroImages.length)]
+      var el = document.getElementById('hero-bg')
+      if (el) {
+        el.src = pick.src
+        el.srcset = pick.srcset
+        el.sizes = '100vw'
+      }
     </script>
     <!-- Dark gradient overlay -->
     <div class="absolute inset-0" aria-hidden="true">
-      <div class="absolute inset-0 bg-gradient-to-b from-[#1a3a21]/80 via-[#2c5234]/70 to-[#1a2f1e]/85"></div>
-      <div class="absolute inset-0 bg-gradient-to-br from-[#3d2b1f]/15 via-transparent to-[#2c1810]/10"></div>
+      <div
+        class="absolute inset-0 bg-gradient-to-b from-[#1a3a21]/80 via-[#2c5234]/70 to-[#1a2f1e]/85"
+      >
+      </div>
+      <div
+        class="absolute inset-0 bg-gradient-to-br from-[#3d2b1f]/15 via-transparent to-[#2c1810]/10"
+      >
+      </div>
     </div>
     <div class="relative z-10 mx-auto max-w-7xl px-4 py-20 text-center sm:px-6 md:py-28 lg:px-8">
       <p class="mb-3 text-sm font-medium uppercase tracking-widest text-southland-green">
@@ -132,7 +142,8 @@ const aboutSchema = {
         Healthy Soil. Healthy Business.
       </h1>
       <p class="mx-auto max-w-3xl text-lg leading-relaxed text-white/80 md:text-xl">
-        Biology-first programs for commercial poultry, turf and crop growers — proven on thousands of farm visits across the U.S.
+        Biology-first programs for commercial poultry, turf and crop growers — proven on thousands
+        of farm visits across the U.S.
       </p>
       <p class="mt-4 text-sm font-medium tracking-wide text-white/60">
         Trusted by growers in 99+ dealer locations nationwide
@@ -147,26 +158,47 @@ const aboutSchema = {
         <!-- Founded -->
         <div class="rounded-2xl bg-white p-6 text-center shadow-lg">
           <p class="text-3xl font-bold text-southland-green-dark">2009</p>
-          <p class="mt-1 text-sm font-semibold uppercase tracking-wide text-shopify-title">In Business Since</p>
-          <p class="mt-1 text-xs text-shopify-secondary-text">16+ years helping growers solve problems</p>
+          <p class="mt-1 text-sm font-semibold uppercase tracking-wide text-shopify-title">
+            In Business Since
+          </p>
+          <p class="mt-1 text-xs text-shopify-secondary-text">
+            16+ years helping growers solve problems
+          </p>
         </div>
         <!-- Dealer Network -->
-        <a href="/store-locator/" class="group rounded-2xl bg-white p-6 text-center shadow-lg transition-all hover:shadow-xl">
+        <a
+          href="/store-locator/"
+          class="group rounded-2xl bg-white p-6 text-center shadow-lg transition-all hover:shadow-xl"
+        >
           <p class="text-3xl font-bold text-southland-green-dark">99+</p>
-          <p class="mt-1 text-sm font-semibold uppercase tracking-wide text-shopify-title transition-colors group-hover:text-southland-green">Dealer Network</p>
-          <p class="mt-1 text-xs text-shopify-secondary-text">Locations carrying Southland programs</p>
+          <p
+            class="mt-1 text-sm font-semibold uppercase tracking-wide text-shopify-title transition-colors group-hover:text-southland-green"
+          >
+            Dealer Network
+          </p>
+          <p class="mt-1 text-xs text-shopify-secondary-text">
+            Locations carrying Southland programs
+          </p>
         </a>
         <!-- Farm Visits -->
         <div class="rounded-2xl bg-white p-6 text-center shadow-lg">
           <p class="text-3xl font-bold text-southland-green-dark">Thousands</p>
-          <p class="mt-1 text-sm font-semibold uppercase tracking-wide text-shopify-title">On-Farm Experience</p>
-          <p class="mt-1 text-xs text-shopify-secondary-text">Farm visits with commercial poultry and crop growers</p>
+          <p class="mt-1 text-sm font-semibold uppercase tracking-wide text-shopify-title">
+            On-Farm Experience
+          </p>
+          <p class="mt-1 text-xs text-shopify-secondary-text">
+            Farm visits with commercial poultry and crop growers
+          </p>
         </div>
         <!-- Nationwide -->
         <div class="rounded-2xl bg-white p-6 text-center shadow-lg">
           <p class="text-3xl font-bold text-southland-green-dark">Nationwide</p>
-          <p class="mt-1 text-sm font-semibold uppercase tracking-wide text-shopify-title">Shipping via UPS</p>
-          <p class="mt-1 text-xs text-shopify-secondary-text">Fast delivery to farms across the U.S.</p>
+          <p class="mt-1 text-sm font-semibold uppercase tracking-wide text-shopify-title">
+            Shipping via UPS
+          </p>
+          <p class="mt-1 text-xs text-shopify-secondary-text">
+            Fast delivery to farms across the U.S.
+          </p>
         </div>
       </div>
     </div>
@@ -185,13 +217,18 @@ const aboutSchema = {
           </h2>
           <div class="space-y-4 text-lg leading-relaxed text-shopify-secondary-text">
             <p>
-              Mike Usry — Founder & CEO, MBA from the University of South Florida, UGA football letterman — spent 20+ years studying humate deposits, soil biology and the disconnect between what works in a lab and what works in a real barn.
+              Mike Usry — Founder & CEO, MBA from the University of South Florida, UGA football
+              letterman — spent 20+ years studying humate deposits, soil biology and the disconnect
+              between what works in a lab and what works in a real barn.
             </p>
             <p>
-              In 2009, Mike and Karin founded Southland Organics to build programs around that science. Programs that feed the biology, not just the plant. Programs that hold up in commercial poultry houses, on turf, and in the field — not just on a data sheet.
+              In 2009, Mike and Karin founded Southland Organics to build programs around that
+              science. Programs that feed the biology, not just the plant. Programs that hold up in
+              commercial poultry houses, on turf, and in the field — not just on a data sheet.
             </p>
             <p>
-              We only keep programs that survive real-barn scrutiny: fewer dead birds, tighter litter, stronger root systems — not just good lab curves.
+              We only keep programs that survive real-barn scrutiny: fewer dead birds, tighter
+              litter, stronger root systems — not just good lab curves.
             </p>
           </div>
         </div>
@@ -200,8 +237,7 @@ const aboutSchema = {
             playback-id="n9Ue00D3CPCVEOzO00ALHxWt01XVYjuJMRHI6wjmOgjdxQ"
             accent-color="#44883e"
             metadata-video-title="Why Choose Southland Organics"
-            style="width:100%;aspect-ratio:16/9;"
-          ></mux-player>
+            style="width:100%;aspect-ratio:16/9;"></mux-player>
         </div>
       </div>
     </div>
@@ -218,7 +254,8 @@ const aboutSchema = {
           The Leaders You'll Actually Talk To
         </h2>
         <p class="mx-auto max-w-2xl text-lg text-shopify-secondary-text">
-          Not just names on a website. Mike and Allen are in the field, on the phone, and on the mic every week.
+          Not just names on a website. Mike and Allen are in the field, on the phone, and on the mic
+          every week.
         </p>
       </div>
 
@@ -241,31 +278,77 @@ const aboutSchema = {
               <p class="mt-1 text-sm font-medium text-southland-green">Founder & CEO</p>
               <ul class="mt-4 space-y-1.5 text-sm text-shopify-secondary-text">
                 <li class="flex items-start gap-2">
-                  <svg class="mt-0.5 h-4 w-4 shrink-0 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                  <svg
+                    class="mt-0.5 h-4 w-4 shrink-0 text-southland-green"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    ><path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path></svg
+                  >
                   20+ years in organic agriculture and soil biology
                 </li>
                 <li class="flex items-start gap-2">
-                  <svg class="mt-0.5 h-4 w-4 shrink-0 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                  <svg
+                    class="mt-0.5 h-4 w-4 shrink-0 text-southland-green"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    ><path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path></svg
+                  >
                   MBA, University of South Florida
                 </li>
                 <li class="flex items-start gap-2">
-                  <svg class="mt-0.5 h-4 w-4 shrink-0 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                  <svg
+                    class="mt-0.5 h-4 w-4 shrink-0 text-southland-green"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    ><path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path></svg
+                  >
                   Lettered at the University of Georgia
                 </li>
                 <li class="flex items-start gap-2">
-                  <svg class="mt-0.5 h-4 w-4 shrink-0 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                  <svg
+                    class="mt-0.5 h-4 w-4 shrink-0 text-southland-green"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    ><path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path></svg
+                  >
                   Host, AG & Culture Podcast
                 </li>
               </ul>
-              <blockquote class="mt-5 border-l-4 border-southland-green/30 pl-4 text-sm italic text-shopify-secondary-text">
-                "What keeps me going is watching a grower try something different with their soil and come back a season later saying it actually worked. That's the whole reason Southland exists."
+              <blockquote
+                class="mt-5 border-l-4 border-southland-green/30 pl-4 text-sm italic text-shopify-secondary-text"
+              >
+                "What keeps me going is watching a grower try something different with their soil
+                and come back a season later saying it actually worked. That's the whole reason
+                Southland exists."
               </blockquote>
               <a
                 href="/podcast/"
                 class="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-southland-green hover:underline"
               >
                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 1a9 9 0 00-9 9v7c0 1.66 1.34 3 3 3h3v-8H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-4v8h3c1.66 0 3-1.34 3-3v-7a9 9 0 00-9-9z"></path>
+                  <path
+                    d="M12 1a9 9 0 00-9 9v7c0 1.66 1.34 3 3 3h3v-8H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-4v8h3c1.66 0 3-1.34 3-3v-7a9 9 0 00-9-9z"
+                  ></path>
                 </svg>
                 Listen to the AG & Culture Podcast
               </a>
@@ -288,27 +371,72 @@ const aboutSchema = {
             </div>
             <div class="p-6 sm:p-8">
               <h3 class="text-xl font-bold text-shopify-title">Allen Reynolds</h3>
-              <p class="mt-1 text-sm font-medium text-southland-green">VP & Director of Operations</p>
+              <p class="mt-1 text-sm font-medium text-southland-green">
+                VP & Director of Operations
+              </p>
               <ul class="mt-4 space-y-1.5 text-sm text-shopify-secondary-text">
                 <li class="flex items-start gap-2">
-                  <svg class="mt-0.5 h-4 w-4 shrink-0 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                  <svg
+                    class="mt-0.5 h-4 w-4 shrink-0 text-southland-green"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    ><path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path></svg
+                  >
                   10+ years helping commercial poultry growers improve performance
                 </li>
                 <li class="flex items-start gap-2">
-                  <svg class="mt-0.5 h-4 w-4 shrink-0 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                  <svg
+                    class="mt-0.5 h-4 w-4 shrink-0 text-southland-green"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    ><path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path></svg
+                  >
                   Thousands of farm visits across the Southeast and beyond
                 </li>
                 <li class="flex items-start gap-2">
-                  <svg class="mt-0.5 h-4 w-4 shrink-0 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                  <svg
+                    class="mt-0.5 h-4 w-4 shrink-0 text-southland-green"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    ><path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path></svg
+                  >
                   Antibiotic-free poultry specialist since 2017
                 </li>
                 <li class="flex items-start gap-2">
-                  <svg class="mt-0.5 h-4 w-4 shrink-0 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                  <svg
+                    class="mt-0.5 h-4 w-4 shrink-0 text-southland-green"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    ><path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path></svg
+                  >
                   Host, Poultry Biosecurity on YouTube
                 </li>
               </ul>
-              <blockquote class="mt-5 border-l-4 border-southland-green/30 pl-4 text-sm italic text-shopify-secondary-text">
-                "The best part of this job is watching a grower go from stressed about their next flock to confident they've got a plan. That's what keeps me on the road."
+              <blockquote
+                class="mt-5 border-l-4 border-southland-green/30 pl-4 text-sm italic text-shopify-secondary-text"
+              >
+                "The best part of this job is watching a grower go from stressed about their next
+                flock to confident they've got a plan. That's what keeps me on the road."
               </blockquote>
               <a
                 href="https://www.youtube.com/@PoultryBiosecurity"
@@ -317,7 +445,9 @@ const aboutSchema = {
                 class="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-southland-green hover:underline"
               >
                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"></path>
+                  <path
+                    d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"
+                  ></path>
                 </svg>
                 Watch Poultry Biosecurity on YouTube
               </a>
@@ -363,9 +493,13 @@ const aboutSchema = {
               ></path>
             </svg>
           </div>
-          <h3 class="mb-3 text-xl font-bold text-shopify-title">Feed the Soil, Not Just the Plant</h3>
+          <h3 class="mb-3 text-xl font-bold text-shopify-title">
+            Feed the Soil, Not Just the Plant
+          </h3>
           <p class="text-shopify-secondary-text">
-            We strengthen the soil microbiome so plants and birds are more resilient — backed by humic-based formulas and effective microorganisms used across poultry, turf and crop operations.
+            We strengthen the soil microbiome so plants and birds are more resilient — backed by
+            humic-based formulas and effective microorganisms used across poultry, turf and crop
+            operations.
           </p>
         </div>
 
@@ -390,7 +524,9 @@ const aboutSchema = {
           </div>
           <h3 class="mb-3 text-xl font-bold text-shopify-title">Proven in the Field</h3>
           <p class="text-shopify-secondary-text">
-            Our programs are refined from thousands of farm visits and side-by-side trials — not just lab data. Better litter, fewer condemnations, stronger turf. If it doesn't hold up in a real barn or on a real lawn, we don't sell it.
+            Our programs are refined from thousands of farm visits and side-by-side trials — not
+            just lab data. Better litter, fewer condemnations, stronger turf. If it doesn't hold up
+            in a real barn or on a real lawn, we don't sell it.
           </p>
         </div>
 
@@ -415,7 +551,9 @@ const aboutSchema = {
           </div>
           <h3 class="mb-3 text-xl font-bold text-shopify-title">People Over Transactions</h3>
           <p class="text-shopify-secondary-text">
-            Long-form AG & Culture Podcast for deep soil and agronomy talks. Poultry biosecurity videos to help growers protect flocks. 99+ dealer locations for boots-on-the-ground support. We invest in education and relationships, not just order taking.
+            Long-form AG & Culture Podcast for deep soil and agronomy talks. Poultry biosecurity
+            videos to help growers protect flocks. 99+ dealer locations for boots-on-the-ground
+            support. We invest in education and relationships, not just order taking.
           </p>
         </div>
       </div>
@@ -429,38 +567,38 @@ const aboutSchema = {
         <p class="mb-3 text-sm font-semibold uppercase tracking-wide text-southland-green">
           Behind the Scenes
         </p>
-        <h2 class="mb-4 text-3xl font-bold text-shopify-title md:text-4xl">
-          See For Yourself
-        </h2>
+        <h2 class="mb-4 text-3xl font-bold text-shopify-title md:text-4xl">See For Yourself</h2>
         <p class="mx-auto max-w-2xl text-lg text-shopify-secondary-text">
           Short videos. Real personality. This is who we are.
         </p>
       </div>
 
       <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {brandVideos.map((video) => (
-          <div
-            class="video-card group relative cursor-pointer overflow-hidden rounded-2xl bg-black shadow-lg"
-            data-playback-id={video.playbackId}
-            data-title={video.title}
-          >
-            <img
-              src={`https://image.mux.com/${video.playbackId}/thumbnail.jpg?width=640&height=360&fit_mode=smartcrop`}
-              alt={video.title}
-              class="aspect-video w-full object-cover transition-transform duration-300 group-hover:scale-105"
-              width="640"
-              height="360"
-              loading="lazy"
-            />
-            <div class="absolute inset-0 flex items-center justify-center">
-              <div class="flex h-16 w-16 items-center justify-center rounded-full bg-black/50 transition-all group-hover:bg-southland-green/90 group-hover:scale-110">
-                <svg class="ml-1 h-7 w-7 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
+        {
+          brandVideos.map((video) => (
+            <div
+              class="video-card group relative cursor-pointer overflow-hidden rounded-2xl bg-black shadow-lg"
+              data-playback-id={video.playbackId}
+              data-title={video.title}
+            >
+              <img
+                src={`https://image.mux.com/${video.playbackId}/thumbnail.jpg?width=640&height=360&fit_mode=smartcrop`}
+                alt={video.title}
+                class="aspect-video w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                width="640"
+                height="360"
+                loading="lazy"
+              />
+              <div class="absolute inset-0 flex items-center justify-center">
+                <div class="flex h-16 w-16 items-center justify-center rounded-full bg-black/50 transition-all group-hover:scale-110 group-hover:bg-southland-green/90">
+                  <svg class="ml-1 h-7 w-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        }
       </div>
     </div>
   </section>
@@ -476,7 +614,8 @@ const aboutSchema = {
           From Backyard to Commercial
         </h2>
         <p class="mx-auto max-w-2xl text-lg text-shopify-secondary-text">
-          The science of soil health doesn't change with scale. Our programs serve growers at every level.
+          The science of soil health doesn't change with scale. Our programs serve growers at every
+          level.
         </p>
       </div>
 
@@ -560,7 +699,9 @@ const aboutSchema = {
 
       <p class="mt-8 text-center text-shopify-secondary-text">
         Not sure where to start?
-        <a href="/contact/" class="font-semibold text-southland-green hover:underline">Contact our team</a>
+        <a href="/contact/" class="font-semibold text-southland-green hover:underline"
+          >Contact our team</a
+        >
         — we'll point you in the right direction.
       </p>
     </div>
@@ -575,7 +716,8 @@ const aboutSchema = {
         </p>
         <h2 class="mb-4 text-3xl font-bold text-shopify-title md:text-4xl">Meet Our Team</h2>
         <p class="mx-auto max-w-2xl text-lg text-shopify-secondary-text">
-          Behind every program and farm visit is a team that obsesses over biology, logistics and service so you don't have to.
+          Behind every program and farm visit is a team that obsesses over biology, logistics and
+          service so you don't have to.
         </p>
       </div>
 
@@ -589,22 +731,21 @@ const aboutSchema = {
       <p class="mb-3 text-sm font-medium uppercase tracking-widest text-southland-green">
         Ag & Culture Podcast
       </p>
-      <h2 class="mb-4 font-heading text-3xl text-white md:text-4xl">
-        Go Deeper on Soil Science
-      </h2>
+      <h2 class="mb-4 font-heading text-3xl text-white md:text-4xl">Go Deeper on Soil Science</h2>
       <p class="mx-auto mb-2 max-w-2xl text-lg text-white/70">
-        Hear growers, agronomists and industry leaders talk through the real biology behind resilient soil, crops and flocks.
+        Hear growers, agronomists and industry leaders talk through the real biology behind
+        resilient soil, crops and flocks.
       </p>
-      <p class="mb-8 text-sm text-white/50">
-        Hosted by Founder & CEO Mike Usry
-      </p>
+      <p class="mb-8 text-sm text-white/50">Hosted by Founder & CEO Mike Usry</p>
       <div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
         <a
           href="/podcast/"
           class="inline-flex items-center justify-center gap-2 rounded-lg bg-southland-green px-8 py-4 text-base font-bold text-white shadow-lg transition-all hover:bg-[#3a7534] hover:shadow-xl active:scale-[0.98]"
         >
           <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 1a9 9 0 00-9 9v7c0 1.66 1.34 3 3 3h3v-8H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-4v8h3c1.66 0 3-1.34 3-3v-7a9 9 0 00-9-9z"></path>
+            <path
+              d="M12 1a9 9 0 00-9 9v7c0 1.66 1.34 3 3 3h3v-8H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-4v8h3c1.66 0 3-1.34 3-3v-7a9 9 0 00-9-9z"
+            ></path>
           </svg>
           Listen to the Podcast
         </a>
@@ -634,14 +775,23 @@ const aboutSchema = {
         >
           BBB Accredited · A+ Rating · Zero Complaints
         </a>
-        · 189 Luke Road, Bogart, GA 30622 · <a href="tel:+18006083755" class="hover:text-southland-green hover:underline">800-608-3755</a>
+        · 189 Luke Road, Bogart, GA 30622 · <a
+          href="tel:+18006083755"
+          class="hover:text-southland-green hover:underline">800-608-3755</a
+        >
       </p>
     </div>
   </section>
   <!-- Video Modal -->
-  <div id="video-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+  <div
+    id="video-modal"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+  >
     <div class="relative w-full max-w-4xl">
-      <button id="video-modal-close" class="absolute -top-10 right-0 text-sm font-medium text-white/70 hover:text-white">
+      <button
+        id="video-modal-close"
+        class="absolute -top-10 right-0 text-sm font-medium text-white/70 hover:text-white"
+      >
         Close
       </button>
       <div id="video-modal-player" class="overflow-hidden rounded-xl"></div>

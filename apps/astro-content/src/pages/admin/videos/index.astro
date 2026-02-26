@@ -18,7 +18,7 @@ if (supabaseUrl && supabaseKey) {
   const { data, error: fetchError } = await supabase
     .from('voice_videos')
     .select(
-      'id, title, business_unit, external_id, source_platform, url, thumbnail_url, duration_seconds, topics, transcript_status, project_name',
+      'id, title, business_unit, external_id, source_platform, url, thumbnail_url, duration_seconds, topics, transcript_status, project_name'
     )
     .eq('source_platform', 'mux')
     .order('title', { ascending: true })
@@ -49,11 +49,7 @@ const businessUnits = [...new Set(videos.map((v) => v.business_unit))].sort()
         <p style="color: var(--error);">Error: {error}</p>
       </div>
     ) : (
-      <VideoLibrary
-        client:load
-        videos={videos}
-        businessUnits={businessUnits}
-      />
+      <VideoLibrary client:load videos={videos} businessUnits={businessUnits} />
     )
   }
 </AdminLayout>

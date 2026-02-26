@@ -123,171 +123,171 @@ const searchIndex = allEpisodes.map((episode) => ({
     </div>
 
     {/* Recent/Popular Topics */}
-      <div class="mt-12 border-t border-gray-100 pt-12">
-        <h2 class="mb-4 text-lg font-semibold text-gray-900">Popular Topics</h2>
-        <div class="flex flex-wrap gap-2">
-          <button
-            class="topic-quick-search rounded-full bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-southland-green hover:text-white"
-            data-topic="poultry health"
-          >
-            Poultry Health
-          </button>
-          <button
-            class="topic-quick-search rounded-full bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-southland-green hover:text-white"
-            data-topic="gut microbiome"
-          >
-            Gut Microbiome
-          </button>
-          <button
-            class="topic-quick-search rounded-full bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-southland-green hover:text-white"
-            data-topic="probiotics"
-          >
-            Probiotics
-          </button>
-          <button
-            class="topic-quick-search rounded-full bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-southland-green hover:text-white"
-            data-topic="turf"
-          >
-            Turf Care
-          </button>
-          <button
-            class="topic-quick-search rounded-full bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-southland-green hover:text-white"
-            data-topic="sustainable"
-          >
-            Sustainable Farming
-          </button>
-        </div>
+    <div class="mt-12 border-t border-gray-100 pt-12">
+      <h2 class="mb-4 text-lg font-semibold text-gray-900">Popular Topics</h2>
+      <div class="flex flex-wrap gap-2">
+        <button
+          class="topic-quick-search rounded-full bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-southland-green hover:text-white"
+          data-topic="poultry health"
+        >
+          Poultry Health
+        </button>
+        <button
+          class="topic-quick-search rounded-full bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-southland-green hover:text-white"
+          data-topic="gut microbiome"
+        >
+          Gut Microbiome
+        </button>
+        <button
+          class="topic-quick-search rounded-full bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-southland-green hover:text-white"
+          data-topic="probiotics"
+        >
+          Probiotics
+        </button>
+        <button
+          class="topic-quick-search rounded-full bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-southland-green hover:text-white"
+          data-topic="turf"
+        >
+          Turf Care
+        </button>
+        <button
+          class="topic-quick-search rounded-full bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-southland-green hover:text-white"
+          data-topic="sustainable"
+        >
+          Sustainable Farming
+        </button>
       </div>
     </div>
-
-    {/* Search index data */}
-    <script id="search-index-data" type="application/json" set:html={JSON.stringify(searchIndex)} />
   </div>
 
-  <script>
-    // Load search index
-    const searchIndexEl = document.getElementById('search-index-data')
-    const searchIndex = searchIndexEl ? JSON.parse(searchIndexEl.textContent || '[]') : []
+  {/* Search index data */}
+  <script id="search-index-data" type="application/json" set:html={JSON.stringify(searchIndex)} />
+</PodcastLayout>
 
-    const searchInput = document.getElementById('search-input') as HTMLInputElement
-    const clearBtn = document.getElementById('clear-search')
-    const searchStats = document.getElementById('search-stats')
-    const initialState = document.getElementById('initial-state')
-    const noResults = document.getElementById('no-results')
-    const resultsContainer = document.getElementById('results-container')
-    const quickSearchBtns = document.querySelectorAll('.topic-quick-search')
+<script>
+  // Load search index
+  const searchIndexEl = document.getElementById('search-index-data')
+  const searchIndex = searchIndexEl ? JSON.parse(searchIndexEl.textContent || '[]') : []
 
-    // Format time (seconds to MM:SS)
-    function formatTime(seconds: number): string {
-      const mins = Math.floor(seconds / 60)
-      const secs = Math.floor(seconds % 60)
-      return `${mins}:${secs.toString().padStart(2, '0')}`
+  const searchInput = document.getElementById('search-input') as HTMLInputElement
+  const clearBtn = document.getElementById('clear-search')
+  const searchStats = document.getElementById('search-stats')
+  const initialState = document.getElementById('initial-state')
+  const noResults = document.getElementById('no-results')
+  const resultsContainer = document.getElementById('results-container')
+  const quickSearchBtns = document.querySelectorAll('.topic-quick-search')
+
+  // Format time (seconds to MM:SS)
+  function formatTime(seconds: number): string {
+    const mins = Math.floor(seconds / 60)
+    const secs = Math.floor(seconds % 60)
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
+  // Highlight matching text
+  function highlightText(text: string, query: string): string {
+    if (!query) return text
+    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+    return text.replace(regex, '<mark class="bg-yellow-200">$1</mark>')
+  }
+
+  // Search function
+  function performSearch(query: string) {
+    if (!query || query.length < 2) {
+      initialState?.classList.remove('hidden')
+      noResults?.classList.add('hidden')
+      resultsContainer?.classList.add('hidden')
+      searchStats?.classList.add('hidden')
+      clearBtn?.classList.add('hidden')
+      return
     }
 
-    // Highlight matching text
-    function highlightText(text: string, query: string): string {
-      if (!query) return text
-      const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
-      return text.replace(regex, '<mark class="bg-yellow-200">$1</mark>')
-    }
+    clearBtn?.classList.remove('hidden')
+    initialState?.classList.add('hidden')
 
-    // Search function
-    function performSearch(query: string) {
-      if (!query || query.length < 2) {
-        initialState?.classList.remove('hidden')
-        noResults?.classList.add('hidden')
-        resultsContainer?.classList.add('hidden')
-        searchStats?.classList.add('hidden')
-        clearBtn?.classList.add('hidden')
-        return
+    const lowerQuery = query.toLowerCase()
+    const results: Array<{
+      episode: (typeof searchIndex)[0]
+      matches: Array<{ time: number; speaker: string; text: string; context: string }>
+      score: number
+    }> = []
+
+    // Search through each episode
+    searchIndex.forEach((episode: any) => {
+      const matches: Array<{ time: number; speaker: string; text: string; context: string }> = []
+      let score = 0
+
+      // Check title
+      if (episode.title.toLowerCase().includes(lowerQuery)) {
+        score += 10
       }
 
-      clearBtn?.classList.remove('hidden')
-      initialState?.classList.add('hidden')
+      // Check description
+      if (episode.description.toLowerCase().includes(lowerQuery)) {
+        score += 5
+      }
 
-      const lowerQuery = query.toLowerCase()
-      const results: Array<{
-        episode: (typeof searchIndex)[0]
-        matches: Array<{ time: number; speaker: string; text: string; context: string }>
-        score: number
-      }> = []
-
-      // Search through each episode
-      searchIndex.forEach((episode: any) => {
-        const matches: Array<{ time: number; speaker: string; text: string; context: string }> = []
-        let score = 0
-
-        // Check title
-        if (episode.title.toLowerCase().includes(lowerQuery)) {
-          score += 10
-        }
-
-        // Check description
-        if (episode.description.toLowerCase().includes(lowerQuery)) {
-          score += 5
-        }
-
-        // Check topics
-        episode.topics.forEach((topic: string) => {
-          if (topic.toLowerCase().includes(lowerQuery)) {
-            score += 3
-          }
-        })
-
-        // Check guests
-        episode.guests.forEach((guest: string) => {
-          if (guest.toLowerCase().includes(lowerQuery)) {
-            score += 3
-          }
-        })
-
-        // Search transcript
-        episode.transcript.forEach((line: any, index: number) => {
-          if (line.text.toLowerCase().includes(lowerQuery)) {
-            score += 1
-            // Get context (previous and next lines if available)
-            const prevLine = episode.transcript[index - 1]
-            const nextLine = episode.transcript[index + 1]
-            const context = [prevLine?.text || '', line.text, nextLine?.text || ''].join(' ').trim()
-
-            matches.push({
-              time: line.time,
-              speaker: line.speaker,
-              text: line.text,
-              context,
-            })
-          }
-        })
-
-        if (score > 0 || matches.length > 0) {
-          results.push({ episode, matches, score })
+      // Check topics
+      episode.topics.forEach((topic: string) => {
+        if (topic.toLowerCase().includes(lowerQuery)) {
+          score += 3
         }
       })
 
-      // Sort by score
-      results.sort((a, b) => b.score - a.score)
-
-      // Render results
-      if (results.length === 0) {
-        noResults?.classList.remove('hidden')
-        resultsContainer?.classList.add('hidden')
-        searchStats?.classList.add('hidden')
-      } else {
-        noResults?.classList.add('hidden')
-        resultsContainer?.classList.remove('hidden')
-
-        // Update stats
-        const totalMatches = results.reduce((sum, r) => sum + Math.max(1, r.matches.length), 0)
-        if (searchStats) {
-          searchStats.textContent = `Found ${totalMatches} result${totalMatches !== 1 ? 's' : ''} in ${results.length} episode${results.length !== 1 ? 's' : ''}`
-          searchStats.classList.remove('hidden')
+      // Check guests
+      episode.guests.forEach((guest: string) => {
+        if (guest.toLowerCase().includes(lowerQuery)) {
+          score += 3
         }
+      })
 
-        // Render
-        if (resultsContainer) {
-          resultsContainer.innerHTML = results
-            .map(
-              (result) => `
+      // Search transcript
+      episode.transcript.forEach((line: any, index: number) => {
+        if (line.text.toLowerCase().includes(lowerQuery)) {
+          score += 1
+          // Get context (previous and next lines if available)
+          const prevLine = episode.transcript[index - 1]
+          const nextLine = episode.transcript[index + 1]
+          const context = [prevLine?.text || '', line.text, nextLine?.text || ''].join(' ').trim()
+
+          matches.push({
+            time: line.time,
+            speaker: line.speaker,
+            text: line.text,
+            context,
+          })
+        }
+      })
+
+      if (score > 0 || matches.length > 0) {
+        results.push({ episode, matches, score })
+      }
+    })
+
+    // Sort by score
+    results.sort((a, b) => b.score - a.score)
+
+    // Render results
+    if (results.length === 0) {
+      noResults?.classList.remove('hidden')
+      resultsContainer?.classList.add('hidden')
+      searchStats?.classList.add('hidden')
+    } else {
+      noResults?.classList.add('hidden')
+      resultsContainer?.classList.remove('hidden')
+
+      // Update stats
+      const totalMatches = results.reduce((sum, r) => sum + Math.max(1, r.matches.length), 0)
+      if (searchStats) {
+        searchStats.textContent = `Found ${totalMatches} result${totalMatches !== 1 ? 's' : ''} in ${results.length} episode${results.length !== 1 ? 's' : ''}`
+        searchStats.classList.remove('hidden')
+      }
+
+      // Render
+      if (resultsContainer) {
+        resultsContainer.innerHTML = results
+          .map(
+            (result) => `
           <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
             <a href="/podcast/${result.episode.slug}/" class="block p-6 hover:bg-gray-50 transition-colors">
               <div class="flex gap-4">
@@ -347,53 +347,52 @@ const searchIndex = allEpisodes.map((episode) => ({
             }
           </div>
         `
-            )
-            .join('')
-        }
-      }
-
-      // Track search
-      if (window.pdPixel) {
-        window.pdPixel.track('podcast_search', {
-          query: query,
-          results_count: results.length,
-        })
+          )
+          .join('')
       }
     }
 
-    // Debounced search
-    let searchTimeout: number
-    searchInput?.addEventListener('input', () => {
-      clearTimeout(searchTimeout)
-      searchTimeout = window.setTimeout(() => {
-        performSearch(searchInput.value.trim())
-      }, 200)
-    })
-
-    // Clear button
-    clearBtn?.addEventListener('click', () => {
-      searchInput.value = ''
-      performSearch('')
-      searchInput.focus()
-    })
-
-    // Quick search buttons
-    quickSearchBtns.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const topic = (btn as HTMLElement).dataset.topic
-        if (topic && searchInput) {
-          searchInput.value = topic
-          performSearch(topic)
-        }
+    // Track search
+    if (window.pdPixel) {
+      window.pdPixel.track('podcast_search', {
+        query: query,
+        results_count: results.length,
       })
-    })
-
-    // Check URL for search query
-    const urlParams = new URLSearchParams(window.location.search)
-    const urlQuery = urlParams.get('q')
-    if (urlQuery && searchInput) {
-      searchInput.value = urlQuery
-      performSearch(urlQuery)
     }
-  </script>
-</PodcastLayout>
+  }
+
+  // Debounced search
+  let searchTimeout: number
+  searchInput?.addEventListener('input', () => {
+    clearTimeout(searchTimeout)
+    searchTimeout = window.setTimeout(() => {
+      performSearch(searchInput.value.trim())
+    }, 200)
+  })
+
+  // Clear button
+  clearBtn?.addEventListener('click', () => {
+    searchInput.value = ''
+    performSearch('')
+    searchInput.focus()
+  })
+
+  // Quick search buttons
+  quickSearchBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const topic = (btn as HTMLElement).dataset.topic
+      if (topic && searchInput) {
+        searchInput.value = topic
+        performSearch(topic)
+      }
+    })
+  })
+
+  // Check URL for search query
+  const urlParams = new URLSearchParams(window.location.search)
+  const urlQuery = urlParams.get('q')
+  if (urlQuery && searchInput) {
+    searchInput.value = urlQuery
+    performSearch(urlQuery)
+  }
+</script>

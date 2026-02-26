@@ -20,10 +20,10 @@ export const GET: APIRoute = async ({ url }) => {
   const supabaseKey = import.meta.env.MOTHERSHIP_SUPABASE_SERVICE_KEY
 
   if (!supabaseUrl || !supabaseKey) {
-    return new Response(
-      JSON.stringify({ error: 'Supabase not configured' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } },
-    )
+    return new Response(JSON.stringify({ error: 'Supabase not configured' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 
   const supabase = createClient(supabaseUrl, supabaseKey)
@@ -43,10 +43,10 @@ export const GET: APIRoute = async ({ url }) => {
   const { data, error } = await queryBuilder.limit(50)
 
   if (error) {
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } },
-    )
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 
   // Extract snippets around the first match

@@ -25,7 +25,7 @@ const PERSONA_SORT_PRIORITY: Record<string, string[]> = {
 }
 
 function sortByPersona(products: Product[], persona: string | null): Product[] {
-  const priority = persona ? PERSONA_SORT_PRIORITY[persona] ?? [] : []
+  const priority = persona ? (PERSONA_SORT_PRIORITY[persona] ?? []) : []
   if (priority.length === 0) return products
 
   return [...products].sort((a, b) => {
@@ -41,9 +41,8 @@ function sortByPersona(products: Product[], persona: string | null): Product[] {
 /** Find the "1 Gallon" variant for a product. */
 function getGallonVariant(product: Product): Product['variants'][number] | null {
   return (
-    product.variants.find(
-      (v) =>
-        v.selectedOptions.some((o) => o.name === 'Size' && o.value === '1 Gallon'),
+    product.variants.find((v) =>
+      v.selectedOptions.some((o) => o.name === 'Size' && o.value === '1 Gallon')
     ) ?? null
   )
 }
@@ -86,14 +85,11 @@ export default function CaseBuilder() {
   }, [])
 
   // Calculate totals
-  const totalSelected = Array.from(selections.values()).reduce(
-    (sum, s) => sum + s.quantity,
-    0,
-  )
+  const totalSelected = Array.from(selections.values()).reduce((sum, s) => sum + s.quantity, 0)
   const remainingSlots = CASE_SIZE - totalSelected
   const subtotal = Array.from(selections.values()).reduce(
     (sum, s) => sum + getVariantPrice(s.product) * s.quantity,
-    0,
+    0
   )
 
   const handleAdd = useCallback(
@@ -111,7 +107,7 @@ export default function CaseBuilder() {
       })
       setAdded(false)
     },
-    [totalSelected],
+    [totalSelected]
   )
 
   const handleRemove = useCallback((variantId: string) => {
@@ -164,9 +160,7 @@ export default function CaseBuilder() {
       <div className="flex min-h-[400px] items-center justify-center">
         <div className="text-center">
           <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-shopify-link" />
-          <p className="mt-3 text-sm text-brand-gray-dark">
-            Loading gallon products...
-          </p>
+          <p className="mt-3 text-sm text-brand-gray-dark">Loading gallon products...</p>
         </div>
       </div>
     )
@@ -194,9 +188,7 @@ export default function CaseBuilder() {
   if (products.length === 0) {
     return (
       <div className="rounded-lg border border-gray-200 p-6 text-center">
-        <p className="text-sm text-brand-gray-dark">
-          No gallon products are currently available.
-        </p>
+        <p className="text-sm text-brand-gray-dark">No gallon products are currently available.</p>
       </div>
     )
   }
@@ -211,9 +203,7 @@ export default function CaseBuilder() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h2 className="mt-4 font-heading text-xl text-shopify-title">
-          Case added to cart!
-        </h2>
+        <h2 className="mt-4 font-heading text-xl text-shopify-title">Case added to cart!</h2>
         <p className="mt-2 text-sm text-brand-gray-dark">
           Your {CASE_SIZE}-gallon case has been added with the case discount.
         </p>

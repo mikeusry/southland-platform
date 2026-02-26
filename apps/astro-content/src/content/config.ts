@@ -244,11 +244,7 @@ const shopCollectionsCollection = defineCollection({
   schema: z.object({
     title: z.string(),
     handle: z.string(),
-    persona: z
-      .enum(['backyard', 'commercial', 'lawn'])
-      .nullable()
-      .optional()
-      .default(null),
+    persona: z.enum(['backyard', 'commercial', 'lawn']).nullable().optional().default(null),
     seoDescription: z.string().optional(),
     heroHeadline: z.string().optional(),
     heroSubheadline: z.string().optional(),

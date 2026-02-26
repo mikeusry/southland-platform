@@ -16,3 +16,5 @@ src/components/CloudinaryImage.astro
 src/components/team/TeamCard.astro
 src/components/tunnels/RealityTunnel.astro
 src/layouts/BaseLayout.astro
+src/pages/admin/site-audit.astro
+src/pages/team/\[slug\].astro

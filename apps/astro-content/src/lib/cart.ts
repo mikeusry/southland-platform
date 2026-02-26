@@ -71,7 +71,11 @@ export function clearCartId(): void {
 function dispatchCartEvent(cart: Cart | null): void {
   if (typeof window === 'undefined') return
   // Persist count for Header badge (read on next page load)
-  try { localStorage.setItem('southland_cart_count', String(cart?.totalQuantity ?? 0)) } catch { /* SSR or private browsing */ }
+  try {
+    localStorage.setItem('southland_cart_count', String(cart?.totalQuantity ?? 0))
+  } catch {
+    /* SSR or private browsing */
+  }
   window.dispatchEvent(new CustomEvent('cart-changed', { detail: cart }))
 }
 
@@ -137,9 +141,7 @@ export async function addToCart(lines: CartLineInput[]): Promise<Cart> {
 /**
  * Update existing cart lines (quantity changes, etc.)
  */
-export async function updateCartLines(
-  lines: CartLineUpdateInput[],
-): Promise<Cart | null> {
+export async function updateCartLines(lines: CartLineUpdateInput[]): Promise<Cart | null> {
   const cartId = getCartId()
   if (!cartId) return null
 
@@ -171,10 +173,7 @@ const CASE_SIZE = 4
  * CartLineInput[] with bundle attributes. Shopify will merge lines
  * with identical merchandiseId + attributes.
  */
-export function buildCaseLines(
-  selections: Map<string, number>,
-  bundleId: string,
-): CartLineInput[] {
+export function buildCaseLines(selections: Map<string, number>, bundleId: string): CartLineInput[] {
   return Array.from(selections.entries()).map(([variantId, quantity]) => ({
     merchandiseId: variantId,
     quantity,
@@ -201,9 +200,7 @@ export function generateBundleId(): string {
 export function countGallonItems(cart: Cart): number {
   return cart.lines
     .filter((line) =>
-      line.attributes.some(
-        (a) => a.key === '_bundle_type' && a.value === 'gallon-case',
-      ),
+      line.attributes.some((a) => a.key === '_bundle_type' && a.value === 'gallon-case')
     )
     .reduce((sum, line) => sum + line.quantity, 0)
 }
@@ -212,9 +209,7 @@ export function countGallonItems(cart: Cart): number {
  * Get case completion nudge info.
  * Returns null if no nudge is needed (0 gallon items, or exactly on a case boundary).
  */
-export function getCaseNudge(
-  gallonCount: number,
-): { needed: number; caseNumber: number } | null {
+export function getCaseNudge(gallonCount: number): { needed: number; caseNumber: number } | null {
   if (gallonCount === 0) return null
   const remainder = gallonCount % CASE_SIZE
   if (remainder === 0) return null

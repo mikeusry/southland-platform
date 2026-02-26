@@ -51,9 +51,7 @@ const ASTRO_ROUTES = [
 function isAstroRoute(pathname: string): boolean {
   // Homepage is Astro-owned
   if (pathname === '/' || pathname === '') return true
-  return ASTRO_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(route + '/'),
-  )
+  return ASTRO_ROUTES.some((route) => pathname === route || pathname.startsWith(route + '/'))
 }
 
 // Permanent redirects — old Shopify pages → new Astro routes
@@ -61,19 +59,16 @@ const REDIRECTS: Record<string, string> = {
   '/pages/why-southland': '/about/',
 }
 
-
 // Module-level cache for partials (persists across requests in same isolate)
 let cachedHeaderHtml: string | null = null
 let cachedFooterHtml: string | null = null
 
-async function getPartials(
-  assets: { fetch: (input: RequestInfo) => Promise<Response> },
-): Promise<{ headerHtml: string; footerHtml: string }> {
+async function getPartials(assets: {
+  fetch: (input: RequestInfo) => Promise<Response>
+}): Promise<{ headerHtml: string; footerHtml: string }> {
   if (!cachedHeaderHtml) {
     try {
-      const res = await assets.fetch(
-        new URL('https://fake-host/_partials/header.html').toString(),
-      )
+      const res = await assets.fetch(new URL('https://fake-host/_partials/header.html').toString())
       cachedHeaderHtml = res.ok ? await res.text() : ''
     } catch {
       cachedHeaderHtml = ''
@@ -81,9 +76,7 @@ async function getPartials(
   }
   if (!cachedFooterHtml) {
     try {
-      const res = await assets.fetch(
-        new URL('https://fake-host/_partials/footer.html').toString(),
-      )
+      const res = await assets.fetch(new URL('https://fake-host/_partials/footer.html').toString())
       cachedFooterHtml = res.ok ? await res.text() : ''
     } catch {
       cachedFooterHtml = ''
@@ -199,7 +192,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
     // Derive the proxy hostname from SHOPIFY_ORIGIN so we can scrub it from HTML
     const proxyHost = new URL(SHOPIFY_ORIGIN).hostname // e.g. "shopify-proxy.southlandorganics.com"
-    const publicHost = context.url.hostname             // e.g. "southlandorganics.com" or "www.southlandorganics.com"
+    const publicHost = context.url.hostname // e.g. "southlandorganics.com" or "www.southlandorganics.com"
 
     // Rewrite proxy hostname in href, src, action, content attributes on ALL elements
     // This catches <link rel="canonical">, <meta og:url>, <a>, <form>, <img>, etc.
@@ -237,8 +230,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
             '<script>window.pdPixelConfig={brandId:"southland",endpoint:"https://pixel.southlandorganics.com/collect"};</script>' +
             '<script src="https://cdn.point.dog/pixel/pd-pixel.min.js" async></script>' +
             // Cart shipping warning — self-gates on /cart, uses CF geolocation for ZIP hint
-            '<script data-cf-zip="' + ((runtime?.cf as any)?.postalCode || '') + '" src="/_partials/cart-warning.js" defer></script>',
-          { html: true },
+            '<script data-cf-zip="' +
+            ((runtime?.cf as any)?.postalCode || '') +
+            '" src="/_partials/cart-warning.js" defer></script>',
+          { html: true }
         )
       },
     })
@@ -251,10 +246,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
       rewriter.on('#shopify-section-header--default', {
         element(element: any) {
           element.before(partials.headerHtml, { html: true })
-          element.setAttribute(
-            'style',
-            'display:none!important',
-          )
+          element.setAttribute('style', 'display:none!important')
         },
       })
     }
@@ -264,10 +256,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
       rewriter.on('#shopify-section-footer', {
         element(element: any) {
           element.after(partials.footerHtml, { html: true })
-          element.setAttribute(
-            'style',
-            'display:none!important',
-          )
+          element.setAttribute('style', 'display:none!important')
         },
       })
     }

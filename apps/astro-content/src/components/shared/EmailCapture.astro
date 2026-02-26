@@ -56,20 +56,22 @@ const buttonClasses =
   data-source={source}
   data-episode-slug={episodeSlug}
 >
-  {(headline || description) && (
-    <div class="mb-4">
-      {headline && (
-        <h3 class={`font-bold text-lg ${variant === 'banner' ? '' : 'text-gray-900'}`}>
-          {headline}
-        </h3>
-      )}
-      {description && (
-        <p class={`text-sm mt-1 ${variant === 'banner' ? 'text-white/80' : 'text-gray-600'}`}>
-          {description}
-        </p>
-      )}
-    </div>
-  )}
+  {
+    (headline || description) && (
+      <div class="mb-4">
+        {headline && (
+          <h3 class={`text-lg font-bold ${variant === 'banner' ? '' : 'text-gray-900'}`}>
+            {headline}
+          </h3>
+        )}
+        {description && (
+          <p class={`mt-1 text-sm ${variant === 'banner' ? 'text-white/80' : 'text-gray-600'}`}>
+            {description}
+          </p>
+        )}
+      </div>
+    )
+  }
 
   <form
     class="klaviyo-form flex flex-col gap-3 sm:flex-row"

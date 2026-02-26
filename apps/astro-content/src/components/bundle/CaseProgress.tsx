@@ -16,9 +16,7 @@ export default function CaseProgress({ filled, total = 4 }: Props) {
           <div
             key={i}
             className={`h-3 w-3 rounded-full border-2 transition-colors ${
-              i < filled
-                ? 'border-shopify-link bg-shopify-link'
-                : 'border-gray-300 bg-white'
+              i < filled ? 'border-shopify-link bg-shopify-link' : 'border-gray-300 bg-white'
             }`}
           />
         ))}
@@ -27,9 +25,7 @@ export default function CaseProgress({ filled, total = 4 }: Props) {
         {filled} of {total} selected
       </span>
       {filled === total && (
-        <span className="text-sm font-medium text-shopify-link">
-          Case complete!
-        </span>
+        <span className="text-sm font-medium text-shopify-link">Case complete!</span>
       )}
     </div>
   )

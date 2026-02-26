@@ -137,9 +137,7 @@ function extractTeam(entry: any) {
   const d = entry.data
   return {
     title: d.name,
-    body: [d.role, d.bio, entry.body, ...(d.storyParagraphs || [])]
-      .filter(Boolean)
-      .join('\n\n'),
+    body: [d.role, d.bio, entry.body, ...(d.storyParagraphs || [])].filter(Boolean).join('\n\n'),
     description: d.bio,
     url: `/team/${entry.id.replace(/\.mdx?$/, '')}/`,
   }
@@ -157,9 +155,7 @@ function extractTopic(entry: any) {
 
 function extractShopCollection(entry: any) {
   const d = entry.data
-  const faqText = (d.faq || [])
-    .map((f: any) => `${f.question}\n${f.answer}`)
-    .join('\n\n')
+  const faqText = (d.faq || []).map((f: any) => `${f.question}\n${f.answer}`).join('\n\n')
   return {
     title: d.title,
     body: [d.seoDescription, d.heroHeadline, d.heroSubheadline, faqText]
@@ -311,7 +307,7 @@ export const POST: APIRoute = async ({ request }) => {
     if (!route) {
       return new Response(
         JSON.stringify({ error: true, message: 'Missing required field: route' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } },
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
       )
     }
 
@@ -327,7 +323,7 @@ export const POST: APIRoute = async ({ request }) => {
           scanVersion: SCAN_VERSION,
           scannedAt: new Date().toISOString(),
         }),
-        { status: 200, headers: { 'Content-Type': 'application/json' } },
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
       )
     }
 
@@ -364,11 +360,7 @@ export const POST: APIRoute = async ({ request }) => {
       const persona = personaRaw ? mapPersona(personaRaw) : null
 
       // Gap analysis (Supabase)
-      const gap = await analyzeContentGap(
-        extracted.title,
-        extracted.body,
-        extracted.url,
-      )
+      const gap = await analyzeContentGap(extracted.title, extracted.body, extracted.url)
 
       // Quality axis (always — local computation)
       const quality = computeQuality(extracted.body, extracted.description)
@@ -393,9 +385,7 @@ export const POST: APIRoute = async ({ request }) => {
       entriesWithPersona.length > 0
         ? {
             primaryAudience: mode(entriesWithPersona.map((e) => e.persona!.audience)),
-            avgAlignment: Math.round(
-              avg(entriesWithPersona.map((e) => e.persona!.alignment)),
-            ),
+            avgAlignment: Math.round(avg(entriesWithPersona.map((e) => e.persona!.alignment))),
             unclearCount: entriesWithPersona.filter((e) => e.persona!.unclear).length,
           }
         : null
@@ -406,11 +396,8 @@ export const POST: APIRoute = async ({ request }) => {
       missingMeta: entries.filter((e) => !e.quality.hasMetaDescription).length,
       noInternalLinks: entries.filter((e) => e.quality.internalLinks === 0).length,
       stubbedCount: entries.filter((e) => e.quality.stubbed).length,
-      avgReadability: Math.round(
-        avg(entries.map((e) => e.quality.readability.fleschKincaid)),
-      ),
-      badHeadingsCount: entries.filter((e) => !e.quality.headings.properStructure)
-        .length,
+      avgReadability: Math.round(avg(entries.map((e) => e.quality.readability.fleschKincaid))),
+      badHeadingsCount: entries.filter((e) => !e.quality.headings.properStructure).length,
     }
 
     // Gap aggregate
@@ -444,7 +431,7 @@ export const POST: APIRoute = async ({ request }) => {
       ? `persona: ${personaAggregate.primaryAudience} @ ${personaAggregate.avgAlignment}%`
       : 'persona: unavailable'
     console.log(
-      `[site-audit] scanned ${route}: ${entries.length} entries, ${personaInfo}, ${qualityAggregate.noInternalLinks} no links (${duration}ms)`,
+      `[site-audit] scanned ${route}: ${entries.length} entries, ${personaInfo}, ${qualityAggregate.noInternalLinks} no links (${duration}ms)`
     )
 
     return new Response(JSON.stringify(resp), {
@@ -458,7 +445,7 @@ export const POST: APIRoute = async ({ request }) => {
         error: true,
         message: err instanceof Error ? err.message : 'Unknown error',
       }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } },
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
     )
   }
 }
