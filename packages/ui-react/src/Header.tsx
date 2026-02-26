@@ -167,13 +167,13 @@ export function Header({ logoUrl, logoAlt, navigation, currentPath }: HeaderProp
     try {
       const stored = localStorage.getItem('southland_cart_count')
       if (stored) setCartCount(parseInt(stored, 10) || 0)
-    } catch {}
+    } catch { /* SSR or private browsing */ }
 
     function handleCartChanged(e: Event) {
       const cart = (e as CustomEvent).detail as { totalQuantity?: number } | null
       const count = cart?.totalQuantity ?? 0
       setCartCount(count)
-      try { localStorage.setItem('southland_cart_count', String(count)) } catch {}
+      try { localStorage.setItem('southland_cart_count', String(count)) } catch { /* ignore */ }
     }
 
     window.addEventListener('cart-changed', handleCartChanged)
