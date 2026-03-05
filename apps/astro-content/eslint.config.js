@@ -48,6 +48,8 @@ export default [
         React: 'readonly',
         RequestInfo: 'readonly',
         HTMLRewriter: 'readonly',
+        HTMLElement: 'readonly',
+        NodeListOf: 'readonly',
       },
     },
     plugins: {
