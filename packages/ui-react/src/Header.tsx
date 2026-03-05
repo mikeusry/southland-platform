@@ -6,6 +6,7 @@ interface HeaderProps {
   logoAlt: string
   navigation: NavItem[]
   currentPath?: string
+  phoneNumber?: string
 }
 
 function groupChildren(children: NavChild[]) {
@@ -159,7 +160,7 @@ function NavDropdown({ item, isActive }: { item: NavItem; isActive: boolean }) {
   )
 }
 
-export function Header({ logoUrl, logoAlt, navigation, currentPath }: HeaderProps) {
+export function Header({ logoUrl, logoAlt, navigation, currentPath, phoneNumber = '800-608-3755' }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [cartCount, setCartCount] = useState(0)
 
@@ -197,6 +198,23 @@ export function Header({ logoUrl, logoAlt, navigation, currentPath }: HeaderProp
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-100 bg-white">
+      {/* Phone utility bar — desktop only */}
+      {phoneNumber && (
+        <div className="hidden bg-[#2C5234] md:block">
+          <div className="mx-auto flex max-w-[1400px] items-center justify-center px-4 py-1.5">
+            <a
+              href={`tel:${phoneNumber.startsWith('1-') ? phoneNumber : `1-${phoneNumber}`}`}
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-white/90 transition-colors hover:text-white"
+              aria-label={`Call Southland Organics at ${phoneNumber}`}
+            >
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+              </svg>
+              {phoneNumber}
+            </a>
+          </div>
+        </div>
+      )}
       <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
         <div className="flex h-[75px] items-center justify-between">
           {/* Logo */}
@@ -299,8 +317,23 @@ export function Header({ logoUrl, logoAlt, navigation, currentPath }: HeaderProp
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <nav className="max-h-[calc(100vh-75px)] overflow-y-auto border-t border-gray-100 bg-white md:hidden">
+        <nav className="max-h-[calc(100vh-110px)] overflow-y-auto border-t border-gray-100 bg-white md:hidden">
           <div className="px-4 py-4">
+            {/* Mobile phone link */}
+            {phoneNumber && (
+              <div className="mb-3 border-b border-gray-100 pb-3">
+                <a
+                  href={`tel:${phoneNumber.startsWith('1-') ? phoneNumber : `1-${phoneNumber}`}`}
+                  className="flex items-center gap-2 py-2 text-base font-semibold"
+                  style={{ color: '#2c5234' }}
+                >
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                  </svg>
+                  Call Us: {phoneNumber}
+                </a>
+              </div>
+            )}
             {navigation.map((item) => {
               const grouped = item.children ? groupChildren(item.children) : null
               return (

@@ -18,7 +18,7 @@
 
 import { buildCloudinaryUrl, getCloudinaryResponsiveSet } from '../lib/cloudinary';
 
-export interface Props {
+interface Props {
   /** Cloudinary public ID */
   publicId: string;
   /** Alt text for accessibility */
@@ -49,6 +49,8 @@ export interface Props {
   parallax?: boolean;
   /** Image effect */
   effect?: 'blur' | 'grayscale' | 'sepia' | 'darken' | 'none';
+  /** Image gravity/anchor point (default: 'auto') */
+  gravity?: 'auto' | 'center' | 'north' | 'south' | 'east' | 'west' | 'face' | 'faces';
 }
 
 const {
@@ -66,7 +68,8 @@ const {
   contentClass = '',
   priority = false,
   parallax = false,
-  effect = 'none'
+  effect = 'none',
+  gravity: gravityProp = 'auto'
 } = Astro.props;
 
 // Responsive widths for hero images
@@ -82,10 +85,11 @@ const effectMap: Record<string, string | undefined> = {
 };
 
 // Generate responsive srcset
+// Use 'lfill' (limit fill) so Cloudinary never upscales beyond the source dimensions
 const responsiveSet = getCloudinaryResponsiveSet(publicId, widths, {
   height,
-  crop: 'fill',
-  gravity: 'auto',
+  crop: 'lfill',
+  gravity: gravityProp,
   quality: 'auto:good',
   format: 'auto',
   effect: effectMap[effect] as any

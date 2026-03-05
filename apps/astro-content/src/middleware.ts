@@ -46,6 +46,7 @@ const ASTRO_ROUTES = [
   '/poultry',
   '/lawn',
   '/turf',
+  '/hydroseeders',
 ]
 
 function isAstroRoute(pathname: string): boolean {
@@ -57,6 +58,15 @@ function isAstroRoute(pathname: string): boolean {
 // Permanent redirects — old Shopify pages → new Astro routes
 const REDIRECTS: Record<string, string> = {
   '/pages/why-southland': '/about/',
+  '/collections/backyard-birds': '/poultry/backyard/',
+  '/collections/poultry-broilers': '/poultry/commercial/',
+  '/collections/turkey': '/poultry/turkey/',
+  '/collections/game-birds': '/poultry/game-birds/',
+  '/collections/poultry-breeders': '/poultry/breeders/',
+  '/collections/hydroseeders': '/hydroseeders/',
+  '/pages/hydroseeding': '/hydroseeders/',
+  '/lawn/hydroseeders': '/hydroseeders/',
+  '/lawn/hydroseeders/': '/hydroseeders/',
 }
 
 // Module-level cache for partials (persists across requests in same isolate)

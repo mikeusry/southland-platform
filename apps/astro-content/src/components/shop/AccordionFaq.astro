@@ -1,0 +1,115 @@
+---
+/**
+ * AccordionFaq — Animated FAQ accordion with persona-aware styling.
+ *
+ * Uses native <details>/<summary> for accessibility, with Web Animations API
+ * for smooth height transitions. Respects prefers-reduced-motion.
+ */
+
+interface Props {
+  items: Array<{ question: string; answer: string }>
+  persona?: 'backyard' | 'commercial' | 'lawn' | null
+  class?: string
+}
+
+const { items, persona, class: className = '' } = Astro.props
+
+const accentColor: Record<string, string> = {
+  backyard: 'text-amber-600',
+  commercial: 'text-green-700',
+  lawn: 'text-emerald-600',
+}
+const chevronAccent = persona && accentColor[persona] ? accentColor[persona] : 'text-brand-green-light'
+---
+
+<div class:list={['accordion divide-y divide-gray-200', className]}>
+  {items.map((item) => (
+    <details class="accordion-item group">
+      <summary class="flex cursor-pointer items-center justify-between gap-4 py-5 text-left">
+        <span class="text-base font-semibold text-gray-900 group-hover:text-gray-700">
+          {item.question}
+        </span>
+        <svg
+          class:list={[
+            'accordion-chevron h-5 w-5 shrink-0 transition-transform duration-200',
+            chevronAccent,
+          ]}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </summary>
+      <div class="accordion-content overflow-hidden">
+        <p class="pb-5 pr-12 text-sm leading-relaxed text-gray-600">
+          {item.answer}
+        </p>
+      </div>
+    </details>
+  ))}
+</div>
+
+<style>
+  details[open] > summary .accordion-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* Remove default marker/triangle */
+  summary {
+    list-style: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+</style>
+
+<script>
+  function initAccordion() {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    document.querySelectorAll('.accordion-item').forEach((details) => {
+      const summary = details.querySelector('summary')
+      const content = details.querySelector('.accordion-content') as HTMLElement | null
+      if (!summary || !content) return
+
+      summary.addEventListener('click', (e) => {
+        e.preventDefault()
+
+        if (prefersReducedMotion) {
+          ;(details as HTMLDetailsElement).open = !(details as HTMLDetailsElement).open
+          return
+        }
+
+        if ((details as HTMLDetailsElement).open) {
+          // Closing
+          const anim = content.animate(
+            [
+              { height: content.scrollHeight + 'px', opacity: '1' },
+              { height: '0px', opacity: '0' },
+            ],
+            { duration: 200, easing: 'ease-out' }
+          )
+          anim.onfinish = () => {
+            ;(details as HTMLDetailsElement).open = false
+          }
+        } else {
+          // Opening
+          ;(details as HTMLDetailsElement).open = true
+          content.animate(
+            [
+              { height: '0px', opacity: '0' },
+              { height: content.scrollHeight + 'px', opacity: '1' },
+            ],
+            { duration: 200, easing: 'ease-out' }
+          )
+        }
+      })
+    })
+  }
+
+  // Run on initial load and after Astro page transitions
+  initAccordion()
+  document.addEventListener('astro:after-swap', initAccordion)
+</script>

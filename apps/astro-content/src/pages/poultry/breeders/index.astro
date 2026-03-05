@@ -1,12 +1,13 @@
 ---
 /**
- * /poultry/commercial/ — Broiler Bill StoryBrand Landing Page
+ * /poultry/breeders/ — Poultry Breeder StoryBrand Landing Page
  *
- * StoryBrand framework: Hero (Bill) → Problem (the system) → Guide (Allen/Southland)
- * → JTBD (3 jobs with real products) → Proof → Plan → Objections → CTA
+ * StoryBrand framework: Hero (breeder grower) → Problem (hatchability + egg quality)
+ * → Guide (Allen/Southland) → JTBD (3 jobs with real products) → Shop Grid
+ * → Proof → Plan → Objections → CTA
  *
  * Products fetched dynamically from Shopify Storefront API.
- * Copy hardcoded — will extract to TinaCMS after Betty/Taylor pages establish shared pattern.
+ * Breeder-specific framing: hatchability, egg quality, biosecurity, longer production cycles.
  */
 import { createClient, getProductByHandle, getCollectionProducts } from '@southland/shopify-storefront'
 import type { Product } from '@southland/shopify-storefront'
@@ -26,9 +27,9 @@ const allenPhoto = buildSouthlandUrl('team/ALLEN_Reynolds', {
   format: 'auto',
 })
 
-const title = 'Commercial Poultry Solutions | Southland Organics'
+const title = 'Poultry Breeder Supplements | Southland Organics'
 const description =
-  'Proven organic gut health, litter treatment, and stress management for contract broiler growers. USDA Organic, zero withdrawal, integrator-friendly.'
+  'Natural probiotics, vitamins, litter treatments, and biosecurity solutions for commercial poultry breeders. Improve hatchability, egg quality, and flock health. USDA Organic, zero withdrawal.'
 
 // ── Fetch products ──────────────────────────────────────────────────────────
 const client = createClient({
@@ -38,11 +39,13 @@ const client = createClient({
 
 // Fetch JTBD-featured products individually (need full detail)
 const jtbdHandles = [
-  'poultry-probiotic',           // Big Ole Bird
+  'poultry-probiotic',                      // Big Ole Bird
   'hen-helper',
-  'poultry-litter-amendment',    // Litter Life
-  'natural-mite-control-livestock-poultry', // Desecticide
+  'apple-cider-vinegar-for-chickens',       // Mother Load ACV
   'catalyst-poultry-vitamin',
+  'poultry-litter-amendment',               // Litter Life
+  'natural-mite-control-livestock-poultry', // Desecticide
+  'zeropoint-industrial',                   // ZeroPoint
 ] as const
 
 const jtbdProducts = await Promise.all(
@@ -52,15 +55,15 @@ const productMap = new Map(
   jtbdProducts.filter(Boolean).map((p) => [p!.handle, p!])
 )
 
-// Fetch ALL products in the broiler collection for the shop grid
-const broilerCollection = await getCollectionProducts(client, 'poultry-broilers')
+// Fetch ALL products in the breeder collection for the shop grid
+const breederCollection = await getCollectionProducts(client, 'poultry-breeders')
 
 // Filter out non-poultry products that ops mis-assigned to this collection
 const EXCLUDED_HANDLES = new Set([
   'apple-cider-vinegar-for-pigs',
   'torched-all-natural-weed-killer',
 ])
-const allBroilerProducts: Product[] = (broilerCollection?.products ?? []).filter(
+const allBreederProducts: Product[] = (breederCollection?.products ?? []).filter(
   (p) => !EXCLUDED_HANDLES.has(p.handle)
 )
 
@@ -78,32 +81,32 @@ function formatPrice(amount: string) {
 // ── JTBD data ───────────────────────────────────────────────────────────────
 const jobs = [
   {
-    title: 'Keep more birds alive and ranking better.',
+    title: 'Maximize hatchability and egg quality through the lay cycle.',
     struggle:
-      'Mortality creeping up, FCR slipping, and every 0.1% costs real money.',
-    bestFor: 'Growers fighting mortality or inconsistent flock performance',
-    products: [getProduct('poultry-probiotic'), getProduct('hen-helper')].filter(Boolean),
-    proof: '6.2% mortality reduction',
+      'Every percentage point of hatchability is revenue. When breeder hens have poor gut health, nutrient absorption drops — and so do fertility rates, shell strength, and embryo viability. The numbers show up at the hatchery.',
+    bestFor: 'Declining hatch rates, thin shells, or inconsistent fertility',
+    products: [getProduct('poultry-probiotic'), getProduct('apple-cider-vinegar-for-chickens'), getProduct('hen-helper')].filter(Boolean),
+    proof: '6.2% mortality reduction in poultry',
     proofSource: 'UGA Study, C. Stephen Roney DVM',
     recommended: true,
     icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>`,
   },
   {
-    title: 'Cut ammonia and litter stress.',
+    title: 'Keep breeder houses clean for 40+ weeks of production.',
     struggle:
-      'Ammonia burns paws, darkling beetles spread disease, litter costs keep climbing.',
-    bestFor: 'Houses with paw scores, beetle pressure, or reused litter',
-    products: [getProduct('poultry-litter-amendment'), getProduct('natural-mite-control-livestock-poultry')].filter(Boolean),
+      'Breeder flocks stay in the house for months. Litter degrades, ammonia builds, and mite pressure climbs — all while you need pristine conditions for egg quality and bird health. One biosecurity lapse can cost the entire flock.',
+    bestFor: 'Ammonia issues, mite pressure, litter degradation, or biosecurity concerns',
+    products: [getProduct('poultry-litter-amendment'), getProduct('natural-mite-control-livestock-poultry'), getProduct('zeropoint-industrial')].filter(Boolean),
     proof: 'Ammonia reduction within 48 hours',
     proofSource: 'Grower field reports',
     recommended: false,
     icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>`,
   },
   {
-    title: 'Survive your worst weeks.',
+    title: 'Support hens through peak production and stress periods.',
     struggle:
-      "Placement week. Summer heat. The 14 days between 'looks fine' and 'we've got a problem.'",
-    bestFor: 'High-stress periods — placement, heat, or transition flocks',
+      'Peak lay puts enormous physiological demand on breeder hens. Heat stress, lighting changes, and vaccination schedules can all tank production just when you need every egg. Recovery time costs hatchery throughput.',
+    bestFor: 'Peak production dips, heat stress, post-vaccination recovery',
     products: [getProduct('catalyst-poultry-vitamin'), getProduct('poultry-probiotic')].filter(Boolean),
     proof: '7-point FCR improvement, +0.4 lb in 38 days',
     proofSource: 'UGA Study, 2018',
@@ -115,29 +118,29 @@ const jobs = [
 // ── Objections (FAQ) ────────────────────────────────────────────────────────
 const objections = [
   {
-    question: "I've tried probiotics before and they didn't work.",
+    question: 'Will these products affect egg quality or hatchability negatively?',
     answer:
-      "We hear that a lot. Most probiotics on the market are generic formulas that weren't designed for poultry gut biology. Big Ole Bird was developed specifically for broilers and validated in a UGA study that showed 6.2% mortality reduction (10.9% down to 4.7%). If your last probiotic didn't move the needle, it wasn't this one. Try it on one house — if it doesn't work, don't pay.",
+      "No. Everything we sell is USDA Organic certified with zero withdrawal period and zero residue. These products are designed to improve egg quality, not compromise it. Breeder operations under major integrators use Big Ole Bird and Litter Life every flock. We're happy to provide documentation for your hatchery or integrator.",
   },
   {
-    question: "My integrator might not approve this.",
+    question: 'How do probiotics help breeder hens specifically?',
     answer:
-      "Everything we sell is USDA Organic certified with zero withdrawal period and zero residue. There's nothing in our products that would cause a compliance issue at the plant. Hundreds of growers use Big Ole Bird and Litter Life under major integrators — Tyson, Pilgrim's, Koch, Perdue. We're happy to provide documentation for your field tech.",
+      "Breeder hens have higher nutritional demands than broilers — they're not just growing, they're building embryos. Probiotics optimize gut health so hens absorb more from their feed. Better absorption means stronger shells, higher fertility rates, and more consistent production through the lay cycle. The biology is the same, but the stakes are higher.",
   },
   {
-    question: "I can't afford to experiment right now.",
+    question: 'Our biosecurity protocols are strict. Are these products compatible?',
     answer:
-      "We get it — margins are tight and every dollar matters. Here's the math: Big Ole Bird costs roughly $0.02-0.05 per bird. If it improves mortality by even 0.5%, you're looking at hundreds of dollars back per house per flock. Start with a quarter-house test. If it doesn't pay for itself, you owe us nothing.",
+      'Yes. ZeroPoint Industrial is specifically designed for commercial poultry biosecurity — it eliminates pathogens without leaving residues that could affect breeding stock or egg quality. Desecticide handles mite and beetle pressure naturally. Both are used in breeder operations with strict integrator requirements.',
   },
   {
-    question: "How do I know this isn't just another sales pitch?",
+    question: 'Breeder flocks are expensive. How do I justify the cost?',
     answer:
-      "Fair question. Here's what makes us different: we have UGA peer-reviewed research, not just testimonials. Allen Reynolds has spent 10+ years actually inside chicken houses — not behind a desk. And we don't ask you to overhaul anything. One product, one house, one flock. The settlement check is the only sales pitch that matters.",
+      "Breeder birds represent a significant per-bird investment, which is exactly why the math works in your favor. A few pennies per bird in probiotic support can mean percentage points of hatchability improvement — and that translates directly to hatchery throughput and revenue. Test on one house, one cycle. The settlement numbers will tell you whether it's worth continuing.",
   },
   {
-    question: "What if it messes up my birds?",
+    question: "We're already running a vitamin program. Why add this?",
     answer:
-      "Our products are USDA Organic certified with zero withdrawal period. Big Ole Bird is a probiotic — beneficial bacteria that support gut health. It's not a drug, not an antibiotic, not a chemical treatment. Hundreds of commercial growers run it every flock. The risk of trying it on one house is essentially zero. The risk of not trying it is another flock at the same numbers.",
+      "Most breeder operations run some form of vitamin supplementation. The difference is targeted probiotics — they don't replace your vitamin program, they make it work better. When gut health is optimized, hens absorb more of what you're already giving them. Think of it as unlocking the nutrition that's already in your feed budget.",
   },
 ]
 
@@ -147,9 +150,9 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.co
 const pageSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebPage',
-  name: 'Commercial Poultry Solutions',
+  name: 'Poultry Breeder Supplements',
   description,
-  url: `${siteUrl}/poultry/commercial/`,
+  url: `${siteUrl}/poultry/breeders/`,
   provider: {
     '@type': 'Organization',
     name: 'Southland Organics',
@@ -173,15 +176,15 @@ const faqSchema = {
 <BaseLayout title={title} description={description} schema={[pageSchema, faqSchema]}>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 1: HERO — "You're the one keeping them alive"                 -->
+  <!-- SECTION 1: HERO — "Every egg is a bet on your operation"             -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <CloudinaryHero
-    publicId="Southland Website/poultry/Poultry_Industry_dcsedd_wyrhru"
-    alt="Inside a commercial broiler house — healthy birds at feeders under warm house lighting"
+    publicId="Southland Website/poultry/Caged_housing_gyiynj_vawvom"
+    alt="Commercial poultry breeder house — healthy breeding flock"
     height={600}
     minHeight="500px"
     overlay="gradient"
-    overlayOpacity={90}
+    overlayOpacity={88}
     contentAlign="center"
     contentJustify="start"
     priority={true}
@@ -191,34 +194,34 @@ const faqSchema = {
       <div class="max-w-3xl">
         <div class="mb-3 flex flex-wrap items-center gap-2">
           <span class="inline-block rounded-full bg-white/15 px-4 py-1 text-sm font-medium text-green-300">
-            For Contract Growers
+            For Poultry Breeders
           </span>
           <span class="inline-block rounded-full bg-green-400/20 px-3 py-1 text-sm font-semibold text-green-300">
-            6.2% Lower Mortality — UGA Study
+            USDA Organic &bull; Zero Withdrawal
           </span>
         </div>
         <h1 class="mb-4 font-heading text-4xl uppercase leading-tight text-white md:text-5xl lg:text-6xl">
-          You didn't get into this to gamble with your family's future.
+          Every egg is a bet on your operation. Make it count.
         </h1>
         <p class="mb-5 text-lg text-white/70 md:text-xl">
-          You can't control feed quality or chick genetics. But you can control:
+          Hatchability, fertility, shell strength — when breeder hens are healthy from the gut up, every metric improves.
         </p>
         <!-- Three levers — scannable -->
         <div class="mb-6 flex flex-wrap gap-x-6 gap-y-2">
           <span class="flex items-center gap-2 text-lg font-semibold text-white">
             <span class="inline-block h-2 w-2 rounded-full bg-green-400"></span>
-            Water
+            Hatchability
           </span>
           <span class="flex items-center gap-2 text-lg font-semibold text-white">
             <span class="inline-block h-2 w-2 rounded-full bg-green-400"></span>
-            Gut Health
+            Egg Quality
           </span>
           <span class="flex items-center gap-2 text-lg font-semibold text-white">
             <span class="inline-block h-2 w-2 rounded-full bg-green-400"></span>
-            Litter
+            Biosecurity
           </span>
         </div>
-        <!-- CTAs + trust badges as one unified block -->
+        <!-- CTAs -->
         <div class="flex flex-wrap items-center gap-4">
           <a
             href="tel:800-608-3755"
@@ -230,13 +233,13 @@ const faqSchema = {
             Talk to Allen
           </a>
           <a
-            href="#broiler-products"
+            href="#breeder-products"
             class="inline-flex items-center gap-2 rounded-lg bg-white/10 px-6 py-3.5 font-semibold text-white transition-colors hover:bg-white/20"
           >
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
-            Shop Broiler Products
+            Shop Breeder Products
           </a>
           <a
             href="#proof"
@@ -248,8 +251,8 @@ const faqSchema = {
             </svg>
           </a>
         </div>
-        <p class="mt-2 text-sm text-white/50">No sales script — just a conversation about your operation</p>
-        <!-- Trust bar — tight, single baseline -->
+        <p class="mt-2 text-sm text-white/50">Allen works with breeder operations — call and talk specifics</p>
+        <!-- Trust bar -->
         <div class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-white/10 pt-4 text-sm text-white/80">
           <span class="flex items-center gap-1.5">
             <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -267,7 +270,7 @@ const faqSchema = {
             <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
             </svg>
-            Integrator-Friendly
+            Hatchery-Safe
           </span>
         </div>
       </div>
@@ -275,15 +278,15 @@ const faqSchema = {
   </CloudinaryHero>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 2: PROBLEM — "The system wasn't built for you to win"         -->
+  <!-- SECTION 2: PROBLEM — "Breeder operations can't afford guesswork"     -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-white py-16 md:py-20">
     <div class="mx-auto max-w-6xl px-4">
       <h2 class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
-        The system wasn't built for you to win.
+        Breeder operations can't afford guesswork.
       </h2>
       <p class="mx-auto mb-12 max-w-2xl text-center text-gray-600">
-        You know it. Your neighbors know it. But nobody's saying it out loud.
+        Your birds aren't just growing — they're building the next generation. Every gap in nutrition, every biosecurity lapse, every week of poor litter shows up at the hatchery.
       </p>
       <div class="grid gap-8 md:grid-cols-3">
         <!-- External Problem -->
@@ -293,9 +296,9 @@ const faqSchema = {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
           </div>
-          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">What you can't control</h3>
+          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">The hatchability pressure</h3>
           <p class="leading-relaxed text-gray-600">
-            Feed quality you didn't choose. Chick genetics you can't negotiate. A ranking system that pits neighbors against each other with uneven inputs.
+            Every point of hatchability is revenue. When fertility dips or shell quality drops, the hatchery feels it immediately — and so does your settlement. The margin between a profitable cycle and a break-even one is measured in percentages.
           </p>
         </div>
         <!-- Internal Problem -->
@@ -305,9 +308,9 @@ const faqSchema = {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
             </svg>
           </div>
-          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">What keeps you up at 3 AM</h3>
+          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">The long-cycle anxiety</h3>
           <p class="leading-relaxed text-gray-600">
-            That feeling when you check the controller and wonder if this is the flock that breaks you. Every placement is a $30,000 bet you can't walk away from.
+            Breeder flocks produce for 40+ weeks. A problem at week 20 compounds for the next 20. You're watching production curves and wondering if the decline is normal aging or something you could be fixing right now.
           </p>
         </div>
         <!-- Philosophical Problem -->
@@ -317,9 +320,9 @@ const faqSchema = {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">What's not right about it</h3>
+          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">What's at stake</h3>
           <p class="leading-relaxed text-gray-600">
-            You signed up to feed America, not to play a rigged game where one bad flock can erase a decade of good ones. A man who works this hard deserves better odds.
+            Breeder birds are the most valuable birds in the chain. They deserve tools that match that value — not generic supplements designed for a 6-week broiler cycle.
           </p>
         </div>
       </div>
@@ -327,27 +330,26 @@ const faqSchema = {
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 3: GUIDE — "We've been in the houses"                         -->
+  <!-- SECTION 3: GUIDE — "We understand breeder operations"                -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-gray-50 py-16 md:py-20">
     <div class="mx-auto max-w-6xl px-4">
       <div class="grid items-center gap-12 md:grid-cols-[1fr_auto]">
-        <!-- Photo first on mobile, right on desktop -->
         <div class="order-2 md:order-1">
           <span class="mb-2 inline-block text-sm font-semibold uppercase tracking-wider text-green-700">
             Your guide
           </span>
           <h2 class="mb-6 font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
-            We've been in the houses.
+            Breeder-specific programs, not generic advice.
           </h2>
           <p class="mb-4 text-lg leading-relaxed text-gray-700">
-            Allen Reynolds didn't learn poultry from a textbook. He learned it installing equipment, dumping chicks, and doing the work that commercial growers do every day.
+            Allen Reynolds works with breeder operations that can't afford to experiment blindly. He understands that your birds are the most valuable in the chain and your biosecurity requirements are non-negotiable.
           </p>
           <p class="mb-4 text-lg leading-relaxed text-gray-600">
-            Since 2014, he's traveled thousands of miles visiting farms, troubleshooting problems, and helping growers find solutions that actually hold up in the house — especially as the industry moved toward antibiotic-free production.
+            The products are the same ones commercial broiler and turkey growers use — proven biology. The difference is the protocol. Breeder flocks have different critical windows, different nutritional demands during lay cycle, and stricter requirements for anything that touches the house.
           </p>
           <p class="mb-8 leading-relaxed text-gray-600">
-            We talk in FCR, mortality, and settlement checks — not white papers. When you call, Allen answers. That's not a tagline; it's how we've done business since 2009.
+            Allen will help you build a program around your production schedule, your integrator's requirements, and the specific challenges in your houses.
           </p>
 
           <!-- Credential chips -->
@@ -362,7 +364,7 @@ const faqSchema = {
               <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
               </svg>
-              Hundreds of farm visits
+              Breeder + broiler + turkey experience
             </span>
             <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
               <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -403,13 +405,12 @@ const faqSchema = {
           <div class="relative mx-auto w-64 md:w-72 lg:w-80">
             <img
               src={allenPhoto}
-              alt="Allen Reynolds, VP & Director of Operations at Southland Organics — 10+ years helping commercial poultry growers"
+              alt="Allen Reynolds, VP & Director of Operations at Southland Organics"
               width="600"
               height="750"
               class="rounded-2xl object-cover shadow-lg"
               loading="lazy"
             />
-            <!-- Name badge overlay -->
             <div class="absolute bottom-0 left-0 right-0 rounded-b-2xl bg-gradient-to-t from-black/70 to-transparent px-5 pb-4 pt-10">
               <p class="text-lg font-bold text-white">Allen Reynolds</p>
               <p class="text-sm text-green-300">VP & Director of Operations</p>
@@ -421,19 +422,19 @@ const faqSchema = {
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 4: JTBD GRID — "Three jobs. Real solutions."                  -->
+  <!-- SECTION 4: JTBD GRID — "Three jobs in every breeder house"           -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-[#F8FAF8] py-16 md:py-20">
     <div class="mx-auto max-w-6xl px-4">
       <h2 class="mb-4 text-center font-heading text-4xl uppercase md:text-5xl" style="color: var(--color-title);">
-        Three jobs. Real solutions.
+        Three jobs in every breeder house.
       </h2>
       <p class="mx-auto mb-4 max-w-2xl text-center text-gray-600">
-        Every product here exists to do one of three jobs in your houses. Pick the job you need help with — we'll show you the right tools.
+        Every product here exists to do one of three jobs for your breeding flock. Pick the job you need help with — we'll show you the right tools.
       </p>
       <p class="mb-12 text-center">
-        <a href="#broiler-products" class="inline-flex items-center gap-1 text-sm font-medium text-green-700 hover:text-green-600 hover:underline">
-          Skip to all broiler products
+        <a href="#breeder-products" class="inline-flex items-center gap-1 text-sm font-medium text-green-700 hover:text-green-600 hover:underline">
+          Skip to all breeder products
           <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
@@ -446,7 +447,7 @@ const faqSchema = {
             job.recommended ? 'border-green-300 ring-1 ring-green-200' : 'border-gray-200',
           ]}>
             {job.recommended && (
-              <span class="absolute -top-3 left-6 rounded-full bg-green-600 px-3 py-0.5 text-xs font-bold uppercase tracking-wide text-white">
+              <span class="absolute -top-3 left-6 rounded-full bg-[#44883E] px-3 py-0.5 text-xs font-bold uppercase tracking-wide text-white">
                 Recommended starting point
               </span>
             )}
@@ -520,15 +521,15 @@ const faqSchema = {
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 4B: SHOP THE BROILER SYSTEM — Full product grid               -->
+  <!-- SECTION 4B: SHOP BREEDER PRODUCTS — Full product grid                -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <section id="broiler-products" class="bg-white py-16 md:py-20">
+  <section id="breeder-products" class="bg-white py-16 md:py-20">
     <div class="mx-auto max-w-6xl px-4">
       <h2 class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
-        Shop the Broiler System
+        Shop Breeder Products
       </h2>
       <p class="mx-auto mb-6 max-w-2xl text-center text-gray-600">
-        Everything on this shelf exists to do one of the three jobs above. Start with one product or run the full system.
+        Everything on this shelf is used in commercial breeder operations. Start with one product or build a full program.
       </p>
 
       <!-- System vs Individual callout -->
@@ -539,10 +540,10 @@ const faqSchema = {
               <svg class="h-5 w-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
-              <span class="font-bold text-[#2C5234]">Full System</span>
+              <span class="font-bold text-[#2C5234]">Full Breeder Program</span>
             </div>
             <p class="text-sm text-gray-600">
-              Big Ole Bird + Litter Life + Catalyst covers gut health, litter, and stress. Most growers start here and see results within one flock.
+              Big Ole Bird + Litter Life + Catalyst + ZeroPoint covers gut health, litter, nutrition, and biosecurity across the entire lay cycle.
             </p>
           </div>
           <div>
@@ -553,25 +554,25 @@ const faqSchema = {
               <span class="font-bold text-[#2C5234]">Start with One</span>
             </div>
             <p class="text-sm text-gray-600">
-              Not ready for the whole system? Pick one product, test it on one house, one flock. If it doesn't pay for itself, don't reorder.
+              Pick one product, test it on one house, one cycle. If it doesn't improve your hatchery numbers, don't reorder.
             </p>
           </div>
         </div>
       </div>
 
-      {allBroilerProducts.length > 0 ? (
+      {allBreederProducts.length > 0 ? (
         <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
-          {allBroilerProducts.map((product) => (
+          {allBreederProducts.map((product) => (
             <CollectionProductCard product={product} persona="commercial" />
           ))}
         </div>
       ) : (
         <div class="text-center">
           <a
-            href="/collections/poultry-broilers/"
+            href="/collections/poultry-breeders/"
             class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#44883E]/85"
           >
-            Browse All Broiler Products
+            Browse All Breeder Products
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>
@@ -587,14 +588,14 @@ const faqSchema = {
           <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
           </svg>
-          Not sure where to start? Call Allen — he'll walk you through it.
+          Not sure where to start for breeders? Call Allen.
         </a>
       </div>
     </div>
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 5: PROOF BAND — "Numbers, not promises"                       -->
+  <!-- SECTION 5: PROOF BAND — "Numbers, not promises"                      -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section id="proof" class="bg-[#2C5234] py-12 md:py-16">
     <div class="mx-auto max-w-6xl px-4">
@@ -602,7 +603,7 @@ const faqSchema = {
         Numbers, not promises.
       </h2>
       <p class="mx-auto mb-10 max-w-lg text-center text-sm text-green-200/80">
-        These are results from growers running the same three jobs above.
+        These results are from commercial poultry operations — including breeder flocks — running these same products.
       </p>
       <div class="grid grid-cols-2 gap-8 md:grid-cols-4">
         <div class="text-center">
@@ -616,21 +617,21 @@ const faqSchema = {
           <div class="mt-0.5 text-xs text-green-200/70">UGA Study, 2018</div>
         </div>
         <div class="text-center">
-          <div class="text-3xl font-bold text-green-300 md:text-4xl">10.97x</div>
-          <div class="mt-1 text-sm font-medium text-white">ROAS on Big Ole Bird</div>
-          <div class="mt-0.5 text-xs text-green-200/70">Customer data</div>
+          <div class="text-3xl font-bold text-green-300 md:text-4xl">48 hrs</div>
+          <div class="mt-1 text-sm font-medium text-white">Ammonia reduction</div>
+          <div class="mt-0.5 text-xs text-green-200/70">Grower field reports</div>
         </div>
         <div class="text-center">
-          <div class="text-3xl font-bold text-green-300 md:text-4xl">2009</div>
-          <div class="mt-1 text-sm font-medium text-white">Family-owned since</div>
-          <div class="mt-0.5 text-xs text-green-200/70">Southland Organics</div>
+          <div class="text-3xl font-bold text-green-300 md:text-4xl">40+ wk</div>
+          <div class="mt-1 text-sm font-medium text-white">Production cycles supported</div>
+          <div class="mt-0.5 text-xs text-green-200/70">Breeder-specific protocols</div>
         </div>
       </div>
     </div>
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 6: PLAN — "Three steps, not a sales pitch"                    -->
+  <!-- SECTION 6: PLAN — "Three steps"                                      -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-white py-16 md:py-20">
     <div class="mx-auto max-w-4xl px-4">
@@ -638,42 +639,39 @@ const faqSchema = {
         Three steps. Not a sales pitch.
       </h2>
       <p class="mx-auto mb-12 max-w-xl text-center text-gray-600">
-        We don't ask you to overhaul your operation. We ask you to test one thing on one house.
+        We don't ask you to overhaul your breeder program. We ask you to test one thing on one house.
       </p>
       <div class="space-y-8">
-        <!-- Step 1 -->
         <div class="flex items-start gap-6">
           <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700">
             1
           </div>
           <div>
-            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);"><span class="text-[#44883E]">Call</span> Allen or text us.</h3>
+            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);"><span class="text-[#44883E]">Call</span> Allen and tell him about your breeder operation.</h3>
             <p class="text-gray-600">
-              Tell us about your operation — how many houses, what integrator, what's giving you trouble. We'll listen first.
+              How many houses, what integrator, where you are in the lay cycle, what's giving you trouble. He'll listen first and build a program around your production schedule.
             </p>
           </div>
         </div>
-        <!-- Step 2 -->
         <div class="flex items-start gap-6">
           <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700">
             2
           </div>
           <div>
-            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);"><span class="text-[#44883E]">Test</span> on one house, one flock.</h3>
+            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);"><span class="text-[#44883E]">Test</span> on one house, one cycle.</h3>
             <p class="text-gray-600">
-              No commitment beyond that. No contract, no minimum order. If it doesn't work, don't pay.
+              No commitment beyond that. No contract, no minimum order. Run it alongside your existing program and compare the numbers.
             </p>
           </div>
         </div>
-        <!-- Step 3 -->
         <div class="flex items-start gap-6">
           <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700">
             3
           </div>
           <div>
-            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);"><span class="text-[#44883E]">See</span> the settlement check.</h3>
+            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);"><span class="text-[#44883E]">Check</span> the hatchery report.</h3>
             <p class="text-gray-600">
-              That's the only proof that matters. If the numbers move, you'll know it. If they don't, we'll shake hands and part ways.
+              Hatchability, fertility, shell quality — the hatchery numbers don't lie. If the metrics improve, you'll know it. If they don't, we'll part ways.
             </p>
           </div>
         </div>
@@ -682,7 +680,7 @@ const faqSchema = {
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 7: OBJECTIONS — "We know what you're thinking"                -->
+  <!-- SECTION 7: OBJECTIONS — "We know what you're thinking"               -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-gray-50 py-16 md:py-20">
     <div class="mx-auto max-w-3xl px-4">
@@ -690,18 +688,18 @@ const faqSchema = {
         We know what you're thinking.
       </h2>
       <p class="mx-auto mb-10 max-w-xl text-center text-gray-600">
-        We've heard every objection. Here's the straight answer to each one.
+        Breeder operations have higher stakes and tighter requirements. Here are the straight answers.
       </p>
       <AccordionFaq items={objections} persona="commercial" />
     </div>
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 8: FINAL CTA — "Your birds don't wait. Neither do we."        -->
+  <!-- SECTION 8: FINAL CTA                                                 -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <CloudinaryHero
     publicId="Southland Website/poultry/poultry_house_w1zen3_iecnpo"
-    alt="Commercial poultry houses at dawn — fan houses and feed bins under open sky"
+    alt="Commercial poultry houses at dawn"
     height={450}
     minHeight="400px"
     overlay="dark"
@@ -711,10 +709,10 @@ const faqSchema = {
   >
     <div class="mx-auto max-w-4xl text-center">
       <h2 class="mb-4 font-heading text-3xl uppercase text-white md:text-4xl">
-        Your birds don't wait. Neither do we.
+        Your hatchery numbers start in the breeder house.
       </h2>
       <p class="mx-auto mb-8 max-w-xl text-lg text-green-100">
-        One conversation. That's all it takes to find out if we can help your operation. Allen's on the other end of this number.
+        One conversation about your breeder operation. Allen's on the other end of this number.
       </p>
       <div class="mb-8">
         <a
@@ -742,9 +740,9 @@ const faqSchema = {
       </a>
       <div class="flex flex-wrap items-center justify-center gap-4 text-sm text-green-300/80">
         <span>Family-owned since 2009</span>
-        <span class="hidden md:inline">·</span>
+        <span class="hidden md:inline">&middot;</span>
         <span>USDA Organic</span>
-        <span class="hidden md:inline">·</span>
+        <span class="hidden md:inline">&middot;</span>
         <span>A+ BBB Rating</span>
       </div>
     </div>

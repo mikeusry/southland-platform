@@ -33,6 +33,8 @@ export default {
           'white': '#ffffff',
           'gray': '#efefef',       // Updated to match Shopify
           'gray-dark': '#686363',  // Updated to match Shopify
+          'green-dark': '#2c5234', // Dark green — titles, hero gradients
+          'green-light': '#44883e', // Light green — links, buttons, accents
         }
       },
       fontFamily: {

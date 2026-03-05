@@ -23,16 +23,18 @@
       },
       {
         "label": "Poultry",
-        "href": "/collections/poultry",
+        "href": "/poultry/",
         "children": [
-          { "label": "Broilers", "href": "/collections/poultry-broilers", "group": "By Bird" },
-          { "label": "Breeders", "href": "/collections/poultry-breeders", "group": "By Bird" },
-          { "label": "Backyard Birds", "href": "/collections/backyard-birds", "group": "By Bird" },
-          { "label": "Game Birds", "href": "/collections/game-birds", "group": "By Bird" },
-          { "label": "Turkey", "href": "/collections/turkey", "group": "By Bird" },
+          { "label": "Commercial Poultry", "href": "/poultry/commercial/", "group": "By Operation" },
+          { "label": "Backyard Flocks", "href": "/poultry/backyard/", "group": "By Operation" },
+          { "label": "Broilers", "href": "/poultry/commercial/", "group": "By Bird" },
+          { "label": "Breeders", "href": "/poultry/breeders/", "group": "By Bird" },
+          { "label": "Backyard Birds", "href": "/poultry/backyard/", "group": "By Bird" },
+          { "label": "Game Birds", "href": "/poultry/game-birds/", "group": "By Bird" },
+          { "label": "Turkey", "href": "/poultry/turkey/", "group": "By Bird" },
           { "label": "Poultry Biosecurity", "href": "/blogs/poultry-biosecurity", "group": "Resources" },
           { "label": "Case Studies", "href": "/blogs/case-studies", "group": "Resources" },
-          { "label": "Shop All Poultry", "href": "/collections/poultry", "group": "Resources" }
+          { "label": "Shop All Poultry", "href": "/poultry/", "group": "Resources" }
         ]
       },
       {
@@ -43,8 +45,7 @@
           { "label": "Golf Courses", "href": "/collections/golf-courses", "group": "By Customer" },
           { "label": "Landscapers", "href": "/collections/landscapers", "group": "By Customer" },
           { "label": "Crops", "href": "/collections/crops", "group": "Specialty" },
-          { "label": "Hydroseeders", "href": "/collections/hydroseeders", "group": "Specialty" },
-          { "label": "Hydroseeding", "href": "/pages/hydroseeding", "group": "Specialty" },
+          { "label": "Hydroseeders", "href": "/hydroseeders/", "group": "Specialty" },
           { "label": "Shop All Lawn & Garden", "href": "/collections/turf", "group": "Specialty" }
         ]
       },

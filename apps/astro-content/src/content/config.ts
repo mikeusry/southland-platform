@@ -261,6 +261,48 @@ const shopCollectionsCollection = defineCollection({
   }),
 })
 
+// Homepage schema - all Reality Tunnel copy in one document
+const tunnelSchema = z.object({
+  heroBadge: z.string().optional(),
+  heroHeadline: z.string(),
+  heroSubheadline: z.string(),
+  heroCTAs: z
+    .array(z.object({ label: z.string(), href: z.string(), style: z.enum(['primary', 'secondary']).default('primary') }))
+    .default([]),
+  heroCredentials: z.array(z.string()).optional().default([]),
+  productsHeadline: z.string(),
+  productsSubheadline: z.string(),
+  productFilter: z.enum(['poultry', 'lawn', 'featured']).default('featured'),
+  trustStats: z.array(z.object({ value: z.string(), label: z.string() })).default([]),
+  ctaHeadline: z.string(),
+  ctaBody: z.string(),
+  ctaPhone: z.string().optional(),
+  ctaCTAs: z
+    .array(z.object({ label: z.string(), href: z.string(), style: z.enum(['primary', 'secondary']).default('primary') }))
+    .default([]),
+})
+
+const homepageCollection = defineCollection({
+  type: 'content',
+  schema: z.object({
+    seoTitle: z.string(),
+    seoDescription: z.string(),
+    // Per-tunnel copy
+    default: tunnelSchema,
+    backyard: tunnelSchema,
+    commercial: tunnelSchema,
+    lawn: tunnelSchema,
+    // Default-only sections
+    decisionEngineHeadline: z.string().optional(),
+    decisionEngineSubheadline: z.string().optional(),
+    resourcesHeadline: z.string().optional(),
+    resources: z
+      .array(z.object({ title: z.string(), description: z.string(), href: z.string() }))
+      .optional()
+      .default([]),
+  }),
+})
+
 // Products schema - links to Shopify products with content enrichment
 // Note: slug is auto-generated from filename in Astro v5
 const productsCollection = defineCollection({
@@ -285,4 +327,5 @@ export const collections = {
   team: teamCollection,
   products: productsCollection,
   shopCollections: shopCollectionsCollection,
+  homepage: homepageCollection,
 }

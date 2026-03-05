@@ -52,6 +52,7 @@ const headerElement = createElement(StaticHeader, {
   logoUrl: layout.header.logoUrl,
   logoAlt: layout.header.logoAlt || 'Southland Organics',
   navigation: layout.header.navigation,
+  phoneNumber: '800-608-3755',
 })
 
 const headerMarkup = renderToStaticMarkup(headerElement)
@@ -115,7 +116,7 @@ const baseColumns =
         {
           title: 'Products',
           links: [
-            { label: 'Poultry', href: '/collections/poultry' },
+            { label: 'Poultry', href: '/poultry/' },
             { label: 'Lawn & Garden', href: '/collections/turf' },
             { label: 'Septic & Waste', href: '/collections/waste' },
             { label: 'Swine', href: '/collections/pig-and-swine-supplements' },

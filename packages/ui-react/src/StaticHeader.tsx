@@ -4,6 +4,7 @@ interface StaticHeaderProps {
   logoUrl: string
   logoAlt: string
   navigation: NavItem[]
+  phoneNumber?: string
 }
 
 function groupChildren(children: NavChild[]) {
@@ -30,9 +31,25 @@ const isPrimary = (label: string) => label.startsWith('Shop All')
  * - data-sl-nav-href for client-side active highlighting
  * - Inline styles for mega-menu grid (no Tailwind dependency)
  */
-export function StaticHeader({ logoUrl, logoAlt, navigation }: StaticHeaderProps) {
+export function StaticHeader({ logoUrl, logoAlt, navigation, phoneNumber = '800-608-3755' }: StaticHeaderProps) {
+  const phoneHref = `tel:${phoneNumber.startsWith('1-') ? phoneNumber : `1-${phoneNumber}`}`
   return (
     <header className="sl-header sticky top-0 z-50 border-b border-gray-100 bg-white">
+      {/* Phone utility bar — desktop only */}
+      {phoneNumber && (
+        <div className="sl-phone-bar" style={{ display: 'none', background: '#2C5234', textAlign: 'center', padding: '0.375rem 1rem' }}>
+          <a
+            href={phoneHref}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.875rem', fontWeight: 500, color: 'rgba(255,255,255,0.9)', textDecoration: 'none' }}
+            aria-label={`Call Southland Organics at ${phoneNumber}`}
+          >
+            <svg style={{ width: '0.875rem', height: '0.875rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+            </svg>
+            {phoneNumber}
+          </a>
+        </div>
+      )}
       <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
         <div className="flex h-[75px] items-center justify-between">
           {/* Logo */}
@@ -271,9 +288,23 @@ export function StaticHeader({ logoUrl, logoAlt, navigation }: StaticHeaderProps
       {/* Mobile Navigation - hidden by default, toggled via JS */}
       <nav
         data-sl-mobile-menu
-        className="hidden max-h-[calc(100vh-75px)] overflow-y-auto border-t border-gray-100 bg-white md:hidden"
+        className="hidden max-h-[calc(100vh-110px)] overflow-y-auto border-t border-gray-100 bg-white md:hidden"
       >
         <div className="px-4 py-4">
+          {/* Mobile phone link */}
+          {phoneNumber && (
+            <div style={{ marginBottom: '0.75rem', paddingBottom: '0.75rem', borderBottom: '1px solid #f3f4f6' }}>
+              <a
+                href={phoneHref}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 0', fontSize: '1rem', fontWeight: 600, color: '#2c5234', textDecoration: 'none' }}
+              >
+                <svg style={{ width: '1.25rem', height: '1.25rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                </svg>
+                Call Us: {phoneNumber}
+              </a>
+            </div>
+          )}
           {navigation.map((item) => {
             const grouped = item.children ? groupChildren(item.children) : null
             return (
@@ -344,6 +375,8 @@ export function StaticHeader({ logoUrl, logoAlt, navigation }: StaticHeaderProps
 .sl-nav-link:hover { color: #44883e !important; }
 .group:hover .sl-mega-wrapper { display: block !important; }
 .sl-mega-link:hover { color: #2c5234 !important; background: #f3f4f6 !important; }
+@media (min-width: 768px) { .sl-phone-bar { display: block !important; } }
+.sl-phone-bar a:hover { color: #fff !important; }
 `,
         }}
       />

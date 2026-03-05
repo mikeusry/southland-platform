@@ -602,7 +602,7 @@ var config_default = defineConfig({
       {
         name: "shopCollections",
         label: "Shop Collections",
-        path: "src/content/collections",
+        path: "src/content/shopCollections",
         format: "mdx",
         ui: {
           filename: {

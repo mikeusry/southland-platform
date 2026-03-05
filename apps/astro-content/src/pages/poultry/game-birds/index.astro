@@ -1,12 +1,12 @@
 ---
 /**
- * /poultry/commercial/ — Broiler Bill StoryBrand Landing Page
+ * /poultry/game-birds/ — Game Bird Operations Landing Page
  *
- * StoryBrand framework: Hero (Bill) → Problem (the system) → Guide (Allen/Southland)
- * → JTBD (3 jobs with real products) → Proof → Plan → Objections → CTA
+ * StoryBrand framework: Hero → Problem → Guide → JTBD → Shop Grid → Proof → Plan → Objections → CTA
  *
- * Products fetched dynamically from Shopify Storefront API.
- * Copy hardcoded — will extract to TinaCMS after Betty/Taylor pages establish shared pattern.
+ * Same products as broilers, copy tailored for quail/pheasant/chukar operators.
+ * Persona: commercial (same as Broiler Bill — these are production operations).
+ * Canonical destination for /collections/game-birds (301 redirect).
  */
 import { createClient, getProductByHandle, getCollectionProducts } from '@southland/shopify-storefront'
 import type { Product } from '@southland/shopify-storefront'
@@ -26,9 +26,9 @@ const allenPhoto = buildSouthlandUrl('team/ALLEN_Reynolds', {
   format: 'auto',
 })
 
-const title = 'Commercial Poultry Solutions | Southland Organics'
+const title = 'Game Bird Supplements | Quail, Pheasant & Chukar | Southland Organics'
 const description =
-  'Proven organic gut health, litter treatment, and stress management for contract broiler growers. USDA Organic, zero withdrawal, integrator-friendly.'
+  'Natural probiotics, litter treatments & vitamins for game bird operations. USDA Organic, zero withdrawal. Trusted by Tuck Farms — the world\'s largest bobwhite quail hatchery.'
 
 // ── Fetch products ──────────────────────────────────────────────────────────
 const client = createClient({
@@ -36,40 +36,32 @@ const client = createClient({
   publicAccessToken: import.meta.env.PUBLIC_SHOPIFY_STOREFRONT_TOKEN,
 })
 
-// Fetch JTBD-featured products individually (need full detail)
-const jtbdHandles = [
-  'poultry-probiotic',           // Big Ole Bird
+const handles = [
+  'poultry-probiotic',                      // Big Ole Bird
   'hen-helper',
-  'poultry-litter-amendment',    // Litter Life
+  'poultry-litter-amendment',               // Litter Life
+  'catalyst-poultry-vitamin',               // Catalyst
   'natural-mite-control-livestock-poultry', // Desecticide
-  'catalyst-poultry-vitamin',
 ] as const
 
-const jtbdProducts = await Promise.all(
-  jtbdHandles.map((h) => getProductByHandle(client, h))
+const products = await Promise.all(
+  handles.map((h) => getProductByHandle(client, h))
 )
 const productMap = new Map(
-  jtbdProducts.filter(Boolean).map((p) => [p!.handle, p!])
+  products.filter(Boolean).map((p) => [p!.handle, p!])
 )
 
-// Fetch ALL products in the broiler collection for the shop grid
-const broilerCollection = await getCollectionProducts(client, 'poultry-broilers')
-
-// Filter out non-poultry products that ops mis-assigned to this collection
-const EXCLUDED_HANDLES = new Set([
-  'apple-cider-vinegar-for-pigs',
-  'torched-all-natural-weed-killer',
-])
-const allBroilerProducts: Product[] = (broilerCollection?.products ?? []).filter(
-  (p) => !EXCLUDED_HANDLES.has(p.handle)
+// Fetch ALL products in the game-birds collection for the shop grid
+const gameBirdCollection = await getCollectionProducts(client, 'game-birds')
+// Filter out swine products (Shopify collection has ACV for Pigs)
+const allGameBirdProducts: Product[] = (gameBirdCollection?.products ?? []).filter(
+  (p) => p.handle !== 'apple-cider-vinegar-for-pigs'
 )
 
-/** Helper: get product or null */
 function getProduct(handle: string) {
   return productMap.get(handle) ?? null
 }
 
-/** Helper: format price from Shopify Money */
 function formatPrice(amount: string) {
   const num = parseFloat(amount)
   return num % 1 === 0 ? `$${num}` : `$${num.toFixed(2)}`
@@ -78,36 +70,30 @@ function formatPrice(amount: string) {
 // ── JTBD data ───────────────────────────────────────────────────────────────
 const jobs = [
   {
-    title: 'Keep more birds alive and ranking better.',
+    title: 'Keep mortality low from hatch to release.',
     struggle:
-      'Mortality creeping up, FCR slipping, and every 0.1% costs real money.',
-    bestFor: 'Growers fighting mortality or inconsistent flock performance',
+      "Ulcerative enteritis can wipe a pen in 48 hours. Respiratory issues hit young chicks before you see signs. In flight pens and large ranges, you can't catch problems bird by bird — you need biology working before disease gets a foothold.",
     products: [getProduct('poultry-probiotic'), getProduct('hen-helper')].filter(Boolean),
-    proof: '6.2% mortality reduction',
-    proofSource: 'UGA Study, C. Stephen Roney DVM',
-    recommended: true,
+    proof: 'Used on 1.4M+ quail chicks/year at Tuck Farms',
+    proofSource: "World's largest bobwhite quail hatchery",
     icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>`,
   },
   {
-    title: 'Cut ammonia and litter stress.',
+    title: 'Control ammonia in flight pens and brood houses.',
     struggle:
-      'Ammonia burns paws, darkling beetles spread disease, litter costs keep climbing.',
-    bestFor: 'Houses with paw scores, beetle pressure, or reused litter',
+      "Game bird houses run tight and flight pens hold litter longer. Ammonia builds fast, disinfectants nuke beneficial biology along with the bad, and you're back to square one every cleanout.",
     products: [getProduct('poultry-litter-amendment'), getProduct('natural-mite-control-livestock-poultry')].filter(Boolean),
-    proof: 'Ammonia reduction within 48 hours',
+    proof: 'Biological ammonia reduction within 48 hours',
     proofSource: 'Grower field reports',
-    recommended: false,
     icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>`,
   },
   {
-    title: 'Survive your worst weeks.',
+    title: 'Survive moves, shipment, and high-stress events.',
     struggle:
-      "Placement week. Summer heat. The 14 days between 'looks fine' and 'we've got a problem.'",
-    bestFor: 'High-stress periods — placement, heat, or transition flocks',
+      "Pen moves, transport to preserves, weather swings, and housing transitions — game birds are more stress-sensitive than broilers. By the time you see symptoms, you've already lost days and birds.",
     products: [getProduct('catalyst-poultry-vitamin'), getProduct('poultry-probiotic')].filter(Boolean),
-    proof: '7-point FCR improvement, +0.4 lb in 38 days',
-    proofSource: 'UGA Study, 2018',
-    recommended: false,
+    proof: 'Targeted nutrition during stress reduces immune suppression',
+    proofSource: 'Southland Organics product research',
     icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>`,
   },
 ]
@@ -115,29 +101,29 @@ const jobs = [
 // ── Objections (FAQ) ────────────────────────────────────────────────────────
 const objections = [
   {
-    question: "I've tried probiotics before and they didn't work.",
+    question: "These products are made for chickens. Do they work on quail and pheasant?",
     answer:
-      "We hear that a lot. Most probiotics on the market are generic formulas that weren't designed for poultry gut biology. Big Ole Bird was developed specifically for broilers and validated in a UGA study that showed 6.2% mortality reduction (10.9% down to 4.7%). If your last probiotic didn't move the needle, it wasn't this one. Try it on one house — if it doesn't work, don't pay.",
+      "Yes. The biology is the same — Bacillus-based probiotics colonize avian gut lining regardless of species. Big Ole Bird was developed for poultry gut health broadly, not just broilers. Game bird operations including Tuck Farms (the world's largest bobwhite quail hatchery) use our products on quail and pheasant. The dosing scales down naturally for smaller birds.",
   },
   {
-    question: "My integrator might not approve this.",
+    question: "I can't be in the house constantly — will these products work with minimal interaction?",
     answer:
-      "Everything we sell is USDA Organic certified with zero withdrawal period and zero residue. There's nothing in our products that would cause a compliance issue at the plant. Hundreds of growers use Big Ole Bird and Litter Life under major integrators — Tyson, Pilgrim's, Koch, Perdue. We're happy to provide documentation for your field tech.",
+      "That's actually the point. Game bird operations need preventive systems that work without daily intervention. Big Ole Bird goes in the water line — dose it at water change and the probiotics do the work. Litter Life treats the litter biology once and keeps working between visits. These are set-and-forget systems designed for operations where less human contact means better birds.",
   },
   {
-    question: "I can't afford to experiment right now.",
+    question: "My operation is smaller than a commercial broiler farm. Is this cost-effective?",
     answer:
-      "We get it — margins are tight and every dollar matters. Here's the math: Big Ole Bird costs roughly $0.02-0.05 per bird. If it improves mortality by even 0.5%, you're looking at hundreds of dollars back per house per flock. Start with a quarter-house test. If it doesn't pay for itself, you owe us nothing.",
+      "Big Ole Bird costs roughly $0.02-0.05 per bird. Even on a small game bird operation, the math works if it prevents one disease event per grow-out cycle. Tuck Farms runs 1.4 million chicks a year and uses our products because the ROI scales — but it works at any size. Start with one barn, one cycle.",
   },
   {
-    question: "How do I know this isn't just another sales pitch?",
+    question: "Will this affect the birds' flight ability or wildness?",
     answer:
-      "Fair question. Here's what makes us different: we have UGA peer-reviewed research, not just testimonials. Allen Reynolds has spent 10+ years actually inside chicken houses — not behind a desk. And we don't ask you to overhaul anything. One product, one house, one flock. The settlement check is the only sales pitch that matters.",
+      "No. These are probiotics, vitamins, and litter biology — not drugs or hormones. They support gut health and immune function. They have zero effect on behavior, flight instinct, or wildness. USDA Organic certified, zero withdrawal, zero residue.",
   },
   {
-    question: "What if it messes up my birds?",
+    question: "What about ulcerative enteritis? That's our biggest killer.",
     answer:
-      "Our products are USDA Organic certified with zero withdrawal period. Big Ole Bird is a probiotic — beneficial bacteria that support gut health. It's not a drug, not an antibiotic, not a chemical treatment. Hundreds of commercial growers run it every flock. The risk of trying it on one house is essentially zero. The risk of not trying it is another flock at the same numbers.",
+      "UE is a gut-flora problem — Clostridium colinum exploits weak or disrupted gut biology. Big Ole Bird works by establishing strong Bacillus colonies that compete against Clostridium and other pathogens for gut real estate. It's not a treatment for active UE, but preventive probiotic support from day one is your best defense against it taking hold. As John Tuck says: be prepared and stay in front of it.",
   },
 ]
 
@@ -147,9 +133,9 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.co
 const pageSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebPage',
-  name: 'Commercial Poultry Solutions',
+  name: 'Game Bird Supplements',
   description,
-  url: `${siteUrl}/poultry/commercial/`,
+  url: `${siteUrl}/poultry/game-birds/`,
   provider: {
     '@type': 'Organization',
     name: 'Southland Organics',
@@ -173,52 +159,53 @@ const faqSchema = {
 <BaseLayout title={title} description={description} schema={[pageSchema, faqSchema]}>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 1: HERO — "You're the one keeping them alive"                 -->
+  <!-- SECTION 1: HERO                                                       -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <CloudinaryHero
-    publicId="Southland Website/poultry/Poultry_Industry_dcsedd_wyrhru"
-    alt="Inside a commercial broiler house — healthy birds at feeders under warm house lighting"
+    publicId="Southland Website/poultry/game-birds/Quail_Header"
+    alt="Bobwhite quail in flight pens — game bird operation"
     height={600}
     minHeight="500px"
     overlay="gradient"
-    overlayOpacity={90}
+    overlayOpacity={85}
     contentAlign="center"
     contentJustify="start"
     priority={true}
-    effect="blur"
+    gravity="south"
   >
     <div class="mx-auto w-full max-w-6xl pb-12 pt-12 md:pt-20">
       <div class="max-w-3xl">
         <div class="mb-3 flex flex-wrap items-center gap-2">
           <span class="inline-block rounded-full bg-white/15 px-4 py-1 text-sm font-medium text-green-300">
-            For Contract Growers
+            For Game Bird Operations
           </span>
           <span class="inline-block rounded-full bg-green-400/20 px-3 py-1 text-sm font-semibold text-green-300">
-            6.2% Lower Mortality — UGA Study
+            USDA Organic · Zero Withdrawal · Zero Residue
           </span>
         </div>
         <h1 class="mb-4 font-heading text-4xl uppercase leading-tight text-white md:text-5xl lg:text-6xl">
-          You didn't get into this to gamble with your family's future.
+          Your birds can't tell you what's wrong. Your biology can.
         </h1>
         <p class="mb-5 text-lg text-white/70 md:text-xl">
-          You can't control feed quality or chick genetics. But you can control:
+          Game birds are sensitive, fast-growing, and unforgiving when something goes wrong.
+          Preventive gut health and litter biology are cheaper than treating your way out of a crisis.
         </p>
-        <!-- Three levers — scannable -->
+        <!-- Three levers -->
         <div class="mb-6 flex flex-wrap gap-x-6 gap-y-2">
-          <span class="flex items-center gap-2 text-lg font-semibold text-white">
-            <span class="inline-block h-2 w-2 rounded-full bg-green-400"></span>
-            Water
-          </span>
           <span class="flex items-center gap-2 text-lg font-semibold text-white">
             <span class="inline-block h-2 w-2 rounded-full bg-green-400"></span>
             Gut Health
           </span>
           <span class="flex items-center gap-2 text-lg font-semibold text-white">
             <span class="inline-block h-2 w-2 rounded-full bg-green-400"></span>
-            Litter
+            Litter Biology
+          </span>
+          <span class="flex items-center gap-2 text-lg font-semibold text-white">
+            <span class="inline-block h-2 w-2 rounded-full bg-green-400"></span>
+            Stress Support
           </span>
         </div>
-        <!-- CTAs + trust badges as one unified block -->
+        <!-- CTAs -->
         <div class="flex flex-wrap items-center gap-4">
           <a
             href="tel:800-608-3755"
@@ -230,13 +217,13 @@ const faqSchema = {
             Talk to Allen
           </a>
           <a
-            href="#broiler-products"
+            href="#game-bird-products"
             class="inline-flex items-center gap-2 rounded-lg bg-white/10 px-6 py-3.5 font-semibold text-white transition-colors hover:bg-white/20"
           >
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
-            Shop Broiler Products
+            Shop Game Bird Products
           </a>
           <a
             href="#proof"
@@ -249,7 +236,7 @@ const faqSchema = {
           </a>
         </div>
         <p class="mt-2 text-sm text-white/50">No sales script — just a conversation about your operation</p>
-        <!-- Trust bar — tight, single baseline -->
+        <!-- Trust bar -->
         <div class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-white/10 pt-4 text-sm text-white/80">
           <span class="flex items-center gap-1.5">
             <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -267,7 +254,7 @@ const faqSchema = {
             <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
             </svg>
-            Integrator-Friendly
+            Trusted by Tuck Farms
           </span>
         </div>
       </div>
@@ -275,15 +262,15 @@ const faqSchema = {
   </CloudinaryHero>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 2: PROBLEM — "The system wasn't built for you to win"         -->
+  <!-- SECTION 2: PROBLEM                                                    -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-white py-16 md:py-20">
     <div class="mx-auto max-w-6xl px-4">
       <h2 class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
-        The system wasn't built for you to win.
+        Game birds don't give you second chances.
       </h2>
       <p class="mx-auto mb-12 max-w-2xl text-center text-gray-600">
-        You know it. Your neighbors know it. But nobody's saying it out loud.
+        Quail, pheasant, and chukar are faster, more sensitive, and less forgiving than broilers. Three problems define game bird production.
       </p>
       <div class="grid gap-8 md:grid-cols-3">
         <!-- External Problem -->
@@ -293,9 +280,9 @@ const faqSchema = {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
           </div>
-          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">What you can't control</h3>
+          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">Disease moves faster than you can</h3>
           <p class="leading-relaxed text-gray-600">
-            Feed quality you didn't choose. Chick genetics you can't negotiate. A ranking system that pits neighbors against each other with uneven inputs.
+            Ulcerative enteritis, respiratory issues in young chicks, coccidiosis — by the time you see symptoms, you've already lost birds. Game bird production demands prevention, not reaction.
           </p>
         </div>
         <!-- Internal Problem -->
@@ -305,9 +292,9 @@ const faqSchema = {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
             </svg>
           </div>
-          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">What keeps you up at 3 AM</h3>
+          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">You can't be in the house every day</h3>
           <p class="leading-relaxed text-gray-600">
-            That feeling when you check the controller and wonder if this is the flock that breaks you. Every placement is a $30,000 bet you can't walk away from.
+            Game birds need minimal human interaction — imprinting kills flight instinct and market value. You need systems that work without constant presence. Walk in twice a week, not twice a day.
           </p>
         </div>
         <!-- Philosophical Problem -->
@@ -317,9 +304,9 @@ const faqSchema = {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">What's not right about it</h3>
+          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">Disinfectants are making it worse</h3>
           <p class="leading-relaxed text-gray-600">
-            You signed up to feed America, not to play a rigged game where one bad flock can erase a decade of good ones. A man who works this hard deserves better odds.
+            Nuking everything — good bacteria and bad — just creates a vacuum for pathogens to fill. Game bird houses need biological balance, not chemical scorched earth.
           </p>
         </div>
       </div>
@@ -327,58 +314,46 @@ const faqSchema = {
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 3: GUIDE — "We've been in the houses"                         -->
+  <!-- SECTION 3: GUIDE — Allen + Tuck Farms                                -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-gray-50 py-16 md:py-20">
     <div class="mx-auto max-w-6xl px-4">
       <div class="grid items-center gap-12 md:grid-cols-[1fr_auto]">
-        <!-- Photo first on mobile, right on desktop -->
         <div class="order-2 md:order-1">
-          <span class="mb-2 inline-block text-sm font-semibold uppercase tracking-wider text-green-700">
+          <span class="mb-2 inline-block text-sm font-semibold uppercase tracking-wider text-[#44883E]">
             Your guide
           </span>
           <h2 class="mb-6 font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
-            We've been in the houses.
+            We've worked with the biggest names in game birds.
           </h2>
           <p class="mb-4 text-lg leading-relaxed text-gray-700">
-            Allen Reynolds didn't learn poultry from a textbook. He learned it installing equipment, dumping chicks, and doing the work that commercial growers do every day.
+            Allen Reynolds has spent 10+ years inside poultry houses — commercial broilers, turkeys, and game bird operations. When John Tuck at Tuck Farms needed a probiotic system that worked for quail, he called us.
           </p>
           <p class="mb-4 text-lg leading-relaxed text-gray-600">
-            Since 2014, he's traveled thousands of miles visiting farms, troubleshooting problems, and helping growers find solutions that actually hold up in the house — especially as the industry moved toward antibiotic-free production.
+            Game birds aren't just small chickens. They have different gut biology, different stress responses, and different management constraints. We understand the differences because we've been in the barns.
           </p>
+          <!-- Scope proof -->
+          <div class="mb-6 rounded-lg border border-green-200 bg-green-50 px-5 py-3">
+            <p class="text-sm font-semibold text-[#2C5234]">
+              Used across 1.4 million+ quail chicks per year at Tuck Farms — the world's largest bobwhite quail hatchery — plus pheasant and chukar operations nationwide.
+            </p>
+          </div>
           <p class="mb-8 leading-relaxed text-gray-600">
-            We talk in FCR, mortality, and settlement checks — not white papers. When you call, Allen answers. That's not a tagline; it's how we've done business since 2009.
+            Every product is USDA Organic certified with zero withdrawal period. Same biology that works on millions of commercial broilers, adapted for game bird operations.
           </p>
 
           <!-- Credential chips -->
           <div class="mb-8 flex flex-wrap gap-2">
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
-              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
-              </svg>
-              10+ years on farms
-            </span>
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
-              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
-              </svg>
-              Hundreds of farm visits
-            </span>
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
-              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
-              </svg>
-              ABF specialist since 2017
-            </span>
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
-              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
-              </svg>
-              Actually answers the phone
-            </span>
+            {['10+ years on farms', 'Trusted by Tuck Farms', 'USDA Organic Certified', 'Zero Withdrawal', 'Family-owned since 2009'].map((cred) => (
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
+                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+                </svg>
+                {cred}
+              </span>
+            ))}
           </div>
 
-          <!-- Quick contact -->
           <div class="flex flex-wrap items-center gap-4">
             <a
               href="tel:800-608-3755"
@@ -391,7 +366,7 @@ const faqSchema = {
             </a>
             <a
               href="mailto:allen@southlandorganics.com"
-              class="text-sm font-medium text-green-700 underline decoration-green-300 underline-offset-2 hover:text-green-600"
+              class="text-sm font-medium text-[#44883E] underline decoration-[#44883E]/40 underline-offset-2 hover:text-[#2C5234]"
             >
               allen@southlandorganics.com
             </a>
@@ -403,10 +378,10 @@ const faqSchema = {
           <div class="relative mx-auto w-64 md:w-72 lg:w-80">
             <img
               src={allenPhoto}
-              alt="Allen Reynolds, VP & Director of Operations at Southland Organics — 10+ years helping commercial poultry growers"
+              alt="Allen Reynolds, VP & Director of Operations at Southland Organics — 10+ years helping poultry and game bird growers"
               width="600"
               height="750"
-              class="rounded-2xl object-cover shadow-lg"
+              class="aspect-[4/5] rounded-2xl object-cover shadow-lg"
               loading="lazy"
             />
             <!-- Name badge overlay -->
@@ -421,19 +396,19 @@ const faqSchema = {
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 4: JTBD GRID — "Three jobs. Real solutions."                  -->
+  <!-- SECTION 4: JTBD GRID                                                  -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <section class="bg-[#F8FAF8] py-16 md:py-20">
+  <section id="jobs" class="bg-[#F8FAF8] py-16 md:py-20">
     <div class="mx-auto max-w-6xl px-4">
       <h2 class="mb-4 text-center font-heading text-4xl uppercase md:text-5xl" style="color: var(--color-title);">
         Three jobs. Real solutions.
       </h2>
       <p class="mx-auto mb-4 max-w-2xl text-center text-gray-600">
-        Every product here exists to do one of three jobs in your houses. Pick the job you need help with — we'll show you the right tools.
+        Same biology proven on millions of commercial birds. Adapted for quail, pheasant, and chukar operations.
       </p>
       <p class="mb-12 text-center">
-        <a href="#broiler-products" class="inline-flex items-center gap-1 text-sm font-medium text-green-700 hover:text-green-600 hover:underline">
-          Skip to all broiler products
+        <a href="#game-bird-products" class="inline-flex items-center gap-1 text-sm font-medium text-[#44883E] hover:text-[#2C5234] hover:underline">
+          Skip to all game bird products
           <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
@@ -441,35 +416,18 @@ const faqSchema = {
       </p>
       <div class="grid gap-8 md:grid-cols-3">
         {jobs.map((job) => (
-          <div class:list={[
-            'relative flex flex-col rounded-xl border bg-white p-8 shadow-sm',
-            job.recommended ? 'border-green-300 ring-1 ring-green-200' : 'border-gray-200',
-          ]}>
-            {job.recommended && (
-              <span class="absolute -top-3 left-6 rounded-full bg-green-600 px-3 py-0.5 text-xs font-bold uppercase tracking-wide text-white">
-                Recommended starting point
-              </span>
-            )}
-
-            <!-- Job icon -->
-            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
-              <svg class="h-6 w-6 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="flex flex-col rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[#2C5234]/10">
+              <svg class="h-6 w-6 text-[#2C5234]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <Fragment set:html={job.icon} />
               </svg>
             </div>
 
-            <!-- Job title + struggle -->
-            <h3 class="mb-2 text-xl font-bold" style="color: var(--color-title);">
+            <h3 class="mb-3 text-xl font-bold" style="color: var(--color-title);">
               {job.title}
             </h3>
-            <p class="mb-3 text-sm text-gray-600">{job.struggle}</p>
+            <p class="mb-6 text-gray-600">{job.struggle}</p>
 
-            <!-- Best for -->
-            <p class="mb-6 text-xs font-medium uppercase tracking-wide text-green-700">
-              Best for: {job.bestFor}
-            </p>
-
-            <!-- Products -->
             <div class="mb-6 flex-1 space-y-4">
               {job.products.map((product) => (
                 <a
@@ -490,7 +448,7 @@ const faqSchema = {
                     <div class="truncate text-sm font-semibold text-gray-900">
                       {product!.title}
                     </div>
-                    <div class="text-sm text-green-700">
+                    <div class="text-sm text-[#44883E]">
                       From {formatPrice(product!.priceRange.minVariantPrice.amount)}
                     </div>
                   </div>
@@ -501,14 +459,13 @@ const faqSchema = {
               ))}
             </div>
 
-            <!-- Proof line -->
             <div class="border-t border-gray-100 pt-4">
               <div class="flex items-start gap-2">
-                <svg class="mt-0.5 h-4 w-4 shrink-0 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="mt-0.5 h-4 w-4 shrink-0 text-[#44883E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
                 </svg>
                 <div>
-                  <span class="text-sm font-semibold text-green-700">{job.proof}</span>
+                  <span class="text-sm font-semibold text-[#2C5234]">{job.proof}</span>
                   <span class="block text-xs text-gray-500">{job.proofSource}</span>
                 </div>
               </div>
@@ -520,117 +477,202 @@ const faqSchema = {
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 4B: SHOP THE BROILER SYSTEM — Full product grid               -->
+  <!-- SECTION 4A: BROWNS CASE STUDY                                         -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <section id="broiler-products" class="bg-white py-16 md:py-20">
+  <section class="bg-white py-16 md:py-20">
+    <div class="mx-auto max-w-4xl px-4">
+      <!-- Featured quote — large, visual priority -->
+      <div class="relative rounded-2xl border border-[#44883E]/20 bg-[#F8FAF8] p-8 shadow-sm md:p-12">
+        <!-- Quote mark -->
+        <svg class="absolute -top-4 left-8 h-10 w-10 text-[#44883E]/20" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H14.017zM0 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H0z" />
+        </svg>
+
+        <!-- The pull quote -->
+        <blockquote class="mb-8">
+          <p class="text-xl font-semibold leading-relaxed text-[#2C5234] md:text-2xl">
+            "Within 5 days the mortality was decreasing and within 2 weeks it was down to 1% loss."
+          </p>
+        </blockquote>
+
+        <!-- Attribution — bold, not buried -->
+        <div class="mb-8 flex items-center gap-4">
+          <div class="flex h-12 w-12 items-center justify-center rounded-full bg-[#2C5234] text-lg font-bold text-white">
+            DB
+          </div>
+          <div>
+            <p class="text-base font-bold text-[#2C5234]">Dennis Brown</p>
+            <p class="text-sm text-gray-600">Brown's Gamebird Farm</p>
+          </div>
+        </div>
+
+        <!-- The full story -->
+        <div class="space-y-4 border-t border-green-100 pt-8">
+          <h3 class="font-heading text-xl uppercase text-[#2C5234] md:text-2xl">
+            From 100% mortality to eradicated — in one month.
+          </h3>
+
+          <div class="space-y-3 text-gray-700">
+            <p>
+              It started with a few quail getting sick in one pen. The sickness progressed until it reached
+              <strong class="text-[#2C5234]">100% mortality</strong>. Dennis treated the ground with every product,
+              additive, supplement, and antibiotic he could find — then added more birds for a second time.
+              Same result. 100% mortality.
+            </p>
+            <p>
+              He tried another "claim to fame" product. Same result. Total losses exceeded
+              <strong class="text-[#2C5234]">3,500+ birds</strong>. Dennis was completely at a loss.
+            </p>
+            <p>
+              It wasn't until <strong>Dr. Chris Seabury at Texas A&M</strong> did research and suggested
+              Dennis call Southland Organics that he discovered Litter Life.
+            </p>
+          </div>
+
+          <!-- Results timeline — visual -->
+          <div class="my-6 grid gap-4 md:grid-cols-3">
+            <div class="rounded-lg border border-gray-200 bg-white p-4 text-center">
+              <div class="text-2xl font-bold text-[#2C5234]">3,500+</div>
+              <div class="text-sm text-gray-600">Birds lost before Litter Life</div>
+            </div>
+            <div class="rounded-lg border border-[#44883E]/20 bg-[#44883E]/5 p-4 text-center">
+              <div class="text-2xl font-bold text-[#2C5234]">5 days</div>
+              <div class="text-sm text-[#2C5234]/70">Mortality started decreasing</div>
+            </div>
+            <div class="rounded-lg border border-[#44883E]/30 bg-[#44883E]/10 p-4 text-center">
+              <div class="text-2xl font-bold text-[#44883E]">1%</div>
+              <div class="text-sm text-[#2C5234]">Loss rate within 2 weeks</div>
+            </div>
+          </div>
+
+          <div class="space-y-3 text-gray-700">
+            <p>
+              After the first application of Litter Life, mortality was decreasing within 5 days. Within 2 weeks,
+              losses dropped to 1%. A second application two weeks later, and over the course of a month,
+              <strong class="text-[#2C5234]">mortality was eradicated</strong>.
+            </p>
+          </div>
+
+          <!-- Dennis's closing — italic, personal -->
+          <blockquote class="border-l-4 border-[#44883E] pl-4 italic text-gray-600">
+            "I was not only impressed with the product but also the ongoing customer support from Allen Reynolds.
+            He worked with me to not only solve the problem but to save my business as well. I will continue to
+            use Litter Life as long as both of us are in business."
+          </blockquote>
+
+          <!-- Validated by -->
+          <p class="text-xs text-gray-500">
+            Validated in collaboration with Dr. Chris Seabury (Texas A&M), U of Arizona Diagnostic Lab,
+            University of Mississippi, University of Georgia, University of Arkansas, and San Diego State.
+          </p>
+        </div>
+      </div>
+
+      <!-- Bridge to shop -->
+      <p class="mt-8 text-center text-sm text-gray-500">
+        Ready to do what Dennis did? The full game bird product line is below.
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 4B: SHOP GRID                                                 -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <section id="game-bird-products" class="bg-[#F8FAF8] py-16 md:py-20">
     <div class="mx-auto max-w-6xl px-4">
       <h2 class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
-        Shop the Broiler System
+        Shop Game Bird Products
       </h2>
       <p class="mx-auto mb-6 max-w-2xl text-center text-gray-600">
-        Everything on this shelf exists to do one of the three jobs above. Start with one product or run the full system.
+        This is the full line for game birds — probiotics, litter treatments, vitamins, and pest control. No hidden products. All USDA Organic, all zero withdrawal.
       </p>
 
-      <!-- System vs Individual callout -->
+      <!-- System callout -->
       <div class="mx-auto mb-10 max-w-3xl rounded-xl border border-green-200 bg-green-50 p-5 md:p-6">
         <div class="grid gap-4 md:grid-cols-2">
           <div>
             <div class="mb-1 flex items-center gap-2">
-              <svg class="h-5 w-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="h-5 w-5 text-[#2C5234]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
               <span class="font-bold text-[#2C5234]">Full System</span>
             </div>
             <p class="text-sm text-gray-600">
-              Big Ole Bird + Litter Life + Catalyst covers gut health, litter, and stress. Most growers start here and see results within one flock.
+              Big Ole Bird + Litter Life + Catalyst covers gut health, litter, and stress. Most game bird operations start here and see results within one grow-out cycle.
             </p>
           </div>
           <div>
             <div class="mb-1 flex items-center gap-2">
-              <svg class="h-5 w-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="h-5 w-5 text-[#2C5234]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
               <span class="font-bold text-[#2C5234]">Start with One</span>
             </div>
             <p class="text-sm text-gray-600">
-              Not ready for the whole system? Pick one product, test it on one house, one flock. If it doesn't pay for itself, don't reorder.
+              Not ready for the whole system? Pick one product, test it on one barn, one cycle. If it doesn't pay for itself, don't reorder.
             </p>
           </div>
         </div>
       </div>
 
-      {allBroilerProducts.length > 0 ? (
+      {allGameBirdProducts.length > 0 ? (
         <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
-          {allBroilerProducts.map((product) => (
+          {allGameBirdProducts.map((product) => (
             <CollectionProductCard product={product} persona="commercial" />
           ))}
         </div>
       ) : (
         <div class="text-center">
+          <p class="mb-4 text-gray-500">Products loading from Shopify...</p>
           <a
-            href="/collections/poultry-broilers/"
+            href="https://southlandorganics.com/collections/game-birds"
             class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#44883E]/85"
           >
-            Browse All Broiler Products
+            Browse All Game Bird Products
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>
           </a>
         </div>
       )}
-
-      <div class="mt-8 text-center">
-        <a
-          href="tel:800-608-3755"
-          class="inline-flex items-center gap-2 text-sm font-medium text-green-700 hover:text-green-600"
-        >
-          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-          </svg>
-          Not sure where to start? Call Allen — he'll walk you through it.
-        </a>
-      </div>
     </div>
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 5: PROOF BAND — "Numbers, not promises"                       -->
+  <!-- SECTION 5: PROOF BAND                                                 -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section id="proof" class="bg-[#2C5234] py-12 md:py-16">
     <div class="mx-auto max-w-6xl px-4">
-      <h2 class="mb-3 text-center font-heading text-3xl uppercase text-white md:text-4xl">
+      <h2 class="mb-10 text-center font-heading text-3xl uppercase text-white md:text-4xl">
         Numbers, not promises.
       </h2>
-      <p class="mx-auto mb-10 max-w-lg text-center text-sm text-green-200/80">
-        These are results from growers running the same three jobs above.
-      </p>
       <div class="grid grid-cols-2 gap-8 md:grid-cols-4">
         <div class="text-center">
-          <div class="text-3xl font-bold text-green-300 md:text-4xl">6.2%</div>
-          <div class="mt-1 text-sm font-medium text-white">Mortality reduction</div>
-          <div class="mt-0.5 text-xs text-green-200/70">UGA Study, 2016</div>
-        </div>
-        <div class="text-center">
-          <div class="text-3xl font-bold text-green-300 md:text-4xl">7 pts</div>
-          <div class="mt-1 text-sm font-medium text-white">FCR improvement</div>
-          <div class="mt-0.5 text-xs text-green-200/70">UGA Study, 2018</div>
-        </div>
-        <div class="text-center">
-          <div class="text-3xl font-bold text-green-300 md:text-4xl">10.97x</div>
-          <div class="mt-1 text-sm font-medium text-white">ROAS on Big Ole Bird</div>
-          <div class="mt-0.5 text-xs text-green-200/70">Customer data</div>
+          <div class="text-3xl font-bold text-green-300 md:text-4xl">1.4M</div>
+          <div class="mt-1 text-sm font-medium text-white">Chicks/year at Tuck Farms</div>
+          <div class="mt-0.5 text-xs text-green-200/70">Uses our products</div>
         </div>
         <div class="text-center">
           <div class="text-3xl font-bold text-green-300 md:text-4xl">2009</div>
           <div class="mt-1 text-sm font-medium text-white">Family-owned since</div>
           <div class="mt-0.5 text-xs text-green-200/70">Southland Organics</div>
         </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-green-300 md:text-4xl">0</div>
+          <div class="mt-1 text-sm font-medium text-white">Withdrawal period</div>
+          <div class="mt-0.5 text-xs text-green-200/70">USDA Organic certified</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-green-300 md:text-4xl">$0.02</div>
+          <div class="mt-1 text-sm font-medium text-white">Per bird cost</div>
+          <div class="mt-0.5 text-xs text-green-200/70">Big Ole Bird probiotic</div>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 6: PLAN — "Three steps, not a sales pitch"                    -->
+  <!-- SECTION 6: PLAN                                                       -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-white py-16 md:py-20">
     <div class="mx-auto max-w-4xl px-4">
@@ -638,42 +680,39 @@ const faqSchema = {
         Three steps. Not a sales pitch.
       </h2>
       <p class="mx-auto mb-12 max-w-xl text-center text-gray-600">
-        We don't ask you to overhaul your operation. We ask you to test one thing on one house.
+        We don't ask you to overhaul your operation. We ask you to test one thing on one barn.
       </p>
       <div class="space-y-8">
-        <!-- Step 1 -->
         <div class="flex items-start gap-6">
-          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700">
+          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#2C5234]/10 text-xl font-bold text-[#2C5234]">
             1
           </div>
           <div>
-            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);"><span class="text-[#44883E]">Call</span> Allen or text us.</h3>
+            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);"><span class="text-[#44883E]">Call</span> Allen.</h3>
             <p class="text-gray-600">
-              Tell us about your operation — how many houses, what integrator, what's giving you trouble. We'll listen first.
+              Tell us about your operation — what species, how many birds, what's giving you trouble. We'll listen first and recommend based on what we've seen work in game bird barns.
             </p>
           </div>
         </div>
-        <!-- Step 2 -->
         <div class="flex items-start gap-6">
-          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700">
+          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#2C5234]/10 text-xl font-bold text-[#2C5234]">
             2
           </div>
           <div>
-            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);"><span class="text-[#44883E]">Test</span> on one house, one flock.</h3>
+            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);"><span class="text-[#44883E]">Test</span> on one barn, one cycle.</h3>
             <p class="text-gray-600">
-              No commitment beyond that. No contract, no minimum order. If it doesn't work, don't pay.
+              No contract, no minimum order. Put Big Ole Bird in the water line, treat the litter with Litter Life, and run the grow-out. Compare it to your control barn.
             </p>
           </div>
         </div>
-        <!-- Step 3 -->
         <div class="flex items-start gap-6">
-          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700">
+          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#2C5234]/10 text-xl font-bold text-[#2C5234]">
             3
           </div>
           <div>
-            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);"><span class="text-[#44883E]">See</span> the settlement check.</h3>
+            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);"><span class="text-[#44883E]">See</span> the numbers.</h3>
             <p class="text-gray-600">
-              That's the only proof that matters. If the numbers move, you'll know it. If they don't, we'll shake hands and part ways.
+              Lower mortality, better feed conversion, cleaner litter. If the numbers don't move, don't reorder. The results are the only pitch that matters.
             </p>
           </div>
         </div>
@@ -682,7 +721,7 @@ const faqSchema = {
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 7: OBJECTIONS — "We know what you're thinking"                -->
+  <!-- SECTION 7: OBJECTIONS                                                 -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-gray-50 py-16 md:py-20">
     <div class="mx-auto max-w-3xl px-4">
@@ -690,31 +729,32 @@ const faqSchema = {
         We know what you're thinking.
       </h2>
       <p class="mx-auto mb-10 max-w-xl text-center text-gray-600">
-        We've heard every objection. Here's the straight answer to each one.
+        We've heard every question game bird operators ask. Here's the straight answer to each one.
       </p>
       <AccordionFaq items={objections} persona="commercial" />
     </div>
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 8: FINAL CTA — "Your birds don't wait. Neither do we."        -->
+  <!-- SECTION 8: FINAL CTA                                                  -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <CloudinaryHero
-    publicId="Southland Website/poultry/poultry_house_w1zen3_iecnpo"
-    alt="Commercial poultry houses at dawn — fan houses and feed bins under open sky"
+    publicId="Southland Website/poultry/game-birds/bob-white-quail-disease"
+    alt="Bobwhite quail — game bird operation"
     height={450}
     minHeight="400px"
     overlay="dark"
     overlayOpacity={88}
     contentAlign="center"
     contentJustify="center"
+    gravity="center"
   >
     <div class="mx-auto max-w-4xl text-center">
       <h2 class="mb-4 font-heading text-3xl uppercase text-white md:text-4xl">
         Your birds don't wait. Neither do we.
       </h2>
       <p class="mx-auto mb-8 max-w-xl text-lg text-green-100">
-        One conversation. That's all it takes to find out if we can help your operation. Allen's on the other end of this number.
+        One conversation. That's all it takes to find out if we can help your game bird operation. Allen's on the other end of this number.
       </p>
       <div class="mb-8">
         <a
@@ -742,9 +782,9 @@ const faqSchema = {
       </a>
       <div class="flex flex-wrap items-center justify-center gap-4 text-sm text-green-300/80">
         <span>Family-owned since 2009</span>
-        <span class="hidden md:inline">·</span>
+        <span class="hidden md:inline">&middot;</span>
         <span>USDA Organic</span>
-        <span class="hidden md:inline">·</span>
+        <span class="hidden md:inline">&middot;</span>
         <span>A+ BBB Rating</span>
       </div>
     </div>

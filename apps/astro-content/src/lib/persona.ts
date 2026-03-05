@@ -17,7 +17,7 @@ export type PersonaId = 'backyard' | 'commercial' | 'lawn' | 'general' | null
 export interface PersonaData {
   id: PersonaId
   selectedAt: string
-  source: 'decision_engine' | 'url_param' | 'inferred' | 'manual'
+  source: 'decision_engine' | 'hero' | 'url_param' | 'inferred' | 'manual'
 }
 
 export interface PersonaConfig {

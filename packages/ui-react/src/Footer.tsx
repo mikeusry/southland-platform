@@ -200,7 +200,7 @@ export function Footer({
               <ul className="space-y-2">
                 <li>
                   <a
-                    href="/collections/poultry"
+                    href="/poultry/"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Poultry

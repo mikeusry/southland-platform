@@ -1,180 +1,299 @@
 ---
 /**
- * Site Audit Dashboard
- * Design checklist + Mothership persona scoring + content quality
+ * Site Audit — Page Operations Console
+ * Prioritization + funnel coverage + quality signals + copy/design pipeline
  */
 import AdminLayout from '../../layouts/AdminLayout.astro'
 
-// Content types: dynamic = collection-backed (scannable), index/non-content = skip
 type ContentType = 'dynamic' | 'index' | 'non-content'
-
+type PageType = 'lander' | 'collection' | 'pdp' | 'content' | 'hub' | 'utility'
+type Persona = 'bill' | 'betty' | 'taylor' | 'general' | null
+type FunnelStage = 'awareness' | 'consideration' | 'purchase' | 'post-purchase'
+type Blocker = 'copy' | 'dev' | 'design' | 'data' | null
+type PipelineStage = 'no-copy' | 'copy-draft' | 'copy-approved' | 'built' | 'design-review' | 'shipped'
 interface AuditPage {
   route: string
   name: string
   template: string
   priority: 'high' | 'medium' | 'low'
   contentType: ContentType
+  pageType: PageType
+  persona: Persona
+  funnelStage: FunnelStage
+  primaryGoal: string
+  blocker: Blocker
+  pipeline?: PipelineStage
+  funnelNext?: string
+  copyDoc?: string
 }
+
+const PIPELINE_STAGES = [
+  { value: 'no-copy', label: 'No Copy' },
+  { value: 'copy-draft', label: 'Copy Draft' },
+  { value: 'copy-approved', label: 'Copy Approved' },
+  { value: 'built', label: 'Built' },
+  { value: 'design-review', label: 'Design Review' },
+  { value: 'shipped', label: 'Shipped' },
+] as const
+
+const BLOCKERS = [
+  { value: '', label: '--' },
+  { value: 'copy', label: 'Copy' },
+  { value: 'dev', label: 'Dev' },
+  { value: 'design', label: 'Design' },
+  { value: 'data', label: 'Data' },
+] as const
 
 const pageGroups: { name: string; id: string; pages: AuditPage[] }[] = [
   {
     name: 'Homepage',
     id: 'homepage',
     pages: [
-      { route: '/', name: 'Homepage', template: 'index.astro', priority: 'high', contentType: 'non-content' },
-    ],
-  },
-  {
-    name: 'Podcast',
-    id: 'podcast',
-    pages: [
-      { route: '/podcast/', name: 'Podcast Hub', template: 'podcast/index.astro', priority: 'high', contentType: 'index' },
-      { route: '/podcast/[slug]', name: 'Episode Detail', template: 'podcast/[...slug].astro', priority: 'high', contentType: 'dynamic' },
-      { route: '/podcast/search', name: 'Podcast Search', template: 'podcast/search.astro', priority: 'medium', contentType: 'non-content' },
-      { route: '/podcast/topics/', name: 'Topics Index', template: 'podcast/topics/index.astro', priority: 'medium', contentType: 'index' },
-      { route: '/podcast/topics/[slug]', name: 'Topic Detail', template: 'podcast/topics/[slug].astro', priority: 'medium', contentType: 'dynamic' },
-      { route: '/podcast/guests/', name: 'Guests Index', template: 'podcast/guests/index.astro', priority: 'low', contentType: 'index' },
-    ],
-  },
-  {
-    name: 'Blog',
-    id: 'blog',
-    pages: [
-      { route: '/blog/', name: 'Blog Index', template: 'blog/index.astro', priority: 'high', contentType: 'index' },
-      { route: '/blog/[slug]', name: 'Blog Post', template: 'blog/[slug].astro', priority: 'high', contentType: 'dynamic' },
-      { route: '/blog/category/[segment]', name: 'Category Archive', template: 'blog/category/[segment].astro', priority: 'medium', contentType: 'non-content' },
-    ],
-  },
-  {
-    name: 'Team',
-    id: 'team',
-    pages: [
-      { route: '/team/', name: 'Team Index', template: 'team/index.astro', priority: 'medium', contentType: 'index' },
-      { route: '/team/[slug]', name: 'Team Member', template: 'team/[slug].astro', priority: 'medium', contentType: 'dynamic' },
-    ],
-  },
-  {
-    name: 'Shop Collections',
-    id: 'collections',
-    pages: [
-      { route: '/collections/', name: 'Collections Index', template: 'collections/index.astro', priority: 'high', contentType: 'index' },
-      { route: '/collections/[slug]', name: 'Collection Detail', template: 'collections/[slug].astro', priority: 'high', contentType: 'dynamic' },
+      { route: '/', name: 'Homepage', template: 'index.astro', priority: 'high', contentType: 'non-content', pageType: 'lander', persona: 'general', funnelStage: 'awareness', primaryGoal: 'Route to persona', blocker: 'copy', funnelNext: '/collections/' },
     ],
   },
   {
     name: 'Persona Landings',
     id: 'persona',
     pages: [
-      { route: '/poultry/', name: 'Poultry Hub', template: 'poultry/index.astro', priority: 'high', contentType: 'non-content' },
-      { route: '/poultry/backyard/', name: 'Backyard Betty Landing', template: 'poultry/backyard/index.astro', priority: 'high', contentType: 'non-content' },
-      { route: '/poultry/commercial/', name: 'Broiler Bill Landing', template: 'poultry/commercial/index.astro', priority: 'high', contentType: 'non-content' },
-      { route: '/lawn/', name: 'Lawn & Garden Hub', template: 'lawn/index.astro', priority: 'high', contentType: 'non-content' },
+      { route: '/poultry/', name: 'Poultry Hub', template: 'poultry/index.astro', priority: 'high', contentType: 'non-content', pageType: 'hub', persona: 'general', funnelStage: 'awareness', primaryGoal: 'Route to persona', blocker: null, pipeline: 'design-review', funnelNext: '/poultry/commercial/', copyDoc: 'BB-Persona/poultry-hub-copy.md' },
+      { route: '/poultry/commercial/', name: 'Broiler Bill Landing', template: 'poultry/commercial/index.astro', priority: 'high', contentType: 'non-content', pageType: 'lander', persona: 'bill', funnelStage: 'consideration', primaryGoal: 'Call sales', blocker: null, pipeline: 'design-review', funnelNext: '/collections/poultry-broilers/', copyDoc: 'BB-Persona/Broilers Landing Page 276cee770ea480b5a085e898802e7e22.md' },
+      { route: '/poultry/backyard/', name: 'Backyard Betty Landing', template: 'poultry/backyard/index.astro', priority: 'high', contentType: 'non-content', pageType: 'lander', persona: 'betty', funnelStage: 'consideration', primaryGoal: 'Add to cart', blocker: 'copy', funnelNext: '/collections/backyard-poultry/', copyDoc: 'BB-Persona/betty-storybrand.md' },
+      { route: '/lawn/', name: 'Turf Pro Taylor Landing', template: 'lawn/index.astro', priority: 'high', contentType: 'non-content', pageType: 'lander', persona: 'taylor', funnelStage: 'consideration', primaryGoal: 'Build program', blocker: 'copy', funnelNext: '/collections/turf/', copyDoc: 'BB-Persona/taylor-storybrand.md' },
+    ],
+  },
+  {
+    name: 'Shop Collections',
+    id: 'collections',
+    pages: [
+      { route: '/collections/', name: 'Collections Index', template: 'collections/index.astro', priority: 'high', contentType: 'index', pageType: 'hub', persona: 'general', funnelStage: 'consideration', primaryGoal: 'Browse products', blocker: null, pipeline: 'built' },
+      { route: '/collections/[slug]', name: 'Collection Detail', template: 'collections/[slug].astro', priority: 'high', contentType: 'dynamic', pageType: 'collection', persona: null, funnelStage: 'consideration', primaryGoal: 'Add to cart', blocker: 'copy', pipeline: 'built' },
+    ],
+  },
+  {
+    name: 'Podcast',
+    id: 'podcast',
+    pages: [
+      { route: '/podcast/', name: 'Podcast Hub', template: 'podcast/index.astro', priority: 'high', contentType: 'index', pageType: 'hub', persona: 'general', funnelStage: 'awareness', primaryGoal: 'Educate', blocker: null, pipeline: 'shipped' },
+      { route: '/podcast/[slug]', name: 'Episode Detail', template: 'podcast/[...slug].astro', priority: 'high', contentType: 'dynamic', pageType: 'content', persona: 'general', funnelStage: 'awareness', primaryGoal: 'Educate', blocker: null, pipeline: 'shipped' },
+      { route: '/podcast/search', name: 'Podcast Search', template: 'podcast/search.astro', priority: 'medium', contentType: 'non-content', pageType: 'utility', persona: null, funnelStage: 'awareness', primaryGoal: 'Search', blocker: null, pipeline: 'shipped' },
+      { route: '/podcast/topics/', name: 'Topics Index', template: 'podcast/topics/index.astro', priority: 'medium', contentType: 'index', pageType: 'hub', persona: 'general', funnelStage: 'awareness', primaryGoal: 'Browse topics', blocker: null, pipeline: 'shipped' },
+      { route: '/podcast/topics/[slug]', name: 'Topic Detail', template: 'podcast/topics/[slug].astro', priority: 'medium', contentType: 'dynamic', pageType: 'content', persona: 'general', funnelStage: 'awareness', primaryGoal: 'Educate', blocker: null, pipeline: 'shipped' },
+      { route: '/podcast/guests/', name: 'Guests Index', template: 'podcast/guests/index.astro', priority: 'low', contentType: 'index', pageType: 'hub', persona: 'general', funnelStage: 'awareness', primaryGoal: 'Browse guests', blocker: null, pipeline: 'shipped' },
+    ],
+  },
+  {
+    name: 'Blog',
+    id: 'blog',
+    pages: [
+      { route: '/blog/', name: 'Blog Index', template: 'blog/index.astro', priority: 'high', contentType: 'index', pageType: 'hub', persona: 'general', funnelStage: 'awareness', primaryGoal: 'Educate', blocker: null, pipeline: 'shipped' },
+      { route: '/blog/[slug]', name: 'Blog Post', template: 'blog/[slug].astro', priority: 'high', contentType: 'dynamic', pageType: 'content', persona: 'general', funnelStage: 'awareness', primaryGoal: 'Educate', blocker: null, pipeline: 'shipped' },
+      { route: '/blog/category/[segment]', name: 'Category Archive', template: 'blog/category/[segment].astro', priority: 'medium', contentType: 'non-content', pageType: 'hub', persona: 'general', funnelStage: 'awareness', primaryGoal: 'Browse category', blocker: null, pipeline: 'shipped' },
+    ],
+  },
+  {
+    name: 'Team',
+    id: 'team',
+    pages: [
+      { route: '/team/', name: 'Team Index', template: 'team/index.astro', priority: 'medium', contentType: 'index', pageType: 'hub', persona: 'general', funnelStage: 'awareness', primaryGoal: 'Build trust', blocker: null, pipeline: 'shipped' },
+      { route: '/team/[slug]', name: 'Team Member', template: 'team/[slug].astro', priority: 'medium', contentType: 'dynamic', pageType: 'content', persona: 'general', funnelStage: 'awareness', primaryGoal: 'Build trust', blocker: null, pipeline: 'shipped' },
     ],
   },
   {
     name: 'Surveys (CDP)',
     id: 'surveys',
     pages: [
-      { route: '/survey/backyard', name: 'Betty Outcome Survey', template: 'survey/backyard.astro', priority: 'medium', contentType: 'non-content' },
-      { route: '/survey/commercial', name: 'Bill Outcome Survey', template: 'survey/commercial.astro', priority: 'medium', contentType: 'non-content' },
+      { route: '/survey/backyard', name: 'Betty Outcome Survey', template: 'survey/backyard.astro', priority: 'medium', contentType: 'non-content', pageType: 'utility', persona: 'betty', funnelStage: 'post-purchase', primaryGoal: 'Collect outcomes', blocker: 'data' },
+      { route: '/survey/commercial', name: 'Bill Outcome Survey', template: 'survey/commercial.astro', priority: 'medium', contentType: 'non-content', pageType: 'utility', persona: 'bill', funnelStage: 'post-purchase', primaryGoal: 'Collect outcomes', blocker: 'data' },
     ],
   },
   {
     name: 'Utility',
     id: 'utility',
     pages: [
-      { route: '/search', name: 'Global Search', template: 'search.astro', priority: 'low', contentType: 'non-content' },
+      { route: '/search', name: 'Global Search', template: 'search.astro', priority: 'low', contentType: 'non-content', pageType: 'utility', persona: null, funnelStage: 'awareness', primaryGoal: 'Search', blocker: null },
     ],
   },
   {
     name: 'Admin',
     id: 'admin',
     pages: [
-      { route: '/admin/', name: 'Admin Dashboard', template: 'admin/index.astro', priority: 'medium', contentType: 'non-content' },
-      { route: '/admin/branding', name: 'Brand Guidelines', template: 'admin/branding.astro', priority: 'low', contentType: 'non-content' },
-      { route: '/admin/images', name: 'Image Docs', template: 'admin/images.astro', priority: 'low', contentType: 'non-content' },
-      { route: '/admin/cdp/', name: 'CDP Analytics', template: 'admin/cdp/index.astro', priority: 'medium', contentType: 'non-content' },
-      { route: '/admin/cdp-guide', name: 'CDP Guide', template: 'admin/cdp-guide.astro', priority: 'low', contentType: 'non-content' },
-      { route: '/admin/sales-log', name: 'Sales Log', template: 'admin/sales-log.astro', priority: 'medium', contentType: 'non-content' },
-      { route: '/admin/content-quality', name: 'Content Quality', template: 'admin/content-quality.astro', priority: 'medium', contentType: 'non-content' },
-      { route: '/admin/site-audit', name: 'Site Audit (this page)', template: 'admin/site-audit.astro', priority: 'low', contentType: 'non-content' },
+      { route: '/admin/', name: 'Admin Dashboard', template: 'admin/index.astro', priority: 'medium', contentType: 'non-content', pageType: 'utility', persona: null, funnelStage: 'awareness', primaryGoal: 'Internal', blocker: null, pipeline: 'shipped' },
+      { route: '/admin/branding', name: 'Brand Guidelines', template: 'admin/branding.astro', priority: 'low', contentType: 'non-content', pageType: 'utility', persona: null, funnelStage: 'awareness', primaryGoal: 'Internal', blocker: null, pipeline: 'shipped' },
+      { route: '/admin/images', name: 'Image Docs', template: 'admin/images.astro', priority: 'low', contentType: 'non-content', pageType: 'utility', persona: null, funnelStage: 'awareness', primaryGoal: 'Internal', blocker: null, pipeline: 'shipped' },
+      { route: '/admin/cdp/', name: 'CDP Analytics', template: 'admin/cdp/index.astro', priority: 'medium', contentType: 'non-content', pageType: 'utility', persona: null, funnelStage: 'awareness', primaryGoal: 'Internal', blocker: null, pipeline: 'shipped' },
+      { route: '/admin/cdp-guide', name: 'CDP Guide', template: 'admin/cdp-guide.astro', priority: 'low', contentType: 'non-content', pageType: 'utility', persona: null, funnelStage: 'awareness', primaryGoal: 'Internal', blocker: null, pipeline: 'shipped' },
+      { route: '/admin/sales-log', name: 'Sales Log', template: 'admin/sales-log.astro', priority: 'medium', contentType: 'non-content', pageType: 'utility', persona: null, funnelStage: 'awareness', primaryGoal: 'Internal', blocker: null, pipeline: 'shipped' },
+      { route: '/admin/content-quality', name: 'Content Quality', template: 'admin/content-quality.astro', priority: 'medium', contentType: 'non-content', pageType: 'utility', persona: null, funnelStage: 'awareness', primaryGoal: 'Internal', blocker: null, pipeline: 'shipped' },
+      { route: '/admin/site-audit', name: 'Site Audit (this page)', template: 'admin/site-audit.astro', priority: 'low', contentType: 'non-content', pageType: 'utility', persona: null, funnelStage: 'awareness', primaryGoal: 'Internal', blocker: null, pipeline: 'shipped' },
     ],
   },
 ]
 
 const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
+
+// Funnel coverage summary
+const funnelCoverage = {
+  awareness: 0,
+  consideration: 0,
+  purchase: 0,
+  'post-purchase': 0,
+}
+const personaCoverage = { bill: 0, betty: 0, taylor: 0, general: 0, none: 0 }
+pageGroups.forEach(g => g.pages.forEach(p => {
+  funnelCoverage[p.funnelStage]++
+  if (p.persona) personaCoverage[p.persona]++
+  else personaCoverage.none++
+}))
 ---
 
 <AdminLayout title="Site Audit" activeNav="/admin/site-audit">
   <header class="page-header">
     <h1 class="page-title">Site Audit</h1>
-    <p class="page-subtitle">Design checklist + Mothership persona scoring</p>
+    <p class="page-subtitle">Page operations console for Southland Organics — prioritize work, close funnel gaps, and enforce copy/design standards.</p>
   </header>
 
-  <!-- Progress Overview -->
-  <div class="progress-card">
-    <div class="progress-header">
+  <!-- Progress + Coverage Overview -->
+  <div class="overview-grid">
+    <div class="progress-card">
+      <div class="card-label">Pipeline Progress</div>
       <div class="progress-stats">
         <div class="stat">
-          <span class="stat-value" id="approved-count">0</span>
-          <span class="stat-label">Approved</span>
+          <span class="stat-value" id="shipped-count">0</span>
+          <span class="stat-label">Shipped</span>
         </div>
         <div class="stat">
-          <span class="stat-value" id="review-count">0</span>
-          <span class="stat-label">In Review</span>
+          <span class="stat-value" id="pipeline-count">0</span>
+          <span class="stat-label">In Pipeline</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="blocked-count">0</span>
+          <span class="stat-label">Blocked</span>
         </div>
         <div class="stat">
           <span class="stat-value" id="pending-count">{totalPages}</span>
           <span class="stat-label">Not Started</span>
         </div>
       </div>
-      <div class="progress-actions">
-        <button class="btn btn-primary" id="scan-all-btn" title="Score all scannable pages via Mothership">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22" />
-          </svg>
-          Scan All
-        </button>
-        <button class="btn btn-secondary" id="export-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-          </svg>
-          Export
-        </button>
-        <button class="btn btn-secondary" id="reset-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-          </svg>
-          Reset
-        </button>
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+      </div>
+      <div class="progress-label">
+        <span id="progress-percent">0%</span> shipped
+      </div>
+      <div class="tile-hint">Sort by impact, persona, or funnel stage to see where to work next.</div>
+    </div>
+
+    <div class="coverage-card">
+      <div class="card-label">Funnel Coverage</div>
+      <div class="coverage-bars">
+        <div class="coverage-row">
+          <span class="coverage-label">Awareness</span>
+          <div class="coverage-track"><div class="coverage-fill fill-awareness" style={`width: ${Math.round(funnelCoverage.awareness / totalPages * 100)}%`}></div></div>
+          <span class="coverage-count">{funnelCoverage.awareness}</span>
+        </div>
+        <div class="coverage-row">
+          <span class="coverage-label">Consider</span>
+          <div class="coverage-track"><div class="coverage-fill fill-consideration" style={`width: ${Math.round(funnelCoverage.consideration / totalPages * 100)}%`}></div></div>
+          <span class="coverage-count">{funnelCoverage.consideration}</span>
+        </div>
+        <div class="coverage-row">
+          <span class="coverage-label">Purchase</span>
+          <div class="coverage-track"><div class="coverage-fill fill-purchase" style={`width: ${Math.round(funnelCoverage.purchase / totalPages * 100)}%`}></div></div>
+          <span class="coverage-count">{funnelCoverage.purchase}</span>
+        </div>
+        <div class="coverage-row">
+          <span class="coverage-label">Post-purch</span>
+          <div class="coverage-track"><div class="coverage-fill fill-post" style={`width: ${Math.round(funnelCoverage['post-purchase'] / totalPages * 100)}%`}></div></div>
+          <span class="coverage-count">{funnelCoverage['post-purchase']}</span>
+        </div>
       </div>
     </div>
-    <div class="progress-bar-container">
-      <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+
+    <div class="coverage-card">
+      <div class="card-label">Persona Coverage</div>
+      <div class="coverage-bars">
+        <div class="coverage-row">
+          <span class="coverage-label persona-chip persona-bill">Bill</span>
+          <div class="coverage-track"><div class="coverage-fill fill-bill" style={`width: ${Math.round(personaCoverage.bill / totalPages * 100)}%`}></div></div>
+          <span class="coverage-count">{personaCoverage.bill}</span>
+        </div>
+        <div class="coverage-row">
+          <span class="coverage-label persona-chip persona-betty">Betty</span>
+          <div class="coverage-track"><div class="coverage-fill fill-betty" style={`width: ${Math.round(personaCoverage.betty / totalPages * 100)}%`}></div></div>
+          <span class="coverage-count">{personaCoverage.betty}</span>
+        </div>
+        <div class="coverage-row">
+          <span class="coverage-label persona-chip persona-taylor">Taylor</span>
+          <div class="coverage-track"><div class="coverage-fill fill-taylor" style={`width: ${Math.round(personaCoverage.taylor / totalPages * 100)}%`}></div></div>
+          <span class="coverage-count">{personaCoverage.taylor}</span>
+        </div>
+        <div class="coverage-row muted-row">
+          <span class="coverage-label">General</span>
+          <div class="coverage-track"><div class="coverage-fill fill-general" style={`width: ${Math.round(personaCoverage.general / totalPages * 100)}%`}></div></div>
+          <span class="coverage-count">{personaCoverage.general}</span>
+        </div>
+      </div>
     </div>
-    <div class="progress-label">
-      <span id="progress-percent">0%</span> complete
+  </div>
+
+  <!-- Actions Bar -->
+  <div class="actions-bar">
+    <div class="filter-group">
+      <select class="filter-select" id="filter-persona">
+        <option value="">All Personas</option>
+        <option value="bill">Bill</option>
+        <option value="betty">Betty</option>
+        <option value="taylor">Taylor</option>
+        <option value="general">General</option>
+      </select>
+      <select class="filter-select" id="filter-funnel">
+        <option value="">All Funnel</option>
+        <option value="awareness">Awareness</option>
+        <option value="consideration">Consideration</option>
+        <option value="purchase">Purchase</option>
+        <option value="post-purchase">Post-purchase</option>
+      </select>
+      <select class="filter-select" id="filter-blocker">
+        <option value="">All Blockers</option>
+        <option value="copy">Blocked: Copy</option>
+        <option value="dev">Blocked: Dev</option>
+        <option value="design">Blocked: Design</option>
+        <option value="data">Blocked: Data</option>
+      </select>
+      <select class="filter-select" id="filter-priority">
+        <option value="">All Priority</option>
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+      </select>
+    </div>
+    <div class="action-buttons">
+      <button class="btn btn-primary" id="scan-all-btn" title="Score all scannable pages via Mothership">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22" /></svg>
+        Scan All
+      </button>
+      <button class="btn btn-secondary" id="export-btn">Export</button>
+      <button class="btn btn-secondary" id="reset-btn">Reset</button>
     </div>
   </div>
 
   <!-- Legend -->
   <div class="legend">
-    <div class="legend-item">
-      <span class="status-dot not-started"></span>
-      <span>Not Started</span>
+    <div class="legend-group">
+      <span class="legend-label">Type:</span>
+      <span class="type-badge type-lander">lander</span>
+      <span class="type-badge type-collection">collection</span>
+      <span class="type-badge type-pdp">pdp</span>
+      <span class="type-badge type-content">content</span>
+      <span class="type-badge type-hub">hub</span>
     </div>
-    <div class="legend-item">
-      <span class="status-dot in-review"></span>
-      <span>In Review</span>
-    </div>
-    <div class="legend-item">
-      <span class="status-dot approved"></span>
-      <span>Approved</span>
-    </div>
-    <div class="legend-item priority">
-      <span class="priority-badge high">High</span>
-      <span class="priority-badge medium">Med</span>
-      <span class="priority-badge low">Low</span>
+    <div class="legend-group">
+      <span class="legend-label">Blocker:</span>
+      <span class="blocker-badge blocker-copy">Copy</span>
+      <span class="blocker-badge blocker-dev">Dev</span>
+      <span class="blocker-badge blocker-design">Design</span>
+      <span class="blocker-badge blocker-data">Data</span>
     </div>
   </div>
 
@@ -188,75 +307,115 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
         </div>
         <div class="audit-table">
           <div class="table-header">
-            <div class="col-status">Status</div>
+            <div class="col-status muted-header"></div>
             <div class="col-page">Page</div>
-            <div class="col-route">Route</div>
-            <div class="col-score">Score</div>
-            <div class="col-design">Design</div>
-            <div class="col-content">Content</div>
-            <div class="col-notes">Notes</div>
-            <div class="col-actions">Actions</div>
+            <div class="col-type muted-header">Type</div>
+            <div class="col-persona">Persona</div>
+            <div class="col-funnel muted-header">Funnel</div>
+            <div class="col-goal muted-header">Goal</div>
+            <div class="col-pipeline strong-header">Pipeline</div>
+            <div class="col-blocker strong-header">Blocker</div>
+            <div class="col-score">Persona Fit</div>
+            <div class="col-cro">CRO</div>
+            <div class="col-checks">Checks</div>
+            <div class="col-reviewed muted-header">Reviewed</div>
+            <div class="col-actions"></div>
           </div>
           {group.pages.map((page) => (
             <div>
-              <div class="table-row" data-route={page.route} data-content-type={page.contentType}>
+              <div class="table-row"
+                data-route={page.route}
+                data-content-type={page.contentType}
+                data-page-type={page.pageType}
+                data-persona={page.persona || ''}
+                data-funnel-stage={page.funnelStage}
+                data-priority={page.priority}
+                data-blocker={page.blocker || ''}
+                data-funnel-next={page.funnelNext || ''}
+                data-copy-doc={page.copyDoc || ''}
+                data-primary-goal={page.primaryGoal}
+              >
                 <div class="col-status">
                   <span class="status-dot not-started" data-status-dot />
                 </div>
                 <div class="col-page">
-                  <span class="page-name">{page.name}</span>
-                  <span class={`priority-badge ${page.priority}`}>{page.priority}</span>
+                  <div class="page-name-row">
+                    <span class="page-name">{page.name}</span>
+                    <span class={`priority-badge ${page.priority}`}>{page.priority}</span>
+                  </div>
+                  <div class="page-route-row">
+                    <code>{page.route}</code>
+                    <a
+                      href={page.route.replace('[slug]', 'example').replace('[segment]', 'poultry').replace('[...slug]', 'episode-1')}
+                      target="_blank"
+                      class="view-link"
+                      title="Open page"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                    </a>
+                  </div>
                 </div>
-                <div class="col-route">
-                  <code>{page.route}</code>
-                  <a
-                    href={page.route
-                      .replace('[slug]', 'example')
-                      .replace('[segment]', 'poultry')
-                      .replace('[...slug]', 'episode-1')}
-                    target="_blank"
-                    class="view-link"
-                    title="Open page"
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                    </svg>
-                  </a>
+                <div class="col-type">
+                  <span class={`type-badge type-${page.pageType}`}>{page.pageType}</span>
+                </div>
+                <div class="col-persona">
+                  {page.persona ? (
+                    <span class={`persona-chip persona-${page.persona}`}>{page.persona}</span>
+                  ) : (
+                    <span class="persona-chip persona-none">--</span>
+                  )}
+                </div>
+                <div class="col-funnel">
+                  <span class={`funnel-badge funnel-${page.funnelStage}`} title={page.funnelStage}>{
+                    page.funnelStage === 'awareness' ? 'A' :
+                    page.funnelStage === 'consideration' ? 'C' :
+                    page.funnelStage === 'purchase' ? 'P' : 'Post'
+                  }</span>
+                </div>
+                <div class="col-goal">
+                  <span class="goal-text" title={page.primaryGoal}>{page.primaryGoal}</span>
+                </div>
+                <div class="col-pipeline">
+                  <select class="pipeline-select" data-field="pipeline">
+                    {PIPELINE_STAGES.map((stage) => (
+                      <option value={stage.value} selected={stage.value === (page.pipeline || 'no-copy')}>{stage.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div class="col-blocker">
+                  <select class="blocker-select" data-field="blocker">
+                    {BLOCKERS.map((b) => (
+                      <option value={b.value} selected={b.value === (page.blocker || '')}>{b.label}</option>
+                    ))}
+                  </select>
                 </div>
                 <div class="col-score">
                   {page.contentType === 'dynamic' ? (
                     <button class="scan-btn" data-action="scan" title="Score via Mothership">Scan</button>
                   ) : (
-                    <span class="score-na">N/A</span>
+                    <span class="score-na">--</span>
                   )}
                 </div>
-                <div class="col-design">
-                  <select class="design-select" data-field="design">
-                    <option value="not-started">Not Started</option>
-                    <option value="in-review">In Review</option>
-                    <option value="approved">Approved</option>
-                  </select>
+                <div class="col-cro">
+                  <span class="cro-score" data-cro-for={page.route}>--</span>
                 </div>
-                <div class="col-content">
-                  <select class="content-select" data-field="content">
-                    <option value="not-started">Not Started</option>
-                    <option value="needs-persona">Needs Persona</option>
-                    <option value="needs-quality">Needs Quality Check</option>
-                    <option value="approved">Approved</option>
-                  </select>
+                <div class="col-checks">
+                  <span class="checks-detail" data-checks-for={page.route}>--</span>
                 </div>
-                <div class="col-notes">
-                  <input type="text" class="notes-input" data-field="notes" placeholder="Add notes..." />
+                <div class="col-reviewed">
+                  <span class="reviewed-date" data-reviewed-for={page.route} title="Click to mark reviewed">--</span>
                 </div>
                 <div class="col-actions">
-                  <button class="action-btn" data-action="clear" title="Clear row">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
+                  <a
+                    href={page.route.replace('[slug]', 'example').replace('[segment]', 'poultry').replace('[...slug]', 'episode-1')}
+                    target="_blank"
+                    class="open-btn"
+                    title="Open page"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                  </a>
                 </div>
               </div>
-              <!-- Expandable scan detail panel -->
               <div class="scan-details" data-details-for={page.route}></div>
             </div>
           ))}
@@ -265,30 +424,29 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     ))
   }
 
-  <!-- Mothership Integration Status -->
-  <div class="card integration-status">
-    <div class="card-header">
-      <h2 class="card-title">Mothership Integration</h2>
-      <span class="badge badge-success">Live</span>
+  <!-- Mothership Integration -->
+  <div class="integration-footer">
+    <div class="integration-header-row">
+      <div class="integration-title">
+        <h2 class="card-title">Mothership Integration</h2>
+        <span class="badge badge-success">Live</span>
+      </div>
+      <div class="integration-tiles">
+        <div class="int-tile">
+          <span class="int-tile-value" id="scanned-count">0</span>
+          <span class="int-tile-label">Routes Scanned</span>
+        </div>
+        <div class="int-tile">
+          <span class="int-tile-value" id="avg-alignment">--</span>
+          <span class="int-tile-label">Avg Persona Fit</span>
+        </div>
+        <div class="int-tile">
+          <span class="int-tile-value" id="total-entries">0</span>
+          <span class="int-tile-label">Entries Scored</span>
+        </div>
+      </div>
     </div>
-    <p>Content scoring powered by Mothership persona vectors + OpenAI embeddings.</p>
-    <div class="integration-stats">
-      <div class="stat">
-        <span class="stat-value" id="scanned-count">0</span>
-        <span class="stat-label">Routes Scanned</span>
-      </div>
-      <div class="stat">
-        <span class="stat-value" id="avg-alignment">--</span>
-        <span class="stat-label">Avg Alignment</span>
-      </div>
-      <div class="stat">
-        <span class="stat-value" id="total-entries">0</span>
-        <span class="stat-label">Entries Scored</span>
-      </div>
-    </div>
-    <p style="margin-top: 12px; color: var(--text-secondary); font-size: 13px;">
-      Two-axis evaluation: <strong>Persona</strong> (WHO does content speak to?) and <strong>Quality</strong> (is it structurally sound?). Never blended.
-    </p>
+    <p class="integration-desc">Content scoring powered by <strong>Mothership persona vectors + OpenAI embeddings</strong>. Pipeline tracks <code>/southland-copy</code> &rarr; Build &rarr; <code>/southland-design review</code> &rarr; Ship.</p>
   </div>
 
   <!-- Scan progress bar (sticky bottom, hidden by default) -->
@@ -305,73 +463,123 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
 </AdminLayout>
 
 <style>
-  /* ========== Progress Card ========== */
-  .progress-card {
+  /* Full-width override for AdminLayout */
+  :global(.admin-main) { max-width: none !important; }
+
+  /* ========== Overview Grid ========== */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .progress-card, .coverage-card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 24px;
-    margin-bottom: 24px;
+    padding: 16px 20px;
   }
-  .progress-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 16px;
+  .card-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-tertiary);
+    margin-bottom: 12px;
   }
-  .progress-stats { display: flex; gap: 32px; }
+  .progress-stats { display: flex; gap: 20px; margin-bottom: 12px; }
   .stat { text-align: center; }
   .stat-value {
     display: block;
-    font-size: 28px;
+    font-size: 22px;
     font-weight: 600;
     color: var(--text);
     line-height: 1;
   }
   .stat-label {
-    font-size: 12px;
+    font-size: 10px;
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
-  .progress-actions { display: flex; gap: 8px; }
   .progress-bar-container {
-    height: 8px;
+    height: 6px;
     background: var(--surface-alt);
-    border-radius: 4px;
+    border-radius: 3px;
     overflow: hidden;
   }
   .progress-bar {
     height: 100%;
     background: var(--accent);
-    border-radius: 4px;
+    border-radius: 3px;
     transition: width 0.3s ease;
   }
   .progress-label {
-    margin-top: 8px;
-    font-size: 13px;
+    margin-top: 6px;
+    font-size: 12px;
     color: var(--text-secondary);
   }
   #progress-percent { font-weight: 600; color: var(--accent); }
+  .tile-hint {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  /* Coverage bars */
+  .coverage-bars { display: flex; flex-direction: column; gap: 6px; }
+  .coverage-row { display: flex; align-items: center; gap: 8px; }
+  .coverage-label { font-size: 11px; font-weight: 500; width: 65px; flex-shrink: 0; color: var(--text-secondary); }
+  .coverage-track { flex: 1; height: 8px; background: var(--surface-alt); border-radius: 4px; overflow: hidden; }
+  .coverage-fill { height: 100%; border-radius: 4px; min-width: 2px; }
+  .coverage-count { font-size: 11px; font-weight: 600; width: 20px; text-align: right; color: var(--text-secondary); }
+  .fill-awareness { background: #94a3b8; }
+  .fill-consideration { background: #a1a1aa; }
+  .fill-purchase { background: #78716c; }
+  .fill-post { background: #9ca3af; }
+  .fill-bill { background: #6b7280; }
+  .fill-betty { background: #9ca3af; }
+  .fill-taylor { background: #78716c; }
+  .fill-general { background: #d1d5db; }
+  .muted-row { opacity: 0.5; }
+
+  /* ========== Actions Bar ========== */
+  .actions-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .filter-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .filter-select {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    background: var(--surface);
+    cursor: pointer;
+  }
+  .filter-select:focus { outline: none; border-color: var(--accent); }
+  .action-buttons { display: flex; gap: 8px; }
 
   /* ========== Legend ========== */
   .legend {
     display: flex;
     gap: 24px;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     flex-wrap: wrap;
     align-items: center;
   }
-  .legend-item {
+  .legend-group {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 13px;
-    color: var(--text-secondary);
+    font-size: 12px;
   }
-  .legend-item.priority { margin-left: auto; gap: 8px; }
+  .legend-label { font-size: 11px; font-weight: 600; color: var(--text-tertiary); }
 
   /* ========== Status & Priority ========== */
   .status-dot {
@@ -383,6 +591,7 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
   .status-dot.not-started { background: var(--border); }
   .status-dot.in-review { background: var(--warning); }
   .status-dot.approved { background: var(--success); }
+  .status-dot.blocked { background: #dc2626; }
 
   .priority-badge {
     display: inline-block;
@@ -392,114 +601,198 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     font-weight: 600;
     text-transform: uppercase;
   }
-  .priority-badge.high { background: #fee2e2; color: #991b1b; }
-  .priority-badge.medium { background: #fef3c7; color: #92400e; }
-  .priority-badge.low { background: #f3f4f6; color: #6b7280; }
+  .priority-badge.high { background: #fef2f2; color: #991b1b; }
+  .priority-badge.medium { background: #f9fafb; color: #9ca3af; }
+  .priority-badge.low { background: #f9fafb; color: #d1d5db; }
 
   /* ========== Audit Table ========== */
   .audit-group {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     overflow: hidden;
   }
+  .audit-group.hidden { display: none; }
   .group-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 20px;
+    padding: 12px 16px;
     background: var(--surface-alt);
     border-bottom: 1px solid var(--border);
   }
   .group-title { font-size: 14px; font-weight: 600; color: var(--text); }
   .group-count { font-size: 12px; color: var(--text-secondary); }
-  .audit-table { font-size: 13px; }
+  .audit-table { font-size: 12px; overflow-x: auto; }
 
   .table-header,
   .table-row {
     display: grid;
-    grid-template-columns: 50px 160px 1fr 80px 120px 140px 1fr 50px;
-    gap: 12px;
-    padding: 12px 20px;
+    grid-template-columns: 28px minmax(180px, 1fr) 65px 55px 55px 80px 110px 60px 70px 50px 110px 70px 32px;
+    gap: 4px;
+    padding: 6px 12px;
     align-items: center;
   }
   .table-header {
     background: var(--bg);
     border-bottom: 1px solid var(--border);
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
   }
   .table-row {
     border-bottom: 1px solid var(--border-subtle);
   }
   .table-row:hover { background: var(--bg); }
+  .table-row.filtered-out { display: none; }
+
+  /* Header emphasis */
+  .muted-header { color: var(--text-tertiary) !important; font-weight: 500 !important; }
+  .strong-header { color: var(--text) !important; font-weight: 700 !important; }
 
   .col-status { display: flex; justify-content: center; }
-  .col-page { display: flex; align-items: center; gap: 8px; }
-  .page-name { font-weight: 500; color: var(--text); }
-  .col-route { display: flex; align-items: center; gap: 8px; }
-  .col-route code {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--text-secondary);
-    background: var(--surface-alt);
-    padding: 2px 6px;
-    border-radius: 3px;
-  }
-  .col-score { display: flex; justify-content: center; }
-  .view-link { color: var(--text-tertiary); transition: color 0.15s; }
+  .col-page { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .page-name-row { display: flex; align-items: center; gap: 4px; }
+  .page-name { font-weight: 500; color: var(--text); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .page-route-row { display: flex; align-items: center; gap: 4px; }
+  .page-route-row code { font-family: var(--font-mono); font-size: 9px; color: var(--text-tertiary); }
+  .view-link { color: var(--text-tertiary); transition: color 0.15s; flex-shrink: 0; }
   .view-link:hover { color: var(--accent); }
-  .view-link svg { width: 14px; height: 14px; }
 
-  .design-select,
-  .content-select {
-    width: 100%;
-    padding: 6px 8px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    font-size: 12px;
-    background: var(--surface);
-    cursor: pointer;
+  /* Type badges */
+  .type-badge {
+    display: inline-block;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
   }
-  .design-select:focus,
-  .content-select:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
-  .notes-input {
-    width: 100%;
-    padding: 6px 8px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    font-size: 12px;
-    background: var(--surface);
-  }
-  .notes-input:focus { outline: none; border-color: var(--accent); }
+  .type-lander { background: #e5e7eb; color: #374151; }
+  .type-collection { background: #e5e7eb; color: #374151; }
+  .type-pdp { background: #e5e7eb; color: #374151; }
+  .type-content { background: #f3f4f6; color: #6b7280; }
+  .type-hub { background: #f3f4f6; color: #6b7280; }
+  .type-utility { background: #f9fafb; color: #9ca3af; }
 
-  .action-btn {
-    width: 28px;
-    height: 28px;
-    display: flex;
+  /* Persona chips */
+  .persona-chip {
+    display: inline-block;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .persona-bill { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+  .persona-betty { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+  .persona-taylor { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+  .persona-general { background: #f9fafb; color: #9ca3af; border: 1px solid #e5e7eb; }
+  .persona-none { color: var(--text-tertiary); background: none; }
+
+  /* Funnel badges */
+  .funnel-badge {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    border: none;
-    background: transparent;
-    color: var(--text-tertiary);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: all 0.15s;
+    width: 22px;
+    height: 18px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: default;
   }
-  .action-btn:hover { background: var(--error-light); color: var(--error); }
-  .action-btn svg { width: 14px; height: 14px; }
+  .funnel-awareness { background: #f3f4f6; color: #6b7280; }
+  .funnel-consideration { background: #f3f4f6; color: #6b7280; }
+  .funnel-purchase { background: #f3f4f6; color: #6b7280; }
+  .funnel-post-purchase { background: #f3f4f6; color: #6b7280; }
 
-  /* ========== Score Column ========== */
-  .scan-btn {
-    padding: 4px 10px;
+  /* Goal text */
+  .goal-text {
+    font-size: 10px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+  }
+
+  /* Blocker badges */
+  .blocker-badge {
+    display: inline-block;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .blocker-copy { background: #f3f4f6; color: #6b7280; }
+  .blocker-dev { background: #f3f4f6; color: #6b7280; }
+  .blocker-design { background: #f3f4f6; color: #6b7280; }
+  .blocker-data { background: #f3f4f6; color: #6b7280; }
+
+  /* Pipeline + blocker selects */
+  .pipeline-select, .blocker-select {
+    width: 100%;
+    padding: 3px 4px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 10px;
+    background: var(--surface);
+    cursor: pointer;
+  }
+  .pipeline-select:focus, .blocker-select:focus { outline: none; border-color: var(--accent); }
+  .pipeline-select.stage-shipped { border-color: var(--accent); font-weight: 600; }
+  .pipeline-select.stage-design-review { border-color: var(--text-secondary); }
+  .pipeline-select.stage-built { border-color: var(--text-secondary); }
+  .pipeline-select.stage-copy-approved { border-color: var(--text-tertiary); }
+  .pipeline-select.stage-copy-draft { border-color: var(--text-tertiary); }
+  .blocker-select.has-blocker { border-color: #b91c1c; color: #b91c1c; font-weight: 600; }
+
+  /* Score / CRO columns */
+  .col-score { display: flex; justify-content: center; }
+  .col-cro { display: flex; justify-content: center; }
+  .cro-score {
     font-size: 11px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+  }
+  .cro-score.cro-a { color: var(--text); }
+  .cro-score.cro-b { color: var(--text-secondary); }
+  .cro-score.cro-c { color: #b91c1c; }
+
+  /* Checks detail — compact checklist */
+  .checks-detail {
+    font-size: 9px;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    cursor: default;
+    line-height: 1.4;
+  }
+  .check-pass { color: #16a34a; }
+  .check-fail { color: #dc2626; }
+  .check-warn { color: #d97706; }
+
+  /* Reviewed column */
+  .reviewed-date {
+    font-size: 10px;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .reviewed-date:hover { color: var(--accent); text-decoration: underline; }
+  .reviewed-date.has-date { color: var(--text-secondary); }
+
+  .scan-btn {
+    padding: 3px 8px;
+    font-size: 10px;
     font-weight: 600;
     background: var(--surface);
     color: var(--accent);
@@ -511,31 +804,40 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
   .scan-btn:hover { background: var(--accent); color: white; }
   .scan-btn:disabled { opacity: 0.5; cursor: wait; }
   .scan-btn.scanning { animation: pulse 1.5s infinite; }
-
-  .score-na {
-    font-size: 11px;
-    color: var(--text-tertiary);
-  }
+  .score-na { font-size: 10px; color: var(--text-tertiary); }
 
   .score-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 36px;
-    height: 28px;
-    padding: 0 8px;
-    border-radius: 14px;
-    font-size: 12px;
+    min-width: 32px;
+    height: 24px;
+    padding: 0 6px;
+    border-radius: 12px;
+    font-size: 10px;
     font-weight: 700;
     cursor: pointer;
     transition: transform 0.15s;
     border: none;
   }
   .score-badge:hover { transform: scale(1.1); }
-  .score-badge.score-high { background: #dcfce7; color: #166534; }
-  .score-badge.score-mid { background: #fef3c7; color: #92400e; }
-  .score-badge.score-low { background: #fee2e2; color: #991b1b; }
-  .score-badge.score-confused { background: #ede9fe; color: #5b21b6; }
+  .score-badge.score-high { background: #f0fdf4; color: #166534; }
+  .score-badge.score-mid { background: #f9fafb; color: #6b7280; }
+  .score-badge.score-low { background: #fef2f2; color: #991b1b; }
+  .score-badge.score-confused { background: #f9fafb; color: #9ca3af; }
+
+  .open-btn {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-tertiary);
+    border-radius: var(--radius-sm);
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  .open-btn:hover { background: var(--surface-alt); color: var(--accent); }
 
   @keyframes pulse {
     0%, 100% { opacity: 1; }
@@ -550,14 +852,12 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     border-bottom: 1px solid var(--border-subtle);
   }
   .scan-details.open { display: block; }
-
   .scan-details-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 16px;
     margin-bottom: 12px;
   }
-
   .detail-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -572,247 +872,106 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     color: var(--text-tertiary);
     margin-bottom: 6px;
   }
-  .detail-card-value {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--text);
-    line-height: 1;
-  }
-  .detail-card-sub {
-    font-size: 11px;
-    color: var(--text-secondary);
-    margin-top: 4px;
-  }
-
+  .detail-card-value { font-size: 20px; font-weight: 700; color: var(--text); line-height: 1; }
+  .detail-card-sub { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
   .persona-bar-group { margin-top: 8px; }
-  .persona-bar-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 4px;
-  }
-  .persona-bar-label {
-    font-size: 10px;
-    font-weight: 600;
-    width: 50px;
-    flex-shrink: 0;
-    color: var(--text-secondary);
-  }
-  .persona-bar-track {
-    flex: 1;
-    height: 8px;
-    background: var(--surface-alt);
-    border-radius: 4px;
-    overflow: hidden;
-  }
-  .persona-bar-fill {
-    height: 100%;
-    border-radius: 4px;
-    transition: width 0.3s ease;
-  }
+  .persona-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .persona-bar-label { font-size: 10px; font-weight: 600; width: 50px; flex-shrink: 0; color: var(--text-secondary); }
+  .persona-bar-track { flex: 1; height: 8px; background: var(--surface-alt); border-radius: 4px; overflow: hidden; }
+  .persona-bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
   .persona-bar-fill.high { background: #16a34a; }
   .persona-bar-fill.mid { background: #eab308; }
   .persona-bar-fill.low { background: #dc2626; }
-  .persona-bar-pct {
-    font-size: 10px;
-    font-weight: 600;
-    width: 30px;
-    text-align: right;
-    color: var(--text-secondary);
-  }
-
-  .detail-badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 8px;
-  }
-  .detail-badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 3px;
-    font-size: 10px;
-    font-weight: 600;
-  }
+  .persona-bar-pct { font-size: 10px; font-weight: 600; width: 30px; text-align: right; color: var(--text-secondary); }
+  .detail-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .detail-badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 10px; font-weight: 600; }
   .detail-badge.blocker { background: #fee2e2; color: #991b1b; }
   .detail-badge.warning { background: #fef3c7; color: #92400e; }
   .detail-badge.ok { background: #dcfce7; color: #166534; }
   .detail-badge.info { background: #dbeafe; color: #1e40af; }
-
-  /* ========== Detail Panel: Summary ========== */
-  .detail-summary {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 16px;
-    line-height: 1.5;
-  }
-
-  /* ========== Detail Panel: Fixes List ========== */
-  .detail-fixes {
-    margin-bottom: 16px;
-    padding: 12px 16px;
-    background: #fffbeb;
-    border: 1px solid #fde68a;
-    border-radius: var(--radius-sm);
-  }
-  .detail-fixes-title {
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #92400e;
-    margin-bottom: 8px;
-  }
-  .detail-fixes ol {
-    margin: 0;
-    padding-left: 20px;
-    font-size: 13px;
-    color: #78350f;
-    line-height: 1.6;
-  }
+  .detail-summary { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 16px; line-height: 1.5; }
+  .detail-fixes { margin-bottom: 16px; padding: 12px 16px; background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius-sm); }
+  .detail-fixes-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #92400e; margin-bottom: 8px; }
+  .detail-fixes ol { margin: 0; padding-left: 20px; font-size: 13px; color: #78350f; line-height: 1.6; }
   .detail-fixes li { margin-bottom: 2px; }
-
-  /* ========== Detail Panel: Entry Table ========== */
-  .entry-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-    margin-bottom: 16px;
-  }
-  .entry-table th {
-    text-align: left;
-    padding: 8px 10px;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--text-tertiary);
-    border-bottom: 2px solid var(--border);
-    white-space: nowrap;
-  }
-  .entry-table td {
-    padding: 8px 10px;
-    border-bottom: 1px solid var(--border-subtle);
-    color: var(--text);
-    vertical-align: middle;
-  }
+  .entry-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 16px; }
+  .entry-table th { text-align: left; padding: 8px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-tertiary); border-bottom: 2px solid var(--border); white-space: nowrap; }
+  .entry-table td { padding: 8px 10px; border-bottom: 1px solid var(--border-subtle); color: var(--text); vertical-align: middle; }
   .entry-table tr:hover td { background: var(--bg); }
-  .entry-table .entry-title a {
-    color: var(--accent);
-    text-decoration: none;
-    font-weight: 500;
-  }
+  .entry-table .entry-title a { color: var(--accent); text-decoration: none; font-weight: 500; }
   .entry-table .entry-title a:hover { text-decoration: underline; }
   .entry-table .cell-red { color: #dc2626; font-weight: 600; }
   .entry-table .cell-amber { color: #d97706; font-weight: 600; }
   .entry-table .cell-green { color: #16a34a; }
   .entry-table .cell-muted { color: var(--text-tertiary); }
-  .entry-table .gap-badge {
-    display: inline-block;
-    padding: 1px 6px;
-    border-radius: 3px;
-    font-size: 10px;
-    font-weight: 600;
-  }
+  .entry-table .gap-badge { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 600; }
   .entry-table .gap-orphan { background: #fee2e2; color: #991b1b; }
   .entry-table .gap-weak { background: #fef3c7; color: #92400e; }
   .entry-table .gap-confused { background: #ede9fe; color: #5b21b6; }
   .entry-table .gap-ok { background: #dcfce7; color: #166534; }
+  .persona-chart { margin-top: 12px; padding: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+  .persona-chart-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-tertiary); margin-bottom: 10px; }
 
-  /* ========== Detail Panel: Persona Chart ========== */
-  .persona-chart {
-    margin-top: 12px;
-    padding: 12px;
+  /* ========== Integration Footer ========== */
+  .integration-footer {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-top: 8px;
   }
-  .persona-chart-title {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--text-tertiary);
-    margin-bottom: 10px;
-  }
-
-  /* ========== Integration Status Card ========== */
-  .integration-status { background: var(--surface); }
-  .integration-status p {
-    font-size: 14px;
-    color: var(--text);
-    margin-bottom: 12px;
-  }
-  .integration-stats {
+  .integration-header-row {
     display: flex;
-    gap: 32px;
-    margin-top: 16px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 12px;
   }
-  .integration-status a { color: var(--accent); }
+  .integration-title { display: flex; align-items: center; gap: 8px; }
+  .integration-tiles { display: flex; gap: 16px; }
+  .int-tile {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 16px;
+    text-align: center;
+    min-width: 80px;
+  }
+  .int-tile-value { display: block; font-size: 20px; font-weight: 700; color: var(--text); line-height: 1; }
+  .int-tile-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-tertiary); }
+  .integration-desc { font-size: 13px; color: var(--text-secondary); margin: 0; }
+  .integration-desc code { font-size: 12px; background: var(--surface-alt); padding: 1px 4px; border-radius: 3px; }
+  .integration-footer a { color: var(--accent); }
 
   /* ========== Scan Progress Bar (Sticky Bottom) ========== */
-  .scan-progress {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    background: var(--surface);
-    border-top: 2px solid var(--accent);
-    box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
-  }
-  .scan-progress-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 12px 24px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  .scan-progress-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text);
-    white-space: nowrap;
-  }
-  .scan-progress-bar-container {
-    flex: 1;
-    height: 8px;
-    background: var(--surface-alt);
-    border-radius: 4px;
-    overflow: hidden;
-  }
-  .scan-progress-bar {
-    height: 100%;
-    background: var(--accent);
-    border-radius: 4px;
-    transition: width 0.3s ease;
-  }
-  .scan-progress-count {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    white-space: nowrap;
-  }
+  .scan-progress { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; background: var(--surface); border-top: 2px solid var(--accent); box-shadow: 0 -2px 8px rgba(0,0,0,0.1); }
+  .scan-progress-inner { max-width: 1200px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; gap: 16px; }
+  .scan-progress-label { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; }
+  .scan-progress-bar-container { flex: 1; height: 8px; background: var(--surface-alt); border-radius: 4px; overflow: hidden; }
+  .scan-progress-bar { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.3s ease; }
+  .scan-progress-count { font-size: 12px; font-weight: 600; color: var(--text-secondary); white-space: nowrap; }
   .btn-sm { padding: 4px 12px; font-size: 12px; }
 
   /* ========== Responsive ========== */
-  @media (max-width: 1100px) {
-    .table-header,
-    .table-row {
-      grid-template-columns: 40px 140px 1fr 70px 100px 120px 50px;
+  @media (max-width: 1400px) {
+    .table-header, .table-row {
+      grid-template-columns: 28px minmax(160px, 1fr) 55px 50px 50px 70px 100px 55px 60px 40px 90px 60px 28px;
     }
-    .col-notes { display: none; }
+  }
+  @media (max-width: 1200px) {
+    .overview-grid { grid-template-columns: 1fr; }
+    .table-header, .table-row {
+      grid-template-columns: 28px minmax(150px, 1fr) 55px 50px 100px 55px 60px 90px 28px;
+    }
+    .col-funnel, .col-goal, .col-cro, .col-reviewed { display: none; }
     .scan-details-grid { grid-template-columns: repeat(2, 1fr); }
   }
-
-  @media (max-width: 800px) {
-    .table-header,
-    .table-row {
-      grid-template-columns: 40px 1fr 60px 100px 100px 40px;
+  @media (max-width: 900px) {
+    .table-header, .table-row {
+      grid-template-columns: 28px 1fr 55px 100px 55px 90px 28px;
     }
-    .col-route { display: none; }
+    .col-persona, .col-funnel, .col-goal, .col-blocker, .col-cro, .col-reviewed { display: none; }
     .scan-details-grid { grid-template-columns: 1fr; }
   }
 </style>
@@ -831,7 +990,6 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
 
   var scanCancelled = false
   var sessionScanCount = 0
-  // Full scan results cached in memory for detail panel rendering
   var scanResults = {}
 
   function loadState() {
@@ -848,40 +1006,228 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
   }
 
   // =========================================================================
-  // ROW STATUS
+  // ROW STATUS — now includes blocked state
   // =========================================================================
 
-  function getRowStatus(design, content) {
-    if (design === 'approved' && (content === 'approved' || content === 'not-started')) return 'approved'
-    if (design === 'in-review' || content === 'needs-persona' || content === 'needs-quality') return 'in-review'
+  function getRowStatus(pipeline, blocker) {
+    if (blocker) return 'blocked'
+    if (pipeline === 'shipped') return 'approved'
+    if (pipeline && pipeline !== 'no-copy') return 'in-review'
     return 'not-started'
   }
 
   function updateProgress() {
     var state = loadState()
     var rows = document.querySelectorAll('.table-row')
-    var approved = 0, inReview = 0, notStarted = 0
+    var shipped = 0, inPipeline = 0, blocked = 0, notStarted = 0
 
     rows.forEach(function(row) {
       var route = row.dataset.route
       var data = state[route] || {}
-      var status = getRowStatus(data.design || 'not-started', data.content || 'not-started')
+      var blocker = data.blocker || row.dataset.blocker || ''
+      var pipelineEl = row.querySelector('[data-field="pipeline"]')
+      var pipeline = data.pipeline || (pipelineEl && pipelineEl.value) || 'no-copy'
+      var status = getRowStatus(pipeline, blocker)
       var dot = row.querySelector('[data-status-dot]')
       if (dot) dot.className = 'status-dot ' + status
-      if (status === 'approved') approved++
-      else if (status === 'in-review') inReview++
+
+      if (status === 'approved') shipped++
+      else if (status === 'blocked') blocked++
+      else if (status === 'in-review') inPipeline++
       else notStarted++
+
+      // Pipeline select styling
+      var pipelineSelect = row.querySelector('.pipeline-select')
+      if (pipelineSelect) {
+        pipelineSelect.className = 'pipeline-select'
+        if (pipeline !== 'no-copy') pipelineSelect.classList.add('stage-' + pipeline)
+      }
+
+      // Blocker select styling
+      var blockerSelect = row.querySelector('.blocker-select')
+      if (blockerSelect) {
+        blockerSelect.className = 'blocker-select'
+        if (blocker) blockerSelect.classList.add('has-blocker')
+      }
+
+      updateChecks(row, data)
+      updateCRO(row, data)
+      updateReviewed(row, data)
     })
 
     var total = rows.length
-    var percent = total > 0 ? Math.round((approved / total) * 100) : 0
-    document.getElementById('approved-count').textContent = approved
-    document.getElementById('review-count').textContent = inReview
+    var percent = total > 0 ? Math.round((shipped / total) * 100) : 0
+    document.getElementById('shipped-count').textContent = shipped
+    document.getElementById('pipeline-count').textContent = inPipeline
+    document.getElementById('blocked-count').textContent = blocked
     document.getElementById('pending-count').textContent = notStarted
     document.getElementById('progress-bar').style.width = percent + '%'
     document.getElementById('progress-percent').textContent = percent + '%'
 
     updateIntegrationStats()
+  }
+
+  // =========================================================================
+  // CHECKS — expanded checklist with named items
+  // =========================================================================
+
+  function updateChecks(row, data) {
+    var checksEl = row.querySelector('.checks-detail')
+    if (!checksEl) return
+
+    var pageType = row.dataset.pageType
+    var pipeline = data.pipeline || 'no-copy'
+
+    if (pipeline === 'no-copy' || pipeline === 'copy-draft' || pipeline === 'copy-approved') {
+      checksEl.innerHTML = '<span style="color:var(--text-tertiary)">--</span>'
+      return
+    }
+
+    var checks = data.checks || {}
+    var parts = []
+
+    if (pageType === 'lander') {
+      parts.push(checkItem('CTA', checks.ctaPersonaTrue))
+      parts.push(checkItem('Proof', checks.proofPresent))
+      parts.push(checkItem('Rhythm', checks.rhythmCorrect))
+      parts.push(checkItem('Eveleth', checks.evelethUppercase))
+      parts.push(checkItem('DualCTA', checks.dualCta))
+      parts.push(checkItem('Funnel', checks.noOrphan))
+    } else if (pageType === 'collection') {
+      parts.push(checkItem('Trust', checks.trustStrip))
+      parts.push(checkItem('Qualify', checks.qualificationBullets))
+      parts.push(checkItem('Funnel', checks.noOrphan))
+    } else if (pageType === 'pdp') {
+      parts.push(checkItem('Proof', checks.proofPresent))
+      parts.push(checkItem('Guarantee', checks.guaranteeNearCta))
+      parts.push(checkItem('Funnel', checks.noOrphan))
+    } else {
+      checksEl.innerHTML = '<span style="color:var(--text-tertiary)">--</span>'
+      return
+    }
+
+    checksEl.innerHTML = parts.join(' ')
+  }
+
+  function checkItem(label, value) {
+    if (value === undefined) return '<span class="check-warn">' + label + '?</span>'
+    if (value) return '<span class="check-pass">' + label + '\u2713</span>'
+    return '<span class="check-fail">' + label + '\u2717</span>'
+  }
+
+  // =========================================================================
+  // CRO SCORE — A/B/C grade based on completeness signals
+  // =========================================================================
+
+  function updateCRO(row, data) {
+    var croEl = row.querySelector('.cro-score')
+    if (!croEl) return
+
+    var pageType = row.dataset.pageType
+    var pipeline = data.pipeline || 'no-copy'
+    var checks = data.checks || {}
+
+    if (pipeline === 'no-copy' || pipeline === 'copy-draft') {
+      croEl.textContent = '--'
+      croEl.className = 'cro-score'
+      return
+    }
+
+    var score = 0
+    var total = 0
+
+    if (pageType === 'lander') {
+      total = 6
+      if (checks.ctaPersonaTrue) score++
+      if (checks.proofPresent) score++
+      if (checks.rhythmCorrect) score++
+      if (checks.evelethUppercase) score++
+      if (checks.dualCta) score++
+      if (checks.noOrphan) score++
+    } else if (pageType === 'collection') {
+      total = 3
+      if (checks.trustStrip) score++
+      if (checks.qualificationBullets) score++
+      if (checks.noOrphan) score++
+    } else if (pageType === 'pdp') {
+      total = 3
+      if (checks.proofPresent) score++
+      if (checks.guaranteeNearCta) score++
+      if (checks.noOrphan) score++
+    } else {
+      croEl.textContent = '--'
+      croEl.className = 'cro-score'
+      return
+    }
+
+    if (total === 0) {
+      croEl.textContent = '--'
+      croEl.className = 'cro-score'
+      return
+    }
+
+    var pct = Math.round((score / total) * 100)
+    var grade, cls
+    if (pct >= 80) { grade = 'A'; cls = 'cro-a' }
+    else if (pct >= 50) { grade = 'B'; cls = 'cro-b' }
+    else { grade = 'C'; cls = 'cro-c' }
+
+    croEl.textContent = grade
+    croEl.className = 'cro-score ' + cls
+    croEl.title = score + '/' + total + ' checks (' + pct + '%)'
+  }
+
+  // =========================================================================
+  // REVIEWED DATE
+  // =========================================================================
+
+  function updateReviewed(row, data) {
+    var el = row.querySelector('.reviewed-date')
+    if (!el) return
+
+    if (data.reviewedAt) {
+      var d = new Date(data.reviewedAt)
+      var label = (d.getMonth() + 1) + '/' + d.getDate()
+      if (data.reviewer) label += ' ' + data.reviewer
+      el.textContent = label
+      el.className = 'reviewed-date has-date'
+      el.title = 'Reviewed ' + d.toLocaleDateString() + (data.reviewer ? ' by ' + data.reviewer : '') + '. Click to update.'
+    } else {
+      el.textContent = '--'
+      el.className = 'reviewed-date'
+      el.title = 'Click to mark as reviewed'
+    }
+  }
+
+  // =========================================================================
+  // FILTERING
+  // =========================================================================
+
+  function applyFilters() {
+    var persona = document.getElementById('filter-persona').value
+    var funnel = document.getElementById('filter-funnel').value
+    var blocker = document.getElementById('filter-blocker').value
+    var priority = document.getElementById('filter-priority').value
+    var state = loadState()
+
+    document.querySelectorAll('.table-row').forEach(function(row) {
+      var show = true
+      if (persona && row.dataset.persona !== persona) show = false
+      if (funnel && row.dataset.funnelStage !== funnel) show = false
+      if (priority && row.dataset.priority !== priority) show = false
+      if (blocker) {
+        var data = state[row.dataset.route] || {}
+        var rowBlocker = data.blocker || row.dataset.blocker || ''
+        if (rowBlocker !== blocker) show = false
+      }
+      row.classList.toggle('filtered-out', !show)
+    })
+
+    // Update group visibility — hide groups with all rows filtered out
+    document.querySelectorAll('.audit-group').forEach(function(group) {
+      var visibleRows = group.querySelectorAll('.table-row:not(.filtered-out)')
+      group.classList.toggle('hidden', visibleRows.length === 0)
+    })
   }
 
   // =========================================================================
@@ -918,9 +1264,7 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     .then(function(res) { return res.json() })
     .then(function(result) {
       sessionScanCount++
-      if (result && result.entries) {
-        scanResults[route] = result
-      }
+      if (result && result.entries) scanResults[route] = result
       return result
     })
   }
@@ -947,7 +1291,7 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
   }
 
   // =========================================================================
-  // RENDER SCORE BADGE — "B 68%" format
+  // RENDER SCORE BADGE
   // =========================================================================
 
   function renderScoreBadge(row, result) {
@@ -962,7 +1306,6 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
       label = '--'
       cls = 'score-low'
     } else if (p.unclearCount === result.scoredCount) {
-      // All entries unclear
       label = '?'
       cls = 'score-confused'
     } else {
@@ -971,12 +1314,11 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
       cls = badgeColor(p.avgAlignment)
     }
 
-    scoreCol.innerHTML = '<button class="score-badge ' + cls + '" data-action="toggle-details" title="Click to expand">' +
-      label + '</button>'
+    scoreCol.innerHTML = '<button class="score-badge ' + cls + '" data-action="toggle-details" title="Click to expand">' + label + '</button>'
   }
 
   // =========================================================================
-  // RENDER DETAIL PANEL — Summary → Fixes → Entry Table → Persona Chart
+  // RENDER DETAIL PANEL
   // =========================================================================
 
   function renderDetailPanel(route, result) {
@@ -987,57 +1329,32 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     var agg = result.aggregate
     var p = agg.persona
     var q = agg.quality
-    var g = agg.gap
     var html = ''
 
-    // === 1. SUMMARY SENTENCE ===
     var summary = result.scoredCount + ' entries scanned.'
     if (p) {
       if (p.unclearCount === result.scoredCount) {
-        summary += ' No clear audience — content is too generic for any persona.'
+        summary += ' No clear audience — content is too generic.'
       } else {
-        summary += ' Speaks to <strong>' + p.primaryAudience + '</strong> at ' + p.avgAlignment + '% avg alignment.'
-        // Top quality issue
-        if (q.noInternalLinks > 0) {
-          summary += ' ' + q.noInternalLinks + ' of ' + result.scoredCount + ' have zero internal links.'
-        } else if (q.stubbedCount > 0) {
-          summary += ' ' + q.stubbedCount + ' are stubs (< 150 words).'
-        } else if (q.missingMeta > 0) {
-          summary += ' ' + q.missingMeta + ' missing meta descriptions.'
-        }
+        summary += ' Speaks to <strong>' + p.primaryAudience + '</strong> at ' + p.avgAlignment + '% avg fit.'
+        if (q.noInternalLinks > 0) summary += ' ' + q.noInternalLinks + ' have zero internal links.'
+        else if (q.stubbedCount > 0) summary += ' ' + q.stubbedCount + ' are stubs.'
+        else if (q.missingMeta > 0) summary += ' ' + q.missingMeta + ' missing meta.'
       }
-    } else {
-      summary += ' Persona scoring unavailable.'
     }
     html += '<div class="detail-summary">' + summary + '</div>'
 
-    // === 2. TOP FIXES (max 4, auto-derived from entries) ===
     var fixes = generateFixes(entries, result.scoredCount)
     if (fixes.length > 0) {
-      html += '<div class="detail-fixes">'
-      html += '<div class="detail-fixes-title">Top Fixes</div>'
-      html += '<ol>'
+      html += '<div class="detail-fixes"><div class="detail-fixes-title">Top Fixes</div><ol>'
       fixes.forEach(function(fix) { html += '<li>' + fix + '</li>' })
       html += '</ol></div>'
     }
 
-    // === 3. PER-ENTRY TABLE (weakest first) ===
     if (entries.length > 0) {
-      // Sort: most issues first (unclear persona, stub, no links, no meta)
-      var sorted = entries.slice().sort(function(a, b) {
-        return issueCount(b) - issueCount(a)
-      })
-
-      html += '<table class="entry-table">'
-      html += '<thead><tr>' +
-        '<th>Entry</th>' +
-        '<th>Audience</th>' +
-        '<th>Align</th>' +
-        '<th>Words</th>' +
-        '<th>Read.</th>' +
-        '<th>Links</th>' +
-        '<th>H2s</th>' +
-        '<th>Gap</th>' +
+      var sorted = entries.slice().sort(function(a, b) { return issueCount(b) - issueCount(a) })
+      html += '<table class="entry-table"><thead><tr>' +
+        '<th>Entry</th><th>Audience</th><th>Align</th><th>Words</th><th>Read.</th><th>Links</th><th>H2s</th><th>Gap</th>' +
         '</tr></thead><tbody>'
 
       sorted.forEach(function(entry) {
@@ -1045,7 +1362,6 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
         var eq = entry.quality
         var eg = entry.gap
 
-        // Audience cell
         var audienceCell, alignCell
         if (!ep) {
           audienceCell = '<span class="cell-muted">--</span>'
@@ -1059,53 +1375,25 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
           alignCell = '<span class="' + alignCls + '">' + ep.alignment + '%</span>'
         }
 
-        // Words
         var wordsCls = eq.stubbed ? 'cell-red' : (eq.wordCount < 300 ? 'cell-amber' : '')
         var wordsCell = '<span class="' + wordsCls + '">' + eq.wordCount + '</span>'
-
-        // Readability
-        var readCell = eq.readability.gradeLevel !== 'unknown'
-          ? eq.readability.gradeLevel
-          : '<span class="cell-muted">--</span>'
-
-        // Links
+        var readCell = eq.readability.gradeLevel !== 'unknown' ? eq.readability.gradeLevel : '<span class="cell-muted">--</span>'
         var linkTotal = eq.internalLinks + eq.externalLinks
-        var linksCls = linkTotal === 0 ? 'cell-red' : ''
-        var linksCell = '<span class="' + linksCls + '">' + linkTotal + '</span>'
-
-        // Headings
-        var h2Cell = eq.headings.h2 > 0
-          ? eq.headings.h2 + ' H2'
-          : '<span class="cell-muted">--</span>'
-        if (!eq.headings.properStructure && eq.headings.h2 > 0) {
-          h2Cell = '<span class="cell-amber">' + h2Cell + '</span>'
-        }
-
-        // Gap
+        var linksCell = '<span class="' + (linkTotal === 0 ? 'cell-red' : '') + '">' + linkTotal + '</span>'
+        var h2Cell = eq.headings.h2 > 0 ? eq.headings.h2 + ' H2' : '<span class="cell-muted">--</span>'
+        if (!eq.headings.properStructure && eq.headings.h2 > 0) h2Cell = '<span class="cell-amber">' + h2Cell + '</span>'
         var gapCell = '<span class="cell-muted">--</span>'
-        if (eg) {
-          var gapCls = 'gap-' + eg.status.toLowerCase()
-          gapCell = '<span class="gap-badge ' + gapCls + '">' + eg.status + '</span>'
-        }
+        if (eg) gapCell = '<span class="gap-badge gap-' + eg.status.toLowerCase() + '">' + eg.status + '</span>'
 
         html += '<tr>' +
           '<td class="entry-title"><a href="' + entry.url + '" target="_blank">' + entry.title + '</a></td>' +
-          '<td>' + audienceCell + '</td>' +
-          '<td>' + alignCell + '</td>' +
-          '<td>' + wordsCell + '</td>' +
-          '<td>' + readCell + '</td>' +
-          '<td>' + linksCell + '</td>' +
-          '<td>' + h2Cell + '</td>' +
-          '<td>' + gapCell + '</td>' +
-          '</tr>'
+          '<td>' + audienceCell + '</td><td>' + alignCell + '</td><td>' + wordsCell + '</td>' +
+          '<td>' + readCell + '</td><td>' + linksCell + '</td><td>' + h2Cell + '</td><td>' + gapCell + '</td></tr>'
       })
-
       html += '</tbody></table>'
     }
 
-    // === 4. PERSONA CHART ===
     if (p && p.unclearCount < result.scoredCount) {
-      // Compute average scores across all entries that have persona data
       var billTotal = 0, bettyTotal = 0, taylorTotal = 0, personaCount = 0
       entries.forEach(function(e) {
         if (e.persona) {
@@ -1119,24 +1407,14 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
         var avgBill = Math.round(billTotal / personaCount)
         var avgBetty = Math.round(bettyTotal / personaCount)
         var avgTaylor = Math.round(taylorTotal / personaCount)
-
-        html += '<div class="persona-chart">'
-        html += '<div class="persona-chart-title">Persona Alignment (avg across ' + personaCount + ' entries)</div>'
-        html += '<div class="persona-bar-group">'
-        html += renderPersonaBar('Bill', avgBill)
-        html += renderPersonaBar('Betty', avgBetty)
-        html += renderPersonaBar('Taylor', avgTaylor)
+        html += '<div class="persona-chart"><div class="persona-chart-title">Persona Fit (avg across ' + personaCount + ' entries)</div><div class="persona-bar-group">'
+        html += renderPersonaBar('Bill', avgBill) + renderPersonaBar('Betty', avgBetty) + renderPersonaBar('Taylor', avgTaylor)
         html += '</div>'
-
-        // List unclear entries
         var unclearEntries = entries.filter(function(e) { return e.persona && e.persona.unclear })
         if (unclearEntries.length > 0) {
-          html += '<div style="margin-top:8px;font-size:12px;color:var(--text-secondary);">'
-          html += '<strong>Unclear audience:</strong> '
-          html += unclearEntries.map(function(e) { return e.title }).join(', ')
-          html += '</div>'
+          html += '<div style="margin-top:8px;font-size:12px;color:var(--text-secondary);"><strong>Unclear:</strong> '
+          html += unclearEntries.map(function(e) { return e.title }).join(', ') + '</div>'
         }
-
         html += '</div>'
       }
     }
@@ -1145,16 +1423,13 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
   }
 
   function renderPersonaBar(label, pct) {
-    var cls = getBarClass(pct)
-    return '<div class="persona-bar-row">' +
-      '<span class="persona-bar-label">' + label + '</span>' +
-      '<div class="persona-bar-track"><div class="persona-bar-fill ' + cls + '" style="width:' + pct + '%"></div></div>' +
-      '<span class="persona-bar-pct">' + pct + '%</span>' +
-    '</div>'
+    return '<div class="persona-bar-row"><span class="persona-bar-label">' + label + '</span>' +
+      '<div class="persona-bar-track"><div class="persona-bar-fill ' + getBarClass(pct) + '" style="width:' + pct + '%"></div></div>' +
+      '<span class="persona-bar-pct">' + pct + '%</span></div>'
   }
 
   // =========================================================================
-  // ISSUE COUNTING (for sort order)
+  // ISSUE COUNTING
   // =========================================================================
 
   function issueCount(entry) {
@@ -1171,68 +1446,49 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
   }
 
   // =========================================================================
-  // FIX GENERATION — auto-derived from entry data
+  // FIX GENERATION
   // =========================================================================
 
   function generateFixes(entries, scoredCount) {
     var fixes = []
-
-    // 1. Entries with 0 links
-    var noLinks = entries.filter(function(e) {
-      return e.quality.internalLinks + e.quality.externalLinks === 0
-    })
+    var noLinks = entries.filter(function(e) { return e.quality.internalLinks + e.quality.externalLinks === 0 })
     if (noLinks.length > 0) {
       var names = noLinks.slice(0, 4).map(function(e) { return e.title })
-      var suffix = noLinks.length > 4 ? ' + ' + (noLinks.length - 4) + ' more' : ''
-      fixes.push('Add internal links to <strong>' + names.join('</strong>, <strong>') + '</strong>' + suffix + ' — zero links to hub or product pages.')
+      fixes.push('Add internal links to <strong>' + names.join('</strong>, <strong>') + '</strong>' + (noLinks.length > 4 ? ' + ' + (noLinks.length - 4) + ' more' : ''))
     }
-
-    // 2. Stubs (< 150 words)
     var stubs = entries.filter(function(e) { return e.quality.stubbed })
     if (stubs.length > 0) {
-      var names2 = stubs.slice(0, 3).map(function(e) { return e.title + ' (' + e.quality.wordCount + ' words)' })
-      fixes.push('Expand <strong>' + names2.join('</strong>, <strong>') + '</strong> — under 150 words, flagged as stub.')
+      var names2 = stubs.slice(0, 3).map(function(e) { return e.title + ' (' + e.quality.wordCount + 'w)' })
+      fixes.push('Expand <strong>' + names2.join('</strong>, <strong>') + '</strong> — stubs')
     }
-
-    // 3. Missing meta descriptions
     var noMeta = entries.filter(function(e) { return !e.quality.hasMetaDescription })
     if (noMeta.length > 0) {
       var names3 = noMeta.slice(0, 4).map(function(e) { return e.title })
-      fixes.push('Add meta descriptions to <strong>' + names3.join('</strong>, <strong>') + '</strong> — missing entirely.')
+      fixes.push('Add meta descriptions: <strong>' + names3.join('</strong>, <strong>') + '</strong>')
     }
-
-    // 4. Bad heading structure
-    var badHeadings = entries.filter(function(e) {
-      return !e.quality.headings.properStructure && e.quality.wordCount >= 150
-    })
-    if (badHeadings.length > 0) {
-      var names4 = badHeadings.slice(0, 3).map(function(e) { return e.title })
-      fixes.push('Fix heading structure in <strong>' + names4.join('</strong>, <strong>') + '</strong> — missing H2s or multiple H1s.')
-    }
-
-    // 5. Unclear persona (all < 30%)
     var unclear = entries.filter(function(e) { return e.persona && e.persona.unclear })
     if (unclear.length > 0 && fixes.length < 4) {
       var names5 = unclear.slice(0, 3).map(function(e) { return e.title })
-      fixes.push('<strong>' + names5.join('</strong>, <strong>') + '</strong> have no clear audience (all personas < 30%). Rewrite to target a specific persona.')
+      fixes.push('<strong>' + names5.join('</strong>, <strong>') + '</strong> — no clear audience')
     }
-
     return fixes.slice(0, 4)
   }
 
   // =========================================================================
-  // AUTO-SET CONTENT STATUS — two-axis rules
+  // AUTO-SET PIPELINE FROM SCAN
   // =========================================================================
 
-  function autoSetContentStatus(route, result) {
+  function autoSetPipelineFromScan(route, result) {
     if (!result || result.scannable === false) return
+    var row = document.querySelector('.table-row[data-route="' + route + '"]')
+    if (!row) return
+    var st = loadState()
+    var data = st[route] || {}
+    if (data.pipeline && data.pipeline !== 'no-copy') return
 
     var agg = result.aggregate
     var p = agg.persona
     var q = agg.quality
-    var contentStatus = 'not-started'
-
-    // Count quality checks passed (6 total)
     var qualityPassed = 0
     if (q.avgWordCount >= 300) qualityPassed++
     if (q.missingMeta === 0) qualityPassed++
@@ -1241,61 +1497,50 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     if (q.avgReadability >= 50) qualityPassed++
     if (q.stubbedCount === 0) qualityPassed++
 
-    if (p && p.avgAlignment >= 60 && qualityPassed >= 4) {
-      contentStatus = 'approved'
-    } else if (!p || p.avgAlignment < 40 || p.unclearCount > 0) {
-      contentStatus = 'needs-persona'
-    } else if (qualityPassed <= 2) {
-      contentStatus = 'needs-quality'
-    }
+    var inferredStage = 'no-copy'
+    if (p && p.avgAlignment >= 60 && qualityPassed >= 4) inferredStage = 'built'
+    else if (p && p.avgAlignment >= 40) inferredStage = 'copy-draft'
 
-    var row = document.querySelector('.table-row[data-route="' + route + '"]')
-    if (!row) return
-
-    var contentSelect = row.querySelector('[data-field="content"]')
-    if (contentSelect) {
-      contentSelect.value = contentStatus
-      contentSelect.dispatchEvent(new Event('change'))
+    if (inferredStage !== 'no-copy') {
+      var pipelineSelect = row.querySelector('[data-field="pipeline"]')
+      if (pipelineSelect) {
+        pipelineSelect.value = inferredStage
+        pipelineSelect.dispatchEvent(new Event('change'))
+      }
     }
   }
 
   // =========================================================================
-  // CACHE SCAN RESULT — two-axis format
+  // CACHE SCAN RESULT
   // =========================================================================
 
   function cacheScanResult(route, result) {
     if (result.scannable === false) return
     var state = loadState()
     if (!state[route]) state[route] = {}
-
     var p = result.aggregate.persona
     var q = result.aggregate.quality
     var g = result.aggregate.gap
-
     state[route].scan = {
       scannedAt: result.scannedAt,
       scanVersion: result.scanVersion,
       scoredCount: result.scoredCount,
       totalEntries: result.entryCount,
-      // Persona axis
       primaryAudience: p ? p.primaryAudience : null,
       avgAlignment: p ? p.avgAlignment : null,
       unclearCount: p ? p.unclearCount : null,
-      // Quality axis
       avgWordCount: q.avgWordCount,
       missingMeta: q.missingMeta,
       noInternalLinks: q.noInternalLinks,
       stubbedCount: q.stubbedCount,
-      // Gap
       gap: g,
-      // Full entries for detail panel restore
       entries: result.entries,
     }
     saveState(state)
   }
 
   // =========================================================================
-  // RESTORE CACHED SCANS ON LOAD
+  // RESTORE CACHED SCANS
   // =========================================================================
 
   function restoreCachedScans() {
@@ -1303,56 +1548,28 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     Object.keys(state).forEach(function(route) {
       var data = state[route]
       if (!data.scan) return
-
       var row = document.querySelector('.table-row[data-route="' + route + '"]')
       if (!row) return
-
       var scoreCol = row.querySelector('.col-score')
       if (!scoreCol) return
-
       var scan = data.scan
       var stale = scan.scanVersion < CURRENT_SCAN_VERSION
       var label, cls
-
-      if (!scan.primaryAudience) {
-        label = '--'
-        cls = 'score-low'
-      } else if (scan.unclearCount === scan.scoredCount) {
-        label = '?'
-        cls = 'score-confused'
-      } else {
-        var initial = personaInitial(scan.primaryAudience)
-        label = initial + ' ' + scan.avgAlignment + '%'
+      if (!scan.primaryAudience) { label = '--'; cls = 'score-low' }
+      else if (scan.unclearCount === scan.scoredCount) { label = '?'; cls = 'score-confused' }
+      else {
+        label = personaInitial(scan.primaryAudience) + ' ' + scan.avgAlignment + '%'
         cls = badgeColor(scan.avgAlignment)
       }
-
       if (stale) label += '*'
-
       scoreCol.innerHTML = '<button class="score-badge ' + cls + '" data-action="toggle-details" title="' +
-        (stale ? 'Stale — re-scan available' : 'Click to expand') + '">' +
-        label + '</button>'
-
-      // Restore full result for detail panel
+        (stale ? 'Stale — re-scan' : 'Click to expand') + '">' + label + '</button>'
       if (scan.entries) {
         scanResults[route] = {
-          scannable: true,
-          scoredCount: scan.scoredCount,
-          entryCount: scan.totalEntries,
-          entries: scan.entries,
+          scannable: true, scoredCount: scan.scoredCount, entryCount: scan.totalEntries, entries: scan.entries,
           aggregate: {
-            persona: scan.primaryAudience ? {
-              primaryAudience: scan.primaryAudience,
-              avgAlignment: scan.avgAlignment,
-              unclearCount: scan.unclearCount,
-            } : null,
-            quality: {
-              avgWordCount: scan.avgWordCount,
-              missingMeta: scan.missingMeta,
-              noInternalLinks: scan.noInternalLinks,
-              stubbedCount: scan.stubbedCount,
-              avgReadability: 0,
-              badHeadingsCount: 0,
-            },
+            persona: scan.primaryAudience ? { primaryAudience: scan.primaryAudience, avgAlignment: scan.avgAlignment, unclearCount: scan.unclearCount } : null,
+            quality: { avgWordCount: scan.avgWordCount, missingMeta: scan.missingMeta, noInternalLinks: scan.noInternalLinks, stubbedCount: scan.stubbedCount, avgReadability: 0, badHeadingsCount: 0 },
             gap: scan.gap,
           },
         }
@@ -1368,7 +1585,6 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     var rows = document.querySelectorAll('.table-row[data-content-type="dynamic"]')
     var routes = []
     rows.forEach(function(row) { routes.push(row.dataset.route) })
-
     if (routes.length === 0) return
 
     scanCancelled = false
@@ -1377,7 +1593,6 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     var progressCount = document.getElementById('scan-progress-count')
     var progressLabel = document.getElementById('scan-progress-label')
     var scanAllBtn = document.getElementById('scan-all-btn')
-
     progressEl.style.display = ''
     scanAllBtn.disabled = true
     var completed = 0
@@ -1389,9 +1604,7 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
         updateProgress()
         return
       }
-
       progressLabel.textContent = 'Scanning ' + routes[completed] + '...'
-
       var route = routes[completed]
       var row = document.querySelector('.table-row[data-route="' + route + '"]')
       var scanBtn = row ? row.querySelector('.scan-btn, .score-badge') : null
@@ -1402,23 +1615,19 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
           if (result && result.scannable !== false && result.entries) {
             renderScoreBadge(row, result)
             renderDetailPanel(route, result)
-            autoSetContentStatus(route, result)
+            autoSetPipelineFromScan(route, result)
             cacheScanResult(route, result)
           }
         })
-        .catch(function(err) {
-          console.error('Scan failed for ' + route + ':', err)
-        })
+        .catch(function(err) { console.error('Scan failed for ' + route + ':', err) })
         .finally(function() {
           if (scanBtn) scanBtn.classList.remove('scanning')
           completed++
-          var pct = Math.round((completed / routes.length) * 100)
-          progressBar.style.width = pct + '%'
+          progressBar.style.width = Math.round((completed / routes.length) * 100) + '%'
           progressCount.textContent = completed + '/' + routes.length
           setTimeout(next, 500)
         })
     }
-
     progressCount.textContent = '0/' + routes.length
     next()
   }
@@ -1434,52 +1643,54 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
     document.querySelectorAll('.table-row').forEach(function(row) {
       var route = row.dataset.route
       var data = state[route] || {}
-      var designSelect = row.querySelector('[data-field="design"]')
-      var contentSelect = row.querySelector('[data-field="content"]')
-      var notesInput = row.querySelector('[data-field="notes"]')
-      if (data.design && designSelect) designSelect.value = data.design
-      if (data.content && contentSelect) contentSelect.value = data.content
-      if (data.notes && notesInput) notesInput.value = data.notes
+      var pipelineSelect = row.querySelector('[data-field="pipeline"]')
+      if (data.pipeline && pipelineSelect) pipelineSelect.value = data.pipeline
+      var blockerSelect = row.querySelector('[data-field="blocker"]')
+      if (data.blocker && blockerSelect) blockerSelect.value = data.blocker
     })
 
-    // Change listeners for dropdowns and notes
-    document.querySelectorAll('.design-select, .content-select, .notes-input').forEach(function(el) {
+    // Change listeners for pipeline/blocker
+    document.querySelectorAll('.pipeline-select').forEach(function(el) {
       el.addEventListener('change', function() {
         var row = this.closest('.table-row')
         var route = row.dataset.route
-        var field = this.dataset.field
         var st = loadState()
         if (!st[route]) st[route] = {}
-        st[route][field] = this.value
+        st[route].pipeline = this.value
         saveState(st)
         updateProgress()
       })
     })
-
-    // Clear row button
-    document.querySelectorAll('[data-action="clear"]').forEach(function(btn) {
-      btn.addEventListener('click', function() {
+    document.querySelectorAll('.blocker-select').forEach(function(el) {
+      el.addEventListener('change', function() {
         var row = this.closest('.table-row')
         var route = row.dataset.route
         var st = loadState()
-        delete st[route]
+        if (!st[route]) st[route] = {}
+        st[route].blocker = this.value
         saveState(st)
-        row.querySelector('[data-field="design"]').value = 'not-started'
-        row.querySelector('[data-field="content"]').value = 'not-started'
-        row.querySelector('[data-field="notes"]').value = ''
-        // Reset score column
-        if (row.dataset.contentType === 'dynamic') {
-          row.querySelector('.col-score').innerHTML = '<button class="scan-btn" data-action="scan" title="Score via Mothership">Scan</button>'
-        }
-        // Close detail panel
-        var panel = document.querySelector('[data-details-for="' + route + '"]')
-        if (panel) { panel.classList.remove('open'); panel.innerHTML = '' }
-        delete scanResults[route]
+        updateProgress()
+      })
+    })
+    // Reviewed date — click to mark
+    document.querySelectorAll('.reviewed-date').forEach(function(el) {
+      el.addEventListener('click', function() {
+        var route = this.dataset.reviewedFor
+        var st = loadState()
+        if (!st[route]) st[route] = {}
+        st[route].reviewedAt = new Date().toISOString()
+        st[route].reviewer = prompt('Reviewer initials:', st[route].reviewer || '')
+        saveState(st)
         updateProgress()
       })
     })
 
-    // Scan button (per-row) and toggle — delegated
+    // Filter listeners
+    ;['filter-persona', 'filter-funnel', 'filter-blocker', 'filter-priority'].forEach(function(id) {
+      document.getElementById(id).addEventListener('change', applyFilters)
+    })
+
+    // Scan button + toggle — delegated
     document.addEventListener('click', function(e) {
       var scanBtn = e.target.closest('[data-action="scan"]')
       if (scanBtn) {
@@ -1488,15 +1699,13 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
         scanBtn.disabled = true
         scanBtn.classList.add('scanning')
         scanBtn.textContent = '...'
-
         scanRoute(route)
           .then(function(result) {
             if (result && result.scannable !== false && result.entries) {
               renderScoreBadge(row, result)
               renderDetailPanel(route, result)
-              autoSetContentStatus(route, result)
+              autoSetPipelineFromScan(route, result)
               cacheScanResult(route, result)
-              // Auto-open detail panel
               var panel = document.querySelector('[data-details-for="' + route + '"]')
               if (panel) panel.classList.add('open')
             }
@@ -1507,36 +1716,26 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
             scanBtn.disabled = false
             scanBtn.classList.remove('scanning')
           })
-          .finally(function() {
-            updateProgress()
-          })
+          .finally(function() { updateProgress() })
       }
 
-      // Toggle detail panel
       var toggleBtn = e.target.closest('[data-action="toggle-details"]')
       if (toggleBtn) {
         var row2 = toggleBtn.closest('.table-row')
         var route2 = row2.dataset.route
         var panel = document.querySelector('[data-details-for="' + route2 + '"]')
         if (panel) {
-          // Re-render from cached result if panel is empty
-          if (!panel.innerHTML && scanResults[route2]) {
-            renderDetailPanel(route2, scanResults[route2])
-          }
+          if (!panel.innerHTML && scanResults[route2]) renderDetailPanel(route2, scanResults[route2])
           panel.classList.toggle('open')
         }
       }
     })
 
-    // Scan All button
+    // Scan All
     document.getElementById('scan-all-btn').addEventListener('click', scanAll)
+    document.getElementById('scan-cancel-btn').addEventListener('click', function() { scanCancelled = true })
 
-    // Cancel scan
-    document.getElementById('scan-cancel-btn').addEventListener('click', function() {
-      scanCancelled = true
-    })
-
-    // Export button
+    // Export
     document.getElementById('export-btn').addEventListener('click', function() {
       var st = loadState()
       var blob = new Blob([JSON.stringify(st, null, 2)], { type: 'application/json' })
@@ -1548,7 +1747,7 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
       URL.revokeObjectURL(url)
     })
 
-    // Reset button
+    // Reset
     document.getElementById('reset-btn').addEventListener('click', function() {
       if (confirm('Reset all audit progress? This cannot be undone.')) {
         localStorage.removeItem(STORAGE_KEY)
@@ -1557,7 +1756,6 @@ const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
       }
     })
 
-    // Restore cached scans and update progress
     restoreCachedScans()
     updateProgress()
   }

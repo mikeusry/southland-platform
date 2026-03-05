@@ -9,8 +9,11 @@
 import { getCollection } from 'astro:content'
 import { createClient, getCollectionProducts } from '@southland/shopify-storefront'
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import CollectionHero from '../../components/shop/CollectionHero.astro'
+import CloudinaryHero from '../../components/CloudinaryHero.astro'
 import CollectionGrid from '../../components/shop/CollectionGrid.astro'
+import AccordionFaq from '../../components/shop/AccordionFaq.astro'
+import ProofPoints from '../../components/cdp/ProofPoints.astro'
+import Breadcrumbs from '../../components/shared/Breadcrumbs.astro'
 import type { PersonaId } from '../../lib/persona'
 
 // SSR — do not prerender
@@ -18,6 +21,17 @@ const { slug } = Astro.params
 
 if (!slug) {
   return Astro.redirect('/collections/')
+}
+
+// ── Redirect collection slugs that now have dedicated hub pages ──────────
+const collectionRedirects: Record<string, string> = {
+  poultry: '/poultry/',
+  'poultry-breeders': '/poultry/breeders/',
+  turkey: '/poultry/turkey/',
+  'game-birds': '/poultry/game-birds/',
+}
+if (slug in collectionRedirects) {
+  return Astro.redirect(collectionRedirects[slug]!, 301)
 }
 
 // ── Read persona from cookie (server-side) ──────────────────────────────────
@@ -53,6 +67,9 @@ const heroHeadline = tinaDoc?.data.heroHeadline || undefined
 const heroSubheadline = tinaDoc?.data.heroSubheadline || undefined
 const collectionPersona = tinaDoc?.data.persona ?? null
 const faq = tinaDoc?.data.faq ?? []
+
+// Render MDX body content if present
+const Content = tinaDoc ? (await tinaDoc.render()).Content : null
 
 // Use the collection's persona tag if set, otherwise fall back to visitor cookie
 const activePersona = collectionPersona || persona
@@ -98,13 +115,61 @@ const faqSchema =
 
 const fullSchema = faqSchema ? [schema, faqSchema] : schema
 
-// ── Persona CTA config ──────────────────────────────────────────────────────
-const ctaConfig: Record<string, { text: string; href: string }> = {
-  backyard: { text: 'Need help choosing?', href: '/contact/' },
-  commercial: { text: 'Request Volume Quote', href: '/contact/commercial/' },
-  lawn: { text: 'Get Seasonal Program', href: '/contact/' },
+// ── Hero image (Cloudinary public ID) ────────────────────────────────────────
+const heroImage = tinaDoc?.data.heroImage ?? null
+
+// ── Persona theme config ─────────────────────────────────────────────────────
+const personaConfig = {
+  backyard: {
+    badge: 'For Backyard Flocks',
+    heroGradient: 'from-amber-500 to-amber-700',
+    proofBg: 'bg-amber-50',
+    ctaGradient: 'from-amber-500 to-amber-700',
+    ctaHeadline: 'Give your backyard flock a healthier coop',
+    ctaSubtext: 'Start with proven supplements that keep your birds thriving.',
+    ctaPrimary: { text: 'Explore Products', href: `/collections/${slug}/` },
+    ctaSecondary: { text: 'Talk to Our Team', href: '/contact/' },
+  },
+  commercial: {
+    badge: 'Commercial Poultry',
+    heroGradient: 'from-slate-800 to-slate-900',
+    proofBg: 'bg-slate-50',
+    ctaGradient: 'from-slate-800 to-slate-900',
+    ctaHeadline: 'Turn small performance gains into serious ROI',
+    ctaSubtext: 'Improve feed conversion, mortality, and scores with proven tools.',
+    ctaPrimary: { text: 'Explore Products', href: `/collections/${slug}/` },
+    ctaSecondary: { text: 'Request Volume Quote', href: '/contact/commercial/' },
+  },
+  lawn: {
+    badge: 'Lawn & Turf',
+    heroGradient: 'from-emerald-500 to-emerald-700',
+    proofBg: 'bg-emerald-50',
+    ctaGradient: 'from-emerald-500 to-emerald-700',
+    ctaHeadline: 'Build healthier soil for greener turf',
+    ctaSubtext: 'Organic programs that work for homeowners and pros.',
+    ctaPrimary: { text: 'Explore Products', href: `/collections/${slug}/` },
+    ctaSecondary: { text: 'Talk to Our Team', href: '/contact/' },
+  },
+} as const
+
+const defaultTheme = {
+  badge: null as string | null,
+  heroGradient: 'from-green-700 to-green-900',
+  proofBg: 'bg-green-50',
+  ctaGradient: 'from-green-700 to-green-900',
+  ctaHeadline: 'Natural solutions to natural problems',
+  ctaSubtext: 'Explore products that restore biology in soil, flocks, and facilities.',
+  ctaPrimary: { text: 'Explore Products', href: '/collections/' },
+  ctaSecondary: { text: 'Talk to Our Team', href: '/contact/' },
 }
-const cta = activePersona && activePersona !== 'general' ? ctaConfig[activePersona] : null
+
+const theme =
+  activePersona && activePersona !== 'general' && activePersona in personaConfig
+    ? personaConfig[activePersona as keyof typeof personaConfig]
+    : defaultTheme
+
+const displayTitle = heroHeadline || title
+const displaySubheadline = heroSubheadline || seoDescription
 ---
 
 <BaseLayout
@@ -113,77 +178,140 @@ const cta = activePersona && activePersona !== 'general' ? ctaConfig[activePerso
   canonicalUrl={canonicalUrl}
   schema={fullSchema}
 >
-  {/* Breadcrumbs */}
-  <nav class="bg-gray-50 px-4 py-3" aria-label="Breadcrumb">
-    <ol class="mx-auto flex max-w-6xl items-center gap-2 text-sm text-gray-500">
-      <li><a href="/" class="hover:text-brand-green-light">Home</a></li>
-      <li class="text-gray-300">/</li>
-      <li><a href="/collections/" class="hover:text-brand-green-light">Collections</a></li>
-      <li class="text-gray-300">/</li>
-      <li class="font-medium text-gray-900">{title}</li>
-    </ol>
-  </nav>
+  {/* ── 1. Breadcrumbs ──────────────────────────────────────────────────────── */}
+  <div class="bg-white/80 px-4 py-3 backdrop-blur-sm">
+    <div class="mx-auto max-w-6xl">
+      <Breadcrumbs
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'Collections', href: '/collections/' },
+          { label: title, href: `/collections/${slug}/` },
+        ]}
+      />
+    </div>
+  </div>
 
-  {/* Hero */}
-  <CollectionHero
-    title={title}
-    description={seoDescription}
-    headline={heroHeadline}
-    subheadline={heroSubheadline}
-    persona={activePersona}
-    productCount={shopifyCollection.products.length}
-  />
-
-  {/* Product Grid */}
-  <section class="mx-auto max-w-6xl px-4 py-8 sm:py-12">
-    <CollectionGrid products={shopifyCollection.products} persona={activePersona} />
-  </section>
-
-  {/* Below-grid CTA */}
+  {/* ── 2. Hero ─────────────────────────────────────────────────────────────── */}
   {
-    cta && (
-      <section class="border-t border-gray-100 bg-gray-50 px-4 py-8">
-        <div class="mx-auto max-w-2xl text-center">
-          <a
-            href={cta.href}
-            class:list={[
-              'inline-flex items-center gap-2 rounded-lg px-6 py-3 font-semibold text-white transition-colors',
-              activePersona === 'backyard' && 'bg-amber-700 hover:bg-amber-800',
-              activePersona === 'commercial' && 'bg-green-700 hover:bg-green-800',
-              activePersona === 'lawn' && 'bg-emerald-700 hover:bg-emerald-800',
-              !activePersona || activePersona === 'general'
-                ? 'bg-brand-green-dark hover:bg-green-800'
-                : '',
-            ]}
-          >
-            {cta.text}
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M17 8l4 4m0 0l-4 4m4-4H3"
-              />
-            </svg>
-          </a>
+    heroImage ? (
+      <CloudinaryHero
+        publicId={heroImage}
+        alt={title}
+        height={500}
+        minHeight="300px"
+        maxHeight="500px"
+        overlay="gradient"
+        overlayOpacity={60}
+        contentAlign="center"
+        contentJustify="center"
+        priority={true}
+      >
+        <div class="mx-auto max-w-3xl text-center">
+          {theme.badge && (
+            <span class="mb-4 inline-block rounded-full bg-white/20 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-white backdrop-blur-sm">
+              {theme.badge}
+            </span>
+          )}
+          <h1 class="font-heading text-3xl text-white sm:text-4xl lg:text-5xl">
+            {displayTitle}
+          </h1>
+          {displaySubheadline && (
+            <p class="mx-auto mt-4 max-w-2xl text-base text-white/90 sm:text-lg">
+              {displaySubheadline}
+            </p>
+          )}
+          <p class="mt-3 text-sm text-white/60">
+            {shopifyCollection.products.length} {shopifyCollection.products.length === 1 ? 'product' : 'products'}
+          </p>
+        </div>
+      </CloudinaryHero>
+    ) : (
+      <section class={`bg-gradient-to-br ${theme.heroGradient} px-4 py-16 sm:py-20`}>
+        <div class="mx-auto max-w-3xl text-center">
+          {theme.badge && (
+            <span class="mb-4 inline-block rounded-full bg-white/20 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-white backdrop-blur-sm">
+              {theme.badge}
+            </span>
+          )}
+          <h1 class="font-heading text-3xl text-white sm:text-4xl lg:text-5xl">
+            {displayTitle}
+          </h1>
+          {displaySubheadline && (
+            <p class="mx-auto mt-4 max-w-2xl text-base text-white/80 sm:text-lg">
+              {displaySubheadline}
+            </p>
+          )}
+          <p class="mt-3 text-sm text-white/50">
+            {shopifyCollection.products.length} {shopifyCollection.products.length === 1 ? 'product' : 'products'}
+          </p>
         </div>
       </section>
     )
   }
 
-  {/* FAQ Section */}
+  {/* ── 3. Product Grid ─────────────────────────────────────────────────────── */}
+  <section class="bg-white px-4 py-12 sm:py-16">
+    <div class="mx-auto max-w-6xl">
+      <CollectionGrid products={shopifyCollection.products} persona={activePersona} />
+    </div>
+  </section>
+
+  {/* ── 4. ProofPoints (persona collections only) ───────────────────────────── */}
+  {
+    activePersona && activePersona !== 'general' && (
+      <section class={`px-4 py-12 sm:py-16 ${theme.proofBg}`}>
+        <div class="mx-auto max-w-4xl">
+          <ProofPoints persona={activePersona as 'backyard' | 'commercial' | 'lawn'} variant="cards" />
+        </div>
+      </section>
+    )
+  }
+
+  {/* ── 5. MDX Content ──────────────────────────────────────────────────────── */}
+  {
+    Content && (
+      <section class="bg-gray-50 px-4 py-12 sm:py-16">
+        <div class="mx-auto max-w-3xl">
+          <div class="prose prose-lg prose-green prose-headings:font-heading prose-headings:text-brand-green-dark prose-a:text-brand-green-light prose-a:no-underline hover:prose-a:underline max-w-none">
+            <Content />
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {/* ── 6. CTA Section ──────────────────────────────────────────────────────── */}
+  <section class={`bg-gradient-to-r ${theme.ctaGradient} px-4 py-12 sm:py-16`}>
+    <div class="mx-auto max-w-3xl text-center text-white">
+      <h2 class="font-heading text-2xl md:text-3xl">{theme.ctaHeadline}</h2>
+      <p class="mt-3 text-base text-white/90">{theme.ctaSubtext}</p>
+      <div class="mt-8 flex flex-wrap justify-center gap-3">
+        <a
+          href={theme.ctaPrimary.href}
+          class="inline-flex items-center justify-center rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-slate-900 transition hover:-translate-y-0.5 hover:shadow-lg"
+        >
+          {theme.ctaPrimary.text}
+        </a>
+        <a
+          href={theme.ctaSecondary.href}
+          class="inline-flex items-center justify-center rounded-full border-2 border-white/50 px-6 py-2.5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:border-white hover:bg-white/10"
+        >
+          {theme.ctaSecondary.text}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  {/* ── 7. FAQ Accordion ────────────────────────────────────────────────────── */}
   {
     faq.length > 0 && (
-      <section class="mx-auto max-w-3xl px-4 py-8 sm:py-12">
-        <h2 class="text-brand-green-dark font-heading text-2xl">Frequently Asked Questions</h2>
-        <dl class="mt-6 space-y-6">
-          {faq.map((item) => (
-            <div>
-              <dt class="text-base font-semibold text-gray-900">{item.question}</dt>
-              <dd class="mt-2 text-sm leading-relaxed text-gray-600">{item.answer}</dd>
-            </div>
-          ))}
-        </dl>
+      <section class="bg-white px-4 py-12 sm:py-16">
+        <div class="mx-auto max-w-3xl">
+          <h2 class="font-heading text-brand-green-dark mb-8 text-center text-2xl">
+            Frequently Asked Questions
+          </h2>
+          <AccordionFaq items={faq} persona={activePersona as 'backyard' | 'commercial' | 'lawn' | null} />
+        </div>
       </section>
     )
   }
