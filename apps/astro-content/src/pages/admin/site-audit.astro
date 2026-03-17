@@ -1,159 +1,194 @@
 ---
 /**
- * Site Audit — Page Operations Console
- * Prioritization + funnel coverage + quality signals + copy/design pipeline
+ * Site Audit v2 — Workflow-Aligned Operations Console
+ *
+ * Simplified: dynamic inventory from content collections,
+ * pipeline stages match real workflow (brief → writing → built → design → shipped),
+ * no manual CRO checks, auto-expanding scan results.
  */
 import AdminLayout from '../../layouts/AdminLayout.astro'
+import { getCollection } from 'astro:content'
 
-type ContentType = 'dynamic' | 'index' | 'non-content'
-type PageType = 'lander' | 'collection' | 'pdp' | 'content' | 'hub' | 'utility'
-type Persona = 'bill' | 'betty' | 'taylor' | 'general' | null
-type FunnelStage = 'awareness' | 'consideration' | 'purchase' | 'post-purchase'
-type Blocker = 'copy' | 'dev' | 'design' | 'data' | null
-type PipelineStage = 'no-copy' | 'copy-draft' | 'copy-approved' | 'built' | 'design-review' | 'shipped'
-interface AuditPage {
+// ---------------------------------------------------------------------------
+// Pipeline stages — match the real workflow
+// ---------------------------------------------------------------------------
+type PipelineStage = 'brief' | 'writing' | 'built' | 'design' | 'shipped'
+
+const PIPELINE_STAGES: { value: PipelineStage | ''; label: string }[] = [
+  { value: '', label: 'Not started' },
+  { value: 'brief', label: 'Brief' },
+  { value: 'writing', label: 'Writing' },
+  { value: 'built', label: 'Built' },
+  { value: 'design', label: 'Design Review' },
+  { value: 'shipped', label: 'Shipped' },
+]
+
+// ---------------------------------------------------------------------------
+// Build dynamic inventory from actual content collections + routes
+// ---------------------------------------------------------------------------
+interface PageEntry {
   route: string
   name: string
-  template: string
-  priority: 'high' | 'medium' | 'low'
-  contentType: ContentType
-  pageType: PageType
-  persona: Persona
-  funnelStage: FunnelStage
-  primaryGoal: string
-  blocker: Blocker
-  pipeline?: PipelineStage
-  funnelNext?: string
-  copyDoc?: string
+  scanRoute?: string // route pattern for scan API
+  count?: number
+  type: 'collection' | 'static' | 'index'
+  backingCollection?: string // collection slug that 301s here (content lives in shopCollections MDX)
 }
 
-const PIPELINE_STAGES = [
-  { value: 'no-copy', label: 'No Copy' },
-  { value: 'copy-draft', label: 'Copy Draft' },
-  { value: 'copy-approved', label: 'Copy Approved' },
-  { value: 'built', label: 'Built' },
-  { value: 'design-review', label: 'Design Review' },
-  { value: 'shipped', label: 'Shipped' },
-] as const
+interface PageGroup {
+  name: string
+  id: string
+  pages: PageEntry[]
+}
 
-const BLOCKERS = [
-  { value: '', label: '--' },
-  { value: 'copy', label: 'Copy' },
-  { value: 'dev', label: 'Dev' },
-  { value: 'design', label: 'Design' },
-  { value: 'data', label: 'Data' },
-] as const
+// ---------------------------------------------------------------------------
+// Redirect map — collection slugs that 301 to persona landings
+// Must stay in sync with middleware.ts REDIRECTS + collections/[slug].astro
+// ---------------------------------------------------------------------------
+const COLLECTION_REDIRECTS: Record<string, { landing: string; name: string }> = {
+  'backyard-birds':    { landing: '/poultry/backyard/',    name: 'Backyard Betty Landing' },
+  'poultry-broilers':  { landing: '/poultry/commercial/',  name: 'Broiler Bill Landing' },
+  'poultry':           { landing: '/poultry/',             name: 'Poultry Hub' },
+  'poultry-breeders':  { landing: '/poultry/breeders/',    name: 'Breeders Landing' },
+  'turkey':            { landing: '/poultry/turkey/',      name: 'Turkey Landing' },
+  'game-birds':        { landing: '/poultry/game-birds/',  name: 'Game Birds Landing' },
+  'hydroseeders':      { landing: '/hydroseeders/',        name: 'Hydroseeders Landing' },
+}
 
-const pageGroups: { name: string; id: string; pages: AuditPage[] }[] = [
+// ---------------------------------------------------------------------------
+// Fetch collection counts + split live vs redirected at build time
+// ---------------------------------------------------------------------------
+let episodeCount = 0
+let blogCount = 0
+let teamCount = 0
+let topicCount = 0
+
+let allCollectionSlugs: string[] = []
+try {
+  const collections = await getCollection('shopCollections')
+  allCollectionSlugs = collections.map((c) => c.data.handle || c.id.replace(/\.mdx?$/, ''))
+} catch { /* */ }
+
+const redirectedSlugs = allCollectionSlugs.filter((s) => s in COLLECTION_REDIRECTS)
+const liveSlugs = allCollectionSlugs.filter((s) => !(s in COLLECTION_REDIRECTS))
+
+try {
+  const episodes = await getCollection('episodes')
+  episodeCount = episodes.length
+} catch { /* */ }
+
+try {
+  const blogs = await getCollection('blog')
+  blogCount = blogs.length
+} catch { /* */ }
+
+try {
+  const team = await getCollection('team')
+  teamCount = team.length
+} catch { /* */ }
+
+try {
+  const topics = await getCollection('topics')
+  topicCount = topics.length
+} catch { /* */ }
+
+// ---------------------------------------------------------------------------
+// Build persona landings with their backing collection slug (for scanning)
+// ---------------------------------------------------------------------------
+const personaPages: PageEntry[] = [
+  { route: '/', name: 'Homepage', type: 'static' },
+]
+
+// Persona landings backed by redirected collections
+for (const slug of redirectedSlugs) {
+  const redir = COLLECTION_REDIRECTS[slug]!
+  personaPages.push({
+    route: redir.landing,
+    name: redir.name,
+    type: 'static',
+    backingCollection: slug,
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Page groups
+// ---------------------------------------------------------------------------
+const pageGroups: PageGroup[] = [
   {
-    name: 'Homepage',
-    id: 'homepage',
-    pages: [
-      { route: '/', name: 'Homepage', template: 'index.astro', priority: 'high', contentType: 'non-content', pageType: 'lander', persona: 'general', funnelStage: 'awareness', primaryGoal: 'Route to persona', blocker: 'copy', funnelNext: '/collections/' },
-    ],
-  },
-  {
-    name: 'Persona Landings',
+    name: `Persona Landings (${personaPages.length})`,
     id: 'persona',
-    pages: [
-      { route: '/poultry/', name: 'Poultry Hub', template: 'poultry/index.astro', priority: 'high', contentType: 'non-content', pageType: 'hub', persona: 'general', funnelStage: 'awareness', primaryGoal: 'Route to persona', blocker: null, pipeline: 'design-review', funnelNext: '/poultry/commercial/', copyDoc: 'BB-Persona/poultry-hub-copy.md' },
-      { route: '/poultry/commercial/', name: 'Broiler Bill Landing', template: 'poultry/commercial/index.astro', priority: 'high', contentType: 'non-content', pageType: 'lander', persona: 'bill', funnelStage: 'consideration', primaryGoal: 'Call sales', blocker: null, pipeline: 'design-review', funnelNext: '/collections/poultry-broilers/', copyDoc: 'BB-Persona/Broilers Landing Page 276cee770ea480b5a085e898802e7e22.md' },
-      { route: '/poultry/backyard/', name: 'Backyard Betty Landing', template: 'poultry/backyard/index.astro', priority: 'high', contentType: 'non-content', pageType: 'lander', persona: 'betty', funnelStage: 'consideration', primaryGoal: 'Add to cart', blocker: 'copy', funnelNext: '/collections/backyard-poultry/', copyDoc: 'BB-Persona/betty-storybrand.md' },
-      { route: '/lawn/', name: 'Turf Pro Taylor Landing', template: 'lawn/index.astro', priority: 'high', contentType: 'non-content', pageType: 'lander', persona: 'taylor', funnelStage: 'consideration', primaryGoal: 'Build program', blocker: 'copy', funnelNext: '/collections/turf/', copyDoc: 'BB-Persona/taylor-storybrand.md' },
-    ],
+    pages: personaPages,
   },
   {
-    name: 'Shop Collections',
+    name: `Shop Collections (${liveSlugs.length} live, ${redirectedSlugs.length} redirect)`,
     id: 'collections',
     pages: [
-      { route: '/collections/', name: 'Collections Index', template: 'collections/index.astro', priority: 'high', contentType: 'index', pageType: 'hub', persona: 'general', funnelStage: 'consideration', primaryGoal: 'Browse products', blocker: null, pipeline: 'built' },
-      { route: '/collections/[slug]', name: 'Collection Detail', template: 'collections/[slug].astro', priority: 'high', contentType: 'dynamic', pageType: 'collection', persona: null, funnelStage: 'consideration', primaryGoal: 'Add to cart', blocker: 'copy', pipeline: 'built' },
+      { route: '/collections/', name: 'Collections Index', type: 'index' },
+      { route: '/collections/[slug]', name: 'Live Collection Pages', type: 'collection', scanRoute: '/collections/[slug]', count: liveSlugs.length },
     ],
   },
   {
-    name: 'Podcast',
+    name: `Podcast (${episodeCount} episodes)`,
     id: 'podcast',
     pages: [
-      { route: '/podcast/', name: 'Podcast Hub', template: 'podcast/index.astro', priority: 'high', contentType: 'index', pageType: 'hub', persona: 'general', funnelStage: 'awareness', primaryGoal: 'Educate', blocker: null, pipeline: 'shipped' },
-      { route: '/podcast/[slug]', name: 'Episode Detail', template: 'podcast/[...slug].astro', priority: 'high', contentType: 'dynamic', pageType: 'content', persona: 'general', funnelStage: 'awareness', primaryGoal: 'Educate', blocker: null, pipeline: 'shipped' },
-      { route: '/podcast/search', name: 'Podcast Search', template: 'podcast/search.astro', priority: 'medium', contentType: 'non-content', pageType: 'utility', persona: null, funnelStage: 'awareness', primaryGoal: 'Search', blocker: null, pipeline: 'shipped' },
-      { route: '/podcast/topics/', name: 'Topics Index', template: 'podcast/topics/index.astro', priority: 'medium', contentType: 'index', pageType: 'hub', persona: 'general', funnelStage: 'awareness', primaryGoal: 'Browse topics', blocker: null, pipeline: 'shipped' },
-      { route: '/podcast/topics/[slug]', name: 'Topic Detail', template: 'podcast/topics/[slug].astro', priority: 'medium', contentType: 'dynamic', pageType: 'content', persona: 'general', funnelStage: 'awareness', primaryGoal: 'Educate', blocker: null, pipeline: 'shipped' },
-      { route: '/podcast/guests/', name: 'Guests Index', template: 'podcast/guests/index.astro', priority: 'low', contentType: 'index', pageType: 'hub', persona: 'general', funnelStage: 'awareness', primaryGoal: 'Browse guests', blocker: null, pipeline: 'shipped' },
+      { route: '/podcast/', name: 'Podcast Hub', type: 'index' },
+      { route: '/podcast/[...slug]', name: 'Episodes', type: 'collection', scanRoute: '/podcast/[slug]', count: episodeCount },
+      { route: '/podcast/search', name: 'Podcast Search', type: 'static' },
+      { route: '/podcast/topics/[slug]', name: 'Topics', type: 'collection', scanRoute: '/podcast/topics/[slug]', count: topicCount },
     ],
   },
   {
-    name: 'Blog',
+    name: `Blog (${blogCount} posts)`,
     id: 'blog',
     pages: [
-      { route: '/blog/', name: 'Blog Index', template: 'blog/index.astro', priority: 'high', contentType: 'index', pageType: 'hub', persona: 'general', funnelStage: 'awareness', primaryGoal: 'Educate', blocker: null, pipeline: 'shipped' },
-      { route: '/blog/[slug]', name: 'Blog Post', template: 'blog/[slug].astro', priority: 'high', contentType: 'dynamic', pageType: 'content', persona: 'general', funnelStage: 'awareness', primaryGoal: 'Educate', blocker: null, pipeline: 'shipped' },
-      { route: '/blog/category/[segment]', name: 'Category Archive', template: 'blog/category/[segment].astro', priority: 'medium', contentType: 'non-content', pageType: 'hub', persona: 'general', funnelStage: 'awareness', primaryGoal: 'Browse category', blocker: null, pipeline: 'shipped' },
+      { route: '/blog/', name: 'Blog Index', type: 'index' },
+      { route: '/blog/[slug]', name: 'Blog Posts', type: 'collection', scanRoute: '/blog/[slug]', count: blogCount },
     ],
   },
   {
-    name: 'Team',
+    name: `Team (${teamCount})`,
     id: 'team',
     pages: [
-      { route: '/team/', name: 'Team Index', template: 'team/index.astro', priority: 'medium', contentType: 'index', pageType: 'hub', persona: 'general', funnelStage: 'awareness', primaryGoal: 'Build trust', blocker: null, pipeline: 'shipped' },
-      { route: '/team/[slug]', name: 'Team Member', template: 'team/[slug].astro', priority: 'medium', contentType: 'dynamic', pageType: 'content', persona: 'general', funnelStage: 'awareness', primaryGoal: 'Build trust', blocker: null, pipeline: 'shipped' },
+      { route: '/team/', name: 'Team Index', type: 'index' },
+      { route: '/team/[slug]', name: 'Team Members', type: 'collection', scanRoute: '/team/[slug]', count: teamCount },
     ],
   },
   {
-    name: 'Surveys (CDP)',
-    id: 'surveys',
+    name: 'Products',
+    id: 'products',
     pages: [
-      { route: '/survey/backyard', name: 'Betty Outcome Survey', template: 'survey/backyard.astro', priority: 'medium', contentType: 'non-content', pageType: 'utility', persona: 'betty', funnelStage: 'post-purchase', primaryGoal: 'Collect outcomes', blocker: 'data' },
-      { route: '/survey/commercial', name: 'Bill Outcome Survey', template: 'survey/commercial.astro', priority: 'medium', contentType: 'non-content', pageType: 'utility', persona: 'bill', funnelStage: 'post-purchase', primaryGoal: 'Collect outcomes', blocker: 'data' },
+      { route: '/products/[handle]', name: 'Product Pages', type: 'static' },
+      { route: '/build-a-case/', name: 'Build a Case', type: 'static' },
+      { route: '/cart', name: 'Cart', type: 'static' },
+      { route: '/account', name: 'Account', type: 'static' },
     ],
   },
   {
-    name: 'Utility',
+    name: 'Utility & Info',
     id: 'utility',
     pages: [
-      { route: '/search', name: 'Global Search', template: 'search.astro', priority: 'low', contentType: 'non-content', pageType: 'utility', persona: null, funnelStage: 'awareness', primaryGoal: 'Search', blocker: null },
-    ],
-  },
-  {
-    name: 'Admin',
-    id: 'admin',
-    pages: [
-      { route: '/admin/', name: 'Admin Dashboard', template: 'admin/index.astro', priority: 'medium', contentType: 'non-content', pageType: 'utility', persona: null, funnelStage: 'awareness', primaryGoal: 'Internal', blocker: null, pipeline: 'shipped' },
-      { route: '/admin/branding', name: 'Brand Guidelines', template: 'admin/branding.astro', priority: 'low', contentType: 'non-content', pageType: 'utility', persona: null, funnelStage: 'awareness', primaryGoal: 'Internal', blocker: null, pipeline: 'shipped' },
-      { route: '/admin/images', name: 'Image Docs', template: 'admin/images.astro', priority: 'low', contentType: 'non-content', pageType: 'utility', persona: null, funnelStage: 'awareness', primaryGoal: 'Internal', blocker: null, pipeline: 'shipped' },
-      { route: '/admin/cdp/', name: 'CDP Analytics', template: 'admin/cdp/index.astro', priority: 'medium', contentType: 'non-content', pageType: 'utility', persona: null, funnelStage: 'awareness', primaryGoal: 'Internal', blocker: null, pipeline: 'shipped' },
-      { route: '/admin/cdp-guide', name: 'CDP Guide', template: 'admin/cdp-guide.astro', priority: 'low', contentType: 'non-content', pageType: 'utility', persona: null, funnelStage: 'awareness', primaryGoal: 'Internal', blocker: null, pipeline: 'shipped' },
-      { route: '/admin/sales-log', name: 'Sales Log', template: 'admin/sales-log.astro', priority: 'medium', contentType: 'non-content', pageType: 'utility', persona: null, funnelStage: 'awareness', primaryGoal: 'Internal', blocker: null, pipeline: 'shipped' },
-      { route: '/admin/content-quality', name: 'Content Quality', template: 'admin/content-quality.astro', priority: 'medium', contentType: 'non-content', pageType: 'utility', persona: null, funnelStage: 'awareness', primaryGoal: 'Internal', blocker: null, pipeline: 'shipped' },
-      { route: '/admin/site-audit', name: 'Site Audit (this page)', template: 'admin/site-audit.astro', priority: 'low', contentType: 'non-content', pageType: 'utility', persona: null, funnelStage: 'awareness', primaryGoal: 'Internal', blocker: null, pipeline: 'shipped' },
+      { route: '/about/', name: 'About', type: 'static' },
+      { route: '/contact/', name: 'Contact', type: 'static' },
+      { route: '/distribution/', name: 'Distribution', type: 'static' },
+      { route: '/store-locator/', name: 'Store Locator', type: 'static' },
     ],
   },
 ]
 
 const totalPages = pageGroups.reduce((sum, g) => sum + g.pages.length, 0)
-
-// Funnel coverage summary
-const funnelCoverage = {
-  awareness: 0,
-  consideration: 0,
-  purchase: 0,
-  'post-purchase': 0,
-}
-const personaCoverage = { bill: 0, betty: 0, taylor: 0, general: 0, none: 0 }
-pageGroups.forEach(g => g.pages.forEach(p => {
-  funnelCoverage[p.funnelStage]++
-  if (p.persona) personaCoverage[p.persona]++
-  else personaCoverage.none++
-}))
+const scannableRoutes = pageGroups
+  .flatMap((g) => g.pages)
+  .filter((p) => p.scanRoute)
+  .map((p) => p.scanRoute!)
 ---
 
 <AdminLayout title="Site Audit" activeNav="/admin/site-audit">
   <header class="page-header">
     <h1 class="page-title">Site Audit</h1>
-    <p class="page-subtitle">Page operations console for Southland Organics — prioritize work, close funnel gaps, and enforce copy/design standards.</p>
+    <p class="page-subtitle">Workflow pipeline + persona scoring for every page on the site.</p>
   </header>
 
-  <!-- Progress + Coverage Overview -->
+  <!-- Pipeline Progress -->
   <div class="overview-grid">
     <div class="progress-card">
       <div class="card-label">Pipeline Progress</div>
@@ -167,11 +202,7 @@ pageGroups.forEach(g => g.pages.forEach(p => {
           <span class="stat-label">In Pipeline</span>
         </div>
         <div class="stat">
-          <span class="stat-value" id="blocked-count">0</span>
-          <span class="stat-label">Blocked</span>
-        </div>
-        <div class="stat">
-          <span class="stat-value" id="pending-count">{totalPages}</span>
+          <span class="stat-value" id="not-started-count">{totalPages}</span>
           <span class="stat-label">Not Started</span>
         </div>
       </div>
@@ -181,119 +212,65 @@ pageGroups.forEach(g => g.pages.forEach(p => {
       <div class="progress-label">
         <span id="progress-percent">0%</span> shipped
       </div>
-      <div class="tile-hint">Sort by impact, persona, or funnel stage to see where to work next.</div>
     </div>
 
-    <div class="coverage-card">
-      <div class="card-label">Funnel Coverage</div>
-      <div class="coverage-bars">
-        <div class="coverage-row">
-          <span class="coverage-label">Awareness</span>
-          <div class="coverage-track"><div class="coverage-fill fill-awareness" style={`width: ${Math.round(funnelCoverage.awareness / totalPages * 100)}%`}></div></div>
-          <span class="coverage-count">{funnelCoverage.awareness}</span>
+    <div class="progress-card">
+      <div class="card-label">Mothership Scan</div>
+      <div class="progress-stats">
+        <div class="stat">
+          <span class="stat-value" id="scanned-count">0</span>
+          <span class="stat-label">Routes Scanned</span>
         </div>
-        <div class="coverage-row">
-          <span class="coverage-label">Consider</span>
-          <div class="coverage-track"><div class="coverage-fill fill-consideration" style={`width: ${Math.round(funnelCoverage.consideration / totalPages * 100)}%`}></div></div>
-          <span class="coverage-count">{funnelCoverage.consideration}</span>
+        <div class="stat">
+          <span class="stat-value" id="avg-alignment">--</span>
+          <span class="stat-label">Avg Persona Fit</span>
         </div>
-        <div class="coverage-row">
-          <span class="coverage-label">Purchase</span>
-          <div class="coverage-track"><div class="coverage-fill fill-purchase" style={`width: ${Math.round(funnelCoverage.purchase / totalPages * 100)}%`}></div></div>
-          <span class="coverage-count">{funnelCoverage.purchase}</span>
+        <div class="stat">
+          <span class="stat-value" id="total-entries">0</span>
+          <span class="stat-label">Entries Scored</span>
         </div>
-        <div class="coverage-row">
-          <span class="coverage-label">Post-purch</span>
-          <div class="coverage-track"><div class="coverage-fill fill-post" style={`width: ${Math.round(funnelCoverage['post-purchase'] / totalPages * 100)}%`}></div></div>
-          <span class="coverage-count">{funnelCoverage['post-purchase']}</span>
-        </div>
+      </div>
+      <div class="scan-actions">
+        <button class="btn btn-primary btn-sm" id="scan-all-btn">
+          Scan All Collections
+        </button>
+        <button class="btn btn-secondary btn-sm" id="reset-btn" title="Clear all saved pipeline state">Reset</button>
       </div>
     </div>
 
-    <div class="coverage-card">
-      <div class="card-label">Persona Coverage</div>
-      <div class="coverage-bars">
-        <div class="coverage-row">
-          <span class="coverage-label persona-chip persona-bill">Bill</span>
-          <div class="coverage-track"><div class="coverage-fill fill-bill" style={`width: ${Math.round(personaCoverage.bill / totalPages * 100)}%`}></div></div>
-          <span class="coverage-count">{personaCoverage.bill}</span>
+    <div class="progress-card">
+      <div class="card-label">Workflow</div>
+      <div class="workflow-stages">
+        <div class="wf-stage">
+          <span class="wf-dot wf-brief"></span>
+          <span class="wf-label">Brief</span>
+          <span class="wf-desc">research-brief.mjs</span>
         </div>
-        <div class="coverage-row">
-          <span class="coverage-label persona-chip persona-betty">Betty</span>
-          <div class="coverage-track"><div class="coverage-fill fill-betty" style={`width: ${Math.round(personaCoverage.betty / totalPages * 100)}%`}></div></div>
-          <span class="coverage-count">{personaCoverage.betty}</span>
+        <div class="wf-arrow">&rarr;</div>
+        <div class="wf-stage">
+          <span class="wf-dot wf-writing"></span>
+          <span class="wf-label">Writing</span>
+          <span class="wf-desc">/southland-copy</span>
         </div>
-        <div class="coverage-row">
-          <span class="coverage-label persona-chip persona-taylor">Taylor</span>
-          <div class="coverage-track"><div class="coverage-fill fill-taylor" style={`width: ${Math.round(personaCoverage.taylor / totalPages * 100)}%`}></div></div>
-          <span class="coverage-count">{personaCoverage.taylor}</span>
+        <div class="wf-arrow">&rarr;</div>
+        <div class="wf-stage">
+          <span class="wf-dot wf-built"></span>
+          <span class="wf-label">Built</span>
+          <span class="wf-desc">Astro page</span>
         </div>
-        <div class="coverage-row muted-row">
-          <span class="coverage-label">General</span>
-          <div class="coverage-track"><div class="coverage-fill fill-general" style={`width: ${Math.round(personaCoverage.general / totalPages * 100)}%`}></div></div>
-          <span class="coverage-count">{personaCoverage.general}</span>
+        <div class="wf-arrow">&rarr;</div>
+        <div class="wf-stage">
+          <span class="wf-dot wf-design"></span>
+          <span class="wf-label">Design</span>
+          <span class="wf-desc">/design review</span>
+        </div>
+        <div class="wf-arrow">&rarr;</div>
+        <div class="wf-stage">
+          <span class="wf-dot wf-shipped"></span>
+          <span class="wf-label">Shipped</span>
+          <span class="wf-desc">Live on site</span>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- Actions Bar -->
-  <div class="actions-bar">
-    <div class="filter-group">
-      <select class="filter-select" id="filter-persona">
-        <option value="">All Personas</option>
-        <option value="bill">Bill</option>
-        <option value="betty">Betty</option>
-        <option value="taylor">Taylor</option>
-        <option value="general">General</option>
-      </select>
-      <select class="filter-select" id="filter-funnel">
-        <option value="">All Funnel</option>
-        <option value="awareness">Awareness</option>
-        <option value="consideration">Consideration</option>
-        <option value="purchase">Purchase</option>
-        <option value="post-purchase">Post-purchase</option>
-      </select>
-      <select class="filter-select" id="filter-blocker">
-        <option value="">All Blockers</option>
-        <option value="copy">Blocked: Copy</option>
-        <option value="dev">Blocked: Dev</option>
-        <option value="design">Blocked: Design</option>
-        <option value="data">Blocked: Data</option>
-      </select>
-      <select class="filter-select" id="filter-priority">
-        <option value="">All Priority</option>
-        <option value="high">High</option>
-        <option value="medium">Medium</option>
-        <option value="low">Low</option>
-      </select>
-    </div>
-    <div class="action-buttons">
-      <button class="btn btn-primary" id="scan-all-btn" title="Score all scannable pages via Mothership">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22" /></svg>
-        Scan All
-      </button>
-      <button class="btn btn-secondary" id="export-btn">Export</button>
-      <button class="btn btn-secondary" id="reset-btn">Reset</button>
-    </div>
-  </div>
-
-  <!-- Legend -->
-  <div class="legend">
-    <div class="legend-group">
-      <span class="legend-label">Type:</span>
-      <span class="type-badge type-lander">lander</span>
-      <span class="type-badge type-collection">collection</span>
-      <span class="type-badge type-pdp">pdp</span>
-      <span class="type-badge type-content">content</span>
-      <span class="type-badge type-hub">hub</span>
-    </div>
-    <div class="legend-group">
-      <span class="legend-label">Blocker:</span>
-      <span class="blocker-badge blocker-copy">Copy</span>
-      <span class="blocker-badge blocker-dev">Dev</span>
-      <span class="blocker-badge blocker-design">Design</span>
-      <span class="blocker-badge blocker-data">Data</span>
     </div>
   </div>
 
@@ -303,37 +280,26 @@ pageGroups.forEach(g => g.pages.forEach(p => {
       <div class="audit-group" data-group={group.id}>
         <div class="group-header">
           <h2 class="group-title">{group.name}</h2>
-          <span class="group-count">{group.pages.length} pages</span>
+          <span class="group-count">{group.pages.length} routes</span>
         </div>
         <div class="audit-table">
           <div class="table-header">
-            <div class="col-status muted-header"></div>
+            <div class="col-status"></div>
             <div class="col-page">Page</div>
-            <div class="col-type muted-header">Type</div>
-            <div class="col-persona">Persona</div>
-            <div class="col-funnel muted-header">Funnel</div>
-            <div class="col-goal muted-header">Goal</div>
-            <div class="col-pipeline strong-header">Pipeline</div>
-            <div class="col-blocker strong-header">Blocker</div>
+            <div class="col-type">Type</div>
+            <div class="col-pipeline">Pipeline</div>
             <div class="col-score">Persona Fit</div>
-            <div class="col-cro">CRO</div>
-            <div class="col-checks">Checks</div>
-            <div class="col-reviewed muted-header">Reviewed</div>
+            <div class="col-quality">Quality</div>
             <div class="col-actions"></div>
           </div>
           {group.pages.map((page) => (
             <div>
-              <div class="table-row"
+              <div
+                class="table-row"
                 data-route={page.route}
-                data-content-type={page.contentType}
-                data-page-type={page.pageType}
-                data-persona={page.persona || ''}
-                data-funnel-stage={page.funnelStage}
-                data-priority={page.priority}
-                data-blocker={page.blocker || ''}
-                data-funnel-next={page.funnelNext || ''}
-                data-copy-doc={page.copyDoc || ''}
-                data-primary-goal={page.primaryGoal}
+                data-scan-route={page.scanRoute || ''}
+                data-type={page.type}
+                data-count={page.count || 0}
               >
                 <div class="col-status">
                   <span class="status-dot not-started" data-status-dot />
@@ -341,79 +307,46 @@ pageGroups.forEach(g => g.pages.forEach(p => {
                 <div class="col-page">
                   <div class="page-name-row">
                     <span class="page-name">{page.name}</span>
-                    <span class={`priority-badge ${page.priority}`}>{page.priority}</span>
+                    {page.count ? <span class="entry-count">{page.count}</span> : null}
                   </div>
-                  <div class="page-route-row">
-                    <code>{page.route}</code>
-                    <a
-                      href={page.route.replace('[slug]', 'example').replace('[segment]', 'poultry').replace('[...slug]', 'episode-1')}
-                      target="_blank"
-                      class="view-link"
-                      title="Open page"
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                    </a>
-                  </div>
+                  <code class="page-route">{page.route}</code>
+                  {page.backingCollection ? (
+                    <span class="redirect-tag" title={`/collections/${page.backingCollection} → ${page.route} (301)`}>
+                      &larr; /collections/{page.backingCollection}
+                    </span>
+                  ) : null}
                 </div>
                 <div class="col-type">
-                  <span class={`type-badge type-${page.pageType}`}>{page.pageType}</span>
-                </div>
-                <div class="col-persona">
-                  {page.persona ? (
-                    <span class={`persona-chip persona-${page.persona}`}>{page.persona}</span>
-                  ) : (
-                    <span class="persona-chip persona-none">--</span>
-                  )}
-                </div>
-                <div class="col-funnel">
-                  <span class={`funnel-badge funnel-${page.funnelStage}`} title={page.funnelStage}>{
-                    page.funnelStage === 'awareness' ? 'A' :
-                    page.funnelStage === 'consideration' ? 'C' :
-                    page.funnelStage === 'purchase' ? 'P' : 'Post'
-                  }</span>
-                </div>
-                <div class="col-goal">
-                  <span class="goal-text" title={page.primaryGoal}>{page.primaryGoal}</span>
+                  <span class={`type-badge type-${page.type}`}>{page.type}</span>
                 </div>
                 <div class="col-pipeline">
                   <select class="pipeline-select" data-field="pipeline">
                     {PIPELINE_STAGES.map((stage) => (
-                      <option value={stage.value} selected={stage.value === (page.pipeline || 'no-copy')}>{stage.label}</option>
-                    ))}
-                  </select>
-                </div>
-                <div class="col-blocker">
-                  <select class="blocker-select" data-field="blocker">
-                    {BLOCKERS.map((b) => (
-                      <option value={b.value} selected={b.value === (page.blocker || '')}>{b.label}</option>
+                      <option value={stage.value}>{stage.label}</option>
                     ))}
                   </select>
                 </div>
                 <div class="col-score">
-                  {page.contentType === 'dynamic' ? (
-                    <button class="scan-btn" data-action="scan" title="Score via Mothership">Scan</button>
+                  {page.scanRoute ? (
+                    <button class="scan-btn" data-action="scan" title="Score via Mothership persona vectors">Scan</button>
                   ) : (
                     <span class="score-na">--</span>
                   )}
                 </div>
-                <div class="col-cro">
-                  <span class="cro-score" data-cro-for={page.route}>--</span>
-                </div>
-                <div class="col-checks">
-                  <span class="checks-detail" data-checks-for={page.route}>--</span>
-                </div>
-                <div class="col-reviewed">
-                  <span class="reviewed-date" data-reviewed-for={page.route} title="Click to mark reviewed">--</span>
+                <div class="col-quality">
+                  <span class="quality-summary" data-quality-for={page.route}>--</span>
                 </div>
                 <div class="col-actions">
-                  <a
-                    href={page.route.replace('[slug]', 'example').replace('[segment]', 'poultry').replace('[...slug]', 'episode-1')}
-                    target="_blank"
-                    class="open-btn"
-                    title="Open page"
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                  </a>
+                  {page.route.includes('[') ? null : (
+                    <a
+                      href={page.route}
+                      target="_blank"
+                      class="open-btn"
+                      title="Open page"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                    </a>
+                  )}
                 </div>
               </div>
               <div class="scan-details" data-details-for={page.route}></div>
@@ -424,32 +357,7 @@ pageGroups.forEach(g => g.pages.forEach(p => {
     ))
   }
 
-  <!-- Mothership Integration -->
-  <div class="integration-footer">
-    <div class="integration-header-row">
-      <div class="integration-title">
-        <h2 class="card-title">Mothership Integration</h2>
-        <span class="badge badge-success">Live</span>
-      </div>
-      <div class="integration-tiles">
-        <div class="int-tile">
-          <span class="int-tile-value" id="scanned-count">0</span>
-          <span class="int-tile-label">Routes Scanned</span>
-        </div>
-        <div class="int-tile">
-          <span class="int-tile-value" id="avg-alignment">--</span>
-          <span class="int-tile-label">Avg Persona Fit</span>
-        </div>
-        <div class="int-tile">
-          <span class="int-tile-value" id="total-entries">0</span>
-          <span class="int-tile-label">Entries Scored</span>
-        </div>
-      </div>
-    </div>
-    <p class="integration-desc">Content scoring powered by <strong>Mothership persona vectors + OpenAI embeddings</strong>. Pipeline tracks <code>/southland-copy</code> &rarr; Build &rarr; <code>/southland-design review</code> &rarr; Ship.</p>
-  </div>
-
-  <!-- Scan progress bar (sticky bottom, hidden by default) -->
+  <!-- Scan progress (sticky bottom) -->
   <div class="scan-progress" id="scan-progress" style="display: none;">
     <div class="scan-progress-inner">
       <span class="scan-progress-label" id="scan-progress-label">Scanning...</span>
@@ -460,10 +368,14 @@ pageGroups.forEach(g => g.pages.forEach(p => {
       <button class="btn btn-secondary btn-sm" id="scan-cancel-btn">Cancel</button>
     </div>
   </div>
+
+  <!-- Scannable routes for JS -->
+  <script is:inline define:vars={{ scannableRoutes }}>
+    window.__SCANNABLE_ROUTES = scannableRoutes
+  </script>
 </AdminLayout>
 
 <style>
-  /* Full-width override for AdminLayout */
   :global(.admin-main) { max-width: none !important; }
 
   /* ========== Overview Grid ========== */
@@ -471,9 +383,9 @@ pageGroups.forEach(g => g.pages.forEach(p => {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 16px;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
   }
-  .progress-card, .coverage-card {
+  .progress-card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -520,90 +432,31 @@ pageGroups.forEach(g => g.pages.forEach(p => {
     color: var(--text-secondary);
   }
   #progress-percent { font-weight: 600; color: var(--accent); }
-  .tile-hint {
-    font-size: 11px;
-    color: var(--text-tertiary);
-    margin-top: 4px;
-    font-style: italic;
-  }
+  .scan-actions { display: flex; gap: 8px; margin-top: 12px; }
 
-  /* Coverage bars */
-  .coverage-bars { display: flex; flex-direction: column; gap: 6px; }
-  .coverage-row { display: flex; align-items: center; gap: 8px; }
-  .coverage-label { font-size: 11px; font-weight: 500; width: 65px; flex-shrink: 0; color: var(--text-secondary); }
-  .coverage-track { flex: 1; height: 8px; background: var(--surface-alt); border-radius: 4px; overflow: hidden; }
-  .coverage-fill { height: 100%; border-radius: 4px; min-width: 2px; }
-  .coverage-count { font-size: 11px; font-weight: 600; width: 20px; text-align: right; color: var(--text-secondary); }
-  .fill-awareness { background: #94a3b8; }
-  .fill-consideration { background: #a1a1aa; }
-  .fill-purchase { background: #78716c; }
-  .fill-post { background: #9ca3af; }
-  .fill-bill { background: #6b7280; }
-  .fill-betty { background: #9ca3af; }
-  .fill-taylor { background: #78716c; }
-  .fill-general { background: #d1d5db; }
-  .muted-row { opacity: 0.5; }
-
-  /* ========== Actions Bar ========== */
-  .actions-bar {
+  /* Workflow stages */
+  .workflow-stages {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    gap: 4px;
     flex-wrap: wrap;
-    gap: 12px;
   }
-  .filter-group { display: flex; gap: 8px; flex-wrap: wrap; }
-  .filter-select {
-    padding: 6px 10px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    font-size: 12px;
-    background: var(--surface);
-    cursor: pointer;
-  }
-  .filter-select:focus { outline: none; border-color: var(--accent); }
-  .action-buttons { display: flex; gap: 8px; }
-
-  /* ========== Legend ========== */
-  .legend {
-    display: flex;
-    gap: 24px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-  .legend-group {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-  }
-  .legend-label { font-size: 11px; font-weight: 600; color: var(--text-tertiary); }
-
-  /* ========== Status & Priority ========== */
-  .status-dot {
-    width: 10px;
-    height: 10px;
+  .wf-stage { text-align: center; }
+  .wf-dot {
+    display: block;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
-    flex-shrink: 0;
+    margin: 0 auto 4px;
   }
-  .status-dot.not-started { background: var(--border); }
-  .status-dot.in-review { background: var(--warning); }
-  .status-dot.approved { background: var(--success); }
-  .status-dot.blocked { background: #dc2626; }
-
-  .priority-badge {
-    display: inline-block;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-  }
-  .priority-badge.high { background: #fef2f2; color: #991b1b; }
-  .priority-badge.medium { background: #f9fafb; color: #9ca3af; }
-  .priority-badge.low { background: #f9fafb; color: #d1d5db; }
+  .wf-brief { background: #94a3b8; }
+  .wf-writing { background: #f59e0b; }
+  .wf-built { background: #3b82f6; }
+  .wf-design { background: #8b5cf6; }
+  .wf-shipped { background: #22c55e; }
+  .wf-label { display: block; font-size: 11px; font-weight: 600; color: var(--text); }
+  .wf-desc { display: block; font-size: 9px; color: var(--text-tertiary); font-family: var(--font-mono); }
+  .wf-arrow { color: var(--text-tertiary); font-size: 14px; margin: 0 2px; }
 
   /* ========== Audit Table ========== */
   .audit-group {
@@ -613,7 +466,6 @@ pageGroups.forEach(g => g.pages.forEach(p => {
     margin-bottom: 16px;
     overflow: hidden;
   }
-  .audit-group.hidden { display: none; }
   .group-header {
     display: flex;
     justify-content: space-between;
@@ -629,9 +481,9 @@ pageGroups.forEach(g => g.pages.forEach(p => {
   .table-header,
   .table-row {
     display: grid;
-    grid-template-columns: 28px minmax(180px, 1fr) 65px 55px 55px 80px 110px 60px 70px 50px 110px 70px 32px;
-    gap: 4px;
-    padding: 6px 12px;
+    grid-template-columns: 28px minmax(200px, 1.5fr) 80px 120px 90px 120px 32px;
+    gap: 8px;
+    padding: 8px 16px;
     align-items: center;
   }
   .table-header {
@@ -650,148 +502,80 @@ pageGroups.forEach(g => g.pages.forEach(p => {
     border-bottom: 1px solid var(--border-subtle);
   }
   .table-row:hover { background: var(--bg); }
-  .table-row.filtered-out { display: none; }
-
-  /* Header emphasis */
-  .muted-header { color: var(--text-tertiary) !important; font-weight: 500 !important; }
-  .strong-header { color: var(--text) !important; font-weight: 700 !important; }
 
   .col-status { display: flex; justify-content: center; }
-  .col-page { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-  .page-name-row { display: flex; align-items: center; gap: 4px; }
-  .page-name { font-weight: 500; color: var(--text); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .page-route-row { display: flex; align-items: center; gap: 4px; }
-  .page-route-row code { font-family: var(--font-mono); font-size: 9px; color: var(--text-tertiary); }
-  .view-link { color: var(--text-tertiary); transition: color 0.15s; flex-shrink: 0; }
-  .view-link:hover { color: var(--accent); }
+  .col-page { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .page-name-row { display: flex; align-items: center; gap: 6px; }
+  .page-name { font-weight: 500; color: var(--text); font-size: 13px; }
+  .entry-count {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    background: var(--surface-alt);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+  .page-route {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-tertiary);
+  }
+  .redirect-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: #7c3aed;
+    background: #ede9fe;
+    padding: 1px 6px;
+    border-radius: 3px;
+    cursor: help;
+  }
+
+  /* Status dots */
+  .status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .status-dot.not-started { background: var(--border); }
+  .status-dot.in-progress { background: #f59e0b; }
+  .status-dot.shipped { background: #22c55e; }
 
   /* Type badges */
   .type-badge {
     display: inline-block;
-    padding: 1px 5px;
+    padding: 2px 6px;
     border-radius: 3px;
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.3px;
   }
-  .type-lander { background: #e5e7eb; color: #374151; }
-  .type-collection { background: #e5e7eb; color: #374151; }
-  .type-pdp { background: #e5e7eb; color: #374151; }
-  .type-content { background: #f3f4f6; color: #6b7280; }
-  .type-hub { background: #f3f4f6; color: #6b7280; }
-  .type-utility { background: #f9fafb; color: #9ca3af; }
+  .type-collection { background: #dbeafe; color: #1e40af; }
+  .type-static { background: #f3f4f6; color: #6b7280; }
+  .type-index { background: #f3f4f6; color: #9ca3af; }
 
-  /* Persona chips */
-  .persona-chip {
-    display: inline-block;
-    padding: 1px 5px;
-    border-radius: 3px;
-    font-size: 9px;
-    font-weight: 600;
-    text-transform: uppercase;
-  }
-  .persona-bill { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
-  .persona-betty { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
-  .persona-taylor { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
-  .persona-general { background: #f9fafb; color: #9ca3af; border: 1px solid #e5e7eb; }
-  .persona-none { color: var(--text-tertiary); background: none; }
-
-  /* Funnel badges */
-  .funnel-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 22px;
-    height: 18px;
-    border-radius: 3px;
-    font-size: 10px;
-    font-weight: 700;
-    cursor: default;
-  }
-  .funnel-awareness { background: #f3f4f6; color: #6b7280; }
-  .funnel-consideration { background: #f3f4f6; color: #6b7280; }
-  .funnel-purchase { background: #f3f4f6; color: #6b7280; }
-  .funnel-post-purchase { background: #f3f4f6; color: #6b7280; }
-
-  /* Goal text */
-  .goal-text {
-    font-size: 10px;
-    color: var(--text-secondary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: block;
-  }
-
-  /* Blocker badges */
-  .blocker-badge {
-    display: inline-block;
-    padding: 1px 5px;
-    border-radius: 3px;
-    font-size: 9px;
-    font-weight: 700;
-    text-transform: uppercase;
-  }
-  .blocker-copy { background: #f3f4f6; color: #6b7280; }
-  .blocker-dev { background: #f3f4f6; color: #6b7280; }
-  .blocker-design { background: #f3f4f6; color: #6b7280; }
-  .blocker-data { background: #f3f4f6; color: #6b7280; }
-
-  /* Pipeline + blocker selects */
-  .pipeline-select, .blocker-select {
+  /* Pipeline select */
+  .pipeline-select {
     width: 100%;
-    padding: 3px 4px;
+    padding: 4px 6px;
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    font-size: 10px;
+    font-size: 11px;
     background: var(--surface);
     cursor: pointer;
   }
-  .pipeline-select:focus, .blocker-select:focus { outline: none; border-color: var(--accent); }
-  .pipeline-select.stage-shipped { border-color: var(--accent); font-weight: 600; }
-  .pipeline-select.stage-design-review { border-color: var(--text-secondary); }
-  .pipeline-select.stage-built { border-color: var(--text-secondary); }
-  .pipeline-select.stage-copy-approved { border-color: var(--text-tertiary); }
-  .pipeline-select.stage-copy-draft { border-color: var(--text-tertiary); }
-  .blocker-select.has-blocker { border-color: #b91c1c; color: #b91c1c; font-weight: 600; }
+  .pipeline-select:focus { outline: none; border-color: var(--accent); }
+  .pipeline-select.stage-shipped { border-color: #22c55e; color: #166534; font-weight: 600; }
+  .pipeline-select.stage-design { border-color: #8b5cf6; color: #5b21b6; }
+  .pipeline-select.stage-built { border-color: #3b82f6; color: #1e40af; }
+  .pipeline-select.stage-writing { border-color: #f59e0b; color: #92400e; }
+  .pipeline-select.stage-brief { border-color: #94a3b8; color: #475569; }
 
-  /* Score / CRO columns */
-  .col-score { display: flex; justify-content: center; }
-  .col-cro { display: flex; justify-content: center; }
-  .cro-score {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-tertiary);
-  }
-  .cro-score.cro-a { color: var(--text); }
-  .cro-score.cro-b { color: var(--text-secondary); }
-  .cro-score.cro-c { color: #b91c1c; }
-
-  /* Checks detail — compact checklist */
-  .checks-detail {
-    font-size: 9px;
-    font-weight: 500;
-    color: var(--text-tertiary);
-    cursor: default;
-    line-height: 1.4;
-  }
-  .check-pass { color: #16a34a; }
-  .check-fail { color: #dc2626; }
-  .check-warn { color: #d97706; }
-
-  /* Reviewed column */
-  .reviewed-date {
-    font-size: 10px;
-    color: var(--text-tertiary);
-    cursor: pointer;
-    white-space: nowrap;
-  }
-  .reviewed-date:hover { color: var(--accent); text-decoration: underline; }
-  .reviewed-date.has-date { color: var(--text-secondary); }
-
+  /* Scan button */
   .scan-btn {
-    padding: 3px 8px;
+    padding: 3px 10px;
     font-size: 10px;
     font-weight: 600;
     background: var(--surface);
@@ -804,27 +588,30 @@ pageGroups.forEach(g => g.pages.forEach(p => {
   .scan-btn:hover { background: var(--accent); color: white; }
   .scan-btn:disabled { opacity: 0.5; cursor: wait; }
   .scan-btn.scanning { animation: pulse 1.5s infinite; }
-  .score-na { font-size: 10px; color: var(--text-tertiary); }
+  .score-na { font-size: 11px; color: var(--text-tertiary); }
 
+  /* Score badge (replaces scan button after scan) */
   .score-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 32px;
+    min-width: 36px;
     height: 24px;
-    padding: 0 6px;
+    padding: 0 8px;
     border-radius: 12px;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
     cursor: pointer;
-    transition: transform 0.15s;
     border: none;
+    transition: transform 0.15s;
   }
-  .score-badge:hover { transform: scale(1.1); }
-  .score-badge.score-high { background: #f0fdf4; color: #166534; }
-  .score-badge.score-mid { background: #f9fafb; color: #6b7280; }
-  .score-badge.score-low { background: #fef2f2; color: #991b1b; }
-  .score-badge.score-confused { background: #f9fafb; color: #9ca3af; }
+  .score-badge:hover { transform: scale(1.05); }
+  .score-high { background: #dcfce7; color: #166534; }
+  .score-mid { background: #fef3c7; color: #92400e; }
+  .score-low { background: #fee2e2; color: #991b1b; }
+  .score-confused { background: #f3f4f6; color: #9ca3af; }
+
+  .quality-summary { font-size: 10px; color: var(--text-tertiary); }
 
   .open-btn {
     width: 24px;
@@ -852,51 +639,49 @@ pageGroups.forEach(g => g.pages.forEach(p => {
     border-bottom: 1px solid var(--border-subtle);
   }
   .scan-details.open { display: block; }
-  .scan-details-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 12px;
-  }
-  .detail-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 12px;
-  }
-  .detail-card-label {
-    font-size: 10px;
+
+  .detail-summary {
+    font-size: 14px;
     font-weight: 600;
+    color: var(--text);
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .detail-fixes {
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: var(--radius-sm);
+  }
+  .detail-fixes-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #92400e;
+    margin-bottom: 8px;
+  }
+  .detail-fixes ol { margin: 0; padding-left: 20px; font-size: 13px; color: #78350f; line-height: 1.6; }
+
+  .entry-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 16px; }
+  .entry-table th {
+    text-align: left;
+    padding: 8px 10px;
+    font-size: 10px;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--text-tertiary);
-    margin-bottom: 6px;
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
   }
-  .detail-card-value { font-size: 20px; font-weight: 700; color: var(--text); line-height: 1; }
-  .detail-card-sub { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
-  .persona-bar-group { margin-top: 8px; }
-  .persona-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-  .persona-bar-label { font-size: 10px; font-weight: 600; width: 50px; flex-shrink: 0; color: var(--text-secondary); }
-  .persona-bar-track { flex: 1; height: 8px; background: var(--surface-alt); border-radius: 4px; overflow: hidden; }
-  .persona-bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
-  .persona-bar-fill.high { background: #16a34a; }
-  .persona-bar-fill.mid { background: #eab308; }
-  .persona-bar-fill.low { background: #dc2626; }
-  .persona-bar-pct { font-size: 10px; font-weight: 600; width: 30px; text-align: right; color: var(--text-secondary); }
-  .detail-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-  .detail-badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 10px; font-weight: 600; }
-  .detail-badge.blocker { background: #fee2e2; color: #991b1b; }
-  .detail-badge.warning { background: #fef3c7; color: #92400e; }
-  .detail-badge.ok { background: #dcfce7; color: #166534; }
-  .detail-badge.info { background: #dbeafe; color: #1e40af; }
-  .detail-summary { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 16px; line-height: 1.5; }
-  .detail-fixes { margin-bottom: 16px; padding: 12px 16px; background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius-sm); }
-  .detail-fixes-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #92400e; margin-bottom: 8px; }
-  .detail-fixes ol { margin: 0; padding-left: 20px; font-size: 13px; color: #78350f; line-height: 1.6; }
-  .detail-fixes li { margin-bottom: 2px; }
-  .entry-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 16px; }
-  .entry-table th { text-align: left; padding: 8px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-tertiary); border-bottom: 2px solid var(--border); white-space: nowrap; }
-  .entry-table td { padding: 8px 10px; border-bottom: 1px solid var(--border-subtle); color: var(--text); vertical-align: middle; }
+  .entry-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--text);
+    vertical-align: middle;
+  }
   .entry-table tr:hover td { background: var(--bg); }
   .entry-table .entry-title a { color: var(--accent); text-decoration: none; font-weight: 500; }
   .entry-table .entry-title a:hover { text-decoration: underline; }
@@ -909,44 +694,50 @@ pageGroups.forEach(g => g.pages.forEach(p => {
   .entry-table .gap-weak { background: #fef3c7; color: #92400e; }
   .entry-table .gap-confused { background: #ede9fe; color: #5b21b6; }
   .entry-table .gap-ok { background: #dcfce7; color: #166534; }
-  .persona-chart { margin-top: 12px; padding: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); }
-  .persona-chart-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-tertiary); margin-bottom: 10px; }
 
-  /* ========== Integration Footer ========== */
-  .integration-footer {
+  .persona-chart {
+    margin-top: 12px;
+    padding: 12px;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px 20px;
-    margin-top: 8px;
-  }
-  .integration-header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-  .integration-title { display: flex; align-items: center; gap: 8px; }
-  .integration-tiles { display: flex; gap: 16px; }
-  .int-tile {
-    background: var(--surface-alt);
-    border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    padding: 8px 16px;
-    text-align: center;
-    min-width: 80px;
   }
-  .int-tile-value { display: block; font-size: 20px; font-weight: 700; color: var(--text); line-height: 1; }
-  .int-tile-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-tertiary); }
-  .integration-desc { font-size: 13px; color: var(--text-secondary); margin: 0; }
-  .integration-desc code { font-size: 12px; background: var(--surface-alt); padding: 1px 4px; border-radius: 3px; }
-  .integration-footer a { color: var(--accent); }
+  .persona-chart-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-tertiary);
+    margin-bottom: 10px;
+  }
+  .persona-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .persona-bar-label { font-size: 10px; font-weight: 600; width: 50px; flex-shrink: 0; color: var(--text-secondary); }
+  .persona-bar-track { flex: 1; height: 8px; background: var(--surface-alt); border-radius: 4px; overflow: hidden; }
+  .persona-bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+  .persona-bar-fill.high { background: #16a34a; }
+  .persona-bar-fill.mid { background: #eab308; }
+  .persona-bar-fill.low { background: #dc2626; }
+  .persona-bar-pct { font-size: 10px; font-weight: 600; width: 30px; text-align: right; color: var(--text-secondary); }
 
-  /* ========== Scan Progress Bar (Sticky Bottom) ========== */
-  .scan-progress { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; background: var(--surface); border-top: 2px solid var(--accent); box-shadow: 0 -2px 8px rgba(0,0,0,0.1); }
-  .scan-progress-inner { max-width: 1200px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; gap: 16px; }
+  /* ========== Scan Progress (Sticky Bottom) ========== */
+  .scan-progress {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: var(--surface);
+    border-top: 2px solid var(--accent);
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+  }
+  .scan-progress-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
   .scan-progress-label { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; }
   .scan-progress-bar-container { flex: 1; height: 8px; background: var(--surface-alt); border-radius: 4px; overflow: hidden; }
   .scan-progress-bar { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.3s ease; }
@@ -954,51 +745,35 @@ pageGroups.forEach(g => g.pages.forEach(p => {
   .btn-sm { padding: 4px 12px; font-size: 12px; }
 
   /* ========== Responsive ========== */
-  @media (max-width: 1400px) {
-    .table-header, .table-row {
-      grid-template-columns: 28px minmax(160px, 1fr) 55px 50px 50px 70px 100px 55px 60px 40px 90px 60px 28px;
-    }
-  }
   @media (max-width: 1200px) {
     .overview-grid { grid-template-columns: 1fr; }
     .table-header, .table-row {
-      grid-template-columns: 28px minmax(150px, 1fr) 55px 50px 100px 55px 60px 90px 28px;
+      grid-template-columns: 28px minmax(160px, 1.5fr) 70px 110px 80px 100px 28px;
     }
-    .col-funnel, .col-goal, .col-cro, .col-reviewed { display: none; }
-    .scan-details-grid { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 900px) {
     .table-header, .table-row {
-      grid-template-columns: 28px 1fr 55px 100px 55px 90px 28px;
+      grid-template-columns: 28px 1fr 100px 80px 28px;
     }
-    .col-persona, .col-funnel, .col-goal, .col-blocker, .col-cro, .col-reviewed { display: none; }
-    .scan-details-grid { grid-template-columns: 1fr; }
+    .col-type, .col-quality { display: none; }
+    .workflow-stages { flex-direction: column; align-items: flex-start; }
+    .wf-arrow { display: none; }
   }
 </style>
 
 <script is:inline>
   // =========================================================================
-  // CONFIG
+  // CONFIG + STATE
   // =========================================================================
-
-  var STORAGE_KEY = 'southland_site_audit'
-  var CURRENT_SCAN_VERSION = 2
-
-  // =========================================================================
-  // STATE
-  // =========================================================================
-
+  var STORAGE_KEY = 'southland_site_audit_v2'
   var scanCancelled = false
-  var sessionScanCount = 0
   var scanResults = {}
 
   function loadState() {
     try {
       var saved = localStorage.getItem(STORAGE_KEY)
       return saved ? JSON.parse(saved) : {}
-    } catch (e) {
-      return {}
-    }
+    } catch (e) { return {} }
   }
 
   function saveState(state) {
@@ -1006,235 +781,75 @@ pageGroups.forEach(g => g.pages.forEach(p => {
   }
 
   // =========================================================================
-  // ROW STATUS — now includes blocked state
+  // STATUS + PROGRESS
   // =========================================================================
 
-  function getRowStatus(pipeline, blocker) {
-    if (blocker) return 'blocked'
-    if (pipeline === 'shipped') return 'approved'
-    if (pipeline && pipeline !== 'no-copy') return 'in-review'
+  function getRowStatus(pipeline) {
+    if (pipeline === 'shipped') return 'shipped'
+    if (pipeline) return 'in-progress'
     return 'not-started'
   }
 
   function updateProgress() {
     var state = loadState()
     var rows = document.querySelectorAll('.table-row')
-    var shipped = 0, inPipeline = 0, blocked = 0, notStarted = 0
+    var shipped = 0, inPipeline = 0, notStarted = 0
 
     rows.forEach(function(row) {
       var route = row.dataset.route
       var data = state[route] || {}
-      var blocker = data.blocker || row.dataset.blocker || ''
-      var pipelineEl = row.querySelector('[data-field="pipeline"]')
-      var pipeline = data.pipeline || (pipelineEl && pipelineEl.value) || 'no-copy'
-      var status = getRowStatus(pipeline, blocker)
+      var pipeline = data.pipeline || ''
+      var pipelineSelect = row.querySelector('[data-field="pipeline"]')
+      if (pipelineSelect && !data.pipeline) pipeline = pipelineSelect.value
+
+      var status = getRowStatus(pipeline)
       var dot = row.querySelector('[data-status-dot]')
       if (dot) dot.className = 'status-dot ' + status
 
-      if (status === 'approved') shipped++
-      else if (status === 'blocked') blocked++
-      else if (status === 'in-review') inPipeline++
+      if (status === 'shipped') shipped++
+      else if (status === 'in-progress') inPipeline++
       else notStarted++
 
       // Pipeline select styling
-      var pipelineSelect = row.querySelector('.pipeline-select')
       if (pipelineSelect) {
         pipelineSelect.className = 'pipeline-select'
-        if (pipeline !== 'no-copy') pipelineSelect.classList.add('stage-' + pipeline)
+        if (pipeline) pipelineSelect.classList.add('stage-' + pipeline)
+        if (data.pipeline) pipelineSelect.value = data.pipeline
       }
 
-      // Blocker select styling
-      var blockerSelect = row.querySelector('.blocker-select')
-      if (blockerSelect) {
-        blockerSelect.className = 'blocker-select'
-        if (blocker) blockerSelect.classList.add('has-blocker')
-      }
-
-      updateChecks(row, data)
-      updateCRO(row, data)
-      updateReviewed(row, data)
+      // Quality summary
+      updateQualitySummary(row, data)
     })
 
     var total = rows.length
     var percent = total > 0 ? Math.round((shipped / total) * 100) : 0
     document.getElementById('shipped-count').textContent = shipped
     document.getElementById('pipeline-count').textContent = inPipeline
-    document.getElementById('blocked-count').textContent = blocked
-    document.getElementById('pending-count').textContent = notStarted
+    document.getElementById('not-started-count').textContent = notStarted
     document.getElementById('progress-bar').style.width = percent + '%'
     document.getElementById('progress-percent').textContent = percent + '%'
 
-    updateIntegrationStats()
+    updateScanStats()
   }
 
-  // =========================================================================
-  // CHECKS — expanded checklist with named items
-  // =========================================================================
+  function updateQualitySummary(row, data) {
+    var el = row.querySelector('.quality-summary')
+    if (!el || !data.scan) return
 
-  function updateChecks(row, data) {
-    var checksEl = row.querySelector('.checks-detail')
-    if (!checksEl) return
-
-    var pageType = row.dataset.pageType
-    var pipeline = data.pipeline || 'no-copy'
-
-    if (pipeline === 'no-copy' || pipeline === 'copy-draft' || pipeline === 'copy-approved') {
-      checksEl.innerHTML = '<span style="color:var(--text-tertiary)">--</span>'
-      return
-    }
-
-    var checks = data.checks || {}
+    var q = data.scan
     var parts = []
+    if (q.avgWordCount) parts.push(q.avgWordCount + 'w avg')
+    if (q.stubbedCount > 0) parts.push(q.stubbedCount + ' stubs')
+    if (q.missingMeta > 0) parts.push(q.missingMeta + ' no meta')
+    if (q.noInternalLinks > 0) parts.push(q.noInternalLinks + ' no links')
 
-    if (pageType === 'lander') {
-      parts.push(checkItem('CTA', checks.ctaPersonaTrue))
-      parts.push(checkItem('Proof', checks.proofPresent))
-      parts.push(checkItem('Rhythm', checks.rhythmCorrect))
-      parts.push(checkItem('Eveleth', checks.evelethUppercase))
-      parts.push(checkItem('DualCTA', checks.dualCta))
-      parts.push(checkItem('Funnel', checks.noOrphan))
-    } else if (pageType === 'collection') {
-      parts.push(checkItem('Trust', checks.trustStrip))
-      parts.push(checkItem('Qualify', checks.qualificationBullets))
-      parts.push(checkItem('Funnel', checks.noOrphan))
-    } else if (pageType === 'pdp') {
-      parts.push(checkItem('Proof', checks.proofPresent))
-      parts.push(checkItem('Guarantee', checks.guaranteeNearCta))
-      parts.push(checkItem('Funnel', checks.noOrphan))
-    } else {
-      checksEl.innerHTML = '<span style="color:var(--text-tertiary)">--</span>'
-      return
-    }
-
-    checksEl.innerHTML = parts.join(' ')
-  }
-
-  function checkItem(label, value) {
-    if (value === undefined) return '<span class="check-warn">' + label + '?</span>'
-    if (value) return '<span class="check-pass">' + label + '\u2713</span>'
-    return '<span class="check-fail">' + label + '\u2717</span>'
-  }
-
-  // =========================================================================
-  // CRO SCORE — A/B/C grade based on completeness signals
-  // =========================================================================
-
-  function updateCRO(row, data) {
-    var croEl = row.querySelector('.cro-score')
-    if (!croEl) return
-
-    var pageType = row.dataset.pageType
-    var pipeline = data.pipeline || 'no-copy'
-    var checks = data.checks || {}
-
-    if (pipeline === 'no-copy' || pipeline === 'copy-draft') {
-      croEl.textContent = '--'
-      croEl.className = 'cro-score'
-      return
-    }
-
-    var score = 0
-    var total = 0
-
-    if (pageType === 'lander') {
-      total = 6
-      if (checks.ctaPersonaTrue) score++
-      if (checks.proofPresent) score++
-      if (checks.rhythmCorrect) score++
-      if (checks.evelethUppercase) score++
-      if (checks.dualCta) score++
-      if (checks.noOrphan) score++
-    } else if (pageType === 'collection') {
-      total = 3
-      if (checks.trustStrip) score++
-      if (checks.qualificationBullets) score++
-      if (checks.noOrphan) score++
-    } else if (pageType === 'pdp') {
-      total = 3
-      if (checks.proofPresent) score++
-      if (checks.guaranteeNearCta) score++
-      if (checks.noOrphan) score++
-    } else {
-      croEl.textContent = '--'
-      croEl.className = 'cro-score'
-      return
-    }
-
-    if (total === 0) {
-      croEl.textContent = '--'
-      croEl.className = 'cro-score'
-      return
-    }
-
-    var pct = Math.round((score / total) * 100)
-    var grade, cls
-    if (pct >= 80) { grade = 'A'; cls = 'cro-a' }
-    else if (pct >= 50) { grade = 'B'; cls = 'cro-b' }
-    else { grade = 'C'; cls = 'cro-c' }
-
-    croEl.textContent = grade
-    croEl.className = 'cro-score ' + cls
-    croEl.title = score + '/' + total + ' checks (' + pct + '%)'
-  }
-
-  // =========================================================================
-  // REVIEWED DATE
-  // =========================================================================
-
-  function updateReviewed(row, data) {
-    var el = row.querySelector('.reviewed-date')
-    if (!el) return
-
-    if (data.reviewedAt) {
-      var d = new Date(data.reviewedAt)
-      var label = (d.getMonth() + 1) + '/' + d.getDate()
-      if (data.reviewer) label += ' ' + data.reviewer
-      el.textContent = label
-      el.className = 'reviewed-date has-date'
-      el.title = 'Reviewed ' + d.toLocaleDateString() + (data.reviewer ? ' by ' + data.reviewer : '') + '. Click to update.'
-    } else {
-      el.textContent = '--'
-      el.className = 'reviewed-date'
-      el.title = 'Click to mark as reviewed'
+    if (parts.length > 0) {
+      el.textContent = parts.join(' · ')
+      el.style.color = (q.stubbedCount > 0 || q.noInternalLinks > 0) ? '#dc2626' : 'var(--text-secondary)'
     }
   }
 
-  // =========================================================================
-  // FILTERING
-  // =========================================================================
-
-  function applyFilters() {
-    var persona = document.getElementById('filter-persona').value
-    var funnel = document.getElementById('filter-funnel').value
-    var blocker = document.getElementById('filter-blocker').value
-    var priority = document.getElementById('filter-priority').value
-    var state = loadState()
-
-    document.querySelectorAll('.table-row').forEach(function(row) {
-      var show = true
-      if (persona && row.dataset.persona !== persona) show = false
-      if (funnel && row.dataset.funnelStage !== funnel) show = false
-      if (priority && row.dataset.priority !== priority) show = false
-      if (blocker) {
-        var data = state[row.dataset.route] || {}
-        var rowBlocker = data.blocker || row.dataset.blocker || ''
-        if (rowBlocker !== blocker) show = false
-      }
-      row.classList.toggle('filtered-out', !show)
-    })
-
-    // Update group visibility — hide groups with all rows filtered out
-    document.querySelectorAll('.audit-group').forEach(function(group) {
-      var visibleRows = group.querySelectorAll('.table-row:not(.filtered-out)')
-      group.classList.toggle('hidden', visibleRows.length === 0)
-    })
-  }
-
-  // =========================================================================
-  // INTEGRATION STATS
-  // =========================================================================
-
-  function updateIntegrationStats() {
+  function updateScanStats() {
     var state = loadState()
     var scanned = 0, totalAlignment = 0, totalEntries = 0
 
@@ -1252,7 +867,7 @@ pageGroups.forEach(g => g.pages.forEach(p => {
   }
 
   // =========================================================================
-  // SCAN ROUTE
+  // SCAN
   // =========================================================================
 
   function scanRoute(route) {
@@ -1263,43 +878,46 @@ pageGroups.forEach(g => g.pages.forEach(p => {
     })
     .then(function(res) { return res.json() })
     .then(function(result) {
-      sessionScanCount++
       if (result && result.entries) scanResults[route] = result
       return result
     })
   }
 
-  // =========================================================================
-  // HELPERS
-  // =========================================================================
+  function handleScanResult(route, result) {
+    if (!result || result.scannable === false) return
 
-  function getBarClass(pct) {
-    if (pct >= 60) return 'high'
-    if (pct >= 40) return 'mid'
-    return 'low'
+    // Find the row that has this scan route
+    var row = document.querySelector('.table-row[data-scan-route="' + route + '"]')
+    if (!row) return
+
+    // Render score badge
+    renderScoreBadge(row, result)
+
+    // Render detail panel
+    renderDetailPanel(row.dataset.route, result)
+
+    // Auto-expand detail panel
+    var panel = document.querySelector('[data-details-for="' + row.dataset.route + '"]')
+    if (panel) panel.classList.add('open')
+
+    // Cache result
+    cacheScanResult(row.dataset.route, result)
+
+    // Auto-set pipeline if not already set
+    autoSetPipeline(row, result)
+
+    updateProgress()
   }
 
-  function personaInitial(name) {
-    if (!name) return '?'
-    return name.split(' ').pop().charAt(0).toUpperCase()
-  }
-
-  function badgeColor(alignment) {
-    if (alignment >= 60) return 'score-high'
-    if (alignment >= 40) return 'score-mid'
-    return 'score-low'
-  }
-
   // =========================================================================
-  // RENDER SCORE BADGE
+  // SCORE BADGE
   // =========================================================================
 
   function renderScoreBadge(row, result) {
     var scoreCol = row.querySelector('.col-score')
-    if (!result || result.scannable === false) return
+    if (!scoreCol) return
 
-    var agg = result.aggregate
-    var p = agg.persona
+    var p = result.aggregate.persona
     var label, cls
 
     if (!p) {
@@ -1309,21 +927,21 @@ pageGroups.forEach(g => g.pages.forEach(p => {
       label = '?'
       cls = 'score-confused'
     } else {
-      var initial = personaInitial(p.primaryAudience)
+      var initial = p.primaryAudience ? p.primaryAudience.split(' ').pop().charAt(0).toUpperCase() : '?'
       label = initial + ' ' + p.avgAlignment + '%'
-      cls = badgeColor(p.avgAlignment)
+      cls = p.avgAlignment >= 60 ? 'score-high' : (p.avgAlignment >= 40 ? 'score-mid' : 'score-low')
     }
 
-    scoreCol.innerHTML = '<button class="score-badge ' + cls + '" data-action="toggle-details" title="Click to expand">' + label + '</button>'
+    scoreCol.innerHTML = '<button class="score-badge ' + cls + '" data-action="toggle-details" title="Click to expand/collapse">' + label + '</button>'
   }
 
   // =========================================================================
-  // RENDER DETAIL PANEL
+  // DETAIL PANEL
   // =========================================================================
 
   function renderDetailPanel(route, result) {
     var panel = document.querySelector('[data-details-for="' + route + '"]')
-    if (!panel || result.scannable === false) return
+    if (!panel) return
 
     var entries = result.entries || []
     var agg = result.aggregate
@@ -1331,31 +949,34 @@ pageGroups.forEach(g => g.pages.forEach(p => {
     var q = agg.quality
     var html = ''
 
-    var summary = result.scoredCount + ' entries scanned.'
+    // Summary line
+    var summary = '<strong>' + result.scoredCount + '</strong> entries scanned.'
     if (p) {
       if (p.unclearCount === result.scoredCount) {
         summary += ' No clear audience — content is too generic.'
       } else {
         summary += ' Speaks to <strong>' + p.primaryAudience + '</strong> at ' + p.avgAlignment + '% avg fit.'
-        if (q.noInternalLinks > 0) summary += ' ' + q.noInternalLinks + ' have zero internal links.'
-        else if (q.stubbedCount > 0) summary += ' ' + q.stubbedCount + ' are stubs.'
-        else if (q.missingMeta > 0) summary += ' ' + q.missingMeta + ' missing meta.'
+        if (q.noInternalLinks > 0) summary += ' <span style="color:#dc2626">' + q.noInternalLinks + ' have zero internal links.</span>'
+        if (q.stubbedCount > 0) summary += ' <span style="color:#dc2626">' + q.stubbedCount + ' are stubs.</span>'
+        if (q.missingMeta > 0) summary += ' ' + q.missingMeta + ' missing meta.'
       }
     }
     html += '<div class="detail-summary">' + summary + '</div>'
 
-    var fixes = generateFixes(entries, result.scoredCount)
+    // Top fixes
+    var fixes = generateFixes(entries)
     if (fixes.length > 0) {
       html += '<div class="detail-fixes"><div class="detail-fixes-title">Top Fixes</div><ol>'
-      fixes.forEach(function(fix) { html += '<li>' + fix + '</li>' })
+      fixes.forEach(function(f) { html += '<li>' + f + '</li>' })
       html += '</ol></div>'
     }
 
+    // Entry table
     if (entries.length > 0) {
       var sorted = entries.slice().sort(function(a, b) { return issueCount(b) - issueCount(a) })
-      html += '<table class="entry-table"><thead><tr>' +
-        '<th>Entry</th><th>Audience</th><th>Align</th><th>Words</th><th>Read.</th><th>Links</th><th>H2s</th><th>Gap</th>' +
-        '</tr></thead><tbody>'
+      html += '<table class="entry-table"><thead><tr>'
+      html += '<th>Entry</th><th>Audience</th><th>Align</th><th>Words</th><th>Read.</th><th>Links</th><th>H2s</th><th>Gap</th>'
+      html += '</tr></thead><tbody>'
 
       sorted.forEach(function(entry) {
         var ep = entry.persona
@@ -1385,14 +1006,15 @@ pageGroups.forEach(g => g.pages.forEach(p => {
         var gapCell = '<span class="cell-muted">--</span>'
         if (eg) gapCell = '<span class="gap-badge gap-' + eg.status.toLowerCase() + '">' + eg.status + '</span>'
 
-        html += '<tr>' +
-          '<td class="entry-title"><a href="' + entry.url + '" target="_blank">' + entry.title + '</a></td>' +
-          '<td>' + audienceCell + '</td><td>' + alignCell + '</td><td>' + wordsCell + '</td>' +
-          '<td>' + readCell + '</td><td>' + linksCell + '</td><td>' + h2Cell + '</td><td>' + gapCell + '</td></tr>'
+        html += '<tr>'
+        html += '<td class="entry-title"><a href="' + entry.url + '" target="_blank">' + entry.title + '</a></td>'
+        html += '<td>' + audienceCell + '</td><td>' + alignCell + '</td><td>' + wordsCell + '</td>'
+        html += '<td>' + readCell + '</td><td>' + linksCell + '</td><td>' + h2Cell + '</td><td>' + gapCell + '</td></tr>'
       })
       html += '</tbody></table>'
     }
 
+    // Persona distribution chart
     if (p && p.unclearCount < result.scoredCount) {
       var billTotal = 0, bettyTotal = 0, taylorTotal = 0, personaCount = 0
       entries.forEach(function(e) {
@@ -1407,14 +1029,8 @@ pageGroups.forEach(g => g.pages.forEach(p => {
         var avgBill = Math.round(billTotal / personaCount)
         var avgBetty = Math.round(bettyTotal / personaCount)
         var avgTaylor = Math.round(taylorTotal / personaCount)
-        html += '<div class="persona-chart"><div class="persona-chart-title">Persona Fit (avg across ' + personaCount + ' entries)</div><div class="persona-bar-group">'
+        html += '<div class="persona-chart"><div class="persona-chart-title">Persona Fit (avg across ' + personaCount + ' entries)</div>'
         html += renderPersonaBar('Bill', avgBill) + renderPersonaBar('Betty', avgBetty) + renderPersonaBar('Taylor', avgTaylor)
-        html += '</div>'
-        var unclearEntries = entries.filter(function(e) { return e.persona && e.persona.unclear })
-        if (unclearEntries.length > 0) {
-          html += '<div style="margin-top:8px;font-size:12px;color:var(--text-secondary);"><strong>Unclear:</strong> '
-          html += unclearEntries.map(function(e) { return e.title }).join(', ') + '</div>'
-        }
         html += '</div>'
       }
     }
@@ -1423,13 +1039,14 @@ pageGroups.forEach(g => g.pages.forEach(p => {
   }
 
   function renderPersonaBar(label, pct) {
+    var cls = pct >= 60 ? 'high' : (pct >= 40 ? 'mid' : 'low')
     return '<div class="persona-bar-row"><span class="persona-bar-label">' + label + '</span>' +
-      '<div class="persona-bar-track"><div class="persona-bar-fill ' + getBarClass(pct) + '" style="width:' + pct + '%"></div></div>' +
+      '<div class="persona-bar-track"><div class="persona-bar-fill ' + cls + '" style="width:' + pct + '%"></div></div>' +
       '<span class="persona-bar-pct">' + pct + '%</span></div>'
   }
 
   // =========================================================================
-  // ISSUE COUNTING
+  // FIXES + ISSUE COUNT
   // =========================================================================
 
   function issueCount(entry) {
@@ -1445,11 +1062,7 @@ pageGroups.forEach(g => g.pages.forEach(p => {
     return count
   }
 
-  // =========================================================================
-  // FIX GENERATION
-  // =========================================================================
-
-  function generateFixes(entries, scoredCount) {
+  function generateFixes(entries) {
     var fixes = []
     var noLinks = entries.filter(function(e) { return e.quality.internalLinks + e.quality.externalLinks === 0 })
     if (noLinks.length > 0) {
@@ -1459,7 +1072,7 @@ pageGroups.forEach(g => g.pages.forEach(p => {
     var stubs = entries.filter(function(e) { return e.quality.stubbed })
     if (stubs.length > 0) {
       var names2 = stubs.slice(0, 3).map(function(e) { return e.title + ' (' + e.quality.wordCount + 'w)' })
-      fixes.push('Expand <strong>' + names2.join('</strong>, <strong>') + '</strong> — stubs')
+      fixes.push('Expand stubs: <strong>' + names2.join('</strong>, <strong>') + '</strong>')
     }
     var noMeta = entries.filter(function(e) { return !e.quality.hasMetaDescription })
     if (noMeta.length > 0) {
@@ -1468,50 +1081,48 @@ pageGroups.forEach(g => g.pages.forEach(p => {
     }
     var unclear = entries.filter(function(e) { return e.persona && e.persona.unclear })
     if (unclear.length > 0 && fixes.length < 4) {
-      var names5 = unclear.slice(0, 3).map(function(e) { return e.title })
-      fixes.push('<strong>' + names5.join('</strong>, <strong>') + '</strong> — no clear audience')
+      var names4 = unclear.slice(0, 3).map(function(e) { return e.title })
+      fixes.push('Unclear audience: <strong>' + names4.join('</strong>, <strong>') + '</strong>')
     }
     return fixes.slice(0, 4)
   }
 
   // =========================================================================
-  // AUTO-SET PIPELINE FROM SCAN
+  // AUTO-SET PIPELINE
   // =========================================================================
 
-  function autoSetPipelineFromScan(route, result) {
-    if (!result || result.scannable === false) return
-    var row = document.querySelector('.table-row[data-route="' + route + '"]')
-    if (!row) return
-    var st = loadState()
-    var data = st[route] || {}
-    if (data.pipeline && data.pipeline !== 'no-copy') return
+  function autoSetPipeline(row, result) {
+    var state = loadState()
+    var route = row.dataset.route
+    var data = state[route] || {}
+    if (data.pipeline) return // already manually set
 
-    var agg = result.aggregate
-    var p = agg.persona
-    var q = agg.quality
+    var p = result.aggregate.persona
+    var q = result.aggregate.quality
     var qualityPassed = 0
     if (q.avgWordCount >= 300) qualityPassed++
     if (q.missingMeta === 0) qualityPassed++
     if (q.noInternalLinks === 0) qualityPassed++
     if (q.badHeadingsCount === 0) qualityPassed++
-    if (q.avgReadability >= 50) qualityPassed++
     if (q.stubbedCount === 0) qualityPassed++
 
-    var inferredStage = 'no-copy'
-    if (p && p.avgAlignment >= 60 && qualityPassed >= 4) inferredStage = 'built'
-    else if (p && p.avgAlignment >= 40) inferredStage = 'copy-draft'
+    var inferred = ''
+    if (p && p.avgAlignment >= 60 && qualityPassed >= 4) inferred = 'built'
+    else if (p && p.avgAlignment >= 40) inferred = 'writing'
 
-    if (inferredStage !== 'no-copy') {
-      var pipelineSelect = row.querySelector('[data-field="pipeline"]')
-      if (pipelineSelect) {
-        pipelineSelect.value = inferredStage
-        pipelineSelect.dispatchEvent(new Event('change'))
+    if (inferred) {
+      var sel = row.querySelector('[data-field="pipeline"]')
+      if (sel) {
+        sel.value = inferred
+        state[route] = data
+        state[route].pipeline = inferred
+        saveState(state)
       }
     }
   }
 
   // =========================================================================
-  // CACHE SCAN RESULT
+  // CACHE SCAN
   // =========================================================================
 
   function cacheScanResult(route, result) {
@@ -1520,10 +1131,8 @@ pageGroups.forEach(g => g.pages.forEach(p => {
     if (!state[route]) state[route] = {}
     var p = result.aggregate.persona
     var q = result.aggregate.quality
-    var g = result.aggregate.gap
     state[route].scan = {
       scannedAt: result.scannedAt,
-      scanVersion: result.scanVersion,
       scoredCount: result.scoredCount,
       totalEntries: result.entryCount,
       primaryAudience: p ? p.primaryAudience : null,
@@ -1533,232 +1142,131 @@ pageGroups.forEach(g => g.pages.forEach(p => {
       missingMeta: q.missingMeta,
       noInternalLinks: q.noInternalLinks,
       stubbedCount: q.stubbedCount,
-      gap: g,
-      entries: result.entries,
     }
     saveState(state)
   }
 
   // =========================================================================
-  // RESTORE CACHED SCANS
+  // EVENT HANDLERS
   // =========================================================================
 
-  function restoreCachedScans() {
-    var state = loadState()
-    Object.keys(state).forEach(function(route) {
-      var data = state[route]
-      if (!data.scan) return
-      var row = document.querySelector('.table-row[data-route="' + route + '"]')
-      if (!row) return
-      var scoreCol = row.querySelector('.col-score')
-      if (!scoreCol) return
-      var scan = data.scan
-      var stale = scan.scanVersion < CURRENT_SCAN_VERSION
-      var label, cls
-      if (!scan.primaryAudience) { label = '--'; cls = 'score-low' }
-      else if (scan.unclearCount === scan.scoredCount) { label = '?'; cls = 'score-confused' }
-      else {
-        label = personaInitial(scan.primaryAudience) + ' ' + scan.avgAlignment + '%'
-        cls = badgeColor(scan.avgAlignment)
-      }
-      if (stale) label += '*'
-      scoreCol.innerHTML = '<button class="score-badge ' + cls + '" data-action="toggle-details" title="' +
-        (stale ? 'Stale — re-scan' : 'Click to expand') + '">' + label + '</button>'
-      if (scan.entries) {
-        scanResults[route] = {
-          scannable: true, scoredCount: scan.scoredCount, entryCount: scan.totalEntries, entries: scan.entries,
-          aggregate: {
-            persona: scan.primaryAudience ? { primaryAudience: scan.primaryAudience, avgAlignment: scan.avgAlignment, unclearCount: scan.unclearCount } : null,
-            quality: { avgWordCount: scan.avgWordCount, missingMeta: scan.missingMeta, noInternalLinks: scan.noInternalLinks, stubbedCount: scan.stubbedCount, avgReadability: 0, badHeadingsCount: 0 },
-            gap: scan.gap,
-          },
-        }
-      }
-    })
-  }
+  document.addEventListener('DOMContentLoaded', function() {
+    updateProgress()
 
-  // =========================================================================
-  // SCAN ALL
-  // =========================================================================
-
-  function scanAll() {
-    var rows = document.querySelectorAll('.table-row[data-content-type="dynamic"]')
-    var routes = []
-    rows.forEach(function(row) { routes.push(row.dataset.route) })
-    if (routes.length === 0) return
-
-    scanCancelled = false
-    var progressEl = document.getElementById('scan-progress')
-    var progressBar = document.getElementById('scan-progress-bar')
-    var progressCount = document.getElementById('scan-progress-count')
-    var progressLabel = document.getElementById('scan-progress-label')
-    var scanAllBtn = document.getElementById('scan-all-btn')
-    progressEl.style.display = ''
-    scanAllBtn.disabled = true
-    var completed = 0
-
-    function next() {
-      if (scanCancelled || completed >= routes.length) {
-        progressEl.style.display = 'none'
-        scanAllBtn.disabled = false
-        updateProgress()
-        return
-      }
-      progressLabel.textContent = 'Scanning ' + routes[completed] + '...'
-      var route = routes[completed]
-      var row = document.querySelector('.table-row[data-route="' + route + '"]')
-      var scanBtn = row ? row.querySelector('.scan-btn, .score-badge') : null
-      if (scanBtn) scanBtn.classList.add('scanning')
-
-      scanRoute(route)
-        .then(function(result) {
-          if (result && result.scannable !== false && result.entries) {
-            renderScoreBadge(row, result)
-            renderDetailPanel(route, result)
-            autoSetPipelineFromScan(route, result)
-            cacheScanResult(route, result)
-          }
-        })
-        .catch(function(err) { console.error('Scan failed for ' + route + ':', err) })
-        .finally(function() {
-          if (scanBtn) scanBtn.classList.remove('scanning')
-          completed++
-          progressBar.style.width = Math.round((completed / routes.length) * 100) + '%'
-          progressCount.textContent = completed + '/' + routes.length
-          setTimeout(next, 500)
-        })
-    }
-    progressCount.textContent = '0/' + routes.length
-    next()
-  }
-
-  // =========================================================================
-  // INIT
-  // =========================================================================
-
-  function init() {
-    var state = loadState()
-
-    // Populate fields from saved state
-    document.querySelectorAll('.table-row').forEach(function(row) {
-      var route = row.dataset.route
-      var data = state[route] || {}
-      var pipelineSelect = row.querySelector('[data-field="pipeline"]')
-      if (data.pipeline && pipelineSelect) pipelineSelect.value = data.pipeline
-      var blockerSelect = row.querySelector('[data-field="blocker"]')
-      if (data.blocker && blockerSelect) blockerSelect.value = data.blocker
-    })
-
-    // Change listeners for pipeline/blocker
-    document.querySelectorAll('.pipeline-select').forEach(function(el) {
-      el.addEventListener('change', function() {
-        var row = this.closest('.table-row')
+    // Pipeline change
+    document.querySelectorAll('.pipeline-select').forEach(function(sel) {
+      sel.addEventListener('change', function() {
+        var row = sel.closest('.table-row')
         var route = row.dataset.route
-        var st = loadState()
-        if (!st[route]) st[route] = {}
-        st[route].pipeline = this.value
-        saveState(st)
-        updateProgress()
-      })
-    })
-    document.querySelectorAll('.blocker-select').forEach(function(el) {
-      el.addEventListener('change', function() {
-        var row = this.closest('.table-row')
-        var route = row.dataset.route
-        var st = loadState()
-        if (!st[route]) st[route] = {}
-        st[route].blocker = this.value
-        saveState(st)
-        updateProgress()
-      })
-    })
-    // Reviewed date — click to mark
-    document.querySelectorAll('.reviewed-date').forEach(function(el) {
-      el.addEventListener('click', function() {
-        var route = this.dataset.reviewedFor
-        var st = loadState()
-        if (!st[route]) st[route] = {}
-        st[route].reviewedAt = new Date().toISOString()
-        st[route].reviewer = prompt('Reviewer initials:', st[route].reviewer || '')
-        saveState(st)
+        var state = loadState()
+        if (!state[route]) state[route] = {}
+        state[route].pipeline = sel.value
+        saveState(state)
         updateProgress()
       })
     })
 
-    // Filter listeners
-    ;['filter-persona', 'filter-funnel', 'filter-blocker', 'filter-priority'].forEach(function(id) {
-      document.getElementById(id).addEventListener('change', applyFilters)
-    })
-
-    // Scan button + toggle — delegated
+    // Individual scan buttons
     document.addEventListener('click', function(e) {
-      var scanBtn = e.target.closest('[data-action="scan"]')
-      if (scanBtn) {
-        var row = scanBtn.closest('.table-row')
-        var route = row.dataset.route
-        scanBtn.disabled = true
-        scanBtn.classList.add('scanning')
-        scanBtn.textContent = '...'
-        scanRoute(route)
-          .then(function(result) {
-            if (result && result.scannable !== false && result.entries) {
-              renderScoreBadge(row, result)
-              renderDetailPanel(route, result)
-              autoSetPipelineFromScan(route, result)
-              cacheScanResult(route, result)
-              var panel = document.querySelector('[data-details-for="' + route + '"]')
-              if (panel) panel.classList.add('open')
-            }
-          })
-          .catch(function(err) {
-            console.error('Scan error:', err)
-            scanBtn.textContent = 'Err'
-            scanBtn.disabled = false
-            scanBtn.classList.remove('scanning')
-          })
-          .finally(function() { updateProgress() })
+      var btn = e.target.closest('[data-action="scan"]')
+      if (btn) {
+        var row = btn.closest('.table-row')
+        var scanRoute = row.dataset.scanRoute
+        if (!scanRoute) return
+
+        btn.disabled = true
+        btn.classList.add('scanning')
+        btn.textContent = '...'
+
+        window.scanRoute(scanRoute).then(function(result) {
+          handleScanResult(scanRoute, result)
+        }).catch(function(err) {
+          btn.disabled = false
+          btn.classList.remove('scanning')
+          btn.textContent = 'Error'
+          console.error('Scan failed:', err)
+        })
       }
 
-      var toggleBtn = e.target.closest('[data-action="toggle-details"]')
-      if (toggleBtn) {
-        var row2 = toggleBtn.closest('.table-row')
-        var route2 = row2.dataset.route
-        var panel = document.querySelector('[data-details-for="' + route2 + '"]')
-        if (panel) {
-          if (!panel.innerHTML && scanResults[route2]) renderDetailPanel(route2, scanResults[route2])
-          panel.classList.toggle('open')
-        }
+      // Toggle detail panel
+      var toggle = e.target.closest('[data-action="toggle-details"]')
+      if (toggle) {
+        var row2 = toggle.closest('.table-row')
+        var panel = document.querySelector('[data-details-for="' + row2.dataset.route + '"]')
+        if (panel) panel.classList.toggle('open')
       }
     })
 
     // Scan All
-    document.getElementById('scan-all-btn').addEventListener('click', scanAll)
-    document.getElementById('scan-cancel-btn').addEventListener('click', function() { scanCancelled = true })
+    document.getElementById('scan-all-btn').addEventListener('click', function() {
+      var routes = window.__SCANNABLE_ROUTES || []
+      if (routes.length === 0) return
 
-    // Export
-    document.getElementById('export-btn').addEventListener('click', function() {
-      var st = loadState()
-      var blob = new Blob([JSON.stringify(st, null, 2)], { type: 'application/json' })
-      var url = URL.createObjectURL(blob)
-      var a = document.createElement('a')
-      a.href = url
-      a.download = 'site-audit-' + new Date().toISOString().split('T')[0] + '.json'
-      a.click()
-      URL.revokeObjectURL(url)
+      scanCancelled = false
+      var progressEl = document.getElementById('scan-progress')
+      var barEl = document.getElementById('scan-progress-bar')
+      var labelEl = document.getElementById('scan-progress-label')
+      var countEl = document.getElementById('scan-progress-count')
+      progressEl.style.display = 'block'
+
+      var done = 0
+      var total = routes.length
+
+      function next(i) {
+        if (i >= total || scanCancelled) {
+          progressEl.style.display = 'none'
+          return
+        }
+
+        var route = routes[i]
+        labelEl.textContent = 'Scanning ' + route + '...'
+        countEl.textContent = (i + 1) + '/' + total
+
+        scanRoute(route).then(function(result) {
+          done++
+          barEl.style.width = Math.round((done / total) * 100) + '%'
+          handleScanResult(route, result)
+          next(i + 1)
+        }).catch(function() {
+          done++
+          barEl.style.width = Math.round((done / total) * 100) + '%'
+          next(i + 1)
+        })
+      }
+
+      next(0)
+    })
+
+    // Cancel scan
+    document.getElementById('scan-cancel-btn').addEventListener('click', function() {
+      scanCancelled = true
     })
 
     // Reset
     document.getElementById('reset-btn').addEventListener('click', function() {
-      if (confirm('Reset all audit progress? This cannot be undone.')) {
+      if (confirm('Reset all pipeline state and scan results?')) {
         localStorage.removeItem(STORAGE_KEY)
         scanResults = {}
-        location.reload()
+        document.querySelectorAll('.scan-details').forEach(function(p) {
+          p.classList.remove('open')
+          p.innerHTML = ''
+        })
+        document.querySelectorAll('.pipeline-select').forEach(function(s) { s.value = '' })
+        document.querySelectorAll('.col-score').forEach(function(col) {
+          var row = col.closest('.table-row')
+          if (row && row.dataset.scanRoute) {
+            col.innerHTML = '<button class="scan-btn" data-action="scan">Scan</button>'
+          }
+        })
+        document.querySelectorAll('.quality-summary').forEach(function(el) {
+          el.textContent = '--'
+          el.style.color = ''
+        })
+        updateProgress()
       }
     })
+  })
 
-    restoreCachedScans()
-    updateProgress()
-  }
-
-  init()
+  // Make scanRoute global so inline handlers work
+  window.scanRoute = scanRoute
 </script>

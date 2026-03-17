@@ -37,3 +37,4 @@ apps/shopify-app/prisma/*.db-journal
 # Package build artifacts
 packages/*/dist/
 *.tsbuildinfo
+briefs/

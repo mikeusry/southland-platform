@@ -25,10 +25,13 @@ if (!slug) {
 
 // ── Redirect collection slugs that now have dedicated hub pages ──────────
 const collectionRedirects: Record<string, string> = {
+  'backyard-birds': '/poultry/backyard/',
+  'poultry-broilers': '/poultry/commercial/',
   poultry: '/poultry/',
   'poultry-breeders': '/poultry/breeders/',
   turkey: '/poultry/turkey/',
   'game-birds': '/poultry/game-birds/',
+  hydroseeders: '/hydroseeders/',
 }
 if (slug in collectionRedirects) {
   return Astro.redirect(collectionRedirects[slug]!, 301)
