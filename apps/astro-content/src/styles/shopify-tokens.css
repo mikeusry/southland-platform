@@ -285,6 +285,118 @@ article h2 {
 }
 
 /* ==========================================================================
+   Tables - Professional data tables for blog/pillar content
+   ========================================================================== */
+
+/* Scrollable wrapper so wide tables don't break mobile layout */
+.prose table {
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 2em 0;
+  font-size: 0.9em;
+  line-height: 1.5;
+  border: 1px solid #d1d5db;
+  border-radius: var(--border-radius-md, 8px);
+}
+
+.prose thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.prose th {
+  background: var(--color-title, #2c5234);
+  color: #ffffff;
+  font-family: var(--font-body, 'Open Sans', sans-serif);
+  font-weight: 600;
+  font-size: 0.8em;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.75em 1em;
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 2px solid var(--color-accent, #44883e);
+}
+
+.prose th:first-child {
+  border-top-left-radius: var(--border-radius-md, 8px);
+}
+
+.prose th:last-child {
+  border-top-right-radius: var(--border-radius-md, 8px);
+}
+
+.prose td {
+  padding: 0.65em 1em;
+  border-bottom: 1px solid #e5e7eb;
+  color: var(--color-text, #191d21);
+  vertical-align: top;
+}
+
+/* First column — row label styling */
+.prose td:first-child {
+  font-weight: 600;
+  color: var(--color-title, #2c5234);
+  white-space: nowrap;
+}
+
+/* Alternating row stripes */
+.prose tbody tr:nth-child(even) {
+  background: #f9fafb;
+}
+
+.prose tbody tr:hover {
+  background: #f0fdf4;
+}
+
+/* Last row — no bottom border (border-radius handles it) */
+.prose tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.prose tbody tr:last-child td:first-child {
+  border-bottom-left-radius: var(--border-radius-md, 8px);
+}
+
+.prose tbody tr:last-child td:last-child {
+  border-bottom-right-radius: var(--border-radius-md, 8px);
+}
+
+/* Bold text inside table cells */
+.prose td strong {
+  color: var(--color-title, #2c5234);
+}
+
+/* Mobile: tighter padding, smaller font */
+@media (max-width: 768px) {
+  .prose table {
+    font-size: 0.8em;
+  }
+
+  .prose th,
+  .prose td {
+    padding: 0.5em 0.75em;
+  }
+
+  .prose td:first-child {
+    min-width: 120px;
+  }
+}
+
+/* Scroll hint shadow for overflowing tables on mobile */
+@media (max-width: 640px) {
+  .prose table {
+    margin-left: -0.5em;
+    margin-right: -0.5em;
+  }
+}
+
+/* ==========================================================================
    Button Styles - Matching Shopify theme
    ========================================================================== */
 
