@@ -420,8 +420,42 @@ Admin pages at `/admin/` are password protected.
 
 Change in `apps/astro-content/src/layouts/AdminLayout.astro` line 227.
 
+## AI Search Content Initiative (March 2026)
+
+**Full doc:** [docs/AI-CONTENT-INITIATIVE.md](docs/AI-CONTENT-INITIATIVE.md)
+
+AI visibility audit found we rank on 4/10 situation queries but are cited in 0/10 AI Overviews. Built 6 pillar pages + upgraded 4 collection pages to fix this.
+
+### New Pillar Pages (blog posts)
+
+| File | Target Situation |
+|------|-----------------|
+| `how-to-reduce-ammonia-in-poultry-house-naturally.mdx` | Poultry ammonia control |
+| `natural-alternatives-to-chemical-poultry-treatments.mdx` | Chemical → natural transition |
+| `organic-soil-health-bermuda-grass-fairways.mdx` | Golf course soil health |
+| `how-to-fix-southern-clay-soil-organically.mdx` | Southern clay soil remediation |
+| `best-organic-fertilizers-warm-season-grass.mdx` | Warm season grass fertilizer guide |
+| `building-soil-biology-farm-fields.mdx` | Farm soil biology rebuilding |
+
+### Content Rules (for all future pillar pages)
+1. Problem-first, product-second — always
+2. Specific data (ppm, $/acre, FCR) — not vague claims
+3. Honest competitor comparisons
+4. Structured for AI extraction (H2/H3, tables, FAQ schema)
+5. Products appear as ONE option among several
+6. Author: `mike-usry` for E-E-A-T
+
+### PMax Rewrite
+Situation-first ad headlines in `mothership/docs/advertising/campaigns/southland-pmax-situation-rewrite-2026-03.md`. A/B test: keep 5 existing, swap 10 situation-framed.
+
+### Launch Tasks
+Tracked in Nexus `/hr/todos` (13 tasks, Mar 23-Apr 3).
+
+---
+
 ## Related Resources
 
 - **Mothership:** `~/CODING/mothership/` - Orchestration platform
+- **Nexus (Inventory):** `~/CODING/southland-inventory/` - Order management, shipping, EOS todos
 - **point.dog:** CDP/analytics integration
 - **Shopify Store:** southland-organics.myshopify.com
