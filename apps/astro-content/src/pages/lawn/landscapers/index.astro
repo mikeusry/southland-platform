@@ -1,0 +1,105 @@
+---
+/**
+ * /lawn/landscapers/ — Landscapers Collection
+ * Replaces /collections/landscapers/
+ */
+import { getCollection } from 'astro:content'
+import { createClient, getCollectionProducts } from '@southland/shopify-storefront'
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import CloudinaryHero from '../../../components/CloudinaryHero.astro'
+import CollectionGrid from '../../../components/shop/CollectionGrid.astro'
+import AccordionFaq from '../../../components/shop/AccordionFaq.astro'
+import Breadcrumbs from '../../../components/shared/Breadcrumbs.astro'
+
+const HANDLE = 'landscapers'
+
+const allCollections = await getCollection('shopCollections')
+const tinaDoc =
+  allCollections.find(
+    (c) => c.data.handle === HANDLE || c.id.replace(/\.mdx?$/, '') === HANDLE,
+  ) ?? null
+
+const client = createClient({
+  storeDomain: import.meta.env.PUBLIC_SHOPIFY_STORE_DOMAIN,
+  publicAccessToken: import.meta.env.PUBLIC_SHOPIFY_STOREFRONT_TOKEN,
+})
+const shopifyCollection = await getCollectionProducts(client, HANDLE)
+
+if (!shopifyCollection) {
+  return Astro.redirect('/')
+}
+
+const title = tinaDoc?.data.title || shopifyCollection.title
+const seoDescription =
+  tinaDoc?.data.seoDescription ||
+  shopifyCollection.description ||
+  `Shop ${title} from Southland Organics.`
+const heroHeadline = tinaDoc?.data.heroHeadline || undefined
+const heroSubheadline = tinaDoc?.data.heroSubheadline || undefined
+const faq = tinaDoc?.data.faq ?? []
+const heroImage = tinaDoc?.data.heroImage ?? null
+const Content = tinaDoc ? (await tinaDoc.render()).Content : null
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+const canonicalUrl = `${siteUrl}/lawn/landscapers/`
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: title,
+  description: seoDescription,
+  url: canonicalUrl,
+}
+const faqSchema =
+  faq.length > 0
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faq.map((item) => ({
+          '@type': 'Question',
+          name: item.question,
+          acceptedAnswer: { '@type': 'Answer', text: item.answer },
+        })),
+      }
+    : null
+const fullSchema = faqSchema ? [schema, faqSchema] : schema
+---
+
+<BaseLayout
+  title={title}
+  description={seoDescription}
+  schema={fullSchema}
+  canonicalUrl={canonicalUrl}
+>
+  {heroImage && <CloudinaryHero publicId={heroImage} alt={title} />}
+  <main class="mx-auto max-w-7xl px-4 py-8">
+    <Breadcrumbs
+      items={[
+        { label: 'Lawn & Garden', href: '/lawn/' },
+        { label: title },
+      ]}
+    />
+    <h1 class="font-heading text-3xl text-brand-dark mb-2">
+      {heroHeadline || title}
+    </h1>
+    {heroSubheadline && (
+      <p class="text-lg text-gray-600 mb-8">{heroSubheadline}</p>
+    )}
+
+    {Content && (
+      <div class="prose prose-green max-w-none mb-12">
+        <Content />
+      </div>
+    )}
+
+    <CollectionGrid products={shopifyCollection.products} />
+
+    {faq.length > 0 && (
+      <section class="mt-16">
+        <h2 class="font-heading text-2xl text-brand-dark mb-6">
+          Frequently Asked Questions
+        </h2>
+        <AccordionFaq items={faq} />
+      </section>
+    )}
+  </main>
+</BaseLayout>

@@ -1,0 +1,1696 @@
+---
+/**
+ * Persona Command Center — Detail Page
+ * /admin/personas/[slug]/
+ *
+ * War room for a single persona: profile, JTBD coverage, page inventory,
+ * plays, copy sandbox, and CDP placeholders.
+ */
+
+import AdminLayout from '../../../layouts/AdminLayout.astro'
+import {
+  getPersona,
+  getJTBDCoverage,
+  getNextBestMove,
+  PERSONAS,
+} from '../../../lib/persona-profiles'
+import { PAGE_GROUPS } from '../../../lib/site-audit-pages'
+import { getCollection } from 'astro:content'
+
+export const prerender = true
+
+export function getStaticPaths() {
+  return PERSONAS.map((p) => ({ params: { slug: p.slug } }))
+}
+
+const { slug } = Astro.params
+const persona = getPersona(slug!)
+
+if (!persona) {
+  return Astro.redirect('/admin/personas/')
+}
+
+const coverage = getJTBDCoverage(persona)
+const nextMove = getNextBestMove(persona)
+
+// CDP metrics — populated when persona-metrics.json exists
+// Generate with: cd mothership && node scripts/cdp/persona-metrics.js --json > ../southland-platform/apps/astro-content/src/data/persona-metrics.json
+const cdpMetrics: any = null
+const cdpPlay: any = null
+const hasCDPData = false
+
+// Relative date helper
+function relativeDate(dateStr: string): string {
+  const now = new Date('2026-03-22')
+  const then = new Date(dateStr)
+  const diffMs = now.getTime() - then.getTime()
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+  if (diffDays === 0) return 'today'
+  if (diffDays === 1) return '1 day ago'
+  if (diffDays < 30) return `${diffDays} days ago`
+  if (diffDays < 60) return '1 month ago'
+  return `${Math.floor(diffDays / 30)} months ago`
+}
+
+// Page inventory — static pages + blog posts via centralized inference
+import { inferPersonaFromBlog, isUntagged } from '../../../lib/persona-inference'
+
+const staticPersonaPages = PAGE_GROUPS.flatMap((g) => g.pages)
+  .filter((p) => p.persona === slug)
+  .map((p) => ({ ...p, source: 'page', confidence: 'high' }))
+
+let blogEntries: any[] = []
+try {
+  blogEntries = await getCollection('blog', ({ data }: any) => data.draft !== true)
+} catch (e) {
+  console.warn('[personas] Failed to fetch blog collection:', e)
+}
+
+const filteredBlog = blogEntries.filter((e: any) => {
+  const match = inferPersonaFromBlog(e.data.tags || [], e.data.segment || 'general')
+  return match ? match.persona === slug : false
+})
+filteredBlog.sort((a: any, b: any) => {
+  return new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
+})
+const allPersonaBlogPosts = filteredBlog.map((e: any) => {
+  const s = e.id.replace(/\.mdx?$/, '')
+  return {
+    name: e.data.title,
+    route: '/blog/' + s + '/',
+    pageType: 'content',
+    funnelStage: e.data.funnelStage || 'awareness',
+    pipeline: 'shipped',
+    persona: slug,
+    source: 'blog',
+    confidence: 'medium',
+  }
+})
+
+// Cap blog display at 25, show count of remaining
+const LINEUP_CAP = 25
+const cappedBlogPosts = allPersonaBlogPosts.slice(0, LINEUP_CAP)
+const hiddenBlogCount = allPersonaBlogPosts.length - cappedBlogPosts.length
+const totalBlogCount = allPersonaBlogPosts.length
+const hasBlogPosts = totalBlogCount > 0
+
+// Untagged posts backlog
+const untaggedCount = blogEntries.filter((e: any) => isUntagged(e.data.tags || [])).length
+
+const allPersonaPages = [...staticPersonaPages, ...cappedBlogPosts]
+
+const awarenessPages = allPersonaPages.filter((p) => p.funnelStage === 'awareness')
+const considerationPages = allPersonaPages.filter((p) => p.funnelStage === 'consideration')
+const purchasePages = allPersonaPages.filter((p) => p.funnelStage === 'purchase')
+const postPurchasePages = allPersonaPages.filter((p) => p.funnelStage === 'post-purchase')
+
+// JTBD gaps for page inventory
+const jtbdGaps = persona.jtbd.filter((j) => j.status === 'gap')
+
+// Funnel stage groups for iteration
+const funnelGroups = [
+  { label: 'Awareness', pages: awarenessPages },
+  { label: 'Consideration', pages: considerationPages },
+  { label: 'Purchase', pages: purchasePages },
+  { label: 'Post-purchase', pages: postPurchasePages },
+]
+
+// Mission progress
+const missionProgress = persona.mission.target > 0
+  ? Math.round((persona.mission.done / persona.mission.target) * 100)
+  : 0
+
+// Coverage percentages for the segmented bar
+const coveredPct = coverage.total > 0 ? (coverage.covered / coverage.total) * 100 : 0
+const partialPct = coverage.total > 0 ? (coverage.partial / coverage.total) * 100 : 0
+const gapPct = coverage.total > 0 ? (coverage.gap / coverage.total) * 100 : 0
+
+// Pipeline label helper
+function pipelineLabel(pipeline?: string): string {
+  const map: Record<string, string> = {
+    'no-copy': 'No Copy',
+    'copy-draft': 'Copy Draft',
+    'copy-approved': 'Copy Approved',
+    'built': 'Built',
+    'design-review': 'Design Review',
+    'shipped': 'Shipped',
+  }
+  return pipeline ? map[pipeline] || pipeline : 'Not started'
+}
+
+function pipelineClass(pipeline?: string): string {
+  if (!pipeline) return 'badge-neutral'
+  if (pipeline === 'shipped') return 'badge-success'
+  if (pipeline === 'built' || pipeline === 'design-review') return 'badge-warning'
+  return 'badge-neutral'
+}
+---
+
+<AdminLayout title={`${persona.name} Command Center`} activeNav="/admin/personas">
+
+  <!-- ================================================================== -->
+  <!-- SECTION 1: Mission Banner                                          -->
+  <!-- ================================================================== -->
+  <div class="mission-banner" style={`background: ${persona.bgColor}; border-left: 4px solid ${persona.color};`}>
+    <div class="mission-content">
+      <div class="mission-label" style={`color: ${persona.color};`}>MISSION (next 30 days)</div>
+      <div class="mission-text">{persona.mission.text}</div>
+      <div class="mission-meta">
+        <span class="mission-deadline">Deadline: {persona.mission.deadline}</span>
+      </div>
+    </div>
+    <div class="mission-progress">
+      <div class="mission-progress-label">{persona.mission.done}/{persona.mission.target} assets shipped</div>
+      <div class="mission-progress-bar">
+        <div class="mission-progress-fill" style={`width: ${missionProgress}%; background: ${persona.color};`}></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================== -->
+  <!-- SECTION 2: Narrative + JTBD Meter                                  -->
+  <!-- ================================================================== -->
+  <section class="section">
+    <div class="section-header">Narrative + JTBD Coverage</div>
+
+    <div class="narrative-callout" style={`border-left: 3px solid ${persona.color};`}>
+      {persona.narrative}
+    </div>
+
+    <div class="jtbd-meter">
+      <div class="jtbd-meter-header">
+        <span class="jtbd-meter-title">Jobs covered: {coverage.covered} / {coverage.total}</span>
+        <span class="jtbd-meter-breakdown">
+          <span class="jtbd-legend-dot" style="background: #16a34a;"></span> {coverage.covered} covered
+          <span class="jtbd-legend-dot" style="background: #f59e0b;"></span> {coverage.partial} partial
+          <span class="jtbd-legend-dot" style="background: #ef4444;"></span> {coverage.gap} gap
+        </span>
+      </div>
+      <div class="jtbd-bar">
+        {coveredPct > 0 && (
+          <div class="jtbd-bar-segment jtbd-bar-covered" style={`flex: ${coveredPct};`}></div>
+        )}
+        {partialPct > 0 && (
+          <div class="jtbd-bar-segment jtbd-bar-partial" style={`flex: ${partialPct};`}></div>
+        )}
+        {gapPct > 0 && (
+          <div class="jtbd-bar-segment jtbd-bar-gap" style={`flex: ${gapPct};`}></div>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- SECTION 3: Last Touched Activity Strip                             -->
+  <!-- ================================================================== -->
+  <section class="section">
+    <div class="section-header">Last Touched</div>
+
+    {persona.lastActivity.length > 0 ? (
+      <div class="activity-strip">
+        {persona.lastActivity.map((act) => (
+          <div class="activity-item">
+            <span class="activity-label">{act.label}</span>
+            <span class="activity-date">({relativeDate(act.date)})</span>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div class="activity-strip">
+        <div class="activity-item activity-empty">No activity recorded yet for {persona.name}.</div>
+      </div>
+    )}
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- SECTION 4: Stats Row                                               -->
+  <!-- ================================================================== -->
+  <section class="section">
+    <div class="section-header">Key Stats</div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value">{Math.round(persona.weight * 100)}%</div>
+        <div class="stat-label">Weight</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{persona.customerCount.toLocaleString()}</div>
+        <div class="stat-label">Customer Count</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">${persona.avgLTV.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+        <div class="stat-label">Avg LTV</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{persona.revenueGoalPct}%</div>
+        <div class="stat-label">Revenue Goal Share</div>
+      </div>
+    </div>
+
+    <div class="stat-lander-link">
+      <a href={persona.landerUrl} class="btn btn-secondary">View {persona.name} Lander &rarr;</a>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- SECTION 5: Funnel Snapshot                                          -->
+  <!-- ================================================================== -->
+  <section class="section">
+    <div class="section-header">Funnel Snapshot</div>
+
+    {hasCDPData ? (
+      <div class="cdp-metrics-grid">
+        <div class="cdp-metric">
+          <div class="cdp-metric-value">{cdpMetrics.customerCount}</div>
+          <div class="cdp-metric-label">Customers</div>
+        </div>
+        <div class="cdp-metric">
+          <div class="cdp-metric-value">{cdpMetrics.active90d}</div>
+          <div class="cdp-metric-label">Active (90d)</div>
+        </div>
+        <div class="cdp-metric">
+          <div class="cdp-metric-value">{cdpMetrics.repeatBuyers}</div>
+          <div class="cdp-metric-label">Repeat Buyers</div>
+        </div>
+        <div class="cdp-metric">
+          <div class="cdp-metric-value">{cdpMetrics.repeatRatePct}%</div>
+          <div class="cdp-metric-label">Repeat Rate</div>
+        </div>
+        <div class="cdp-metric">
+          <div class="cdp-metric-value">{cdpMetrics.dormant60_180d}</div>
+          <div class="cdp-metric-label">Dormant (60-180d)</div>
+        </div>
+        <div class="cdp-metric">
+          <div class="cdp-metric-value">{cdpMetrics.dormant180Plus}</div>
+          <div class="cdp-metric-label">Dormant (180d+)</div>
+        </div>
+        <div class="cdp-metric">
+          <div class="cdp-metric-value">${cdpMetrics.totalRevenue?.toLocaleString()}</div>
+          <div class="cdp-metric-label">Total Revenue</div>
+        </div>
+        <div class="cdp-metric">
+          <div class="cdp-metric-value">{cdpMetrics.avgDaysSinceOrder}d</div>
+          <div class="cdp-metric-label">Avg Days Since Order</div>
+        </div>
+      </div>
+    ) : (
+      <div class="placeholder-card">
+        <div class="placeholder-icon">&#x1F50C;</div>
+        <div class="placeholder-text">Run <code>node scripts/cdp/persona-metrics.js --json</code> in mothership to populate.</div>
+        <details class="placeholder-details">
+          <summary>What this will unlock</summary>
+          <ul>
+            <li>Customer count, active/dormant split, repeat rate</li>
+            <li>Total revenue, avg days since order</li>
+            <li>Play target sizing with real numbers</li>
+          </ul>
+        </details>
+      </div>
+    )}
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- SECTION 6: Radar Chart (PLACEHOLDER)                               -->
+  <!-- ================================================================== -->
+  <section class="section">
+    <div class="section-header">Coverage Radar</div>
+
+    <div class="placeholder-card">
+      <div class="placeholder-icon">&#x1F50C;</div>
+      <div class="placeholder-text">Radar chart: Are we serving {persona.name} evenly?</div>
+      <p class="placeholder-note">6 spokes: Awareness, Consideration, Purchase, Post-purchase, E-E-A-T/Trust, Technical Quality. Derived from site audit badges on persona-tagged pages.</p>
+      <details class="placeholder-details">
+        <summary>What this will unlock</summary>
+        <ul>
+          <li>Visual balance check across funnel stages</li>
+          <li>Spot overweight awareness vs underweight post-purchase</li>
+          <li>Weighted by traffic and revenue when CDP data available</li>
+        </ul>
+      </details>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- SECTION 7: Demographics                                            -->
+  <!-- ================================================================== -->
+  <section class="section">
+    <div class="section-header">Demographics</div>
+
+    <div class="demo-grid">
+      <div class="demo-item">
+        <div class="demo-label">Age</div>
+        <div class="demo-value">{persona.demographics.age}</div>
+      </div>
+      <div class="demo-item">
+        <div class="demo-label">Income</div>
+        <div class="demo-value">{persona.demographics.income}</div>
+      </div>
+      <div class="demo-item">
+        <div class="demo-label">Location</div>
+        <div class="demo-value">{persona.demographics.location}</div>
+      </div>
+      <div class="demo-item">
+        <div class="demo-label">Operation</div>
+        <div class="demo-value">{persona.demographics.operation}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- SECTION 8: Values & Fears                                          -->
+  <!-- ================================================================== -->
+  <section class="section">
+    <div class="section-header">Values &amp; Fears</div>
+
+    <div class="two-col">
+      <div class="col-card">
+        <div class="col-card-title">Values</div>
+        <ul class="col-list">
+          {persona.values.map((v) => (
+            <li>{v}</li>
+          ))}
+        </ul>
+      </div>
+      <div class="col-card">
+        <div class="col-card-title">Fears</div>
+        <ul class="col-list">
+          {persona.fears.map((f) => (
+            <li>{f}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- SECTION 9: Pain Points + JTBD Detail                               -->
+  <!-- ================================================================== -->
+  <section class="section">
+    <div class="section-header">Pain Points + Jobs to Be Done</div>
+
+    {nextMove && (
+      <div class="next-move-callout" style={`border-left: 3px solid ${persona.color};`}>
+        <div class="next-move-label">Next Best Move</div>
+        <div class="next-move-text">
+          For {persona.name} this week: Fill JTBD {nextMove.status === 'gap' ? 'gap' : 'partial gap'} &ldquo;{nextMove.statement}&rdquo; with a mid-funnel article.
+        </div>
+      </div>
+    )}
+
+    <div class="pain-points-box">
+      <div class="col-card-title">Pain Points</div>
+      <ul class="col-list">
+        {persona.painPoints.map((pp) => (
+          <li>{pp}</li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="jtbd-detail">
+      <div class="col-card-title">JTBD Checklist</div>
+      <div class="jtbd-list">
+        {persona.jtbd.map((job) => (
+          <div class="jtbd-item">
+            <span class={`jtbd-status-icon jtbd-status-${job.status}`}>
+              {job.status === 'covered' ? '\u2713' : job.status === 'partial' ? '\u25CB' : '\u2717'}
+            </span>
+            <span class="jtbd-statement">{job.statement}</span>
+            <span class={`badge ${job.status === 'covered' ? 'badge-success' : job.status === 'partial' ? 'badge-warning' : 'badge-error'}`}>
+              {job.status}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- SECTION 10: Buying Triggers & Objections                           -->
+  <!-- ================================================================== -->
+  <section class="section">
+    <div class="section-header">Buying Triggers &amp; Objections</div>
+
+    <div class="two-col">
+      <div class="col-card">
+        <div class="col-card-title">Buying Triggers</div>
+        <ul class="col-list">
+          {persona.buyingTriggers.map((bt) => (
+            <li>{bt}</li>
+          ))}
+        </ul>
+      </div>
+      <div class="col-card">
+        <div class="col-card-title">Objections</div>
+        <ul class="col-list">
+          {persona.objections.map((obj) => (
+            <li>{obj}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- SECTION 11: Trust Hierarchy                                        -->
+  <!-- ================================================================== -->
+  <section class="section">
+    <div class="section-header">Trust Hierarchy</div>
+
+    <div class="trust-list-card">
+      <ol class="trust-list">
+        {persona.trustHierarchy.map((item) => (
+          <li>{item}</li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- SECTION 12: Communication, Language & Copy Sandbox                  -->
+  <!-- ================================================================== -->
+  <section class="section">
+    <div class="section-header">Communication, Language &amp; Copy Sandbox</div>
+
+    <div class="two-col">
+      <div class="col-card">
+        <div class="col-card-title">Preferred Channels</div>
+        <ul class="col-list">
+          {persona.preferredChannels.map((ch) => (
+            <li>{ch}</li>
+          ))}
+        </ul>
+      </div>
+      <div class="col-card">
+        <div class="col-card-title">Content Preferences</div>
+        <ul class="col-list">
+          {persona.contentPreferences.map((cp) => (
+            <li>{cp}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <div class="language-section">
+      <div class="col-card-title">Language Rules</div>
+      <table class="language-table">
+        <thead>
+          <tr>
+            <th class="lang-use-header">Use</th>
+            <th class="lang-avoid-header">Avoid</th>
+          </tr>
+        </thead>
+        <tbody>
+          {Array.from({ length: Math.max(persona.languageRules.use.length, persona.languageRules.avoid.length) }).map((_, i) => (
+            <tr>
+              <td class="lang-use-cell">{persona.languageRules.use[i] || ''}</td>
+              <td class="lang-avoid-cell">{persona.languageRules.avoid[i] || ''}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="skepticism-section">
+      <div class="col-card-title">Skepticism Triggers</div>
+      <ul class="col-list">
+        {persona.skepticismTriggers.map((st) => (
+          <li>{st}</li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="copy-sandbox-section">
+      <div class="col-card-title">Copy Sandbox</div>
+      <p class="sandbox-description">Paste a draft headline or intro below. The checklist will light up based on {persona.name}&apos;s language rules.</p>
+      <textarea
+        id="copy-sandbox-input"
+        class="sandbox-textarea"
+        placeholder={`Paste draft copy for ${persona.name} here...`}
+        rows="4"
+      ></textarea>
+      <div class="sandbox-rules-grid">
+        <div class="sandbox-rules-col">
+          <div class="sandbox-rules-title sandbox-use-title">Use words found</div>
+          <div id="sandbox-use-results" class="sandbox-results">
+            {persona.languageRules.use.map((word) => (
+              <div class="sandbox-rule-item" data-sandbox-use={word.toLowerCase()}>
+                <span class="sandbox-rule-icon sandbox-rule-inactive">&mdash;</span>
+                <span class="sandbox-rule-word">{word}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div class="sandbox-rules-col">
+          <div class="sandbox-rules-title sandbox-avoid-title">Avoid words found</div>
+          <div id="sandbox-avoid-results" class="sandbox-results">
+            {persona.languageRules.avoid.map((word) => (
+              <div class="sandbox-rule-item" data-sandbox-avoid={word.toLowerCase()}>
+                <span class="sandbox-rule-icon sandbox-rule-inactive">&mdash;</span>
+                <span class="sandbox-rule-word">{word}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- SECTION 13: Top Products + Persona x Product Matrix                 -->
+  <!-- ================================================================== -->
+  <section class="section">
+    <div class="section-header">Top Products</div>
+
+    <div class="product-cards">
+      {persona.topProducts.map((prod) => (
+        <div class="product-card">
+          <span class="product-name">{prod.name}</span>
+          <span class="product-handle">{prod.handle}</span>
+          {prod.roas && <span class="product-roas">{prod.roas}x ROAS</span>}
+        </div>
+      ))}
+    </div>
+
+    <div class="placeholder-card" style="margin-top: 16px;">
+      <div class="placeholder-icon">&#x1F50C;</div>
+      <div class="placeholder-text">Persona x Product Matrix</div>
+      <p class="placeholder-note">Cross-persona view showing which products are heroes for whom. Surfaces white space where a persona&apos;s JTBD has no strong product match.</p>
+      <details class="placeholder-details">
+        <summary>What this will unlock</summary>
+        <ul>
+          <li>Matrix of all 3 personas vs all products with revenue data</li>
+          <li>Identify products with no persona champion</li>
+          <li>Surface JTBD-product gaps for new content</li>
+        </ul>
+      </details>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- SECTION 14: Page Inventory ("The Lineup")                           -->
+  <!-- ================================================================== -->
+  <section class="section">
+    <div class="section-header">The Lineup &mdash; Page Inventory</div>
+    <p class="section-description">
+      {staticPersonaPages.length + totalBlogCount} pages serving {persona.name}
+      {hasBlogPosts ? ` (${totalBlogCount} blog, ${staticPersonaPages.length} site)` : ''}.
+      {hiddenBlogCount > 0 ? ` Showing top ${LINEUP_CAP} blog posts by date.` : ''}
+    </p>
+
+    {!hasBlogPosts && slug === 'betty' && (
+      <div class="lineup-notice">
+        No blog posts explicitly targeting Backyard Betty yet. Add a <code>Backyard Poultry</code> tag to blog posts written for small flock owners.
+      </div>
+    )}
+
+    {!hasBlogPosts && !allPersonaBlogPosts.length && slug !== 'betty' && (
+      <div class="lineup-notice">
+        No blog posts matched for {persona.name}. Posts are matched by tags ({slug === 'taylor' ? 'Turf' : 'Poultry'}).
+      </div>
+    )}
+
+    <table class="lineup-table">
+      <thead>
+        <tr>
+          <th class="lt-page">Page</th>
+          <th class="lt-route">Route</th>
+          <th class="lt-source">Source</th>
+          <th class="lt-type">Type</th>
+          <th class="lt-pipeline">Pipeline</th>
+          <th class="lt-health">Health</th>
+        </tr>
+      </thead>
+      <tbody>
+        {funnelGroups.map((group) => (
+          <>
+            <tr class="lt-stage-row">
+              <td colspan="6">
+                <span class="lt-stage-label">{group.label}</span>
+                <span class="lt-stage-count">{group.pages.length}</span>
+              </td>
+            </tr>
+            {group.pages.length > 0 ? (
+              group.pages.map((page) => (
+                <tr class="lt-page-row">
+                  <td class="lt-page">
+                    <a href={page.route} target="_blank">{page.name}</a>
+                  </td>
+                  <td class="lt-route"><code>{page.route}</code></td>
+                  <td class="lt-source">
+                    <span class={`source-label source-${page.source}`}>{page.source}</span>
+                  </td>
+                  <td class="lt-type">{page.pageType}</td>
+                  <td class="lt-pipeline">
+                    <span class={`pipeline-text ${pipelineClass(page.pipeline)}`}>
+                      {pipelineLabel(page.pipeline)}
+                    </span>
+                  </td>
+                  <td class="lt-health">&mdash;</td>
+                </tr>
+              ))
+            ) : (
+              <tr class="lt-empty-row">
+                <td colspan="6">No pages at this stage yet.</td>
+              </tr>
+            )}
+            {jtbdGaps.map((gap) => (
+              <tr class="lt-gap-row">
+                <td colspan="6">No content for: &ldquo;{gap.statement}&rdquo;</td>
+              </tr>
+            ))}
+          </>
+        ))}
+      </tbody>
+    </table>
+
+    {hiddenBlogCount > 0 && (
+      <div class="lineup-more">
+        + {hiddenBlogCount} more blog posts not shown. <a href="/admin/site-audit">View all in Site Audit</a>
+      </div>
+    )}
+
+    {untaggedCount > 0 && (
+      <div class="lineup-untagged">
+        {untaggedCount} blog posts have no tags and can't be assigned to any persona.
+      </div>
+    )}
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- SECTION 15: Plays                                                   -->
+  <!-- ================================================================== -->
+  <section class="section">
+    <div class="section-header">Plays</div>
+
+    <div class="plays-grid">
+      {persona.plays.map((play) => (
+        <div class="play-card">
+          <div class="play-title">{play.title}</div>
+          <div class="play-description">{play.description}</div>
+          <div class="play-estimates">
+            {play.targetEstimate && (
+              <span class="play-estimate-item">
+                <span class="play-estimate-label">Target:</span> {play.targetEstimate}
+              </span>
+            )}
+            {play.expectedLift && (
+              <span class="play-estimate-item">
+                <span class="play-estimate-label">Expected lift:</span> {play.expectedLift}
+              </span>
+            )}
+          </div>
+          <div class="play-actions">
+            <button class="btn btn-secondary" disabled>Export Audience</button>
+            <button class="btn btn-secondary" disabled>Generate Brief</button>
+            <button class="btn btn-secondary" disabled>Create UTM Bundle</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- SECTION 16: Persona Drift + Message Winners (PLACEHOLDERS)          -->
+  <!-- ================================================================== -->
+  <section class="section">
+    <div class="section-header">Persona Drift &amp; Message Winners</div>
+
+    <div class="two-col">
+      <div class="placeholder-card">
+        <div class="placeholder-icon">&#x1F50C;</div>
+        <div class="placeholder-text">Persona Drift</div>
+        <p class="placeholder-note">X% of {persona.name} sessions in last 90d browsed other persona content.</p>
+        <details class="placeholder-details">
+          <summary>What this will unlock</summary>
+          <ul>
+            <li>Drift percentage showing cross-persona browsing</li>
+            <li>Which other persona content {persona.name} visitors consume</li>
+            <li>Signals for persona misclassification or multi-persona customers</li>
+          </ul>
+        </details>
+      </div>
+      <div class="placeholder-card">
+        <div class="placeholder-icon">&#x1F50C;</div>
+        <div class="placeholder-text">Message Winners</div>
+        <p class="placeholder-note">Top-performing phrases and angles for {persona.name}.</p>
+        <details class="placeholder-details">
+          <summary>What this will unlock</summary>
+          <ul>
+            <li>Best-performing ad headlines by CTR and conversion</li>
+            <li>Email subject lines with highest open rates</li>
+            <li>Blog titles driving the most organic traffic</li>
+            <li>Copy patterns to replicate across channels</li>
+          </ul>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Copy Sandbox Script -->
+  <script is:inline>
+    ;(function () {
+      var textarea = document.getElementById('copy-sandbox-input')
+      if (!textarea) return
+
+      var useItems = document.querySelectorAll('[data-sandbox-use]')
+      var avoidItems = document.querySelectorAll('[data-sandbox-avoid]')
+
+      textarea.addEventListener('input', function () {
+        var text = textarea.value.toLowerCase()
+
+        useItems.forEach(function (el) {
+          var word = el.getAttribute('data-sandbox-use')
+          var icon = el.querySelector('.sandbox-rule-icon')
+          if (text.indexOf(word) !== -1) {
+            icon.textContent = '\u2713'
+            icon.className = 'sandbox-rule-icon sandbox-rule-found-use'
+          } else {
+            icon.textContent = '\u2014'
+            icon.className = 'sandbox-rule-icon sandbox-rule-inactive'
+          }
+        })
+
+        avoidItems.forEach(function (el) {
+          var word = el.getAttribute('data-sandbox-avoid')
+          var icon = el.querySelector('.sandbox-rule-icon')
+          if (text.indexOf(word) !== -1) {
+            icon.textContent = '\u2717'
+            icon.className = 'sandbox-rule-icon sandbox-rule-found-avoid'
+          } else {
+            icon.textContent = '\u2014'
+            icon.className = 'sandbox-rule-icon sandbox-rule-inactive'
+          }
+        })
+      })
+    })()
+  </script>
+
+</AdminLayout>
+
+<style>
+  /* ====================================================================
+   * GLOBAL SECTION STYLES
+   * ==================================================================== */
+  .section {
+    margin-bottom: 32px;
+  }
+
+  .section-header {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-tertiary);
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .section-description {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+  }
+
+  /* ====================================================================
+   * SECTION 1: Mission Banner
+   * ==================================================================== */
+  .mission-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 16px 20px;
+    border-radius: var(--radius);
+    margin-bottom: 28px;
+  }
+
+  .mission-content {
+    flex: 1;
+  }
+
+  .mission-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    margin-bottom: 4px;
+  }
+
+  .mission-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .mission-meta {
+    margin-top: 6px;
+  }
+
+  .mission-deadline {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .mission-progress {
+    min-width: 180px;
+    text-align: right;
+  }
+
+  .mission-progress-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .mission-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .mission-progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+  }
+
+  /* ====================================================================
+   * SECTION 2: Narrative + JTBD Meter
+   * ==================================================================== */
+  .narrative-callout {
+    background: var(--surface);
+    padding: 14px 18px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  .jtbd-meter {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+  }
+
+  .jtbd-meter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .jtbd-meter-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .jtbd-meter-breakdown {
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .jtbd-legend-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-left: 8px;
+  }
+
+  .jtbd-bar {
+    display: flex;
+    height: 12px;
+    border-radius: 6px;
+    overflow: hidden;
+    gap: 2px;
+  }
+
+  .jtbd-bar-segment {
+    border-radius: 6px;
+    min-width: 4px;
+  }
+
+  .jtbd-bar-covered {
+    background: #16a34a;
+  }
+
+  .jtbd-bar-partial {
+    background: #f59e0b;
+  }
+
+  .jtbd-bar-gap {
+    background: #ef4444;
+  }
+
+  /* ====================================================================
+   * SECTION 3: Activity Strip
+   * ==================================================================== */
+  .activity-strip {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .activity-item {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+
+  .activity-label {
+    color: var(--text);
+  }
+
+  .activity-date {
+    color: var(--text-tertiary);
+    font-size: 12px;
+  }
+
+  .activity-empty {
+    color: var(--text-tertiary);
+    font-style: italic;
+  }
+
+  /* ====================================================================
+   * SECTION 4: Stats Row
+   * ==================================================================== */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .stat-lander-link {
+    margin-top: 8px;
+  }
+
+  /* ====================================================================
+   * SECTION 5 & 6 & 16: Placeholder Cards
+   * ==================================================================== */
+  .placeholder-card {
+    background: var(--surface-alt);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+  }
+
+  .placeholder-icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+    opacity: 0.5;
+  }
+
+  .placeholder-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+
+  .placeholder-note {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-bottom: 12px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .placeholder-details {
+    text-align: left;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .placeholder-details summary {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent);
+    cursor: pointer;
+    margin-bottom: 8px;
+  }
+
+  .placeholder-details ul {
+    list-style: disc;
+    padding-left: 20px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  /* ====================================================================
+   * SECTION 7: Demographics
+   * ==================================================================== */
+  .demo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .demo-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+  }
+
+  .demo-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-tertiary);
+    margin-bottom: 4px;
+  }
+
+  .demo-value {
+    font-size: 14px;
+    color: var(--text);
+  }
+
+  /* ====================================================================
+   * SECTION 8, 10: Two-column layouts
+   * ==================================================================== */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .col-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+  }
+
+  .col-card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+
+  .col-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .col-list li {
+    font-size: 13px;
+    color: var(--text-secondary);
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border-subtle);
+    line-height: 1.4;
+  }
+
+  .col-list li:last-child {
+    border-bottom: none;
+  }
+
+  /* ====================================================================
+   * SECTION 9: Pain Points + JTBD Detail
+   * ==================================================================== */
+  .next-move-callout {
+    background: var(--surface);
+    padding: 14px 18px;
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+  }
+
+  .next-move-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+
+  .next-move-text {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .pain-points-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+
+  .jtbd-detail {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+  }
+
+  .jtbd-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .jtbd-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .jtbd-item:last-child {
+    border-bottom: none;
+  }
+
+  .jtbd-status-icon {
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .jtbd-status-covered {
+    background: #dcfce7;
+    color: #16a34a;
+  }
+
+  .jtbd-status-partial {
+    background: #fef3c7;
+    color: #f59e0b;
+  }
+
+  .jtbd-status-gap {
+    background: #fee2e2;
+    color: #ef4444;
+  }
+
+  .jtbd-statement {
+    flex: 1;
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  /* ====================================================================
+   * SECTION 11: Trust Hierarchy
+   * ==================================================================== */
+  .trust-list-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+  }
+
+  .trust-list {
+    padding-left: 24px;
+  }
+
+  .trust-list li {
+    font-size: 13px;
+    color: var(--text-secondary);
+    padding: 5px 0;
+    line-height: 1.4;
+  }
+
+  /* ====================================================================
+   * SECTION 12: Communication, Language & Copy Sandbox
+   * ==================================================================== */
+  .language-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-top: 16px;
+  }
+
+  .language-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 8px;
+  }
+
+  .language-table th {
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .lang-use-header {
+    color: #16a34a;
+  }
+
+  .lang-avoid-header {
+    color: #ef4444;
+  }
+
+  .language-table td {
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .lang-use-cell {
+    color: var(--text);
+  }
+
+  .lang-avoid-cell {
+    color: var(--text-secondary);
+  }
+
+  .skepticism-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-top: 16px;
+  }
+
+  .copy-sandbox-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-top: 16px;
+  }
+
+  .sandbox-description {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+  }
+
+  .sandbox-textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font);
+    font-size: 14px;
+    color: var(--text);
+    resize: vertical;
+    margin-bottom: 16px;
+    background: var(--bg);
+  }
+
+  .sandbox-textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(68, 136, 62, 0.1);
+  }
+
+  .sandbox-rules-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .sandbox-rules-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  .sandbox-use-title {
+    color: #16a34a;
+  }
+
+  .sandbox-avoid-title {
+    color: #ef4444;
+  }
+
+  .sandbox-results {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .sandbox-rule-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    padding: 3px 0;
+  }
+
+  .sandbox-rule-icon {
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .sandbox-rule-inactive {
+    background: var(--surface-alt);
+    color: var(--text-tertiary);
+  }
+
+  .sandbox-rule-found-use {
+    background: #dcfce7;
+    color: #16a34a;
+  }
+
+  .sandbox-rule-found-avoid {
+    background: #fee2e2;
+    color: #ef4444;
+  }
+
+  .sandbox-rule-word {
+    color: var(--text-secondary);
+  }
+
+  /* ====================================================================
+   * SECTION 13: Top Products
+   * ==================================================================== */
+  .product-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .product-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 16px;
+  }
+
+  .product-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .product-handle {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+  }
+
+  .product-roas {
+    font-size: 11px;
+    font-weight: 600;
+    color: #16a34a;
+    background: #dcfce7;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  /* ====================================================================
+   * SECTION 14: Page Inventory (The Lineup) — Clean Table
+   * ==================================================================== */
+  .lineup-notice {
+    font-size: 13px;
+    color: #92400e;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .lineup-notice code {
+    background: #fef3c7;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 12px;
+  }
+
+  .lineup-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .lineup-table thead th {
+    text-align: left;
+    padding: 6px 10px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-tertiary);
+    border-bottom: 1px solid var(--border);
+  }
+  .lt-page { min-width: 180px; }
+  .lt-route { min-width: 140px; }
+  .lt-source { width: 60px; text-align: center; }
+  .lt-type { width: 70px; }
+  .lt-pipeline { width: 80px; }
+  .lt-health { width: 55px; text-align: center; }
+
+  .lt-stage-row td {
+    padding: 10px 10px 6px;
+    background: var(--surface-alt);
+    border-bottom: 1px solid var(--border);
+    font-size: 0;
+  }
+  .lt-stage-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text);
+  }
+  .lt-stage-count {
+    font-size: 10px;
+    color: var(--text-tertiary);
+    margin-left: 8px;
+    background: var(--bg);
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+
+  .lt-page-row td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border-subtle);
+    vertical-align: middle;
+  }
+  .lt-page-row:hover td { background: #f8fafc; }
+  .lt-page-row a {
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .lt-page-row a:hover { color: var(--accent); text-decoration: underline; }
+  .lt-page-row code {
+    font-size: 11px;
+    color: var(--text-tertiary);
+  }
+
+  .source-label {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+  .source-page { color: #475569; background: #f1f5f9; }
+  .source-blog { color: #7c3aed; background: #f5f3ff; }
+  .source-collection { color: #0369a1; background: #f0f9ff; }
+
+  .pipeline-text { font-size: 12px; font-weight: 600; }
+  .pipeline-text.stage-shipped { color: #16a34a; }
+  .pipeline-text.stage-built { color: #2563eb; }
+  .pipeline-text.stage-design-review { color: #7c3aed; }
+  .pipeline-text.stage-copy-approved { color: #d97706; }
+  .pipeline-text.stage-copy-draft { color: #9ca3af; }
+  .pipeline-text.stage-no-copy { color: #d4d4d8; }
+
+  .lt-empty-row td {
+    padding: 10px;
+    color: var(--text-tertiary);
+    font-style: italic;
+    font-size: 12px;
+  }
+
+  .lt-gap-row td {
+    padding: 6px 10px;
+    color: #991b1b;
+    font-style: italic;
+    font-size: 12px;
+    background: #fef2f2;
+    border-bottom: 1px solid #fecaca;
+  }
+
+  .lineup-more {
+    padding: 10px 10px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--border);
+  }
+  .lineup-more a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .lineup-more a:hover { text-decoration: underline; }
+
+  .lineup-untagged {
+    margin-top: 12px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: #6b7280;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+  }
+
+  /* ====================================================================
+   * SECTION 15: Plays
+   * ==================================================================== */
+  .plays-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .play-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+
+  .play-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .play-description {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+
+  .play-estimates {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+
+  .play-estimate-item {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .play-estimate-label {
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .play-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .play-actions button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* ====================================================================
+   * RESPONSIVE
+   * ==================================================================== */
+  @media (max-width: 768px) {
+    .mission-banner {
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .mission-progress {
+      min-width: unset;
+      width: 100%;
+      text-align: left;
+    }
+
+    .stats-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .two-col {
+      grid-template-columns: 1fr;
+    }
+
+    .demo-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .sandbox-rules-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .lt-route, .lt-source, .lt-type, .lt-health {
+      display: none;
+    }
+
+    .play-actions {
+      flex-direction: column;
+    }
+
+    .play-actions button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>

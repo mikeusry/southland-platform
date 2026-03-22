@@ -47,6 +47,8 @@ const ASTRO_ROUTES = [
   '/lawn',
   '/turf',
   '/hydroseeders',
+  '/agriculture',
+  '/livestock',
 ]
 
 function isAstroRoute(pathname: string): boolean {
@@ -67,6 +69,27 @@ const REDIRECTS: Record<string, string> = {
   '/pages/hydroseeding': '/hydroseeders/',
   '/lawn/hydroseeders': '/hydroseeders/',
   '/lawn/hydroseeders/': '/hydroseeders/',
+  // Collection → new IA URLs
+  '/collections/golf-courses': '/lawn/golf-courses/',
+  '/collections/golf-courses/': '/lawn/golf-courses/',
+  '/collections/homeowners': '/lawn/homeowners/',
+  '/collections/homeowners/': '/lawn/homeowners/',
+  '/collections/landscapers': '/lawn/landscapers/',
+  '/collections/landscapers/': '/lawn/landscapers/',
+  '/collections/turf': '/lawn/turf-pros/',
+  '/collections/turf/': '/lawn/turf-pros/',
+  '/collections/crops': '/agriculture/crops/',
+  '/collections/crops/': '/agriculture/crops/',
+  '/collections/produce': '/agriculture/produce/',
+  '/collections/produce/': '/agriculture/produce/',
+  '/collections/pig-and-swine-supplements': '/livestock/swine/',
+  '/collections/pig-and-swine-supplements/': '/livestock/swine/',
+  '/collections/sanitizers': '/products/sanitizers/',
+  '/collections/sanitizers/': '/products/sanitizers/',
+  '/collections/waste': '/products/waste-treatment/',
+  '/collections/waste/': '/products/waste-treatment/',
+  '/collections/other': '/',
+  '/collections/other/': '/',
 }
 
 // Module-level cache for partials (persists across requests in same isolate)

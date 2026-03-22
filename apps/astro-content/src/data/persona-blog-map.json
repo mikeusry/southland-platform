@@ -1,0 +1,5652 @@
+{
+  "generatedAt": "2026-03-22T17:35:17.100Z",
+  "total": 296,
+  "scored": 296,
+  "entries": [
+    {
+      "slug": "whats-wrong-with-my-chicken-symptom-guide",
+      "title": "What's Wrong With My Chicken? A Backyard Symptom Guide",
+      "tags": [
+        "Backyard Chickens",
+        "Chicken Health",
+        "Symptoms",
+        "Flock Care"
+      ],
+      "segment": "poultry",
+      "heuristicPersona": "bill",
+      "heuristicSource": "segment",
+      "scores": {
+        "bill": 50,
+        "betty": 63,
+        "taylor": 0
+      },
+      "aligned": true,
+      "confidence": "high",
+      "vecPersona": "betty",
+      "vecScore": 63
+    },
+    {
+      "slug": "backyard-chicken-dosing-guide",
+      "title": "Backyard Chicken Dosing Guide: Exact Amounts for Small Flocks",
+      "tags": [
+        "Backyard Chickens",
+        "Dosing",
+        "Flock Care",
+        "Getting Started"
+      ],
+      "segment": "poultry",
+      "heuristicPersona": "bill",
+      "heuristicSource": "segment",
+      "scores": {
+        "bill": 57,
+        "betty": 56,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 57
+    },
+    {
+      "slug": "new-chicken-owner-first-30-days",
+      "title": "Your First 30 Days With Chickens: A New Owner's Guide",
+      "tags": [
+        "Backyard Chickens",
+        "Getting Started",
+        "New Chicken Owner",
+        "Flock Care"
+      ],
+      "segment": "poultry",
+      "heuristicPersona": "bill",
+      "heuristicSource": "segment",
+      "scores": {
+        "bill": 55,
+        "betty": 61,
+        "taylor": 0
+      },
+      "aligned": true,
+      "confidence": "high",
+      "vecPersona": "betty",
+      "vecScore": 61
+    },
+    {
+      "slug": "how-to-reduce-ammonia-in-poultry-house-naturally",
+      "title": "How to Reduce Ammonia in a Poultry House Naturally",
+      "tags": [
+        "Poultry",
+        "Litter Management",
+        "Ammonia",
+        "Air Quality"
+      ],
+      "segment": "poultry",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 51,
+        "betty": 43,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 51
+    },
+    {
+      "slug": "organic-soil-health-bermuda-grass-fairways",
+      "title": "Organic Soil Health for Bermuda Grass Fairways: A Superintendent's Guide",
+      "tags": [
+        "Turf",
+        "Golf Course",
+        "Soil Health",
+        "Bermuda Grass",
+        "Organic"
+      ],
+      "segment": "turf",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 46,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 46
+    },
+    {
+      "slug": "best-organic-fertilizers-warm-season-grass",
+      "title": "Best Organic Fertilizers for Warm Season Grass: A Practical Comparison Guide",
+      "tags": [
+        "Turf",
+        "Plants & Crops",
+        "Soil Health"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 46,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 46
+    },
+    {
+      "slug": "natural-alternatives-to-chemical-poultry-treatments",
+      "title": "Natural Alternatives to Chemical Poultry House Treatments",
+      "tags": [
+        "Poultry",
+        "Natural Treatments",
+        "Litter Management",
+        "Biosecurity"
+      ],
+      "segment": "poultry",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 58,
+        "betty": 52,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 58
+    },
+    {
+      "slug": "how-to-fix-southern-clay-soil-organically",
+      "title": "How to Fix Southern Clay Soil Organically: A Complete Remediation Guide",
+      "tags": [
+        "Turf",
+        "Soil Health",
+        "Clay Soil",
+        "Organic",
+        "Lawn Care"
+      ],
+      "segment": "turf",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 40,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 40
+    },
+    {
+      "slug": "building-soil-biology-farm-fields",
+      "title": "Building Soil Biology in Farm Fields: A Practical Guide for Row Crop and Pasture Operations",
+      "tags": [
+        "Soil Health",
+        "Plants & Crops",
+        "Agriculture"
+      ],
+      "segment": "agriculture",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 47,
+        "betty": 39,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 47
+    },
+    {
+      "slug": "17909840-2014-the-year-of-family-farming",
+      "title": "2014 The Year of Family Farming",
+      "tags": [
+        "Plants & Crops"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 37,
+        "betty": 41,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 41
+    },
+    {
+      "slug": "a-glimpse-into-a-small-businesss-soul",
+      "title": "Small Business",
+      "tags": [],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 48,
+        "betty": 47,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "bill",
+      "vecScore": 48
+    },
+    {
+      "slug": "chicken-egg-production",
+      "title": "Chicken Egg Production Infographic",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 51,
+        "betty": 54,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 54
+    },
+    {
+      "slug": "dealing-with-mass-mortality-the-emotional-side-of-poultry-farming",
+      "title": "Dealing With Mass Mortality: The Emotional Side of Poultry Farming",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 53,
+        "betty": 47,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 53
+    },
+    {
+      "slug": "gangrenous-dermatitis-in-poultry",
+      "title": "Gangrenous Dermatitis in Poultry",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 57,
+        "betty": 50,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 57
+    },
+    {
+      "slug": "how-smart-lighting-systems-help-create-calmer-more-productive-flocks",
+      "title": "How Smart Lighting Systems Help Create Calmer, More Productive Flocks",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 50,
+        "betty": 50,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 50
+    },
+    {
+      "slug": "sanitize-your-home-to-prevent-foodborne-illness",
+      "title": "Sanitize Your Home to Prevent Foodborne Illness",
+      "tags": [],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 0,
+        "betty": 31,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "betty",
+      "vecScore": 31
+    },
+    {
+      "slug": "tips-and-tricks-for-poultry-farmers-part-8",
+      "title": "Tips and Tricks for Poultry Farmers: Part 8",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 54,
+        "betty": 49,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 54
+    },
+    {
+      "slug": "vitamins-for-chickens-catalyst",
+      "title": "Vitamins for Chickens- Catalyst",
+      "tags": [
+        "Backyard Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "betty",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 48,
+        "betty": 52,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 52
+    },
+    {
+      "slug": "behind-the-equipment-innovative-poultry-products-llc-at-the-sunbelt-ag-expo",
+      "title": "Behind the Equipment: Innovative Poultry Products, LLC at the Sunbelt Ag Expo",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 57,
+        "betty": 46,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 57
+    },
+    {
+      "slug": "7-electrical-best-practices-for-poultry-growers",
+      "title": "7 Electrical Best Practices for Poultry Growers",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 51,
+        "betty": 43,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 51
+    },
+    {
+      "slug": "tips-and-tricks-for-poultry-farmers-part-7",
+      "title": "Tips and Tricks for Poultry Farmers: Part 7",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 52,
+        "betty": 48,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 52
+    },
+    {
+      "slug": "behind-the-equipment-apex-predator-mortality-disposal-at-the-sunbelt-ag-expo",
+      "title": "Behind the Equipment: APEX Predator Mortality Disposal at the Sunbelt Ag Expo",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 60,
+        "betty": 46,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 60
+    },
+    {
+      "slug": "humic-acid-vs-fulvic-acid-key-differences-and-benefits-explained",
+      "title": "Humic Acid vs. Fulvic Acid: Key Differences and Benefits Explained",
+      "tags": [],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 47,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "bill",
+      "vecScore": 47
+    },
+    {
+      "slug": "a-thanksgiving-message-of-gratitude-and-encouragement",
+      "title": "A Thanksgiving Message of Gratitude and Encouragement",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 43,
+        "betty": 43,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 43
+    },
+    {
+      "slug": "a-thanksgiving-reflection-on-hardship-and-gratitude",
+      "title": "A Thanksgiving Reflection on Hardship and Gratitude",
+      "tags": [
+        "Backyard Poultry",
+        "Plants & Crops"
+      ],
+      "segment": "general",
+      "heuristicPersona": "betty",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 33,
+        "betty": 34,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 34
+    },
+    {
+      "slug": "all-about-litter-what-s-really-happening-on-the-poultry-house-floor",
+      "title": "All About Litter: What\u2019s Really Happening on the Poultry House Floor",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 57,
+        "betty": 55,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 57
+    },
+    {
+      "slug": "water-consumption-what-it-indicates-about-bird-health",
+      "title": "Water Consumption: What It Indicates About Bird Health",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 56,
+        "betty": 50,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 56
+    },
+    {
+      "slug": "celebrating-national-farmers-day",
+      "title": "Celebrating National Farmer's Day",
+      "tags": [
+        "Plants & Crops",
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 36,
+        "betty": 33,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 36
+    },
+    {
+      "slug": "celebrating-national-farmer-s-day",
+      "title": "Celebrating National Farmer\u2019s Day",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 43,
+        "betty": 36,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 43
+    },
+    {
+      "slug": "normalization-of-deviance-why-details-matter-in-poultry-farming",
+      "title": "Normalization of Deviance: Why Details Matter in Poultry Farming",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 57,
+        "betty": 52,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 57
+    },
+    {
+      "slug": "tips-and-tricks-for-poultry-farmers-part-6",
+      "title": "Tips and Tricks for Poultry Farmers: Part 6",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 58,
+        "betty": 53,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 58
+    },
+    {
+      "slug": "behind-the-equipment-lvi-enterprises-at-the-southern-farm-show",
+      "title": "Behind the Equipment: LVI Enterprises at the Southern Farm Show",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 51,
+        "betty": 41,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 51
+    },
+    {
+      "slug": "ftc-v-john-deere-why-this-lawsuit-hits-home-for-poultry-farmers",
+      "title": "FTC v. John Deere: Why This Lawsuit Hits Home for Poultry Farmers",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 54,
+        "betty": 47,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 54
+    },
+    {
+      "slug": "behind-the-equipment-harris-moore-at-the-southern-farm-show",
+      "title": "Behind the Equipment: Harris-Moore at the Southern Farm Show",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 50,
+        "betty": 45,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 50
+    },
+    {
+      "slug": "how-to-improve-flock-health-and-egg-quality",
+      "title": "How to Improve Flock Health and Egg Quality",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 60,
+        "betty": 61,
+        "taylor": 0
+      },
+      "aligned": true,
+      "confidence": "high",
+      "vecPersona": "betty",
+      "vecScore": 61
+    },
+    {
+      "slug": "improving-operations-with-the-chicken-reaper",
+      "title": "Improving Operations with the Chicken Reaper",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 57,
+        "betty": 46,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 57
+    },
+    {
+      "slug": "sustainability-in-poultry",
+      "title": "Sustainability in Poultry",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 56,
+        "betty": 48,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 56
+    },
+    {
+      "slug": "understanding-anaerobic-bacteria-in-septic-tanks-a-complete-guide",
+      "title": "Understanding Anaerobic Bacteria in Septic Tanks: A Complete Guide",
+      "tags": [
+        "Waste"
+      ],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 33,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "bill",
+      "vecScore": 33
+    },
+    {
+      "slug": "chicken-gut-microbiome-management",
+      "title": "Chicken Gut Microbiome Management\u00a0",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 60,
+        "betty": 53,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 60
+    },
+    {
+      "slug": "quail-industry-rundown",
+      "title": "Quail Industry Rundown",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 50,
+        "betty": 45,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 50
+    },
+    {
+      "slug": "how-to-manage-poultry-litter-piles-in-your-parking-lot",
+      "title": "How to Manage Poultry Litter Piles in Your Parking Lot",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 50,
+        "betty": 46,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 50
+    },
+    {
+      "slug": "optimal-solutions-for-reduction-in-tss-total-suspended-solids",
+      "title": "Optimal Solutions for Reduction in TSS (Total Suspended Solids)",
+      "tags": [
+        "Waste"
+      ],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 34,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "bill",
+      "vecScore": 34
+    },
+    {
+      "slug": "tips-for-raising-quail-from-an-alabama-game-bird-farmer",
+      "title": "Tips for Raising Quail from an Alabama Game Bird Farmer",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 54,
+        "betty": 52,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 54
+    },
+    {
+      "slug": "new-usda-rules-and-their-impact-on-poultry-growers",
+      "title": "New USDA Rules and Their Impact on Poultry Growers",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 48,
+        "betty": 36,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 48
+    },
+    {
+      "slug": "how-to-keep-your-money-earned-on-the-farm-tax-credits-vs-farm-credits",
+      "title": "How to Keep Your Money Earned on the Farm: Tax Credits vs. Farm Credits",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 47,
+        "betty": 41,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 47
+    },
+    {
+      "slug": "early-disease-detection-in-poultry",
+      "title": "Early Disease Detection in Poultry",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 58,
+        "betty": 55,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 58
+    },
+    {
+      "slug": "5-tips-to-beat-the-heat-as-a-poultry-grower",
+      "title": "5 Tips to Beat the Heat as a Poultry Grower",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 47,
+        "betty": 45,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 47
+    },
+    {
+      "slug": "the-impact-of-chicken-body-temperature-on-feed-conversion-ratio-and-weight-gain",
+      "title": "The Impact of Chicken Body Temperature on Feed Conversion Ratio and Weight Gain",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 53,
+        "betty": 47,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 53
+    },
+    {
+      "slug": "preventing-heat-stroke-in-chickens",
+      "title": "Preventing Heat Stroke in Chickens",
+      "tags": [
+        "Backyard Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "betty",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 43,
+        "betty": 52,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 52
+    },
+    {
+      "slug": "how-to-grow-indoor-plants-with-the-best-indoor-potting-soil",
+      "title": "How to Grow with the Best Soil for Indoor Plants",
+      "tags": [
+        "Plants & Crops"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 0,
+        "betty": 34,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 34
+    },
+    {
+      "slug": "how-to-clean-water-lines-in-poultry-houses",
+      "title": "How to Clean Water Lines in Poultry Houses",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 50,
+        "betty": 47,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 50
+    },
+    {
+      "slug": "keeping-pets-safe-guide-to-weed-killer-and-pet-safety",
+      "title": "Keeping Pets Safe: Guide To Weed Killer and Pet Safety",
+      "tags": [
+        "Plants & Crops",
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 0,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "taylor",
+      "vecScore": 0
+    },
+    {
+      "slug": "how-to-boost-bird-health-through-poultry-vitamins",
+      "title": "How to Boost Bird Health Through Poultry Vitamins",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 56,
+        "betty": 52,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 56
+    },
+    {
+      "slug": "6-ways-to-manage-lawn-heat-stress",
+      "title": "6 Ways to Manage Lawn Heat Stress",
+      "tags": [
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 36,
+        "betty": 32,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 36
+    },
+    {
+      "slug": "managing-chicken-leg-problems",
+      "title": "Managing Chicken Leg Problems",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 50,
+        "betty": 50,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 50
+    },
+    {
+      "slug": "tips-and-tricks-for-poultry-farmers-part-five",
+      "title": "Tips and Tricks for Poultry Farmers: Part Five",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 56,
+        "betty": 55,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 56
+    },
+    {
+      "slug": "a-natural-alternative-to-conventional-nitrogen-fertilizer-for-plants",
+      "title": "A Natural Alternative to Conventional Nitrogen Fertilizer for Plants",
+      "tags": [
+        "Plants & Crops",
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 38,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 38
+    },
+    {
+      "slug": "fulvic-acid-for-plants-the-missing-ingredient-in-your-diy-lawn-and-garden-care-program",
+      "title": "Fulvic Acid for Plants: The Missing Ingredient in your DIY Lawn and Garden Care Program",
+      "tags": [
+        "Plants & Crops"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 0,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "taylor",
+      "vecScore": 0
+    },
+    {
+      "slug": "clostridial-dermatitis-in-turkeys",
+      "title": "Clostridial Dermatitis in Turkeys: Identify, React and Prevent",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 50,
+        "betty": 44,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 50
+    },
+    {
+      "slug": "poultry-farmers-options-for-managing-mortality",
+      "title": "Options for Managing Poultry Mortality",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 58,
+        "betty": 42,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 58
+    },
+    {
+      "slug": "parasites-in-chickens",
+      "title": "Internal Parasites in Chickens: A Crash Course",
+      "tags": [
+        "Backyard Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "betty",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 46,
+        "betty": 53,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 53
+    },
+    {
+      "slug": "poultry-ventilation-tune-up-prep-for-the-warm-months",
+      "title": "Poultry Ventilation Tune-Up: Prep for the Warm Months",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 48,
+        "betty": 44,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 48
+    },
+    {
+      "slug": "big-ole-bird-commercial-layer-case-study",
+      "title": "Big Ole Bird: Commercial Layer Case Study",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 61,
+        "betty": 55,
+        "taylor": 0
+      },
+      "aligned": true,
+      "confidence": "high",
+      "vecPersona": "bill",
+      "vecScore": 61
+    },
+    {
+      "slug": "big-ole-bird-vs-necrotic-enteritis-broiler-chicken-case-study",
+      "title": "Big Ole Bird vs. Necrotic Enteritis: Broiler Chicken Case Study",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 56,
+        "betty": 51,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 56
+    },
+    {
+      "slug": "vidalia-onion-fertility-study",
+      "title": "Vidalia Onion Fertility Study: Impact of Humic Acid",
+      "tags": [
+        "Plants & Crops"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 40,
+        "betty": 37,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 40
+    },
+    {
+      "slug": "testing-germination-enhancement-of-genesis",
+      "title": "Testing Germination Enhancement of Genesis",
+      "tags": [
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 43,
+        "betty": 34,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 43
+    },
+    {
+      "slug": "how-to-overcome-challenges-of-growing-pullet-chickens",
+      "title": "How to Overcome Challenges of Growing Pullet Chickens",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 65,
+        "betty": 57,
+        "taylor": 0
+      },
+      "aligned": true,
+      "confidence": "high",
+      "vecPersona": "bill",
+      "vecScore": 65
+    },
+    {
+      "slug": "hydrogen-sulfide-reduction-corrosion-control-with-port",
+      "title": "Paper Mill Hydrogen Sulfide Reduction & Corrosion Control with PORT",
+      "tags": [
+        "Waste"
+      ],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 33,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "bill",
+      "vecScore": 33
+    },
+    {
+      "slug": "significant-increases-in-seed-germination-for-hydroseeding-jobs",
+      "title": "Significant Increases In Seed Germination for Hydroseeding Jobs",
+      "tags": [
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 46,
+        "betty": 38,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 46
+    },
+    {
+      "slug": "sweet-success-reducing-tss-and-cbod-in-a-commercial-bakery-with-port",
+      "title": "Sweet Success: Reducing TSS and CBOD in a Commercial Bakery with PORT",
+      "tags": [
+        "Waste"
+      ],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 45,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "bill",
+      "vecScore": 45
+    },
+    {
+      "slug": "tss-reduction-disposal-fee-savings-a-success-story-from-a-chicken-processing-plant",
+      "title": "TSS Reduction & Disposal Fee Savings: A Success Story from a Chicken Processing Plant",
+      "tags": [
+        "Waste"
+      ],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 49,
+        "betty": 41,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "bill",
+      "vecScore": 49
+    },
+    {
+      "slug": "hydroseeding-products-for-faster-seed-germination-and-erosion-control",
+      "title": "Hydroseeding Products for Faster Seed Germination and Erosion Control",
+      "tags": [
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 43,
+        "betty": 38,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 43
+    },
+    {
+      "slug": "how-port-reduced-fresh-water-consumption-at-a-car-wash-by-70",
+      "title": "How PORT Reduced Fresh Water Consumption at a Car Wash by 70%",
+      "tags": [
+        "Waste"
+      ],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 38,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "bill",
+      "vecScore": 38
+    },
+    {
+      "slug": "septic-tank-system-restoration-with-port",
+      "title": "Septic Tank System Restoration with PORT",
+      "tags": [
+        "Waste"
+      ],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 38,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "bill",
+      "vecScore": 38
+    },
+    {
+      "slug": "clean-out-checklist",
+      "title": "Clean Out Checklist for Poultry Farmers",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 57,
+        "betty": 54,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 57
+    },
+    {
+      "slug": "how-to-reduce-culls-with-a-probiotic-for-hens",
+      "title": "How to Reduce Culls with a Probiotic for Hens",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 53,
+        "betty": 56,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 56
+    },
+    {
+      "slug": "understanding-humate-a-beginners-guide",
+      "title": "Understanding Humate: A Beginner's Guide",
+      "tags": [
+        "Plants & Crops",
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 0,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "taylor",
+      "vecScore": 0
+    },
+    {
+      "slug": "why-humate-soil-conditioner",
+      "title": "Why Humate Soil Conditioner?",
+      "tags": [
+        "Plants & Crops",
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 40,
+        "betty": 41,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 41
+    },
+    {
+      "slug": "baby-chicks-to-adult-chickens-huddled-in-corner-causes-and-prevention",
+      "title": "Baby Chicks to Adult Chickens Huddled in Corner: Causes and Prevention",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 45,
+        "betty": 52,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 52
+    },
+    {
+      "slug": "poultry-litter-treatment-for-healthy-floors-and-healthy-birds",
+      "title": "Poultry Litter Treatment for Healthy Floors and Healthy Birds",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 52,
+        "betty": 51,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 52
+    },
+    {
+      "slug": "how-to-kill-darkling-beetles-in-poultry-houses",
+      "title": "How to Kill Darkling Beetles on Chickens",
+      "tags": [
+        "Backyard Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "betty",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 43,
+        "betty": 40,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 43
+    },
+    {
+      "slug": "poultry-gut-health",
+      "title": "Poultry Gut Health: Microscopic Issue, Big Impact",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 55,
+        "betty": 54,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 55
+    },
+    {
+      "slug": "the-benefits-of-humic-acid-for-lawns",
+      "title": "The Benefits of Humic Acid for Lawns",
+      "tags": [
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 35,
+        "betty": 35,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 35
+    },
+    {
+      "slug": "how-to-treat-horse-mites-naturally",
+      "title": "How to Treat Horse Mites (Naturally!)",
+      "tags": [],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 0,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "taylor",
+      "vecScore": 0
+    },
+    {
+      "slug": "big-ole-bird-poultry-probiotics-performance-study-results",
+      "title": "Big Ole Bird Poultry Probiotics: Performance Study Results",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 58,
+        "betty": 50,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 58
+    },
+    {
+      "slug": "women-in-business",
+      "title": "Women in Business: Tips for Female Farmers from CEO Leisa Coyne",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 51,
+        "betty": 48,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 51
+    },
+    {
+      "slug": "bridging-the-gap-agriculture-and-the-environment",
+      "title": "Bridging the Gap: Agriculture and the Environment",
+      "tags": [],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 45,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "bill",
+      "vecScore": 45
+    },
+    {
+      "slug": "tips-for-poultry-farmers-december-2023-update",
+      "title": "Tips and Tricks for Poultry Farmers: December 2023 Update",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 56,
+        "betty": 51,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 56
+    },
+    {
+      "slug": "molting-chickens-how-to-encourage-the-molting-process",
+      "title": "Molting Chickens: How Molting Benefits Your Flock",
+      "tags": [
+        "Backyard Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "betty",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 43,
+        "betty": 48,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 48
+    },
+    {
+      "slug": "turkey-farming-vs-chicken-farming-the-major-differences",
+      "title": "Turkey Farming vs. Chicken Farming: The Major Differences",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 50,
+        "betty": 45,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 50
+    },
+    {
+      "slug": "how-do-plants-get-nutrients-cation-exchange-capacity-cec-explained",
+      "title": "How Do Plants Get Nutrients? Cation Exchange Capacity (CEC) Explained",
+      "tags": [
+        "Plants & Crops",
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 0,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "taylor",
+      "vecScore": 0
+    },
+    {
+      "slug": "nae-chicken-vs-naihm-chicken",
+      "title": "What Farmers Need to Know About Antibiotic Regulation: NAE Chicken vs. NAIHM Chicken",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 63,
+        "betty": 51,
+        "taylor": 0
+      },
+      "aligned": true,
+      "confidence": "high",
+      "vecPersona": "bill",
+      "vecScore": 63
+    },
+    {
+      "slug": "bridging-the-gap-antibiotic-regulation-in-food-animals",
+      "title": "Bridging the Gap: Antibiotic Regulation in Food Animals",
+      "tags": [],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 53,
+        "betty": 42,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "bill",
+      "vecScore": 53
+    },
+    {
+      "slug": "safeguarding-your-structures-lighting-and-surge-protection-on-poultry-farms",
+      "title": "Safeguarding Your Structures: Lightning and Surge Protection on Poultry Farms",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 48,
+        "betty": 39,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 48
+    },
+    {
+      "slug": "how-to-keep-chickens-warm-in-winter-chicken-coop-winterization-tips",
+      "title": "How to Keep Chickens Warm in Winter: Chicken Coop Winterization Tips",
+      "tags": [
+        "Backyard Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "betty",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 42,
+        "betty": 55,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 55
+    },
+    {
+      "slug": "poultry-house-heater-comparison",
+      "title": "Poultry House Heater Comparison: Pancake vs. Tube Heaters",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 47,
+        "betty": 39,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 47
+    },
+    {
+      "slug": "lawn-dethatcher",
+      "title": "Tackling Thatch: Using a Lawn Dethatcher for a Healthier Lawn\u00a0",
+      "tags": [
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 37,
+        "betty": 36,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 37
+    },
+    {
+      "slug": "the-first-three-days-of-a-chickens-life-the-most-important-stage",
+      "title": "The First Three Days of a Chicken's Life: The Most Important Stage!",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 49,
+        "betty": 50,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 50
+    },
+    {
+      "slug": "bridging-the-gap-the-definition-of-greenwashing",
+      "title": "Bridging the Gap: The Definition of Greenwashing",
+      "tags": [],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 42,
+        "betty": 43,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "betty",
+      "vecScore": 43
+    },
+    {
+      "slug": "lawn-mower-maintenance",
+      "title": "Lawn Mower Maintenance Tips from an Expert",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 48,
+        "betty": 46,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 48
+    },
+    {
+      "slug": "the-scoop-on-backyard-chicken-poop",
+      "title": "The Scoop on Backyard Chicken Poop",
+      "tags": [
+        "Backyard Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "betty",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 49,
+        "betty": 58,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 58
+    },
+    {
+      "slug": "how-to-start-a-poultry-farm-tips-from-a-new-poultry-farmer",
+      "title": "How to Start a Poultry Farm: 13 Tips from New Poultry Farmers",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 54,
+        "betty": 48,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 54
+    },
+    {
+      "slug": "our-salmonella-study-results-and-analysis",
+      "title": "Our Salmonella Study: Results and Analysis",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 51,
+        "betty": 47,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 51
+    },
+    {
+      "slug": "bridging-the-gap-can-subsistence-farming-feed-us-all",
+      "title": "Bridging the Gap: Can Subsistence Farming Feed Us All?",
+      "tags": [
+        "Plants & Crops"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 46,
+        "betty": 42,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 46
+    },
+    {
+      "slug": "mother-load-acv-the-mother-of-all-apple-cider-vinegar-for-poultry-farms",
+      "title": "Mother Load ACV: The \"Mother\" of all Apple Cider Vinegar for Poultry Farms",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 56,
+        "betty": 53,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 56
+    },
+    {
+      "slug": "natural-pest-control-desecticide-product-suite",
+      "title": "Natural Pest Control: Insecticides for Indoors, Garden and Coop",
+      "tags": [
+        "Backyard Poultry",
+        "Plants & Crops",
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "betty",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 0,
+        "betty": 49,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 49
+    },
+    {
+      "slug": "battling-heat-stress-in-poultry",
+      "title": "Battling Heat Stress in Poultry Houses",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 51,
+        "betty": 47,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 51
+    },
+    {
+      "slug": "coccidiosis-in-chickens-causes-and-prevention",
+      "title": "Coccidiosis in Chickens: Causes and Prevention",
+      "tags": [
+        "Backyard Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "betty",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 43,
+        "betty": 49,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 49
+    },
+    {
+      "slug": "eliminate-weeds-without-harming-your-birds-torched-all-natural-weed-killer",
+      "title": "Chicken-Safe Weed Killer: Eliminate Weeds With Torched Weed Killer",
+      "tags": [
+        "Poultry",
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 50,
+        "betty": 47,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 50
+    },
+    {
+      "slug": "how-to-liquid-aerate-your-lawn-for-a-full-turf-revival",
+      "title": "How to Liquid Aerate Your Lawn for a Full Turf Revival",
+      "tags": [
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 39,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 39
+    },
+    {
+      "slug": "farm-upgrades-are-they-worth-it",
+      "title": "Farm Upgrades: Are They Worth It?",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 61,
+        "betty": 47,
+        "taylor": 0
+      },
+      "aligned": true,
+      "confidence": "high",
+      "vecPersona": "bill",
+      "vecScore": 61
+    },
+    {
+      "slug": "the-ins-and-outs-of-the-solectrac-electric-tractor",
+      "title": "The Ins and Outs of the Solectrac Electric Tractor",
+      "tags": [
+        "Backyard Poultry",
+        "Plants & Crops"
+      ],
+      "segment": "general",
+      "heuristicPersona": "betty",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 43,
+        "betty": 36,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 43
+    },
+    {
+      "slug": "building-new-poultry-houses",
+      "title": "Building New Poultry Houses: An Interview with a 5th Generation Farmer",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 59,
+        "betty": 51,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 59
+    },
+    {
+      "slug": "what-does-organic-mean",
+      "title": "What Does \u201cOrganic\u201d Mean?",
+      "tags": [],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 39,
+        "betty": 38,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "bill",
+      "vecScore": 39
+    },
+    {
+      "slug": "tips-for-poultry-farmers-may-2023-update",
+      "title": "Tips for Poultry Farmers: May 2023 Update",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 55,
+        "betty": 48,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 55
+    },
+    {
+      "slug": "nutrition-for-chickens-101",
+      "title": "Nutrition for Chickens 101",
+      "tags": [
+        "Backyard Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "betty",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 49,
+        "betty": 56,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 56
+    },
+    {
+      "slug": "how-to-get-nrcs-grants-for-your-farm",
+      "title": "How to get NRCS Grants: Save Money and Improve your Farm",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 49,
+        "betty": 41,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 49
+    },
+    {
+      "slug": "how-to-keep-your-lawn-healthy-throughout-the-summer-with-omega-soil-activator",
+      "title": "How to Keep Your Lawn Healthy Throughout the Summer with Omega Soil Activator",
+      "tags": [
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 42,
+        "betty": 41,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 42
+    },
+    {
+      "slug": "grower-spotlight-poultry-farm-hacks-with-a-farmer-pastor",
+      "title": "Grower Spotlight: Poultry Farm Hacks with a Farming Pastor",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 56,
+        "betty": 45,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 56
+    },
+    {
+      "slug": "using-a-bio-surfactant-as-a-natural-floor-cleaner",
+      "title": "Using a Bio Surfactant as a Natural Floor Cleaner",
+      "tags": [
+        "Waste"
+      ],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 0,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "taylor",
+      "vecScore": 0
+    },
+    {
+      "slug": "types-of-eggs-conventional-to-cage-free-to-organic-egg-production",
+      "title": "Types of Eggs: Conventional to Cage-Free to Organic Egg Production",
+      "tags": [
+        "Backyard Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "betty",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 48,
+        "betty": 53,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 53
+    },
+    {
+      "slug": "desecticide-darkling-beetle-control-in-poultry-houses",
+      "title": "Desecticide: Effective, Unique Solution to Darkling Beetles in Poultry Houses",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 49,
+        "betty": 45,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 49
+    },
+    {
+      "slug": "get-rid-of-weeds-with-torched-all-natural-weed-killer",
+      "title": "Get Rid of Weeds with Torched All-Natural Weed Killer",
+      "tags": [
+        "Backyard Poultry",
+        "Plants & Crops",
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "betty",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 0,
+        "betty": 40,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 40
+    },
+    {
+      "slug": "sunbelt-ag-expo-poultry-equipment-finds",
+      "title": "Sunbelt Ag Expo: Favorite Poultry Equipment Finds",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 52,
+        "betty": 44,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 52
+    },
+    {
+      "slug": "incubating-and-hatching-chicks-at-home",
+      "title": "Incubating and Hatching Chicks at Home",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 39,
+        "betty": 50,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 50
+    },
+    {
+      "slug": "interview-with-innovative-poultry-products",
+      "title": "Interview with Innovative Poultry Products: Finding a Better Way",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 60,
+        "betty": 49,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 60
+    },
+    {
+      "slug": "the-secret-to-green-grass-genesis-soil-conditioner-for-lawns",
+      "title": "The Secret to Green Grass: Genesis Soil Conditioner for Lawns",
+      "tags": [
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 41,
+        "betty": 40,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 41
+    },
+    {
+      "slug": "ippe-interview-with-ag-lighting-innovation",
+      "title": "IPPE Interview with Ag Lighting Innovation",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 58,
+        "betty": 42,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 58
+    },
+    {
+      "slug": "chicken-manure-fertilizer-what-it-is-and-how-to-use-it",
+      "title": "Chicken Manure Fertilizer: What it is and How to use it",
+      "tags": [
+        "Plants & Crops",
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 43,
+        "betty": 46,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 46
+    },
+    {
+      "slug": "highly-pathogenic-avian-influenza",
+      "title": "Highly Pathogenic Avian Influenza",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 44,
+        "betty": 39,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 44
+    },
+    {
+      "slug": "humic-acid-for-lawns-3-simple-steps",
+      "title": "How to Apply Humic Acid to Lawn: 3 Simple Steps",
+      "tags": [
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 0,
+        "betty": 38,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 38
+    },
+    {
+      "slug": "tips-for-poultry-farmers-january-2023-update",
+      "title": "Tips for Poultry Farmers: January 2023 Update",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 54,
+        "betty": 48,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 54
+    },
+    {
+      "slug": "parts-of-a-chicken-egg-composition-and-fertility",
+      "title": "Parts of a Chicken Egg: Composition and Fertility",
+      "tags": [
+        "Backyard Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "betty",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 36,
+        "betty": 46,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 46
+    },
+    {
+      "slug": "cleaning-feed-bins",
+      "title": "Cleaning Feed Bins: How and Why",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 50,
+        "betty": 51,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 51
+    },
+    {
+      "slug": "bridging-the-gap-intro-to-agriculture-literacy",
+      "title": "Bridging the Gap: Intro to Agriculture Literacy",
+      "tags": [],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 39,
+        "betty": 37,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "bill",
+      "vecScore": 39
+    },
+    {
+      "slug": "poultry-management-systems-controllers-for-your-farm",
+      "title": "Poultry Management Systems: Controllers for Your Farm",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 52,
+        "betty": 38,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 52
+    },
+    {
+      "slug": "poultry-farm-biosecurity-basics",
+      "title": "Poultry Farm Biosecurity Basics",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 56,
+        "betty": 49,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 56
+    },
+    {
+      "slug": "chemical-pest-control-in-poultry-houses",
+      "title": "Chemical Pest Control in Poultry Houses",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 48,
+        "betty": 42,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 48
+    },
+    {
+      "slug": "essential-oils-in-our-products",
+      "title": "Essential Oils in Our Products",
+      "tags": [
+        "Backyard Poultry",
+        "Plants & Crops",
+        "Poultry",
+        "Turf",
+        "Waste"
+      ],
+      "segment": "general",
+      "heuristicPersona": "betty",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 0,
+        "betty": 45,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 45
+    },
+    {
+      "slug": "poultry-farm-light-tips",
+      "title": "Poultry Farm Light Tips",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 48,
+        "betty": 42,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 48
+    },
+    {
+      "slug": "when-do-chickens-start-laying-eggs",
+      "title": "When Do Chickens Start Laying Eggs?",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 37,
+        "betty": 49,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 49
+    },
+    {
+      "slug": "npip-certified-2022-updates",
+      "title": "NPIP Certified: 2022 Updates",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 55,
+        "betty": 45,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 55
+    },
+    {
+      "slug": "genetic-selection-and-gmos-in-poultry",
+      "title": "Genetic Selection and GMOs in Poultry",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 49,
+        "betty": 44,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 49
+    },
+    {
+      "slug": "poultry-house-sanitation",
+      "title": "Sanitation in Poultry House Control Rooms",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 49,
+        "betty": 45,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 49
+    },
+    {
+      "slug": "humate-for-lawns",
+      "title": "Humate for Lawns",
+      "tags": [
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 35,
+        "betty": 33,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 35
+    },
+    {
+      "slug": "difference-between-surfactant-and-surfactin",
+      "title": "Surface Tension and The Difference Between Surfactant and Surfactin",
+      "tags": [
+        "Plants & Crops",
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 0,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "taylor",
+      "vecScore": 0
+    },
+    {
+      "slug": "poultry-farm-winter-preparation",
+      "title": "Poultry Farm Winter Preparation",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 52,
+        "betty": 51,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 52
+    },
+    {
+      "slug": "grower-spotlight-growing-up-on-a-poultry-farm",
+      "title": "Grower Spotlight: Growing Up on a Poultry Farm",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 54,
+        "betty": 50,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 54
+    },
+    {
+      "slug": "buying-chicks-online-our-experience-2022",
+      "title": "Buying Chicks Online: Our Experience 2022",
+      "tags": [],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 55,
+        "betty": 59,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "betty",
+      "vecScore": 59
+    },
+    {
+      "slug": "poultry-farm-tips",
+      "title": "Poultry Farm Tips",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 59,
+        "betty": 54,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 59
+    },
+    {
+      "slug": "how-to-grow-pumpkins-from-seeds-grow-the-perfect-pumpkin",
+      "title": "How to Grow Pumpkins from Seeds- Grow the Perfect Pumpkin!",
+      "tags": [
+        "Plants & Crops"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 0,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": null,
+      "vecScore": 0
+    },
+    {
+      "slug": "poultry-house-ventilation-maintenance-pulleys-and-belts",
+      "title": "Poultry House Ventilation Maintenance: Pulleys and Belts",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 50,
+        "betty": 45,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 50
+    },
+    {
+      "slug": "rickets-in-chickens",
+      "title": "Rickets in Chickens",
+      "tags": [
+        "Backyard Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "betty",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 44,
+        "betty": 48,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 48
+    },
+    {
+      "slug": "viruses-and-bacteria-in-poultry-whats-the-difference",
+      "title": "Viruses and Bacteria in Poultry- What's the Difference?",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 47,
+        "betty": 43,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 47
+    },
+    {
+      "slug": "cultural-and-environmental-pest-control-in-poultry-farms",
+      "title": "Cultural and Environmental Pest Control in Poultry Farms",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 52,
+        "betty": 51,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 52
+    },
+    {
+      "slug": "backyard-chicken-safety",
+      "title": "Backyard Chicken Safety",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 42,
+        "betty": 58,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 58
+    },
+    {
+      "slug": "treating-vent-gleet-and-pasty-butt-in-chickens",
+      "title": "Treating Vent Gleet and Pasty Butt in Chickens",
+      "tags": [],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 41,
+        "betty": 47,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "betty",
+      "vecScore": 47
+    },
+    {
+      "slug": "how-to-raise-chicks-getting-new-backyard-chickens",
+      "title": "How to Raise Chicks- Getting New Backyard Chickens!",
+      "tags": [],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 46,
+        "betty": 55,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "betty",
+      "vecScore": 55
+    },
+    {
+      "slug": "hepatitis-in-chickens-commercial-poultry-farming",
+      "title": "Hepatitis in Chickens- Commercial Poultry Farming",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 43,
+        "betty": 43,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 43
+    },
+    {
+      "slug": "cool-cell-pads-and-air-cells-in-poultry-houses",
+      "title": "Cool Cell Pads in Poultry Houses",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 43,
+        "betty": 43,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 43
+    },
+    {
+      "slug": "grower-spotlight-shanons-story",
+      "title": "Fighting Dermatitis in Chickens: A Grower Spotlight",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 54,
+        "betty": 51,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 54
+    },
+    {
+      "slug": "18032404-why-compost",
+      "title": "Easiest Recipe for Compost + Why Compost",
+      "tags": [
+        "Plants & Crops"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 33,
+        "betty": 36,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 36
+    },
+    {
+      "slug": "how-to-fix-potholes-in-gravel-driveway-what-youre-missing",
+      "title": "How To Fix Potholes in Gravel Driveway - What You're Missing",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 0,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "taylor",
+      "vecScore": 0
+    },
+    {
+      "slug": "our-best-organic-lawn-care-products",
+      "title": "Our Best Organic Lawn Care Products",
+      "tags": [
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 45,
+        "betty": 44,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 45
+    },
+    {
+      "slug": "solar-panels-for-farm-buildings",
+      "title": "Solar Panels for Farm Buildings",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 42,
+        "betty": 33,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 42
+    },
+    {
+      "slug": "perfect-gifts-for-people-with-chickens",
+      "title": "Perfect Gifts for People with Chickens",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 49,
+        "betty": 60,
+        "taylor": 0
+      },
+      "aligned": true,
+      "confidence": "high",
+      "vecPersona": "betty",
+      "vecScore": 60
+    },
+    {
+      "slug": "bug-free-backyard-spray",
+      "title": "Defender- Backyard Mosquito Spray",
+      "tags": [
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 0,
+        "betty": 34,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 34
+    },
+    {
+      "slug": "our-secret-ingredient-fulvic-acid-liquid",
+      "title": "Our Secret Ingredient: Fulvic Acid Liquid",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 58,
+        "betty": 55,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 58
+    },
+    {
+      "slug": "5-things-that-make-poultry-farmers-say-huh",
+      "title": "5 Things that make Poultry Farmers Say Huh?!",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 57,
+        "betty": 50,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 57
+    },
+    {
+      "slug": "17884484-big-ole-bird-ingredients",
+      "title": "Big ole Bird Ingredients",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 54,
+        "betty": 54,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 54
+    },
+    {
+      "slug": "poultry-farmers-take-a-break",
+      "title": "Poultry Farmers- Take a Break!",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 53,
+        "betty": 46,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 53
+    },
+    {
+      "slug": "catalyst-liquid-chicken-vitamins",
+      "title": "Catalyst- Liquid Chicken Vitamins",
+      "tags": [
+        "Backyard Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "betty",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 48,
+        "betty": 55,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 55
+    },
+    {
+      "slug": "farm-tax-exemption-keep-your-money",
+      "title": "Farm tax exemption- Keep your money",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 39,
+        "betty": 34,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 39
+    },
+    {
+      "slug": "farming-and-the-gospel-from-georgia-to-nicaragua",
+      "title": "Farming and the Gospel: From Georgia to Nicaragua",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 35,
+        "betty": 34,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 35
+    },
+    {
+      "slug": "using-our-products-for-poultry-farming-in-winter",
+      "title": "Using our Products for Poultry Farming in Winter",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 53,
+        "betty": 51,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 53
+    },
+    {
+      "slug": "tractor-maintenance-keep-your-operation-running-smoothly",
+      "title": "Tractor Maintenance: Keep Your Operation Running Smoothly",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 43,
+        "betty": 36,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 43
+    },
+    {
+      "slug": "merry-christmas-from-southland-organics",
+      "title": "Merry Christmas from Southland Organics!",
+      "tags": [],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 0,
+        "betty": 33,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "betty",
+      "vecScore": 33
+    },
+    {
+      "slug": "warm-wishes-of-hope-for-poultry-farmers",
+      "title": "Warm Wishes of Hope for Poultry Farmers",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 44,
+        "betty": 39,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 44
+    },
+    {
+      "slug": "poultry-farm-led-lighting",
+      "title": "Poultry Farm LED Lighting",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 52,
+        "betty": 42,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 52
+    },
+    {
+      "slug": "farm-security-cameras",
+      "title": "Farm Security Cameras",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 38,
+        "betty": 36,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 38
+    },
+    {
+      "slug": "poultry-farming-equipment",
+      "title": "Poultry Farming Equipment",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 56,
+        "betty": 49,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 56
+    },
+    {
+      "slug": "the-best-all-natural-septic-tank-treatment",
+      "title": "The Best Septic System Treatment: All-Natural Tank Care",
+      "tags": [
+        "Waste"
+      ],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 0,
+        "betty": 36,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "betty",
+      "vecScore": 36
+    },
+    {
+      "slug": "electric-motor-maintenance",
+      "title": "Electric Motor Maintenance",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 38,
+        "betty": 33,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 38
+    },
+    {
+      "slug": "the-effect-of-soil-ph-on-plants",
+      "title": "The Effect of Soil pH on Plants",
+      "tags": [
+        "Plants & Crops"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 30,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 30
+    },
+    {
+      "slug": "septic-tank-treatment-for-farmers",
+      "title": "Septic Tank Treatment for Farmers\u00a0",
+      "tags": [
+        "Poultry",
+        "Waste"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 44,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 44
+    },
+    {
+      "slug": "how-to-get-rid-of-chicken-mites",
+      "title": "How to Get Rid of Chicken Mites",
+      "tags": [
+        "Backyard Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "betty",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 32,
+        "betty": 41,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 41
+    },
+    {
+      "slug": "broiler-chicken-water-consumption",
+      "title": "Broiler Chicken Water Consumption",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 58,
+        "betty": 53,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 58
+    },
+    {
+      "slug": "garlic-and-apple-cider-vinegar-for-chickens",
+      "title": "Garlic and Apple Cider Vinegar for Chickens",
+      "tags": [
+        "Backyard Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "betty",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 46,
+        "betty": 53,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 53
+    },
+    {
+      "slug": "happy-national-chicken-month",
+      "title": "Happy National Chicken Month!",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 52,
+        "betty": 48,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 52
+    },
+    {
+      "slug": "chicken-litter-as-fertilizer",
+      "title": "Chicken Litter as Fertilizer: Do's and Don't's",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 41,
+        "betty": 40,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 41
+    },
+    {
+      "slug": "a-healthy-floor-is-a-healthy-bird",
+      "title": "Coop Litter Conditioner: A Healthy Floor is a Healthy Bird!",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 44,
+        "betty": 51,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 51
+    },
+    {
+      "slug": "the-big-catch-commercial-poultry",
+      "title": "The Big Catch: Commercial Poultry",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 41,
+        "betty": 37,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 41
+    },
+    {
+      "slug": "the-easy-fix-to-brown-spots-in-your-yard",
+      "title": "Dog Spot - Dog Urine Lawn Repair",
+      "tags": [
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 0,
+        "betty": 33,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 33
+    },
+    {
+      "slug": "inside-the-life-of-a-commercial-poultry-grower",
+      "title": "Inside the Life of a Commercial Poultry Grower",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 63,
+        "betty": 55,
+        "taylor": 0
+      },
+      "aligned": true,
+      "confidence": "high",
+      "vecPersona": "bill",
+      "vecScore": 63
+    },
+    {
+      "slug": "better-shells-more-eggs-and-happier-hens",
+      "title": "Probiotic for hens: Improved shells, more eggs and happier hens!",
+      "tags": [
+        "Backyard Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "betty",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 44,
+        "betty": 54,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 54
+    },
+    {
+      "slug": "the-truth-about-industrial-farming-practices",
+      "title": "Sustainable Commercial Farming",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 52,
+        "betty": 47,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 52
+    },
+    {
+      "slug": "poultry-vitamins-for-better-performance",
+      "title": "Poultry Vitamins for Better Performance",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 57,
+        "betty": 50,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 57
+    },
+    {
+      "slug": "insurance-for-commercial-poultry-farms",
+      "title": "Insurance for Commercial Poultry Farms",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 47,
+        "betty": 35,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 47
+    },
+    {
+      "slug": "how-to-grow-tomatoes-grow-and-eat-the-perfect-tomato",
+      "title": "How to Grow Tomatoes: Grow and Eat the Perfect Tomato",
+      "tags": [
+        "Plants & Crops"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 0,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": null,
+      "vecScore": 0
+    },
+    {
+      "slug": "runt-and-stunt-deadly-poultry-virus",
+      "title": "Runt and Stunt: Deadly Poultry Virus",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 47,
+        "betty": 42,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 47
+    },
+    {
+      "slug": "port-for-vault-toilets",
+      "title": "PORT: Vault Toilet Treatment",
+      "tags": [
+        "Waste"
+      ],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 0,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "taylor",
+      "vecScore": 0
+    },
+    {
+      "slug": "factory-farm-debunking-the-term",
+      "title": "Factory Farm: Debunking the Term",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 40,
+        "betty": 35,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 40
+    },
+    {
+      "slug": "how-to-use-our-products-for-healthy-backyard-birds",
+      "title": "Our Best Chicken Supplements for Backyard Coops",
+      "tags": [
+        "Backyard Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "betty",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 53,
+        "betty": 59,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 59
+    },
+    {
+      "slug": "growers-spotlight-so-you-want-to-build-a-chicken-house",
+      "title": "Grower's Spotlight: So You Want to Build a Chicken House",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 53,
+        "betty": 47,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 53
+    },
+    {
+      "slug": "avian-stress-factors-effects-and-abatement",
+      "title": "Avian Stress: Factors, Effects and Abatement",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 39,
+        "betty": 42,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 42
+    },
+    {
+      "slug": "port-organic-tank-treatment",
+      "title": "PORT: Organic Tank Treatment",
+      "tags": [
+        "Waste"
+      ],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 38,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "bill",
+      "vecScore": 38
+    },
+    {
+      "slug": "lets-talk-ladder-safety",
+      "title": "Let's Talk Ladder Safety",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 36,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 36
+    },
+    {
+      "slug": "apartment-building-plumbing-problems-a-case-study",
+      "title": "Apartment Building Plumbing Problems: A Case Study",
+      "tags": [
+        "Waste"
+      ],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 40,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "bill",
+      "vecScore": 40
+    },
+    {
+      "slug": "spondylolisthesis-its-easier-to-say-kinky-back",
+      "title": "\"Spondylolisthesis!\" It's easier to say Kinky Back.",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 48,
+        "betty": 44,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 48
+    },
+    {
+      "slug": "stackhouses-for-daily-poultry-mortality",
+      "title": "Stackhouses for Daily Poultry Mortality",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 51,
+        "betty": 43,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 51
+    },
+    {
+      "slug": "clean-sanitize-or-disinfect",
+      "title": "Clean, Sanitize or Disinfect?",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 45,
+        "betty": 44,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 45
+    },
+    {
+      "slug": "stenner-pump-troubleshooting",
+      "title": "Stenner Pump Troubleshooting",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 50,
+        "betty": 40,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 50
+    },
+    {
+      "slug": "twas-the-night-before-catch",
+      "title": "'Twas the Night Before Catch",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 38,
+        "betty": 43,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 43
+    },
+    {
+      "slug": "defeating-dermatitis",
+      "title": "Defeating Gangrenous Dermatitis in Poultry",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 52,
+        "betty": 50,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 52
+    },
+    {
+      "slug": "the-secret-to-a-perfect-thanksgiving",
+      "title": "The Secret to a Perfect Thanksgiving",
+      "tags": [],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 0,
+        "betty": 33,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "betty",
+      "vecScore": 33
+    },
+    {
+      "slug": "how-to-run-big-ole-bird-poultry-probiotic",
+      "title": "How to Run Big Ole Bird Poultry Probiotic",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 60,
+        "betty": 50,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 60
+    },
+    {
+      "slug": "poultry-farm-troubleshooting",
+      "title": "Poultry Farm Troubleshooting",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 59,
+        "betty": 49,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 59
+    },
+    {
+      "slug": "grower-spotlight-charles-robinett-scott-vetterkind",
+      "title": "Grower Spotlight: Charles Robinett & Scott Vetterkind",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 52,
+        "betty": 41,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 52
+    },
+    {
+      "slug": "farm-safety-electrical-tips-and-tools",
+      "title": "Farm Safety: Electrical Tips and Tools",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 46,
+        "betty": 41,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 46
+    },
+    {
+      "slug": "using-grass-and-seed-for-erosion-control",
+      "title": "Using Grass and Seed for Erosion Control",
+      "tags": [
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 0,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "taylor",
+      "vecScore": 0
+    },
+    {
+      "slug": "prepping-for-winter-ammonia-buildup-with-litter-life",
+      "title": "Prepping for Winter Ammonia Buildup with Litter Life",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 46,
+        "betty": 45,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 46
+    },
+    {
+      "slug": "the-importance-of-water-quality",
+      "title": "The Importance of Water Quality",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 58,
+        "betty": 54,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 58
+    },
+    {
+      "slug": "poultry-farm-finances-with-john-hylton",
+      "title": "Poultry Farm Finances with John Hylton",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 57,
+        "betty": 47,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 57
+    },
+    {
+      "slug": "grower-spotlight-father-son-team-troy-matt",
+      "title": "Grower Spotlight: Father-Son Team, Troy & Matt",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 57,
+        "betty": 49,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 57
+    },
+    {
+      "slug": "farm-safety-climbing-feed-bins-safely",
+      "title": "Farm Safety: Climbing Feed Bins Safely",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 45,
+        "betty": 45,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 45
+    },
+    {
+      "slug": "big-ole-bird-performance-study-results",
+      "title": "Big Ole Bird | Performance Study Results",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 59,
+        "betty": 53,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 59
+    },
+    {
+      "slug": "farmer-longevity-tools-for-your-health-arsenal",
+      "title": "Farmer Longevity: Tools for your Health Arsenal",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 58,
+        "betty": 53,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 58
+    },
+    {
+      "slug": "the-secret-to-a-successful-poultry-operation",
+      "title": "The Secret to a Successful Poultry Operation",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 55,
+        "betty": 54,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 55
+    },
+    {
+      "slug": "how-to-prevent-soil-erosion",
+      "title": "Farming Techniques That Prevent Erosion",
+      "tags": [
+        "Plants & Crops",
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 32,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 32
+    },
+    {
+      "slug": "generator-tips-to-prep-for-warmer-weather",
+      "title": "Generator Tips to Prep for Warmer Weather",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 53,
+        "betty": 50,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 53
+    },
+    {
+      "slug": "3-reminders-for-poultry-house-ventilation",
+      "title": "3 Reminders for Poultry House Ventilation",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 56,
+        "betty": 51,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 56
+    },
+    {
+      "slug": "a-word-of-encouragement-for-poultry-farmers-amidst-covid-19",
+      "title": "A Word of Encouragement for Poultry Farmers Amidst COVID-19",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 50,
+        "betty": 49,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 50
+    },
+    {
+      "slug": "keep-your-money-farm-tax-deductions",
+      "title": "Keep Your Money: Farm Tax Deductions",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 54,
+        "betty": 46,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 54
+    },
+    {
+      "slug": "the-role-of-vitamins-in-poultry-nutrition",
+      "title": "The Role of Vitamins in Poultry Nutrition",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 56,
+        "betty": 49,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 56
+    },
+    {
+      "slug": "the-human-side-of-farming-how-to-motivate-farm-employees",
+      "title": "The Human Side of Farming: How to Motivate Farm Employees",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 55,
+        "betty": 49,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 55
+    },
+    {
+      "slug": "5-tips-for-safely-using-farm-equipment",
+      "title": "5 Tips for Safely Using Farm Equipment",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 45,
+        "betty": 43,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 45
+    },
+    {
+      "slug": "how-to-get-money-to-improve-your-poultry-operation-and-help-the-environment",
+      "title": "How to Improve Poultry Farming-  and Get Money!",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 56,
+        "betty": 48,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 56
+    },
+    {
+      "slug": "the-importance-of-poultry-paw-quality",
+      "title": "The Importance of Poultry Paw Quality",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 54,
+        "betty": 53,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 54
+    },
+    {
+      "slug": "bird-anatomy-tips",
+      "title": "Bird Anatomy Tips",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 40,
+        "betty": 44,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 44
+    },
+    {
+      "slug": "how-to-achieve-adequate-flow-rate-in-your-poultry-houses",
+      "title": "How to Achieve Adequate Flow Rate in Your Poultry Houses",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 56,
+        "betty": 50,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 56
+    },
+    {
+      "slug": "tips-for-monitoring-water-pressure-in-your-poultry-houses",
+      "title": "Tips for Monitoring Water Pressure in Your Poultry Houses",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 56,
+        "betty": 47,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 56
+    },
+    {
+      "slug": "apple-cider-vinegar-as-a-poultry-supplement",
+      "title": "Apple Cider Vinegar as a Poultry Supplement",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 55,
+        "betty": 53,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 55
+    },
+    {
+      "slug": "the-scoop-on-poop-series-from-digestion-to-the-difference-between-good-and-bad-poop",
+      "title": "The Scoop on Poop Series: Good Poop, Bad Poop and Digestion",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 52,
+        "betty": 52,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 52
+    },
+    {
+      "slug": "farm-safety",
+      "title": "Farm Safety: A Tragic Story and a Simple, Possibly Life-Saving Safety Precaution",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 46,
+        "betty": 44,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 46
+    },
+    {
+      "slug": "new-year-new-decade-wishes-for-a-happy-2020",
+      "title": "New Year. New Decade. Wishes for a Happy 2020!",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 48,
+        "betty": 45,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 48
+    },
+    {
+      "slug": "integrator-relations",
+      "title": "A Word on Integrator Relations",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 60,
+        "betty": 47,
+        "taylor": 0
+      },
+      "aligned": true,
+      "confidence": "high",
+      "vecPersona": "bill",
+      "vecScore": 60
+    },
+    {
+      "slug": "debunking-the-organics-stereotype",
+      "title": "Debunking the \"Organics\" Stereotype",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 68,
+        "betty": 59,
+        "taylor": 0
+      },
+      "aligned": true,
+      "confidence": "high",
+      "vecPersona": "bill",
+      "vecScore": 68
+    },
+    {
+      "slug": "happy-thanksgiving",
+      "title": "Happy Thanksgiving!",
+      "tags": [],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 0,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": null,
+      "vecScore": 0
+    },
+    {
+      "slug": "diy-farm-security-camera-system",
+      "title": "DIY Farm Security Camera System",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 49,
+        "betty": 47,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 49
+    },
+    {
+      "slug": "scoop-on-poop-good-poop-vs-bad-poop",
+      "title": "Scoop on Poop: Good Poop vs. Bad Poop",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 63,
+        "betty": 58,
+        "taylor": 0
+      },
+      "aligned": true,
+      "confidence": "high",
+      "vecPersona": "bill",
+      "vecScore": 63
+    },
+    {
+      "slug": "scoop-on-poop-digestion-101",
+      "title": "Scoop on Poop: Poultry Digestion 101",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 51,
+        "betty": 49,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 51
+    },
+    {
+      "slug": "grower-spotlight-tiffany-hodges",
+      "title": "Grower Spotlight: Tiffany Hodges",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 49,
+        "betty": 48,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 49
+    },
+    {
+      "slug": "video-keys-to-windrow-success-part-3-repopulation",
+      "title": "Keys to Windrow Success, Part 3: Repopulate",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 58,
+        "betty": 55,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 58
+    },
+    {
+      "slug": "video-keys-to-windrow-success-part-2",
+      "title": "Keys to Windrow Success, Part 2: Annihilate",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 54,
+        "betty": 50,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 54
+    },
+    {
+      "slug": "video-keys-to-windrow-success-part-1",
+      "title": "Keys to Windrow Success, Part 1: Set Up",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 54,
+        "betty": 51,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 54
+    },
+    {
+      "slug": "the-windrow-series-set-up-annihilate-and-repopulate",
+      "title": "Why Windrow? Set Up, Annihilate and Repopulate",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 55,
+        "betty": 48,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 55
+    },
+    {
+      "slug": "what-to-plant-now-for-your-fall-winter-harvest",
+      "title": "What to plant now for your fall garden",
+      "tags": [
+        "Plants & Crops"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 0,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": null,
+      "vecScore": 0
+    },
+    {
+      "slug": "a-ticking-time-bomb-how-to-get-rid-of-ticks-in-your-yard",
+      "title": "A Tick(ing) Time Bomb: How to Get Rid of Ticks in your Yard",
+      "tags": [
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 0,
+        "betty": 35,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 35
+    },
+    {
+      "slug": "poultry-farmer-interview",
+      "title": "Poultry Farmer Interview",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 58,
+        "betty": 47,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 58
+    },
+    {
+      "slug": "uga-10th-annual-bulldog-100-list",
+      "title": "Southland Organics lands on 10th Annual Bulldog 100",
+      "tags": [],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 34,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "bill",
+      "vecScore": 34
+    },
+    {
+      "slug": "support-local-farmers-buy-local",
+      "title": "Support Local Farmers\u2014Buy Local Produce",
+      "tags": [
+        "Plants & Crops"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 34,
+        "betty": 38,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 38
+    },
+    {
+      "slug": "17989192-raise-antibiotic-free-birds",
+      "title": "Raise Antibiotic-Free Birds",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 58,
+        "betty": 46,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 58
+    },
+    {
+      "slug": "new-changes-in-commercial-poultry",
+      "title": "New Changes in Commercial Poultry",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 61,
+        "betty": 54,
+        "taylor": 0
+      },
+      "aligned": true,
+      "confidence": "high",
+      "vecPersona": "bill",
+      "vecScore": 61
+    },
+    {
+      "slug": "avoid-nitrogen-loss-in-the-soil",
+      "title": "Avoid Nitrogen Loss In the Soil",
+      "tags": [
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 35,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 35
+    },
+    {
+      "slug": "51637060-quail-farm-disease-high-mortality",
+      "title": "Commercial Quail Farming: Preventing Disease on Quail Farms",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 50,
+        "betty": 52,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 52
+    },
+    {
+      "slug": "4-gardening-tips-for-beginners",
+      "title": "Helpful Gardening Tips for Beginners",
+      "tags": [
+        "Plants & Crops"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 31,
+        "betty": 36,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 36
+    },
+    {
+      "slug": "transforming-waste-management-port",
+      "title": "Transforming Waste Management: The Incredible Story of How a Paper Mill Slashed Total Suspended Solids by Nearly 60% Using PORT",
+      "tags": [
+        "Waste"
+      ],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 41,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "bill",
+      "vecScore": 41
+    },
+    {
+      "slug": "amazon-the-troubled-table",
+      "title": "AMZN & The Troubled Table",
+      "tags": [
+        "Plants & Crops"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 39,
+        "betty": 35,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 39
+    },
+    {
+      "slug": "what-is-soil-amendment",
+      "title": "What Is a Soil Amendment?",
+      "tags": [
+        "Plants & Crops",
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 0,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "taylor",
+      "vecScore": 0
+    },
+    {
+      "slug": "organic-poultry-the-new-nop-avian-rule",
+      "title": "Organic Poultry: The New NOP Avian Rule",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 53,
+        "betty": 48,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 53
+    },
+    {
+      "slug": "phosphorus-free-fertilizer",
+      "title": "Phosphorus-Free Fertilizer",
+      "tags": [
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 33,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 33
+    },
+    {
+      "slug": "improving-poultry-litter-as-a-fertilizer-and",
+      "title": "Improving Poultry Litter as a Fertilizer. And\u2026?",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 55,
+        "betty": 51,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 55
+    },
+    {
+      "slug": "big-ole-bird-vs-necrotic-enteritis",
+      "title": "Necrotic Enteritis in Poultry: Treatment and Prevention",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 56,
+        "betty": 48,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 56
+    },
+    {
+      "slug": "what-is-competitive-exclusion",
+      "title": "What is competitive exclusion?",
+      "tags": [
+        "Plants & Crops"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 37,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 37
+    },
+    {
+      "slug": "falls-dilemma-soil-nutrient-depletion",
+      "title": "Fall's Dilemma: Soil Nutrient Depletion",
+      "tags": [
+        "Plants & Crops",
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 39,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 39
+    },
+    {
+      "slug": "17989272-don-t-risk-getting-it-wrong-compost-tea",
+      "title": "Buy Compost Tea- Don't Risk Making it Wrong!",
+      "tags": [
+        "Plants & Crops"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 35,
+        "betty": 33,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 35
+    },
+    {
+      "slug": "beneficial-garden-insects",
+      "title": "Beneficial Garden Insects",
+      "tags": [
+        "Plants & Crops"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 0,
+        "betty": 36,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 36
+    },
+    {
+      "slug": "115524548-poultry-farming-battling-poultry-disease-the-proper-way",
+      "title": "Battling Poultry Diseases the Proper Way",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 57,
+        "betty": 50,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 57
+    },
+    {
+      "slug": "88651780-we-feed-the-soil",
+      "title": "We Feed The Soil",
+      "tags": [
+        "Plants & Crops"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 45,
+        "betty": 48,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 48
+    },
+    {
+      "slug": "85872068-onion-fertilizer-improvement-in-marketable-yield-of-vidalia-onions",
+      "title": "Onion Fertilizer: Improvement in Marketable Yield of Vidalia Onions",
+      "tags": [
+        "Plants & Crops"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 43,
+        "betty": 35,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 43
+    },
+    {
+      "slug": "50860292-commercial-poultry-worst-to-first",
+      "title": "Broiler Production: Commercial Poultry Performance A Worst to First Story",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 66,
+        "betty": 58,
+        "taylor": 0
+      },
+      "aligned": true,
+      "confidence": "high",
+      "vecPersona": "bill",
+      "vecScore": 66
+    },
+    {
+      "slug": "17989176-what-is-soil-conditioner",
+      "title": "What is Soil Conditioner?",
+      "tags": [
+        "Plants & Crops",
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 32,
+        "betty": 31,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 32
+    },
+    {
+      "slug": "dry-poultry-litter",
+      "title": "How to Keep Poultry Litter Dry",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 52,
+        "betty": 49,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 52
+    },
+    {
+      "slug": "17909872-case-study-the-appalachian-trail-minimizing-moldering",
+      "title": "Case Study: The Appalachian Trail Minimizing Moldering",
+      "tags": [
+        "Waste"
+      ],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 37,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "bill",
+      "vecScore": 37
+    },
+    {
+      "slug": "17910020-e-coli-in-commercial-poultry",
+      "title": "How to Prevent E. coli in Chickens",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 52,
+        "betty": 48,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 52
+    },
+    {
+      "slug": "17910304-odor-control-in-portable-toilets",
+      "title": "Odor Control in Portable Toilets",
+      "tags": [
+        "Waste"
+      ],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 0,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "taylor",
+      "vecScore": 0
+    },
+    {
+      "slug": "17910296-jump-start-your-garden",
+      "title": "Jump Start Your Garden",
+      "tags": [
+        "Plants & Crops"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 0,
+        "betty": 34,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "betty",
+      "vecScore": 34
+    },
+    {
+      "slug": "117201796-landfill-odor-control-foot-and-mouth-burial-site",
+      "title": "Landfill Odor Control | Foot and Mouth Burial Site",
+      "tags": [
+        "Waste"
+      ],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 37,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "bill",
+      "vecScore": 37
+    },
+    {
+      "slug": "18110728-big-ole-bird-approved-for-organic-use",
+      "title": "Big Ole Bird Approved For Organic Use!",
+      "tags": [
+        "Poultry"
+      ],
+      "segment": "general",
+      "heuristicPersona": "bill",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 52,
+        "betty": 49,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 52
+    },
+    {
+      "slug": "18052368-improving-your-garden-through-chelation",
+      "title": "Improving your Garden Chelation",
+      "tags": [
+        "Plants & Crops"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 32,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 32
+    },
+    {
+      "slug": "115435780-brown-spots-in-my-yard",
+      "title": "Brown Spots in your Yard?",
+      "tags": [
+        "Waste"
+      ],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 0,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "taylor",
+      "vecScore": 0
+    },
+    {
+      "slug": "17989348-microorganisms-that-enrich-your-soil-part-i",
+      "title": "Microorganisms in Soil",
+      "tags": [
+        "Plants & Crops",
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 0,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "taylor",
+      "vecScore": 0
+    },
+    {
+      "slug": "17989236-the-campground-pit-toilet",
+      "title": "The Campground Pit Toilet",
+      "tags": [
+        "Waste"
+      ],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 0,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "taylor",
+      "vecScore": 0
+    },
+    {
+      "slug": "17989164-vault-toilets-a-step-up-from-the-pit",
+      "title": "Vault Toilet Meaning: A Step Up from the Pit",
+      "tags": [
+        "Waste"
+      ],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 0,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "taylor",
+      "vecScore": 0
+    },
+    {
+      "slug": "17982128-eliminate-portable-toilet-odors-naturally",
+      "title": "Eliminate Portable Toilet Odors Naturally",
+      "tags": [
+        "Waste"
+      ],
+      "segment": "general",
+      "heuristicPersona": null,
+      "heuristicSource": null,
+      "scores": {
+        "bill": 0,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "low",
+      "vecPersona": "taylor",
+      "vecScore": 0
+    },
+    {
+      "slug": "17982096-health-effects-of-synthetic-fertilizer",
+      "title": "Synthetic Fertilizers Disadvantages and Health Effects",
+      "tags": [
+        "Plants & Crops",
+        "Turf"
+      ],
+      "segment": "general",
+      "heuristicPersona": "taylor",
+      "heuristicSource": "tag",
+      "scores": {
+        "bill": 36,
+        "betty": 0,
+        "taylor": 0
+      },
+      "aligned": false,
+      "confidence": "medium",
+      "vecPersona": "bill",
+      "vecScore": 36
+    }
+  ]
+}

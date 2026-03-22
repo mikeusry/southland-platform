@@ -73,6 +73,12 @@ function getPerUnitPrice(): string | null {
 }
 
 const perUnit = getPerUnitPrice()
+
+// Display-friendly name: strip "| SEO keyword stuff" from Shopify titles
+// Full title preserved on PDP for SEO; cards show just the brand name
+const displayName = product.title.includes('|')
+  ? product.title.split('|')[0].trim()
+  : product.title
 ---
 
 <a
@@ -127,8 +133,8 @@ const perUnit = getPerUnitPrice()
 
   {/* Product Info */}
   <div class="p-4">
-    <h3 class="group-hover:text-brand-green-dark line-clamp-2 text-sm font-semibold text-gray-900">
-      {product.title}
+    <h3 class="group-hover:text-brand-green-dark text-sm font-semibold text-gray-900">
+      {displayName}
     </h3>
 
     {

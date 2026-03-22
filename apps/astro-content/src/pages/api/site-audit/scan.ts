@@ -11,8 +11,8 @@
  */
 import type { APIRoute } from 'astro'
 import { getCollection } from 'astro:content'
-import type { PersonaScores, GapStatus } from '../../../lib/content-score.types'
-import { scorePersonas, analyzeContentGap } from '../../../lib/services/mothership'
+import type { PersonaScores, GapStatus, BrandVoiceScore } from '../../../lib/content-score.types'
+import { scorePersonas, analyzeContentGap, scoreBrandVoice } from '../../../lib/services/mothership'
 import { computeLocalSEOMetrics } from '../../../lib/services/dataforseo'
 
 // =============================================================================
@@ -53,6 +53,21 @@ interface QualityResult {
   }
 }
 
+interface SEOResult {
+  titleTag: { present: boolean; length: number; optimal: boolean }
+  ogTags: { title: boolean; image: boolean; description: boolean }
+  canonical: boolean
+  imageAltCoverage: number
+  schemaTypes: string[]
+}
+
+interface EEATResult {
+  hasAuthor: boolean
+  authorSlug: string | null
+  hasUpdatedDate: boolean
+  updatedDate: string | null
+}
+
 interface EntryResult {
   slug: string
   title: string
@@ -60,6 +75,9 @@ interface EntryResult {
   persona: PersonaResult | null
   quality: QualityResult
   gap: GapStatus | null
+  voice: BrandVoiceScore | null
+  seo: SEOResult | null
+  eeat: EEATResult | null
 }
 
 interface ScanResponse {
@@ -275,6 +293,64 @@ function computeQuality(body: string, description?: string): QualityResult {
 }
 
 // =============================================================================
+// SEO + E-E-A-T CHECKS — computed from frontmatter + body content
+// =============================================================================
+
+function computeSEO(data: any, body: string): SEOResult {
+  const title = data.title || data.name || ''
+  const titleLength = title.length
+
+  // OG tags: check frontmatter fields that typically map to OG
+  const hasOgTitle = Boolean(data.title || data.metaTitle)
+  const hasOgImage = Boolean(data.image || data.coverImage || data.heroImage || data.thumbnail)
+  const hasOgDesc = Boolean(data.description || data.seoDescription || data.metaDescription)
+
+  // Canonical: assume present if page exists (Astro generates canonical by default)
+  const canonical = true
+
+  // Image alt coverage: count markdown images with and without alt text
+  const imgRegex = /!\[([^\]]*)\]\([^)]+\)/g
+  let totalImages = 0
+  let imagesWithAlt = 0
+  let match
+  while ((match = imgRegex.exec(body)) !== null) {
+    totalImages++
+    if (match[1] && match[1].trim().length > 0) imagesWithAlt++
+  }
+  const imageAltCoverage = totalImages > 0 ? Math.round((imagesWithAlt / totalImages) * 100) : 100
+
+  // Schema types: infer from content structure
+  const schemaTypes: string[] = []
+  if (data.faq && data.faq.length > 0) schemaTypes.push('FAQPage')
+  if (data.publishDate && data.author) schemaTypes.push('Article')
+  if (data.episodeNumber || data.audioUrl) schemaTypes.push('PodcastEpisode')
+  if (data.handle && data.variants) schemaTypes.push('Product')
+
+  return {
+    titleTag: { present: Boolean(title), length: titleLength, optimal: titleLength >= 30 && titleLength <= 60 },
+    ogTags: { title: hasOgTitle, image: hasOgImage, description: hasOgDesc },
+    canonical,
+    imageAltCoverage,
+    schemaTypes,
+  }
+}
+
+function computeEEAT(data: any): EEATResult {
+  const authorSlug = data.author || data.authorSlug || null
+  const hasAuthor = Boolean(authorSlug) && authorSlug !== 'admin'
+
+  const updatedDate = data.updatedDate || data.lastModified || data.publishDate || null
+  const hasUpdatedDate = Boolean(updatedDate)
+
+  return {
+    hasAuthor,
+    authorSlug: hasAuthor ? authorSlug : null,
+    hasUpdatedDate,
+    updatedDate: updatedDate ? String(updatedDate) : null,
+  }
+}
+
+// =============================================================================
 // PERSONA MAPPING — convert raw Mothership scores to PersonaResult
 // =============================================================================
 
@@ -299,9 +375,11 @@ export const POST: APIRoute = async ({ request }) => {
   const startTime = Date.now()
 
   try {
-    const { route, limit } = (await request.json()) as {
+    const { route, limit, slug, staticUrl } = (await request.json()) as {
       route: string
       limit?: number
+      slug?: string
+      staticUrl?: string
     }
 
     if (!route) {
@@ -311,9 +389,16 @@ export const POST: APIRoute = async ({ request }) => {
       )
     }
 
+    // =========================================================================
+    // STATIC PAGE SCAN — fetch rendered HTML and analyze
+    // =========================================================================
+    if (staticUrl) {
+      return await scanStaticPage(route, staticUrl, request)
+    }
+
     const mapping = findMapping(route)
 
-    // Non-content or unmapped route
+    // Non-content or unmapped route — still scannable via staticUrl
     if (!mapping || mapping.type === 'non-content' || mapping.type === 'index') {
       return new Response(
         JSON.stringify({
@@ -332,38 +417,54 @@ export const POST: APIRoute = async ({ request }) => {
     const extractor = mapping.extractor!
     const entryLimit = limit ?? mapping.defaultLimit ?? 50
 
-    let allEntries: any[]
-    try {
-      allEntries = await getCollection(collectionName as any, ({ data }: any) => {
-        return data.draft !== true
+    let entriesToScore: any[]
+
+    if (slug) {
+      // Single-entry lookup — fast path
+      const { getEntry } = await import('astro:content')
+      const entry = await getEntry(collectionName as any, slug)
+      entriesToScore = entry ? [entry] : []
+    } else {
+      // Full collection scan
+      let allEntries: any[]
+      try {
+        allEntries = await getCollection(collectionName as any, ({ data }: any) => {
+          return data.draft !== true
+        })
+      } catch {
+        allEntries = await getCollection(collectionName as any)
+      }
+
+      // Sort by date (newest first) for consistent sampling
+      allEntries.sort((a: any, b: any) => {
+        const dateA = a.data.publishDate || a.data.order || 0
+        const dateB = b.data.publishDate || b.data.order || 0
+        return new Date(dateB).getTime() - new Date(dateA).getTime()
       })
-    } catch {
-      allEntries = await getCollection(collectionName as any)
+
+      entriesToScore = allEntries.slice(0, entryLimit)
     }
-
-    // Sort by date (newest first) for consistent sampling
-    allEntries.sort((a: any, b: any) => {
-      const dateA = a.data.publishDate || a.data.order || 0
-      const dateB = b.data.publishDate || b.data.order || 0
-      return new Date(dateB).getTime() - new Date(dateA).getTime()
-    })
-
-    const entriesToScore = allEntries.slice(0, entryLimit)
     const entries: EntryResult[] = []
 
     for (const entry of entriesToScore) {
       const extracted = extractor(entry)
       const contentText = `${extracted.title}\n\n${extracted.body}`
 
-      // Persona axis (Supabase + OpenAI)
-      const personaRaw = await scorePersonas(contentText, mapping.segment)
-      const persona = personaRaw ? mapPersona(personaRaw) : null
+      // Run all axes in parallel
+      const [personaRaw, gap, voice] = await Promise.all([
+        scorePersonas(contentText, mapping.segment),
+        analyzeContentGap(extracted.title, extracted.body, extracted.url),
+        scoreBrandVoice(contentText),
+      ])
 
-      // Gap analysis (Supabase)
-      const gap = await analyzeContentGap(extracted.title, extracted.body, extracted.url)
+      const persona = personaRaw ? mapPersona(personaRaw) : null
 
       // Quality axis (always — local computation)
       const quality = computeQuality(extracted.body, extracted.description)
+
+      // SEO + E-E-A-T (local — from frontmatter + body)
+      const seo = computeSEO(entry.data, extracted.body)
+      const eeat = computeEEAT(entry.data)
 
       entries.push({
         slug: entry.id.replace(/\.mdx?$/, ''),
@@ -372,6 +473,9 @@ export const POST: APIRoute = async ({ request }) => {
         persona,
         quality,
         gap,
+        voice,
+        seo,
+        eeat,
       })
     }
 
@@ -416,7 +520,7 @@ export const POST: APIRoute = async ({ request }) => {
       route,
       scannedAt: new Date().toISOString(),
       scanVersion: SCAN_VERSION,
-      entryCount: allEntries.length,
+      entryCount: entriesToScore.length,
       scoredCount: entries.length,
       entries,
       aggregate: {
@@ -446,6 +550,196 @@ export const POST: APIRoute = async ({ request }) => {
         message: err instanceof Error ? err.message : 'Unknown error',
       }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
+    )
+  }
+}
+
+// =============================================================================
+// STATIC PAGE SCAN — fetch rendered HTML, extract text, run quality + vectors
+// =============================================================================
+
+async function scanStaticPage(route: string, staticUrl: string, request: Request) {
+  const startTime = Date.now()
+
+  try {
+    // Build absolute URL from the request origin
+    const origin = new URL(request.url).origin
+    const fetchUrl = new URL(staticUrl, origin).toString()
+
+    const res = await fetch(fetchUrl, {
+      headers: { Accept: 'text/html' },
+    })
+
+    if (!res.ok) {
+      return new Response(
+        JSON.stringify({
+          route,
+          error: true,
+          message: `Failed to fetch ${staticUrl}: ${res.status}`,
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      )
+    }
+
+    const html = await res.text()
+
+    // Extract text content from HTML
+    const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i)
+    const title = titleMatch ? titleMatch[1].trim() : ''
+
+    // Extract meta description
+    const metaDescMatch = html.match(/<meta\s+name=["']description["']\s+content=["']([^"']+)["']/i)
+      || html.match(/<meta\s+content=["']([^"']+)["']\s+name=["']description["']/i)
+    const description = metaDescMatch ? metaDescMatch[1] : ''
+
+    // Strip HTML tags to get body text
+    const bodyMatch = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i)
+      || html.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
+    const rawBody = bodyMatch ? bodyMatch[1] : html
+    const bodyText = rawBody
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[\s\S]*?<\/style>/gi, '')
+      .replace(/<nav[\s\S]*?<\/nav>/gi, '')
+      .replace(/<footer[\s\S]*?<\/footer>/gi, '')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+
+    // Count headings from HTML
+    const h1Count = (html.match(/<h1[\s>]/gi) || []).length
+    const h2Count = (html.match(/<h2[\s>]/gi) || []).length
+    const h3Count = (html.match(/<h3[\s>]/gi) || []).length
+
+    // Count images and alt text
+    const imgMatches = html.match(/<img\s[^>]*>/gi) || []
+    let totalImages = imgMatches.length
+    let imagesWithAlt = 0
+    for (const img of imgMatches) {
+      const altMatch = img.match(/alt=["']([^"']+)["']/i)
+      if (altMatch && altMatch[1].trim().length > 0) imagesWithAlt++
+    }
+
+    // Check for OG tags
+    const hasOgTitle = /<meta\s[^>]*property=["']og:title["']/i.test(html)
+    const hasOgImage = /<meta\s[^>]*property=["']og:image["']/i.test(html)
+    const hasOgDesc = /<meta\s[^>]*property=["']og:description["']/i.test(html)
+
+    // Check canonical
+    const hasCanonical = /<link\s[^>]*rel=["']canonical["']/i.test(html)
+
+    // Check schema markup
+    const schemaTypes: string[] = []
+    const ldJsonMatches = html.match(/<script\s+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi) || []
+    for (const ldJson of ldJsonMatches) {
+      const content = ldJson.replace(/<[^>]+>/g, '')
+      try {
+        const parsed = JSON.parse(content)
+        if (parsed['@type']) schemaTypes.push(parsed['@type'])
+      } catch { /* ignore malformed JSON-LD */ }
+    }
+
+    // Count links
+    const linkMatches = html.match(/<a\s[^>]*href=["']([^"']+)["']/gi) || []
+    let internalLinks = 0
+    let externalLinks = 0
+    for (const link of linkMatches) {
+      const hrefMatch = link.match(/href=["']([^"']+)["']/i)
+      if (hrefMatch) {
+        const href = hrefMatch[1]
+        if (href.startsWith('http') && !href.includes('southlandorganics.com')) externalLinks++
+        else if (href.startsWith('/') || href.includes('southlandorganics.com')) internalLinks++
+      }
+    }
+
+    const wordCount = bodyText.split(/\s+/).filter(Boolean).length
+
+    // Build quality result
+    const quality: QualityResult = {
+      wordCount,
+      hasMetaDescription: Boolean(description),
+      metaDescOptimal: description.length >= 120 && description.length <= 160,
+      internalLinks,
+      externalLinks,
+      stubbed: wordCount < 150,
+      headings: {
+        h1: h1Count,
+        h2: h2Count,
+        h3: h3Count,
+        properStructure: h1Count <= 1 && h2Count > 0,
+      },
+      readability: {
+        fleschKincaid: 0,
+        gradeLevel: 'unknown',
+      },
+    }
+
+    const seo: SEOResult = {
+      titleTag: { present: Boolean(title), length: title.length, optimal: title.length >= 30 && title.length <= 60 },
+      ogTags: { title: hasOgTitle, image: hasOgImage, description: hasOgDesc },
+      canonical: hasCanonical,
+      imageAltCoverage: totalImages > 0 ? Math.round((imagesWithAlt / totalImages) * 100) : 100,
+      schemaTypes,
+    }
+
+    // Run persona + voice scoring on body text (if substantial)
+    let persona: PersonaResult | null = null
+    let voice: BrandVoiceScore | null = null
+
+    if (wordCount > 50) {
+      const contentText = `${title}\n\n${bodyText.slice(0, 8000)}`
+      const [personaRaw, voiceResult] = await Promise.all([
+        scorePersonas(contentText),
+        scoreBrandVoice(contentText),
+      ])
+      persona = personaRaw ? mapPersona(personaRaw) : null
+      voice = voiceResult
+    }
+
+    const entry: EntryResult = {
+      slug: route.replace(/\//g, '_').replace(/^_|_$/g, '') || 'index',
+      title: title || route,
+      url: route,
+      persona,
+      quality,
+      gap: null,
+      voice,
+      seo,
+      eeat: { hasAuthor: false, authorSlug: null, hasUpdatedDate: false, updatedDate: null },
+    }
+
+    const duration = Date.now() - startTime
+    console.log(`[site-audit] static scan ${route}: ${wordCount} words, ${h2Count} h2s (${duration}ms)`)
+
+    return new Response(
+      JSON.stringify({
+        route,
+        scannedAt: new Date().toISOString(),
+        scanVersion: SCAN_VERSION,
+        entryCount: 1,
+        scoredCount: 1,
+        entries: [entry],
+        aggregate: {
+          persona: persona
+            ? { primaryAudience: persona.audience, avgAlignment: persona.alignment, unclearCount: persona.unclear ? 1 : 0 }
+            : null,
+          quality: {
+            avgWordCount: wordCount,
+            missingMeta: description ? 0 : 1,
+            noInternalLinks: internalLinks === 0 ? 1 : 0,
+            stubbedCount: wordCount < 150 ? 1 : 0,
+            avgReadability: 0,
+            badHeadingsCount: quality.headings.properStructure ? 0 : 1,
+          },
+          gap: null,
+        },
+      }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } },
+    )
+  } catch (err) {
+    console.error('[site-audit] static scan error:', err)
+    return new Response(
+      JSON.stringify({ error: true, message: err instanceof Error ? err.message : 'Unknown error' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } },
     )
   }
 }

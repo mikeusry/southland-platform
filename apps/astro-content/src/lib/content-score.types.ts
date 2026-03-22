@@ -225,6 +225,24 @@ export interface QualityMetrics {
 }
 
 // ============================================================================
+// BRAND VOICE (Mothership transcript similarity)
+// ============================================================================
+
+export interface BrandVoiceScore {
+  /** Alignment percentage 0-100 */
+  alignment: number
+  /** Top matching video transcript chunks */
+  topMatches: {
+    videoTitle: string
+    similarity: number
+    timestamp?: string
+    chunkType?: string
+  }[]
+  /** Whether voice scoring infrastructure is available */
+  available: boolean
+}
+
+// ============================================================================
 // ERROR RESPONSE
 // ============================================================================
 

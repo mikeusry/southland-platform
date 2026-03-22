@@ -446,7 +446,7 @@ const faqSchema = {
                   )}
                   <div class="min-w-0 flex-1">
                     <div class="truncate text-sm font-semibold text-gray-900">
-                      {product!.title}
+                      {product!.title.includes('|') ? product!.title.split('|')[0].trim() : product!.title}
                     </div>
                     <div class="text-sm text-[#44883E]">
                       From {formatPrice(product!.priceRange.minVariantPrice.amount)}

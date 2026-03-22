@@ -292,6 +292,34 @@ const homepageCollection = defineCollection({
     backyard: tunnelSchema,
     commercial: tunnelSchema,
     lawn: tunnelSchema,
+    // Science section
+    scienceHeadline: z.string().optional(),
+    scienceSubheadline: z.string().optional(),
+    scienceColumns: z.array(z.object({
+      title: z.string(),
+      body: z.string(),
+    })).optional().default([]),
+    // Benefits band
+    benefitsHeadline: z.string().optional(),
+    benefitsSubheadline: z.string().optional(),
+    benefits: z.array(z.object({
+      title: z.string(),
+      body: z.string(),
+    })).optional().default([]),
+    // Trust section
+    trustHeadline: z.string().optional(),
+    trustSubheadline: z.string().optional(),
+    trustLogos: z.array(z.string()).optional().default([]),
+    trustMicrocopy: z.string().optional(),
+    // Human section
+    humanHeadline: z.string().optional(),
+    humanSubheadline: z.string().optional(),
+    humanBody: z.string().optional(),
+    humanCTAs: z.array(z.object({
+      label: z.string(),
+      href: z.string(),
+      style: z.enum(['primary', 'secondary']).default('primary'),
+    })).optional().default([]),
     // Default-only sections
     decisionEngineHeadline: z.string().optional(),
     decisionEngineSubheadline: z.string().optional(),

@@ -3,7 +3,7 @@
  * Persona scoring and content gap analysis via point.dog Supabase
  */
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
-import type { PersonaScores, GapStatus, BuyerStage } from '../content-score.types'
+import type { PersonaScores, GapStatus, BuyerStage, BrandVoiceScore } from '../content-score.types'
 
 // Initialize Supabase client
 let supabaseClient: SupabaseClient | null = null
@@ -61,6 +61,105 @@ async function generateEmbedding(text: string): Promise<number[] | null> {
   } catch (error) {
     console.error('[mothership] OpenAI embedding exception:', error)
     return null
+  }
+}
+
+/**
+ * Generate a 3072-dim embedding using text-embedding-3-large.
+ * Matches the dimension of transcript_chunks.embedding in Mothership.
+ */
+async function generateLargeEmbedding(text: string): Promise<number[] | null> {
+  const apiKey = import.meta.env.OPENAI_API_KEY
+  if (!apiKey) {
+    console.error('[mothership] MISSING OPENAI_API_KEY env var')
+    return null
+  }
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/embeddings', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'text-embedding-3-large',
+        input: text.slice(0, 8000),
+      }),
+    })
+
+    if (!response.ok) {
+      const errorBody = await response.text()
+      console.error('[mothership] OpenAI large embedding HTTP error:', response.status, errorBody)
+      return null
+    }
+
+    const data = await response.json()
+    return data.data[0].embedding
+  } catch (error) {
+    console.error('[mothership] OpenAI large embedding exception:', error)
+    return null
+  }
+}
+
+/**
+ * Score content against brand voice using transcript chunk similarity.
+ * Uses 3072-dim embeddings to match Mothership's transcript_chunks table.
+ */
+export async function scoreBrandVoice(content: string): Promise<BrandVoiceScore> {
+  const supabase = getSupabaseClient()
+
+  if (!supabase) {
+    console.warn('[mothership] scoreBrandVoice: Supabase client is null (env vars missing)')
+    return { alignment: 0, topMatches: [], available: false }
+  }
+
+  if (!import.meta.env.ENABLE_MOTHERSHIP) {
+    console.warn('[mothership] scoreBrandVoice: ENABLE_MOTHERSHIP is falsy')
+    return { alignment: 0, topMatches: [], available: false }
+  }
+
+  try {
+    const embedding = await generateLargeEmbedding(content)
+    if (!embedding) {
+      console.error('[mothership] scoreBrandVoice: embedding generation failed — OpenAI text-embedding-3-large may not be accessible')
+      return { alignment: 0, topMatches: [], available: false }
+    }
+
+    const { data: chunks, error } = await supabase.rpc('search_voice_chunks', {
+      query_embedding: embedding,
+      match_threshold: 0.3,
+      match_count: 10,
+    })
+
+    if (error) {
+      console.error('[mothership] scoreBrandVoice: search_voice_chunks RPC error:', error.message || error)
+      return { alignment: 0, topMatches: [], available: false }
+    }
+
+    if (!chunks || chunks.length === 0) {
+      console.info('[mothership] scoreBrandVoice: no transcript chunks found — run embed-chunks.js in mothership to populate')
+      return { alignment: 0, topMatches: [], available: false }
+    }
+
+    // Average top-5 similarity scores for alignment percentage
+    const topN = chunks.slice(0, 5)
+    const avgSimilarity = topN.reduce((s: number, c: any) => s + c.similarity, 0) / topN.length
+    const alignment = Math.round(avgSimilarity * 100)
+
+    const topMatches = topN.map((c: any) => ({
+      videoTitle: c.video_title || c.title || 'Untitled',
+      similarity: Math.round(c.similarity * 100),
+      timestamp: c.start_seconds
+        ? `${Math.floor(c.start_seconds / 60)}:${String(c.start_seconds % 60).padStart(2, '0')}`
+        : undefined,
+      chunkType: c.chunk_type || undefined,
+    }))
+
+    return { alignment, topMatches, available: true }
+  } catch (error) {
+    console.error('[mothership] scoreBrandVoice: unexpected exception:', error)
+    return { alignment: 0, topMatches: [], available: false }
   }
 }
 

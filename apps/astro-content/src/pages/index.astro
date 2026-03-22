@@ -5,8 +5,8 @@
  * Architecture:
  * - SSR: Fetches products from Shopify Storefront API on every request
  * - Copy: All text pulled from content/homepage/index.mdx
- * - Default: 7-section structure (hero, persona strip, proof band, products,
- *   content hub, persona mini, final CTA)
+ * - Default: 10-section arc (hero, persona strip, science, benefits band,
+ *   trust stats, products, trust & proof, human help, content hub, final CTA)
  * - Persona tunnels: Filtered product grids for Betty/Bill/Taylor
  * - Decision Engine: In-page persona selection (no redirects)
  */
@@ -594,11 +594,11 @@ function getProducts(filter: string) {
     </Fragment>
 
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
-    <!-- DEFAULT: 7-section homepage for new/unknown visitors                   -->
+    <!-- DEFAULT: 10-section homepage arc for new/unknown visitors              -->
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
     <Fragment slot="default">
 
-      <!-- ─── Section 1: Hero — 55/45 Credibility + Product Preview ──────── -->
+      <!-- ─── Section 1: Hero ────────────────────────────────────────────── -->
       <section class="bg-gradient-to-br from-[#2C5234] to-[#44883E] px-5 py-16 md:py-24">
         <div class="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-[55fr_45fr]" id="hero-section">
           <!-- LEFT (55%): Credibility -->
@@ -624,7 +624,7 @@ function getProducts(filter: string) {
               </a>
             </div>
 
-            <!-- Proof credential chips (text-only — A+ BBB lives in Proof Band below) -->
+            <!-- Proof credential chips -->
             <div class="mt-6 flex flex-wrap gap-3">
               <span class="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-sm font-medium text-white/90">
                 <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
@@ -636,24 +636,29 @@ function getProducts(filter: string) {
               </span>
             </div>
 
-            <!-- CTAs — primary scrolls to persona selector, secondary to products -->
+            <!-- CTAs -->
             <div class="mt-8 flex flex-wrap gap-4">
-              <a
-                href="#persona-selector"
-                class="inline-flex items-center gap-2 rounded-lg bg-white px-8 py-4 text-base font-semibold transition hover:-translate-y-0.5 hover:shadow-lg"
-                style="color: var(--color-title);"
-              >
-                What are you growing?
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
-                </svg>
-              </a>
-              <a
-                href="/products/"
-                class="inline-flex items-center rounded-lg border-2 border-white/50 px-8 py-4 text-base font-semibold text-white transition hover:border-white hover:bg-white/10"
-              >
-                Explore Products
-              </a>
+              {def.heroCTAs.map((cta, i) =>
+                i === 0 ? (
+                  <a
+                    href={cta.href}
+                    class="inline-flex items-center gap-2 rounded-lg bg-white px-8 py-4 text-base font-semibold transition hover:-translate-y-0.5 hover:shadow-lg"
+                    style="color: var(--color-title);"
+                  >
+                    {cta.label}
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                    </svg>
+                  </a>
+                ) : (
+                  <a
+                    href={cta.href}
+                    class="inline-flex items-center rounded-lg border-2 border-white/50 px-8 py-4 text-base font-semibold text-white transition hover:border-white hover:bg-white/10"
+                  >
+                    {cta.label}
+                  </a>
+                )
+              )}
             </div>
           </div>
 
@@ -686,33 +691,91 @@ function getProducts(filter: string) {
         </div>
       </section>
 
-      <!-- ─── Section 2: Persona Strip — "What Are You Growing?" ───────────── -->
+      <!-- ─── Section 2: Persona Quick-Strip — "What Are You Growing?" ───── -->
       <section class="bg-[#f8f5ef] px-5 py-16" id="persona-selector" style="scroll-margin-top: 120px;">
         <DecisionEngine
-          headline="What Are You Growing?"
-          subheadline="Select your focus area and we'll show you the right products"
+          headline={hp.decisionEngineHeadline}
+          subheadline={hp.decisionEngineSubheadline}
           source="decision_engine"
         />
       </section>
 
-      <!-- ─── Section 3: Proof Band — Stats ────────────────────────────────── -->
-      <section class="bg-[#2C5234] px-5 py-12">
+      <!-- ─── Section 3: Science Credibility ─────────────────────────────── -->
+      <section class="hp-science bg-gray-50 px-5 py-16 md:py-20">
+        <div class="mx-auto max-w-6xl">
+          <div class="mb-12 text-center">
+            <h2 class="font-heading text-3xl md:text-4xl" style="color: var(--color-title);">
+              {hp.scienceHeadline}
+            </h2>
+            {hp.scienceSubheadline && (
+              <p class="mx-auto mt-4 max-w-2xl text-lg text-gray-600">
+                {hp.scienceSubheadline}
+              </p>
+            )}
+          </div>
+          <div class="grid gap-8 md:grid-cols-3">
+            {hp.scienceColumns.map((col, i) => (
+              <div class="hp-science-col rounded-xl bg-white p-8 shadow-sm">
+                <div class="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-[#2C5234] text-lg font-bold text-white">
+                  {i + 1}
+                </div>
+                <h3 class="font-heading text-xl" style="color: var(--color-title);">
+                  {col.title}
+                </h3>
+                <p class="mt-3 leading-relaxed text-gray-600">
+                  {col.body}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── Section 4: Benefits Band ───────────────────────────────────── -->
+      <section class="hp-benefits px-5 py-16 md:py-20" style="background-color: #2C5234;">
+        <div class="mx-auto max-w-6xl">
+          <div class="mb-12 text-center">
+            <h2 class="font-heading text-3xl text-white md:text-4xl">
+              {hp.benefitsHeadline}
+            </h2>
+            {hp.benefitsSubheadline && (
+              <p class="mx-auto mt-4 max-w-2xl text-lg text-white/80">
+                {hp.benefitsSubheadline}
+              </p>
+            )}
+          </div>
+          <div class="grid gap-8 md:grid-cols-3">
+            {hp.benefits.map((benefit) => (
+              <div class="hp-benefit-card rounded-xl border border-white/15 bg-white/10 p-8">
+                <h3 class="font-heading text-xl text-white">
+                  {benefit.title}
+                </h3>
+                <p class="mt-3 leading-relaxed text-white/80">
+                  {benefit.body}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── Section 5: Trust Stats Strip ───────────────────────────────── -->
+      <section class="bg-white px-5 py-12">
         <div class="mx-auto grid max-w-4xl grid-cols-2 gap-8 text-center md:grid-cols-4">
           {def.trustStats.map((stat) => (
             <div>
-              <div class="mb-1 text-3xl font-bold text-white">{stat.value}</div>
-              <div class="text-sm uppercase tracking-wide text-white/70">{stat.label}</div>
+              <div class="mb-1 text-3xl font-bold" style="color: var(--color-title);">{stat.value}</div>
+              <div class="text-sm uppercase tracking-wide text-gray-500">{stat.label}</div>
             </div>
           ))}
         </div>
       </section>
 
-      <!-- ─── Section 4: Featured Products ─────────────────────────────────── -->
+      <!-- ─── Section 6: Featured Products ───────────────────────────────── -->
       {featuredProducts.length > 0 && (
-        <section id="featured-products" class="bg-white px-5 py-16" style="scroll-margin-top: 120px;">
+        <section id="featured-products" class="bg-gray-50 px-5 py-16" style="scroll-margin-top: 120px;">
           <div class="mx-auto max-w-6xl">
             <div class="mb-10 text-center">
-              <!-- NOTE: Use font-sans here to override global font-heading -->
               <h2 class="font-sans text-3xl font-bold" style="color: var(--color-title);">
                 {def.productsHeadline}
               </h2>
@@ -737,12 +800,91 @@ function getProducts(filter: string) {
         </section>
       )}
 
-      <!-- ─── Section 5: Content Hub Teaser (Podcast + Blog only) ────────── -->
+      <!-- ─── Section 7: Trust & Proof Band ──────────────────────────────── -->
+      <section class="hp-trust bg-[#f8f5ef] px-5 py-16 md:py-20">
+        <div class="mx-auto max-w-5xl">
+          <div class="mb-10 text-center">
+            <h2 class="font-heading text-3xl md:text-4xl" style="color: var(--color-title);">
+              {hp.trustHeadline}
+            </h2>
+            {hp.trustSubheadline && (
+              <p class="mx-auto mt-4 max-w-2xl text-lg text-gray-600">
+                {hp.trustSubheadline}
+              </p>
+            )}
+          </div>
+          <!-- Logo band -->
+          <div class="flex flex-wrap items-center justify-center gap-6 md:gap-10">
+            {hp.trustLogos.map((logo) => (
+              <span class="hp-trust-logo rounded-lg border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-500">
+                {logo}
+              </span>
+            ))}
+          </div>
+          {hp.trustMicrocopy && (
+            <p class="mx-auto mt-8 max-w-2xl text-center text-sm text-gray-500">
+              {hp.trustMicrocopy}
+            </p>
+          )}
+        </div>
+      </section>
+
+      <!-- ─── Section 8: Real Help From Real People ──────────────────────── -->
+      <section class="hp-human bg-white px-5 py-16 md:py-20">
+        <div class="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-2">
+          <!-- Left: Text -->
+          <div>
+            <h2 class="font-heading text-3xl md:text-4xl" style="color: var(--color-title);">
+              {hp.humanHeadline}
+            </h2>
+            {hp.humanSubheadline && (
+              <p class="mt-4 text-lg text-gray-600">
+                {hp.humanSubheadline}
+              </p>
+            )}
+            {hp.humanBody && (
+              <p class="mt-4 leading-relaxed text-gray-600">
+                {hp.humanBody}
+              </p>
+            )}
+            <div class="mt-8 flex flex-wrap gap-4">
+              {hp.humanCTAs.map((cta, i) =>
+                i === 0 ? (
+                  <a
+                    href={cta.href}
+                    class="bg-brand-green-dark inline-flex items-center rounded-lg px-6 py-3.5 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:bg-green-800"
+                  >
+                    {cta.label}
+                  </a>
+                ) : (
+                  <a
+                    href={cta.href}
+                    class="inline-flex items-center rounded-lg border-2 border-[#2C5234] px-6 py-3.5 text-base font-semibold transition hover:bg-[#2C5234] hover:text-white"
+                    style="color: var(--color-title);"
+                  >
+                    {cta.label}
+                  </a>
+                )
+              )}
+            </div>
+          </div>
+          <!-- Right: Placeholder for team photos -->
+          <div class="hp-human-placeholder hidden items-center justify-center rounded-2xl bg-gray-100 md:flex">
+            <div class="p-12 text-center">
+              <svg class="mx-auto h-16 w-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+              </svg>
+              <p class="mt-3 text-sm text-gray-400">Team photos coming soon</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── Section 9: Content Engine (Learn & Grow) ───────────────────── -->
       {hp.resources && hp.resources.length >= 2 && (
         <section class="bg-[#f8f5ef] px-5 py-16">
           <div class="mx-auto max-w-4xl">
             <div class="mb-10 text-center">
-              <!-- NOTE: Use font-sans here to override global font-heading -->
               <h2 class="font-sans text-3xl font-bold" style="color: var(--color-title);">
                 {hp.resourcesHeadline}
               </h2>
@@ -779,7 +921,6 @@ function getProducts(filter: string) {
                     </div>
                   </div>
                   <div class="p-5">
-                    <!-- NOTE: Use font-sans here to override global font-heading -->
                     <h3 class="font-sans font-semibold text-gray-900 group-hover:text-[#2C5234]">
                       {resource.title}
                     </h3>
@@ -790,59 +931,27 @@ function getProducts(filter: string) {
                 </a>
               ))}
             </div>
+            <!-- Third resource card (Store Locator) if present -->
+            {hp.resources[2] && (
+              <div class="mt-6 text-center">
+                <a
+                  href={hp.resources[2].href}
+                  class="inline-flex items-center gap-2 rounded-lg border-2 border-[#2C5234] px-6 py-3 font-semibold transition hover:bg-[#2C5234] hover:text-white"
+                  style="color: var(--color-title);"
+                >
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 0115 0z" />
+                  </svg>
+                  {hp.resources[2].title}
+                </a>
+              </div>
+            )}
           </div>
         </section>
       )}
 
-      <!-- ─── Section 6: Persona Mini Section (conditional, client-only) ───── -->
-      <section id="persona-mini" class="bg-white px-5 py-16" style="display: none;">
-        <div class="mx-auto max-w-2xl text-center">
-          <!-- Backyard mini -->
-          <div data-persona-mini="backyard" style="display: none;">
-            {betty.ctaHeadline && (
-              <Fragment>
-                <h2 class="font-sans text-2xl font-bold" style="color: var(--color-title);">{betty.ctaHeadline}</h2>
-                <p class="mt-3 text-gray-600">{betty.ctaBody}</p>
-                {betty.ctaCTAs[0] && (
-                  <a href={betty.ctaCTAs[0].href} class="bg-brand-green-dark mt-6 inline-flex rounded-lg px-6 py-3 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-green-800">
-                    {betty.ctaCTAs[0].label}
-                  </a>
-                )}
-              </Fragment>
-            )}
-          </div>
-          <!-- Commercial mini -->
-          <div data-persona-mini="commercial" style="display: none;">
-            {bill.ctaHeadline && (
-              <Fragment>
-                <h2 class="font-sans text-2xl font-bold" style="color: var(--color-title);">{bill.ctaHeadline}</h2>
-                <p class="mt-3 text-gray-600">{bill.ctaBody}</p>
-                {bill.ctaCTAs[0] && (
-                  <a href={bill.ctaCTAs[0].href} class="bg-brand-green-dark mt-6 inline-flex rounded-lg px-6 py-3 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-green-800">
-                    {bill.ctaCTAs[0].label}
-                  </a>
-                )}
-              </Fragment>
-            )}
-          </div>
-          <!-- Lawn mini -->
-          <div data-persona-mini="lawn" style="display: none;">
-            {taylor.ctaHeadline && (
-              <Fragment>
-                <h2 class="font-sans text-2xl font-bold" style="color: var(--color-title);">{taylor.ctaHeadline}</h2>
-                <p class="mt-3 text-gray-600">{taylor.ctaBody}</p>
-                {taylor.ctaCTAs[0] && (
-                  <a href={taylor.ctaCTAs[0].href} class="bg-brand-green-dark mt-6 inline-flex rounded-lg px-6 py-3 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-green-800">
-                    {taylor.ctaCTAs[0].label}
-                  </a>
-                )}
-              </Fragment>
-            )}
-          </div>
-        </div>
-      </section>
-
-      <!-- ─── Section 7: Final CTA — Service-Oriented ─────────────────────── -->
+      <!-- ─── Section 10: Final CTA — Service-Oriented ──────────────────── -->
       <section class="bg-gradient-to-br from-[#44883E] to-[#2C5234] px-5 py-16 text-center md:py-20">
         <div class="mx-auto max-w-2xl">
           <h2 class="font-heading text-3xl text-white md:text-4xl">{def.ctaHeadline}</h2>
@@ -904,6 +1013,40 @@ function getProducts(filter: string) {
   </RealityTunnel>
 </BaseLayout>
 
+<style>
+  /* ── Section 3: Science Credibility ──────────────────────────────────────── */
+  .hp-science-col {
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .hp-science-col:hover {
+    box-shadow: 0 4px 20px rgba(44, 82, 52, 0.12);
+    transform: translateY(-2px);
+  }
+
+  /* ── Section 4: Benefits Band ────────────────────────────────────────────── */
+  .hp-benefit-card {
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+  .hp-benefit-card:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+  }
+
+  /* ── Section 7: Trust Logos ──────────────────────────────────────────────── */
+  .hp-trust-logo {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .hp-trust-logo:hover {
+    border-color: #44883E;
+    box-shadow: 0 2px 8px rgba(68, 136, 62, 0.15);
+  }
+
+  /* ── Section 8: Human — placeholder height ──────────────────────────────── */
+  .hp-human-placeholder {
+    min-height: 320px;
+  }
+</style>
+
 <script>
   import { getPersonaId, getJourneyStage } from '../lib/persona'
 
@@ -919,16 +1062,6 @@ function getProducts(filter: string) {
         has_persona: Boolean(personaId),
         is_personalized: Boolean(personaId && personaId !== 'general'),
       })
-    }
-
-    // Reveal persona mini section for returning visitors
-    const miniSection = document.getElementById('persona-mini')
-    if (miniSection && personaId && personaId !== 'general') {
-      const miniBlock = miniSection.querySelector(`[data-persona-mini="${personaId}"]`) as HTMLElement
-      if (miniBlock && miniBlock.innerHTML.trim()) {
-        miniBlock.style.display = 'block'
-        miniSection.style.display = 'block'
-      }
     }
   }
 

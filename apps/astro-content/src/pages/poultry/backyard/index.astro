@@ -399,7 +399,7 @@ const faqSchema = {
                   )}
                   <div class="min-w-0 flex-1">
                     <div class="truncate text-sm font-semibold text-gray-900">
-                      {product!.title}
+                      {product!.title.includes('|') ? product!.title.split('|')[0].trim() : product!.title}
                     </div>
                     <div class="text-sm text-green-700">
                       From {formatPrice(product!.priceRange.minVariantPrice.amount)}
@@ -588,6 +588,34 @@ const faqSchema = {
         We've heard every question backyard keepers ask. Here's the honest answer to each one.
       </p>
       <AccordionFaq items={objections} persona="backyard" />
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 7B: RESOURCES — Guides for backyard keepers                  -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <section class="py-16 md:py-20">
+    <div class="mx-auto max-w-4xl px-4">
+      <h2 class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
+        Free guides for backyard keepers
+      </h2>
+      <p class="mx-auto mb-10 max-w-xl text-center text-gray-600">
+        Written for small flocks. No commercial jargon, no guessing on dosing.
+      </p>
+      <div class="grid gap-6 md:grid-cols-3">
+        <a href="/blog/whats-wrong-with-my-chicken-symptom-guide/" class="group block rounded-xl border border-gray-200 p-6 transition-colors hover:border-green-300 hover:bg-green-50/30">
+          <h3 class="mb-2 text-lg font-bold" style="color: var(--color-title);">What's Wrong With My Chicken?</h3>
+          <p class="text-sm text-gray-600">Symptom-by-symptom diagnostic guide. Lethargy, sneezing, feather loss, pale combs, egg drops — what each one means and what to do first.</p>
+        </a>
+        <a href="/blog/backyard-chicken-dosing-guide/" class="group block rounded-xl border border-gray-200 p-6 transition-colors hover:border-green-300 hover:bg-green-50/30">
+          <h3 class="mb-2 text-lg font-bold" style="color: var(--color-title);">Dosing Guide for Small Flocks</h3>
+          <p class="text-sm text-gray-600">Exact amounts for flocks of 3 to 25 birds. Every product, every waterer size, seasonal schedules included.</p>
+        </a>
+        <a href="/blog/new-chicken-owner-first-30-days/" class="group block rounded-xl border border-gray-200 p-6 transition-colors hover:border-green-300 hover:bg-green-50/30">
+          <h3 class="mb-2 text-lg font-bold" style="color: var(--color-title);">Your First 30 Days With Chickens</h3>
+          <p class="text-sm text-gray-600">Week-by-week guide for new owners. What to do, what to watch for, and when to start supplements.</p>
+        </a>
+      </div>
     </div>
   </section>
 

@@ -32,6 +32,21 @@ const collectionRedirects: Record<string, string> = {
   turkey: '/poultry/turkey/',
   'game-birds': '/poultry/game-birds/',
   hydroseeders: '/hydroseeders/',
+  // Lawn & Garden
+  'golf-courses': '/lawn/golf-courses/',
+  homeowners: '/lawn/homeowners/',
+  landscapers: '/lawn/landscapers/',
+  turf: '/lawn/turf-pros/',
+  // Agriculture
+  crops: '/agriculture/crops/',
+  produce: '/agriculture/produce/',
+  // Livestock
+  'pig-and-swine-supplements': '/livestock/swine/',
+  // Products
+  sanitizers: '/products/sanitizers/',
+  waste: '/products/waste-treatment/',
+  // Other → homepage
+  other: '/',
 }
 if (slug in collectionRedirects) {
   return Astro.redirect(collectionRedirects[slug]!, 301)

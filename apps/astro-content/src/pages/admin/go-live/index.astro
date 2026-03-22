@@ -1,0 +1,932 @@
+---
+/**
+ * Go-Live Readiness Dashboard
+ *
+ * Focused comparison of ~40 critical revenue pages.
+ * Uses /api/go-live/compare to fetch live vs new data.
+ */
+import AdminLayout from '../../../layouts/AdminLayout.astro'
+
+const CRITICAL_PAGES = [
+  // Homepage
+  { livePath: '/', label: 'Homepage', priority: 'critical', group: 'Homepage' },
+
+  // Persona Landers
+  { livePath: '/collections/poultry', label: 'Poultry Hub', priority: 'critical', group: 'Persona Landers' },
+  { livePath: '/collections/poultry-broilers', label: 'Broiler Bill Landing', priority: 'critical', group: 'Persona Landers' },
+  { livePath: '/collections/backyard-birds', label: 'Backyard Betty Landing', priority: 'critical', group: 'Persona Landers' },
+  { livePath: '/collections/poultry-breeders', label: 'Breeders Landing', priority: 'critical', group: 'Persona Landers' },
+  { livePath: '/collections/turkey', label: 'Turkey Landing', priority: 'critical', group: 'Persona Landers' },
+  { livePath: '/collections/game-birds', label: 'Game Birds Landing', priority: 'critical', group: 'Persona Landers' },
+
+  // Collections (new IA)
+  { livePath: '/collections/golf-courses', label: 'Golf Courses', priority: 'high', group: 'Collections' },
+  { livePath: '/collections/homeowners', label: 'Homeowners', priority: 'high', group: 'Collections' },
+  { livePath: '/collections/landscapers', label: 'Landscapers', priority: 'high', group: 'Collections' },
+  { livePath: '/collections/turf', label: 'Turf Pros', priority: 'high', group: 'Collections' },
+  { livePath: '/collections/crops', label: 'Crops', priority: 'high', group: 'Collections' },
+  { livePath: '/collections/produce', label: 'Produce', priority: 'high', group: 'Collections' },
+  { livePath: '/collections/pig-and-swine-supplements', label: 'Swine', priority: 'high', group: 'Collections' },
+  { livePath: '/collections/sanitizers', label: 'Sanitizers', priority: 'high', group: 'Collections' },
+  { livePath: '/collections/waste', label: 'Waste Treatment', priority: 'high', group: 'Collections' },
+
+  // Info Pages
+  { livePath: '/pages/about-us', label: 'About', priority: 'high', group: 'Info Pages' },
+  { livePath: '/pages/contact-us', label: 'Contact', priority: 'high', group: 'Info Pages' },
+  { livePath: '/pages/distribution', label: 'Distribution', priority: 'medium', group: 'Info Pages' },
+  { livePath: '/pages/store-locator', label: 'Store Locator', priority: 'medium', group: 'Info Pages' },
+
+  // Commerce
+  { livePath: '/pages/build-a-case', label: 'Build-a-Case', priority: 'high', group: 'Commerce' },
+]
+
+// Group pages
+const groups: Record<string, typeof CRITICAL_PAGES> = {}
+for (const page of CRITICAL_PAGES) {
+  if (!groups[page.group]) groups[page.group] = []
+  groups[page.group].push(page)
+}
+const groupOrder = ['Homepage', 'Persona Landers', 'Collections', 'Info Pages', 'Commerce']
+const totalPages = CRITICAL_PAGES.length
+---
+
+<AdminLayout title="Go Live Readiness" activeNav="/admin/go-live">
+  <div class="page-header">
+    <h1 class="page-title">Go-Live Readiness</h1>
+    <p class="page-subtitle">Compare {totalPages} critical pages — live Shopify vs new Astro</p>
+  </div>
+
+  <!-- Readiness bar -->
+  <div class="readiness-bar">
+    <div class="readiness-stats" id="readiness-stats">
+      <span class="readiness-label">Critical: <strong id="reviewed-count">0</strong>/{totalPages} reviewed.</span>
+      <span class="readiness-dot dot-green"></span><strong id="green-count">0</strong> green
+      <span class="readiness-dot dot-amber"></span><strong id="amber-count">0</strong> amber
+      <span class="readiness-dot dot-red"></span><strong id="red-count">0</strong> red
+    </div>
+    <div class="readiness-meta">Live site crawl: Dec 31, 2025</div>
+  </div>
+
+  <!-- Two-column layout -->
+  <div class="go-live-grid">
+    <!-- Left: Page list -->
+    <div class="page-list" id="page-list">
+      {groupOrder.map(groupName => {
+        const pages = groups[groupName] || []
+        return (
+          <div class="page-group">
+            <div class="group-header">
+              <span class="group-name">{groupName}</span>
+              <span class="group-count">{pages.length}</span>
+            </div>
+            {pages.map(page => (
+              <button
+                class="page-row"
+                data-live-path={page.livePath}
+                data-label={page.label}
+                data-priority={page.priority}
+              >
+                <span class="status-dot dot-unchecked" data-dot={page.livePath}></span>
+                <span class="page-label">{page.label}</span>
+                <span class={`priority-badge priority-${page.priority}`}>{page.priority}</span>
+              </button>
+            ))}
+          </div>
+        )
+      })}
+    </div>
+
+    <!-- Right: Result panel -->
+    <div class="result-panel" id="result-panel">
+      <div class="empty-state" id="empty-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="1.5">
+          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+        <p>Select a page to compare</p>
+      </div>
+      <div class="loading-state" id="loading-state" style="display:none">
+        <div class="spinner"></div>
+        <p>Comparing pages...</p>
+      </div>
+      <div class="result-content" id="result-content" style="display:none"></div>
+    </div>
+  </div>
+</AdminLayout>
+
+<style>
+  /* Readiness bar */
+  .readiness-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 20px;
+    margin-bottom: 20px;
+  }
+
+  .readiness-stats {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--text);
+  }
+
+  .readiness-label {
+    margin-right: 8px;
+  }
+
+  .readiness-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 8px;
+  }
+
+  .readiness-meta {
+    font-size: 12px;
+    color: var(--text-tertiary);
+  }
+
+  /* Two-column grid */
+  .go-live-grid {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+
+  @media (max-width: 900px) {
+    .go-live-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Page list (left column) */
+  .page-list {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow-y: auto;
+    max-height: calc(100vh - 200px);
+  }
+
+  .page-group {
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .page-group:last-child {
+    border-bottom: none;
+  }
+
+  .group-header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    background: var(--surface-alt);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .group-name {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+  }
+
+  .group-count {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    background: var(--bg);
+    padding: 1px 6px;
+    border-radius: 8px;
+  }
+
+  /* Page rows */
+  .page-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: var(--font);
+    font-size: 13px;
+    color: var(--text);
+    text-align: left;
+    transition: background 0.1s;
+    border-left: 3px solid transparent;
+  }
+
+  .page-row:hover {
+    background: var(--bg);
+  }
+
+  .page-row.selected {
+    background: var(--accent-light);
+    border-left-color: var(--accent);
+  }
+
+  .page-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Status dots */
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-unchecked { background: #d4d4d8; }
+  .dot-green { background: #22c55e; }
+  .dot-amber { background: #f59e0b; }
+  .dot-red { background: #ef4444; }
+
+  /* Priority badges */
+  .priority-badge {
+    font-size: 10px;
+    font-weight: 500;
+    padding: 1px 6px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .priority-critical {
+    background: var(--error-light);
+    color: #991b1b;
+  }
+
+  .priority-high {
+    background: var(--warning-light);
+    color: #92400e;
+  }
+
+  .priority-medium {
+    background: var(--surface-alt);
+    color: var(--text-secondary);
+  }
+
+  /* Result panel (right column) */
+  .result-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    min-height: 400px;
+  }
+
+  .empty-state, .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 300px;
+    color: var(--text-tertiary);
+    font-size: 14px;
+  }
+
+  /* Spinner */
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Result content styles */
+  .result-content :global(.result-header) {
+    margin-bottom: 20px;
+  }
+
+  .result-content :global(.path-mapping) {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    font-family: var(--font-mono);
+  }
+
+  .result-content :global(.path-arrow) {
+    color: var(--accent);
+    margin: 0 6px;
+  }
+
+  .result-content :global(.verdict-badge) {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+  }
+
+  .result-content :global(.verdict-green) { background: #22c55e; }
+  .result-content :global(.verdict-amber) { background: #f59e0b; }
+  .result-content :global(.verdict-red) { background: #ef4444; }
+
+  .result-content :global(.verdict-score) {
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  /* Comparison table */
+  .result-content :global(.compare-table) {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 16px 0;
+  }
+
+  .result-content :global(.compare-table th) {
+    text-align: left;
+    padding: 8px 12px;
+    background: var(--surface-alt);
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: var(--text-secondary);
+  }
+
+  .result-content :global(.compare-table td) {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-subtle);
+    vertical-align: top;
+  }
+
+  .result-content :global(.compare-table tr:nth-child(even)) {
+    background: var(--surface-alt);
+  }
+
+  .result-content :global(.row-improved) {
+    background: #f0fdf4 !important;
+  }
+
+  .result-content :global(.row-regressed) {
+    background: #fef2f2 !important;
+  }
+
+  .result-content :global(.field-label) {
+    font-weight: 500;
+    white-space: nowrap;
+    color: var(--text-secondary);
+    width: 120px;
+  }
+
+  .result-content :global(.cell-live),
+  .result-content :global(.cell-new) {
+    max-width: 280px;
+    word-break: break-word;
+  }
+
+  .result-content :global(.delta-indicator) {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+
+  .result-content :global(.delta-up) {
+    background: var(--success-light);
+    color: #166534;
+  }
+
+  .result-content :global(.delta-down) {
+    background: var(--error-light);
+    color: #991b1b;
+  }
+
+  .result-content :global(.delta-same) {
+    background: var(--surface-alt);
+    color: var(--text-tertiary);
+  }
+
+  /* Products section */
+  .result-content :global(.products-section) {
+    margin: 16px 0;
+  }
+
+  .result-content :global(.products-section h4) {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+
+  .result-content :global(.product-tag) {
+    display: inline-block;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin: 2px 4px 2px 0;
+    font-family: var(--font-mono);
+  }
+
+  .result-content :global(.product-kept) {
+    background: var(--success-light);
+    color: #166534;
+  }
+
+  .result-content :global(.product-lost) {
+    background: var(--error-light);
+    color: #991b1b;
+  }
+
+  .result-content :global(.product-added) {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  /* Issues / Improvements / Warnings */
+  .result-content :global(.feedback-section) {
+    margin: 16px 0;
+  }
+
+  .result-content :global(.feedback-list) {
+    list-style: none;
+    padding: 0;
+  }
+
+  .result-content :global(.feedback-list li) {
+    padding: 4px 0;
+    font-size: 13px;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .result-content :global(.feedback-icon) {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    margin-top: 2px;
+  }
+
+  .result-content :global(.section-label) {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 6px;
+  }
+
+  .result-content :global(.section-label-issues) { color: #991b1b; }
+  .result-content :global(.section-label-improvements) { color: #166534; }
+  .result-content :global(.section-label-warnings) { color: #92400e; }
+
+  /* Actions */
+  .result-content :global(.actions-bar) {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 20px 0 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .result-content :global(.action-btn) {
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--radius);
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    color: white;
+    transition: opacity 0.15s;
+  }
+
+  .result-content :global(.action-btn:hover) {
+    opacity: 0.9;
+  }
+
+  .result-content :global(.btn-approve) { background: #22c55e; }
+  .result-content :global(.btn-caveat) { background: #f59e0b; }
+  .result-content :global(.btn-retired) { background: #6b7280; }
+  .result-content :global(.btn-needs-work) { background: #ef4444; }
+
+  .result-content :global(.notes-area) {
+    width: 100%;
+    min-height: 60px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: var(--font);
+    font-size: 13px;
+    resize: vertical;
+    margin-top: 8px;
+    color: var(--text);
+    background: var(--surface);
+  }
+
+  .result-content :global(.notes-area:focus) {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .result-content :global(.notes-label) {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .result-content :global(.no-data-msg) {
+    color: var(--text-tertiary);
+    font-size: 13px;
+    font-style: italic;
+  }
+</style>
+
+<script is:inline>
+  // =========================================================================
+  // STATE
+  // =========================================================================
+
+  const STORAGE_KEY = 'southland_go_live'
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY)
+      return raw ? JSON.parse(raw) : {}
+    } catch {
+      return {}
+    }
+  }
+
+  function saveState(state) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+  }
+
+  // =========================================================================
+  // READINESS BAR
+  // =========================================================================
+
+  function updateReadiness() {
+    const state = loadState()
+    let reviewed = 0, green = 0, amber = 0, red = 0
+
+    document.querySelectorAll('.page-row').forEach(function(row) {
+      const path = row.getAttribute('data-live-path')
+      const dot = row.querySelector('.status-dot')
+      const entry = state[path]
+
+      if (entry && entry.status) {
+        reviewed++
+        dot.className = 'status-dot'
+        if (entry.status === 'approved') {
+          dot.classList.add('dot-green')
+          green++
+        } else if (entry.status === 'caveat') {
+          dot.classList.add('dot-amber')
+          amber++
+        } else if (entry.status === 'retired') {
+          dot.classList.add('dot-amber')
+          amber++
+        } else if (entry.status === 'needs-work') {
+          dot.classList.add('dot-red')
+          red++
+        }
+      } else {
+        dot.className = 'status-dot dot-unchecked'
+      }
+    })
+
+    document.getElementById('reviewed-count').textContent = reviewed
+    document.getElementById('green-count').textContent = green
+    document.getElementById('amber-count').textContent = amber
+    document.getElementById('red-count').textContent = red
+  }
+
+  // =========================================================================
+  // COMPARE + RENDER
+  // =========================================================================
+
+  let currentPath = null
+  let currentData = null
+
+  function selectPage(livePath) {
+    currentPath = livePath
+
+    // Highlight selected row
+    document.querySelectorAll('.page-row').forEach(function(r) {
+      r.classList.toggle('selected', r.getAttribute('data-live-path') === livePath)
+    })
+
+    // Show loading
+    document.getElementById('empty-state').style.display = 'none'
+    document.getElementById('result-content').style.display = 'none'
+    document.getElementById('loading-state').style.display = 'flex'
+
+    fetch('/api/go-live/compare', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ livePath: livePath }),
+    })
+      .then(function(res) { return res.json() })
+      .then(function(data) {
+        if (currentPath !== livePath) return // stale
+        currentData = data
+        document.getElementById('loading-state').style.display = 'none'
+        document.getElementById('result-content').style.display = 'block'
+        renderResult(data)
+      })
+      .catch(function(err) {
+        console.error('Compare failed:', err)
+        document.getElementById('loading-state').style.display = 'none'
+        document.getElementById('result-content').style.display = 'block'
+        document.getElementById('result-content').innerHTML =
+          '<p style="color:var(--error)">Failed to compare. Check console.</p>'
+      })
+  }
+
+  function renderResult(data) {
+    var live = data.live
+    var new_ = data.new_
+    var delta = data.delta
+    var verdict = data.verdict
+    var state = loadState()
+    var saved = state[data.livePath] || {}
+
+    var html = ''
+
+    // Header: path mapping
+    html += '<div class="result-header">'
+    html += '<div class="path-mapping">'
+    html += escapeHtml(data.livePath)
+    html += '<span class="path-arrow">&rarr;</span>'
+    html += escapeHtml(data.newPath)
+    html += '</div>'
+
+    // Verdict badge
+    html += '<div class="verdict-badge verdict-' + verdict.status + '">'
+    html += '<span class="verdict-score">' + verdict.score + '</span>'
+    html += verdict.status.toUpperCase()
+    html += '</div>'
+    html += '</div>'
+
+    // Side-by-side table
+    html += '<table class="compare-table">'
+    html += '<thead><tr><th>Field</th><th>Live</th><th>New</th><th></th></tr></thead>'
+    html += '<tbody>'
+
+    var rows = [
+      {
+        label: 'Title',
+        liveVal: live ? live.title : '—',
+        newVal: new_ ? new_.title : '—',
+        status: delta ? (delta.titleChanged ? 'changed' : 'same') : 'na',
+      },
+      {
+        label: 'H1',
+        liveVal: live ? live.h1 : '—',
+        newVal: new_ ? new_.h1 : '—',
+        status: live && new_ ? (live.h1 === new_.h1 ? 'same' : 'changed') : 'na',
+      },
+      {
+        label: 'Meta Desc',
+        liveVal: live ? truncate(live.metaDescription, 80) : '—',
+        newVal: new_ ? truncate(new_.metaDescription, 80) : '—',
+        status: delta ? (delta.metaDescChanged ? 'changed' : 'same') : 'na',
+      },
+      {
+        label: 'Word Count',
+        liveVal: live ? live.wordCount.toLocaleString() : '—',
+        newVal: new_ ? new_.wordCount.toLocaleString() : '—',
+        status: delta ? (delta.wordCountDelta > 0 ? 'improved' : delta.wordCountDelta < 0 ? 'regressed' : 'same') : 'na',
+        delta: delta ? (delta.wordCountDelta > 0 ? '+' + delta.wordCountDelta : String(delta.wordCountDelta)) : null,
+      },
+      {
+        label: 'Page Type',
+        liveVal: live ? live.pageType : '—',
+        newVal: new_ ? new_.pageType : '—',
+        status: delta && delta.pageTypeChanged ? 'changed' : 'same',
+      },
+      {
+        label: 'Headings',
+        liveVal: live ? 'H2: ' + live.headings.h2 + ', H3: ' + live.headings.h3 : '—',
+        newVal: new_ ? 'H2: ' + new_.headings.h2 + ', H3: ' + new_.headings.h3 : '—',
+        status: 'na',
+      },
+      {
+        label: 'Int. Links',
+        liveVal: live ? String(live.internalLinks) : '—',
+        newVal: new_ ? String(new_.internalLinks) : '—',
+        status: delta ? (delta.linksGained > 0 ? 'improved' : delta.linksGained < 0 ? 'regressed' : 'same') : 'na',
+        delta: delta ? (delta.linksGained > 0 ? '+' + delta.linksGained : String(delta.linksGained)) : null,
+      },
+      {
+        label: 'Ext. Links',
+        liveVal: live ? String(live.externalLinks) : '—',
+        newVal: new_ ? String(new_.externalLinks) : '—',
+        status: 'na',
+      },
+      {
+        label: 'Images',
+        liveVal: live ? String(live.imageCount) : '—',
+        newVal: new_ ? String(new_.imageCount) : '—',
+        status: live && new_ ? (new_.imageCount >= live.imageCount ? 'same' : 'regressed') : 'na',
+      },
+      {
+        label: 'Schema',
+        liveVal: live && live.schemaTypes.length ? live.schemaTypes.join(', ') : '—',
+        newVal: new_ && new_.schemaTypes.length ? new_.schemaTypes.join(', ') : '—',
+        status: delta && delta.schemaLost.length > 0 ? 'regressed' : 'same',
+      },
+    ]
+
+    for (var i = 0; i < rows.length; i++) {
+      var r = rows[i]
+      var rowClass = r.status === 'improved' ? 'row-improved' : r.status === 'regressed' ? 'row-regressed' : ''
+      html += '<tr class="' + rowClass + '">'
+      html += '<td class="field-label">' + r.label + '</td>'
+      html += '<td class="cell-live">' + escapeHtml(r.liveVal) + '</td>'
+      html += '<td class="cell-new">' + escapeHtml(r.newVal) + '</td>'
+      html += '<td>'
+      if (r.delta && r.delta !== '0') {
+        var cls = r.status === 'improved' ? 'delta-up' : r.status === 'regressed' ? 'delta-down' : 'delta-same'
+        html += '<span class="delta-indicator ' + cls + '">' + r.delta + '</span>'
+      }
+      html += '</td>'
+      html += '</tr>'
+    }
+
+    html += '</tbody></table>'
+
+    // Products section
+    if (delta && (delta.productsKept.length || delta.productsLost.length || delta.productsAdded.length)) {
+      html += '<div class="products-section">'
+      html += '<h4>Products</h4>'
+
+      if (delta.productsKept.length) {
+        for (var k = 0; k < delta.productsKept.length; k++) {
+          html += '<span class="product-tag product-kept">' + escapeHtml(delta.productsKept[k]) + '</span>'
+        }
+      }
+      if (delta.productsLost.length) {
+        for (var k = 0; k < delta.productsLost.length; k++) {
+          html += '<span class="product-tag product-lost">' + escapeHtml(delta.productsLost[k]) + '</span>'
+        }
+      }
+      if (delta.productsAdded.length) {
+        for (var k = 0; k < delta.productsAdded.length; k++) {
+          html += '<span class="product-tag product-added">' + escapeHtml(delta.productsAdded[k]) + '</span>'
+        }
+      }
+      html += '</div>'
+    } else if (!delta && !live && new_) {
+      html += '<p class="no-data-msg">No live page data — new page only.</p>'
+    }
+
+    // Issues
+    if (verdict.issues.length) {
+      html += '<div class="feedback-section">'
+      html += '<div class="section-label section-label-issues">Issues</div>'
+      html += '<ul class="feedback-list">'
+      for (var j = 0; j < verdict.issues.length; j++) {
+        html += '<li><svg class="feedback-icon" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>' + escapeHtml(verdict.issues[j]) + '</li>'
+      }
+      html += '</ul></div>'
+    }
+
+    // Improvements
+    if (verdict.improvements.length) {
+      html += '<div class="feedback-section">'
+      html += '<div class="section-label section-label-improvements">Improvements</div>'
+      html += '<ul class="feedback-list">'
+      for (var j = 0; j < verdict.improvements.length; j++) {
+        html += '<li><svg class="feedback-icon" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>' + escapeHtml(verdict.improvements[j]) + '</li>'
+      }
+      html += '</ul></div>'
+    }
+
+    // Warnings
+    if (verdict.warnings.length) {
+      html += '<div class="feedback-section">'
+      html += '<div class="section-label section-label-warnings">Warnings</div>'
+      html += '<ul class="feedback-list">'
+      for (var j = 0; j < verdict.warnings.length; j++) {
+        html += '<li><svg class="feedback-icon" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M12 9v2m0 4h.01M10.29 3.86l-8.58 14.85A1 1 0 002.58 20h18.84a1 1 0 00.86-1.29L13.71 3.86a1 1 0 00-1.42 0z"/></svg>' + escapeHtml(verdict.warnings[j]) + '</li>'
+      }
+      html += '</ul></div>'
+    }
+
+    // Actions
+    html += '<div class="actions-bar">'
+    html += '<button class="action-btn btn-approve" onclick="approveReview(\'' + escapeAttr(data.livePath) + '\', \'approved\')">Approve</button>'
+    html += '<button class="action-btn btn-caveat" onclick="approveReview(\'' + escapeAttr(data.livePath) + '\', \'caveat\')">Approve with Caveat</button>'
+    html += '<button class="action-btn btn-retired" onclick="approveReview(\'' + escapeAttr(data.livePath) + '\', \'retired\')">Retired</button>'
+    html += '<button class="action-btn btn-needs-work" onclick="approveReview(\'' + escapeAttr(data.livePath) + '\', \'needs-work\')">Needs Work</button>'
+    html += '</div>'
+
+    // Notes
+    html += '<div>'
+    html += '<div class="notes-label">Notes</div>'
+    html += '<textarea class="notes-area" id="review-notes" placeholder="Add review notes..."'
+    html += ' onchange="saveNote(\'' + escapeAttr(data.livePath) + '\', this.value)"'
+    html += '>' + escapeHtml(saved.note || '') + '</textarea>'
+    html += '</div>'
+
+    document.getElementById('result-content').innerHTML = html
+  }
+
+  // =========================================================================
+  // ACTIONS
+  // =========================================================================
+
+  function approveReview(livePath, status) {
+    var state = loadState()
+    var note = document.getElementById('review-notes')
+    if (!state[livePath]) state[livePath] = {}
+    state[livePath].status = status
+    state[livePath].reviewedAt = new Date().toISOString()
+    if (note) state[livePath].note = note.value
+    saveState(state)
+    updateReadiness()
+
+    // Visual feedback: highlight the active button
+    document.querySelectorAll('.actions-bar .action-btn').forEach(function(btn) {
+      btn.style.opacity = '0.5'
+    })
+    event.target.style.opacity = '1'
+    event.target.style.outline = '2px solid var(--text)'
+
+    // Flash confirmation
+    var flash = document.createElement('div')
+    flash.textContent = status === 'needs-work' ? 'Marked as needs work' : status === 'approved' ? 'Approved' : status === 'caveat' ? 'Approved with caveat' : 'Marked as retired'
+    flash.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#1f2937;color:white;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:999;'
+    document.body.appendChild(flash)
+    setTimeout(function() { flash.remove() }, 2000)
+  }
+
+  function saveNote(livePath, value) {
+    var state = loadState()
+    if (!state[livePath]) state[livePath] = {}
+    state[livePath].note = value
+    saveState(state)
+  }
+
+  // =========================================================================
+  // HELPERS
+  // =========================================================================
+
+  function escapeHtml(str) {
+    if (!str) return ''
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+  }
+
+  function escapeAttr(str) {
+    return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;')
+  }
+
+  function truncate(str, len) {
+    if (!str) return ''
+    return str.length > len ? str.substring(0, len) + '...' : str
+  }
+
+  // =========================================================================
+  // INIT
+  // =========================================================================
+
+  document.querySelectorAll('.page-row').forEach(function(row) {
+    row.addEventListener('click', function() {
+      selectPage(row.getAttribute('data-live-path'))
+    })
+  })
+
+  updateReadiness()
+</script>
