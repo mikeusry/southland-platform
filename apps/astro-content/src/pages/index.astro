@@ -241,7 +241,7 @@ function getProducts(filter: string) {
             {
               getProducts(betty.productFilter)
                 .slice(0, 8)
-                .map((product) => <CollectionProductCard product={product} persona="backyard" />)
+                .map((product) => <CollectionProductCard product={product} persona="betty" />)
             }
           </div>
           <div class="mt-10 text-center">
@@ -386,7 +386,7 @@ function getProducts(filter: string) {
             {
               getProducts(bill.productFilter)
                 .slice(0, 8)
-                .map((product) => <CollectionProductCard product={product} persona="commercial" />)
+                .map((product) => <CollectionProductCard product={product} persona="bill" />)
             }
           </div>
           <div class="mt-10 text-center">
@@ -543,7 +543,7 @@ function getProducts(filter: string) {
             {
               getProducts(taylor.productFilter)
                 .slice(0, 8)
-                .map((product) => <CollectionProductCard product={product} persona="lawn" />)
+                .map((product) => <CollectionProductCard product={product} persona="taylor" />)
             }
           </div>
           <div class="mt-10 text-center">
@@ -606,19 +606,19 @@ function getProducts(filter: string) {
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
 
       <!-- ─── Section 1: Hero ────────────────────────────────────────────── -->
-      <section class="bg-gradient-to-br from-[#2C5234] to-[#44883E] px-5 py-16 md:py-24">
-        <div class="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-[55fr_45fr]" id="hero-section">
+      <section class="bg-gradient-to-br from-[#1e3a28] via-[#2C5234] to-[#3a6d42] px-5 py-14 md:py-20">
+        <div class="mx-auto grid max-w-6xl items-center gap-8 md:grid-cols-[55fr_45fr]" id="hero-section">
           <!-- LEFT (55%): Bill-credible, segment-inclusive -->
           <div>
-            <h1 class="font-heading text-4xl leading-tight text-white md:text-5xl lg:text-6xl">
+            <h1 class="font-heading text-4xl leading-[1.1] text-white md:text-5xl lg:text-[3.5rem]">
               Science-backed biology for healthier flocks, stronger turf, and cleaner systems.
             </h1>
-            <p class="mt-5 max-w-xl font-serif text-lg italic leading-relaxed text-white/80 md:text-xl">
+            <p class="mt-3 max-w-xl text-base leading-relaxed text-white/75 md:text-lg">
               USDA Organic microbiology products trusted by commercial poultry growers, lawn and turf pros, and septic system owners.
             </p>
 
             <!-- Phone -->
-            <div class="mt-5">
+            <div class="mt-4">
               <a
                 href="tel:1-800-608-3755"
                 aria-label="Call Southland Organics at 800-608-3755"
@@ -632,7 +632,7 @@ function getProducts(filter: string) {
             </div>
 
             <!-- Proof credential chips -->
-            <div class="mt-6 flex flex-wrap gap-3">
+            <div class="mt-4 flex flex-wrap gap-2">
               <span class="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-sm font-medium text-white/90">
                 <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                 500+ Commercial Growers
@@ -680,20 +680,39 @@ function getProducts(filter: string) {
             <p class="mt-4 text-sm text-white/60">Trusted in over 10,000 flocks, fields, and systems nationwide.</p>
           </div>
 
-          <!-- RIGHT (45%): Featured product preview (desktop only) -->
-          <div class="hidden md:grid md:grid-cols-2 md:gap-4">
-            {featuredProducts.slice(0, 4).map((product) => (
+          <!-- RIGHT (45%): Asymmetrical product preview (desktop only) -->
+          <div class="hidden md:grid md:grid-cols-3 md:grid-rows-2 md:gap-3" style="grid-template-areas: 'big big sm1' 'big big sm2';">
+            {featuredProducts[0] && (
+              <a
+                href={`/products/${featuredProducts[0].handle}/`}
+                class="group overflow-hidden rounded-xl bg-white/10 backdrop-blur-sm transition hover:bg-white/20"
+                style="grid-area: big;"
+              >
+                {featuredProducts[0].images[0] && (
+                  <img
+                    src={featuredProducts[0].images[0].url}
+                    alt={featuredProducts[0].images[0].altText || featuredProducts[0].title}
+                    class="h-full w-full object-cover transition group-hover:scale-105"
+                    width="400"
+                    height="400"
+                    loading="eager"
+                  />
+                )}
+              </a>
+            )}
+            {featuredProducts.slice(1, 3).map((product, i) => (
               <a
                 href={`/products/${product.handle}/`}
                 class="group overflow-hidden rounded-xl bg-white/10 backdrop-blur-sm transition hover:bg-white/20"
+                style={`grid-area: sm${i + 1};`}
               >
                 {product.images[0] ? (
                   <img
                     src={product.images[0].url}
                     alt={product.images[0].altText || product.title}
                     class="aspect-square w-full object-cover transition group-hover:scale-105"
-                    width="300"
-                    height="300"
+                    width="200"
+                    height="200"
                     loading="eager"
                   />
                 ) : (
