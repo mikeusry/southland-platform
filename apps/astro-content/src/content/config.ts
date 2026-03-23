@@ -164,6 +164,8 @@ const blogCollection = defineCollection({
     tags: z.array(z.string()).optional().default([]),
     segment: z.enum(['poultry', 'turf', 'agriculture', 'general']).optional().default('general'),
     featuredImage: z.string().optional(),
+    // Video embeds (Mux playback IDs — migrated from Wistia/Gumlet)
+    muxPlaybackIds: z.array(z.string()).optional().default([]),
     draft: z.boolean().optional().default(false),
     // Shopify migration fields
     shopifyId: z.union([z.number(), z.string()]).optional(),
