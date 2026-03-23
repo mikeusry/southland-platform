@@ -144,10 +144,15 @@ const articleSchema = {
 ---
 
 <BaseLayout
-  title={`${post.data.title} | Southland Organics Blog`}
-  description={post.data.description}
+  title={post.data.title}
+  description={post.data.description.length > 160 ? post.data.description.slice(0, 157) + '...' : post.data.description}
   ogImage={post.data.featuredImage}
+  ogType="article"
   schema={articleSchema}
+  articlePublishedTime={new Date(post.data.publishDate).toISOString()}
+  articleModifiedTime={post.data.updatedDate ? new Date(post.data.updatedDate).toISOString() : new Date(post.data.publishDate).toISOString()}
+  articleAuthor={author?.name}
+  articleSection={segmentLabels[post.data.segment || 'general']}
 >
   <!-- Article Header -->
   <header
@@ -155,7 +160,7 @@ const articleSchema = {
   >
     <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
       <!-- Breadcrumb -->
-      <nav class="mb-8">
+      <nav class="mb-8" aria-label="Breadcrumb">
         <ol class="flex items-center gap-2 text-sm text-white/60">
           <li>
             <a href="/" class="transition-colors hover:text-white">Home</a>
@@ -190,9 +195,14 @@ const articleSchema = {
       </div>
 
       <!-- Title -->
-      <h1 class="mb-6 text-3xl font-bold leading-tight text-white md:text-4xl lg:text-5xl">
+      <h1 class="mb-4 text-3xl font-bold leading-tight text-white md:text-4xl lg:text-5xl">
         {post.data.title}
       </h1>
+
+      <!-- Teaser / Description -->
+      <p class="mb-6 max-w-3xl text-lg leading-relaxed text-white/70">
+        {post.data.description}
+      </p>
 
       <!-- Meta -->
       <div class="flex flex-wrap items-center gap-4 text-white/70">
@@ -225,9 +235,9 @@ const articleSchema = {
     </div>
   </header>
 
-  <!-- Featured Image -->
+  <!-- Featured Image (skip if video exists — they share the same thumbnail) -->
   {
-    post.data.featuredImage && (
+    post.data.featuredImage && !(post.data.muxPlaybackIds && post.data.muxPlaybackIds.length > 0) && (
       <div class="border-b border-gray-100 bg-white">
         <div class="mx-auto -mt-8 max-w-5xl px-4 sm:px-6 lg:px-8">
           <img

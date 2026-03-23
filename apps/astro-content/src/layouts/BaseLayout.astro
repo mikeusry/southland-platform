@@ -13,6 +13,10 @@ interface Props {
   canonicalUrl?: string;
   noIndex?: boolean;
   schema?: object;
+  articlePublishedTime?: string;
+  articleModifiedTime?: string;
+  articleAuthor?: string;
+  articleSection?: string;
 }
 
 const {
@@ -23,6 +27,10 @@ const {
   canonicalUrl,
   noIndex = false,
   schema,
+  articlePublishedTime,
+  articleModifiedTime,
+  articleAuthor,
+  articleSection,
 } = Astro.props;
 
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com';
@@ -71,6 +79,10 @@ const gtmContainerId = import.meta.env.PUBLIC_GTM_CONTAINER_ID;
       ogImage={fullOgImage}
       ogType={ogType}
       url={fullCanonicalUrl}
+      articlePublishedTime={articlePublishedTime}
+      articleModifiedTime={articleModifiedTime}
+      articleAuthor={articleAuthor}
+      articleSection={articleSection}
     />
 
     <!-- Schema.org JSON-LD -->

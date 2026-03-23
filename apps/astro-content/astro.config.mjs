@@ -6,6 +6,18 @@ import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
 import cloudflare from '@astrojs/cloudflare';
 import rehypeExternalLinks from 'rehype-external-links';
+import { visit } from 'unist-util-visit';
+
+/** Rehype plugin: add loading="lazy" to all images in markdown content */
+function rehypeLazyImages() {
+  return (tree) => {
+    visit(tree, 'element', (node) => {
+      if (node.tagName === 'img' && node.properties) {
+        node.properties.loading = 'lazy';
+      }
+    });
+  };
+}
 
 // https://astro.build/config
 // TinaCMS runs as separate dev server (npx tinacms dev) alongside Astro
@@ -42,6 +54,7 @@ export default defineConfig({
         target: '_blank',
         rel: ['nofollow', 'noopener', 'noreferrer'],
       }],
+      rehypeLazyImages,
     ],
   },
   build: {
