@@ -2,43 +2,164 @@
 /**
  * /blogs/poultry-biosecurity — Poultry Biosecurity Resource Hub
  *
- * Matches the live Shopify URL exactly so existing nav links,
- * Google index entries, and backlinks continue to work after DNS cutover.
+ * Lead capture hub, not a blog listing. Allen Reynolds' authority page.
+ * Organizes 50+ posts by JTBD, embeds YouTube, captures leads via
+ * phone, email, and Klaviyo form.
  *
- * Shows all blog posts tagged "Biosecurity" (segment: poultry),
- * sorted newest-first. This is Allen Reynolds' primary content channel —
- * the YouTube companion in written form.
+ * Structure:
+ *   1. Hero — Allen's face + "Call Allen" CTA
+ *   2. Topic grid — 6 JTBD categories, 3 articles each
+ *   3. Inline lead capture — Klaviyo email + phone
+ *   4. YouTube — top biosecurity video
+ *   5. Product band — Big Ole Bird, Litter Life, Desecticide
+ *   6. All articles — full archive
+ *   7. Final CTA — Allen + form
  */
 
 export const prerender = true
 
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import BlogCard from '../../components/blog/BlogCard.astro'
 import BlogGrid from '../../components/blog/BlogGrid.astro'
+import EmailCapture from '../../components/shared/EmailCapture.astro'
 import { getCollection } from 'astro:content'
-import { getLogoUrl } from '../../lib/cloudinary'
+import { buildSouthlandUrl } from '../../lib/cloudinary'
+import { createClient, getProductByHandle } from '@southland/shopify-storefront'
 
-// Get all published biosecurity posts
-const allPosts = await getCollection('blog', ({ data }) => {
-  if (data.draft) return false
-  // Include posts with Biosecurity tag OR poultry segment posts about biosecurity topics
-  const hasBiosecurityTag = (data.tags || []).some(
-    (t) => t.toLowerCase() === 'biosecurity'
-  )
-  return hasBiosecurityTag
+// ── Allen's photo ───────────────────────────────────────────────────────────
+const allenPhoto = buildSouthlandUrl('team/ALLEN_Reynolds', {
+  width: 600,
+  height: 750,
+  crop: 'fill',
+  gravity: 'face',
+  quality: 'auto',
+  format: 'auto',
 })
 
-// Sort by publish date (newest first)
+// ── All biosecurity posts ───────────────────────────────────────────────────
+const allPosts = await getCollection('blog', ({ data }) => {
+  if (data.draft) return false
+  return (data.tags || []).some((t) => t.toLowerCase() === 'biosecurity')
+})
+
 const posts = allPosts.sort(
   (a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
 )
 
+// ── JTBD topic categories ───────────────────────────────────────────────────
+// Hand-curated slugs for each topic — best 3-4 per category
+const TOPICS = [
+  {
+    id: 'mortality',
+    label: 'Mortality & Disease',
+    icon: '🔬',
+    description: 'Prevention, early detection, and management when things go wrong.',
+    slugs: [
+      'early-disease-detection-in-poultry',
+      'dealing-with-mass-mortality-the-emotional-side-of-poultry-farming',
+      'poultry-farmers-options-for-managing-mortality',
+      'poultry-gut-health',
+    ],
+  },
+  {
+    id: 'litter',
+    label: 'Litter & Ammonia',
+    icon: '🏠',
+    description: 'Litter biology, ammonia control, and clean-out best practices.',
+    slugs: [
+      'all-about-litter-what-s-really-happening-on-the-poultry-house-floor',
+      'poultry-litter-treatment-for-healthy-floors-and-healthy-birds',
+      'how-to-manage-poultry-litter-piles-in-your-parking-lot',
+      'clean-out-checklist',
+    ],
+  },
+  {
+    id: 'environment',
+    label: 'House Environment',
+    icon: '🌡️',
+    description: 'Ventilation, lighting, heating, and water line management.',
+    slugs: [
+      'how-smart-lighting-systems-help-create-calmer-more-productive-flocks',
+      'poultry-ventilation-tune-up-prep-for-the-warm-months',
+      'how-to-clean-water-lines-in-poultry-houses',
+      'poultry-house-heater-comparison',
+    ],
+  },
+  {
+    id: 'bird-health',
+    label: 'Bird Health & Nutrition',
+    icon: '💪',
+    description: 'Gut health, vitamins, feed conversion, and growth optimization.',
+    slugs: [
+      'chicken-gut-microbiome-management',
+      'how-to-boost-bird-health-through-poultry-vitamins',
+      'water-consumption-what-it-indicates-about-bird-health',
+      'the-impact-of-chicken-body-temperature-on-feed-conversion-ratio-and-weight-gain',
+    ],
+  },
+  {
+    id: 'operations',
+    label: 'Farm Operations',
+    icon: '⚙️',
+    description: 'Equipment, electrical, safety, and day-to-day management.',
+    slugs: [
+      '7-electrical-best-practices-for-poultry-growers',
+      'safeguarding-your-structures-lighting-and-surge-protection-on-poultry-farms',
+      'normalization-of-deviance-why-details-matter-in-poultry-farming',
+      'the-first-three-days-of-a-chickens-life-the-most-important-stage',
+    ],
+  },
+  {
+    id: 'business',
+    label: 'Business & Regulations',
+    icon: '📋',
+    description: 'USDA rules, taxes, insurance, and the business side of growing.',
+    slugs: [
+      'new-usda-rules-and-their-impact-on-poultry-growers',
+      'how-to-keep-your-money-earned-on-the-farm-tax-credits-vs-farm-credits',
+      'nae-chicken-vs-naihm-chicken',
+      'ftc-v-john-deere-why-this-lawsuit-hits-home-for-poultry-farmers',
+    ],
+  },
+]
+
+// Resolve topic posts from the collection
+function findPost(slug: string) {
+  return posts.find((p) => {
+    const postSlug = p.id.replace(/\.mdx?$/, '')
+    return postSlug === slug
+  })
+}
+
+const topicSlugsUsed = new Set(TOPICS.flatMap((t) => t.slugs))
+
+// Remaining posts not in any topic (for the full archive)
+const archivePosts = posts.filter((p) => {
+  const slug = p.id.replace(/\.mdx?$/, '')
+  return !topicSlugsUsed.has(slug)
+})
+
+// ── Products ────────────────────────────────────────────────────────────────
+const client = createClient({
+  storeDomain: import.meta.env.PUBLIC_SHOPIFY_STORE_DOMAIN,
+  publicAccessToken: import.meta.env.PUBLIC_SHOPIFY_STOREFRONT_TOKEN,
+})
+
+const productHandles = ['poultry-probiotic', 'poultry-litter-amendment', 'natural-mite-control-livestock-poultry']
+const products = (await Promise.all(productHandles.map((h) => getProductByHandle(client, h)))).filter(Boolean)
+
+function formatPrice(amount: string) {
+  const num = parseFloat(amount)
+  return num % 1 === 0 ? `$${num}` : `$${num.toFixed(2)}`
+}
+
+// ── SEO ─────────────────────────────────────────────────────────────────────
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
-
-const title = 'Poultry Farmer Resources: Biosecurity in Poultry'
+const title = 'Poultry Biosecurity Resources | Southland Organics'
 const description =
-  'Poultry Biosecurity. What is it? and Why will it change your poultry operation? We have been helping growers with the biosecurity of their farms for more than 10 years. We understand the challenges you are facing with this New Poultry Environment.'
+  'Expert poultry biosecurity resources from Allen Reynolds — 10+ years in houses, hundreds of farm visits. Mortality, litter, ventilation, disease prevention, and more.'
 
-const blogSchema = {
+const schema = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
   name: title,
@@ -50,103 +171,385 @@ const blogSchema = {
     url: siteUrl,
     foundingDate: '2009',
   },
+  author: {
+    '@type': 'Person',
+    name: 'Allen Reynolds',
+    jobTitle: 'VP & Director of Operations',
+    worksFor: { '@type': 'Organization', name: 'Southland Organics' },
+  },
 }
 ---
 
 <BaseLayout
-  title={`${title} - Southland Organics`}
+  title={title}
   description={description}
-  ogImage={getLogoUrl('square', { width: 800 })}
-  schema={blogSchema}
+  ogImage={allenPhoto}
+  schema={schema}
 >
-  <!-- Hero Section -->
-  <section
-    class="bg-gradient-to-br from-southland-green-dark via-southland-green-dark to-[#1f3d24] py-16 md:py-24"
-  >
-    <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-      <p class="mb-3 text-sm font-medium uppercase tracking-wide text-southland-green">
-        Poultry Resources
-      </p>
-      <h1 class="mb-6 text-4xl font-bold text-white md:text-5xl lg:text-6xl">
-        Poultry Biosecurity
-      </h1>
-      <p class="mx-auto max-w-2xl text-lg text-white/70 md:text-xl">
-        {description}
-      </p>
-      <div class="mt-8 flex flex-wrap justify-center gap-4">
-        <a
-          href="/poultry/"
-          class="rounded-lg bg-white/10 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/20"
-        >
-          Poultry Hub
-        </a>
-        <a
-          href="/poultry/commercial/"
-          class="rounded-lg bg-white/10 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/20"
-        >
-          Commercial Growers
-        </a>
-        <a
-          href="/poultry/backyard/"
-          class="rounded-lg bg-white/10 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/20"
-        >
-          Backyard Flocks
-        </a>
-        <a
-          href="/blog/category/poultry/"
-          class="rounded-lg bg-white/10 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/20"
-        >
-          All Poultry Articles
-        </a>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 1: HERO — Allen + CTA                                        -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <section class="bg-gradient-to-br from-southland-green-dark via-[#1f3d24] to-[#162b1b] py-16 md:py-20">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div class="grid items-center gap-10 md:grid-cols-[1fr_280px] lg:grid-cols-[1fr_320px]">
+
+        <div>
+          <p class="mb-3 text-sm font-semibold uppercase tracking-wider text-green-400">
+            Poultry Biosecurity Resources
+          </p>
+          <h1 class="mb-6 font-heading text-3xl uppercase text-white md:text-4xl lg:text-5xl">
+            We've been in the houses.
+          </h1>
+          <p class="mb-4 text-lg leading-relaxed text-white/80">
+            Allen Reynolds has spent 10+ years on poultry farms — installing equipment, troubleshooting mortality, and helping growers protect their flocks. This is everything he's learned, written for growers who don't have time for white papers.
+          </p>
+          <p class="mb-8 text-white/60">
+            {posts.length} articles covering mortality, litter management, ventilation, disease prevention, equipment, and the business side of growing.
+          </p>
+
+          <!-- Credential chips -->
+          <div class="mb-8 flex flex-wrap gap-2">
+            {['10+ years on farms', 'Hundreds of farm visits', 'ABF specialist since 2017', 'Actually answers the phone'].map((cred) => (
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-white/90">
+                <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+                </svg>
+                {cred}
+              </span>
+            ))}
+          </div>
+
+          <!-- CTAs -->
+          <div class="flex flex-wrap items-center gap-4">
+            <a
+              href="tel:800-608-3755"
+              class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3 text-base font-semibold text-white shadow-lg transition-all hover:bg-[#3a7534] hover:shadow-xl"
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+              Call Allen: 800-608-3755
+            </a>
+            <a
+              href="mailto:allen@southlandorganics.com"
+              class="text-sm font-medium text-green-300 underline decoration-green-500/40 underline-offset-2 hover:text-green-200"
+            >
+              allen@southlandorganics.com
+            </a>
+          </div>
+        </div>
+
+        <!-- Allen's photo -->
+        <div class="hidden md:block">
+          <div class="relative">
+            <img
+              src={allenPhoto}
+              alt="Allen Reynolds, VP & Director of Operations at Southland Organics — 10+ years helping commercial poultry growers"
+              width="320"
+              height="400"
+              class="rounded-2xl object-cover shadow-2xl"
+              loading="eager"
+            />
+            <div class="absolute -bottom-3 -right-3 rounded-xl bg-white px-4 py-2 shadow-lg">
+              <p class="text-xs font-semibold text-gray-500">VP & Director of Operations</p>
+              <p class="font-heading text-sm uppercase text-southland-green-dark">Allen Reynolds</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Blog Grid -->
-  <section class="bg-brand-gray py-16 md:py-20">
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 2: TOPIC GRID — 6 JTBD categories                            -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <section class="bg-white py-16 md:py-20">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="mb-8 flex items-center justify-between">
-        <p class="text-gray-500">
-          {posts.length} {posts.length === 1 ? 'article' : 'articles'}
+      <div class="mb-12 text-center">
+        <h2 class="mb-3 font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
+          Browse by Topic
+        </h2>
+        <p class="mx-auto max-w-2xl text-lg text-gray-600">
+          Real-world biosecurity knowledge organized by what you're dealing with right now.
         </p>
       </div>
 
-      {
-        posts.length > 0 ? (
-          <BlogGrid posts={posts} showFeatured={true} columns={3} />
-        ) : (
-          <div class="py-12 text-center">
-            <p class="text-lg text-gray-500">No biosecurity articles found.</p>
-            <a href="/blog/category/poultry/" class="mt-4 inline-block text-southland-green hover:underline">
-              View all poultry articles
-            </a>
-          </div>
-        )
-      }
-    </div>
-  </section>
-
-  <!-- CTA Section -->
-  <section class="bg-white py-16">
-    <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-      <h2 class="mb-4 text-3xl font-bold text-shopify-title">
-        Need Help With Your Operation?
-      </h2>
-      <p class="mx-auto mb-8 max-w-2xl text-lg text-shopify-secondary-text">
-        Allen Reynolds has spent over 10 years helping poultry growers improve biosecurity,
-        lower mortality, and produce stronger flocks. Talk to our team.
-      </p>
-      <div class="flex flex-wrap justify-center gap-4">
-        <a href="/poultry/commercial/" class="btn-primary inline-flex items-center gap-2">
-          Commercial Programs
-          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-          </svg>
-        </a>
-        <a href="/blog/" class="btn-secondary inline-flex items-center gap-2">
-          All Articles
-        </a>
+      <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        {TOPICS.map((topic) => {
+          const topicPosts = topic.slugs.map(findPost).filter(Boolean)
+          return (
+            <div class="rounded-xl border border-gray-100 bg-gray-50 p-6 transition-shadow hover:shadow-md" id={`topic-${topic.id}`}>
+              <div class="mb-4 flex items-center gap-3">
+                <span class="text-2xl">{topic.icon}</span>
+                <div>
+                  <h3 class="text-lg font-bold text-gray-900">{topic.label}</h3>
+                  <p class="text-sm text-gray-500">{topic.description}</p>
+                </div>
+              </div>
+              <ul class="space-y-3">
+                {topicPosts.map((post) => {
+                  const slug = post!.id.replace(/\.mdx?$/, '')
+                  return (
+                    <li>
+                      <a
+                        href={`/blog/${slug}/`}
+                        class="group flex items-start gap-2 text-sm"
+                      >
+                        <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                        <span class="font-medium text-gray-700 group-hover:text-southland-green">
+                          {post!.data.title}
+                        </span>
+                      </a>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          )
+        })}
       </div>
     </div>
   </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 3: INLINE LEAD CAPTURE                                        -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <section class="bg-southland-green-dark py-14">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+      <div class="grid items-center gap-8 md:grid-cols-[1fr_1fr]">
+        <div>
+          <h2 class="mb-3 font-heading text-2xl uppercase text-white md:text-3xl">
+            Get biosecurity tips in your inbox
+          </h2>
+          <p class="text-white/70">
+            Allen sends practical, no-BS poultry advice. No spam, no sales pitches — just what's working on farms right now.
+          </p>
+        </div>
+        <div>
+          <EmailCapture
+            headline=""
+            description=""
+            source="blog"
+            buttonText="Subscribe"
+            variant="banner"
+          />
+          <p class="mt-3 text-center text-xs text-white/40">
+            Or call directly: <a href="tel:800-608-3755" class="underline">800-608-3755</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 4: YOUTUBE — Allen's channel                                  -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <section class="bg-gray-50 py-16 md:py-20">
+    <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+      <div class="grid items-center gap-10 lg:grid-cols-[1.2fr_1fr]">
+        <div class="aspect-video overflow-hidden rounded-xl shadow-lg">
+          <iframe
+            src="https://www.youtube-nocookie.com/embed/?listType=user_uploads&list=PoultryBiosecurity"
+            title="Poultry Biosecurity YouTube Channel"
+            class="h-full w-full"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+            loading="lazy"
+          ></iframe>
+        </div>
+        <div>
+          <span class="mb-2 inline-block text-sm font-semibold uppercase tracking-wider text-red-600">
+            YouTube Channel
+          </span>
+          <h2 class="mb-4 font-heading text-2xl uppercase md:text-3xl" style="color: var(--color-title);">
+            Poultry Biosecurity
+          </h2>
+          <p class="mb-4 text-gray-600">
+            Allen's YouTube channel covers everything from grower spotlights to on-farm troubleshooting. Real farms, real problems, real solutions.
+          </p>
+          <ul class="mb-6 space-y-2 text-sm text-gray-500">
+            <li class="flex items-center gap-2">
+              <svg class="h-4 w-4 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/><path fill="#fff" d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+              Grower spotlights & farm visits
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="h-4 w-4 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/><path fill="#fff" d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+              Equipment reviews & Sunbelt Ag Expo
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="h-4 w-4 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/><path fill="#fff" d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+              Biosecurity education & disease prevention
+            </li>
+          </ul>
+          <a
+            href="https://www.youtube.com/@PoultryBiosecurity"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-700"
+          >
+            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/><path fill="#fff" d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            Watch on YouTube
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 5: PRODUCT BAND — The products behind the articles            -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  {products.length > 0 && (
+    <section class="border-y border-gray-100 bg-white py-14">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div class="mb-8 text-center">
+          <p class="mb-1 text-sm font-semibold uppercase tracking-wider text-gray-400">
+            The products behind these articles
+          </p>
+          <h2 class="font-heading text-2xl uppercase md:text-3xl" style="color: var(--color-title);">
+            Proven in the House
+          </h2>
+        </div>
+        <div class="grid gap-6 sm:grid-cols-3">
+          {products.map((product) => {
+            const image = product.images?.edges?.[0]?.node
+            const price = product.priceRange?.minVariantPrice
+            return (
+              <a
+                href={`/products/${product.handle}/`}
+                class="group flex flex-col items-center rounded-xl border border-gray-100 p-6 text-center transition-all hover:border-southland-green/20 hover:shadow-md"
+              >
+                {image && (
+                  <img
+                    src={image.url}
+                    alt={image.altText || product.title}
+                    width="200"
+                    height="200"
+                    class="mb-4 h-40 w-40 object-contain transition-transform group-hover:scale-105"
+                    loading="lazy"
+                  />
+                )}
+                <h3 class="mb-1 text-base font-bold text-gray-900 group-hover:text-southland-green">
+                  {product.title}
+                </h3>
+                {price && (
+                  <p class="text-sm font-semibold text-southland-green">
+                    From {formatPrice(price.amount)}
+                  </p>
+                )}
+                <p class="mt-2 text-xs text-gray-400">USDA Organic &middot; Zero Withdrawal</p>
+              </a>
+            )
+          })}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 6: LATEST ARTICLES — newest-first grid                        -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <section class="bg-brand-gray py-16 md:py-20">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-10 flex items-end justify-between">
+        <div>
+          <h2 class="font-heading text-2xl uppercase md:text-3xl" style="color: var(--color-title);">
+            Latest Articles
+          </h2>
+          <p class="mt-2 text-gray-500">
+            {posts.length} articles and counting
+          </p>
+        </div>
+        <a
+          href="/blog/category/poultry/"
+          class="hidden text-sm font-medium text-southland-green hover:underline sm:block"
+        >
+          All poultry articles &rarr;
+        </a>
+      </div>
+
+      <BlogGrid posts={posts.slice(0, 12)} showFeatured={true} columns={3} />
+
+      {posts.length > 12 && (
+        <details class="mt-12">
+          <summary class="mx-auto flex w-fit cursor-pointer items-center gap-2 rounded-lg bg-white px-6 py-3 text-sm font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+            Show all {posts.length} articles
+          </summary>
+          <div class="mt-8">
+            <BlogGrid posts={posts.slice(12)} columns={3} />
+          </div>
+        </details>
+      )}
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 7: FINAL CTA — Allen + form                                  -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <section class="bg-gradient-to-br from-southland-green-dark to-[#1a3420] py-16 md:py-20">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+      <div class="grid items-center gap-10 md:grid-cols-[auto_1fr]">
+        <!-- Allen photo (small) -->
+        <div class="hidden md:block">
+          <img
+            src={allenPhoto}
+            alt="Allen Reynolds"
+            width="160"
+            height="200"
+            class="rounded-xl object-cover shadow-lg"
+            loading="lazy"
+          />
+        </div>
+
+        <div>
+          <h2 class="mb-4 font-heading text-2xl uppercase text-white md:text-3xl">
+            Ready to talk about your operation?
+          </h2>
+          <p class="mb-6 text-white/70">
+            Allen picks up the phone. That's not a tagline — it's how we've done business since 2009.
+            Whether you're dealing with high mortality, ammonia, or just want a second opinion on your program, the call is free.
+          </p>
+
+          <div class="mb-8 grid gap-4 sm:grid-cols-2">
+            <a
+              href="tel:800-608-3755"
+              class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#44883E] px-6 py-3.5 text-base font-semibold text-white shadow-lg transition-all hover:bg-[#3a7534] hover:shadow-xl"
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+              Call Allen: 800-608-3755
+            </a>
+            <a
+              href="mailto:allen@southlandorganics.com"
+              class="inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 px-6 py-3.5 text-base font-medium text-white transition-colors hover:bg-white/10"
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              Email Allen
+            </a>
+          </div>
+
+          <div class="rounded-xl bg-white/5 p-5">
+            <p class="mb-3 text-sm font-semibold text-white/90">Or get tips straight to your inbox:</p>
+            <EmailCapture
+              headline=""
+              description=""
+              source="blog"
+              buttonText="Subscribe"
+              variant="banner"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
 </BaseLayout>
