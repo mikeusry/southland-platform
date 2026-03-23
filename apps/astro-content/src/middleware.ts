@@ -28,6 +28,7 @@ const SHOPIFY_ORIGIN_DEFAULT = 'https://shopify-proxy.southlandorganics.com'
 const ASTRO_ROUTES = [
   '/podcast',
   '/blog',
+  '/blogs',
   '/team',
   '/about',
   '/contact',

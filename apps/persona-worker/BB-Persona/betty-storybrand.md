@@ -214,7 +214,7 @@ Formulated in Georgia
 
 **Job 3: Keep eggs coming through every season.**
 - Struggle: "Production dropped and you don't know if it's the weather, the feed, or something you're doing wrong."
-- Products: Hen Helper (hen-helper), Mother Load ACV (mother-load-apple-cider-vinegar-for-chickens), Catalyst Liquid (catalyst-poultry-vitamin)
+- Products: Hen Helper (hen-helper), Mother Load ACV (apple-cider-vinegar-for-chickens), Catalyst Liquid (catalyst-poultry-vitamin)
 - Proof: "Stress reduction and gut balance support reliable egg production"
 - Proof Source: "Southland Organics product research"
 - Icon: Sun/cycle (seasonal consistency)
@@ -232,14 +232,14 @@ Formulated in Georgia
 | Litter Life | `poultry-litter-amendment` | Yes | LL-1G (1 Gal) | $31 |
 | Catalyst Liquid | `catalyst-poultry-vitamin` | Yes | CAT-8oz-Liquid | $23 |
 | Desecticide | `natural-mite-control-livestock-poultry` | Yes | DESECT-Q (Quart $20), DESECT-1G ($40) | $20+ |
-| Mother Load ACV | `mother-load-apple-cider-vinegar-for-chickens` | NEEDS VERIFY | ML-1G (1 Gal) | $21 |
+| Mother Load ACV | `apple-cider-vinegar-for-chickens` | Yes (verified 2026-03-23) | ML-1G (1 Gal) | $21 |
 | Backyard Poultry Bundle | `backyard-poultry-bundle-chicken-supplements` | Yes (Southland Supabase) | BYPB ($52), BYPB+ ($62) | $52+ |
 
 **Roost products** (Lay, Nest, Peak) exist as SKUs but are $0 — NOT yet priced/launched. Do NOT feature until pricing is set.
 
 **Handle correction:** The collection MDX referenced `roost-bundle` — actual handle is `backyard-poultry-bundle-chicken-supplements`. The "Roost" brand name may be a future rebrand of the backyard line.
 
-**Mother Load handle** needs Storefront API verification — SKU is `ML-1G` but Shopify handle may differ.
+**Mother Load handle** verified 2026-03-23: correct Shopify handle is `apple-cider-vinegar-for-chickens`.
 
 ---
 

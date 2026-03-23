@@ -1,0 +1,152 @@
+---
+/**
+ * /blogs/poultry-biosecurity — Poultry Biosecurity Resource Hub
+ *
+ * Matches the live Shopify URL exactly so existing nav links,
+ * Google index entries, and backlinks continue to work after DNS cutover.
+ *
+ * Shows all blog posts tagged "Biosecurity" (segment: poultry),
+ * sorted newest-first. This is Allen Reynolds' primary content channel —
+ * the YouTube companion in written form.
+ */
+
+export const prerender = true
+
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import BlogGrid from '../../components/blog/BlogGrid.astro'
+import { getCollection } from 'astro:content'
+import { getLogoUrl } from '../../lib/cloudinary'
+
+// Get all published biosecurity posts
+const allPosts = await getCollection('blog', ({ data }) => {
+  if (data.draft) return false
+  // Include posts with Biosecurity tag OR poultry segment posts about biosecurity topics
+  const hasBiosecurityTag = (data.tags || []).some(
+    (t) => t.toLowerCase() === 'biosecurity'
+  )
+  return hasBiosecurityTag
+})
+
+// Sort by publish date (newest first)
+const posts = allPosts.sort(
+  (a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
+)
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+
+const title = 'Poultry Farmer Resources: Biosecurity in Poultry'
+const description =
+  'Poultry Biosecurity. What is it? and Why will it change your poultry operation? We have been helping growers with the biosecurity of their farms for more than 10 years. We understand the challenges you are facing with this New Poultry Environment.'
+
+const blogSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: title,
+  description,
+  url: `${siteUrl}/blogs/poultry-biosecurity`,
+  publisher: {
+    '@type': 'Organization',
+    name: 'Southland Organics',
+    url: siteUrl,
+    foundingDate: '2009',
+  },
+}
+---
+
+<BaseLayout
+  title={`${title} - Southland Organics`}
+  description={description}
+  ogImage={getLogoUrl('square', { width: 800 })}
+  schema={blogSchema}
+>
+  <!-- Hero Section -->
+  <section
+    class="bg-gradient-to-br from-southland-green-dark via-southland-green-dark to-[#1f3d24] py-16 md:py-24"
+  >
+    <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+      <p class="mb-3 text-sm font-medium uppercase tracking-wide text-southland-green">
+        Poultry Resources
+      </p>
+      <h1 class="mb-6 text-4xl font-bold text-white md:text-5xl lg:text-6xl">
+        Poultry Biosecurity
+      </h1>
+      <p class="mx-auto max-w-2xl text-lg text-white/70 md:text-xl">
+        {description}
+      </p>
+      <div class="mt-8 flex flex-wrap justify-center gap-4">
+        <a
+          href="/poultry/"
+          class="rounded-lg bg-white/10 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/20"
+        >
+          Poultry Hub
+        </a>
+        <a
+          href="/poultry/commercial/"
+          class="rounded-lg bg-white/10 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/20"
+        >
+          Commercial Growers
+        </a>
+        <a
+          href="/poultry/backyard/"
+          class="rounded-lg bg-white/10 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/20"
+        >
+          Backyard Flocks
+        </a>
+        <a
+          href="/blog/category/poultry/"
+          class="rounded-lg bg-white/10 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/20"
+        >
+          All Poultry Articles
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Blog Grid -->
+  <section class="bg-brand-gray py-16 md:py-20">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-8 flex items-center justify-between">
+        <p class="text-gray-500">
+          {posts.length} {posts.length === 1 ? 'article' : 'articles'}
+        </p>
+      </div>
+
+      {
+        posts.length > 0 ? (
+          <BlogGrid posts={posts} showFeatured={true} columns={3} />
+        ) : (
+          <div class="py-12 text-center">
+            <p class="text-lg text-gray-500">No biosecurity articles found.</p>
+            <a href="/blog/category/poultry/" class="mt-4 inline-block text-southland-green hover:underline">
+              View all poultry articles
+            </a>
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="bg-white py-16">
+    <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+      <h2 class="mb-4 text-3xl font-bold text-shopify-title">
+        Need Help With Your Operation?
+      </h2>
+      <p class="mx-auto mb-8 max-w-2xl text-lg text-shopify-secondary-text">
+        Allen Reynolds has spent over 10 years helping poultry growers improve biosecurity,
+        lower mortality, and produce stronger flocks. Talk to our team.
+      </p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="/poultry/commercial/" class="btn-primary inline-flex items-center gap-2">
+          Commercial Programs
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </a>
+        <a href="/blog/" class="btn-secondary inline-flex items-center gap-2">
+          All Articles
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
