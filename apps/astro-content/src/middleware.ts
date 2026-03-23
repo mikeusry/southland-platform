@@ -49,6 +49,7 @@ const ASTRO_ROUTES = [
   '/hydroseeders',
   '/agriculture',
   '/livestock',
+  '/homepage-b',
 ]
 
 function isAstroRoute(pathname: string): boolean {

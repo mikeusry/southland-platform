@@ -85,6 +85,12 @@ export const REDIRECT_MAP: Record<string, string> = {
   '/collections/waste': '/products/waste-treatment/',
   '/collections/other': '/',
   '/pages/why-southland': '/about/',
+  '/pages/about-us': '/about/',
+  '/pages/contact-us': '/contact/',
+  '/pages/distribution': '/distribution/',
+  '/pages/store-locator': '/store-locator/',
+  '/pages/build-a-case': '/build-a-case/',
+  '/pages/hydroseeding': '/hydroseeders/',
 }
 
 // =============================================================================

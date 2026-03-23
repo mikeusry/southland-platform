@@ -17,8 +17,8 @@
         "href": "/products/",
         "children": [
           { "label": "All Products", "href": "/products/", "group": "Browse" },
-          { "label": "Collections", "href": "/collections/", "group": "Browse" },
-          { "label": "Build a Case", "href": "/build-a-case/", "group": "Browse" }
+          { "label": "Build a Case", "href": "/build-a-case/", "group": "Browse" },
+          { "label": "Find a Dealer", "href": "/store-locator/", "group": "Browse" }
         ]
       },
       {
@@ -39,28 +39,29 @@
       },
       {
         "label": "Lawn & Garden",
-        "href": "/collections/turf",
+        "href": "/lawn/",
         "children": [
-          { "label": "Homeowners", "href": "/collections/homeowners", "group": "By Customer" },
-          { "label": "Golf Courses", "href": "/collections/golf-courses", "group": "By Customer" },
-          { "label": "Landscapers", "href": "/collections/landscapers", "group": "By Customer" },
-          { "label": "Crops", "href": "/collections/crops", "group": "Specialty" },
+          { "label": "Homeowners", "href": "/lawn/homeowners/", "group": "By Customer" },
+          { "label": "Golf Courses", "href": "/lawn/golf-courses/", "group": "By Customer" },
+          { "label": "Landscapers", "href": "/lawn/landscapers/", "group": "By Customer" },
+          { "label": "Turf Professionals", "href": "/lawn/turf-pros/", "group": "By Customer" },
+          { "label": "Crops", "href": "/agriculture/crops/", "group": "Specialty" },
           { "label": "Hydroseeders", "href": "/hydroseeders/", "group": "Specialty" },
-          { "label": "Shop All Lawn & Garden", "href": "/collections/turf", "group": "Specialty" }
+          { "label": "Shop All Lawn & Garden", "href": "/lawn/", "group": "Specialty" }
         ]
       },
       {
         "label": "Septic & Waste",
-        "href": "/collections/waste",
+        "href": "/products/waste-treatment/",
         "children": [
           { "label": "Septic Care", "href": "/products/pour-the-port-septic-tank-treatment" },
-          { "label": "Odor Control", "href": "/collections/waste" },
-          { "label": "Sanitizers", "href": "/collections/sanitizers" }
+          { "label": "Waste Treatment", "href": "/products/waste-treatment/" },
+          { "label": "Sanitizers", "href": "/products/sanitizers/" }
         ]
       },
       {
         "label": "Swine",
-        "href": "/collections/pig-and-swine-supplements"
+        "href": "/livestock/swine/"
       },
       {
         "label": "About",
@@ -73,8 +74,8 @@
           { "label": "Distribution", "href": "/distribution/", "group": "Company" },
           { "label": "Rewards Program", "href": "/pages/southland-organics-rewards", "group": "Company" },
           { "label": "Podcast", "href": "/podcast/", "group": "Learn" },
-          { "label": "Blog", "href": "/blogs/news", "group": "Learn" },
-          { "label": "Humate Hub", "href": "/blogs/humate-hub", "group": "Learn" },
+          { "label": "Blog", "href": "/blog/", "group": "Learn" },
+          { "label": "Humate Hub", "href": "/blog/", "group": "Learn" },
           { "label": "FAQs", "href": "/pages/faqs", "group": "Learn" }
         ]
       }

@@ -11,15 +11,15 @@
  * - Decision Engine: In-page persona selection (no redirects)
  */
 import { getCollection } from 'astro:content'
-import BaseLayout from '../layouts/BaseLayout.astro'
+import BaseLayout from '../../layouts/BaseLayout.astro'
 // DecisionEngine + RealityTunnel disabled for launch — enable post-launch for persona tunnels
-// import DecisionEngine from '../components/cdp/DecisionEngine.astro'
-import RealityTunnel from '../components/tunnels/RealityTunnel.astro'
-import CollectionProductCard from '../components/shop/CollectionProductCard.astro'
-import EmailCapture from '../components/shared/EmailCapture.astro'
+// import DecisionEngine from '../../components/cdp/DecisionEngine.astro'
+import RealityTunnel from '../../components/tunnels/RealityTunnel.astro'
+import CollectionProductCard from '../../components/shop/CollectionProductCard.astro'
+import EmailCapture from '../../components/shared/EmailCapture.astro'
 import { createClient, getAllProducts, getAllCollections } from '@southland/shopify-storefront'
 import type { Product, CollectionSummary } from '@southland/shopify-storefront'
-import { buildSouthlandUrl } from '../lib/cloudinary'
+import { buildSouthlandUrl } from '../../lib/cloudinary'
 
 // ── Load homepage copy from content collection ──────────────────────────────
 const homepageEntries = await getCollection('homepage')
@@ -1159,7 +1159,7 @@ function getProducts(filter: string) {
 </style>
 
 <script>
-  import { getPersonaId, getJourneyStage } from '../lib/persona'
+  import { getPersonaId, getJourneyStage } from '../../lib/persona'
 
   function initHomepage() {
     const personaId = getPersonaId()
