@@ -562,7 +562,7 @@ const faqSchema = {
       {allBroilerProducts.length > 0 ? (
         <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
           {allBroilerProducts.map((product) => (
-            <CollectionProductCard product={product} persona="commercial" />
+            <CollectionProductCard product={product} persona="bill" />
           ))}
         </div>
       ) : (
@@ -692,7 +692,7 @@ const faqSchema = {
       <p class="mx-auto mb-10 max-w-xl text-center text-gray-600">
         We've heard every objection. Here's the straight answer to each one.
       </p>
-      <AccordionFaq items={objections} persona="commercial" />
+      <AccordionFaq items={objections} persona="bill" />
     </div>
   </section>
 

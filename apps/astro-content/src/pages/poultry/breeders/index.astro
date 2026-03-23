@@ -563,7 +563,7 @@ const faqSchema = {
       {allBreederProducts.length > 0 ? (
         <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
           {allBreederProducts.map((product) => (
-            <CollectionProductCard product={product} persona="commercial" />
+            <CollectionProductCard product={product} persona="bob" />
           ))}
         </div>
       ) : (
@@ -690,7 +690,7 @@ const faqSchema = {
       <p class="mx-auto mb-10 max-w-xl text-center text-gray-600">
         Breeder operations have higher stakes and tighter requirements. Here are the straight answers.
       </p>
-      <AccordionFaq items={objections} persona="commercial" />
+      <AccordionFaq items={objections} persona="bob" />
     </div>
   </section>
 

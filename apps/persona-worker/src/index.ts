@@ -10,13 +10,17 @@
  * - POST /batch - Process multiple events
  */
 
-import type { Env, PixelEvent, VisitorData, ScoringResponse, PersonaId } from './types'
+import type { Env, PixelEvent, VisitorData, ScoringResponse, PersonaId, SegmentId } from './types'
+import { ALL_PERSONA_IDS, ALL_SEGMENT_IDS, PERSONA_TO_SEGMENT } from './types'
 import { extractSignals } from './signals'
 import {
   computePersonaScores,
+  computeSegmentScores,
   getPredictedPersona,
+  getPredictedSegment,
   calculateConfidence,
   getEffectivePersona,
+  getEffectiveSegment,
 } from './scoring'
 import { detectJourneyStage, calculateStageConfidence, updateStageHistory } from './stages'
 
@@ -25,6 +29,28 @@ const KV_TTL_SECONDS = 30 * 24 * 60 * 60
 
 // Max signals to keep per visitor
 const MAX_SIGNALS = 100
+
+// Default persona scores for new visitors (anchored to observed distribution)
+const DEFAULT_PERSONA_SCORES = {
+  bill: 0.15,
+  betty: 0.12,
+  bob: 0.05,
+  tom: 0.05,
+  greg: 0.04,
+  taylor: 0.08,
+  gary: 0.05,
+  hannah: 0.06,
+  maggie: 0.04,
+  sam: 0.06,
+  general: 0.30,
+}
+
+const DEFAULT_SEGMENT_SCORES = {
+  poultry: 0.45,
+  turf: 0.25,
+  waste: 0.15,
+  general: 0.15,
+}
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -100,7 +126,7 @@ export default {
 async function processEvent(event: PixelEvent, env: Env): Promise<ScoringResponse> {
   const visitorId = event.anonymous_id
 
-  // Get or create visitor
+  // Get or create visitor (with migration for old format)
   let visitor = await getVisitor(visitorId, env)
   if (!visitor) {
     visitor = createNewVisitor(visitorId)
@@ -116,13 +142,28 @@ async function processEvent(event: PixelEvent, env: Env): Promise<ScoringRespons
 
   // Check for explicit persona choice in event
   if (event.event === 'persona_selected' && event.properties?.persona) {
-    visitor.explicit_persona = event.properties.persona as PersonaId
+    const persona = event.properties.persona as string
+    if (ALL_PERSONA_IDS.includes(persona as PersonaId)) {
+      visitor.explicit_persona = persona as PersonaId
+    }
+  }
+
+  // Check for explicit segment choice in event
+  if (event.event === 'segment_path_selected' && event.properties?.segment_id) {
+    const segment = event.properties.segment_id as string
+    if (ALL_SEGMENT_IDS.includes(segment as SegmentId)) {
+      visitor.explicit_segment = segment as SegmentId
+    }
   }
 
   // Compute persona scores
   visitor.persona_scores = computePersonaScores(visitor)
   visitor.predicted_persona = getPredictedPersona(visitor.persona_scores)
   visitor.persona_confidence = calculateConfidence(visitor.persona_scores)
+
+  // Compute segment scores (rolled up from persona scores)
+  visitor.segment_scores = computeSegmentScores(visitor.persona_scores)
+  visitor.predicted_segment = getPredictedSegment(visitor.segment_scores)
 
   // Detect journey stage
   const newStage = detectJourneyStage(visitor)
@@ -144,19 +185,41 @@ async function processEvent(event: PixelEvent, env: Env): Promise<ScoringRespons
     visitor_id: visitorId,
     persona: getEffectivePersona(visitor),
     persona_confidence: visitor.persona_confidence,
+    segment: getEffectiveSegment(visitor),
+    segment_confidence: calculateConfidence(visitor.segment_scores),
     stage: visitor.current_stage,
     stage_confidence: visitor.stage_confidence,
     explicit_choice: visitor.explicit_persona,
+    explicit_segment: visitor.explicit_segment,
   }
 }
 
 /**
- * Get visitor from KV
+ * Get visitor from KV, with migration for old 4-key format
  */
 async function getVisitor(id: string, env: Env): Promise<VisitorData | null> {
   try {
     const data = await env.VISITOR_KV.get(`visitor:${id}`, 'json')
-    return data as VisitorData | null
+    if (!data) return null
+
+    const visitor = data as VisitorData
+
+    // Migrate old 4-key format to new 11-key format
+    if (visitor.persona_scores && !('bill' in visitor.persona_scores)) {
+      visitor.persona_scores = migratePersonaScores(visitor.persona_scores as any)
+      visitor.predicted_persona = migratePersonaId(visitor.predicted_persona as any)
+      if (visitor.explicit_persona) {
+        visitor.explicit_persona = migratePersonaId(visitor.explicit_persona as any)
+      }
+    }
+
+    // Add segment fields if missing
+    if (!visitor.segment_scores) {
+      visitor.segment_scores = computeSegmentScores(visitor.persona_scores)
+      visitor.predicted_segment = getPredictedSegment(visitor.segment_scores)
+    }
+
+    return visitor
   } catch {
     return null
   }
@@ -179,14 +242,11 @@ function createNewVisitor(id: string): VisitorData {
   return {
     anonymous_id: id,
     signals: [],
-    persona_scores: {
-      backyard: 0.25,
-      commercial: 0.25,
-      lawn: 0.25,
-      general: 0.25,
-    },
+    persona_scores: { ...DEFAULT_PERSONA_SCORES } as any,
     predicted_persona: 'general',
     persona_confidence: 0,
+    segment_scores: { ...DEFAULT_SEGMENT_SCORES } as any,
+    predicted_segment: 'general',
     current_stage: 'unaware',
     stage_confidence: 0,
     stage_history: [{ stage: 'unaware', entered_at: now }],
@@ -195,6 +255,38 @@ function createNewVisitor(id: string): VisitorData {
     session_count: 1,
     total_signals: 0,
   }
+}
+
+// =============================================================================
+// KV MIGRATION — old 4-key format → new 11-key format
+// =============================================================================
+
+const LEGACY_PERSONA_MAP: Record<string, PersonaId> = {
+  backyard: 'betty',
+  commercial: 'bill',
+  lawn: 'taylor',
+}
+
+/**
+ * Migrate old 4-key persona scores to new 11-key format
+ */
+function migratePersonaScores(old: Record<string, number>): any {
+  const migrated = { ...DEFAULT_PERSONA_SCORES }
+
+  // Map old keys to new keys and distribute weight
+  if (old.backyard) migrated.betty = old.backyard
+  if (old.commercial) migrated.bill = old.commercial
+  if (old.lawn) migrated.taylor = old.lawn
+  if (old.general) migrated.general = old.general
+
+  return migrated
+}
+
+/**
+ * Migrate old persona ID to new format
+ */
+function migratePersonaId(old: string): PersonaId {
+  return LEGACY_PERSONA_MAP[old] ?? (old as PersonaId)
 }
 
 /**
@@ -224,10 +316,17 @@ async function forwardToBigQuery(event: PixelEvent, visitor: VisitorData, env: E
           utm_campaign: event.utm_campaign || null,
           properties: JSON.stringify(event.properties || {}),
 
-          // Enriched with persona/stage
+          // Enriched with persona
           predicted_persona: visitor.predicted_persona,
           persona_confidence: visitor.persona_confidence,
           explicit_persona: visitor.explicit_persona || null,
+
+          // Enriched with segment
+          predicted_segment: visitor.predicted_segment,
+          explicit_segment: visitor.explicit_segment || null,
+          segment_scores: JSON.stringify(visitor.segment_scores),
+
+          // Journey stage
           current_stage: visitor.current_stage,
           stage_confidence: visitor.stage_confidence,
           persona_scores: JSON.stringify(visitor.persona_scores),

@@ -1,19 +1,19 @@
 ---
 /**
- * Decision Engine Component
+ * Decision Engine Component — Segment Selector
  *
- * CDP Week 1 - Homepage 3-way branch
- * Asks visitors "What describes you best?" to set their persona in-page.
- * No redirects — stores persona via setPersona(), smooth-scrolls to
- * the featured-products section, and lets RealityTunnel handle
- * persona-specific content on next page load.
+ * Homepage 3-way branch routing visitors into segment lanes.
+ * Sets segment (not persona) — persona refinement happens on hub pages.
+ *
+ * Flow: Homepage → select segment → scroll to products → visit hub page → select persona
  *
  * Features:
- * - 3 clickable persona cards
- * - Persists selection in localStorage + cookie (via shared persona lib)
- * - Fires `persona_path_selected` event to point.dog pixel + GTM
+ * - 3 clickable segment cards (Poultry, Turf & Soil, Waste)
+ * - Persists segment in localStorage + cookie (via shared persona lib)
+ * - Fires `segment_path_selected` event to point.dog pixel + GTM
  * - Smooth-scrolls to scroll target (default: #featured-products)
- * - Highlights active persona card for returning visitors
+ * - Highlights active segment card for returning visitors
+ * - Frictionless default: preselects if visitor arrived from a segment-leaning URL
  */
 
 interface Props {
@@ -25,38 +25,44 @@ interface Props {
 }
 
 const {
-  headline = 'What best describes you?',
-  subheadline = 'Help us personalize your experience',
+  headline = 'What are you working on?',
+  subheadline = 'Choose your focus and we\'ll show you the right solutions',
   scrollTarget = 'featured-products',
   source = 'decision_engine',
   class: className = '',
 } = Astro.props
 
-// Persona paths configuration
-const personaPaths = [
+// Segment paths — maps to the 3 segments in persona-profiles.ts
+const segmentPaths = [
   {
-    id: 'backyard',
-    label: 'Backyard Flock',
-    description: 'Hobby chicken keepers with small flocks at home',
-    icon: 'chicken',
-    color: 'bg-amber-50 hover:bg-amber-100 border-amber-200',
-    iconColor: 'text-amber-600',
-  },
-  {
-    id: 'commercial',
-    label: 'Commercial Poultry',
-    description: 'Broiler farms, layer operations, or contract growers',
+    id: 'poultry',
+    label: 'Poultry',
+    description: 'Commercial broilers, backyard flocks, turkeys, breeders, and game birds',
+    microcopy: 'Start here if you raise poultry — commercial or backyard.',
     icon: 'barn',
     color: 'bg-green-50 hover:bg-green-100 border-green-200',
     iconColor: 'text-green-700',
+    hubPage: '/poultry/',
   },
   {
-    id: 'lawn',
-    label: 'Lawn & Garden',
-    description: 'Homeowners, landscapers, or turf professionals',
+    id: 'turf',
+    label: 'Turf & Soil',
+    description: 'Lawn care pros, golf courses, homeowners, and market gardeners',
+    microcopy: 'Organic programs for professional turf and residential lawns.',
     icon: 'grass',
     color: 'bg-emerald-50 hover:bg-emerald-100 border-emerald-200',
     iconColor: 'text-emerald-600',
+    hubPage: '/lawn/',
+  },
+  {
+    id: 'waste',
+    label: 'Septic & Waste',
+    description: 'Septic systems, holding tanks, grease traps, and odor control',
+    microcopy: 'Biological treatments for homes, campgrounds, and facilities.',
+    icon: 'droplet',
+    color: 'bg-purple-50 hover:bg-purple-100 border-purple-200',
+    iconColor: 'text-purple-600',
+    hubPage: '/waste/',
   },
 ]
 ---
@@ -77,49 +83,51 @@ const personaPaths = [
       </p>
     </div>
 
-    <!-- Persona Cards -->
+    <!-- Segment Cards -->
     <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-      {personaPaths.map((persona) => (
+      {segmentPaths.map((segment) => (
         <button
-          class={`persona-card group relative cursor-pointer rounded-xl border-2 p-6 text-left transition-all duration-300 ${persona.color}`}
-          data-persona-id={persona.id}
-          data-persona-select={persona.id}
-          aria-label={`Select ${persona.label}`}
+          class={`segment-card group relative cursor-pointer rounded-xl border-2 p-6 text-left transition-all duration-300 ${segment.color}`}
+          data-segment-id={segment.id}
+          data-segment-select={segment.id}
+          data-hub-page={segment.hubPage}
+          aria-label={`Select ${segment.label}`}
         >
           <!-- Icon -->
-          <div class={`mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm ${persona.iconColor}`}>
-            {persona.icon === 'chicken' && (
-              <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 19c-4 0-7-2.5-7-6 0-2 1-3.5 2-4.5-.5-1-.5-2.5 0-3.5 1 0 2 .5 2.5 1 .5-1 1.5-2 3-2s2.5 1 3 2c.5-.5 1.5-1 2.5-1 .5 1 .5 2.5 0 3.5 1 1 2 2.5 2 4.5 0 3.5-3 6-7 6z"/>
-                <circle cx="9" cy="11" r="1" fill="currentColor"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 13v2"/>
-              </svg>
-            )}
-            {persona.icon === 'barn' && (
+          <div class={`mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm ${segment.iconColor}`}>
+            {segment.icon === 'barn' && (
               <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 21h18M4 21V10l8-6 8 6v11M9 21v-6h6v6"/>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4l-8 6h16l-8-6z"/>
               </svg>
             )}
-            {persona.icon === 'grass' && (
+            {segment.icon === 'grass' && (
               <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21V8c0-3 3-5 5-5M12 21V8c0-3 3-5 5-5M17 21v-8c0-2-2-4-4-4"/>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 21c0-3 2-5 4-6M19 21c0-3-2-5-4-6"/>
+              </svg>
+            )}
+            {segment.icon === 'droplet' && (
+              <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 21c-4.418 0-8-3.134-8-7 0-4.418 8-11 8-11s8 6.582 8 11c0 3.866-3.582 7-8 7z"/>
               </svg>
             )}
           </div>
 
           <!-- Content -->
           <h3 class="mb-2 text-xl font-bold" style="color: var(--color-title);">
-            {persona.label}
+            {segment.label}
           </h3>
-          <p class="text-sm leading-relaxed text-gray-600">
-            {persona.description}
+          <p class="mb-2 text-sm leading-relaxed text-gray-600">
+            {segment.description}
+          </p>
+          <p class="text-xs italic text-gray-400">
+            {segment.microcopy}
           </p>
 
           <!-- Arrow indicator -->
           <div class="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-100">
-            <svg class={`h-6 w-6 ${persona.iconColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class={`h-6 w-6 ${segment.iconColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
             </svg>
           </div>
@@ -127,7 +135,7 @@ const personaPaths = [
       ))}
     </div>
 
-    <!-- Skip link — subtle inline text, not a competing button -->
+    <!-- Skip link -->
     <div class="mt-8 text-center">
       <button
         class="skip-personalization text-sm text-gray-500 underline underline-offset-2 hover:text-gray-700"
@@ -140,29 +148,29 @@ const personaPaths = [
 </section>
 
 <script>
-  import { setPersona } from '../../lib/persona'
-  import { attachPersonaHandlers } from '../../lib/personaDom'
+  import { setSegment } from '../../lib/persona'
+  import { attachSegmentHandlers } from '../../lib/personaDom'
 
   function initDecisionEngine() {
     document.querySelectorAll<HTMLElement>('.decision-engine').forEach((container) => {
       const scrollTarget = container.dataset.scrollTarget || 'featured-products'
       const source = (container.dataset.source as 'decision_engine' | 'hero') || 'decision_engine'
 
-      // Attach persona card handlers (click + highlight)
-      attachPersonaHandlers(container, source, scrollTarget)
+      // Attach segment card handlers (click + highlight)
+      attachSegmentHandlers(container, source, scrollTarget)
 
       // Handle skip button
       const skipBtn = container.querySelector('.skip-personalization')
       skipBtn?.addEventListener('click', () => {
         // Track skip event
         if ((window as any).pdPixel) {
-          ;(window as any).pdPixel.track('persona_path_skipped', {
+          ;(window as any).pdPixel.track('segment_path_skipped', {
             source,
             page: window.location.pathname,
           })
         }
 
-        setPersona('general', source)
+        setSegment('general', source)
 
         document.getElementById(scrollTarget)?.scrollIntoView({
           behavior: 'smooth',
@@ -184,14 +192,14 @@ const personaPaths = [
 </script>
 
 <style>
-  .persona-card:focus {
+  .segment-card:focus {
     outline: none;
     ring: 4px;
     ring-color: var(--color-accent);
     ring-opacity: 0.5;
   }
 
-  .persona-card:active {
+  .segment-card:active {
     transform: scale(0.98);
   }
 
@@ -207,11 +215,11 @@ const personaPaths = [
     }
   }
 
-  .persona-card {
+  .segment-card {
     animation: fadeInUp 0.5s ease-out forwards;
   }
 
-  .persona-card:nth-child(1) { animation-delay: 0.1s; }
-  .persona-card:nth-child(2) { animation-delay: 0.2s; }
-  .persona-card:nth-child(3) { animation-delay: 0.3s; }
+  .segment-card:nth-child(1) { animation-delay: 0.1s; }
+  .segment-card:nth-child(2) { animation-delay: 0.2s; }
+  .segment-card:nth-child(3) { animation-delay: 0.3s; }
 </style>

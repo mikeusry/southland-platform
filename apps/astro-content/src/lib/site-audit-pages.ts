@@ -308,10 +308,10 @@ export function computeFunnelCoverage(groups: PageGroup[]) {
 }
 
 export function computePersonaCoverage(groups: PageGroup[]) {
-  const counts = { bill: 0, betty: 0, taylor: 0, general: 0, none: 0 }
+  const counts: Record<string, number> = { bill: 0, betty: 0, bob: 0, tom: 0, greg: 0, taylor: 0, gary: 0, hannah: 0, maggie: 0, sam: 0, general: 0, none: 0 }
   for (const g of groups) {
     for (const p of g.pages) {
-      if (p.persona) counts[p.persona]++
+      if (p.persona && p.persona in counts) counts[p.persona]++
       else counts.none++
     }
   }

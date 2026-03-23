@@ -11,15 +11,16 @@ import type { Product } from '@southland/shopify-storefront'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Breadcrumbs from '../../components/shared/Breadcrumbs.astro'
 import CollectionProductCard from '../../components/shop/CollectionProductCard.astro'
-import type { PersonaId } from '../../lib/persona'
+import { isValidPersonaId, type PersonaId } from '../../lib/persona'
 
 // SSR — do not prerender
 
 // ── Persona ─────────────────────────────────────────────────────────────────
 const personaCookie = Astro.cookies.get('sl_persona')?.value ?? null
-const validPersonas = ['backyard', 'commercial', 'lawn', 'general']
+const LEGACY_MAP: Record<string, string> = { backyard: 'betty', commercial: 'bill', lawn: 'taylor' }
+const resolvedCookie = personaCookie ? (LEGACY_MAP[personaCookie] ?? personaCookie) : null
 const persona: PersonaId =
-  personaCookie && validPersonas.includes(personaCookie) ? (personaCookie as PersonaId) : null
+  resolvedCookie && isValidPersonaId(resolvedCookie) ? (resolvedCookie as PersonaId) : null
 
 // ── Fetch Shopify data ──────────────────────────────────────────────────────
 const client = createClient({

@@ -6,23 +6,18 @@
  */
 
 import type { PixelEvent, Signal, SignalType, PersonaId } from './types'
+import { ALL_PERSONA_IDS } from './types'
 
-// Keywords that indicate persona affinity
-const PERSONA_KEYWORDS: Record<PersonaId, string[]> = {
-  backyard: [
-    'backyard',
-    'hobby',
-    'small flock',
-    'hen',
-    'eggs',
-    'coop',
-    'chicken keeping',
-    'beginner',
-    'pet chickens',
-    'laying hens',
-    'hen helper',
-  ],
-  commercial: [
+// =============================================================================
+// PERSONA KEYWORDS — config-driven, keyed by PersonaId
+// =============================================================================
+
+/**
+ * Keywords that indicate persona affinity.
+ * Adding a new persona = add one entry here. Scoring loops over keys automatically.
+ */
+const PERSONA_KEYWORDS: Partial<Record<PersonaId, string[]>> = {
+  bill: [
     'commercial',
     'bulk',
     'fcr',
@@ -36,35 +31,160 @@ const PERSONA_KEYWORDS: Record<PersonaId, string[]> = {
     'grow out',
     'litter',
     'big ole bird',
+    'settlement',
+    'house ranking',
+    'cents per bird',
   ],
-  lawn: [
-    'lawn',
-    'turf',
-    'grass',
-    'fire ant',
-    'garden',
-    'fertilizer',
-    'soil',
-    'landscape',
+  betty: [
+    'backyard',
+    'hobby',
+    'small flock',
+    'hen',
+    'eggs',
+    'coop',
+    'chicken keeping',
+    'beginner',
+    'pet chickens',
+    'laying hens',
+    'hen helper',
+    'chicken mom',
+  ],
+  bob: [
+    'breeder',
+    'hatching eggs',
+    'hatchability',
+    'pullet',
+    'parent stock',
+    'hatch rate',
+    'settable eggs',
+    'breeder flock',
+    'egg quality',
+    'lay cycle',
+  ],
+  tom: [
+    'turkey',
+    'poult',
+    'turkey house',
+    'clostridial',
+    'butterball',
+    'processing weight',
+    'turkey grower',
+    'tom',
+    'necrotic enteritis',
+  ],
+  greg: [
+    'game bird',
+    'quail',
+    'pheasant',
+    'chukar',
+    'flight pen',
+    'preserve',
+    'hunting',
+    'bobwhite',
+    'ulcerative enteritis',
+    'hatchery',
+  ],
+  taylor: [
+    'turf management',
+    'sports turf',
+    'application rate',
+    'athletic field',
+    'professional lawn',
+    'turf program',
+    'warm-season',
+    'transition zone',
+    'soil biology',
+  ],
+  gary: [
+    'fairway',
+    'greens',
+    'superintendent',
+    'bermuda',
+    'zoysia',
+    'cec',
+    'infiltration',
+    'golf course',
+    'tee box',
+    'gcsaa',
+  ],
+  hannah: [
+    'homeowner',
+    'yard',
+    'kids',
+    'pets',
     'organic lawn',
-    'humate',
+    'diy',
+    'brown spots',
+    'fire ants',
+    'safe for family',
+    'weed killer',
   ],
-  general: [],
+  maggie: [
+    'market garden',
+    'raised bed',
+    'compost tea',
+    'csa',
+    'farmers market',
+    'no-till',
+    'regenerative',
+    'cover crop',
+    'living soil',
+    'intensive',
+  ],
+  sam: [
+    'septic',
+    'holding tank',
+    'grease trap',
+    'sewage',
+    'drain field',
+    'vault toilet',
+    'odor',
+    'port',
+    'waste treatment',
+    'bio-surfactant',
+  ],
+  // general has no keywords — it's the fallback
 }
 
-// URL patterns that indicate persona
+// =============================================================================
+// URL PATTERNS — config-driven, keyed by regex → PersonaId
+// =============================================================================
+
+/**
+ * URL patterns that indicate persona.
+ * Adding a new persona = add patterns here.
+ */
 const URL_PERSONA_PATTERNS: Array<{ pattern: RegExp; persona: PersonaId }> = [
-  { pattern: /\/poultry\/backyard/i, persona: 'backyard' },
-  { pattern: /\/poultry\/commercial/i, persona: 'commercial' },
-  { pattern: /\/lawn/i, persona: 'lawn' },
-  { pattern: /\/shop\/poultry\/backyard/i, persona: 'backyard' },
-  { pattern: /\/shop\/poultry\/commercial/i, persona: 'commercial' },
-  { pattern: /\/shop\/lawn/i, persona: 'lawn' },
-  { pattern: /\/collections\/backyard/i, persona: 'backyard' },
-  { pattern: /\/collections\/commercial/i, persona: 'commercial' },
-  { pattern: /\/products\/.*gallon/i, persona: 'commercial' }, // Bulk sizes
-  { pattern: /\/products\/.*bulk/i, persona: 'commercial' },
+  // Poultry personas
+  { pattern: /\/poultry\/backyard/i, persona: 'betty' },
+  { pattern: /\/poultry\/commercial/i, persona: 'bill' },
+  { pattern: /\/poultry\/breeders/i, persona: 'bob' },
+  { pattern: /\/poultry\/turkey/i, persona: 'tom' },
+  { pattern: /\/poultry\/game-birds/i, persona: 'greg' },
+
+  // Turf & Soil personas
+  { pattern: /\/lawn\/golf/i, persona: 'gary' },
+  { pattern: /\/lawn\/homeowner/i, persona: 'hannah' },
+  { pattern: /\/garden\//i, persona: 'maggie' },
+  { pattern: /\/lawn/i, persona: 'taylor' }, // catch-all turf after specific sub-pages
+
+  // Waste
+  { pattern: /\/waste/i, persona: 'sam' },
+  { pattern: /\/septic/i, persona: 'sam' },
+
+  // Legacy shop URLs
+  { pattern: /\/shop\/poultry\/backyard/i, persona: 'betty' },
+  { pattern: /\/shop\/poultry\/commercial/i, persona: 'bill' },
+  { pattern: /\/shop\/lawn/i, persona: 'taylor' },
+
+  // Product size hints (bulk = commercial poultry)
+  { pattern: /\/products\/.*gallon/i, persona: 'bill' },
+  { pattern: /\/products\/.*bulk/i, persona: 'bill' },
 ]
+
+// =============================================================================
+// SIGNAL EXTRACTION
+// =============================================================================
 
 /**
  * Extract signals from a pixel event
@@ -128,13 +248,23 @@ export function extractSignals(event: PixelEvent): Signal[] {
     })
   }
 
-  // Decision Engine selection
+  // Decision Engine selection (persona or segment)
   if (event.event === 'persona_selected' && event.properties?.persona) {
     signals.push({
       type: 'decision_engine',
       value: String(event.properties.persona),
       timestamp,
       metadata: { source: 'decision_engine' },
+    })
+  }
+
+  // Segment selection (homepage)
+  if (event.event === 'segment_path_selected' && event.properties?.segment_id) {
+    signals.push({
+      type: 'decision_engine',
+      value: String(event.properties.segment_id),
+      timestamp,
+      metadata: { source: 'segment_selector', segment_id: event.properties.segment_id },
     })
   }
 
@@ -200,13 +330,16 @@ export function detectPersonaFromText(text: string): PersonaId | null {
   let bestMatch: PersonaId | null = null
   let bestScore = 0
 
-  for (const [persona, keywords] of Object.entries(PERSONA_KEYWORDS)) {
-    if (persona === 'general') continue
+  for (const personaId of ALL_PERSONA_IDS) {
+    if (personaId === 'general') continue
+
+    const keywords = PERSONA_KEYWORDS[personaId]
+    if (!keywords) continue
 
     const matchCount = keywords.filter((kw) => lowerText.includes(kw)).length
     if (matchCount > bestScore) {
       bestScore = matchCount
-      bestMatch = persona as PersonaId
+      bestMatch = personaId
     }
   }
 
@@ -242,7 +375,7 @@ export function getSignalPersonaHint(signal: Signal): PersonaId | null {
   // Decision engine is explicit
   if (signal.type === 'decision_engine') {
     const persona = signal.value as PersonaId
-    if (['backyard', 'commercial', 'lawn', 'general'].includes(persona)) {
+    if (ALL_PERSONA_IDS.includes(persona)) {
       return persona
     }
   }

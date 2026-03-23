@@ -54,9 +54,11 @@ if (slug in collectionRedirects) {
 
 // ── Read persona from cookie (server-side) ──────────────────────────────────
 const personaCookie = Astro.cookies.get('sl_persona')?.value ?? null
-const validPersonas = ['backyard', 'commercial', 'lawn', 'general']
+const { isValidPersonaId, PERSONA_TO_SEGMENT } = await import('../../lib/persona')
+const LEGACY_MAP: Record<string, string> = { backyard: 'betty', commercial: 'bill', lawn: 'taylor' }
+const resolvedCookie = personaCookie ? (LEGACY_MAP[personaCookie] ?? personaCookie) : null
 const persona: PersonaId =
-  personaCookie && validPersonas.includes(personaCookie) ? (personaCookie as PersonaId) : null
+  resolvedCookie && isValidPersonaId(resolvedCookie) ? (resolvedCookie as PersonaId) : null
 
 // ── Fetch TinaCMS content ───────────────────────────────────────────────────
 const allCollections = await getCollection('shopCollections')
@@ -83,14 +85,17 @@ const seoDescription =
   `Shop ${title} from Southland Organics.`
 const heroHeadline = tinaDoc?.data.heroHeadline || undefined
 const heroSubheadline = tinaDoc?.data.heroSubheadline || undefined
-const collectionPersona = tinaDoc?.data.persona ?? null
+const rawCollectionPersona = tinaDoc?.data.persona ?? null
+const collectionPersona: PersonaId = rawCollectionPersona
+  ? (LEGACY_MAP[rawCollectionPersona] ?? rawCollectionPersona) as PersonaId
+  : null
 const faq = tinaDoc?.data.faq ?? []
 
 // Render MDX body content if present
 const Content = tinaDoc ? (await tinaDoc.render()).Content : null
 
 // Use the collection's persona tag if set, otherwise fall back to visitor cookie
-const activePersona = collectionPersona || persona
+const activePersona: PersonaId = collectionPersona || persona
 
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
 const canonicalUrl = `${siteUrl}/collections/${slug}/`
@@ -279,7 +284,7 @@ const displaySubheadline = heroSubheadline || seoDescription
     activePersona && activePersona !== 'general' && (
       <section class={`px-4 py-12 sm:py-16 ${theme.proofBg}`}>
         <div class="mx-auto max-w-4xl">
-          <ProofPoints persona={activePersona as 'backyard' | 'commercial' | 'lawn'} variant="cards" />
+          <ProofPoints persona={activePersona} variant="cards" />
         </div>
       </section>
     )
@@ -328,7 +333,7 @@ const displaySubheadline = heroSubheadline || seoDescription
           <h2 class="font-heading text-brand-green-dark mb-8 text-center text-2xl">
             Frequently Asked Questions
           </h2>
-          <AccordionFaq items={faq} persona={activePersona as 'backyard' | 'commercial' | 'lawn' | null} />
+          <AccordionFaq items={faq} persona={activePersona} />
         </div>
       </section>
     )

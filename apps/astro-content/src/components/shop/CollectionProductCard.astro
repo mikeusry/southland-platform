@@ -11,7 +11,7 @@ import type { Product } from '@southland/shopify-storefront'
 
 interface Props {
   product: Product
-  persona?: 'backyard' | 'commercial' | 'lawn' | 'general' | null
+  persona?: import('../../lib/persona').PersonaId
   class?: string
 }
 
@@ -34,19 +34,22 @@ function getPersonaBadge(): string | null {
   // Check product tags for persona-specific badges
   const tags = product.tags.map((t) => t.toLowerCase())
 
-  if (persona === 'backyard') {
+  // Poultry — backyard
+  if (persona === 'betty') {
     if (tags.includes('bundle')) return 'Starter Bundle'
     if (tags.includes('bestseller') || tags.includes('best-seller')) return 'Flock Favorite'
     return null
   }
 
-  if (persona === 'commercial') {
+  // Poultry — commercial (bill, bob, tom, greg)
+  if (persona === 'bill' || persona === 'bob' || persona === 'tom' || persona === 'greg') {
     if (tags.includes('bundle')) return 'Value Pack'
     if (tags.includes('bestseller') || tags.includes('best-seller')) return 'Commercial Favorite'
     return null
   }
 
-  if (persona === 'lawn') {
+  // Turf & Soil (taylor, gary, hannah, maggie)
+  if (persona === 'taylor' || persona === 'gary' || persona === 'hannah' || persona === 'maggie') {
     if (tags.includes('bundle')) return 'Program Bundle'
     if (tags.includes('bestseller') || tags.includes('best-seller')) return "Pro's Choice"
     return null
@@ -59,7 +62,7 @@ const badge = getPersonaBadge()
 
 // Check if product has a gallon/bulk variant for per-unit pricing (Bill)
 function getPerUnitPrice(): string | null {
-  if (persona !== 'commercial') return null
+  if (persona !== 'bill' && persona !== 'bob' && persona !== 'tom' && persona !== 'greg') return null
   const gallonVariant = product.variants.find((v) =>
     v.selectedOptions.some(
       (opt) => opt.name === 'Size' && (opt.value.includes('Gallon') || opt.value.includes('gallon'))
@@ -143,9 +146,10 @@ const displayName = product.title.includes('|')
         <span
           class:list={[
             'absolute left-3 top-3 rounded-full px-2.5 py-0.5 text-xs font-semibold',
-            persona === 'backyard' && 'bg-amber-100 text-amber-800',
-            persona === 'commercial' && 'bg-green-100 text-green-800',
-            persona === 'lawn' && 'bg-emerald-100 text-emerald-800',
+            persona === 'betty' && 'bg-amber-100 text-amber-800',
+            (persona === 'bill' || persona === 'bob' || persona === 'tom' || persona === 'greg') && 'bg-green-100 text-green-800',
+            (persona === 'taylor' || persona === 'gary' || persona === 'hannah' || persona === 'maggie') && 'bg-emerald-100 text-emerald-800',
+            persona === 'sam' && 'bg-purple-100 text-purple-800',
           ]}
         >
           {badge}

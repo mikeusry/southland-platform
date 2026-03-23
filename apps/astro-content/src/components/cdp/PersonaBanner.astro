@@ -2,8 +2,9 @@
 /**
  * PersonaBanner Component
  *
- * A small, persistent banner that shows the current persona and allows
- * visitors to switch their persona. Appears at the top or bottom of the page.
+ * A small, persistent banner that shows the current segment/persona and allows
+ * visitors to switch. Shows segment label if only segment is set, persona label
+ * if persona is set.
  *
  * Usage:
  * <PersonaBanner position="top" />
@@ -29,7 +30,10 @@ const { position = 'bottom', showChangeLink = true, class: className = '' } = As
 >
   <div class="persona-banner__content">
     <span class="persona-banner__label">
-      Browsing as: <strong class="persona-banner__name"></strong>
+      Browsing: <strong class="persona-banner__name"></strong>
+    </span>
+    <span class="persona-banner__refine" style="display: none;">
+      <a class="persona-banner__refine-link" href="#">Refine for your exact setup</a>
     </span>
     {
       showChangeLink && (
@@ -41,24 +45,33 @@ const { position = 'bottom', showChangeLink = true, class: className = '' } = As
   </div>
 </div>
 
-<!-- Change Persona Modal -->
+<!-- Change Modal — shows 3 segments, clicking navigates to hub page -->
 <div class="persona-modal" id="persona-modal" style="display: none;">
   <div class="persona-modal__backdrop"></div>
   <div class="persona-modal__content">
     <h3 class="persona-modal__title">Change Your Experience</h3>
-    <p class="persona-modal__desc">Select what best describes you:</p>
+    <p class="persona-modal__desc">Select your focus area:</p>
     <div class="persona-modal__options">
-      <button class="persona-modal__option" data-persona="backyard">
-        <span class="persona-modal__option-icon">🐔</span>
-        <span class="persona-modal__option-label">Backyard Flock</span>
+      <button class="persona-modal__option" data-segment="poultry" data-hub="/poultry/">
+        <span class="persona-modal__option-icon" style="color: #166534;">&#x1F413;</span>
+        <div>
+          <span class="persona-modal__option-label">Poultry</span>
+          <span class="persona-modal__option-sub">Commercial, backyard, turkeys, breeders, game birds</span>
+        </div>
       </button>
-      <button class="persona-modal__option" data-persona="commercial">
-        <span class="persona-modal__option-icon">🏠</span>
-        <span class="persona-modal__option-label">Commercial Poultry</span>
+      <button class="persona-modal__option" data-segment="turf" data-hub="/lawn/">
+        <span class="persona-modal__option-icon" style="color: #065f46;">&#x1F33F;</span>
+        <div>
+          <span class="persona-modal__option-label">Turf & Soil</span>
+          <span class="persona-modal__option-sub">Lawn care pros, golf courses, homeowners, market gardens</span>
+        </div>
       </button>
-      <button class="persona-modal__option" data-persona="lawn">
-        <span class="persona-modal__option-icon">🌱</span>
-        <span class="persona-modal__option-label">Lawn & Garden</span>
+      <button class="persona-modal__option" data-segment="waste" data-hub="/waste/">
+        <span class="persona-modal__option-icon" style="color: #7c3aed;">&#x1F4A7;</span>
+        <div>
+          <span class="persona-modal__option-label">Septic & Waste</span>
+          <span class="persona-modal__option-sub">Septic systems, holding tanks, odor control</span>
+        </div>
       </button>
     </div>
     <button class="persona-modal__close" type="button">Cancel</button>
@@ -108,6 +121,18 @@ const { position = 'bottom', showChangeLink = true, class: className = '' } = As
     color: var(--persona-color, #166534);
   }
 
+  .persona-banner__refine-link {
+    color: var(--color-accent, #44883e);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .persona-banner__refine-link:hover {
+    color: var(--color-accent-hover, #2c5234);
+  }
+
   .persona-banner__change {
     background: transparent;
     border: none;
@@ -145,7 +170,7 @@ const { position = 'bottom', showChangeLink = true, class: className = '' } = As
     background: white;
     border-radius: 16px;
     padding: 24px;
-    max-width: 400px;
+    max-width: 440px;
     width: 100%;
     text-align: center;
   }
@@ -189,11 +214,20 @@ const { position = 'bottom', showChangeLink = true, class: className = '' } = As
 
   .persona-modal__option-icon {
     font-size: 24px;
+    flex-shrink: 0;
   }
 
   .persona-modal__option-label {
     font-weight: 600;
     color: #374151;
+    display: block;
+  }
+
+  .persona-modal__option-sub {
+    font-size: 12px;
+    color: #9ca3af;
+    display: block;
+    margin-top: 2px;
   }
 
   .persona-modal__close {
@@ -210,10 +244,20 @@ const { position = 'bottom', showChangeLink = true, class: className = '' } = As
 </style>
 
 <script>
-  import { getPersonaId, setPersona, getPersonaConfig, PERSONA_CONFIG } from '../../lib/persona'
+  import {
+    getPersona,
+    getPersonaConfig,
+    getSegmentConfig,
+    setSegment,
+    PERSONA_CONFIG,
+    SEGMENT_CONFIG,
+  } from '../../lib/persona'
+  import type { SegmentId } from '../../lib/persona'
 
   const banner = document.getElementById('persona-banner')
   const nameEl = banner?.querySelector('.persona-banner__name')
+  const refineEl = banner?.querySelector('.persona-banner__refine') as HTMLElement | null
+  const refineLinkEl = banner?.querySelector('.persona-banner__refine-link') as HTMLAnchorElement | null
   const changeBtn = banner?.querySelector('.persona-banner__change')
   const modal = document.getElementById('persona-modal')
   const modalBackdrop = modal?.querySelector('.persona-modal__backdrop')
@@ -221,17 +265,44 @@ const { position = 'bottom', showChangeLink = true, class: className = '' } = As
   const modalOptions = modal?.querySelectorAll('.persona-modal__option')
 
   function updateBanner(): void {
-    const personaId = getPersonaId()
-    const config = getPersonaConfig(personaId)
-
-    if (personaId && config && banner && nameEl) {
-      nameEl.textContent = config.label
-      banner.style.setProperty('--persona-bg', config.bgColor)
-      banner.style.setProperty('--persona-color', config.color)
-      banner.style.display = 'block'
-    } else if (banner) {
-      banner.style.display = 'none'
+    const data = getPersona()
+    if (!data || !banner || !nameEl) {
+      if (banner) banner.style.display = 'none'
+      return
     }
+
+    // Persona is set — show persona label
+    if (data.id && data.id !== 'general') {
+      const config = getPersonaConfig(data.id)
+      if (config) {
+        nameEl.textContent = config.label
+        banner.style.setProperty('--persona-bg', config.bgColor)
+        banner.style.setProperty('--persona-color', config.color)
+        banner.style.display = 'block'
+        if (refineEl) refineEl.style.display = 'none'
+        return
+      }
+    }
+
+    // Only segment is set — show segment label + refine CTA
+    if (data.segmentId && data.segmentId !== 'general') {
+      const segConfig = SEGMENT_CONFIG[data.segmentId]
+      if (segConfig) {
+        nameEl.textContent = segConfig.label
+        banner.style.setProperty('--persona-bg', segConfig.bgColor)
+        banner.style.setProperty('--persona-color', segConfig.color)
+        banner.style.display = 'block'
+
+        // Show "Refine" link pointing to hub page
+        if (refineEl && refineLinkEl) {
+          refineLinkEl.href = segConfig.hubPage
+          refineEl.style.display = 'inline'
+        }
+        return
+      }
+    }
+
+    banner.style.display = 'none'
   }
 
   function openModal(): void {
@@ -257,21 +328,30 @@ const { position = 'bottom', showChangeLink = true, class: className = '' } = As
   // Modal close button
   modalClose?.addEventListener('click', closeModal)
 
-  // Modal option clicks
+  // Modal option clicks — set segment and navigate to hub page
   modalOptions?.forEach((option) => {
     option.addEventListener('click', () => {
-      const personaId = (option as HTMLElement).dataset.persona
-      if (personaId) {
-        setPersona(personaId as any, 'manual')
+      const el = option as HTMLElement
+      const segmentId = el.dataset.segment as SegmentId
+      const hubPage = el.dataset.hub
+
+      if (segmentId) {
+        setSegment(segmentId, 'manual')
         closeModal()
-        updateBanner()
 
         // Track the change
-        if (window.pdPixel) {
-          window.pdPixel.track('persona_changed', {
-            new_persona: personaId,
+        if ((window as any).pdPixel) {
+          ;(window as any).pdPixel.track('persona_refinement', {
+            new_segment: segmentId,
             source: 'banner_modal',
           })
+        }
+
+        // Navigate to hub page for persona refinement
+        if (hubPage) {
+          window.location.href = hubPage
+        } else {
+          updateBanner()
         }
       }
     })
@@ -279,16 +359,12 @@ const { position = 'bottom', showChangeLink = true, class: className = '' } = As
 
   // Escape key closes modal
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      closeModal()
-    }
+    if (e.key === 'Escape') closeModal()
   })
 
   // Initialize
   document.addEventListener('DOMContentLoaded', updateBanner)
-  if (document.readyState !== 'loading') {
-    updateBanner()
-  }
+  if (document.readyState !== 'loading') updateBanner()
 
   // Listen for persona changes
   window.addEventListener('persona-changed', updateBanner)

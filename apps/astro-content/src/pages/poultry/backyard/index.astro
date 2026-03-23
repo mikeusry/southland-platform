@@ -472,7 +472,7 @@ const faqSchema = {
       {allBackyardProducts.length > 0 ? (
         <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
           {allBackyardProducts.map((product) => (
-            <CollectionProductCard product={product} persona="backyard" />
+            <CollectionProductCard product={product} persona="betty" />
           ))}
         </div>
       ) : (
@@ -587,7 +587,7 @@ const faqSchema = {
       <p class="mx-auto mb-10 max-w-xl text-center text-gray-600">
         We've heard every question backyard keepers ask. Here's the honest answer to each one.
       </p>
-      <AccordionFaq items={objections} persona="backyard" />
+      <AccordionFaq items={objections} persona="betty" />
     </div>
   </section>
 

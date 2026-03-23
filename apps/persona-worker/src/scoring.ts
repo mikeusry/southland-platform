@@ -1,11 +1,19 @@
 /**
  * Persona Scoring Algorithm
  *
- * Computes persona probabilities based on behavioral signals.
+ * Two-tier scoring: PersonaScores (11 keys) + SegmentScores (4 keys).
  * Uses weighted signal accumulation with recency decay.
  */
 
-import type { Signal, PersonaScores, PersonaId, VisitorData } from './types'
+import type {
+  Signal,
+  PersonaScores,
+  SegmentScores,
+  PersonaId,
+  SegmentId,
+  VisitorData,
+} from './types'
+import { ALL_PERSONA_IDS, ALL_SEGMENT_IDS, PERSONA_TO_SEGMENT } from './types'
 import { getSignalWeight, getSignalPersonaHint } from './signals'
 
 // Minimum signals required for confident scoring
@@ -14,13 +22,47 @@ const MIN_SIGNALS_FOR_SCORING = 3
 // Recency decay factor (signals older than this many hours decay)
 const RECENCY_HOURS = 72
 
-// Default scores when no signals (uniform distribution)
-const DEFAULT_SCORES: PersonaScores = {
-  backyard: 0.25,
-  commercial: 0.25,
-  lawn: 0.25,
-  general: 0.25,
+// Default scores anchored to observed distribution (not flat)
+// Bill ~0.15, Betty ~0.12, Taylor ~0.08, others ~0.05-0.06
+const DEFAULT_PERSONA_SCORES: PersonaScores = {
+  bill: 0.15,
+  betty: 0.12,
+  bob: 0.05,
+  tom: 0.05,
+  greg: 0.04,
+  taylor: 0.08,
+  gary: 0.05,
+  hannah: 0.06,
+  maggie: 0.04,
+  sam: 0.06,
+  general: 0.30,
 }
+
+const DEFAULT_SEGMENT_SCORES: SegmentScores = {
+  poultry: 0.45,
+  turf: 0.25,
+  waste: 0.15,
+  general: 0.15,
+}
+
+// =============================================================================
+// GENERIC NORMALIZE — works on any Record<string, number>
+// =============================================================================
+
+function normalizeRecord<T extends string>(raw: Record<T, number>): Record<T, number> {
+  const total = Object.values<number>(raw).reduce((s, v) => s + v, 0)
+  if (total === 0) return { ...raw }
+
+  const result = {} as Record<T, number>
+  for (const key of Object.keys(raw) as T[]) {
+    result[key] = raw[key] / total
+  }
+  return result
+}
+
+// =============================================================================
+// PERSONA SCORING
+// =============================================================================
 
 /**
  * Compute persona scores from visitor signals
@@ -28,23 +70,20 @@ const DEFAULT_SCORES: PersonaScores = {
 export function computePersonaScores(visitor: VisitorData): PersonaScores {
   const signals = visitor.signals
 
-  // Not enough signals - return default or explicit choice weighted
+  // Not enough signals — return default or explicit choice weighted
   if (signals.length < MIN_SIGNALS_FOR_SCORING) {
     if (visitor.explicit_persona) {
       return createExplicitScores(visitor.explicit_persona)
     }
-    return { ...DEFAULT_SCORES }
+    return { ...DEFAULT_PERSONA_SCORES }
   }
 
   // Accumulate weighted scores per persona
-  const rawScores: PersonaScores = {
-    backyard: 0,
-    commercial: 0,
-    lawn: 0,
-    general: 0,
-  }
+  const rawScores: PersonaScores = {} as PersonaScores
+  for (const id of ALL_PERSONA_IDS) rawScores[id] = 0
 
   const now = Date.now()
+  const signalCountByPersona: Record<string, number> = {}
 
   for (const signal of signals) {
     const personaHint = getSignalPersonaHint(signal)
@@ -55,6 +94,25 @@ export function computePersonaScores(visitor: VisitorData): PersonaScores {
     const weight = baseWeight * recencyMultiplier
 
     rawScores[personaHint] += weight
+    signalCountByPersona[personaHint] = (signalCountByPersona[personaHint] || 0) + 1
+  }
+
+  // Signal suppression: if a persona has only 1 signal but another persona
+  // in the same segment has 3+, halve the lone signal's contribution
+  for (const personaId of ALL_PERSONA_IDS) {
+    if (personaId === 'general') continue
+    if ((signalCountByPersona[personaId] || 0) !== 1) continue
+
+    const segment = PERSONA_TO_SEGMENT[personaId]
+    const sameSegmentPersonas = ALL_PERSONA_IDS.filter(
+      (p) => p !== personaId && p !== 'general' && PERSONA_TO_SEGMENT[p] === segment,
+    )
+    const hasStrongerCompetitor = sameSegmentPersonas.some(
+      (p) => (signalCountByPersona[p] || 0) >= 3,
+    )
+    if (hasStrongerCompetitor) {
+      rawScores[personaId] *= 0.5
+    }
   }
 
   // Apply explicit choice boost (if set)
@@ -63,8 +121,27 @@ export function computePersonaScores(visitor: VisitorData): PersonaScores {
   }
 
   // Normalize to probabilities
-  return normalizeScores(rawScores)
+  return normalizeRecord(rawScores)
 }
+
+/**
+ * Compute segment scores by rolling up persona scores
+ */
+export function computeSegmentScores(personaScores: PersonaScores): SegmentScores {
+  const raw: SegmentScores = {} as SegmentScores
+  for (const id of ALL_SEGMENT_IDS) raw[id] = 0
+
+  for (const personaId of ALL_PERSONA_IDS) {
+    const segment = PERSONA_TO_SEGMENT[personaId]
+    raw[segment] += personaScores[personaId]
+  }
+
+  return normalizeRecord(raw)
+}
+
+// =============================================================================
+// RECENCY
+// =============================================================================
 
 /**
  * Calculate recency multiplier (recent signals weighted more)
@@ -79,66 +156,71 @@ function calculateRecencyMultiplier(timestamp: string, now: number): number {
   return 0.3 // Older signal decay
 }
 
-/**
- * Normalize raw scores to probabilities (sum to 1)
- */
-function normalizeScores(raw: PersonaScores): PersonaScores {
-  const total = raw.backyard + raw.commercial + raw.lawn + raw.general
-
-  if (total === 0) {
-    return { ...DEFAULT_SCORES }
-  }
-
-  return {
-    backyard: raw.backyard / total,
-    commercial: raw.commercial / total,
-    lawn: raw.lawn / total,
-    general: raw.general / total,
-  }
-}
+// =============================================================================
+// EXPLICIT CHOICE
+// =============================================================================
 
 /**
  * Create scores heavily weighted toward explicit choice
  */
 function createExplicitScores(persona: PersonaId): PersonaScores {
-  const scores: PersonaScores = {
-    backyard: 0.1,
-    commercial: 0.1,
-    lawn: 0.1,
-    general: 0.1,
-  }
+  const scores: PersonaScores = {} as PersonaScores
+  for (const id of ALL_PERSONA_IDS) scores[id] = 0.03
 
   if (persona !== 'general') {
     scores[persona] = 0.7
   }
 
-  // Normalize
-  const total = scores.backyard + scores.commercial + scores.lawn + scores.general
-  return {
-    backyard: scores.backyard / total,
-    commercial: scores.commercial / total,
-    lawn: scores.lawn / total,
-    general: scores.general / total,
-  }
+  return normalizeRecord(scores)
 }
+
+// =============================================================================
+// PREDICTIONS
+// =============================================================================
 
 /**
  * Get predicted persona from scores
  */
 export function getPredictedPersona(scores: PersonaScores): PersonaId {
-  const entries = Object.entries(scores) as Array<[PersonaId, number]>
-  entries.sort((a, b) => b[1] - a[1])
-  return entries[0][0]
+  let best: PersonaId = 'general'
+  let bestScore = -1
+
+  for (const id of ALL_PERSONA_IDS) {
+    if (scores[id] > bestScore) {
+      bestScore = scores[id]
+      best = id
+    }
+  }
+
+  return best
+}
+
+/**
+ * Get predicted segment from segment scores
+ */
+export function getPredictedSegment(scores: SegmentScores): SegmentId {
+  let best: SegmentId = 'general'
+  let bestScore = -1
+
+  for (const id of ALL_SEGMENT_IDS) {
+    if (scores[id] > bestScore) {
+      bestScore = scores[id]
+      best = id
+    }
+  }
+
+  return best
 }
 
 /**
  * Calculate confidence based on score distribution
  * Higher confidence when one persona dominates
  */
-export function calculateConfidence(scores: PersonaScores): number {
-  const values = Object.values(scores)
+export function calculateConfidence(scores: PersonaScores | SegmentScores): number {
+  const values = Object.values(scores) as number[]
   const max = Math.max(...values)
-  const secondMax = values.filter((v) => v !== max).sort((a, b) => b - a)[0] || 0
+  const sorted = [...values].sort((a, b) => b - a)
+  const secondMax = sorted[1] || 0
 
   // Confidence based on margin between top two
   const margin = max - secondMax
@@ -154,7 +236,6 @@ export function calculateConfidence(scores: PersonaScores): number {
  * Determine if we should override with explicit choice
  */
 export function shouldUseExplicitChoice(visitor: VisitorData): boolean {
-  // Explicit choice always wins if set
   return Boolean(visitor.explicit_persona)
 }
 
@@ -166,4 +247,14 @@ export function getEffectivePersona(visitor: VisitorData): PersonaId {
     return visitor.explicit_persona
   }
   return visitor.predicted_persona
+}
+
+/**
+ * Get effective segment (considering explicit segment choice)
+ */
+export function getEffectiveSegment(visitor: VisitorData): SegmentId {
+  if (visitor.explicit_segment) {
+    return visitor.explicit_segment
+  }
+  return visitor.predicted_segment
 }

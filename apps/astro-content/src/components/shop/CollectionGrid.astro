@@ -38,11 +38,10 @@ function getPersonaScore(product: Product, p: NonNullable<PersonaId>): number {
   const hasBundle = tags.includes('bundle')
   const hasBestseller = tags.includes('bestseller') || tags.includes('best-seller')
 
-  if (p === 'backyard') {
-    // Prefer bundles and smaller sizes
+  // Poultry — backyard personas prefer small sizes and bundles
+  if (p === 'betty') {
     if (hasBundle) score += 10
     if (hasBestseller) score += 5
-    // Check for small size variants (16oz, quart)
     const hasSmall = product.variants.some((v) =>
       v.selectedOptions.some(
         (opt) =>
@@ -53,8 +52,8 @@ function getPersonaScore(product: Product, p: NonNullable<PersonaId>): number {
     if (hasSmall) score += 3
   }
 
-  if (p === 'commercial') {
-    // Prefer gallon/bulk sizes
+  // Poultry — commercial personas prefer gallon/bulk sizes
+  if (p === 'bill' || p === 'bob' || p === 'tom' || p === 'greg') {
     if (hasBestseller) score += 5
     const hasBulk = product.variants.some((v) =>
       v.selectedOptions.some(
@@ -67,8 +66,8 @@ function getPersonaScore(product: Product, p: NonNullable<PersonaId>): number {
     if (hasBundle) score += 3
   }
 
-  if (p === 'lawn') {
-    // Prefer programs and bundles
+  // Turf & Soil — prefer programs and bundles
+  if (p === 'taylor' || p === 'gary' || p === 'hannah' || p === 'maggie') {
     if (hasBundle) score += 10
     if (hasBestseller) score += 5
     const hasProgram = tags.includes('program') || tags.includes('subscription')

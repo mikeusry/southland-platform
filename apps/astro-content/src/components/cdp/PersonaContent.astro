@@ -2,21 +2,25 @@
 /**
  * PersonaContent Component
  *
- * Shows or hides content based on the visitor's stored persona.
+ * Shows or hides content based on the visitor's stored persona or segment.
  * Content is rendered in the HTML but hidden via CSS until client-side
  * JavaScript determines if it should be shown.
  *
  * Usage:
- * <PersonaContent show="backyard">
- *   Content only for Backyard Betty
+ * <PersonaContent show="bill">
+ *   Content only for Broiler Bill
  * </PersonaContent>
  *
- * <PersonaContent show={["backyard", "commercial"]}>
- *   Content for poultry personas
+ * <PersonaContent show={["bill", "bob", "tom", "greg"]}>
+ *   Content for commercial poultry personas
  * </PersonaContent>
  *
- * <PersonaContent hide="commercial">
- *   Content hidden from commercial users
+ * <PersonaContent showSegment="poultry">
+ *   Content for ALL poultry personas (bill, betty, bob, tom, greg)
+ * </PersonaContent>
+ *
+ * <PersonaContent hideSegment="waste">
+ *   Content hidden from waste segment
  * </PersonaContent>
  *
  * <PersonaContent showIfUnknown>
@@ -24,13 +28,17 @@
  * </PersonaContent>
  */
 
-import type { PersonaId } from '../../lib/persona'
+import type { PersonaId, SegmentId } from '../../lib/persona'
 
 interface Props {
   /** Show content if persona matches (single or array) */
   show?: PersonaId | PersonaId[]
   /** Hide content if persona matches (single or array) */
   hide?: PersonaId | PersonaId[]
+  /** Show content if segment matches (single or array) */
+  showSegment?: SegmentId | SegmentId[]
+  /** Hide content if segment matches (single or array) */
+  hideSegment?: SegmentId | SegmentId[]
   /** Show content only if no persona is selected */
   showIfUnknown?: boolean
   /** Hide content if no persona is selected */
@@ -44,6 +52,8 @@ interface Props {
 const {
   show,
   hide,
+  showSegment,
+  hideSegment,
   showIfUnknown = false,
   hideIfUnknown = false,
   showWhileLoading = false,
@@ -53,6 +63,8 @@ const {
 // Convert single values to arrays for consistent handling
 const showPersonas = show ? (Array.isArray(show) ? show : [show]) : []
 const hidePersonas = hide ? (Array.isArray(hide) ? hide : [hide]) : []
+const showSegments = showSegment ? (Array.isArray(showSegment) ? showSegment : [showSegment]) : []
+const hideSegments = hideSegment ? (Array.isArray(hideSegment) ? hideSegment : [hideSegment]) : []
 
 // Build data attributes for client-side logic
 const dataAttrs: Record<string, string> = {}
@@ -61,6 +73,12 @@ if (showPersonas.length > 0) {
 }
 if (hidePersonas.length > 0) {
   dataAttrs['data-persona-hide'] = hidePersonas.filter(Boolean).join(',')
+}
+if (showSegments.length > 0) {
+  dataAttrs['data-segment-show'] = showSegments.filter(Boolean).join(',')
+}
+if (hideSegments.length > 0) {
+  dataAttrs['data-segment-hide'] = hideSegments.filter(Boolean).join(',')
 }
 if (showIfUnknown) {
   dataAttrs['data-persona-show-unknown'] = 'true'
@@ -94,27 +112,42 @@ if (hideIfUnknown) {
 </style>
 
 <script>
-  import { getPersonaId, type PersonaId } from '../../lib/persona'
+  import { getPersonaId, getSegmentId, type PersonaId, type SegmentId } from '../../lib/persona'
 
   function updatePersonaContent(): void {
     const currentPersona = getPersonaId()
+    const currentSegment = getSegmentId()
     const elements = document.querySelectorAll('.persona-content')
 
     elements.forEach((el) => {
       const showAttr = el.getAttribute('data-persona-show')
       const hideAttr = el.getAttribute('data-persona-hide')
+      const showSegAttr = el.getAttribute('data-segment-show')
+      const hideSegAttr = el.getAttribute('data-segment-hide')
       const showIfUnknown = el.getAttribute('data-persona-show-unknown') === 'true'
       const hideIfUnknown = el.getAttribute('data-persona-hide-unknown') === 'true'
 
       let shouldShow = true
 
-      // Check "show" condition
+      // Check persona "show" condition
       if (showAttr) {
         const showPersonas = showAttr.split(',') as PersonaId[]
         shouldShow = currentPersona !== null && showPersonas.includes(currentPersona)
       }
 
-      // Check "hide" condition
+      // Check segment "show" condition (if no persona show matched)
+      if (showSegAttr && !showAttr) {
+        const showSegments = showSegAttr.split(',') as SegmentId[]
+        shouldShow = currentSegment !== null && showSegments.includes(currentSegment)
+      }
+
+      // Segment show can also augment persona show (show if either matches)
+      if (showSegAttr && showAttr && !shouldShow) {
+        const showSegments = showSegAttr.split(',') as SegmentId[]
+        shouldShow = currentSegment !== null && showSegments.includes(currentSegment)
+      }
+
+      // Check persona "hide" condition
       if (hideAttr && shouldShow) {
         const hidePersonas = hideAttr.split(',') as PersonaId[]
         if (currentPersona !== null && hidePersonas.includes(currentPersona)) {
@@ -122,13 +155,21 @@ if (hideIfUnknown) {
         }
       }
 
+      // Check segment "hide" condition
+      if (hideSegAttr && shouldShow) {
+        const hideSegments = hideSegAttr.split(',') as SegmentId[]
+        if (currentSegment !== null && hideSegments.includes(currentSegment)) {
+          shouldShow = false
+        }
+      }
+
       // Check "showIfUnknown" condition
       if (showIfUnknown) {
-        shouldShow = currentPersona === null
+        shouldShow = currentPersona === null && currentSegment === null
       }
 
       // Check "hideIfUnknown" condition
-      if (hideIfUnknown && currentPersona === null) {
+      if (hideIfUnknown && currentPersona === null && currentSegment === null) {
         shouldShow = false
       }
 
