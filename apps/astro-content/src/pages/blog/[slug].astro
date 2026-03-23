@@ -264,6 +264,9 @@ const articleSchema = {
       </div>
     )
   }
+  {post.data.muxPlaybackIds && post.data.muxPlaybackIds.length > 0 && (
+    <script>import '@mux/mux-player';</script>
+  )}
 
   <!-- Article Content -->
   <article class="bg-white py-12 md:py-16">
