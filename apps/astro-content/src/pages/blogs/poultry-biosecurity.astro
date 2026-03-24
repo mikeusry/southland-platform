@@ -320,7 +320,7 @@ const schema = {
           Browse by Topic
         </h2>
         <p class="mx-auto max-w-2xl text-lg text-gray-600">
-          Real-world biosecurity knowledge organized by what you're dealing with right now.
+          Find real-world biosecurity guidance organized by the problem you're dealing with.
         </p>
       </div>
 
@@ -330,28 +330,28 @@ const schema = {
           const topicPosts = topic.slugs.map(findPost).filter(Boolean)
           const iconPath = TOPIC_ICONS[topic.id]
           return (
-            <div class="rounded-xl border border-gray-100 bg-gray-50 p-6 transition-shadow hover:shadow-md" id={`topic-${topic.id}`}>
-              <div class="mb-2 flex items-center gap-3">
-                <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
+            <div class="group cursor-pointer rounded-xl border border-gray-100 bg-gray-50 p-6 transition-all hover:border-southland-green/30 hover:shadow-md" id={`topic-${topic.id}`} onclick={`document.getElementById('topic-${topic.id}').scrollIntoView()`}>
+              <div class="mb-3 flex items-center gap-3">
+                <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
                   <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d={iconPath} />
                   </svg>
                 </div>
-                <h3 class="text-lg font-bold text-gray-900">{topic.label}</h3>
+                <h3 class="text-xl font-bold text-gray-900">{topic.label}</h3>
               </div>
-              <p class="mb-4 text-xs font-medium uppercase tracking-wider text-southland-green">
-                Best for: {topic.bestFor}
+              <p class="mb-4 text-xs font-medium text-[#44883E]">
+                {topic.bestFor}
               </p>
-              <ul class="space-y-3">
+              <ul class="space-y-2.5">
                 {topicPosts.map((post) => {
                   const slug = post!.id.replace(/\.mdx?$/, '')
                   return (
                     <li>
-                      <a href={`/blog/${slug}/`} class="group flex items-start gap-2 text-sm">
-                        <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <a href={`/blog/${slug}/`} class="flex items-start gap-2 text-sm">
+                        <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-[#44883E]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>
-                        <span class="font-medium text-gray-700 group-hover:text-southland-green">{post!.data.title}</span>
+                        <span class="text-gray-500 hover:text-southland-green">{post!.data.title}</span>
                       </a>
                     </li>
                   )
@@ -363,36 +363,36 @@ const schema = {
       </div>
 
       <!-- Mobile: accordion -->
-      <div class="space-y-3 md:hidden">
+      <div class="space-y-4 md:hidden">
         {TOPICS.map((topic) => {
           const topicPosts = topic.slugs.map(findPost).filter(Boolean)
           const iconPath = TOPIC_ICONS[topic.id]
           return (
             <details class="group rounded-xl border border-gray-100 bg-gray-50">
-              <summary class="flex cursor-pointer items-center gap-3 p-4">
-                <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
+              <summary class="flex cursor-pointer items-center gap-3 px-4 py-5">
+                <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
                   <svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d={iconPath} />
                   </svg>
                 </div>
                 <div class="flex-1">
-                  <p class="font-bold text-gray-900">{topic.label}</p>
-                  <p class="text-xs text-southland-green">{topic.bestFor}</p>
+                  <p class="text-base font-bold text-gray-900">{topic.label}</p>
+                  <p class="text-xs text-[#44883E]">{topic.bestFor}</p>
                 </div>
                 <svg class="h-5 w-5 text-gray-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <ul class="space-y-3 px-4 pb-4">
+              <ul class="space-y-3 px-4 pb-5">
                 {topicPosts.map((post) => {
                   const slug = post!.id.replace(/\.mdx?$/, '')
                   return (
                     <li>
-                      <a href={`/blog/${slug}/`} class="group flex items-start gap-2 text-sm">
-                        <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <a href={`/blog/${slug}/`} class="flex items-start gap-2 text-sm">
+                        <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-[#44883E]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>
-                        <span class="font-medium text-gray-700 group-hover:text-southland-green">{post!.data.title}</span>
+                        <span class="text-gray-500 hover:text-southland-green">{post!.data.title}</span>
                       </a>
                     </li>
                   )
