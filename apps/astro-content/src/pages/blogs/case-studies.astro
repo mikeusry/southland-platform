@@ -1,0 +1,192 @@
+---
+/**
+ * /blogs/case-studies — Case Studies & Proof Hub
+ *
+ * Matches the live Shopify URL. Organizes 17 case studies by segment
+ * so visitors from each persona lander can find relevant proof.
+ *
+ * Structure:
+ *   1. Hero — credibility-first, outcome data
+ *   2. Segment-organized proof cards
+ *   3. Lead capture
+ *   4. Full archive
+ */
+
+export const prerender = true
+
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import BlogCard from '../../components/blog/BlogCard.astro'
+import BlogGrid from '../../components/blog/BlogGrid.astro'
+import EmailCapture from '../../components/shared/EmailCapture.astro'
+import { getCollection } from 'astro:content'
+import { buildSouthlandUrl, getLogoUrl } from '../../lib/cloudinary'
+
+// ── All case study posts ────────────────────────────────────────────────────
+const allPosts = await getCollection('blog', ({ data }) => {
+  if (data.draft) return false
+  return (data.tags || []).some((t) => t.toLowerCase() === 'case study')
+})
+
+const posts = allPosts.sort(
+  (a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
+)
+
+// Group by segment
+const poultryStudies = posts.filter((p) => p.data.segment === 'poultry')
+const turfStudies = posts.filter((p) => p.data.segment === 'turf' || p.data.segment === 'agriculture')
+const wasteStudies = posts.filter((p) => p.data.segment === 'general') // PORT/waste studies are general-tagged
+
+// ── SEO ─────────────────────────────────────────────────────────────────────
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+const title = 'Case Studies | Southland Organics'
+const description =
+  'Real results from real operations. Poultry performance studies, waste treatment data, soil trials, and more — with measured outcomes, not marketing claims.'
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: title,
+  description,
+  url: `${siteUrl}/blogs/case-studies`,
+  publisher: {
+    '@type': 'Organization',
+    name: 'Southland Organics',
+    url: siteUrl,
+    foundingDate: '2009',
+  },
+}
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  ogImage={getLogoUrl('square', { width: 800 })}
+  schema={schema}
+>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 1: HERO                                                       -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <section class="bg-gradient-to-br from-southland-green-dark via-[#1f3d24] to-[#162b1b] py-16 md:py-20">
+    <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+      <p class="mb-3 text-sm font-semibold uppercase tracking-wider text-green-400">
+        Proof, Not Promises
+      </p>
+      <h1 class="mb-6 font-heading text-3xl uppercase text-white md:text-4xl lg:text-5xl">
+        Case Studies
+      </h1>
+      <p class="mx-auto mb-8 max-w-2xl text-lg text-white/70">
+        {description}
+      </p>
+
+      <!-- Quick stats -->
+      <div class="mx-auto grid max-w-3xl grid-cols-2 gap-4 md:grid-cols-4">
+        {[
+          { num: '6.2%', label: 'Mortality reduction (UGA)' },
+          { num: '60%', label: 'TSS reduction (paper mill)' },
+          { num: '70%', label: 'Water savings (car wash)' },
+          { num: '15+', label: 'Documented studies' },
+        ].map((stat) => (
+          <div class="rounded-lg bg-white/10 px-4 py-3">
+            <p class="font-heading text-xl text-white md:text-2xl">{stat.num}</p>
+            <p class="text-xs text-white/50">{stat.label}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 2: POULTRY PROOF                                              -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  {poultryStudies.length > 0 && (
+    <section class="bg-white py-14 md:py-16">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mb-8 flex items-end justify-between">
+          <div>
+            <span class="mb-1 block text-sm font-semibold uppercase tracking-wider text-green-600">Poultry</span>
+            <h2 class="font-heading text-2xl uppercase md:text-3xl" style="color: var(--color-title);">
+              Flock Performance Studies
+            </h2>
+          </div>
+          <a href="/poultry/commercial/" class="hidden text-sm font-medium text-southland-green hover:underline sm:block">
+            Commercial programs &rarr;
+          </a>
+        </div>
+        <BlogGrid posts={poultryStudies} columns={3} />
+      </div>
+    </section>
+  )}
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 3: TURF & AGRICULTURE PROOF                                   -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  {turfStudies.length > 0 && (
+    <section class="bg-gray-50 py-14 md:py-16">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mb-8 flex items-end justify-between">
+          <div>
+            <span class="mb-1 block text-sm font-semibold uppercase tracking-wider text-emerald-600">Turf & Agriculture</span>
+            <h2 class="font-heading text-2xl uppercase md:text-3xl" style="color: var(--color-title);">
+              Soil & Germination Trials
+            </h2>
+          </div>
+          <a href="/lawn/" class="hidden text-sm font-medium text-southland-green hover:underline sm:block">
+            Lawn programs &rarr;
+          </a>
+        </div>
+        <BlogGrid posts={turfStudies} columns={3} />
+      </div>
+    </section>
+  )}
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 4: WASTE & INDUSTRIAL PROOF                                   -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  {wasteStudies.length > 0 && (
+    <section class="bg-white py-14 md:py-16">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mb-8 flex items-end justify-between">
+          <div>
+            <span class="mb-1 block text-sm font-semibold uppercase tracking-wider text-blue-600">Waste & Industrial</span>
+            <h2 class="font-heading text-2xl uppercase md:text-3xl" style="color: var(--color-title);">
+              PORT Treatment Results
+            </h2>
+          </div>
+        </div>
+        <BlogGrid posts={wasteStudies} columns={3} />
+      </div>
+    </section>
+  )}
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 5: LEAD CAPTURE                                               -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <section class="bg-southland-green-dark py-14">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+      <div class="grid items-center gap-8 md:grid-cols-[1fr_1fr]">
+        <div>
+          <h2 class="mb-3 font-heading text-2xl uppercase text-white md:text-3xl">
+            Want results like these?
+          </h2>
+          <p class="text-white/70">
+            Every operation is different. Tell us about yours and we'll recommend a program based on what's actually worked — not guesswork.
+          </p>
+          <p class="mt-3 text-xs text-white/40">
+            Or call directly: <a href="tel:800-608-3755" class="underline">800-608-3755</a>
+          </p>
+        </div>
+        <div>
+          <EmailCapture
+            headline=""
+            description=""
+            source="blog"
+            buttonText="Get a Recommendation"
+            variant="banner"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+</BaseLayout>
