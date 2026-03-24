@@ -37,13 +37,14 @@ const formattedDate = new Date(publishDate).toLocaleDateString('en-US', {
   day: 'numeric',
 });
 
-// Segment colors
-const segmentColors: Record<string, string> = {
-  poultry: 'bg-amber-100 text-amber-800',
-  turf: 'bg-emerald-100 text-emerald-800',
-  agriculture: 'bg-blue-100 text-blue-800',
-  general: 'bg-gray-100 text-gray-800',
+// Segment config — colors + labels
+const segmentConfig: Record<string, { color: string; label: string }> = {
+  poultry: { color: 'bg-[#2C5234]/10 text-[#2C5234]', label: 'Poultry' },
+  turf: { color: 'bg-emerald-50 text-emerald-700', label: 'Turf & Lawn' },
+  agriculture: { color: 'bg-amber-50 text-amber-700', label: 'Agriculture' },
+  general: { color: 'bg-gray-100 text-gray-600', label: 'News' },
 };
+const segmentInfo = segmentConfig[segment] || segmentConfig.general;
 
 const variantClasses = {
   card: 'bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow',
@@ -66,8 +67,8 @@ const variantClasses = {
       )}
       <div class="flex-1 min-w-0">
         <div class="flex items-center gap-2 mb-1">
-          <span class={`text-xs px-2 py-0.5 rounded-full ${segmentColors[segment]}`}>
-            {segment}
+          <span class={`text-xs px-2 py-0.5 rounded-full font-medium ${segmentInfo.color}`}>
+            {segmentInfo.label}
           </span>
           <time class="text-xs text-gray-500">{formattedDate}</time>
         </div>
@@ -94,8 +95,8 @@ const variantClasses = {
       )}
       <div class={`p-${variant === 'featured' ? '8' : '6'}`}>
         <div class="flex items-center gap-2 mb-3">
-          <span class={`text-xs px-2 py-0.5 rounded-full ${segmentColors[segment]}`}>
-            {segment}
+          <span class={`text-xs px-2 py-0.5 rounded-full font-medium ${segmentInfo.color}`}>
+            {segmentInfo.label}
           </span>
           <time class="text-xs text-gray-500">{formattedDate}</time>
         </div>
@@ -114,10 +115,10 @@ const variantClasses = {
           <p class="text-sm text-gray-500 mb-3">By {author}</p>
         )}
 
-        {tags.length > 0 && variant === 'featured' && (
-          <div class="flex flex-wrap gap-2 mb-4">
-            {tags.slice(0, 4).map((tag) => (
-              <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+        {tags.length > 0 && (
+          <div class="flex flex-wrap gap-1.5 mb-4">
+            {tags.filter(t => t !== 'Biosecurity' && t !== 'Case Study' && t !== 'Humate Hub').slice(0, variant === 'featured' ? 4 : 2).map((tag) => (
+              <span class="text-[11px] bg-gray-50 text-gray-400 px-2 py-0.5 rounded border border-gray-100">
                 {tag}
               </span>
             ))}
