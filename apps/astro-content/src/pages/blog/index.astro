@@ -2,18 +2,23 @@
 /**
  * /blog/ — Main Blog Index
  *
- * Persona-aware content hub. Excludes Biosecurity, Case Study, and
+ * Persona-aware content router. Excludes Biosecurity, Case Study, and
  * Humate Hub posts (they have dedicated hubs). Organizes remaining
- * 245 posts by segment with routing tiles and per-segment sections.
+ * ~220 posts by segment with routing tiles and per-segment sections.
  *
- * Segments: Poultry (154), Turf & Lawn (35), Agriculture (21), News (35)
+ * CRO structure (Perplexity-audited):
+ *   1. Hero + segment tiles (anchor-linked, audience microcopy)
+ *   2. Mobile sticky segment jump bar
+ *   3. Latest strip
+ *   4. Per-segment sections with hub cross-links
+ *   5. Dedicated hubs banner
+ *   6. Newsletter CTA (segment-aware copy)
  */
 
 export const prerender = true
 
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import BlogGrid from '../../components/blog/BlogGrid.astro'
-import BlogCard from '../../components/blog/BlogCard.astro'
 import EmailCapture from '../../components/shared/EmailCapture.astro'
 import { getCollection } from 'astro:content'
 import { getLogoUrl } from '../../lib/cloudinary'
@@ -31,42 +36,50 @@ const posts = allPosts.sort(
   (a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
 )
 
-// ── Segment grouping ────────────────────────────────────────────────────────
+// ── Segment config ──────────────────────────────────────────────────────────
 const SEGMENTS = [
   {
     id: 'poultry',
     label: 'Poultry',
+    audience: 'For Bill, Betty, Bob, Tom & Greg',
     description: 'Flock health, gut biology, equipment, and growing tips for commercial and backyard operations.',
     icon: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
     hub: '/blogs/poultry-biosecurity',
     hubLabel: 'Biosecurity Hub',
+    hubNote: 'Looking for biosecurity and flock programs?',
     color: 'border-[#2C5234]/20',
   },
   {
     id: 'turf',
     label: 'Turf & Lawn',
-    description: 'Soil health, humic acid, weed control, and organic lawn care for pros and homeowners.',
+    audience: 'For Taylor, Gary & Hannah',
+    description: 'Weed control, humic acid, and soil health for lawn care pros and homeowners.',
     icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z',
     hub: '/blogs/humate-hub',
     hubLabel: 'Humate Hub',
+    hubNote: 'Need help with soil biology and humate programs?',
     color: 'border-emerald-200',
   },
   {
     id: 'agriculture',
     label: 'Agriculture',
-    description: 'Crops, soil amendments, and sustainable farming practices for row crop and specialty growers.',
+    audience: 'For Maggie & specialty growers',
+    description: 'Soil amendments and regenerative practices for row crops, produce, and specialty growers.',
     icon: 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
     hub: null,
     hubLabel: null,
+    hubNote: null,
     color: 'border-amber-200',
   },
   {
     id: 'general',
     label: 'News & Updates',
+    audience: 'For everyone',
     description: 'Company news, industry insights, and stories from the Southland Organics team.',
     icon: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z',
     hub: null,
     hubLabel: null,
+    hubNote: null,
     color: 'border-gray-200',
   },
 ]
@@ -80,7 +93,6 @@ SEGMENTS.forEach((seg) => {
   segmentCounts[seg.id] = filtered.length
 })
 
-// Latest 3 across all segments for the hero strip
 const latestPosts = posts.slice(0, 3)
 
 // ── SEO ─────────────────────────────────────────────────────────────────────
@@ -105,6 +117,14 @@ const blogSchema = {
     datePublished: new Date(post.data.publishDate).toISOString(),
     url: `${siteUrl}/blog/${post.id.replace(/\.mdx?$/, '')}/`,
   })),
+}
+
+// Segment config for mobile jump bar colors
+const segmentBadgeColors: Record<string, string> = {
+  poultry: 'bg-[#2C5234]/10 text-[#2C5234]',
+  turf: 'bg-emerald-50 text-emerald-700',
+  agriculture: 'bg-amber-50 text-amber-700',
+  general: 'bg-gray-100 text-gray-600',
 }
 ---
 
@@ -137,7 +157,7 @@ const blogSchema = {
         {SEGMENTS.map((seg) => (
           <a
             href={`#${seg.id}`}
-            class={`group rounded-xl border bg-white/5 p-5 backdrop-blur-sm transition-all hover:bg-white/10 ${seg.color}`}
+            class={`group rounded-xl border bg-white/5 p-5 backdrop-blur-sm transition-all hover:bg-white/10 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-400/50 ${seg.color}`}
           >
             <div class="mb-3 flex items-center gap-3">
               <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
@@ -146,26 +166,56 @@ const blogSchema = {
                 </svg>
               </div>
               <div>
-                <p class="font-bold text-white">{seg.label}</p>
+                <p class="font-bold text-white group-hover:text-green-300">{seg.label}</p>
                 <p class="text-xs text-white/50">{segmentCounts[seg.id]} articles</p>
               </div>
             </div>
-            <p class="text-xs leading-relaxed text-white/40">{seg.description}</p>
+            <p class="mb-2 text-xs leading-relaxed text-white/40">{seg.description}</p>
+            <p class="text-[10px] font-medium uppercase tracking-wider text-green-400/60">{seg.audience}</p>
           </a>
         ))}
       </div>
+
+      <!-- "New here?" helper -->
+      <p class="mt-6 text-center text-sm text-white/40">
+        New here? <a href="#latest" class="text-green-400 underline decoration-green-400/30 underline-offset-2 hover:text-green-300">Start with our most-read guides</a>
+        &nbsp;or&nbsp;
+        <a href="#newsletter" class="text-green-400 underline decoration-green-400/30 underline-offset-2 hover:text-green-300">sign up for updates</a>
+      </p>
     </div>
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- MOBILE STICKY SEGMENT BAR                                             -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <nav class="sticky top-0 z-20 border-b border-gray-100 bg-white/95 backdrop-blur-sm md:hidden" aria-label="Segment navigation">
+    <div class="scrollbar-hide flex gap-2 overflow-x-auto px-4 py-3">
+      {SEGMENTS.map((seg) => (
+        <a
+          href={`#${seg.id}`}
+          class={`flex flex-shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${segmentBadgeColors[seg.id]}`}
+        >
+          {seg.label}
+          <span class="opacity-50">({segmentCounts[seg.id]})</span>
+        </a>
+      ))}
+      <a href="/blogs/poultry-biosecurity" class="flex flex-shrink-0 items-center gap-1 rounded-full bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700">
+        PBS Hub
+      </a>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 2: LATEST POSTS STRIP                                         -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <section class="border-b border-gray-100 bg-white py-10">
+  <section class="border-b border-gray-100 bg-white py-10" id="latest">
     <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
       <h2 class="mb-6 text-lg font-bold text-gray-900">Latest</h2>
       <div class="grid gap-4 sm:grid-cols-3">
         {latestPosts.map((post) => {
           const slug = post.id.replace(/\.mdx?$/, '')
+          const segInfo = segmentBadgeColors[post.data.segment || 'general']
+          const segLabel = SEGMENTS.find(s => s.id === (post.data.segment || 'general'))?.label || 'News'
           return (
             <a
               href={`/blog/${slug}/`}
@@ -182,9 +232,12 @@ const blogSchema = {
                 />
               )}
               <div class="min-w-0">
-                <p class="mb-0.5 text-xs font-medium text-gray-400">
-                  {new Date(post.data.publishDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                </p>
+                <div class="mb-1 flex items-center gap-2">
+                  <span class={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${segInfo}`}>{segLabel}</span>
+                  <span class="text-xs text-gray-400">
+                    {new Date(post.data.publishDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </span>
+                </div>
                 <p class="text-sm font-medium text-gray-900 group-hover:text-southland-green line-clamp-2">{post.data.title}</p>
               </div>
             </a>
@@ -195,7 +248,7 @@ const blogSchema = {
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SEGMENT SECTIONS — one per segment                                    -->
+  <!-- SEGMENT SECTIONS — one per segment, with hub cross-links              -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   {SEGMENTS.map((seg, i) => {
     const sPosts = segmentPosts[seg.id]
@@ -204,6 +257,7 @@ const blogSchema = {
     return (
       <section class={`${bgClass} py-14 md:py-16`} id={seg.id}>
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <!-- Section header -->
           <div class="mb-8 flex items-end justify-between">
             <div class="flex items-center gap-3">
               <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
@@ -230,7 +284,19 @@ const blogSchema = {
             </div>
           </div>
 
-          <BlogGrid posts={sPosts.slice(0, 6)} columns={3} />
+          <!-- Hub cross-link (inline, below heading) -->
+          {seg.hub && seg.hubNote && (
+            <div class="mb-6 rounded-lg border border-southland-green/10 bg-southland-green/5 px-4 py-3">
+              <a href={seg.hub} class="flex items-center gap-2 text-sm text-[#2C5234]">
+                <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+                <span>{seg.hubNote} <strong class="font-semibold underline decoration-southland-green/30 underline-offset-2">Visit the {seg.hubLabel}</strong></span>
+              </a>
+            </div>
+          )}
+
+          <BlogGrid posts={sPosts.slice(0, 6)} showFeatured={true} columns={3} />
 
           {sPosts.length > 6 && (
             <div class="mt-8 text-center">
@@ -297,7 +363,7 @@ const blogSchema = {
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <!-- NEWSLETTER CTA                                                        -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <section class="bg-southland-green-dark py-14">
+  <section class="bg-southland-green-dark py-14" id="newsletter">
     <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
       <div class="grid items-center gap-8 md:grid-cols-[1fr_1fr]">
         <div>
@@ -305,7 +371,7 @@ const blogSchema = {
             Stay in the loop
           </h2>
           <p class="text-white/70">
-            New articles, field tips, and product updates. Written for growers, not marketers.
+            Get new poultry, turf, and agriculture guides in your inbox. Written for growers, not marketers.
           </p>
         </div>
         <div>
