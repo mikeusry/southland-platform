@@ -113,27 +113,33 @@ const schema = {
 // Learning path level config
 const LEVELS = [
   {
+    step: 1,
     level: 'Beginner',
     title: 'What is Humate?',
     subtitle: 'The basics of soil biology and why it matters.',
+    bestFor: 'Homeowners and lawn pros new to humic acid',
     slugs: beginnerSlugs,
     borderColor: 'border-[#2C5234]/20',
     bgColor: 'bg-[#2C5234]/5',
     badgeColor: 'bg-[#2C5234]/10 text-[#2C5234]',
   },
   {
+    step: 2,
     level: 'Intermediate',
     title: 'How to Apply',
     subtitle: 'Application guides and soil chemistry.',
+    bestFor: 'Contractors looking for application rates and tank mix tips',
     slugs: intermediateSlugs,
     borderColor: 'border-[#44883E]/20',
     bgColor: 'bg-[#44883E]/5',
     badgeColor: 'bg-[#44883E]/10 text-[#44883E]',
   },
   {
+    step: 3,
     level: 'Advanced',
     title: 'Deep Soil Science',
     subtitle: 'Humic vs fulvic acid, CEC, and formulation.',
+    bestFor: 'Agronomists and turf managers wanting deeper soil biology',
     slugs: advancedSlugs,
     borderColor: 'border-[#2C5234]/30',
     bgColor: 'bg-[#2C5234]/5',
@@ -174,8 +180,11 @@ const LEVELS = [
           <p class="mb-4 text-lg leading-relaxed text-white/85">
             Heal your soil from the ground up. Humic acid, fulvic acid, and living biology aren't buzzwords — they're the foundation of every healthy lawn, field, and garden.
           </p>
-          <p class="mb-8 text-sm text-white/50">
+          <p class="mb-4 text-sm text-white/50">
             <strong class="text-white">{posts.length} curated guides</strong> covering soil science, application rates, and the biology that makes everything else work.
+          </p>
+          <p class="mb-8 text-xs font-medium uppercase tracking-wider text-green-400/60">
+            For lawn pros, golf courses, farmers, and homeowners who want soil that actually works
           </p>
 
           <!-- Credential chips -->
@@ -238,15 +247,40 @@ const LEVELS = [
   <!-- SECTION 2: WHAT IS THE HUMATE HUB? — educational intro                -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-white py-12 md:py-16">
-    <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-      <div class="prose prose-lg prose-headings:font-heading prose-headings:uppercase max-w-none text-center">
-        <h2 class="text-2xl" style="color: var(--color-title);">What is the Humate Hub?</h2>
-        <p class="text-gray-600">
-          The Humate Hub is a collection of guides designed to teach you about humic substances and their impact on lawn and garden care. Whether you're a professional landscaper, a golf course superintendent, or a homeowner looking to revitalize your lawn, understanding humates is pivotal to achieving your goals without synthetic chemicals.
-        </p>
-        <p class="text-gray-600">
-          These naturally occurring organic compounds are derived from the decomposition of ancient plant matter, making them a treasure trove of nutrients essential for soil health and plant growth. From the basic science behind humic acids to advanced application techniques, this hub ensures your soil receives the rejuvenation it deserves.
-        </p>
+    <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+      <h2 class="mb-8 text-center font-heading text-2xl uppercase md:text-3xl" style="color: var(--color-title);">What is the Humate Hub?</h2>
+      <div class="grid gap-8 md:grid-cols-[1.2fr_1fr]">
+        <div>
+          <p class="mb-4 text-base leading-relaxed text-gray-600">
+            The Humate Hub is a curated collection of guides designed to teach you about humic substances and their impact on lawn and garden care. These naturally occurring organic compounds are derived from the decomposition of ancient plant matter — a treasure trove of nutrients essential for soil health and plant growth.
+          </p>
+          <p class="text-base leading-relaxed text-gray-600">
+            From the basic science behind humic acids to advanced application techniques, this hub ensures your soil receives the rejuvenation it deserves — without synthetic chemicals.
+          </p>
+        </div>
+        <div class="rounded-xl border border-gray-100 bg-gray-50 p-6">
+          <p class="mb-4 text-sm font-bold text-gray-900">Who is this for?</p>
+          <ul class="space-y-3">
+            {[
+              { icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z', label: 'Lawn care professionals', detail: 'Application rates, tank mixes, program design' },
+              { icon: 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z', label: 'Golf & turf managers', detail: 'Soil biology for fairways, greens, and sports turf' },
+              { icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', label: 'Homeowners', detail: 'Safe, organic lawn care for families and pets' },
+              { icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253', label: 'Farmers & market gardeners', detail: 'Soil amendments for row crops, produce, and specialty growers' },
+            ].map(({ icon, label, detail }) => (
+              <li class="flex items-start gap-3">
+                <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
+                  <svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d={icon} />
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-sm font-semibold text-gray-900">{label}</p>
+                  <p class="text-xs text-gray-500">{detail}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   </section>
@@ -275,18 +309,20 @@ const LEVELS = [
           ]
           return (
             <div class={`rounded-xl border ${lvl.borderColor} ${lvl.bgColor} p-6`}>
-              <div class="mb-4 flex items-center gap-3">
+              <div class="mb-3 flex items-center gap-3">
                 <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
                   <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d={stepIcons[i]} />
                   </svg>
                 </div>
                 <div>
+                  <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Step {lvl.step}</p>
                   <span class={`inline-block rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${lvl.badgeColor}`}>{lvl.level}</span>
-                  <h3 class="text-lg font-bold text-gray-900">{lvl.title}</h3>
+                  <h3 class="text-xl font-bold text-gray-900">{lvl.title}</h3>
                 </div>
               </div>
-              <p class="mb-4 text-sm text-gray-500">{lvl.subtitle}</p>
+              <p class="mb-1 text-sm text-gray-500">{lvl.subtitle}</p>
+              <p class="mb-4 text-xs font-medium text-[#44883E]">Best for: {lvl.bestFor}</p>
               <ul class="space-y-2.5">
                 {levelPosts.map((post) => {
                   const slug = post!.id.replace(/\.mdx?$/, '')
@@ -472,6 +508,7 @@ const LEVELS = [
           </h2>
           <p class="mb-6 text-white/70">
             Every lawn, field, and course is different. Tell us what you're working with and we'll recommend the right humate program for your soil type and goals.
+            Most programs start with a quick call about your soil test and current products.
           </p>
 
           <div class="mb-8 grid gap-3 sm:grid-cols-2">
