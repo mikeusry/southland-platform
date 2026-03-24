@@ -46,11 +46,20 @@ const posts = allPosts.sort(
 )
 
 // ── JTBD topic categories ───────────────────────────────────────────────────
+// SVG icon paths for each topic (white on green hex)
+const TOPIC_ICONS: Record<string, string> = {
+  mortality: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z', // alert triangle
+  litter: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', // house
+  environment: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', // monitor/environment
+  'bird-health': 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z', // heart
+  operations: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z', // cog
+  business: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', // document
+}
+
 const TOPICS = [
   {
     id: 'mortality',
     label: 'Mortality & Disease',
-    icon: '🔬',
     bestFor: 'High mortality, disease pressure, or post-flock investigation',
     slugs: [
       'early-disease-detection-in-poultry',
@@ -62,7 +71,6 @@ const TOPICS = [
   {
     id: 'litter',
     label: 'Litter & Ammonia',
-    icon: '🏠',
     bestFor: 'Wet litter, ammonia spikes, paw quality issues, or pre-clean-out planning',
     slugs: [
       'all-about-litter-what-s-really-happening-on-the-poultry-house-floor',
@@ -74,7 +82,6 @@ const TOPICS = [
   {
     id: 'environment',
     label: 'House Environment',
-    icon: '🌡️',
     bestFor: 'Ventilation prep, water line issues, lighting, or heater selection',
     slugs: [
       'how-smart-lighting-systems-help-create-calmer-more-productive-flocks',
@@ -86,7 +93,6 @@ const TOPICS = [
   {
     id: 'bird-health',
     label: 'Bird Health & Nutrition',
-    icon: '💪',
     bestFor: 'Gut health, vitamin programs, FCR improvement, or heat stress',
     slugs: [
       'chicken-gut-microbiome-management',
@@ -98,7 +104,6 @@ const TOPICS = [
   {
     id: 'operations',
     label: 'Farm Operations',
-    icon: '⚙️',
     bestFor: 'Equipment maintenance, electrical safety, or placement prep',
     slugs: [
       '7-electrical-best-practices-for-poultry-growers',
@@ -110,7 +115,6 @@ const TOPICS = [
   {
     id: 'business',
     label: 'Business & Regulations',
-    icon: '📋',
     bestFor: 'USDA rules, tax strategy, NAE/NAIHM compliance, or right-to-repair',
     slugs: [
       'new-usda-rules-and-their-impact-on-poultry-growers',
@@ -324,10 +328,15 @@ const schema = {
       <div class="hidden gap-8 md:grid md:grid-cols-2 lg:grid-cols-3">
         {TOPICS.map((topic) => {
           const topicPosts = topic.slugs.map(findPost).filter(Boolean)
+          const iconPath = TOPIC_ICONS[topic.id]
           return (
             <div class="rounded-xl border border-gray-100 bg-gray-50 p-6 transition-shadow hover:shadow-md" id={`topic-${topic.id}`}>
               <div class="mb-2 flex items-center gap-3">
-                <span class="text-2xl">{topic.icon}</span>
+                <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
+                  <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d={iconPath} />
+                  </svg>
+                </div>
                 <h3 class="text-lg font-bold text-gray-900">{topic.label}</h3>
               </div>
               <p class="mb-4 text-xs font-medium uppercase tracking-wider text-southland-green">
@@ -357,10 +366,15 @@ const schema = {
       <div class="space-y-3 md:hidden">
         {TOPICS.map((topic) => {
           const topicPosts = topic.slugs.map(findPost).filter(Boolean)
+          const iconPath = TOPIC_ICONS[topic.id]
           return (
             <details class="group rounded-xl border border-gray-100 bg-gray-50">
               <summary class="flex cursor-pointer items-center gap-3 p-4">
-                <span class="text-xl">{topic.icon}</span>
+                <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
+                  <svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d={iconPath} />
+                  </svg>
+                </div>
                 <div class="flex-1">
                   <p class="font-bold text-gray-900">{topic.label}</p>
                   <p class="text-xs text-southland-green">{topic.bestFor}</p>
