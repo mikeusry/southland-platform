@@ -144,18 +144,20 @@ Situation-first framing: "Cut Poultry Ammonia 60%", "Stop Barn Mites Naturally",
 
 ---
 
-## Launch Week Schedule (Mar 23-28)
+## Launch Week Schedule (Mar 30 – Apr 4)
+
+**Blocker:** Astro site must be live on `southlandorganics.com` (DNS cutover) before any of this matters. Blog posts and pillar pages only exist on `pages.dev` staging until then. Schedule shifted 7 days from original (was Mar 23-28).
 
 Tasks tracked in Nexus at `/hr/todos` (13 tasks, all assigned to Mike).
 
 | Day | Tasks |
 |-----|-------|
-| **Mon 3/23** | Review pillar pages, commit + deploy, verify Rich Results |
-| **Tue 3/24** | Google Ads review — swap PMax headlines + search themes |
-| **Wed 3/25** | Embed Mux videos in pages, upload 3 to YouTube for PMax |
-| **Thu 3/26** | Re-run 10-query audit, submit URLs to GSC, set up rank tracking |
-| **Fri 3/27** | Check indexing status + PMax asset labels |
-| **Fri 4/3** | Week 2: audit comparison + PMax A/B decision |
+| **Mon 3/30** | Review pillar pages, commit + deploy, verify Rich Results |
+| **Tue 3/31** | Google Ads review — swap PMax headlines + search themes |
+| **Wed 4/1** | Embed Mux videos in pages, upload 3 to YouTube for PMax |
+| **Thu 4/2** | Re-run 10-query audit, submit URLs to GSC, set up rank tracking |
+| **Fri 4/3** | Check indexing status + PMax asset labels |
+| **Fri 4/10** | Week 2: audit comparison + PMax A/B decision |
 
 ---
 
@@ -166,13 +168,13 @@ Tasks tracked in Nexus at `/hr/todos` (13 tasks, all assigned to Mike).
 - AI Overview citations: 0/10 queries
 - PMax headlines: product-first (15.2x ROAS on poultry, 2.0x on Torched)
 
-### Week 2 Check (April 3)
+### Week 2 Check (April 10)
 - Re-run all 10 queries
 - Document organic position changes
 - Check AI Overview citations
 - PMax asset label performance (Best/Good/Low)
 
-### Week 4 Check (April 17)
+### Week 4 Check (April 24)
 - Full audit re-run
 - PMax A/B final decision
 - GSC click/impression data for new pages

@@ -453,9 +453,20 @@ Tracked in Nexus `/hr/todos` (13 tasks, Mar 23-Apr 3).
 
 ---
 
+## Klaviyo Flow Integration
+
+**Master Roadmap:** `mothership/docs/KLAVIYO-FLOW-ROADMAP.md`
+
+Platform's role in the Klaviyo flow ecosystem:
+- **CDP Personas** (Broiler Bill, Backyard Betty, Turf Pro Taylor) drive post-purchase email segmentation — product education and cross-sell flows branch by persona
+- **Reality Tunnels** content strategy aligns with post-purchase education emails (same content, different channel)
+- **Replenishment timing** data from BigQuery CDP informs reorder email scheduling
+- Nexus owns event infrastructure (delivery events, fulfillment sync); Mothership owns flow definitions; Platform owns persona/content strategy
+
 ## Related Resources
 
 - **Mothership:** `~/CODING/mothership/` - Orchestration platform
+  - `docs/KLAVIYO-FLOW-ROADMAP.md` — Klaviyo flow master checklist (post-purchase, NBA, loyalty, leads)
 - **Nexus (Inventory):** `~/CODING/southland-inventory/` - Order management, shipping, EOS todos
 - **point.dog:** CDP/analytics integration
 - **Shopify Store:** southland-organics.myshopify.com
