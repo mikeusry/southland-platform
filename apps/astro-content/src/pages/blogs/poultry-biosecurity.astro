@@ -1,19 +1,19 @@
 ---
 /**
- * /blogs/poultry-biosecurity — Poultry Biosecurity Resource Hub
+ * /blogs/poultry-biosecurity — Poultry Biosecurity Lead Capture Hub
  *
- * Lead capture hub, not a blog listing. Allen Reynolds' authority page.
- * Organizes 50+ posts by JTBD, embeds YouTube, captures leads via
- * phone, email, and Klaviyo form.
+ * Allen Reynolds' authority page. Not a blog listing — a conversion engine.
+ * Organizes 50+ posts by JTBD, captures leads via phone, form, and Klaviyo.
  *
- * Structure:
- *   1. Hero — Allen's face + "Call Allen" CTA
- *   2. Topic grid — 6 JTBD categories, 3 articles each
- *   3. Inline lead capture — Klaviyo email + phone
- *   4. YouTube — top biosecurity video
- *   5. Product band — Big Ole Bird, Litter Life, Desecticide
- *   6. All articles — full archive
- *   7. Final CTA — Allen + form
+ * CRO structure (Perplexity-audited 2026-03-24):
+ *   1. Hero — Allen + dual CTA (Call + Send a Question)
+ *   2. "Start Here" — 3 highest-impact articles for Bill
+ *   3. Topic grid — 6 JTBD cards with "Best for" lines, mobile accordion
+ *   4. Inline lead capture — Klaviyo → Rv67aH (PBS Newsletter)
+ *   5. Video — Mux-hosted biosecurity videos
+ *   6. Product band — JTBD-framed products + program CTA
+ *   7. Latest articles — full archive with topic tags
+ *   8. Final CTA — mirrors hero (Call + Send a Question + subscribe)
  */
 
 export const prerender = true
@@ -46,13 +46,12 @@ const posts = allPosts.sort(
 )
 
 // ── JTBD topic categories ───────────────────────────────────────────────────
-// Hand-curated slugs for each topic — best 3-4 per category
 const TOPICS = [
   {
     id: 'mortality',
     label: 'Mortality & Disease',
     icon: '🔬',
-    description: 'Prevention, early detection, and management when things go wrong.',
+    bestFor: 'High mortality, disease pressure, or post-flock investigation',
     slugs: [
       'early-disease-detection-in-poultry',
       'dealing-with-mass-mortality-the-emotional-side-of-poultry-farming',
@@ -64,7 +63,7 @@ const TOPICS = [
     id: 'litter',
     label: 'Litter & Ammonia',
     icon: '🏠',
-    description: 'Litter biology, ammonia control, and clean-out best practices.',
+    bestFor: 'Wet litter, ammonia spikes, paw quality issues, or pre-clean-out planning',
     slugs: [
       'all-about-litter-what-s-really-happening-on-the-poultry-house-floor',
       'poultry-litter-treatment-for-healthy-floors-and-healthy-birds',
@@ -76,7 +75,7 @@ const TOPICS = [
     id: 'environment',
     label: 'House Environment',
     icon: '🌡️',
-    description: 'Ventilation, lighting, heating, and water line management.',
+    bestFor: 'Ventilation prep, water line issues, lighting, or heater selection',
     slugs: [
       'how-smart-lighting-systems-help-create-calmer-more-productive-flocks',
       'poultry-ventilation-tune-up-prep-for-the-warm-months',
@@ -88,7 +87,7 @@ const TOPICS = [
     id: 'bird-health',
     label: 'Bird Health & Nutrition',
     icon: '💪',
-    description: 'Gut health, vitamins, feed conversion, and growth optimization.',
+    bestFor: 'Gut health, vitamin programs, FCR improvement, or heat stress',
     slugs: [
       'chicken-gut-microbiome-management',
       'how-to-boost-bird-health-through-poultry-vitamins',
@@ -100,7 +99,7 @@ const TOPICS = [
     id: 'operations',
     label: 'Farm Operations',
     icon: '⚙️',
-    description: 'Equipment, electrical, safety, and day-to-day management.',
+    bestFor: 'Equipment maintenance, electrical safety, or placement prep',
     slugs: [
       '7-electrical-best-practices-for-poultry-growers',
       'safeguarding-your-structures-lighting-and-surge-protection-on-poultry-farms',
@@ -112,7 +111,7 @@ const TOPICS = [
     id: 'business',
     label: 'Business & Regulations',
     icon: '📋',
-    description: 'USDA rules, taxes, insurance, and the business side of growing.',
+    bestFor: 'USDA rules, tax strategy, NAE/NAIHM compliance, or right-to-repair',
     slugs: [
       'new-usda-rules-and-their-impact-on-poultry-growers',
       'how-to-keep-your-money-earned-on-the-farm-tax-credits-vs-farm-credits',
@@ -122,22 +121,35 @@ const TOPICS = [
   },
 ]
 
-// Resolve topic posts from the collection
 function findPost(slug: string) {
-  return posts.find((p) => {
-    const postSlug = p.id.replace(/\.mdx?$/, '')
-    return postSlug === slug
-  })
+  return posts.find((p) => p.id.replace(/\.mdx?$/, '') === slug)
 }
 
-// ── Products ────────────────────────────────────────────────────────────────
+// "Start Here" — 3 highest-impact articles for Bill
+const START_HERE = [
+  { slug: 'early-disease-detection-in-poultry', problem: 'Mortality spike' },
+  { slug: 'all-about-litter-what-s-really-happening-on-the-poultry-house-floor', problem: 'Wet litter / ammonia' },
+  { slug: 'the-first-three-days-of-a-chickens-life-the-most-important-stage', problem: 'Placement prep' },
+]
+
+// Topic→slug lookup for article card tags
+const slugToTopic = new Map<string, string>()
+TOPICS.forEach((t) => t.slugs.forEach((s) => slugToTopic.set(s, t.label)))
+
+// ── Products with JTBD framing ──────────────────────────────────────────────
 const client = createClient({
   storeDomain: import.meta.env.PUBLIC_SHOPIFY_STORE_DOMAIN,
   publicAccessToken: import.meta.env.PUBLIC_SHOPIFY_STOREFRONT_TOKEN,
 })
 
-const productHandles = ['poultry-probiotic', 'poultry-litter-amendment', 'natural-mite-control-livestock-poultry']
-const products = (await Promise.all(productHandles.map((h) => getProductByHandle(client, h)))).filter(Boolean)
+const PRODUCT_JTBD = [
+  { handle: 'poultry-probiotic', bestFor: 'Gut health, FCR, and mortality reduction in ABF and conventional flocks' },
+  { handle: 'poultry-litter-amendment', bestFor: 'Ammonia control, litter moisture, and paw quality between flocks' },
+  { handle: 'natural-mite-control-livestock-poultry', bestFor: 'Darkling beetle and mite control without harsh chemicals' },
+]
+
+const productResults = await Promise.all(PRODUCT_JTBD.map((p) => getProductByHandle(client, p.handle)))
+const products = PRODUCT_JTBD.map((p, i) => ({ ...p, product: productResults[i] })).filter((p) => p.product)
 
 function formatPrice(amount: string) {
   const num = parseFloat(amount)
@@ -179,7 +191,7 @@ const schema = {
 >
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 1: HERO — Allen + CTA                                        -->
+  <!-- SECTION 1: HERO — Allen + dual CTA                                   -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-gradient-to-br from-southland-green-dark via-[#1f3d24] to-[#162b1b] py-16 md:py-20">
     <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -193,16 +205,16 @@ const schema = {
             We've been in the houses.
           </h1>
           <p class="mb-4 text-lg leading-relaxed text-white/80">
-            Allen Reynolds has spent 10+ years on poultry farms — installing equipment, troubleshooting mortality, and helping growers protect their flocks. This is everything he's learned, written for growers who don't have time for white papers.
+            <strong class="text-white">{posts.length} field-tested articles</strong> on mortality, litter, ventilation, and disease prevention — written by Allen Reynolds for growers who don't have time for white papers.
           </p>
-          <p class="mb-8 text-white/60">
-            {posts.length} articles covering mortality, litter management, ventilation, disease prevention, equipment, and the business side of growing.
+          <p class="mb-8 text-sm text-white/50">
+            10+ years on poultry farms. Hundreds of farm visits. ABF specialist since 2017.
           </p>
 
           <!-- Credential chips -->
           <div class="mb-8 flex flex-wrap gap-2">
             {['10+ years on farms', 'Hundreds of farm visits', 'ABF specialist since 2017', 'Actually answers the phone'].map((cred) => (
-              <span class="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-white/90">
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-sm font-medium text-white/90">
                 <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
                 </svg>
@@ -211,8 +223,8 @@ const schema = {
             ))}
           </div>
 
-          <!-- CTAs -->
-          <div class="flex flex-wrap items-center gap-4">
+          <!-- Dual CTAs -->
+          <div class="flex flex-wrap items-center gap-3">
             <a
               href="tel:800-608-3755"
               class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3 text-base font-semibold text-white shadow-lg transition-all hover:bg-[#3a7534] hover:shadow-xl"
@@ -223,10 +235,13 @@ const schema = {
               Call Allen: 800-608-3755
             </a>
             <a
-              href="mailto:allen@southlandorganics.com"
-              class="text-sm font-medium text-green-300 underline decoration-green-500/40 underline-offset-2 hover:text-green-200"
+              href="/contact/?dept=poultry"
+              class="inline-flex items-center gap-2 rounded-lg border border-white/20 px-6 py-3 text-base font-medium text-white transition-colors hover:bg-white/10"
             >
-              allen@southlandorganics.com
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+              </svg>
+              Send a Question
             </a>
           </div>
         </div>
@@ -253,7 +268,46 @@ const schema = {
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 2: TOPIC GRID — 6 JTBD categories                            -->
+  <!-- SECTION 2: START HERE — 3 highest-impact articles                     -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <section class="border-b border-gray-100 bg-white py-12">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-6">
+        <h2 class="text-lg font-bold text-gray-900">Start here if you're dealing with...</h2>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-3">
+        {START_HERE.map(({ slug, problem }) => {
+          const post = findPost(slug)
+          if (!post) return null
+          const postSlug = post.id.replace(/\.mdx?$/, '')
+          return (
+            <a
+              href={`/blog/${postSlug}/`}
+              class="group flex items-center gap-4 rounded-xl border border-gray-100 bg-gray-50 p-4 transition-all hover:border-southland-green/20 hover:shadow-md"
+            >
+              {post.data.featuredImage && (
+                <img
+                  src={post.data.featuredImage}
+                  alt={post.data.title}
+                  width="80"
+                  height="80"
+                  class="h-16 w-16 flex-shrink-0 rounded-lg object-cover"
+                  loading="lazy"
+                />
+              )}
+              <div class="min-w-0">
+                <p class="mb-0.5 text-xs font-semibold uppercase tracking-wider text-southland-green">{problem}</p>
+                <p class="text-sm font-medium text-gray-900 group-hover:text-southland-green line-clamp-2">{post.data.title}</p>
+              </div>
+            </a>
+          )
+        })}
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 3: TOPIC GRID — desktop cards, mobile accordion               -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-white py-16 md:py-20">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -266,33 +320,29 @@ const schema = {
         </p>
       </div>
 
-      <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+      <!-- Desktop: grid -->
+      <div class="hidden gap-8 md:grid md:grid-cols-2 lg:grid-cols-3">
         {TOPICS.map((topic) => {
           const topicPosts = topic.slugs.map(findPost).filter(Boolean)
           return (
             <div class="rounded-xl border border-gray-100 bg-gray-50 p-6 transition-shadow hover:shadow-md" id={`topic-${topic.id}`}>
-              <div class="mb-4 flex items-center gap-3">
+              <div class="mb-2 flex items-center gap-3">
                 <span class="text-2xl">{topic.icon}</span>
-                <div>
-                  <h3 class="text-lg font-bold text-gray-900">{topic.label}</h3>
-                  <p class="text-sm text-gray-500">{topic.description}</p>
-                </div>
+                <h3 class="text-lg font-bold text-gray-900">{topic.label}</h3>
               </div>
+              <p class="mb-4 text-xs font-medium uppercase tracking-wider text-southland-green">
+                Best for: {topic.bestFor}
+              </p>
               <ul class="space-y-3">
                 {topicPosts.map((post) => {
                   const slug = post!.id.replace(/\.mdx?$/, '')
                   return (
                     <li>
-                      <a
-                        href={`/blog/${slug}/`}
-                        class="group flex items-start gap-2 text-sm"
-                      >
+                      <a href={`/blog/${slug}/`} class="group flex items-start gap-2 text-sm">
                         <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>
-                        <span class="font-medium text-gray-700 group-hover:text-southland-green">
-                          {post!.data.title}
-                        </span>
+                        <span class="font-medium text-gray-700 group-hover:text-southland-green">{post!.data.title}</span>
                       </a>
                     </li>
                   )
@@ -302,21 +352,57 @@ const schema = {
           )
         })}
       </div>
+
+      <!-- Mobile: accordion -->
+      <div class="space-y-3 md:hidden">
+        {TOPICS.map((topic) => {
+          const topicPosts = topic.slugs.map(findPost).filter(Boolean)
+          return (
+            <details class="group rounded-xl border border-gray-100 bg-gray-50">
+              <summary class="flex cursor-pointer items-center gap-3 p-4">
+                <span class="text-xl">{topic.icon}</span>
+                <div class="flex-1">
+                  <p class="font-bold text-gray-900">{topic.label}</p>
+                  <p class="text-xs text-southland-green">{topic.bestFor}</p>
+                </div>
+                <svg class="h-5 w-5 text-gray-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <ul class="space-y-3 px-4 pb-4">
+                {topicPosts.map((post) => {
+                  const slug = post!.id.replace(/\.mdx?$/, '')
+                  return (
+                    <li>
+                      <a href={`/blog/${slug}/`} class="group flex items-start gap-2 text-sm">
+                        <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                        <span class="font-medium text-gray-700 group-hover:text-southland-green">{post!.data.title}</span>
+                      </a>
+                    </li>
+                  )
+                })}
+              </ul>
+            </details>
+          )
+        })}
+      </div>
     </div>
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 3: INLINE LEAD CAPTURE                                        -->
+  <!-- SECTION 4: INLINE LEAD CAPTURE                                        -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-southland-green-dark py-14">
     <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
       <div class="grid items-center gap-8 md:grid-cols-[1fr_1fr]">
         <div>
           <h2 class="mb-3 font-heading text-2xl uppercase text-white md:text-3xl">
-            Get biosecurity tips in your inbox
+            Get new biosecurity articles and field tips in your inbox
           </h2>
           <p class="text-white/70">
-            Allen sends practical, no-BS poultry advice. No spam, no sales pitches — just what's working on farms right now.
+            Practical poultry advice from Allen. No spam, no sales pitches — just what's working on farms right now.
           </p>
         </div>
         <div>
@@ -337,7 +423,7 @@ const schema = {
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 4: VIDEO — Mux-hosted biosecurity videos + YouTube link       -->
+  <!-- SECTION 5: VIDEO — Mux-hosted biosecurity videos                      -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-gray-50 py-16 md:py-20">
     <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -349,12 +435,11 @@ const schema = {
           See It in Action
         </h2>
         <p class="mx-auto max-w-2xl text-gray-600">
-          152 poultry videos — grower spotlights, equipment reviews, biosecurity education, and on-farm troubleshooting.
+          Short videos from real complexes — biosecurity fundamentals and performance data you can apply on your next flock.
         </p>
       </div>
 
       <div class="grid gap-6 lg:grid-cols-2">
-        <!-- Featured video: Poultry Farm Biosecurity Basics -->
         <div>
           <div class="aspect-video overflow-hidden rounded-xl shadow-lg">
             <mux-player
@@ -370,7 +455,6 @@ const schema = {
           <p class="text-xs text-gray-500">5 min — The fundamentals every grower needs to know</p>
         </div>
 
-        <!-- Secondary video: Big Ole Bird Performance Study -->
         <div>
           <div class="aspect-video overflow-hidden rounded-xl shadow-lg">
             <mux-player
@@ -387,7 +471,6 @@ const schema = {
         </div>
       </div>
 
-      <!-- YouTube channel link -->
       <div class="mt-8 text-center">
         <a
           href="https://www.youtube.com/@PoultryBiosecurity"
@@ -405,21 +488,21 @@ const schema = {
   <script>import '@mux/mux-player';</script>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 5: PRODUCT BAND — The products behind the articles            -->
+  <!-- SECTION 6: PRODUCT BAND — JTBD-framed + program CTA                  -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   {products.length > 0 && (
     <section class="border-y border-gray-100 bg-white py-14">
       <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div class="mb-8 text-center">
           <p class="mb-1 text-sm font-semibold uppercase tracking-wider text-gray-400">
-            The products behind these articles
+            The microbiology tools behind effective biosecurity programs
           </p>
           <h2 class="font-heading text-2xl uppercase md:text-3xl" style="color: var(--color-title);">
-            Proven in the House
+            Proven Products for Poultry Biosecurity
           </h2>
         </div>
         <div class="grid gap-6 sm:grid-cols-3">
-          {products.map((product) => {
+          {products.map(({ product, bestFor }) => {
             const image = product!.images?.[0]
             const price = product!.priceRange?.minVariantPrice
             return (
@@ -445,17 +528,30 @@ const schema = {
                     From {formatPrice(price.amount)}
                   </p>
                 )}
-                <p class="mt-2 text-xs text-gray-400">USDA Organic &middot; Zero Withdrawal</p>
+                <p class="mt-2 text-xs text-gray-500">{bestFor}</p>
               </a>
             )
           })}
+        </div>
+
+        <!-- Program CTA -->
+        <div class="mt-8 text-center">
+          <a
+            href="/poultry/commercial/"
+            class="inline-flex items-center gap-2 text-sm font-semibold text-southland-green hover:underline"
+          >
+            Want a house-wide biosecurity plan? View the Commercial Poultry Program
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
         </div>
       </div>
     </section>
   )}
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 6: LATEST ARTICLES — newest-first grid                        -->
+  <!-- SECTION 7: LATEST ARTICLES                                            -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-brand-gray py-16 md:py-20">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -495,12 +591,11 @@ const schema = {
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 7: FINAL CTA — Allen + form                                  -->
+  <!-- SECTION 8: FINAL CTA — mirrors hero                                  -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-gradient-to-br from-southland-green-dark to-[#1a3420] py-16 md:py-20">
     <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
       <div class="grid items-center gap-10 md:grid-cols-[auto_1fr]">
-        <!-- Allen photo (small) -->
         <div class="hidden md:block">
           <img
             src={allenPhoto}
@@ -517,11 +612,11 @@ const schema = {
             Ready to talk about your operation?
           </h2>
           <p class="mb-6 text-white/70">
+            Most conversations start with a specific problem — mortality spike, wet litter, or ventilation concern.
             Allen picks up the phone. That's not a tagline — it's how we've done business since 2009.
-            Whether you're dealing with high mortality, ammonia, or just want a second opinion on your program, the call is free.
           </p>
 
-          <div class="mb-8 grid gap-4 sm:grid-cols-2">
+          <div class="mb-8 grid gap-3 sm:grid-cols-2">
             <a
               href="tel:800-608-3755"
               class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#44883E] px-6 py-3.5 text-base font-semibold text-white shadow-lg transition-all hover:bg-[#3a7534] hover:shadow-xl"
@@ -532,22 +627,23 @@ const schema = {
               Call Allen: 800-608-3755
             </a>
             <a
-              href="mailto:allen@southlandorganics.com"
+              href="/contact/?dept=poultry"
               class="inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 px-6 py-3.5 text-base font-medium text-white transition-colors hover:bg-white/10"
             >
               <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
               </svg>
-              Email Allen
+              Send a Question
             </a>
           </div>
 
           <div class="rounded-xl bg-white/5 p-5">
-            <p class="mb-3 text-sm font-semibold text-white/90">Or get tips straight to your inbox:</p>
+            <p class="mb-3 text-sm font-semibold text-white/90">Get new biosecurity articles and field tips in your inbox:</p>
             <EmailCapture
               headline=""
               description=""
-              source="blog"
+              listId="Rv67aH"
+              source="biosecurity"
               buttonText="Subscribe"
               variant="banner"
             />
