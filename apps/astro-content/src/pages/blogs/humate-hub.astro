@@ -2,16 +2,18 @@
 /**
  * /blogs/humate-hub — Humate Hub: Soil Science Education
  *
- * Matches the live Shopify URL. Mike Usry's authority page for soil
- * biology, humic/fulvic acid education, and lawn care science.
- * Targets Taylor (Turf Pro) and Hannah (Homeowner).
+ * Mike Usry's authority page for soil biology, humic/fulvic acid
+ * education, and lawn care science. Targets Taylor (Turf Pro),
+ * Hannah (Homeowner), Gary (Golf), and Maggie (Market Garden).
  *
- * Structure:
- *   1. Hero — Mike + soil science credibility
- *   2. Content grid (8 posts, organized by learning path)
- *   3. Video section (3 Mux videos)
- *   4. Product tie-in (Omega, Torched, FertAlive)
- *   5. Lead capture
+ * CRO structure:
+ *   1. Hero — soil background image + Mike overlay + dual CTA
+ *   2. "What is the Humate Hub?" — educational intro (from Shopify)
+ *   3. Learning path — Beginner → Intermediate → Advanced
+ *   4. Video section — 3 Mux video thumbnails
+ *   5. Product band — JTBD-framed lawn care products
+ *   6. All articles — full grid
+ *   7. Final CTA — Mike + dual CTA + Klaviyo
  */
 
 export const prerender = true
@@ -23,12 +25,21 @@ import { getCollection } from 'astro:content'
 import { buildSouthlandUrl, getLogoUrl } from '../../lib/cloudinary'
 import { createClient, getProductByHandle } from '@southland/shopify-storefront'
 
-// ── Mike's photo ────────────────────────────────────────────────────────────
+// ── Images ──────────────────────────────────────────────────────────────────
 const mikePhoto = buildSouthlandUrl('team/MIKE_Usry', {
   width: 600,
   height: 750,
   crop: 'fill',
   gravity: 'face',
+  quality: 'auto',
+  format: 'auto',
+})
+
+const heroBackground = buildSouthlandUrl('heroes/Farm_Athens_GA_4_qaishv', {
+  width: 1600,
+  height: 600,
+  crop: 'fill',
+  gravity: 'center',
   quality: 'auto',
   format: 'auto',
 })
@@ -43,10 +54,9 @@ const posts = allPosts.sort(
   (a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
 )
 
-// Posts with video (for the video section)
 const videoPosts = posts.filter((p) => p.data.muxPlaybackIds && p.data.muxPlaybackIds.length > 0)
 
-// Learning path: beginner → intermediate → advanced
+// Learning path
 const beginnerSlugs = ['understanding-humate-a-beginners-guide', 'humate-for-lawns', 'the-benefits-of-humic-acid-for-lawns']
 const intermediateSlugs = ['humic-acid-for-lawns-3-simple-steps', 'how-do-plants-get-nutrients-cation-exchange-capacity-cec-explained', 'why-humate-soil-conditioner']
 const advancedSlugs = ['humic-acid-vs-fulvic-acid-key-differences-and-benefits-explained', 'fulvic-acid-for-plants-the-missing-ingredient-in-your-diy-lawn-and-garden-care-program']
@@ -55,14 +65,19 @@ function findPost(slug: string) {
   return posts.find((p) => p.id.replace(/\.mdx?$/, '') === slug)
 }
 
-// ── Products ────────────────────────────────────────────────────────────────
+// ── Products with JTBD ──────────────────────────────────────────────────────
 const client = createClient({
   storeDomain: import.meta.env.PUBLIC_SHOPIFY_STORE_DOMAIN,
   publicAccessToken: import.meta.env.PUBLIC_SHOPIFY_STOREFRONT_TOKEN,
 })
 
-const productHandles = ['natural-lawn-care-products', 'torched-all-natural-weed-killer']
-const products = (await Promise.all(productHandles.map((h) => getProductByHandle(client, h)))).filter(Boolean)
+const PRODUCT_JTBD = [
+  { handle: 'natural-lawn-care-products', bestFor: 'Complete humate-based lawn program — soil biology, root development, and nutrient uptake' },
+  { handle: 'torched-all-natural-weed-killer', bestFor: 'Organic weed control that works with your soil biology, not against it' },
+]
+
+const productResults = await Promise.all(PRODUCT_JTBD.map((p) => getProductByHandle(client, p.handle)))
+const products = PRODUCT_JTBD.map((p, i) => ({ ...p, product: productResults[i] })).filter((p) => p.product)
 
 function formatPrice(amount: string) {
   const num = parseFloat(amount)
@@ -94,6 +109,37 @@ const schema = {
     worksFor: { '@type': 'Organization', name: 'Southland Organics' },
   },
 }
+
+// Learning path level config
+const LEVELS = [
+  {
+    level: 'Beginner',
+    title: 'What is Humate?',
+    subtitle: 'The basics of soil biology and why it matters.',
+    slugs: beginnerSlugs,
+    borderColor: 'border-[#2C5234]/20',
+    bgColor: 'bg-[#2C5234]/5',
+    badgeColor: 'bg-[#2C5234]/10 text-[#2C5234]',
+  },
+  {
+    level: 'Intermediate',
+    title: 'How to Apply',
+    subtitle: 'Application guides and soil chemistry.',
+    slugs: intermediateSlugs,
+    borderColor: 'border-[#44883E]/20',
+    bgColor: 'bg-[#44883E]/5',
+    badgeColor: 'bg-[#44883E]/10 text-[#44883E]',
+  },
+  {
+    level: 'Advanced',
+    title: 'Deep Soil Science',
+    subtitle: 'Humic vs fulvic acid, CEC, and formulation.',
+    slugs: advancedSlugs,
+    borderColor: 'border-[#2C5234]/30',
+    bgColor: 'bg-[#2C5234]/5',
+    badgeColor: 'bg-[#2C5234] text-white',
+  },
+]
 ---
 
 <BaseLayout
@@ -104,30 +150,38 @@ const schema = {
 >
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 1: HERO — Mike + soil science credibility                     -->
+  <!-- SECTION 1: HERO — soil background + Mike overlay                      -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <section class="bg-gradient-to-br from-southland-green-dark via-[#1f3d24] to-[#162b1b] py-16 md:py-20">
-    <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-      <div class="grid items-center gap-10 md:grid-cols-[1fr_280px] lg:grid-cols-[1fr_320px]">
+  <section class="relative overflow-hidden py-20 md:py-24">
+    <!-- Background image -->
+    <img
+      src={heroBackground}
+      alt=""
+      class="absolute inset-0 h-full w-full object-cover"
+      loading="eager"
+    />
+    <div class="absolute inset-0 bg-gradient-to-r from-[#2C5234]/95 via-[#2C5234]/85 to-[#2C5234]/60"></div>
 
+    <div class="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div class="grid items-center gap-10 md:grid-cols-[1fr_280px] lg:grid-cols-[1fr_320px]">
         <div>
-          <p class="mb-3 text-sm font-semibold uppercase tracking-wider text-green-400">
+          <p class="mb-3 text-sm font-semibold uppercase tracking-wider text-green-300">
             Soil Science Education
           </p>
           <h1 class="mb-6 font-heading text-3xl uppercase text-white md:text-4xl lg:text-5xl">
             Humate Hub
           </h1>
-          <p class="mb-4 text-lg leading-relaxed text-white/80">
+          <p class="mb-4 text-lg leading-relaxed text-white/85">
             Heal your soil from the ground up. Humic acid, fulvic acid, and living biology aren't buzzwords — they're the foundation of every healthy lawn, field, and garden.
           </p>
-          <p class="mb-8 text-white/60">
-            {posts.length} articles covering soil science, application guides, and the biology that makes everything else work.
+          <p class="mb-8 text-sm text-white/50">
+            <strong class="text-white">{posts.length} curated guides</strong> covering soil science, application rates, and the biology that makes everything else work.
           </p>
 
           <!-- Credential chips -->
           <div class="mb-8 flex flex-wrap gap-2">
-            {['15+ years in soil biology', 'Humate deposit expertise', 'Host of Ag & Culture Podcast', 'UGA letterman, USF MBA'].map((cred) => (
-              <span class="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-white/90">
+            {['15+ years in soil biology', 'Humate deposit expertise', 'Host of Ag & Culture Podcast'].map((cred) => (
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-sm font-medium text-white/90">
                 <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
                 </svg>
@@ -136,8 +190,8 @@ const schema = {
             ))}
           </div>
 
-          <!-- CTAs -->
-          <div class="flex flex-wrap items-center gap-4">
+          <!-- Dual CTAs -->
+          <div class="flex flex-wrap items-center gap-3">
             <a
               href="tel:800-608-3755"
               class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3 text-base font-semibold text-white shadow-lg transition-all hover:bg-[#3a7534] hover:shadow-xl"
@@ -148,10 +202,13 @@ const schema = {
               Talk Soil: 800-608-3755
             </a>
             <a
-              href="mailto:mike@southlandorganics.com"
-              class="text-sm font-medium text-green-300 underline decoration-green-500/40 underline-offset-2 hover:text-green-200"
+              href="/contact/?dept=lawn"
+              class="inline-flex items-center gap-2 rounded-lg border border-white/20 px-6 py-3 text-base font-medium text-white transition-colors hover:bg-white/10"
             >
-              mike@southlandorganics.com
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+              </svg>
+              Ask a Question
             </a>
           </div>
         </div>
@@ -164,7 +221,7 @@ const schema = {
               alt="Mike Usry, Founder & CEO of Southland Organics — 15+ years in soil biology and humate science"
               width="320"
               height="400"
-              class="rounded-2xl object-cover shadow-2xl"
+              class="rounded-2xl object-cover shadow-2xl ring-2 ring-white/20"
               loading="eager"
             />
             <div class="absolute -bottom-3 -right-3 rounded-xl bg-white px-4 py-2 shadow-lg">
@@ -178,9 +235,26 @@ const schema = {
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 2: LEARNING PATH — Beginner → Advanced                        -->
+  <!-- SECTION 2: WHAT IS THE HUMATE HUB? — educational intro                -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <section class="bg-white py-16 md:py-20">
+  <section class="bg-white py-12 md:py-16">
+    <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+      <div class="prose prose-lg prose-headings:font-heading prose-headings:uppercase max-w-none text-center">
+        <h2 class="text-2xl" style="color: var(--color-title);">What is the Humate Hub?</h2>
+        <p class="text-gray-600">
+          The Humate Hub is a collection of guides designed to teach you about humic substances and their impact on lawn and garden care. Whether you're a professional landscaper, a golf course superintendent, or a homeowner looking to revitalize your lawn, understanding humates is pivotal to achieving your goals without synthetic chemicals.
+        </p>
+        <p class="text-gray-600">
+          These naturally occurring organic compounds are derived from the decomposition of ancient plant matter, making them a treasure trove of nutrients essential for soil health and plant growth. From the basic science behind humic acids to advanced application techniques, this hub ensures your soil receives the rejuvenation it deserves.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 3: LEARNING PATH — Beginner → Advanced (green hex icons)      -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <section class="bg-brand-gray py-16 md:py-20">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="mb-12 text-center">
         <h2 class="mb-3 font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
@@ -192,86 +266,85 @@ const schema = {
       </div>
 
       <div class="grid gap-8 md:grid-cols-3">
-        <!-- Beginner -->
-        <div class="rounded-xl border border-green-100 bg-green-50/50 p-6">
-          <div class="mb-4">
-            <span class="inline-block rounded-full bg-green-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-green-700">Beginner</span>
-            <h3 class="mt-3 text-lg font-bold text-gray-900">What is Humate?</h3>
-            <p class="mt-1 text-sm text-gray-500">The basics of soil biology and why it matters.</p>
-          </div>
-          <ul class="space-y-3">
-            {beginnerSlugs.map(findPost).filter(Boolean).map((post) => {
-              const slug = post!.id.replace(/\.mdx?$/, '')
-              return (
-                <li>
-                  <a href={`/blog/${slug}/`} class="group flex items-start gap-2 text-sm">
-                    <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                    <span class="font-medium text-gray-700 group-hover:text-southland-green">{post!.data.title}</span>
-                  </a>
-                </li>
-              )
-            })}
-          </ul>
-        </div>
+        {LEVELS.map((lvl, i) => {
+          const levelPosts = lvl.slugs.map(findPost).filter(Boolean)
+          const stepIcons = [
+            'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253', // book
+            'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z', // lightbulb
+            'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z', // beaker
+          ]
+          return (
+            <div class={`rounded-xl border ${lvl.borderColor} ${lvl.bgColor} p-6`}>
+              <div class="mb-4 flex items-center gap-3">
+                <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
+                  <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d={stepIcons[i]} />
+                  </svg>
+                </div>
+                <div>
+                  <span class={`inline-block rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${lvl.badgeColor}`}>{lvl.level}</span>
+                  <h3 class="text-lg font-bold text-gray-900">{lvl.title}</h3>
+                </div>
+              </div>
+              <p class="mb-4 text-sm text-gray-500">{lvl.subtitle}</p>
+              <ul class="space-y-2.5">
+                {levelPosts.map((post) => {
+                  const slug = post!.id.replace(/\.mdx?$/, '')
+                  return (
+                    <li>
+                      <a href={`/blog/${slug}/`} class="flex items-start gap-2 text-sm">
+                        <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-[#44883E]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                        <span class="text-gray-500 hover:text-southland-green">{post!.data.title}</span>
+                      </a>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  </section>
 
-        <!-- Intermediate -->
-        <div class="rounded-xl border border-amber-100 bg-amber-50/50 p-6">
-          <div class="mb-4">
-            <span class="inline-block rounded-full bg-amber-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-amber-700">Intermediate</span>
-            <h3 class="mt-3 text-lg font-bold text-gray-900">How to Apply</h3>
-            <p class="mt-1 text-sm text-gray-500">Application guides and soil chemistry.</p>
-          </div>
-          <ul class="space-y-3">
-            {intermediateSlugs.map(findPost).filter(Boolean).map((post) => {
-              const slug = post!.id.replace(/\.mdx?$/, '')
-              return (
-                <li>
-                  <a href={`/blog/${slug}/`} class="group flex items-start gap-2 text-sm">
-                    <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                    <span class="font-medium text-gray-700 group-hover:text-southland-green">{post!.data.title}</span>
-                  </a>
-                </li>
-              )
-            })}
-          </ul>
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 4: INLINE LEAD CAPTURE                                        -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <section class="bg-southland-green-dark py-14">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+      <div class="grid items-center gap-8 md:grid-cols-[1fr_1fr]">
+        <div>
+          <h2 class="mb-3 font-heading text-2xl uppercase text-white md:text-3xl">
+            Get soil science tips in your inbox
+          </h2>
+          <p class="text-white/70">
+            Practical humate and lawn care guidance from Mike. Application rates, seasonal timing, and soil biology — no fluff.
+          </p>
         </div>
-
-        <!-- Advanced -->
-        <div class="rounded-xl border border-purple-100 bg-purple-50/50 p-6">
-          <div class="mb-4">
-            <span class="inline-block rounded-full bg-purple-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-purple-700">Advanced</span>
-            <h3 class="mt-3 text-lg font-bold text-gray-900">Deep Soil Science</h3>
-            <p class="mt-1 text-sm text-gray-500">Humic vs fulvic acid, CEC, and formulation.</p>
-          </div>
-          <ul class="space-y-3">
-            {advancedSlugs.map(findPost).filter(Boolean).map((post) => {
-              const slug = post!.id.replace(/\.mdx?$/, '')
-              return (
-                <li>
-                  <a href={`/blog/${slug}/`} class="group flex items-start gap-2 text-sm">
-                    <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                    <span class="font-medium text-gray-700 group-hover:text-southland-green">{post!.data.title}</span>
-                  </a>
-                </li>
-              )
-            })}
-          </ul>
+        <div>
+          <EmailCapture
+            headline=""
+            description=""
+            listId="TckeZK"
+            source="lawn"
+            buttonText="Subscribe"
+            variant="banner"
+          />
+          <p class="mt-3 text-center text-xs text-white/40">
+            Or call directly: <a href="tel:800-608-3755" class="underline">800-608-3755</a>
+          </p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 3: VIDEO — Mux-hosted soil science videos                     -->
+  <!-- SECTION 5: VIDEO — Mux-hosted soil science videos                     -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   {videoPosts.length > 0 && (
-    <section class="bg-gray-50 py-16 md:py-20">
+    <section class="bg-white py-16 md:py-20">
       <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div class="mb-10 text-center">
           <span class="mb-2 inline-block text-sm font-semibold uppercase tracking-wider text-southland-green">
@@ -280,6 +353,9 @@ const schema = {
           <h2 class="mb-3 font-heading text-2xl uppercase md:text-3xl" style="color: var(--color-title);">
             Soil Science on Video
           </h2>
+          <p class="mx-auto max-w-xl text-gray-600">
+            Short videos covering humate application, soil chemistry, and the science behind healthier turf.
+          </p>
         </div>
 
         <div class="grid gap-6 md:grid-cols-3">
@@ -308,10 +384,10 @@ const schema = {
   )}
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 4: PRODUCTS — Lawn care products                              -->
+  <!-- SECTION 6: PRODUCTS — JTBD-framed                                     -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   {products.length > 0 && (
-    <section class="border-y border-gray-100 bg-white py-14">
+    <section class="border-y border-gray-100 bg-gray-50 py-14">
       <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <div class="mb-8 text-center">
           <p class="mb-1 text-sm font-semibold uppercase tracking-wider text-gray-400">
@@ -322,13 +398,13 @@ const schema = {
           </h2>
         </div>
         <div class="grid gap-6 sm:grid-cols-2">
-          {products.map((product) => {
+          {products.map(({ product, bestFor }) => {
             const image = product!.images?.[0]
             const price = product!.priceRange?.minVariantPrice
             return (
               <a
                 href={`/products/${product!.handle}/`}
-                class="group flex items-center gap-6 rounded-xl border border-gray-100 p-6 transition-all hover:border-southland-green/20 hover:shadow-md"
+                class="group flex items-center gap-6 rounded-xl border border-gray-200 bg-white p-6 transition-all hover:border-southland-green/20 hover:shadow-md"
               >
                 {image && (
                   <img
@@ -349,7 +425,7 @@ const schema = {
                       From {formatPrice(price.amount)}
                     </p>
                   )}
-                  <p class="mt-1 text-xs text-gray-400">Humate-based soil biology</p>
+                  <p class="mt-1 text-xs text-gray-500">{bestFor}</p>
                 </div>
               </a>
             )
@@ -360,7 +436,7 @@ const schema = {
   )}
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 5: ALL ARTICLES                                               -->
+  <!-- SECTION 7: ALL ARTICLES                                               -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-brand-gray py-16 md:py-20">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -368,14 +444,14 @@ const schema = {
         <h2 class="font-heading text-2xl uppercase md:text-3xl" style="color: var(--color-title);">
           All Articles
         </h2>
-        <p class="mt-2 text-gray-500">{posts.length} guides and deep dives</p>
+        <p class="mt-2 text-gray-500">{posts.length} curated guides and deep dives</p>
       </div>
       <BlogGrid posts={posts} showFeatured={true} columns={3} />
     </div>
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION 6: LEAD CAPTURE                                               -->
+  <!-- SECTION 8: FINAL CTA — Mike + dual CTA + Klaviyo                      -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-gradient-to-br from-southland-green-dark to-[#1a3420] py-16 md:py-20">
     <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
@@ -395,11 +471,10 @@ const schema = {
             Need a custom soil program?
           </h2>
           <p class="mb-6 text-white/70">
-            Every lawn, field, and course is different. Tell us what you're working with
-            and we'll recommend the right humate program for your soil type and goals.
+            Every lawn, field, and course is different. Tell us what you're working with and we'll recommend the right humate program for your soil type and goals.
           </p>
 
-          <div class="mb-8 grid gap-4 sm:grid-cols-2">
+          <div class="mb-8 grid gap-3 sm:grid-cols-2">
             <a
               href="tel:800-608-3755"
               class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#44883E] px-6 py-3.5 text-base font-semibold text-white shadow-lg transition-all hover:bg-[#3a7534] hover:shadow-xl"
@@ -410,18 +485,18 @@ const schema = {
               Call Mike: 800-608-3755
             </a>
             <a
-              href="mailto:mike@southlandorganics.com"
+              href="/contact/?dept=lawn"
               class="inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 px-6 py-3.5 text-base font-medium text-white transition-colors hover:bg-white/10"
             >
               <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
               </svg>
-              Email Mike
+              Ask a Question
             </a>
           </div>
 
           <div class="rounded-xl bg-white/5 p-5">
-            <p class="mb-3 text-sm font-semibold text-white/90">Get lawn care tips in your inbox:</p>
+            <p class="mb-3 text-sm font-semibold text-white/90">Get soil science tips in your inbox:</p>
             <EmailCapture
               headline=""
               description=""
