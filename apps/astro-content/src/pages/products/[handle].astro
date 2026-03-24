@@ -104,6 +104,20 @@ const priceFormatted = new Intl.NumberFormat('en-US', {
 }).format(Number(minPrice.amount))
 
 const hasMultipleVariants = product.variants.length > 1
+
+// ── Product video map (Mux playback IDs) ────────────────────────────────────
+const PRODUCT_VIDEOS: Record<string, string> = {
+  'poultry-litter-amendment': 'BGIagRt3O5MXoFdzHejUiCr124usH69oqTl9jB4ZpC4',
+  'catalyst-poultry-vitamin': 'uM9Q00XQD5puYDVFf00800tC00lpUrc19ZbP5JTuO7gtgUw',
+}
+const muxPlaybackId = PRODUCT_VIDEOS[handle] ?? null
+
+// ── Strip Gumlet/Wistia iframes from Shopify description HTML ───────────────
+const cleanDescriptionHtml = product.descriptionHtml
+  ?.replace(/<iframe[^>]*(?:gumlet|wistia)[^>]*>[\s\S]*?<\/iframe>/gi, '')
+  ?.replace(/<div[^>]*(?:gumlet|wistia)[^>]*>[\s\S]*?<\/div>/gi, '')
+  ?.replace(/<script[^>]*(?:gumlet|wistia)[^>]*>[\s\S]*?<\/script>/gi, '')
+  ?.trim()
 ---
 
 <BaseLayout
@@ -200,15 +214,36 @@ const hasMultipleVariants = product.variants.length > 1
     </div>
   </section>
 
+  {/* Product video (Mux) */}
+  {
+    muxPlaybackId && (
+      <section class="border-t border-gray-100 bg-gray-50 py-8 md:py-12">
+        <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <div class="aspect-video overflow-hidden rounded-xl shadow-lg">
+            <mux-player
+              playback-id={muxPlaybackId}
+              accent-color="#44883e"
+              metadata-video-title={product.title}
+              default-hidden-captions
+              poster={`https://image.mux.com/${muxPlaybackId}/thumbnail.jpg?time=10`}
+              style="width:100%;height:100%;--media-object-fit:cover;"
+            />
+          </div>
+        </div>
+      </section>
+    )
+  }
+  {muxPlaybackId && <script>import '@mux/mux-player';</script>}
+
   {/* Full HTML description */}
   {
-    product.descriptionHtml && product.descriptionHtml !== '<p></p>' && (
+    cleanDescriptionHtml && cleanDescriptionHtml !== '<p></p>' && (
       <section class="border-t border-gray-100">
         <div class="mx-auto max-w-3xl px-4 py-8 sm:py-12">
           <h2 class="font-heading text-2xl text-gray-900">Product Details</h2>
           <div
             class="prose prose-sm prose-headings:font-heading prose-a:text-brand-green-light mt-4 max-w-none"
-            set:html={product.descriptionHtml}
+            set:html={cleanDescriptionHtml}
           />
         </div>
       </section>
