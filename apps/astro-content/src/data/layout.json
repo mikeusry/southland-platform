@@ -47,7 +47,9 @@
           { "label": "Turf Professionals", "href": "/lawn/turf-pros/", "group": "By Customer" },
           { "label": "Crops", "href": "/agriculture/crops/", "group": "Specialty" },
           { "label": "Hydroseeders", "href": "/hydroseeders/", "group": "Specialty" },
-          { "label": "Shop All Lawn & Garden", "href": "/lawn/", "group": "Specialty" }
+          { "label": "Shop All Lawn & Garden", "href": "/lawn/", "group": "Specialty" },
+          { "label": "Humate Hub", "href": "/blogs/humate-hub", "group": "Resources" },
+          { "label": "Case Studies", "href": "/blogs/case-studies", "group": "Resources" }
         ]
       },
       {
@@ -75,7 +77,7 @@
           { "label": "Rewards Program", "href": "/pages/southland-organics-rewards", "group": "Company" },
           { "label": "Podcast", "href": "/podcast/", "group": "Learn" },
           { "label": "Blog", "href": "/blog/", "group": "Learn" },
-          { "label": "Humate Hub", "href": "/blog/", "group": "Learn" },
+          { "label": "Humate Hub", "href": "/blogs/humate-hub", "group": "Learn" },
           { "label": "FAQs", "href": "/pages/faqs", "group": "Learn" }
         ]
       }
