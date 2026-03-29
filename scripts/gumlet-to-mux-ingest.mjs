@@ -1,77 +1,57 @@
 #!/usr/bin/env node
 /**
- * Ingest 15 Wistia videos into Mux, then update blog post frontmatter.
+ * Ingest 10 Gumlet videos into Mux, then update blog post frontmatter.
  *
  * Flow:
- *   1. Query Wistia API for each video's metadata + download URL
- *   2. Create Mux asset from URL
+ *   1. Query Gumlet API for each video's HLS playback URL + metadata
+ *   2. Create Mux asset from URL (Mux ingests the HLS stream)
  *   3. Wait for Mux to finish processing
  *   4. Get Mux playback ID
  *   5. Update MDX frontmatter with muxPlaybackIds
- *   6. Remove Wistia swatch image from MDX body
- *   7. Insert into Supabase voice_videos for catalog completeness
+ *   6. Insert into Supabase voice_videos for catalog completeness
  *
- * Usage: node scripts/wistia-to-mux-ingest.mjs
+ * Usage: node scripts/gumlet-to-mux-ingest.mjs
  */
 
 import { readFileSync, writeFileSync } from 'fs'
 
 // ── Config (read from environment — never hardcode secrets) ─────────────────
-const WISTIA_API_TOKEN = process.env.WISTIA_API_TOKEN
+const GUMLET_KEY = process.env.GUMLET_API_KEY
 const MUX_TOKEN_ID = process.env.MUX_TOKEN_ID
 const MUX_TOKEN_SECRET = process.env.MUX_TOKEN_SECRET
 const SUPABASE_URL = process.env.SUPABASE_URL
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY
 const BRAND_ID = 'dbca74d1-d751-48c2-95ed-f432490b0826' // Southland
 
-if (!WISTIA_API_TOKEN || !MUX_TOKEN_ID || !MUX_TOKEN_SECRET || !SUPABASE_URL || !SUPABASE_KEY) {
-  console.error('Missing required env vars: WISTIA_API_TOKEN, MUX_TOKEN_ID, MUX_TOKEN_SECRET, SUPABASE_URL, SUPABASE_SERVICE_KEY')
+if (!GUMLET_KEY || !MUX_TOKEN_ID || !MUX_TOKEN_SECRET || !SUPABASE_URL || !SUPABASE_KEY) {
+  console.error('Missing required env vars: GUMLET_API_KEY, MUX_TOKEN_ID, MUX_TOKEN_SECRET, SUPABASE_URL, SUPABASE_SERVICE_KEY')
   process.exit(1)
 }
 
 const BLOG_DIR = './apps/astro-content/src/content/blog'
 
-const WISTIA_VIDEOS = [
-  { slug: 'clean-sanitize-or-disinfect', wistiaId: '7gqmjbra30' },
-  { slug: 'rickets-in-chickens', wistiaId: 'n6wwiytglt' },
-  { slug: 'how-to-run-big-ole-bird-poultry-probiotic', wistiaId: 'al945kyt5k' },
-  { slug: 'vitamins-for-chickens-catalyst', wistiaId: 'bve6faql8u' },
-  { slug: 'catalyst-liquid-chicken-vitamins', wistiaId: 'osatgf6xk8' },
-  { slug: 'our-best-organic-lawn-care-products', wistiaId: 'pev4h9zny6' },
-  { slug: 'when-do-chickens-start-laying-eggs', wistiaId: 'eykcmcwty0' },
-  { slug: 'how-to-use-our-products-for-healthy-backyard-birds', wistiaId: 'wjpk8b6kzd' },
-  { slug: 'defeating-dermatitis', wistiaId: 'll3lp318zy' },
-  { slug: 'a-healthy-floor-is-a-healthy-bird', wistiaId: 'z1cooyso1x' },
-  { slug: 'difference-between-surfactant-and-surfactin', wistiaId: 'th4b968qtb' },
-  { slug: 'port-for-vault-toilets', wistiaId: '4mmes7iu66' },
-  { slug: 'perfect-gifts-for-people-with-chickens', wistiaId: '7360poi69v' },
-  { slug: 'video-keys-to-windrow-success-part-1', wistiaId: '9ywo9ag0a3' },
-  { slug: 'the-secret-to-a-perfect-thanksgiving', wistiaId: '67x9bdycm2' },
+const GUMLET_VIDEOS = [
+  { slug: 'how-smart-lighting-systems-help-create-calmer-more-productive-flocks', gumletId: '693b134d3cf0cd39b93f81b6' },
+  { slug: 'dealing-with-mass-mortality-the-emotional-side-of-poultry-farming', gumletId: '693b0fca3cf0cd39b93f1c5f' },
+  { slug: 'tips-and-tricks-for-poultry-farmers-part-8', gumletId: '693b09803cf0cd39b93e5912' },
+  { slug: 'behind-the-equipment-innovative-poultry-products-llc-at-the-sunbelt-ag-expo', gumletId: '6900d23960d267cdc06173b3' },
+  { slug: '7-electrical-best-practices-for-poultry-growers', gumletId: '693b0b107ada4a2333dfb200' },
+  { slug: 'tips-and-tricks-for-poultry-farmers-part-7', gumletId: '693b0980b45f2098f4b4de9d' },
+  { slug: 'behind-the-equipment-apex-predator-mortality-disposal-at-the-sunbelt-ag-expo', gumletId: '6900d3015ecad45f6c8bbed7' },
+  { slug: 'a-thanksgiving-message-of-gratitude-and-encouragement', gumletId: '691e3940d00d0f5c9436946c' },
+  { slug: 'all-about-litter-what-s-really-happening-on-the-poultry-house-floor', gumletId: '690bde44ea35e3d6340f1f3e' },
+  { slug: 'water-consumption-what-it-indicates-about-bird-health', gumletId: '68e7a9454d658cce80568ebb' },
 ]
 
 const muxAuth = 'Basic ' + Buffer.from(`${MUX_TOKEN_ID}:${MUX_TOKEN_SECRET}`).toString('base64')
 
-// ── Step 1: Get Wistia video metadata + download URL ────────────────────────
-async function getWistiaVideo(wistiaId) {
-  const res = await fetch(`https://api.wistia.com/v1/medias/${wistiaId}.json`, {
-    headers: { Authorization: `Bearer ${WISTIA_API_TOKEN}` },
+// ── Step 1: Get Gumlet video metadata ───────────────────────────────────────
+async function getGumletVideo(gumletId) {
+  const res = await fetch(`https://api.gumlet.com/v1/video/assets/${gumletId}`, {
+    headers: { Authorization: `Bearer ${GUMLET_KEY}` },
   })
-  if (!res.ok) throw new Error(`Wistia ${wistiaId}: ${res.status} ${await res.text()}`)
-  const data = await res.json()
-
-  // Find the best quality original file asset
-  const assets = data.assets || []
-  const original = assets.find((a) => a.type === 'OriginalFile') ||
-    assets.find((a) => a.type === 'HdMp4VideoFile') ||
-    assets.find((a) => a.type === 'Mp4VideoFile') ||
-    assets[0]
-
-  return {
-    title: data.name,
-    duration: Math.round(data.duration || 0),
-    downloadUrl: original?.url,
-    wistiaId: data.hashed_id,
-  }
+  if (!res.ok) throw new Error(`Gumlet ${gumletId}: ${res.status}`)
+  return res.json()
 }
 
 // ── Step 2: Create Mux asset from URL ───────────────────────────────────────
@@ -85,7 +65,7 @@ async function createMuxAsset(videoUrl, title) {
     body: JSON.stringify({
       input: [{ url: videoUrl }],
       playback_policy: ['public'],
-      passthrough: JSON.stringify({ title, source: 'wistia-migration' }),
+      passthrough: JSON.stringify({ title, source: 'gumlet-migration' }),
     }),
   })
   if (!res.ok) {
@@ -115,26 +95,23 @@ async function waitForMuxAsset(assetId, maxWaitMs = 300_000) {
   throw new Error(`Mux asset ${assetId} timed out`)
 }
 
-// ── Step 4: Update MDX frontmatter + remove Wistia swatch ──────────────────
-function updateMdx(slug, muxPlaybackId, wistiaId) {
+// ── Step 4: Update MDX frontmatter ──────────────────────────────────────────
+function updateMdxFrontmatter(slug, muxPlaybackId) {
   const path = `${BLOG_DIR}/${slug}.mdx`
   let content = readFileSync(path, 'utf-8')
 
-  // Add muxPlaybackIds to frontmatter
   if (content.includes('muxPlaybackIds:')) {
+    // Already has the field — replace
     content = content.replace(
       /muxPlaybackIds:\s*\[[^\]]*\]/,
-      `muxPlaybackIds: ["${muxPlaybackId}"]`,
+      `muxPlaybackIds: ["${muxPlaybackId}"]`
     )
   } else if (content.includes('featuredImage:')) {
     content = content.replace(
       /(featuredImage:\s*"[^"]*")/,
-      `$1\nmuxPlaybackIds: ["${muxPlaybackId}"]`,
+      `$1\nmuxPlaybackIds: ["${muxPlaybackId}"]`
     )
   }
-
-  // Remove Wistia swatch image lines (with or without bold wrappers)
-  content = content.replace(/\*?\*?\!\[\]\(https:\/\/fast\.wistia\.com\/embed\/medias\/[^)]+\)\*?\*?\s*\n?/g, '')
 
   writeFileSync(path, content)
 }
@@ -159,27 +136,30 @@ async function insertSupabase(record) {
 
 // ── Main ────────────────────────────────────────────────────────────────────
 async function main() {
-  console.log('=== Wistia → Mux Ingest ===')
-  console.log(`Videos: ${WISTIA_VIDEOS.length}`)
+  console.log('=== Gumlet → Mux Ingest ===')
+  console.log(`Videos: ${GUMLET_VIDEOS.length}`)
   console.log()
 
   const results = []
 
-  for (const video of WISTIA_VIDEOS) {
+  for (const video of GUMLET_VIDEOS) {
     console.log(`[${video.slug}]`)
 
-    // 1. Get Wistia metadata
-    console.log('  1. Fetching Wistia metadata...')
-    const wistia = await getWistiaVideo(video.wistiaId)
-    console.log(`     Title: ${wistia.title}`)
-    console.log(`     Duration: ${wistia.duration}s`)
-    console.log(`     Download URL: ${wistia.downloadUrl?.substring(0, 80)}...`)
+    // 1. Get Gumlet metadata
+    console.log('  1. Fetching Gumlet metadata...')
+    const gumlet = await getGumletVideo(video.gumletId)
+    const title = gumlet.input.title
+    const duration = Math.round(gumlet.input.duration)
+    const downloadUrl = gumlet.original_download_url
+    console.log(`     Title: ${title}`)
+    console.log(`     Duration: ${duration}s`)
+    console.log(`     Download URL: ${downloadUrl?.substring(0, 80)}...`)
 
-    if (!wistia.downloadUrl) throw new Error(`No download URL for Wistia ${video.wistiaId}`)
+    if (!downloadUrl) throw new Error('No download URL from Gumlet')
 
-    // 2. Create Mux asset
+    // 2. Create Mux asset from signed download URL
     console.log('  2. Creating Mux asset...')
-    const muxAsset = await createMuxAsset(wistia.downloadUrl, wistia.title)
+    const muxAsset = await createMuxAsset(downloadUrl, title)
     const assetId = muxAsset.id
     console.log(`     Asset ID: ${assetId}`)
 
@@ -190,21 +170,21 @@ async function main() {
     console.log(`     Playback ID: ${playbackId}`)
 
     // 4. Update MDX
-    console.log('  4. Updating MDX...')
-    updateMdx(video.slug, playbackId, video.wistiaId)
+    console.log('  4. Updating MDX frontmatter...')
+    updateMdxFrontmatter(video.slug, playbackId)
     console.log('     Done')
 
     // 5. Insert into Supabase
     console.log('  5. Inserting into Supabase...')
     await insertSupabase({
       brand_id: BRAND_ID,
-      business_unit: 'southland',
+      business_unit: 'commercial-poultry',
       source_platform: 'mux',
       external_id: assetId,
-      original_platform: 'wistia',
-      original_external_id: video.wistiaId,
-      title: wistia.title,
-      duration_seconds: wistia.duration,
+      original_platform: 'gumlet',
+      original_external_id: video.gumletId,
+      title,
+      duration_seconds: duration,
       url: `https://stream.mux.com/${playbackId}.m3u8`,
       thumbnail_url: `https://image.mux.com/${playbackId}/thumbnail.jpg`,
       author: 'allen',
@@ -212,21 +192,15 @@ async function main() {
     })
     console.log('     Done')
 
-    results.push({
-      slug: video.slug,
-      title: wistia.title,
-      wistiaId: video.wistiaId,
-      muxAssetId: assetId,
-      muxPlaybackId: playbackId,
-    })
+    results.push({ slug: video.slug, title, gumletId: video.gumletId, muxAssetId: assetId, muxPlaybackId: playbackId })
     console.log(`  ✅ Complete: ${playbackId}`)
     console.log()
   }
 
   // Write results
-  writeFileSync('./test-results/wistia-to-mux-results.json', JSON.stringify(results, null, 2))
+  writeFileSync('./test-results/live-crawl/gumlet-to-mux-results.json', JSON.stringify(results, null, 2))
   console.log('=== DONE ===')
-  console.log(`Ingested: ${results.length}/${WISTIA_VIDEOS.length}`)
+  console.log(`Ingested: ${results.length}/${GUMLET_VIDEOS.length}`)
   results.forEach((r) => {
     console.log(`  ${r.slug}: ${r.muxPlaybackId}`)
   })
