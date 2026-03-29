@@ -148,8 +148,6 @@ const priceFormatted = new Intl.NumberFormat('en-US', {
   currency: minPrice.currencyCode || 'USD',
 }).format(Number(minPrice.amount))
 
-const hasMultipleVariants = product.variants.length > 1
-
 // ── Product video map (Mux playback IDs) ────────────────────────────────────
 const PRODUCT_VIDEOS: Record<string, string> = {
   'poultry-litter-amendment': 'BGIagRt3O5MXoFdzHejUiCr124usH69oqTl9jB4ZpC4',
