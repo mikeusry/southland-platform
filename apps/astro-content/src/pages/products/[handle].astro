@@ -66,6 +66,7 @@ const pageDescription =
 const ogImage = product.images[0]?.url ?? '/images/podcast/og-default.jpg'
 
 // ── Schema.org Product ──────────────────────────────────────────────────────
+const hasMultipleVariants = product.variants.length > 1
 const productSchema = {
   '@context': 'https://schema.org',
   '@type': 'Product',
@@ -77,16 +78,60 @@ const productSchema = {
     '@type': 'Brand',
     name: product.vendor || 'Southland Organics',
   },
-  offers: product.variants.map((variant) => ({
-    '@type': 'Offer',
-    name: variant.title !== 'Default Title' ? variant.title : product.title,
-    price: variant.price.amount,
-    priceCurrency: variant.price.currencyCode || 'USD',
-    availability: variant.availableForSale
-      ? 'https://schema.org/InStock'
-      : 'https://schema.org/OutOfStock',
-    url: canonicalUrl,
-  })),
+  category: product.productType || undefined,
+  offers: hasMultipleVariants
+    ? {
+        '@type': 'AggregateOffer',
+        lowPrice: product.priceRange.minVariantPrice.amount,
+        highPrice: Math.max(...product.variants.map((v) => parseFloat(v.price.amount))).toFixed(2),
+        priceCurrency: product.priceRange.minVariantPrice.currencyCode || 'USD',
+        offerCount: product.variants.length,
+        offers: product.variants.map((variant) => ({
+          '@type': 'Offer',
+          name: variant.title !== 'Default Title' ? variant.title : product.title,
+          price: variant.price.amount,
+          priceCurrency: variant.price.currencyCode || 'USD',
+          availability: variant.availableForSale
+            ? 'https://schema.org/InStock'
+            : 'https://schema.org/OutOfStock',
+          url: canonicalUrl,
+          seller: { '@type': 'Organization', name: 'Southland Organics' },
+          shippingDetails: {
+            '@type': 'OfferShippingDetails',
+            shippingDestination: {
+              '@type': 'DefinedRegion',
+              addressCountry: 'US',
+            },
+            deliveryTime: {
+              '@type': 'ShippingDeliveryTime',
+              handlingTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 2, unitCode: 'DAY' },
+              transitTime: { '@type': 'QuantitativeValue', minValue: 2, maxValue: 7, unitCode: 'DAY' },
+            },
+          },
+        })),
+      }
+    : {
+        '@type': 'Offer',
+        price: product.variants[0]?.price.amount,
+        priceCurrency: product.variants[0]?.price.currencyCode || 'USD',
+        availability: product.variants[0]?.availableForSale
+          ? 'https://schema.org/InStock'
+          : 'https://schema.org/OutOfStock',
+        url: canonicalUrl,
+        seller: { '@type': 'Organization', name: 'Southland Organics' },
+        shippingDetails: {
+          '@type': 'OfferShippingDetails',
+          shippingDestination: {
+            '@type': 'DefinedRegion',
+            addressCountry: 'US',
+          },
+          deliveryTime: {
+            '@type': 'ShippingDeliveryTime',
+            handlingTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 2, unitCode: 'DAY' },
+            transitTime: { '@type': 'QuantitativeValue', minValue: 2, maxValue: 7, unitCode: 'DAY' },
+          },
+        },
+      },
 }
 
 // ── Breadcrumb items ────────────────────────────────────────────────────────

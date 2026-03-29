@@ -94,26 +94,59 @@ const contentHubImages = {
 
 // ── SEO Schema ──────────────────────────────────────────────────────────────
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
-const schema = {
-  '@context': 'https://schema.org',
-  '@type': 'Organization',
-  name: 'Southland Organics',
-  description,
-  url: siteUrl,
-  logo: 'https://res.cloudinary.com/southland-organics/image/upload/v1/Southland%20Website/Southland%20Branding/logos/southland-logo-primary.png',
-  contactPoint: {
-    '@type': 'ContactPoint',
-    telephone: '+1-800-608-3755',
-    contactType: 'customer service',
-    areaServed: 'US',
-    availableLanguage: 'English',
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    '@id': `${siteUrl}/#organization`,
+    name: 'Southland Organics',
+    description,
+    url: siteUrl,
+    logo: {
+      '@type': 'ImageObject',
+      url: 'https://res.cloudinary.com/southland-organics/image/upload/v1/Southland%20Website/Southland%20Branding/logos/southland-logo-primary.png',
+      width: 600,
+      height: 200,
+    },
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: '189 Luke Road',
+      addressLocality: 'Bogart',
+      addressRegion: 'GA',
+      postalCode: '30622',
+      addressCountry: 'US',
+    },
+    contactPoint: {
+      '@type': 'ContactPoint',
+      telephone: '+1-800-608-3755',
+      contactType: 'customer service',
+      areaServed: 'US',
+      availableLanguage: 'English',
+    },
+    sameAs: [
+      'https://www.facebook.com/southlandorganics',
+      'https://www.instagram.com/southlandorganics',
+      'https://www.youtube.com/@SouthlandOrganics',
+      'https://www.linkedin.com/company/southland-organics',
+    ],
   },
-  sameAs: [
-    'https://www.facebook.com/southlandorganics',
-    'https://www.instagram.com/southlandorganics',
-    'https://www.youtube.com/southlandorganics',
-  ],
-}
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${siteUrl}/#website`,
+    name: 'Southland Organics',
+    url: siteUrl,
+    publisher: { '@id': `${siteUrl}/#organization` },
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${siteUrl}/collections/?q={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  },
+]
 
 // ── Helper: resolve product list by filter ──────────────────────────────────
 function getProducts(filter: string) {
