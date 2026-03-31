@@ -30,6 +30,43 @@ const {
   class: className = '',
 } = Astro.props;
 
+// ── Segment fallback images ─────────────────────────────────────────────────
+// When a post uses a generic/mismatched hero, pick a segment-appropriate image.
+const GENERIC_HEROES = ['DSC_0137', 'Farm_Athens_GA_4', 'Farm_Athens_GA_7', 'Farm_Athens_GA_11']
+const isGenericImage = !featuredImage || GENERIC_HEROES.some((h) => featuredImage.includes(h))
+
+const SEGMENT_FALLBACKS: Record<string, string[]> = {
+  poultry: [
+    'https://res.cloudinary.com/southland-organics/image/upload/w_600,h_340,c_fill,g_auto,q_auto,f_auto/Southland%20Website/poultry/poultry_house_w1zen3_iecnpo',
+    'https://res.cloudinary.com/southland-organics/image/upload/w_600,h_340,c_fill,g_auto,q_auto,f_auto/Southland%20Website/poultry/Poultry_Industry_dcsedd_wyrhru',
+    'https://res.cloudinary.com/southland-organics/image/upload/w_600,h_340,c_fill,g_auto,q_auto,f_auto/Southland%20Website/poultry/broilers/broiler_farm_sxnkd0',
+    'https://res.cloudinary.com/southland-organics/image/upload/w_600,h_340,c_fill,g_auto,q_auto,f_auto/Southland%20Website/poultry/backyard/BY_Chicken_kdbbxr',
+    'https://res.cloudinary.com/southland-organics/image/upload/w_600,h_340,c_fill,g_auto,q_auto,f_auto/Southland%20Website/poultry/backyard/BY-Eggs_lwlnnx',
+    'https://res.cloudinary.com/southland-organics/image/upload/w_600,h_340,c_fill,g_auto,q_auto,f_auto/Southland%20Website/poultry/backyard/Healthy_chickens',
+    'https://res.cloudinary.com/southland-organics/image/upload/w_600,h_340,c_fill,g_auto,q_auto,f_auto/Southland%20Website/poultry/Pasture-raised_hens_gkeodz_uz3ogv',
+  ],
+  turf: [
+    'https://res.cloudinary.com/southland-organics/image/upload/w_600,h_340,c_fill,g_auto,q_auto,f_auto/Southland%20Website/turf/home-and-yard-2026-03-25-01-32-34-utc_result_kwqnjn',
+    'https://res.cloudinary.com/southland-organics/image/upload/w_600,h_340,c_fill,g_auto,q_auto,f_auto/Southland%20Website/turf/house-with-a-green-lawn-under-blue-sky-2026-03-18-16-04-37-utc_result_vxsjpl',
+    'https://res.cloudinary.com/southland-organics/image/upload/w_600,h_340,c_fill,g_auto,q_auto,f_auto/Southland%20Website/turf/mowed-green-frontyard-grass-before-residential-sub-2026-03-19-09-25-06-utc_result_isfebr',
+  ],
+  agriculture: [
+    'https://res.cloudinary.com/southland-organics/image/upload/w_600,h_340,c_fill,g_auto,q_auto,f_auto/Southland%20Website/heroes/DSC_0137_dco2wk',
+  ],
+  general: [
+    'https://res.cloudinary.com/southland-organics/image/upload/w_600,h_340,c_fill,g_auto,q_auto,f_auto/Southland%20Website/heroes/Farm_Athens_GA_7_jbdjik',
+  ],
+}
+
+// Pick a deterministic-but-varied fallback based on slug hash
+function pickFallback(seg: string, postSlug: string): string {
+  const pool = SEGMENT_FALLBACKS[seg] || SEGMENT_FALLBACKS.general
+  const hash = postSlug.split('').reduce((a, c) => a + c.charCodeAt(0), 0)
+  return pool[hash % pool.length]
+}
+
+const resolvedImage = isGenericImage ? pickFallback(segment, slug) : featuredImage
+
 // Format date
 const formattedDate = new Date(publishDate).toLocaleDateString('en-US', {
   year: 'numeric',
@@ -57,9 +94,9 @@ const variantClasses = {
   {variant === 'compact' ? (
     <!-- Compact layout: horizontal -->
     <Fragment>
-      {featuredImage && (
+      {resolvedImage && (
         <img
-          src={featuredImage}
+          src={resolvedImage}
           alt={title}
           class="w-24 h-24 rounded-lg object-cover flex-shrink-0"
           loading="lazy"
@@ -83,10 +120,10 @@ const variantClasses = {
   ) : (
     <!-- Card/Featured layout: vertical -->
     <Fragment>
-      {featuredImage && (
+      {resolvedImage && (
         <a href={`/blog/${slug}/`} class="block aspect-video overflow-hidden">
           <img
-            src={featuredImage}
+            src={resolvedImage}
             alt={title}
             class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
             loading="lazy"

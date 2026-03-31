@@ -38,3 +38,4 @@ screenshots/
 
 # jetbrains setting folder
 .idea/
+go-live-state.json
