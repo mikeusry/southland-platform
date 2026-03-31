@@ -81,6 +81,7 @@ export interface PersonaScores {
     broilerBill: number // Commercial poultry
     backyardBetty: number // Backyard flock
     turfTaylor: number // Lawn professionals
+    mosquitoMary: number // Pest/mosquito control
   }
   /** Is primary score above threshold (0.6)? */
   aligned: boolean
@@ -88,7 +89,7 @@ export interface PersonaScores {
   recommendation?: string
 }
 
-export type PersonaName = 'Broiler Bill' | 'Backyard Betty' | 'Turf Taylor' | 'Unknown'
+export type PersonaName = 'Broiler Bill' | 'Backyard Betty' | 'Turf Pro Taylor' | 'Mosquito Mary' | 'Unknown'
 
 // ============================================================================
 // CONTENT GAP STATUS (from Mothership SQL)

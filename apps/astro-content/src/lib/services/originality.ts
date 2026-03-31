@@ -22,8 +22,9 @@ interface OriginalityApiResponse {
 export async function checkOriginality(
   content: string
 ): Promise<{ originality: OriginalityScore; aiDetection: AIDetectionScore }> {
-  const apiKey = import.meta.env.ORIGINALITY_API_KEY
-  const enabled = import.meta.env.ENABLE_ORIGINALITY_CHECK === 'true'
+  const apiKey = import.meta.env.ORIGINALITY_API_KEY || process.env.ORIGINALITY_API_KEY
+  const rawEnabled = import.meta.env.ENABLE_ORIGINALITY_CHECK ?? process.env.ENABLE_ORIGINALITY_CHECK
+  const enabled = rawEnabled === true || rawEnabled === 'true'
 
   // Check if disabled
   if (!enabled || !apiKey) {

@@ -222,6 +222,7 @@ export async function scorePersonas(
       broilerBill: 0,
       backyardBetty: 0,
       turfTaylor: 0,
+      mosquitoMary: 0,
     }
 
     const nameMap: Record<string, string> = {
@@ -230,13 +231,19 @@ export async function scorePersonas(
       'backyard-betty': 'backyardBetty',
       backyard: 'backyardBetty',
       'turf-taylor': 'turfTaylor',
+      'turf-pro-taylor': 'turfTaylor',
+      'turf pro taylor': 'turfTaylor',
       lawn: 'turfTaylor',
+      'mosquito-mary': 'mosquitoMary',
+      'mosquito mary': 'mosquitoMary',
     }
 
     for (const persona of personas) {
       const key = nameMap[persona.slug] || nameMap[persona.name?.toLowerCase()]
       if (key) {
         scores[key] = Math.max(scores[key], persona.similarity)
+      } else {
+        console.warn(`[mothership] scorePersonas: unmapped persona slug="${persona.slug}" name="${persona.name}" similarity=${persona.similarity}`)
       }
     }
 
@@ -247,12 +254,13 @@ export async function scorePersonas(
     const displayNames: Record<string, PersonaScores['primary']['name']> = {
       broilerBill: 'Broiler Bill',
       backyardBetty: 'Backyard Betty',
-      turfTaylor: 'Turf Taylor',
+      turfTaylor: 'Turf Pro Taylor',
+      mosquitoMary: 'Mosquito Mary',
     }
 
     return {
       primary: {
-        name: displayNames[primaryKey] || 'Unknown',
+        name: displayNames[primaryKey] ?? 'Unknown',
         slug: primaryKey.replace(/([A-Z])/g, '-$1').toLowerCase(),
         score: primaryScore,
       },

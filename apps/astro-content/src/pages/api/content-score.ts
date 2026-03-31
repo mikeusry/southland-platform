@@ -267,7 +267,7 @@ export const POST: APIRoute = async ({ request }) => {
       // Persona scoring failed — don't fake it
       response.persona = {
         primary: { name: 'Unknown', slug: 'unknown', score: 0 },
-        scores: { broilerBill: 0, backyardBetty: 0, turfTaylor: 0 },
+        scores: { broilerBill: 0, backyardBetty: 0, turfTaylor: 0, mosquitoMary: 0 },
         aligned: false,
         recommendation: 'Persona scoring unavailable — check Mothership connection',
       }

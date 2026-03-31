@@ -4,6 +4,29 @@
  * Fetches live page data from Southland Supabase (crawled),
  * fetches new page rendered HTML, computes deltas and verdict.
  */
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+
+// =============================================================================
+// SUPABASE CLIENT
+// =============================================================================
+
+let _southlandClient: SupabaseClient | null = null
+
+function getSouthlandClient(): SupabaseClient | null {
+  if (_southlandClient) return _southlandClient
+
+  const url = import.meta.env.MOTHERSHIP_SUPABASE_URL
+  const key = import.meta.env.MOTHERSHIP_SUPABASE_SERVICE_KEY
+
+  if (!url || !key) {
+    console.warn('[compare] Supabase env vars not set — getAllLiveUrls disabled')
+    return null
+  }
+
+  _southlandClient = createClient(url, key)
+  return _southlandClient
+}
+
 // =============================================================================
 // TYPES
 // =============================================================================

@@ -1,932 +1,1127 @@
 ---
 /**
- * Go-Live Readiness Dashboard
+ * Go-Live Readiness — Page Audit Pipeline
  *
- * Focused comparison of ~40 critical revenue pages.
- * Uses /api/go-live/compare to fetch live vs new data.
+ * Pipeline-style audit console for DNS cutover readiness.
+ * Leads Pipeline pattern: summary cards → compact table → side drawer.
  */
 import AdminLayout from '../../../layouts/AdminLayout.astro'
 
-const CRITICAL_PAGES = [
-  // Homepage
-  { livePath: '/', label: 'Homepage', priority: 'critical', group: 'Homepage' },
-
-  // Persona Landers
-  { livePath: '/collections/poultry', label: 'Poultry Hub', priority: 'critical', group: 'Persona Landers' },
-  { livePath: '/collections/poultry-broilers', label: 'Broiler Bill Landing', priority: 'critical', group: 'Persona Landers' },
-  { livePath: '/collections/backyard-birds', label: 'Backyard Betty Landing', priority: 'critical', group: 'Persona Landers' },
-  { livePath: '/collections/poultry-breeders', label: 'Breeders Landing', priority: 'critical', group: 'Persona Landers' },
-  { livePath: '/collections/turkey', label: 'Turkey Landing', priority: 'critical', group: 'Persona Landers' },
-  { livePath: '/collections/game-birds', label: 'Game Birds Landing', priority: 'critical', group: 'Persona Landers' },
-  { livePath: '/collections/turf', label: 'Lawn & Garden Hub', priority: 'critical', group: 'Persona Landers' },
-
-  // Collections (new IA)
-  { livePath: '/collections/golf-courses', label: 'Golf Courses', priority: 'high', group: 'Collections' },
-  { livePath: '/collections/homeowners', label: 'Homeowners', priority: 'high', group: 'Collections' },
-  { livePath: '/collections/landscapers', label: 'Landscapers', priority: 'high', group: 'Collections' },
-  { livePath: '/collections/crops', label: 'Crops', priority: 'high', group: 'Collections' },
-  { livePath: '/collections/produce', label: 'Produce', priority: 'high', group: 'Collections' },
-  { livePath: '/collections/pig-and-swine-supplements', label: 'Swine', priority: 'high', group: 'Collections' },
-  { livePath: '/collections/sanitizers', label: 'Sanitizers', priority: 'high', group: 'Collections' },
-  { livePath: '/collections/waste', label: 'Waste Treatment', priority: 'high', group: 'Collections' },
-
-  // Info Pages
-  { livePath: '/pages/about-us', label: 'About', priority: 'high', group: 'Info Pages' },
-  { livePath: '/pages/contact-us', label: 'Contact', priority: 'high', group: 'Info Pages' },
-  { livePath: '/pages/distribution', label: 'Distribution', priority: 'medium', group: 'Info Pages' },
-  { livePath: '/pages/store-locator', label: 'Store Locator', priority: 'medium', group: 'Info Pages' },
-
-  // Commerce
-  { livePath: '/pages/build-a-case', label: 'Build-a-Case', priority: 'high', group: 'Commerce' },
+// ---------------------------------------------------------------------------
+// Pages with classification data
+// ---------------------------------------------------------------------------
+const pages = [
+  { path: '/poultry/commercial/', label: 'Broiler Bill Landing', archetype: 'storybrand-landing', persona: 'bill', referencePage: null, priority: 'critical', group: 'StoryBrand Landings', type: 'audit' },
+  { path: '/poultry/backyard/', label: 'Backyard Betty Landing', archetype: 'storybrand-landing', persona: 'betty', referencePage: '/poultry/commercial/', priority: 'critical', group: 'StoryBrand Landings', type: 'audit' },
+  { path: '/poultry/breeders/', label: 'Breeders Landing', archetype: 'storybrand-landing', persona: 'bill', referencePage: '/poultry/commercial/', priority: 'critical', group: 'StoryBrand Landings', type: 'audit' },
+  { path: '/poultry/turkey/', label: 'Turkey Landing', archetype: 'storybrand-landing', persona: 'bill', referencePage: '/poultry/commercial/', priority: 'critical', group: 'StoryBrand Landings', type: 'audit' },
+  { path: '/poultry/game-birds/', label: 'Game Birds Landing', archetype: 'storybrand-landing', persona: 'bill', referencePage: '/poultry/commercial/', priority: 'critical', group: 'StoryBrand Landings', type: 'audit' },
+  { path: '/lawn/turf-pros/', label: 'Turf Pro Landing', archetype: 'storybrand-landing', persona: 'taylor', referencePage: '/poultry/commercial/', priority: 'critical', group: 'StoryBrand Landings', type: 'audit' },
+  { path: '/lawn/golf-courses/', label: 'Golf Courses Landing', archetype: 'storybrand-landing', persona: 'taylor', referencePage: '/poultry/commercial/', priority: 'high', group: 'StoryBrand Landings', type: 'audit' },
+  { path: '/lawn/homeowners/', label: 'Homeowners Landing', archetype: 'storybrand-landing', persona: 'general', referencePage: '/poultry/commercial/', priority: 'high', group: 'StoryBrand Landings', type: 'audit' },
+  { path: '/lawn/landscapers/', label: 'Landscapers Landing', archetype: 'storybrand-landing', persona: 'taylor', referencePage: '/poultry/commercial/', priority: 'high', group: 'StoryBrand Landings', type: 'audit' },
+  { path: '/agriculture/crops/', label: 'Crops Landing', archetype: 'storybrand-landing', persona: 'general', referencePage: '/poultry/commercial/', priority: 'high', group: 'StoryBrand Landings', type: 'audit' },
+  { path: '/agriculture/produce/', label: 'Produce Landing', archetype: 'storybrand-landing', persona: 'general', referencePage: '/poultry/commercial/', priority: 'high', group: 'StoryBrand Landings', type: 'audit' },
+  { path: '/livestock/swine/', label: 'Swine Landing', archetype: 'storybrand-landing', persona: 'general', referencePage: '/poultry/commercial/', priority: 'high', group: 'StoryBrand Landings', type: 'audit' },
+  { path: '/hydroseeders/', label: 'Hydroseeders Landing', archetype: 'storybrand-landing', persona: 'taylor', referencePage: '/poultry/commercial/', priority: 'high', group: 'StoryBrand Landings', type: 'audit' },
+  { path: '/poultry/', label: 'Poultry Hub', archetype: 'hub', persona: 'general', referencePage: null, priority: 'critical', group: 'Hub Pages', type: 'audit' },
+  { path: '/lawn/', label: 'Lawn Hub', archetype: 'hub', persona: 'general', referencePage: '/poultry/', priority: 'high', group: 'Hub Pages', type: 'audit' },
+  { path: '/blog/', label: 'Blog Index', archetype: 'hub', persona: 'general', referencePage: null, priority: 'high', group: 'Hub Pages', type: 'audit' },
+  { path: '/podcast/', label: 'Podcast Hub', archetype: 'hub', persona: 'general', referencePage: null, priority: 'high', group: 'Hub Pages', type: 'audit' },
+  { path: '/about/', label: 'About', archetype: 'utility', persona: 'general', referencePage: '/contact/', priority: 'high', group: 'Utility Pages', type: 'audit' },
+  { path: '/contact/', label: 'Contact', archetype: 'utility', persona: 'general', referencePage: null, priority: 'high', group: 'Utility Pages', type: 'audit' },
+  { path: '/distribution/', label: 'Distribution', archetype: 'utility', persona: 'general', referencePage: '/contact/', priority: 'medium', group: 'Utility Pages', type: 'audit' },
+  { path: '/store-locator/', label: 'Store Locator', archetype: 'utility', persona: 'general', referencePage: '/contact/', priority: 'medium', group: 'Utility Pages', type: 'audit' },
+  { path: '/team/', label: 'Team', archetype: 'utility', persona: 'general', referencePage: '/contact/', priority: 'medium', group: 'Utility Pages', type: 'audit' },
+  { path: '/podcast/guests/', label: 'Podcast Guests', archetype: 'utility', persona: 'general', referencePage: '/podcast/', priority: 'medium', group: 'Utility Pages', type: 'audit' },
+  { path: '/podcast/topics/', label: 'Podcast Topics', archetype: 'utility', persona: 'general', referencePage: '/podcast/', priority: 'medium', group: 'Utility Pages', type: 'audit' },
+  { path: '/build-a-case/', label: 'Build a Case', archetype: 'shop', persona: 'general', referencePage: null, priority: 'high', group: 'Shop Pages', type: 'audit' },
+  { path: '/products/', label: 'Products Index', archetype: 'shop', persona: 'general', referencePage: null, priority: 'high', group: 'Shop Pages', type: 'audit' },
+  { path: '/products/sanitizers/', label: 'Sanitizers', archetype: 'shop', persona: 'general', referencePage: null, priority: 'medium', group: 'Shop Pages', type: 'audit' },
+  { path: '/products/waste-treatment/', label: 'Waste Treatment', archetype: 'shop', persona: 'general', referencePage: null, priority: 'medium', group: 'Shop Pages', type: 'audit' },
+  { path: '/blog/how-do-plants-get-nutrients-cation-exchange-capacity-cec-explained/', label: 'Sample Blog (CEC)', archetype: 'content', persona: 'general', referencePage: null, priority: 'medium', group: 'Content Samples', type: 'audit' },
+  { path: '/', label: 'Homepage', archetype: 'proxy', persona: 'general', referencePage: null, priority: 'critical', group: 'Proxy Pass-through', type: 'check' },
+  { path: '/products/big-ole-bird', label: 'Sample PDP', archetype: 'proxy', persona: 'general', referencePage: null, priority: 'medium', group: 'Proxy Pass-through', type: 'check' },
+  { path: '/cart/', label: 'Cart', archetype: 'proxy', persona: 'general', referencePage: null, priority: 'medium', group: 'Proxy Pass-through', type: 'check' },
+  { path: '/collections/all', label: 'All Products', archetype: 'proxy', persona: 'general', referencePage: null, priority: 'medium', group: 'Proxy Pass-through', type: 'check' },
 ]
 
-// Group pages
-const groups: Record<string, typeof CRITICAL_PAGES> = {}
-for (const page of CRITICAL_PAGES) {
-  if (!groups[page.group]) groups[page.group] = []
-  groups[page.group].push(page)
+const pageGroupOrder = ['StoryBrand Landings', 'Hub Pages', 'Utility Pages', 'Shop Pages', 'Content Samples', 'Proxy Pass-through']
+const groupShortNames: Record<string, string> = { 'StoryBrand Landings': 'STORYBRAND', 'Hub Pages': 'HUB', 'Utility Pages': 'UTILITY', 'Shop Pages': 'SHOP', 'Content Samples': 'CONTENT', 'Proxy Pass-through': 'PROXY' }
+
+function groupBy<T extends { group: string }>(items: T[]): Map<string, T[]> {
+  const map = new Map<string, T[]>()
+  for (const item of items) {
+    if (!map.has(item.group)) map.set(item.group, [])
+    map.get(item.group)!.push(item)
+  }
+  return map
 }
-const groupOrder = ['Homepage', 'Persona Landers', 'Collections', 'Info Pages', 'Commerce']
-const totalPages = CRITICAL_PAGES.length
+
+const pageGroups = groupBy(pages)
+const totalPages = pages.length
+const auditableCount = pages.filter(p => p.type === 'audit').length
 ---
 
-<AdminLayout title="Go Live Readiness" activeNav="/admin/go-live">
-  <div class="page-header">
-    <h1 class="page-title">Go-Live Readiness</h1>
-    <p class="page-subtitle">Compare {totalPages} critical pages — live Shopify vs new Astro</p>
+<AdminLayout title="Go Live" activeNav="/admin/go-live">
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <button class="scard scard--ship" data-filter="ship">
+      <div class="scard__num" id="count-ship">0</div>
+      <div class="scard__label" id="label-ship">Ship</div>
+    </button>
+    <button class="scard scard--fix" data-filter="fix">
+      <div class="scard__num" id="count-fix">0</div>
+      <div class="scard__label" id="label-fix">Fix</div>
+    </button>
+    <button class="scard scard--rewrite" data-filter="rewrite">
+      <div class="scard__num" id="count-rewrite">0</div>
+      <div class="scard__label" id="label-rewrite">Rewrite</div>
+    </button>
+    <button class="scard scard--unaudited" data-filter="unaudited">
+      <div class="scard__num" id="count-unaudited">{totalPages}</div>
+      <div class="scard__label" id="label-unaudited">Not Audited</div>
+    </button>
   </div>
 
-  <!-- Readiness bar -->
-  <div class="readiness-bar">
-    <div class="readiness-stats" id="readiness-stats">
-      <span class="readiness-label">Critical: <strong id="reviewed-count">0</strong>/{totalPages} reviewed.</span>
-      <span class="readiness-dot dot-green"></span><strong id="green-count">0</strong> green
-      <span class="readiness-dot dot-amber"></span><strong id="amber-count">0</strong> amber
-      <span class="readiness-dot dot-red"></span><strong id="red-count">0</strong> red
-    </div>
-    <div class="readiness-meta">Live site crawl: Dec 31, 2025</div>
+  <!-- Progress + controls -->
+  <div class="controls-row">
+    <span class="progress-text" id="progress-text">0/{totalPages} approved</span>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    <label class="critical-toggle">
+      <input type="checkbox" id="critical-only" /> <span id="critical-label">Critical only</span>
+    </label>
+    <button class="btn btn-sm btn-primary" id="audit-all-btn">Audit All ({auditableCount})</button>
+    <button class="btn btn-sm btn-secondary" id="reset-btn">Reset</button>
   </div>
 
-  <!-- Two-column layout -->
-  <div class="go-live-grid">
-    <!-- Left: Page list -->
-    <div class="page-list" id="page-list">
-      {groupOrder.map(groupName => {
-        const pages = groups[groupName] || []
-        return (
-          <div class="page-group">
-            <div class="group-header">
-              <span class="group-name">{groupName}</span>
-              <span class="group-count">{pages.length}</span>
-            </div>
-            {pages.map(page => (
-              <button
-                class="page-row"
-                data-live-path={page.livePath}
-                data-label={page.label}
-                data-priority={page.priority}
-              >
-                <span class="status-dot dot-unchecked" data-dot={page.livePath}></span>
-                <span class="page-label">{page.label}</span>
-                <span class={`priority-badge priority-${page.priority}`}>{page.priority}</span>
-              </button>
-            ))}
-          </div>
-        )
-      })}
-    </div>
+  <!-- Compact Table -->
+  <div class="table-wrap">
+    <table class="audit-table">
+      <thead>
+        <tr>
+          <th class="th-page">Page</th>
+          <th class="th-group">Group</th>
+          <th class="th-grade">Grade</th>
+          <th class="th-grade">Orig</th>
+          <th class="th-grade">Voice</th>
+          <th class="th-verdict">Verdict</th>
+          <th class="th-actions"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {pageGroupOrder.map(groupName => {
+          const groupPages = pageGroups.get(groupName) || []
+          return (
+            <>
+              <tr class="group-row"><td colspan="7">{groupName} <span class="group-count">{groupPages.length}</span></td></tr>
+              {groupPages.map(page => (
+                <tr
+                  class="page-row"
+                  data-path={page.path}
+                  data-archetype={page.archetype}
+                  data-persona={page.persona}
+                  data-reference={page.referencePage || ''}
+                  data-page-type={page.type}
+                  data-priority={page.priority}
+                  data-status="pending"
+                  data-verdict=""
+                  data-group={groupShortNames[page.group] || page.group}
+                >
+                  <td class="td-page">
+                    <div class="page-info">
+                      <div class="page-name">{page.label}</div>
+                      <div class="page-path">{page.path}</div>
+                    </div>
+                  </td>
+                  <td class="td-group">{groupShortNames[page.group]}</td>
+                  <td class="td-grade"><span class="grade-slot" id={`g-${page.path}`}>—</span></td>
+                  <td class="td-grade"><span class="grade-slot" id={`o-${page.path}`}>—</span></td>
+                  <td class="td-grade"><span class="grade-slot" id={`vd-${page.path}`}>—</span></td>
+                  <td class="td-verdict"><span class="verdict-slot" id={`v-${page.path}`}>—</span></td>
+                  <td class="td-actions">
+                    <a class="icon-link" href={page.path} target="_blank" rel="noopener" title="Open page">&#x2197;</a>
+                    <button class="btn btn-sm btn-secondary action-btn" data-action="audit">{page.type === 'audit' ? 'Audit' : 'Check'}</button>
+                  </td>
+                </tr>
+              ))}
+            </>
+          )
+        })}
+      </tbody>
+    </table>
+  </div>
 
-    <!-- Right: Result panel -->
-    <div class="result-panel" id="result-panel">
-      <div class="empty-state" id="empty-state">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="1.5">
-          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-        </svg>
-        <p>Select a page to compare</p>
+  <!-- Drawer backdrop -->
+  <div class="drawer-backdrop" id="drawer-backdrop" style="display:none"></div>
+
+  <!-- Side Drawer -->
+  <div class="drawer" id="audit-drawer">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title" id="drawer-title"></div>
+        <div class="drawer-path" id="drawer-path"></div>
+        <div class="drawer-meta" id="drawer-meta"></div>
       </div>
-      <div class="loading-state" id="loading-state" style="display:none">
-        <div class="spinner"></div>
-        <p>Comparing pages...</p>
-      </div>
-      <div class="result-content" id="result-content" style="display:none"></div>
+      <button class="drawer-close" id="drawer-close">&times;</button>
     </div>
+    <div class="drawer-body" id="drawer-body"></div>
+    <div class="drawer-footer" id="drawer-footer"></div>
   </div>
-</AdminLayout>
 
-<style>
-  /* Readiness bar */
-  .readiness-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 12px 20px;
-    margin-bottom: 20px;
-  }
-
-  .readiness-stats {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    color: var(--text);
-  }
-
-  .readiness-label {
-    margin-right: 8px;
-  }
-
-  .readiness-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-left: 8px;
-  }
-
-  .readiness-meta {
-    font-size: 12px;
-    color: var(--text-tertiary);
-  }
-
-  /* Two-column grid */
-  .go-live-grid {
+<style is:global>
+  /* ── Summary Cards ─────────────────────────────────────────── */
+  .summary-cards {
     display: grid;
-    grid-template-columns: 350px 1fr;
-    gap: 20px;
-    align-items: start;
-  }
-
-  @media (max-width: 900px) {
-    .go-live-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  /* Page list (left column) */
-  .page-list {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow-y: auto;
-    max-height: calc(100vh - 200px);
-  }
-
-  .page-group {
-    border-bottom: 1px solid var(--border-subtle);
-  }
-
-  .page-group:last-child {
-    border-bottom: none;
-  }
-
-  .group-header {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 16px;
-    background: var(--surface-alt);
-    border-bottom: 1px solid var(--border-subtle);
-  }
-
-  .group-name {
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--text-secondary);
-  }
-
-  .group-count {
-    font-size: 11px;
-    color: var(--text-tertiary);
-    background: var(--bg);
-    padding: 1px 6px;
-    border-radius: 8px;
-  }
-
-  /* Page rows */
-  .page-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    padding: 8px 12px;
-    border: none;
-    background: none;
-    cursor: pointer;
-    font-family: var(--font);
-    font-size: 13px;
-    color: var(--text);
-    text-align: left;
-    transition: background 0.1s;
-    border-left: 3px solid transparent;
-  }
-
-  .page-row:hover {
-    background: var(--bg);
-  }
-
-  .page-row.selected {
-    background: var(--accent-light);
-    border-left-color: var(--accent);
-  }
-
-  .page-label {
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  /* Status dots */
-  .status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .dot-unchecked { background: #d4d4d8; }
-  .dot-green { background: #22c55e; }
-  .dot-amber { background: #f59e0b; }
-  .dot-red { background: #ef4444; }
-
-  /* Priority badges */
-  .priority-badge {
-    font-size: 10px;
-    font-weight: 500;
-    padding: 1px 6px;
-    border-radius: 3px;
-    flex-shrink: 0;
-  }
-
-  .priority-critical {
-    background: var(--error-light);
-    color: #991b1b;
-  }
-
-  .priority-high {
-    background: var(--warning-light);
-    color: #92400e;
-  }
-
-  .priority-medium {
-    background: var(--surface-alt);
-    color: var(--text-secondary);
-  }
-
-  /* Result panel (right column) */
-  .result-panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-    min-height: 400px;
-  }
-
-  .empty-state, .loading-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    grid-template-columns: repeat(4, 1fr);
     gap: 12px;
-    min-height: 300px;
-    color: var(--text-tertiary);
-    font-size: 14px;
+    margin-bottom: 12px;
   }
-
-  /* Spinner */
-  .spinner {
-    width: 32px;
-    height: 32px;
-    border: 3px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+  .scard {
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    border: 2px solid transparent;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    font-family: var(--font);
   }
+  .scard:hover { box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .scard.active { border-color: currentColor; }
+  .scard__num { font-size: 26px; font-weight: 700; font-family: var(--font-mono); line-height: 1; }
+  .scard__label { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+  .scard--ship { background: #dcfce7; }
+  .scard--ship .scard__num { color: #166534; }
+  .scard--fix { background: #fef3c7; }
+  .scard--fix .scard__num { color: #92400e; }
+  .scard--rewrite { background: #fee2e2; }
+  .scard--rewrite .scard__num { color: #991b1b; }
+  .scard--unaudited { background: #e5e7eb; }
+  .scard--unaudited .scard__num { color: #6b7280; }
 
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  /* Result content styles */
-  .result-content :global(.result-header) {
-    margin-bottom: 20px;
-  }
-
-  .result-content :global(.path-mapping) {
+  /* ── Controls Row ──────────────────────────────────────────── */
+  .controls-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
     font-size: 13px;
     color: var(--text-secondary);
-    margin-bottom: 8px;
-    font-family: var(--font-mono);
   }
-
-  .result-content :global(.path-arrow) {
-    color: var(--accent);
-    margin: 0 6px;
+  .progress-text { white-space: nowrap; font-weight: 500; }
+  .progress-track {
+    flex: 1;
+    height: 4px;
+    background: var(--surface-alt);
+    border-radius: 2px;
+    overflow: hidden;
+    min-width: 80px;
   }
-
-  .result-content :global(.verdict-badge) {
-    display: inline-flex;
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+  .critical-toggle {
+    display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
+    gap: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    color: var(--text-secondary);
+  }
+  .critical-toggle input { accent-color: var(--accent); }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+  .btn-primary { background: var(--accent); color: white; border: 1px solid var(--accent); }
+  .btn-primary:hover { opacity: 0.9; }
+
+  /* ── Table ──────────────────────────────────────────────────── */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: var(--radius);
-    font-size: 16px;
-    font-weight: 600;
-    color: white;
+    overflow: hidden;
   }
-
-  .result-content :global(.verdict-green) { background: #22c55e; }
-  .result-content :global(.verdict-amber) { background: #f59e0b; }
-  .result-content :global(.verdict-red) { background: #ef4444; }
-
-  .result-content :global(.verdict-score) {
-    font-size: 22px;
-    font-weight: 700;
-  }
-
-  /* Comparison table */
-  .result-content :global(.compare-table) {
+  .audit-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 13px;
-    margin: 16px 0;
   }
-
-  .result-content :global(.compare-table th) {
+  .audit-table thead th {
+    padding: 6px 12px;
     text-align: left;
-    padding: 8px 12px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-tertiary);
     background: var(--surface-alt);
     border-bottom: 1px solid var(--border);
+  }
+  .th-grade, .th-verdict { text-align: center; width: 60px; }
+  .th-group { width: 100px; }
+  .th-actions { width: 100px; }
+
+  .group-row td {
+    padding: 5px 12px;
+    font-size: 10px;
     font-weight: 600;
-    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-tertiary);
+    background: var(--surface-alt);
+    border-top: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .group-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 16px;
+    padding: 0 5px;
+    border-radius: 8px;
+    background: var(--surface);
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-left: 4px;
+  }
+
+  .page-row {
+    border-bottom: 1px solid var(--border-subtle);
+    border-left: 3px solid var(--border);
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .page-row:hover { background: var(--surface-alt); }
+  .page-row.selected { background: rgba(68,136,62,0.06); }
+  .page-row[data-verdict="ship"] { border-left-color: #22c55e; }
+  .page-row[data-verdict="fix"] { border-left-color: #f59e0b; }
+  .page-row[data-verdict="rewrite"] { border-left-color: #ef4444; }
+  .page-row[data-status="flagged"] { border-left-color: #ef4444; }
+  .page-row[data-status="approved"] { opacity: 0.6; }
+  .page-row[data-status="approved"]:hover { opacity: 0.85; }
+
+  .td-page {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px;
+  }
+  .page-info { min-width: 0; }
+  .page-name { font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .page-path { font-size: 11px; color: var(--text-tertiary); font-family: var(--font-mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
+
+  .td-group {
+    padding: 7px 8px;
+    font-size: 10px;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.3px;
-    color: var(--text-secondary);
-  }
-
-  .result-content :global(.compare-table td) {
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--border-subtle);
-    vertical-align: top;
-  }
-
-  .result-content :global(.compare-table tr:nth-child(even)) {
-    background: var(--surface-alt);
-  }
-
-  .result-content :global(.row-improved) {
-    background: #f0fdf4 !important;
-  }
-
-  .result-content :global(.row-regressed) {
-    background: #fef2f2 !important;
-  }
-
-  .result-content :global(.field-label) {
-    font-weight: 500;
-    white-space: nowrap;
-    color: var(--text-secondary);
-    width: 120px;
-  }
-
-  .result-content :global(.cell-live),
-  .result-content :global(.cell-new) {
-    max-width: 280px;
-    word-break: break-word;
-  }
-
-  .result-content :global(.delta-indicator) {
-    font-size: 11px;
-    font-weight: 500;
-    padding: 1px 6px;
-    border-radius: 3px;
-  }
-
-  .result-content :global(.delta-up) {
-    background: var(--success-light);
-    color: #166534;
-  }
-
-  .result-content :global(.delta-down) {
-    background: var(--error-light);
-    color: #991b1b;
-  }
-
-  .result-content :global(.delta-same) {
-    background: var(--surface-alt);
     color: var(--text-tertiary);
   }
+  .td-grade, .td-verdict { text-align: center; padding: 7px 8px; }
+  .grade-slot { font-size: 12px; font-weight: 700; font-family: var(--font-mono); color: var(--text-tertiary); }
+  .verdict-slot { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; color: var(--text-tertiary); }
 
-  /* Products section */
-  .result-content :global(.products-section) {
-    margin: 16px 0;
+  .grade-A { color: #166534; }
+  .grade-B { color: #1e40af; }
+  .grade-C { color: #92400e; }
+  .grade-D { color: #991b1b; }
+  .grade-F { color: #fff; background: #991b1b; padding: 1px 5px; border-radius: 3px; }
+  .verdict-ship { color: #166534; }
+  .verdict-fix { color: #92400e; }
+  .verdict-rewrite { color: #991b1b; }
+
+  .td-actions {
+    padding: 7px 12px;
+    text-align: right;
+    white-space: nowrap;
   }
-
-  .result-content :global(.products-section h4) {
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    color: var(--text-secondary);
-    margin-bottom: 8px;
-  }
-
-  .result-content :global(.product-tag) {
-    display: inline-block;
-    font-size: 12px;
-    padding: 2px 8px;
-    border-radius: 3px;
-    margin: 2px 4px 2px 0;
-    font-family: var(--font-mono);
-  }
-
-  .result-content :global(.product-kept) {
-    background: var(--success-light);
-    color: #166534;
-  }
-
-  .result-content :global(.product-lost) {
-    background: var(--error-light);
-    color: #991b1b;
-  }
-
-  .result-content :global(.product-added) {
-    background: #dbeafe;
-    color: #1e40af;
-  }
-
-  /* Issues / Improvements / Warnings */
-  .result-content :global(.feedback-section) {
-    margin: 16px 0;
-  }
-
-  .result-content :global(.feedback-list) {
-    list-style: none;
-    padding: 0;
-  }
-
-  .result-content :global(.feedback-list li) {
-    padding: 4px 0;
+  .icon-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 5px;
     font-size: 13px;
+    color: var(--text-tertiary);
+    text-decoration: none;
+    border-radius: 3px;
+  }
+  .icon-link:hover { background: var(--surface-alt); color: var(--text); }
+  .action-btn { margin-left: 4px; }
+
+  /* ── Drawer ─────────────────────────────────────────────────── */
+  .drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background: rgba(0,0,0,0.12);
+  }
+  .drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    width: 520px;
+    max-width: 100vw;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    box-shadow: -4px 0 20px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.2s ease;
+  }
+  .drawer.open { transform: translateX(0); }
+  .drawer-header {
     display: flex;
     align-items: flex-start;
-    gap: 6px;
-  }
-
-  .result-content :global(.feedback-icon) {
+    justify-content: space-between;
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--border);
     flex-shrink: 0;
-    width: 16px;
-    height: 16px;
-    margin-top: 2px;
   }
-
-  .result-content :global(.section-label) {
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    margin-bottom: 6px;
-  }
-
-  .result-content :global(.section-label-issues) { color: #991b1b; }
-  .result-content :global(.section-label-improvements) { color: #166534; }
-  .result-content :global(.section-label-warnings) { color: #92400e; }
-
-  /* Actions */
-  .result-content :global(.actions-bar) {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin: 20px 0 12px;
-    padding-top: 16px;
-    border-top: 1px solid var(--border);
-  }
-
-  .result-content :global(.action-btn) {
-    padding: 8px 16px;
+  .drawer-title { font-size: 15px; font-weight: 600; color: var(--text); }
+  .drawer-path { font-size: 11px; color: var(--text-tertiary); font-family: var(--font-mono); margin-top: 2px; }
+  .drawer-meta { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
+  .drawer-close {
+    background: none;
     border: none;
-    border-radius: var(--radius);
-    font-family: var(--font);
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 20px;
     cursor: pointer;
-    color: white;
-    transition: opacity 0.15s;
+    color: var(--text-tertiary);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    line-height: 1;
   }
-
-  .result-content :global(.action-btn:hover) {
-    opacity: 0.9;
+  .drawer-close:hover { background: var(--surface-alt); color: var(--text); }
+  .drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 20px;
   }
-
-  .result-content :global(.btn-approve) { background: #22c55e; }
-  .result-content :global(.btn-caveat) { background: #f59e0b; }
-  .result-content :global(.btn-retired) { background: #6b7280; }
-  .result-content :global(.btn-needs-work) { background: #ef4444; }
-
-  .result-content :global(.notes-area) {
-    width: 100%;
-    min-height: 60px;
-    padding: 10px 12px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    font-family: var(--font);
-    font-size: 13px;
-    resize: vertical;
-    margin-top: 8px;
-    color: var(--text);
+  .drawer-footer {
+    flex-shrink: 0;
+    padding: 12px 20px;
+    border-top: 1px solid var(--border);
     background: var(--surface);
   }
 
-  .result-content :global(.notes-area:focus) {
-    outline: none;
-    border-color: var(--accent);
-  }
-
-  .result-content :global(.notes-label) {
-    font-size: 12px;
+  /* Drawer sections */
+  .dsection { margin-bottom: 14px; }
+  .dsection-title {
+    font-size: 10px;
     font-weight: 600;
-    color: var(--text-secondary);
     text-transform: uppercase;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.5px;
+    color: var(--text-tertiary);
+    margin-bottom: 6px;
+  }
+  .dclass-row {
+    display: flex;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    flex-wrap: wrap;
+  }
+  .dclass-row strong { color: var(--text); }
+
+  .dgrades {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .dgrades strong { font-family: var(--font-mono); font-weight: 700; }
+
+  .dcat {
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    margin-bottom: 4px;
+    overflow: hidden;
+  }
+  .dcat-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    user-select: none;
+  }
+  .dcat-header:hover { background: var(--surface-alt); }
+  .dcat-toggle { font-size: 9px; color: var(--text-tertiary); transition: transform 0.15s; }
+  .dcat.open .dcat-toggle { transform: rotate(90deg); }
+  .dcat-grade { margin-left: auto; font-family: var(--font-mono); font-weight: 700; font-size: 11px; }
+  .dcat-body { display: none; padding: 0 10px 6px; font-size: 12px; }
+  .dcat.open .dcat-body { display: block; }
+
+  .dcheck {
+    display: flex;
+    align-items: flex-start;
+    gap: 5px;
+    padding: 3px 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .dcheck:last-child { border-bottom: none; }
+  .dcheck-icon { flex-shrink: 0; width: 14px; text-align: center; font-size: 11px; }
+  .dcheck-label { color: var(--text); }
+  .dcheck-detail { color: var(--text-tertiary); font-size: 11px; }
+  .chk-pass { color: #166534; }
+  .chk-fail { color: #991b1b; }
+  .chk-warn { color: #92400e; }
+
+  /* Deep scan */
+  .deep-section {
+    padding: 10px 12px;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 14px;
+  }
+  .deep-btn {
+    padding: 5px 12px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .deep-hint { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
+
+  /* Actions list */
+  .dactions { margin-bottom: 14px; }
+  .daction-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0;
+    font-size: 12px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .daction-row:last-child { border-bottom: none; }
+  .daction-num { font-weight: 600; color: var(--text-tertiary); min-width: 18px; }
+  .daction-type {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 5px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .dtype-fix { background: #fef3c7; color: #92400e; }
+  .dtype-rewrite { background: #fee2e2; color: #991b1b; }
+  .dtype-add { background: #dbeafe; color: #1e40af; }
+  .daction-text { flex: 1; color: var(--text); }
+
+  /* Footer review actions */
+  .review-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .btn-approve { background: #dcfce7; color: #166534; border: 1px solid transparent; }
+  .btn-approve:hover, .btn-approve.active { background: #22c55e; color: white; }
+  .btn-flag { background: #fee2e2; color: #991b1b; border: 1px solid transparent; }
+  .btn-flag:hover, .btn-flag.active { background: #ef4444; color: white; }
+  .btn-skip { background: var(--surface-alt); color: var(--text-secondary); border: 1px solid transparent; }
+  .btn-skip:hover, .btn-skip.active { background: var(--text-tertiary); color: white; }
+  .note-input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font);
+    font-size: 12px;
+    resize: vertical;
+    min-height: 32px;
   }
 
-  .result-content :global(.no-data-msg) {
-    color: var(--text-tertiary);
-    font-size: 13px;
-    font-style: italic;
+  @media (max-width: 900px) {
+    .summary-cards { grid-template-columns: repeat(2, 1fr); }
+    .controls-row { flex-wrap: wrap; }
+    .drawer { width: 100vw; }
   }
 </style>
 
 <script is:inline>
-  // =========================================================================
+  // ═══════════════════════════════════════════════════════════════════════════
   // STATE
-  // =========================================================================
+  // ═══════════════════════════════════════════════════════════════════════════
+  var STORAGE_KEY = 'southland_go_live_v3'
+  var FILTER_KEY = 'southland_go_live_filter'
+  var TOTAL_PAGES = document.querySelectorAll('.page-row').length
 
-  const STORAGE_KEY = 'southland_go_live'
+  function emptyState() { return { _version: 3, _infra: {}, pages: {} } }
 
-  function loadState() {
+  function loadStateLocal() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY)
-      return raw ? JSON.parse(raw) : {}
-    } catch {
-      return {}
+      var raw = localStorage.getItem(STORAGE_KEY)
+      if (!raw) return null
+      var s = JSON.parse(raw)
+      return s._version === 3 ? s : null
+    } catch (e) { return null }
+  }
+
+  async function loadStateFromFile() {
+    try {
+      var res = await fetch('/api/go-live/state')
+      if (!res.ok) return null
+      var data = await res.json()
+      if (!data || data._version !== 3) return null
+      return data
+    } catch (e) { return null }
+  }
+
+  function mergeStates(fileState, localState) {
+    if (!fileState) return localState || emptyState()
+    if (!localState) return fileState
+    var merged = JSON.parse(JSON.stringify(fileState))
+    for (var path in localState.pages) {
+      var lp = localState.pages[path]
+      var fp = merged.pages[path]
+      if (!fp) { merged.pages[path] = lp; continue }
+      if (lp.reviewedAt && (!fp.reviewedAt || lp.reviewedAt > fp.reviewedAt)) {
+        fp.status = lp.status; fp.reviewedAt = lp.reviewedAt; fp.note = lp.note
+      }
+      if (lp.cached && lp.cached.fetchedAt && (!fp.cached || !fp.cached.fetchedAt || lp.cached.fetchedAt > fp.cached.fetchedAt)) {
+        fp.cached = lp.cached; fp.audit = lp.audit
+      }
+      // Deep scan: keep whichever exists or is newer; tie goes to local
+      if (lp.deepScan && !fp.deepScan) {
+        fp.deepScan = lp.deepScan
+      } else if (lp.deepScan && fp.deepScan && lp.deepScan.scannedAt && (!fp.deepScan.scannedAt || lp.deepScan.scannedAt >= fp.deepScan.scannedAt)) {
+        fp.deepScan = lp.deepScan
+      }
     }
+    for (var k in localState._infra) { if (localState._infra[k]) merged._infra[k] = true }
+    return merged
   }
 
-  function saveState(state) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+  var _saveTimer = null
+  function saveState(s) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(s))
+    clearTimeout(_saveTimer)
+    _saveTimer = setTimeout(function() {
+      fetch('/api/go-live/state', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(s) }).catch(function() {})
+    }, 500)
   }
 
-  // =========================================================================
-  // READINESS BAR
-  // =========================================================================
+  function getPage(state, path) {
+    if (!state.pages[path]) state.pages[path] = { status: null, reviewedAt: null, note: '', cached: null, audit: null, deepScan: null }
+    return state.pages[path]
+  }
 
-  function updateReadiness() {
-    const state = loadState()
-    let reviewed = 0, green = 0, amber = 0, red = 0
+  function esc(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
 
+  function timeAgo(iso) {
+    if (!iso) return 'never'
+    var ms = Date.now() - new Date(iso).getTime()
+    var mins = Math.round(ms / 60000)
+    if (mins < 1) return 'just now'
+    if (mins < 60) return mins + 'm ago'
+    var hrs = Math.round(mins / 60)
+    if (hrs < 24) return hrs + 'h ago'
+    return Math.round(hrs / 24) + 'd ago'
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SUMMARY + FILTERS
+  // ═══════════════════════════════════════════════════════════════════════════
+  var activeFilter = localStorage.getItem(FILTER_KEY) || null
+
+  function updateSummary(state) {
+    var approved = 0, flagged = 0, skipped = 0
+    var ship = 0, fix = 0, rewrite = 0, audited = 0
+    for (var key in state.pages) {
+      var p = state.pages[key]
+      if (p.status === 'approved') approved++
+      else if (p.status === 'flagged') flagged++
+      else if (p.status === 'skipped') skipped++
+      if (p.audit && p.audit.verdict) {
+        audited++
+        if (p.audit.verdict === 'ship') ship++
+        else if (p.audit.verdict === 'fix') fix++
+        else if (p.audit.verdict === 'rewrite') rewrite++
+      }
+    }
+    var unaudited = TOTAL_PAGES - audited
+
+    document.getElementById('count-ship').textContent = ship
+    document.getElementById('label-ship').textContent = ship + ' page' + (ship !== 1 ? 's' : '') + ' \u00B7 ' + (TOTAL_PAGES > 0 ? Math.round(ship / TOTAL_PAGES * 100) : 0) + '%'
+    document.getElementById('count-fix').textContent = fix
+    document.getElementById('label-fix').textContent = fix + ' page' + (fix !== 1 ? 's' : '') + ' \u00B7 ' + (TOTAL_PAGES > 0 ? Math.round(fix / TOTAL_PAGES * 100) : 0) + '%'
+    document.getElementById('count-rewrite').textContent = rewrite
+    document.getElementById('label-rewrite').textContent = rewrite + ' page' + (rewrite !== 1 ? 's' : '') + ' \u00B7 ' + (TOTAL_PAGES > 0 ? Math.round(rewrite / TOTAL_PAGES * 100) : 0) + '%'
+    document.getElementById('count-unaudited').textContent = unaudited
+    document.getElementById('label-unaudited').textContent = unaudited + ' page' + (unaudited !== 1 ? 's' : '') + ' \u00B7 ' + (TOTAL_PAGES > 0 ? Math.round(unaudited / TOTAL_PAGES * 100) : 0) + '%'
+
+    var done = approved + skipped
+    var pct = TOTAL_PAGES > 0 ? Math.round(done / TOTAL_PAGES * 100) : 0
+    document.getElementById('progress-text').textContent = approved + '/' + TOTAL_PAGES + ' approved'
+    document.getElementById('progress-fill').style.width = pct + '%'
+  }
+
+  function applyFilters() {
+    var critOnly = document.getElementById('critical-only').checked
+    var critCount = 0
     document.querySelectorAll('.page-row').forEach(function(row) {
-      const path = row.getAttribute('data-live-path')
-      const dot = row.querySelector('.status-dot')
-      const entry = state[path]
+      var verdict = row.dataset.verdict
+      var priority = row.dataset.priority
+      var show = true
+      if (activeFilter) {
+        if (activeFilter === 'unaudited') show = !verdict
+        else show = verdict === activeFilter
+      }
+      if (show && critOnly) show = priority === 'critical'
+      if (critOnly && priority === 'critical') critCount++
+      row.style.display = show ? '' : 'none'
+    })
+    // Highlight active card
+    document.querySelectorAll('.scard').forEach(function(c) {
+      c.classList.toggle('active', c.dataset.filter === activeFilter)
+    })
+    // Update critical label
+    var critLabel = document.getElementById('critical-label')
+    if (critLabel) critLabel.textContent = critOnly ? 'Critical only \u00B7 ' + critCount + ' pages' : 'Critical only'
+  }
 
-      if (entry && entry.status) {
-        reviewed++
-        dot.className = 'status-dot'
-        if (entry.status === 'approved') {
-          dot.classList.add('dot-green')
-          green++
-        } else if (entry.status === 'caveat') {
-          dot.classList.add('dot-amber')
-          amber++
-        } else if (entry.status === 'retired') {
-          dot.classList.add('dot-amber')
-          amber++
-        } else if (entry.status === 'needs-work') {
-          dot.classList.add('dot-red')
-          red++
-        }
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TABLE ROW BADGES
+  // ═══════════════════════════════════════════════════════════════════════════
+  function updateRowBadges(path, state) {
+    var ps = getPage(state, path)
+    var row = document.querySelector('tr.page-row[data-path="' + path + '"]')
+    if (!row) return
+
+    if (ps.status) row.dataset.status = ps.status
+
+    var gradeEl = document.getElementById('g-' + path)
+    var verdictEl = document.getElementById('v-' + path)
+
+    if (ps.audit && !ps.audit.error) {
+      row.dataset.verdict = ps.audit.verdict
+      row.title = ps.audit.verdict.toUpperCase() + ' \u2014 ' + ps.audit.overallGrade + ' \u2014 Click to view details'
+      if (gradeEl) { gradeEl.textContent = ps.audit.overallGrade; gradeEl.className = 'grade-slot grade-' + ps.audit.overallGrade }
+      if (verdictEl) { verdictEl.textContent = ps.audit.verdict.toUpperCase(); verdictEl.className = 'verdict-slot verdict-' + ps.audit.verdict }
+    }
+
+    // Deep scan columns
+    var origEl = document.getElementById('o-' + path)
+    var vdEl = document.getElementById('vd-' + path)
+    if (ps.deepScan) {
+      if (origEl && ps.deepScan.originality) { origEl.textContent = ps.deepScan.originality.grade; origEl.className = 'grade-slot grade-' + ps.deepScan.originality.grade }
+      if (vdEl && ps.deepScan.voiceDeep) { vdEl.textContent = ps.deepScan.voiceDeep.grade; vdEl.className = 'grade-slot grade-' + ps.deepScan.voiceDeep.grade }
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // AUDIT API
+  // ═══════════════════════════════════════════════════════════════════════════
+  async function auditPage(path, archetype, persona, ref) {
+    var res = await fetch('/api/go-live/audit', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: path, archetype: archetype, persona: persona, referencePage: ref }),
+    })
+    if (!res.ok) throw new Error('Audit API returned ' + res.status)
+    return await res.json()
+  }
+
+  async function checkPage(path) {
+    var res = await fetch(path, { redirect: 'follow' })
+    var html = await res.text()
+    var titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)
+    var bodyText = html.replace(/<script[\s\S]*?<\/script>/gi,'').replace(/<style[\s\S]*?<\/style>/gi,'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()
+    return { ok: res.ok, status: res.status, title: titleMatch ? titleMatch[1].trim() : '(no title)', wordCount: bodyText.split(/\s+/).filter(Boolean).length }
+  }
+
+  async function runCheck(path, state, forceRefresh) {
+    var row = document.querySelector('tr.page-row[data-path="' + path + '"]')
+    if (!row) return
+    var ps = getPage(state, path)
+    var pageType = row.dataset.pageType
+
+    if (!forceRefresh && ps.cached) {
+      openDrawer(path, state)
+      return
+    }
+
+    openDrawer(path, state, true) // show loading in drawer
+
+    try {
+      var result
+      if (pageType === 'audit') {
+        result = await auditPage(path, row.dataset.archetype, row.dataset.persona, row.dataset.reference || null)
+        ps.audit = result
       } else {
-        dot.className = 'status-dot dot-unchecked'
+        result = await checkPage(path)
       }
-    })
-
-    document.getElementById('reviewed-count').textContent = reviewed
-    document.getElementById('green-count').textContent = green
-    document.getElementById('amber-count').textContent = amber
-    document.getElementById('red-count').textContent = red
+      ps.cached = { response: result, fetchedAt: new Date().toISOString() }
+      saveState(state)
+      updateRowBadges(path, state)
+      updateSummary(state)
+      applyFilters()
+      openDrawer(path, state)
+    } catch (err) {
+      document.getElementById('drawer-body').innerHTML = '<div style="color:#991b1b;padding:12px">Error: ' + esc(err.message) + '</div>'
+    }
   }
 
-  // =========================================================================
-  // COMPARE + RENDER
-  // =========================================================================
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DRAWER
+  // ═══════════════════════════════════════════════════════════════════════════
+  var currentDrawerPath = null
 
-  let currentPath = null
-  let currentData = null
+  function openDrawer(path, state, loading) {
+    currentDrawerPath = path
+    var row = document.querySelector('tr.page-row[data-path="' + path + '"]')
+    var ps = getPage(state, path)
+    var drawer = document.getElementById('audit-drawer')
+    var backdrop = document.getElementById('drawer-backdrop')
 
-  function selectPage(livePath) {
-    currentPath = livePath
+    // Highlight row
+    document.querySelectorAll('.page-row.selected').forEach(function(r) { r.classList.remove('selected') })
+    if (row) row.classList.add('selected')
 
-    // Highlight selected row
-    document.querySelectorAll('.page-row').forEach(function(r) {
-      r.classList.toggle('selected', r.getAttribute('data-live-path') === livePath)
-    })
+    // Header
+    document.getElementById('drawer-title').textContent = row ? row.querySelector('.page-name').textContent : path
+    document.getElementById('drawer-path').textContent = path
+    var metaParts = []
+    if (row) metaParts.push(row.dataset.archetype, row.dataset.persona !== 'general' ? row.dataset.persona : null, row.dataset.priority)
+    if (ps.cached) metaParts.push('Audited ' + timeAgo(ps.cached.fetchedAt))
+    document.getElementById('drawer-meta').textContent = metaParts.filter(Boolean).join(' \u00B7 ')
 
-    // Show loading
-    document.getElementById('empty-state').style.display = 'none'
-    document.getElementById('result-content').style.display = 'none'
-    document.getElementById('loading-state').style.display = 'flex'
+    // Body
+    var body = document.getElementById('drawer-body')
+    if (loading) {
+      body.innerHTML = '<div style="padding:20px;color:var(--text-tertiary)">Auditing\u2026</div>'
+    } else if (ps.audit && !ps.audit.error) {
+      body.innerHTML = renderDrawerContent(ps.audit, path, state)
+      wireDrawerSections()
+    } else if (ps.cached && ps.cached.response && ps.cached.response.ok !== undefined) {
+      // Simple check result
+      var r = ps.cached.response
+      body.innerHTML = '<div class="dsection"><div class="dsection-title">HTTP Check</div>' +
+        '<div style="font-size:13px">' + (r.ok ? '<span style="color:#166534">' + r.status + ' OK</span>' : '<span style="color:#991b1b">' + r.status + ' Error</span>') +
+        ' &mdash; ' + esc(r.title) + ' &mdash; ' + (r.wordCount || 0).toLocaleString() + ' words</div></div>'
+    } else {
+      body.innerHTML = '<div style="padding:20px;color:var(--text-tertiary)">No audit data yet. Click Audit to scan.</div>'
+    }
 
-    fetch('/api/go-live/compare', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ livePath: livePath }),
-    })
-      .then(function(res) { return res.json() })
-      .then(function(data) {
-        if (currentPath !== livePath) return // stale
-        currentData = data
-        document.getElementById('loading-state').style.display = 'none'
-        document.getElementById('result-content').style.display = 'block'
-        renderResult(data)
-      })
-      .catch(function(err) {
-        console.error('Compare failed:', err)
-        document.getElementById('loading-state').style.display = 'none'
-        document.getElementById('result-content').style.display = 'block'
-        document.getElementById('result-content').innerHTML =
-          '<p style="color:var(--error)">Failed to compare. Check console.</p>'
-      })
+    // Footer
+    renderFooter(path, state)
+
+    drawer.classList.add('open')
+    backdrop.style.display = ''
   }
 
-  function renderResult(data) {
-    var live = data.live
-    var new_ = data.new_
-    var delta = data.delta
-    var verdict = data.verdict
-    var state = loadState()
-    var saved = state[data.livePath] || {}
+  function closeDrawer() {
+    currentDrawerPath = null
+    document.getElementById('audit-drawer').classList.remove('open')
+    document.getElementById('drawer-backdrop').style.display = 'none'
+    document.querySelectorAll('.page-row.selected').forEach(function(r) { r.classList.remove('selected') })
+  }
 
-    var html = ''
+  function renderFooter(path, state) {
+    var ps = getPage(state, path)
+    var f = document.getElementById('drawer-footer')
+    var h = '<div class="review-bar">'
+    h += '<button class="btn btn-sm btn-approve' + (ps.status === 'approved' ? ' active' : '') + '" data-set-status="approved">Approve</button>'
+    h += '<button class="btn btn-sm btn-flag' + (ps.status === 'flagged' ? ' active' : '') + '" data-set-status="flagged">Flag</button>'
+    h += '<button class="btn btn-sm btn-skip' + (ps.status === 'skipped' ? ' active' : '') + '" data-set-status="skipped">Skip</button>'
+    h += '<span style="flex:1"></span>'
+    h += '<button class="btn btn-sm btn-secondary" id="drawer-reaudit">Re-Audit</button>'
+    h += '</div>'
+    h += '<textarea class="note-input" id="drawer-note" placeholder="Notes...">' + esc(ps.note || '') + '</textarea>'
+    f.innerHTML = h
 
-    // Header: path mapping
-    html += '<div class="result-header">'
-    html += '<div class="path-mapping">'
-    html += escapeHtml(data.livePath)
-    html += '<span class="path-arrow">&rarr;</span>'
-    html += escapeHtml(data.newPath)
-    html += '</div>'
+    // Wire
+    f.querySelectorAll('[data-set-status]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var ps2 = getPage(state, path)
+        ps2.status = btn.dataset.setStatus
+        ps2.reviewedAt = new Date().toISOString()
+        saveState(state)
+        updateRowBadges(path, state)
+        updateSummary(state)
+        applyFilters()
+        f.querySelectorAll('[data-set-status]').forEach(function(b) { b.classList.remove('active') })
+        btn.classList.add('active')
+      })
+    })
+    var noteEl = document.getElementById('drawer-note')
+    noteEl.addEventListener('input', function() { var ps2 = getPage(state, path); ps2.note = noteEl.value; saveState(state) })
+    document.getElementById('drawer-reaudit').addEventListener('click', function() { runCheck(path, state, true) })
+  }
 
-    // Verdict badge
-    html += '<div class="verdict-badge verdict-' + verdict.status + '">'
-    html += '<span class="verdict-score">' + verdict.score + '</span>'
-    html += verdict.status.toUpperCase()
-    html += '</div>'
-    html += '</div>'
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DRAWER CONTENT RENDERING
+  // ═══════════════════════════════════════════════════════════════════════════
+  function renderDrawerContent(audit, path, state) {
+    var h = ''
 
-    // Side-by-side table
-    html += '<table class="compare-table">'
-    html += '<thead><tr><th>Field</th><th>Live</th><th>New</th><th></th></tr></thead>'
-    html += '<tbody>'
+    // Grades
+    h += '<div class="dsection"><div class="dsection-title">Grades</div><div class="dgrades">'
+    var cats = audit.categories
+    if (cats.architecture) h += 'Arch: <strong class="grade-' + cats.architecture.grade + '">' + cats.architecture.grade + '</strong>'
+    h += 'Design: <strong class="grade-' + cats.design.grade + '">' + cats.design.grade + '</strong>'
+    h += 'SEO: <strong class="grade-' + cats.seo.grade + '">' + cats.seo.grade + '</strong>'
+    if (cats.products) h += 'Products: <strong class="grade-' + cats.products.grade + '">' + cats.products.grade + '</strong>'
+    if (cats.voice) h += 'Voice: <strong class="grade-' + cats.voice.grade + '">' + cats.voice.grade + '</strong>'
+    h += '<span style="margin-left:auto;font-weight:700" class="grade-' + audit.overallGrade + '">' + audit.overallGrade + '</span>'
+    h += '<span class="verdict-' + audit.verdict + '" style="font-size:11px;font-weight:600;text-transform:uppercase">' + audit.verdict + '</span>'
+    h += '</div></div>'
 
-    var rows = [
-      {
-        label: 'Title',
-        liveVal: live ? live.title : '—',
-        newVal: new_ ? new_.title : '—',
-        status: delta ? (delta.titleChanged ? 'changed' : 'same') : 'na',
-      },
-      {
-        label: 'H1',
-        liveVal: live ? live.h1 : '—',
-        newVal: new_ ? new_.h1 : '—',
-        status: live && new_ ? (live.h1 === new_.h1 ? 'same' : 'changed') : 'na',
-      },
-      {
-        label: 'Meta Desc',
-        liveVal: live ? truncate(live.metaDescription, 80) : '—',
-        newVal: new_ ? truncate(new_.metaDescription, 80) : '—',
-        status: delta ? (delta.metaDescChanged ? 'changed' : 'same') : 'na',
-      },
-      {
-        label: 'Word Count',
-        liveVal: live ? live.wordCount.toLocaleString() : '—',
-        newVal: new_ ? new_.wordCount.toLocaleString() : '—',
-        status: delta ? (delta.wordCountDelta > 0 ? 'improved' : delta.wordCountDelta < 0 ? 'regressed' : 'same') : 'na',
-        delta: delta ? (delta.wordCountDelta > 0 ? '+' + delta.wordCountDelta : String(delta.wordCountDelta)) : null,
-      },
-      {
-        label: 'Page Type',
-        liveVal: live ? live.pageType : '—',
-        newVal: new_ ? new_.pageType : '—',
-        status: delta && delta.pageTypeChanged ? 'changed' : 'same',
-      },
-      {
-        label: 'Headings',
-        liveVal: live ? 'H2: ' + live.headings.h2 + ', H3: ' + live.headings.h3 : '—',
-        newVal: new_ ? 'H2: ' + new_.headings.h2 + ', H3: ' + new_.headings.h3 : '—',
-        status: 'na',
-      },
-      {
-        label: 'Int. Links',
-        liveVal: live ? String(live.internalLinks) : '—',
-        newVal: new_ ? String(new_.internalLinks) : '—',
-        status: delta ? (delta.linksGained > 0 ? 'improved' : delta.linksGained < 0 ? 'regressed' : 'same') : 'na',
-        delta: delta ? (delta.linksGained > 0 ? '+' + delta.linksGained : String(delta.linksGained)) : null,
-      },
-      {
-        label: 'Ext. Links',
-        liveVal: live ? String(live.externalLinks) : '—',
-        newVal: new_ ? String(new_.externalLinks) : '—',
-        status: 'na',
-      },
-      {
-        label: 'Images',
-        liveVal: live ? String(live.imageCount) : '—',
-        newVal: new_ ? String(new_.imageCount) : '—',
-        status: live && new_ ? (new_.imageCount >= live.imageCount ? 'same' : 'regressed') : 'na',
-      },
-      {
-        label: 'Schema',
-        liveVal: live && live.schemaTypes.length ? live.schemaTypes.join(', ') : '—',
-        newVal: new_ && new_.schemaTypes.length ? new_.schemaTypes.join(', ') : '—',
-        status: delta && delta.schemaLost.length > 0 ? 'regressed' : 'same',
-      },
-    ]
+    // Audit sections
+    h += '<div class="dsection"><div class="dsection-title">Audit Details</div>'
+    if (cats.architecture) h += renderCat(cats.architecture)
+    h += renderCat(cats.design)
+    h += renderCat(cats.seo)
+    if (cats.products) h += renderCat(cats.products)
+    if (cats.voice) h += renderCat(cats.voice)
+    h += '</div>'
 
-    for (var i = 0; i < rows.length; i++) {
-      var r = rows[i]
-      var rowClass = r.status === 'improved' ? 'row-improved' : r.status === 'regressed' ? 'row-regressed' : ''
-      html += '<tr class="' + rowClass + '">'
-      html += '<td class="field-label">' + r.label + '</td>'
-      html += '<td class="cell-live">' + escapeHtml(r.liveVal) + '</td>'
-      html += '<td class="cell-new">' + escapeHtml(r.newVal) + '</td>'
-      html += '<td>'
-      if (r.delta && r.delta !== '0') {
-        var cls = r.status === 'improved' ? 'delta-up' : r.status === 'regressed' ? 'delta-down' : 'delta-same'
-        html += '<span class="delta-indicator ' + cls + '">' + r.delta + '</span>'
-      }
-      html += '</td>'
-      html += '</tr>'
+    // Deep scan
+    var ps = getPage(state, path)
+    var ds = ps.deepScan
+    var deepTime = ds ? timeAgo(ds.scannedAt) : 'never'
+    var isStale = ds && ds.scannedAt && (Date.now() - new Date(ds.scannedAt).getTime() > 7 * 24 * 60 * 60 * 1000)
+    var btnLabel = ds ? 'Re-Run Deep Scan' : 'Run Deep Scan'
+
+    h += '<div class="deep-section" id="deep-section">'
+    h += '<div class="dsection-title">Deep Scan</div>'
+    h += '<div id="deep-results">'
+    // Restore saved results
+    if (ds) {
+      if (ds.originality) h += renderCat(ds.originality)
+      if (ds.voiceDeep) h += renderCat(ds.voiceDeep)
     }
-
-    html += '</tbody></table>'
-
-    // Products section
-    if (delta && (delta.productsKept.length || delta.productsLost.length || delta.productsAdded.length)) {
-      html += '<div class="products-section">'
-      html += '<h4>Products</h4>'
-
-      if (delta.productsKept.length) {
-        for (var k = 0; k < delta.productsKept.length; k++) {
-          html += '<span class="product-tag product-kept">' + escapeHtml(delta.productsKept[k]) + '</span>'
-        }
-      }
-      if (delta.productsLost.length) {
-        for (var k = 0; k < delta.productsLost.length; k++) {
-          html += '<span class="product-tag product-lost">' + escapeHtml(delta.productsLost[k]) + '</span>'
-        }
-      }
-      if (delta.productsAdded.length) {
-        for (var k = 0; k < delta.productsAdded.length; k++) {
-          html += '<span class="product-tag product-added">' + escapeHtml(delta.productsAdded[k]) + '</span>'
-        }
-      }
-      html += '</div>'
-    } else if (!delta && !live && new_) {
-      html += '<p class="no-data-msg">No live page data — new page only.</p>'
-    }
-
-    // Issues
-    if (verdict.issues.length) {
-      html += '<div class="feedback-section">'
-      html += '<div class="section-label section-label-issues">Issues</div>'
-      html += '<ul class="feedback-list">'
-      for (var j = 0; j < verdict.issues.length; j++) {
-        html += '<li><svg class="feedback-icon" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>' + escapeHtml(verdict.issues[j]) + '</li>'
-      }
-      html += '</ul></div>'
-    }
-
-    // Improvements
-    if (verdict.improvements.length) {
-      html += '<div class="feedback-section">'
-      html += '<div class="section-label section-label-improvements">Improvements</div>'
-      html += '<ul class="feedback-list">'
-      for (var j = 0; j < verdict.improvements.length; j++) {
-        html += '<li><svg class="feedback-icon" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>' + escapeHtml(verdict.improvements[j]) + '</li>'
-      }
-      html += '</ul></div>'
-    }
-
-    // Warnings
-    if (verdict.warnings.length) {
-      html += '<div class="feedback-section">'
-      html += '<div class="section-label section-label-warnings">Warnings</div>'
-      html += '<ul class="feedback-list">'
-      for (var j = 0; j < verdict.warnings.length; j++) {
-        html += '<li><svg class="feedback-icon" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M12 9v2m0 4h.01M10.29 3.86l-8.58 14.85A1 1 0 002.58 20h18.84a1 1 0 00.86-1.29L13.71 3.86a1 1 0 00-1.42 0z"/></svg>' + escapeHtml(verdict.warnings[j]) + '</li>'
-      }
-      html += '</ul></div>'
-    }
+    h += '</div>'
+    h += '<button class="btn btn-sm btn-secondary deep-btn" id="deep-scan-btn">' + btnLabel + '</button>'
+    h += '<div class="deep-hint" id="deep-hint">~5\u201310s \u00B7 Originality + persona vectors + voice alignment \u00B7 Last: ' + deepTime
+    if (isStale) h += ' <span style="color:#92400e">(consider re-running)</span>'
+    h += '</div>'
+    h += '</div>'
 
     // Actions
-    html += '<div class="actions-bar">'
-    html += '<button class="action-btn btn-approve" onclick="approveReview(\'' + escapeAttr(data.livePath) + '\', \'approved\')">Approve</button>'
-    html += '<button class="action-btn btn-caveat" onclick="approveReview(\'' + escapeAttr(data.livePath) + '\', \'caveat\')">Approve with Caveat</button>'
-    html += '<button class="action-btn btn-retired" onclick="approveReview(\'' + escapeAttr(data.livePath) + '\', \'retired\')">Retired</button>'
-    html += '<button class="action-btn btn-needs-work" onclick="approveReview(\'' + escapeAttr(data.livePath) + '\', \'needs-work\')">Needs Work</button>'
-    html += '</div>'
+    if (audit.actions && audit.actions.length > 0) {
+      h += '<div class="dactions"><div class="dsection-title">Priority Actions (' + audit.actions.length + ')</div>'
+      audit.actions.forEach(function(a) {
+        h += '<div class="daction-row">'
+        h += '<span class="daction-num">' + a.index + '</span>'
+        h += '<span class="daction-type dtype-' + a.type + '">' + a.type + '</span>'
+        h += '<span class="daction-text">' + esc(a.action) + '</span>'
+        h += '</div>'
+      })
+      h += '</div>'
+    }
 
-    // Notes
-    html += '<div>'
-    html += '<div class="notes-label">Notes</div>'
-    html += '<textarea class="notes-area" id="review-notes" placeholder="Add review notes..."'
-    html += ' onchange="saveNote(\'' + escapeAttr(data.livePath) + '\', this.value)"'
-    html += '>' + escapeHtml(saved.note || '') + '</textarea>'
-    html += '</div>'
-
-    document.getElementById('result-content').innerHTML = html
+    return h
   }
 
-  // =========================================================================
-  // ACTIONS
-  // =========================================================================
-
-  function approveReview(livePath, status) {
-    var state = loadState()
-    var note = document.getElementById('review-notes')
-    if (!state[livePath]) state[livePath] = {}
-    state[livePath].status = status
-    state[livePath].reviewedAt = new Date().toISOString()
-    if (note) state[livePath].note = note.value
-    saveState(state)
-    updateReadiness()
-
-    // Visual feedback: highlight the active button
-    document.querySelectorAll('.actions-bar .action-btn').forEach(function(btn) {
-      btn.style.opacity = '0.5'
+  function renderCat(cat) {
+    var passCount = cat.checks.filter(function(c) { return c.status === 'pass' }).length
+    var h = '<div class="dcat">'
+    h += '<div class="dcat-header" onclick="this.parentElement.classList.toggle(\'open\')">'
+    h += '<span class="dcat-toggle">\u25B6</span>'
+    h += '<span>' + esc(cat.name) + '</span>'
+    h += '<span style="font-size:11px;color:var(--text-tertiary)">' + passCount + '/' + cat.checks.length + '</span>'
+    h += '<span class="dcat-grade grade-' + cat.grade + '">' + cat.grade + '</span>'
+    h += '</div><div class="dcat-body">'
+    cat.checks.forEach(function(c) {
+      var icon = c.status === 'pass' ? '\u2713' : c.status === 'fail' ? '\u2717' : '\u26A0'
+      var cls = 'chk-' + c.status
+      h += '<div class="dcheck"><span class="dcheck-icon ' + cls + '">' + icon + '</span><div>'
+      h += '<div class="dcheck-label ' + cls + '">' + esc(c.label) + '</div>'
+      if (c.detail) h += '<div class="dcheck-detail">' + esc(c.detail) + '</div>'
+      h += '</div></div>'
     })
-    event.target.style.opacity = '1'
-    event.target.style.outline = '2px solid var(--text)'
-
-    // Flash confirmation
-    var flash = document.createElement('div')
-    flash.textContent = status === 'needs-work' ? 'Marked as needs work' : status === 'approved' ? 'Approved' : status === 'caveat' ? 'Approved with caveat' : 'Marked as retired'
-    flash.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#1f2937;color:white;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:999;'
-    document.body.appendChild(flash)
-    setTimeout(function() { flash.remove() }, 2000)
+    h += '</div></div>'
+    return h
   }
 
-  function saveNote(livePath, value) {
-    var state = loadState()
-    if (!state[livePath]) state[livePath] = {}
-    state[livePath].note = value
-    saveState(state)
+  function wireDrawerSections() {
+    var btn = document.getElementById('deep-scan-btn')
+    if (btn) {
+      btn.addEventListener('click', function() {
+        var path = currentDrawerPath
+        var ps = getPage(state, path)
+
+        // Confirm if recent scan exists (saves Originality credits)
+        if (ps.deepScan && ps.deepScan.scannedAt) {
+          var ageMs = Date.now() - new Date(ps.deepScan.scannedAt).getTime()
+          if (ageMs < 10 * 60 * 1000) {
+            if (!confirm('Last deep scan was ' + timeAgo(ps.deepScan.scannedAt) + '. Re-run? This uses Originality.ai credits.')) return
+          }
+        }
+
+        btn.disabled = true
+        btn.textContent = 'Running\u2026'
+        var row = document.querySelector('tr.page-row[data-path="' + path + '"]')
+        fetch('/api/go-live/deep-audit', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: path, persona: row ? row.dataset.persona : 'general' }),
+        }).then(function(res) { return res.json() })
+        .then(function(data) {
+          if (data.error) throw new Error(data.message)
+
+          // Persist to state
+          ps.deepScan = {
+            version: 1,
+            originality: data.originality || null,
+            voiceDeep: data.voiceDeep || null,
+            scannedAt: new Date().toISOString(),
+            duration: data.duration || null,
+          }
+          saveState(state)
+
+          // Update table columns
+          updateRowBadges(path, state)
+
+          // Render results in drawer
+          var results = document.getElementById('deep-results')
+          var h = ''
+          if (data.originality) h += renderCat(data.originality)
+          if (data.voiceDeep) h += renderCat(data.voiceDeep)
+          results.innerHTML = h
+
+          btn.textContent = 'Re-Run Deep Scan'
+          btn.disabled = false
+          var hint = document.getElementById('deep-hint')
+          if (hint) hint.innerHTML = '~5\u201310s \u00B7 Originality + persona vectors + voice alignment \u00B7 Last: just now'
+        }).catch(function(err) {
+          // Don't overwrite good deepScan on failure
+          btn.textContent = ps.deepScan ? 'Re-Run Deep Scan' : 'Run Deep Scan'
+          btn.disabled = false
+          var results = document.getElementById('deep-results')
+          // Prepend error but keep existing results
+          var errHtml = '<div style="color:#991b1b;font-size:12px;margin-bottom:6px;padding:6px;border:1px solid #fee2e2;border-radius:4px">' + esc(err.message) + '</div>'
+          results.insertAdjacentHTML('afterbegin', errHtml)
+        })
+      })
+    }
   }
 
-  // =========================================================================
-  // HELPERS
-  // =========================================================================
-
-  function escapeHtml(str) {
-    if (!str) return ''
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
+  // ═══════════════════════════════════════════════════════════════════════════
+  // AUDIT ALL
+  // ═══════════════════════════════════════════════════════════════════════════
+  async function auditAll(state) {
+    var rows = document.querySelectorAll('tr.page-row[data-page-type="audit"]')
+    var btn = document.getElementById('audit-all-btn')
+    btn.disabled = true
+    var total = rows.length
+    for (var i = 0; i < rows.length; i++) {
+      btn.textContent = (i + 1) + '/' + total + '\u2026'
+      var path = rows[i].dataset.path
+      try { await runCheck(path, state, true) } catch (e) {}
+    }
+    btn.disabled = false
+    btn.textContent = 'Audit All (' + total + ')'
+    closeDrawer()
   }
 
-  function escapeAttr(str) {
-    return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;')
-  }
+  // ═══════════════════════════════════════════════════════════════════════════
+  // KEYBOARD
+  // ═══════════════════════════════════════════════════════════════════════════
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { closeDrawer(); return }
+    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return
+    if (!currentDrawerPath) return
+    e.preventDefault()
+    var rows = Array.from(document.querySelectorAll('tr.page-row'))
+    var visibleRows = rows.filter(function(r) { return r.style.display !== 'none' })
+    var idx = visibleRows.findIndex(function(r) { return r.dataset.path === currentDrawerPath })
+    if (idx === -1) return
+    var next = e.key === 'ArrowDown' ? idx + 1 : idx - 1
+    if (next < 0 || next >= visibleRows.length) return
+    openDrawer(visibleRows[next].dataset.path, state)
+    visibleRows[next].scrollIntoView({ block: 'nearest' })
+  })
 
-  function truncate(str, len) {
-    if (!str) return ''
-    return str.length > len ? str.substring(0, len) + '...' : str
-  }
-
-  // =========================================================================
+  // ═══════════════════════════════════════════════════════════════════════════
   // INIT
-  // =========================================================================
+  // ═══════════════════════════════════════════════════════════════════════════
+  var state = emptyState()
 
+  ;(async function init() {
+    var fileState = await loadStateFromFile()
+    var localState = loadStateLocal()
+    state = mergeStates(fileState, localState)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+    if (fileState === null && localState !== null) {
+      fetch('/api/go-live/state', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(state) }).catch(function() {})
+    }
+
+    // Restore row badges
+    document.querySelectorAll('.page-row').forEach(function(row) {
+      updateRowBadges(row.dataset.path, state)
+    })
+
+    // Restore filter
+    var savedFilter = localStorage.getItem(FILTER_KEY)
+    if (savedFilter) activeFilter = savedFilter
+
+    updateSummary(state)
+    applyFilters()
+  })()
+
+  // Wire row clicks (exclude link icons and action buttons)
   document.querySelectorAll('.page-row').forEach(function(row) {
-    row.addEventListener('click', function() {
-      selectPage(row.getAttribute('data-live-path'))
+    row.addEventListener('click', function(e) {
+      if (e.target.closest('.icon-link') || e.target.closest('.action-btn')) return
+      openDrawer(row.dataset.path, state)
     })
   })
 
-  updateReadiness()
+  // Wire audit buttons
+  document.querySelectorAll('.action-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation()
+      var row = btn.closest('.page-row')
+      runCheck(row.dataset.path, state, false)
+    })
+  })
+
+  // Wire link icons to not propagate
+  document.querySelectorAll('.icon-link').forEach(function(link) {
+    link.addEventListener('click', function(e) { e.stopPropagation() })
+  })
+
+  // Wire summary cards
+  document.querySelectorAll('.scard').forEach(function(card) {
+    card.addEventListener('click', function() {
+      var f = card.dataset.filter
+      activeFilter = activeFilter === f ? null : f
+      localStorage.setItem(FILTER_KEY, activeFilter || '')
+      applyFilters()
+    })
+  })
+
+  // Wire critical toggle
+  document.getElementById('critical-only').addEventListener('change', applyFilters)
+
+  // Wire backdrop
+  document.getElementById('drawer-backdrop').addEventListener('click', closeDrawer)
+  document.getElementById('drawer-close').addEventListener('click', closeDrawer)
+
+  // Wire audit all
+  document.getElementById('audit-all-btn').addEventListener('click', function() { auditAll(state) })
+
+  // Wire reset
+  document.getElementById('reset-btn').addEventListener('click', function() {
+    if (confirm('Reset all progress?')) {
+      localStorage.removeItem(STORAGE_KEY)
+      localStorage.removeItem(FILTER_KEY)
+      fetch('/api/go-live/state', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(emptyState()) })
+        .then(function() { location.reload() }).catch(function() { location.reload() })
+    }
+  })
 </script>
+</AdminLayout>
