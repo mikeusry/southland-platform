@@ -8,7 +8,7 @@
 export const prerender = true
 
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import { getLogoUrl, getSouthlandImageId, getCloudinaryResponsiveSet } from '../../lib/cloudinary'
+import { getLogoUrl, buildSouthlandUrl, getSouthlandImageId, getCloudinaryResponsiveSet } from '../../lib/cloudinary'
 
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
 
@@ -71,7 +71,7 @@ const contactSchema = {
 <BaseLayout
   title="Contact Us | Southland Organics"
   description="Get in touch with Southland Organics. Reach our poultry team, lawn & garden specialists, or customer service. Call 800-608-3755 or send us a message."
-  ogImage={getLogoUrl('square', { width: 800 })}
+  ogImage={buildSouthlandUrl('heroes/Farm_Athens_GA_7_jbdjik', { width: 1200, height: 630, crop: 'fill', quality: 'auto', format: 'auto' })}
   schema={contactSchema}
 >
   <!-- Hero with rotating farm photos -->
@@ -79,7 +79,7 @@ const contactSchema = {
     <!-- Background photo - randomly selected farm scene -->
     <img
       id="hero-bg"
-      alt=""
+      alt="Southland Organics farm in Athens, Georgia"
       class="absolute inset-0 h-full w-full object-cover"
       loading="eager"
       decoding="async"
@@ -107,19 +107,21 @@ const contactSchema = {
     </div>
     <div class="relative z-10 mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 md:py-20 lg:px-8">
       <p class="mb-3 text-sm font-medium uppercase tracking-widest text-southland-green">
-        We're Here to Help
+        Real People. Real Answers.
       </p>
       <h1 class="mb-4 font-heading text-4xl text-white md:text-5xl">Get in Touch</h1>
       <p class="mx-auto max-w-2xl text-lg text-white/80">
-        Whether you need product advice, want to become a dealer, or just have a question — we'd
-        love to hear from you.
+        Struggling with mortality, soil compaction, or rising input costs? Talk to someone
+        who's been in the field — not a call center. Our team has helped 500+ farms and turf
+        operations find solutions that actually work.
       </p>
     </div>
   </section>
 
   <!-- Quick Contact Cards -->
-  <section class="relative -mt-8 pb-8">
+  <section class="relative -mt-8 py-16 md:py-20">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <h2 class="sr-only font-heading">Contact Options</h2>
       <div class="grid gap-4 md:mx-auto md:max-w-2xl md:grid-cols-2">
         <!-- Call -->
         <a
@@ -127,7 +129,8 @@ const contactSchema = {
           class="group flex items-start gap-4 rounded-2xl bg-white p-6 shadow-lg transition-all hover:shadow-xl"
         >
           <div
-            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-southland-green/10 transition-colors group-hover:bg-southland-green/20"
+            class="flex h-12 w-12 shrink-0 items-center justify-center bg-southland-green/10 transition-colors group-hover:bg-southland-green/20"
+            style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
           >
             <svg
               class="h-6 w-6 text-southland-green"
@@ -153,7 +156,8 @@ const contactSchema = {
         <!-- Location -->
         <div class="flex items-start gap-4 rounded-2xl bg-white p-6 shadow-lg">
           <div
-            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-southland-green/10"
+            class="flex h-12 w-12 shrink-0 items-center justify-center bg-southland-green/10"
+            style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
           >
             <svg
               class="h-6 w-6 text-southland-green"
@@ -193,7 +197,7 @@ const contactSchema = {
         <!-- Contact Form -->
         <div class="lg:col-span-3">
           <div class="rounded-2xl bg-white p-8 shadow-sm md:p-10">
-            <h2 class="mb-2 text-2xl font-bold text-shopify-title">Send Us a Message</h2>
+            <h2 class="mb-2 font-heading text-2xl text-shopify-title">Send Us a Message</h2>
             <p class="mb-8 text-shopify-secondary-text">
               Fill out the form below and we'll get back to you as soon as possible.
             </p>
@@ -357,14 +361,17 @@ const contactSchema = {
           <div class="rounded-2xl bg-white p-6 shadow-sm">
             <div class="mb-3 flex items-center gap-3">
               <div
-                class="flex h-10 w-10 items-center justify-center rounded-lg bg-southland-green/10 text-lg"
+                class="flex h-10 w-10 items-center justify-center bg-southland-green/10"
+                style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
               >
-                🐔
+                <svg class="h-5 w-5 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
               </div>
               <h3 class="text-lg font-bold text-shopify-title">Poultry Team</h3>
             </div>
             <p class="mb-3 text-sm text-shopify-secondary-text">
-              Talk to Allen Reynolds about litter treatments, water line solutions, and biosecurity.
+              Talk to Allen Reynolds about <a href="/poultry/commercial/" class="font-medium text-southland-green hover:underline">litter treatments</a>, water line solutions, and biosecurity.
             </p>
             <a
               href="tel:+18006083755"
@@ -386,14 +393,17 @@ const contactSchema = {
           <div class="rounded-2xl bg-white p-6 shadow-sm">
             <div class="mb-3 flex items-center gap-3">
               <div
-                class="flex h-10 w-10 items-center justify-center rounded-lg bg-southland-green/10 text-lg"
+                class="flex h-10 w-10 items-center justify-center bg-southland-green/10"
+                style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
               >
-                🌱
+                <svg class="h-5 w-5 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
               </div>
               <h3 class="text-lg font-bold text-shopify-title">Lawn & Garden</h3>
             </div>
             <p class="mb-3 text-sm text-shopify-secondary-text">
-              Soil conditioning, organic lawn care, and turf professional programs.
+              <a href="/lawn/" class="font-medium text-southland-green hover:underline">Soil conditioning</a>, organic lawn care, and turf professional programs.
             </p>
             <a
               href="tel:+18006083755"
@@ -415,9 +425,12 @@ const contactSchema = {
           <div class="rounded-2xl bg-white p-6 shadow-sm">
             <div class="mb-3 flex items-center gap-3">
               <div
-                class="flex h-10 w-10 items-center justify-center rounded-lg bg-southland-green/10 text-lg"
+                class="flex h-10 w-10 items-center justify-center bg-southland-green/10"
+                style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
               >
-                🤝
+                <svg class="h-5 w-5 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
               </div>
               <h3 class="text-lg font-bold text-shopify-title">Become a Dealer</h3>
             </div>
@@ -443,14 +456,17 @@ const contactSchema = {
           <div class="rounded-2xl bg-white p-6 shadow-sm">
             <div class="mb-3 flex items-center gap-3">
               <div
-                class="flex h-10 w-10 items-center justify-center rounded-lg bg-southland-green/10 text-lg"
+                class="flex h-10 w-10 items-center justify-center bg-southland-green/10"
+                style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
               >
-                📦
+                <svg class="h-5 w-5 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
               </div>
               <h3 class="text-lg font-bold text-shopify-title">Order Support</h3>
             </div>
             <p class="mb-3 text-sm text-shopify-secondary-text">
-              Questions about your order, shipping, or returns.
+              Questions about your order, shipping, or returns. Check our <a href="/pages/shipping-policy" class="font-medium text-southland-green hover:underline">shipping policy</a>.
             </p>
             <a
               href="tel:+18006083755"
@@ -472,20 +488,50 @@ const contactSchema = {
     </div>
   </section>
 
+  <!-- Proof Band -->
+  <section class="bg-[#2C5234] py-12 md:py-16">
+    <div class="mx-auto max-w-6xl px-4">
+      <div class="grid grid-cols-2 gap-8 md:grid-cols-4">
+        <div class="text-center">
+          <div class="text-3xl font-bold text-green-300 md:text-4xl">6.2%</div>
+          <div class="mt-1 text-sm font-medium text-white">Mortality reduction</div>
+          <div class="mt-0.5 text-xs text-green-200/60">UGA-validated study, C. Stephen Roney DVM</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-green-300 md:text-4xl">500+</div>
+          <div class="mt-1 text-sm font-medium text-white">Farms & operations served</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-green-300 md:text-4xl">20-40%</div>
+          <div class="mt-1 text-sm font-medium text-white">CEC increase with humic acid</div>
+          <div class="mt-0.5 text-xs text-green-200/60">Soil Science Society of America</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-green-300 md:text-4xl">2009</div>
+          <div class="mt-1 text-sm font-medium text-white">Family-owned, A+ BBB</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Map Section -->
   <section class="bg-white py-16">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="grid items-center gap-8 lg:grid-cols-2">
         <div>
-          <h2 class="mb-4 text-3xl font-bold text-shopify-title">Based in Georgia</h2>
+          <h2 class="mb-4 font-heading text-3xl text-shopify-title">Based in Georgia</h2>
           <p class="mb-2 text-lg text-shopify-secondary-text">
-            Southland Organics is headquartered in Bogart, Georgia.
+            Southland Organics is headquartered in Bogart, Georgia — producing <a
+              href="/products/"
+              class="font-semibold text-southland-green hover:underline">organic solutions</a> for poultry, turf, and agriculture.
           </p>
           <p class="mb-6 text-lg text-shopify-secondary-text">
             We ship nationwide and have a strong <a
               href="/store-locator/"
               class="font-semibold text-southland-green hover:underline">dealer network</a
-            >.
+            >. Learn more <a
+              href="/about/"
+              class="font-semibold text-southland-green hover:underline">about our story</a>.
           </p>
           <div class="space-y-3 text-shopify-secondary-text">
             <div class="flex items-start gap-3">

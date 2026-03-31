@@ -10,7 +10,7 @@
 export const prerender = true
 
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import { getLogoUrl } from '../../lib/cloudinary'
+import { getLogoUrl, buildSouthlandUrl } from '../../lib/cloudinary'
 import dealersData from '../../data/dealers.json'
 
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
@@ -29,13 +29,21 @@ const storeLocatorSchema = {
   description:
     'Find Southland Organics products near you. Locate authorized dealers and retailers for poultry, turf, and lawn & garden products.',
   url: `${siteUrl}/store-locator/`,
+  mainEntity: {
+    '@type': 'Organization',
+    name: 'Southland Organics',
+    url: 'https://southlandorganics.com',
+    telephone: '+1-800-608-3755',
+    areaServed: 'US',
+    numberOfEmployees: { '@type': 'QuantitativeValue', value: 20 },
+  },
 }
 ---
 
 <BaseLayout
   title="Store Locator | Find Southland Organics Near You"
   description="Find Southland Organics products near you. Locate authorized dealers and retailers for poultry, turf, and lawn & garden products."
-  ogImage={getLogoUrl('square', { width: 800 })}
+  ogImage={buildSouthlandUrl('heroes/Farm_Athens_GA_7_jbdjik', { width: 1200, height: 630, crop: 'fill', quality: 'auto', format: 'auto' })}
   schema={storeLocatorSchema}
 >
   <!-- Hero -->
@@ -43,17 +51,18 @@ const storeLocatorSchema = {
     <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
       <h1 class="mb-4 font-heading text-4xl text-white md:text-5xl">Find a Dealer</h1>
       <p class="mx-auto max-w-2xl text-lg text-white/80">
-        Locate authorized Southland Organics dealers near you. Can't find one in your area? Order
-        direct or
+        Need biology-based poultry, lawn, or soil products but don't want to wait for shipping?
+        Over 500 authorized dealers across 25+ states carry Southland Organics — find the one nearest you.
+        Don't see a dealer in your area?
         <a href="/contact/" class="font-semibold text-southland-green underline hover:text-white"
-          >contact us</a
-        > about becoming a dealer.
+          >Contact us</a
+        > or order direct with fast UPS shipping.
       </p>
     </div>
   </section>
 
   <!-- Search + Results -->
-  <section class="bg-brand-gray py-8 md:py-12">
+  <section class="bg-brand-gray py-16 md:py-20">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <!-- Search Bar -->
       <div class="mb-8 rounded-2xl bg-white p-6 shadow-sm">
@@ -87,6 +96,7 @@ const storeLocatorSchema = {
             <label for="category-filter" class="mb-1.5 block text-sm font-medium text-shopify-title"
               >Product Category</label
             >
+            <p class="mb-1.5 text-xs text-gray-400">Filter by what dealers stock</p>
             <select
               id="category-filter"
               class="w-full rounded-lg border border-gray-300 px-4 py-3 text-shopify-title transition-colors focus:border-southland-green focus:outline-none focus:ring-2 focus:ring-southland-green/20 md:w-auto"
@@ -103,7 +113,7 @@ const storeLocatorSchema = {
           </div>
           <button
             id="use-location-btn"
-            class="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-southland-green px-5 py-3 font-bold text-southland-green transition-all hover:bg-southland-green hover:text-white active:scale-[0.98]"
+            class="inline-flex items-center justify-center gap-2 rounded-lg bg-southland-green px-6 py-3 font-bold text-white transition-all hover:bg-[#3a7534] active:scale-[0.98]"
             title="Use my current location"
           >
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -118,7 +128,7 @@ const storeLocatorSchema = {
           </button>
           <button
             id="search-btn"
-            class="inline-flex items-center justify-center gap-2 rounded-lg bg-southland-green px-6 py-3 font-bold text-white transition-all hover:bg-[#3a7534] active:scale-[0.98]"
+            class="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-gray-300 px-5 py-3 font-bold text-shopify-title transition-all hover:border-southland-green hover:text-southland-green active:scale-[0.98]"
           >
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -188,51 +198,90 @@ const storeLocatorSchema = {
 
   <!-- Become a Dealer CTA -->
   <section class="bg-white py-16">
-    <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-      <h2 class="mb-4 text-3xl font-bold text-shopify-title">Want to Carry Our Products?</h2>
-      <p class="mx-auto mb-8 max-w-2xl text-lg text-shopify-secondary-text">
-        Join our growing network of authorized dealers. We provide training, marketing support, and
-        competitive wholesale pricing.
-      </p>
-      <div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
-        <a
-          href="/distribution/"
-          class="inline-flex items-center justify-center gap-2 rounded-lg bg-southland-green px-8 py-4 text-base font-bold text-white shadow-sm transition-all hover:bg-[#3a7534] hover:shadow-md active:scale-[0.98]"
-        >
-          Learn About Our Dealer Program
-        </a>
-        <a
-          href="/contact/"
-          class="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-gray-300 px-8 py-4 text-base font-bold text-shopify-title transition-all hover:border-southland-green hover:text-southland-green"
-        >
-          Contact Us
-        </a>
+    <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div class="grid items-center gap-10 lg:grid-cols-2">
+        <div>
+          <img
+            src={buildSouthlandUrl('heroes/Farm_Athens_GA_4_qaishv', { width: 720, height: 480, crop: 'fill', quality: 'auto', format: 'auto' })}
+            alt="Southland Organics farm in Athens, Georgia — products used by dealers and growers nationwide"
+            class="rounded-2xl shadow-md"
+            width="720"
+            height="480"
+            loading="lazy"
+          />
+        </div>
+        <div class="text-center lg:text-left">
+          <h2 class="mb-4 font-heading text-3xl text-shopify-title">Your Customers Keep Asking for Organic — Can You Supply It?</h2>
+          <p class="mb-2 max-w-2xl text-lg text-shopify-secondary-text">
+            Growers and turf managers are shifting to biology-based inputs, and they reorder once they see results.
+            Our dealer partners get wholesale pricing, training, and marketing support to meet that demand.
+          </p>
+          <p class="mb-8 max-w-2xl text-sm italic text-gray-400">
+            500+ farm stores and dealers already carry Southland Organics — all products backed by
+            <a href="/blog/" class="text-southland-green hover:underline">university research and field trials</a>.
+          </p>
+          <div class="flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
+            <a
+              href="/distribution/"
+              class="inline-flex items-center justify-center gap-2 rounded-lg bg-southland-green px-8 py-4 text-base font-bold text-white shadow-sm transition-all hover:bg-[#3a7534] hover:shadow-md active:scale-[0.98]"
+            >
+              Apply to Become a Dealer
+            </a>
+            <a
+              href="/contact/"
+              class="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-gray-300 px-8 py-4 text-base font-bold text-shopify-title transition-all hover:border-southland-green hover:text-southland-green"
+            >
+              Talk to Our Sales Team
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Proof Band -->
+  <section class="bg-[#2C5234] py-12 md:py-16">
+    <div class="mx-auto max-w-6xl px-4">
+      <div class="grid grid-cols-3 gap-8">
+        <div class="text-center">
+          <div class="text-3xl font-bold text-green-300 md:text-4xl">500+</div>
+          <div class="mt-1 text-sm font-medium text-white">Retail locations</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-green-300 md:text-4xl">25+</div>
+          <div class="mt-1 text-sm font-medium text-white">States served</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-green-300 md:text-4xl">2009</div>
+          <div class="mt-1 text-sm font-medium text-white">Family-owned since</div>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- Order Direct Callout -->
-  <section class="bg-brand-gray py-12">
+  <section class="bg-brand-gray py-16 md:py-20">
     <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
       <p class="mb-2 text-sm font-semibold uppercase tracking-wide text-southland-green">
         No dealer nearby?
       </p>
-      <h3 class="mb-4 text-2xl font-bold text-shopify-title">Order Direct — We Ship Nationwide</h3>
-      <p class="mx-auto mb-6 max-w-xl text-shopify-secondary-text">
-        All Southland Organics products are available for direct purchase online with UPS shipping
-        across the United States.
+      <h2 class="mb-3 font-heading text-2xl text-shopify-title md:text-3xl">Don't Let Location Delay Your Results</h2>
+      <p class="mx-auto mb-8 max-w-xl text-shopify-secondary-text">
+        Ammonia won't wait and neither will brown patch. Every Southland Organics product ships direct via UPS — poultry, lawn, agriculture, and
+        <a href="/products/waste-treatment/" class="text-southland-green hover:underline">waste treatment</a>
+        — so you can start seeing results this week, not next month.
       </p>
       <a
-        href="https://www.southlandorganics.com"
-        class="inline-flex items-center gap-2 font-bold text-southland-green hover:underline"
+        href="/products/"
+        class="inline-flex items-center justify-center gap-2 rounded-lg bg-southland-green px-8 py-4 text-base font-bold text-white shadow-sm transition-all hover:bg-[#3a7534] hover:shadow-md active:scale-[0.98]"
       >
-        Shop Online
+        Browse Products &amp; Order Direct
         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
             stroke-width="2"
-            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+            d="M9 5l7 7-7 7"></path>
         </svg>
       </a>
     </div>

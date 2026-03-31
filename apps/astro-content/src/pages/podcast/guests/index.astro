@@ -1,12 +1,13 @@
 ---
 /**
  * Guest Directory Page - /podcast/guests/
- * Browse all podcast guests
+ * Browse all podcast guests — farmers, researchers, and industry experts
  */
 
 import PodcastLayout from '../../../layouts/PodcastLayout.astro'
 import GuestCard from '../../../components/podcast/GuestCard.astro'
 import { getCollection } from 'astro:content'
+import { buildCloudinaryUrl } from '../../../lib/cloudinary'
 
 // Get all guests
 const allGuests = await getCollection('guests')
@@ -40,55 +41,151 @@ const sortedGuests = [...allGuests].sort((a, b) => {
   const bCount = guestAppearances[b.id] || 0
   return bCount - aCount
 })
+
+const guestCount = sortedGuests.length
+const episodeCount = allEpisodes.length
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+const canonicalUrl = `${siteUrl}/podcast/guests/`
+const ogImage = buildCloudinaryUrl('Southland Website/heroes/Farm_Athens_GA_4_qaishv', {
+  width: 1200, height: 630, crop: 'fill',
+})
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'Ag & Culture Podcast Guests',
+  description: 'Farmers, veterinarians, and soil scientists who share real-world results on the Ag & Culture Podcast.',
+  url: canonicalUrl,
+}
 ---
 
 <PodcastLayout
   title="Podcast Guests"
-  description="Meet the farmers, researchers, and industry experts who have joined us on the Ag & Culture Podcast."
+  description="Meet the farmers, veterinarians, and soil scientists who share real-world results on the Ag & Culture Podcast. Browse all guests."
   breadcrumbs={[{ label: 'Guests', href: '/podcast/guests/' }]}
+  canonicalUrl={canonicalUrl}
+  ogImage={ogImage}
+  schema={schema}
 >
-  <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-    {/* Header */}
-    <header class="mb-12 text-center">
-      <h1 class="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">Our Guests</h1>
-      <p class="mx-auto max-w-2xl text-lg text-gray-600">
-        Meet the farmers, researchers, and industry experts who have joined us on the Ag & Culture
-        Podcast.
+  <!-- HERO / HEADER -->
+  <section class="bg-[#2C5234] py-16 md:py-20">
+    <div class="mx-auto max-w-7xl px-4 text-center">
+      <h1 class="mb-4 font-heading text-3xl uppercase text-white md:text-4xl lg:text-5xl">
+        Our Guests
+      </h1>
+      <p class="mx-auto max-w-2xl text-lg text-green-100">
+        The Ag & Culture Podcast brings real operators, researchers, and veterinarians to the mic.
+        No scripts, no sponsors — just the people doing the work sharing what they've learned.
       </p>
-    </header>
+      <div class="mt-6 flex flex-wrap items-center justify-center gap-6 text-sm text-green-300/80">
+        <span class="flex items-center gap-1.5">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          {guestCount} guests
+        </span>
+        <span class="flex items-center gap-1.5">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+          </svg>
+          {episodeCount} episodes
+        </span>
+        <span class="flex items-center gap-1.5">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          Since 2020
+        </span>
+      </div>
+    </div>
+  </section>
 
-    {/* Guest Grid */}
-    {
-      sortedGuests.length > 0 ? (
-        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {sortedGuests.map((guest) => (
-            <GuestCard
-              name={guest.data.name}
-              slug={guest.id}
-              role={guest.data.role}
-              company={guest.data.company}
-              bio={guest.data.bio}
-              photo={guest.data.photo}
-              links={guest.data.links}
-              episodeCount={guestAppearances[guest.id]}
-            />
-          ))}
-        </div>
-      ) : (
-        <div class="py-12 text-center">
-          <div class="mx-auto mb-4 h-20 w-20 text-gray-200">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+  <!-- GUEST GRID -->
+  <section class="bg-white py-16 md:py-20">
+    <div class="mx-auto max-w-7xl px-4">
+      <h2 class="mb-8 text-center font-heading text-2xl uppercase md:text-3xl" style="color: #2C5234;">
+        Browse All Guests
+      </h2>
+      {
+        sortedGuests.length > 0 ? (
+          <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {sortedGuests.map((guest) => (
+              <GuestCard
+                name={guest.data.name}
+                slug={guest.id}
+                role={guest.data.role}
+                company={guest.data.company}
+                bio={guest.data.bio}
+                photo={guest.data.photo}
+                links={guest.data.links}
+                episodeCount={guestAppearances[guest.id]}
               />
-            </svg>
+            ))}
           </div>
-          <p class="text-gray-500">Guest directory coming soon.</p>
-        </div>
-      )
-    }
-  </div>
+        ) : (
+          <div class="py-12 text-center">
+            <p class="text-gray-500">Guest directory coming soon.</p>
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <!-- EXPLORE MORE + CTA -->
+  <section class="bg-gray-50 py-16 md:py-20">
+    <div class="mx-auto max-w-4xl px-4 text-center">
+      <h2 class="mb-4 font-heading text-2xl uppercase md:text-3xl" style="color: #2C5234;">
+        Explore the Podcast
+      </h2>
+      <p class="mx-auto mb-8 max-w-xl text-gray-600">
+        Every episode features operators sharing real numbers — mortality rates, FCR, soil test results, and program costs.
+        Find episodes by topic or browse the full archive.
+      </p>
+      <div class="flex flex-wrap items-center justify-center gap-4">
+        <a
+          href="/podcast/"
+          class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#44883E]/85"
+        >
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+          </svg>
+          All Episodes
+        </a>
+        <a
+          href="/podcast/topics/"
+          class="inline-flex items-center gap-2 rounded-lg border-2 border-[#2C5234]/30 px-6 py-3 font-semibold transition-colors hover:border-[#2C5234]/60 hover:bg-[#2C5234]/5"
+          style="color: #2C5234;"
+        >
+          Browse by Topic
+        </a>
+        <a
+          href="/blog/"
+          class="inline-flex items-center gap-2 rounded-lg border-2 border-[#2C5234]/30 px-6 py-3 font-semibold transition-colors hover:border-[#2C5234]/60 hover:bg-[#2C5234]/5"
+          style="color: #2C5234;"
+        >
+          Read the Blog
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="bg-[#2C5234] py-16 md:py-20">
+    <div class="mx-auto max-w-4xl px-4 text-center">
+      <h2 class="mb-4 font-heading text-2xl uppercase text-white md:text-3xl">
+        Want to be a guest?
+      </h2>
+      <p class="mx-auto mb-8 max-w-xl text-lg text-green-100">
+        If you're doing interesting work in poultry, turf, or soil health — we want to hear about it.
+        Reach out and tell us your story.
+      </p>
+      <a
+        href="/contact/"
+        class="inline-flex items-center gap-2 rounded-lg bg-white px-8 py-4 text-lg font-bold transition-colors hover:bg-green-50"
+        style="color: #2C5234;"
+      >
+        Get in Touch
+      </a>
+    </div>
+  </section>
 </PodcastLayout>

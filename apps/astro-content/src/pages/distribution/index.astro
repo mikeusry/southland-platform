@@ -18,13 +18,26 @@ const distributionSchema = {
   description:
     'Become a Southland Organics dealer or distributor. Wholesale pricing on organic agriculture, poultry, turf, and waste treatment products.',
   url: `${siteUrl}/distribution/`,
+  mainEntity: {
+    '@type': 'Organization',
+    name: 'Southland Organics',
+    url: 'https://southlandorganics.com',
+    telephone: '+1-800-608-3755',
+    contactPoint: {
+      '@type': 'ContactPoint',
+      telephone: '+1-800-608-3755',
+      contactType: 'sales',
+      areaServed: 'US',
+      availableLanguage: 'English',
+    },
+  },
 }
 ---
 
 <BaseLayout
   title="Distribution & Dealer Program | Southland Organics"
   description="Become a Southland Organics dealer or distributor. Wholesale pricing on organic agriculture, poultry, turf, and waste treatment products."
-  ogImage={getLogoUrl('square', { width: 800 })}
+  ogImage={buildSouthlandUrl('heroes/Farm_Athens_GA_7_jbdjik', { width: 1200, height: 630, crop: 'fill', quality: 'auto', format: 'auto' })}
   schema={distributionSchema}
 >
   <!-- Hero -->
@@ -37,9 +50,33 @@ const distributionSchema = {
         Distribution & Dealer Program
       </h1>
       <p class="mx-auto max-w-3xl text-lg text-white/80 md:text-xl">
-        Carry Southland Organics products in your store or recommend them to your clients. We
-        support our dealers with training, marketing materials, and competitive wholesale pricing.
+        For farm stores, feed dealers, lawn & garden distributors, and ag consultants who want
+        biology-based products their customers reorder.
       </p>
+
+      <!-- Proof bar -->
+      <div
+        class="mx-auto mt-10 flex max-w-2xl flex-col items-center justify-center gap-4 border-t border-white/15 pt-8 sm:flex-row sm:gap-10"
+      >
+        <div class="flex items-center gap-2 text-sm text-white/70">
+          <svg class="h-4 w-4 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          Nationwide via UPS
+        </div>
+        <div class="flex items-center gap-2 text-sm text-white/70">
+          <svg class="h-4 w-4 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          Drop Ship Available
+        </div>
+        <div class="flex items-center gap-2 text-sm text-white/70">
+          <svg class="h-4 w-4 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          Mon-Fri Support
+        </div>
+      </div>
     </div>
   </section>
 
@@ -47,20 +84,18 @@ const distributionSchema = {
   <section class="bg-white py-16 md:py-24">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="mb-12 text-center">
-        <h2 class="mb-4 text-3xl font-bold text-shopify-title md:text-4xl">
+        <h2 class="mb-4 font-heading text-3xl text-shopify-title md:text-4xl">
           Why Carry Our Products
         </h2>
         <p class="mx-auto max-w-2xl text-lg text-shopify-secondary-text">
-          Southland Organics products solve real problems for growers. That's why our dealers see
-          strong repeat business.
+          Biology-first solutions that fix recurring problems — so growers come back season after
+          season. That's why our dealers see strong repeat business.
         </p>
       </div>
 
       <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         <div class="rounded-2xl border border-gray-100 bg-white p-8">
-          <div
-            class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-southland-green/10"
-          >
+          <div class="hex-icon mb-4 bg-southland-green/10">
             <svg
               class="h-6 w-6 text-southland-green"
               fill="none"
@@ -76,15 +111,13 @@ const distributionSchema = {
           </div>
           <h3 class="mb-2 text-xl font-bold text-shopify-title">Repeat Customers</h3>
           <p class="text-shopify-secondary-text">
-            Growers who try our products come back. Biology-first solutions create results people
-            can see — and they reorder season after season.
+            Biology-first solutions that fix recurring problems so people come back season after
+            season. Products that work sell themselves.
           </p>
         </div>
 
         <div class="rounded-2xl border border-gray-100 bg-white p-8">
-          <div
-            class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-southland-green/10"
-          >
+          <div class="hex-icon mb-4 bg-southland-green/10">
             <svg
               class="h-6 w-6 text-southland-green"
               fill="none"
@@ -101,15 +134,13 @@ const distributionSchema = {
           </div>
           <h3 class="mb-2 text-xl font-bold text-shopify-title">Training & Support</h3>
           <p class="text-shopify-secondary-text">
-            We train your team on the science behind every product. When your staff understands the
-            "why," they sell with confidence.
+            We train your team so they can confidently recommend products and answer tough grower
+            questions. When your staff understands the "why," they sell with confidence.
           </p>
         </div>
 
         <div class="rounded-2xl border border-gray-100 bg-white p-8">
-          <div
-            class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-southland-green/10"
-          >
+          <div class="hex-icon mb-4 bg-southland-green/10">
             <svg
               class="h-6 w-6 text-southland-green"
               fill="none"
@@ -127,14 +158,12 @@ const distributionSchema = {
           <h3 class="mb-2 text-xl font-bold text-shopify-title">Competitive Margins</h3>
           <p class="text-shopify-secondary-text">
             Wholesale pricing that gives you healthy margins while keeping products accessible to
-            growers.
+            growers. No MAP headaches.
           </p>
         </div>
 
         <div class="rounded-2xl border border-gray-100 bg-white p-8">
-          <div
-            class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-southland-green/10"
-          >
+          <div class="hex-icon mb-4 bg-southland-green/10">
             <svg
               class="h-6 w-6 text-southland-green"
               fill="none"
@@ -157,9 +186,7 @@ const distributionSchema = {
         </div>
 
         <div class="rounded-2xl border border-gray-100 bg-white p-8">
-          <div
-            class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-southland-green/10"
-          >
+          <div class="hex-icon mb-4 bg-southland-green/10">
             <svg
               class="h-6 w-6 text-southland-green"
               fill="none"
@@ -176,13 +203,12 @@ const distributionSchema = {
           <h3 class="mb-2 text-xl font-bold text-shopify-title">Drop Ship Available</h3>
           <p class="text-shopify-secondary-text">
             Don't want to carry inventory? We can ship directly to your customers on your behalf.
+            Zero warehouse risk.
           </p>
         </div>
 
         <div class="rounded-2xl border border-gray-100 bg-white p-8">
-          <div
-            class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-southland-green/10"
-          >
+          <div class="hex-icon mb-4 bg-southland-green/10">
             <svg
               class="h-6 w-6 text-southland-green"
               fill="none"
@@ -199,8 +225,8 @@ const distributionSchema = {
           </div>
           <h3 class="mb-2 text-xl font-bold text-shopify-title">Nationwide Reach</h3>
           <p class="text-shopify-secondary-text">
-            We ship across the US via UPS. Whether you're in Georgia or Oregon, we can get product
-            to you.
+            We ship across the US via UPS. Whether you're in Georgia or Oregon, we can get product to
+            you fast.
           </p>
         </div>
       </div>
@@ -211,75 +237,158 @@ const distributionSchema = {
   <section class="bg-brand-gray py-16 md:py-24">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="mb-12 text-center">
-        <h2 class="mb-4 text-3xl font-bold text-shopify-title md:text-4xl">
+        <h2 class="mb-4 font-heading text-3xl text-shopify-title md:text-4xl">
           Product Lines Available
         </h2>
         <p class="mx-auto max-w-2xl text-lg text-shopify-secondary-text">
-          Our product catalog spans multiple categories, each backed by soil biology science.
+          Four product categories, each backed by soil biology science and real-world field results.
         </p>
       </div>
 
       <div class="grid gap-6 md:grid-cols-2">
-        <div class="flex items-start gap-6 rounded-2xl bg-white p-6 shadow-sm">
-          <div
-            class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-southland-green/10 text-2xl"
-          >
-            🐔
+        <a
+          href="/poultry/"
+          class="group flex items-start gap-6 rounded-2xl bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+        >
+          <div class="hex-icon shrink-0 bg-southland-green/10">
+            <svg
+              class="h-6 w-6 text-southland-green"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+              ></path>
+            </svg>
           </div>
           <div>
-            <h3 class="mb-1 text-lg font-bold text-shopify-title">Poultry</h3>
-            <p class="text-sm text-shopify-secondary-text">
-              Litter treatments (Big Ole Bird, Litter Life), water line solutions, and biosecurity
-              products for commercial broiler and layer operations.
+            <h3 class="mb-1 text-lg font-bold text-shopify-title group-hover:text-southland-green">
+              Poultry
+            </h3>
+            <p class="mb-2 text-sm text-shopify-secondary-text">
+              Litter treatments, water line solutions, and biosecurity products for commercial broiler
+              and layer operations.
+            </p>
+            <p class="text-xs font-medium text-southland-green">
+              Top sellers: Big Ole Bird, Litter Life, Mother Load, Catalyst
             </p>
           </div>
-        </div>
+        </a>
 
-        <div class="flex items-start gap-6 rounded-2xl bg-white p-6 shadow-sm">
-          <div
-            class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-southland-green/10 text-2xl"
-          >
-            🌱
+        <a
+          href="/lawn/"
+          class="group flex items-start gap-6 rounded-2xl bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+        >
+          <div class="hex-icon shrink-0 bg-southland-green/10">
+            <svg
+              class="h-6 w-6 text-southland-green"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+              ></path>
+            </svg>
           </div>
           <div>
-            <h3 class="mb-1 text-lg font-bold text-shopify-title">Lawn & Garden</h3>
-            <p class="text-sm text-shopify-secondary-text">
-              Humic acid, fulvic acid, Genesis soil conditioner, and organic lawn care programs for
+            <h3 class="mb-1 text-lg font-bold text-shopify-title group-hover:text-southland-green">
+              Lawn & Garden
+            </h3>
+            <p class="mb-2 text-sm text-shopify-secondary-text">
+              Humic acid, fulvic acid, soil conditioners, and organic lawn care programs for
               homeowners and professionals.
             </p>
-          </div>
-        </div>
-
-        <div class="flex items-start gap-6 rounded-2xl bg-white p-6 shadow-sm">
-          <div
-            class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-southland-green/10 text-2xl"
-          >
-            🐖
-          </div>
-          <div>
-            <h3 class="mb-1 text-lg font-bold text-shopify-title">Swine</h3>
-            <p class="text-sm text-shopify-secondary-text">
-              Supplements and health solutions for hog operations focused on natural,
-              antibiotic-free production.
+            <p class="text-xs font-medium text-southland-green">
+              Top sellers: Torched, Omega, Genesis, Carbon
             </p>
           </div>
-        </div>
+        </a>
 
-        <div class="flex items-start gap-6 rounded-2xl bg-white p-6 shadow-sm">
-          <div
-            class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-southland-green/10 text-2xl"
-          >
-            ♻️
+        <a
+          href="/livestock/swine/"
+          class="group flex items-start gap-6 rounded-2xl bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+        >
+          <div class="hex-icon shrink-0 bg-southland-green/10">
+            <svg
+              class="h-6 w-6 text-southland-green"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+              ></path>
+            </svg>
           </div>
           <div>
-            <h3 class="mb-1 text-lg font-bold text-shopify-title">Septic & Waste Treatment</h3>
-            <p class="text-sm text-shopify-secondary-text">
-              Biological waste treatment products for residential septic systems and commercial
-              waste management.
+            <h3 class="mb-1 text-lg font-bold text-shopify-title group-hover:text-southland-green">
+              Swine
+            </h3>
+            <p class="mb-2 text-sm text-shopify-secondary-text">
+              Supplements and health solutions for hog operations focused on natural, antibiotic-free
+              production.
+            </p>
+            <p class="text-xs font-medium text-southland-green">
+              Top sellers: Big Ole Bird (swine formulation), Litter Life
             </p>
           </div>
-        </div>
+        </a>
+
+        <a
+          href="/products/waste-treatment/"
+          class="group flex items-start gap-6 rounded-2xl bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+        >
+          <div class="hex-icon shrink-0 bg-southland-green/10">
+            <svg
+              class="h-6 w-6 text-southland-green"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+              ></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="mb-1 text-lg font-bold text-shopify-title group-hover:text-southland-green">
+              Septic & Waste Treatment
+            </h3>
+            <p class="mb-2 text-sm text-shopify-secondary-text">
+              Biological waste treatment products for residential septic systems and commercial waste
+              management.
+            </p>
+            <p class="text-xs font-medium text-southland-green">
+              Top seller: PORT septic treatment
+            </p>
+          </div>
+        </a>
       </div>
+
+      <p class="mt-8 text-center text-sm text-shopify-secondary-text">
+        Want to see all products?
+        <a href="/products/" class="font-medium text-southland-green hover:underline"
+          >Browse our full catalog</a
+        >
+        or
+        <a href="/store-locator/" class="font-medium text-southland-green hover:underline"
+          >find an existing dealer near you</a
+        >.
+      </p>
     </div>
   </section>
 
@@ -289,8 +398,8 @@ const distributionSchema = {
       <div class="mb-10 text-center">
         <h2 class="mb-4 font-heading text-3xl text-white md:text-4xl">Ready to Partner?</h2>
         <p class="mx-auto max-w-2xl text-lg text-white/70">
-          Tell us about your business and we'll reach out to discuss dealer pricing, minimum orders,
-          and how we can support you.
+          Tell us about your business and we'll follow up within 1-2 business days with pricing,
+          minimums, and a recommended product mix for your market.
         </p>
       </div>
 
@@ -390,6 +499,8 @@ const distributionSchema = {
                 <option value="co-op">Co-op</option>
                 <option value="turf-pro">Turf Professional / Landscaper</option>
                 <option value="consultant">Agricultural Consultant</option>
+                <option value="vet-supply">Veterinarian / Vet Supply</option>
+                <option value="online-retailer">Online Retailer</option>
                 <option value="other">Other</option>
               </select>
             </div>
@@ -435,7 +546,7 @@ const distributionSchema = {
               name="message"
               rows="4"
               class="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 text-shopify-title transition-colors focus:border-southland-green focus:outline-none focus:ring-2 focus:ring-southland-green/20"
-              placeholder="How many locations, current product mix, anything else we should know..."
+              placeholder="Number of locations, typical customers, current brands you carry, etc."
             ></textarea>
           </div>
 
@@ -446,7 +557,7 @@ const distributionSchema = {
             type="submit"
             class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-southland-green px-8 py-4 text-base font-bold text-white shadow-sm transition-all hover:bg-[#3a7534] hover:shadow-md active:scale-[0.98]"
           >
-            Submit Inquiry
+            Apply for Dealer Pricing
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 stroke-linecap="round"
@@ -491,7 +602,7 @@ const distributionSchema = {
       </div>
 
       <p class="mt-6 text-center text-sm text-white/50">
-        Or call us directly at
+        Prefer to talk now? Call us at
         <a href="tel:+18006083755" class="font-medium text-white/70 hover:text-white"
           >800-608-3755</a
         >
@@ -500,6 +611,22 @@ const distributionSchema = {
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  .hex-icon {
+    width: 3rem;
+    height: 3.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  }
+  /* Larger hex for product line cards */
+  section:nth-of-type(3) .hex-icon {
+    width: 3.5rem;
+    height: 3.75rem;
+  }
+</style>
 
 <script>
   // --- Attribution capture (runs on page load) ---
@@ -588,7 +715,7 @@ const distributionSchema = {
         if (errorEl) errorEl.classList.remove('hidden')
         if (submitBtn) {
           submitBtn.disabled = false
-          submitBtn.textContent = 'Submit Inquiry'
+          submitBtn.textContent = 'Apply for Dealer Pricing'
         }
       }
     })

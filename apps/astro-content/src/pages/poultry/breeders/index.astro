@@ -29,7 +29,17 @@ const allenPhoto = buildSouthlandUrl('team/ALLEN_Reynolds', {
 
 const title = 'Poultry Breeder Supplements | Southland Organics'
 const description =
-  'Natural probiotics, vitamins, litter treatments, and biosecurity solutions for commercial poultry breeders. Improve hatchability, egg quality, and flock health. USDA Organic, zero withdrawal.'
+  'Natural probiotics, litter treatments, and biosecurity for commercial poultry breeders. Improve hatchability, egg quality, and flock health. USDA Organic.'
+
+// OG image from hero
+const ogImage = buildSouthlandUrl('Southland Website/poultry/Caged_housing_gyiynj_vawvom', {
+  width: 1200,
+  height: 630,
+  crop: 'fill',
+  gravity: 'auto',
+  quality: 'auto',
+  format: 'auto',
+})
 
 // ── Fetch products ──────────────────────────────────────────────────────────
 const client = createClient({
@@ -173,7 +183,7 @@ const faqSchema = {
 }
 ---
 
-<BaseLayout title={title} description={description} schema={[pageSchema, faqSchema]}>
+<BaseLayout title={title} description={description} ogImage={ogImage} schema={[pageSchema, faqSchema]}>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 1: HERO — "Every egg is a bet on your operation"             -->
@@ -190,7 +200,7 @@ const faqSchema = {
     priority={true}
     effect="blur"
   >
-    <div class="mx-auto w-full max-w-6xl pb-12 pt-12 md:pt-20">
+    <div class="mx-auto w-full max-w-7xl pb-12 pt-12 md:pt-20">
       <div class="max-w-3xl">
         <div class="mb-3 flex flex-wrap items-center gap-2">
           <span class="inline-block rounded-full bg-white/15 px-4 py-1 text-sm font-medium text-green-300">
@@ -281,8 +291,8 @@ const faqSchema = {
   <!-- SECTION 2: PROBLEM — "Breeder operations can't afford guesswork"     -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-white py-16 md:py-20">
-    <div class="mx-auto max-w-6xl px-4">
-      <h2 class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
+    <div class="mx-auto max-w-7xl px-4">
+      <h2 class="mb-4 text-center font-heading text-3xl uppercase text-shopify-title md:text-4xl">
         Breeder operations can't afford guesswork.
       </h2>
       <p class="mx-auto mb-12 max-w-2xl text-center text-gray-600">
@@ -290,37 +300,37 @@ const faqSchema = {
       </p>
       <div class="grid gap-8 md:grid-cols-3">
         <!-- External Problem -->
-        <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
-          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[#2C5234]/10">
+        <div class="rounded-2xl border border-gray-200 bg-gray-50 p-8">
+          <div class="hex-icon mb-4 bg-[#2C5234]/10">
             <svg class="h-6 w-6 text-[#2C5234]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
           </div>
-          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">The hatchability pressure</h3>
+          <h3 class="mb-3 text-lg font-bold text-shopify-title">The hatchability pressure</h3>
           <p class="leading-relaxed text-gray-600">
             Every point of hatchability is revenue. When fertility dips or shell quality drops, the hatchery feels it immediately — and so does your settlement. The margin between a profitable cycle and a break-even one is measured in percentages.
           </p>
         </div>
         <!-- Internal Problem -->
-        <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
-          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[#44883E]/10">
+        <div class="rounded-2xl border border-gray-200 bg-gray-50 p-8">
+          <div class="hex-icon mb-4 bg-[#44883E]/10">
             <svg class="h-6 w-6 text-[#44883E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
             </svg>
           </div>
-          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">The long-cycle anxiety</h3>
+          <h3 class="mb-3 text-lg font-bold text-shopify-title">The long-cycle anxiety</h3>
           <p class="leading-relaxed text-gray-600">
             Breeder flocks produce for 40+ weeks. A problem at week 20 compounds for the next 20. You're watching production curves and wondering if the decline is normal aging or something you could be fixing right now.
           </p>
         </div>
         <!-- Philosophical Problem -->
-        <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
-          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[#2C5234]/10">
+        <div class="rounded-2xl border border-gray-200 bg-gray-50 p-8">
+          <div class="hex-icon mb-4 bg-[#2C5234]/10">
             <svg class="h-6 w-6 text-[#2C5234]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">What's at stake</h3>
+          <h3 class="mb-3 text-lg font-bold text-shopify-title">What's at stake</h3>
           <p class="leading-relaxed text-gray-600">
             Breeder birds are the most valuable birds in the chain. They deserve tools that match that value — not generic supplements designed for a 6-week broiler cycle.
           </p>
@@ -333,13 +343,13 @@ const faqSchema = {
   <!-- SECTION 3: GUIDE — "We understand breeder operations"                -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-gray-50 py-16 md:py-20">
-    <div class="mx-auto max-w-6xl px-4">
+    <div class="mx-auto max-w-7xl px-4">
       <div class="grid items-center gap-12 md:grid-cols-[1fr_auto]">
         <div class="order-2 md:order-1">
           <span class="mb-2 inline-block text-sm font-semibold uppercase tracking-wider text-green-700">
             Your guide
           </span>
-          <h2 class="mb-6 font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
+          <h2 class="mb-6 font-heading text-3xl uppercase text-shopify-title md:text-4xl">
             Breeder-specific programs, not generic advice.
           </h2>
           <p class="mb-4 text-lg leading-relaxed text-gray-700">
@@ -425,8 +435,8 @@ const faqSchema = {
   <!-- SECTION 4: JTBD GRID — "Three jobs in every breeder house"           -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-[#F8FAF8] py-16 md:py-20">
-    <div class="mx-auto max-w-6xl px-4">
-      <h2 class="mb-4 text-center font-heading text-4xl uppercase md:text-5xl" style="color: var(--color-title);">
+    <div class="mx-auto max-w-7xl px-4">
+      <h2 class="mb-4 text-center font-heading text-4xl uppercase text-shopify-title md:text-5xl">
         Three jobs in every breeder house.
       </h2>
       <p class="mx-auto mb-4 max-w-2xl text-center text-gray-600">
@@ -453,14 +463,14 @@ const faqSchema = {
             )}
 
             <!-- Job icon -->
-            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
+            <div class="hex-icon mb-4 bg-green-100">
               <svg class="h-6 w-6 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <Fragment set:html={job.icon} />
               </svg>
             </div>
 
             <!-- Job title + struggle -->
-            <h3 class="mb-2 text-xl font-bold" style="color: var(--color-title);">
+            <h3 class="mb-2 text-xl font-bold text-shopify-title">
               {job.title}
             </h3>
             <p class="mb-3 text-sm text-gray-600">{job.struggle}</p>
@@ -524,8 +534,8 @@ const faqSchema = {
   <!-- SECTION 4B: SHOP BREEDER PRODUCTS — Full product grid                -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section id="breeder-products" class="bg-white py-16 md:py-20">
-    <div class="mx-auto max-w-6xl px-4">
-      <h2 class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
+    <div class="mx-auto max-w-7xl px-4">
+      <h2 class="mb-4 text-center font-heading text-3xl uppercase text-shopify-title md:text-4xl">
         Shop Breeder Products
       </h2>
       <p class="mx-auto mb-6 max-w-2xl text-center text-gray-600">
@@ -598,7 +608,7 @@ const faqSchema = {
   <!-- SECTION 5: PROOF BAND — "Numbers, not promises"                      -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section id="proof" class="bg-[#2C5234] py-12 md:py-16">
-    <div class="mx-auto max-w-6xl px-4">
+    <div class="mx-auto max-w-7xl px-4">
       <h2 class="mb-3 text-center font-heading text-3xl uppercase text-white md:text-4xl">
         Numbers, not promises.
       </h2>
@@ -635,7 +645,7 @@ const faqSchema = {
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-white py-16 md:py-20">
     <div class="mx-auto max-w-4xl px-4">
-      <h2 class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
+      <h2 class="mb-4 text-center font-heading text-3xl uppercase text-shopify-title md:text-4xl">
         Three steps. Not a sales pitch.
       </h2>
       <p class="mx-auto mb-12 max-w-xl text-center text-gray-600">
@@ -647,7 +657,7 @@ const faqSchema = {
             1
           </div>
           <div>
-            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);"><span class="text-[#44883E]">Call</span> Allen and tell him about your breeder operation.</h3>
+            <h3 class="mb-1 text-lg font-bold text-shopify-title"><span class="text-[#44883E]">Call</span> Allen and tell him about your breeder operation.</h3>
             <p class="text-gray-600">
               How many houses, what integrator, where you are in the lay cycle, what's giving you trouble. He'll listen first and build a program around your production schedule.
             </p>
@@ -658,7 +668,7 @@ const faqSchema = {
             2
           </div>
           <div>
-            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);"><span class="text-[#44883E]">Test</span> on one house, one cycle.</h3>
+            <h3 class="mb-1 text-lg font-bold text-shopify-title"><span class="text-[#44883E]">Test</span> on one house, one cycle.</h3>
             <p class="text-gray-600">
               No commitment beyond that. No contract, no minimum order. Run it alongside your existing program and compare the numbers.
             </p>
@@ -669,7 +679,7 @@ const faqSchema = {
             3
           </div>
           <div>
-            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);"><span class="text-[#44883E]">Check</span> the hatchery report.</h3>
+            <h3 class="mb-1 text-lg font-bold text-shopify-title"><span class="text-[#44883E]">Check</span> the hatchery report.</h3>
             <p class="text-gray-600">
               Hatchability, fertility, shell quality — the hatchery numbers don't lie. If the metrics improve, you'll know it. If they don't, we'll part ways.
             </p>
@@ -684,13 +694,103 @@ const faqSchema = {
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-gray-50 py-16 md:py-20">
     <div class="mx-auto max-w-3xl px-4">
-      <h2 class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
+      <h2 class="mb-4 text-center font-heading text-3xl uppercase text-shopify-title md:text-4xl">
         We know what you're thinking.
       </h2>
       <p class="mx-auto mb-10 max-w-xl text-center text-gray-600">
         Breeder operations have higher stakes and tighter requirements. Here are the straight answers.
       </p>
       <AccordionFaq items={objections} persona="bob" />
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 7B: CROSS-LINKS — Related poultry segments + content         -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <section class="bg-[#F8FAF8] py-16 md:py-20">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <h2 class="mb-8 text-center font-heading text-2xl uppercase text-[#2C5234] md:text-3xl">
+        More from our poultry program
+      </h2>
+      <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <a href="/poultry/" class="group overflow-hidden rounded-xl border border-[#44883E]/15 bg-white transition-all hover:border-[#44883E]/30 hover:shadow-lg">
+          <img
+            src="https://res.cloudinary.com/southland-organics/image/upload/c_fill,w_400,h_180,g_auto,f_auto,q_auto/Southland%20Website/poultry/poultry_house_w1zen3_iecnpo"
+            alt="Commercial poultry houses at dusk"
+            class="h-28 w-full object-cover"
+            loading="lazy"
+          />
+          <div class="p-4">
+            <p class="font-semibold text-[#2C5234] group-hover:text-[#44883E]">Poultry Hub</p>
+            <p class="mt-1 text-xs text-gray-500">All programs, products & resources</p>
+          </div>
+        </a>
+        <a href="/poultry/commercial/" class="group overflow-hidden rounded-xl border border-[#44883E]/15 bg-white transition-all hover:border-[#44883E]/30 hover:shadow-lg">
+          <img
+            src="https://res.cloudinary.com/southland-organics/image/upload/c_fill,w_400,h_180,g_auto,f_auto,q_auto/v1774912260/Southland%20Website/poultry/broilers/broiler_farm_sxnkd0"
+            alt="Commercial broiler farm"
+            class="h-28 w-full object-cover"
+            loading="lazy"
+          />
+          <div class="p-4">
+            <p class="font-semibold text-[#2C5234] group-hover:text-[#44883E]">Commercial Broilers</p>
+            <p class="mt-1 text-xs text-gray-500">Gut health & litter programs for growers</p>
+          </div>
+        </a>
+        <a href="/poultry/backyard/" class="group overflow-hidden rounded-xl border border-[#44883E]/15 bg-white transition-all hover:border-[#44883E]/30 hover:shadow-lg">
+          <img
+            src="https://res.cloudinary.com/southland-organics/image/upload/c_fill,w_400,h_180,g_auto,f_auto,q_auto/v1772720860/Southland%20Website/poultry/backyard/Backyard_poultry_products"
+            alt="Backyard chickens in a flock"
+            class="h-28 w-full object-cover"
+            loading="lazy"
+          />
+          <div class="p-4">
+            <p class="font-semibold text-[#2C5234] group-hover:text-[#44883E]">Backyard Flocks</p>
+            <p class="mt-1 text-xs text-gray-500">Small flock supplements & solutions</p>
+          </div>
+        </a>
+        <a href="/poultry/turkey/" class="group overflow-hidden rounded-xl border border-[#44883E]/15 bg-white transition-all hover:border-[#44883E]/30 hover:shadow-lg">
+          <img
+            src="https://res.cloudinary.com/southland-organics/image/upload/c_fill,w_400,h_180,g_auto,f_auto,q_auto/Southland%20Website/poultry/turkey/Turkey_Header"
+            alt="Turkey flock in poultry house"
+            class="h-28 w-full object-cover"
+            loading="lazy"
+          />
+          <div class="p-4">
+            <p class="font-semibold text-[#2C5234] group-hover:text-[#44883E]">Turkey Operations</p>
+            <p class="mt-1 text-xs text-gray-500">Turkey-scale gut health & litter management</p>
+          </div>
+        </a>
+      </div>
+      <div class="mt-5 grid gap-5 sm:grid-cols-3">
+        <a href="/blog/how-to-reduce-ammonia-in-poultry-house-naturally/" class="group flex items-center gap-4 rounded-xl border border-[#44883E]/15 bg-white p-4 transition-all hover:border-[#44883E]/30 hover:shadow-lg">
+          <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#2C5234]">
+            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-[#2C5234] group-hover:text-[#44883E]">How to Reduce Ammonia Naturally</p>
+            <p class="text-xs text-gray-500">Ventilation, litter management & biology</p>
+          </div>
+        </a>
+        <a href="/blog/natural-alternatives-to-chemical-poultry-treatments/" class="group flex items-center gap-4 rounded-xl border border-[#44883E]/15 bg-white p-4 transition-all hover:border-[#44883E]/30 hover:shadow-lg">
+          <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#2C5234]">
+            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-[#2C5234] group-hover:text-[#44883E]">Natural Alternatives to Chemicals</p>
+            <p class="text-xs text-gray-500">Litter, water, pest & sanitation</p>
+          </div>
+        </a>
+        <a href="/blog/poultry-farm-biosecurity-basics/" class="group flex items-center gap-4 rounded-xl border border-[#44883E]/15 bg-white p-4 transition-all hover:border-[#44883E]/30 hover:shadow-lg">
+          <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#2C5234]">
+            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-[#2C5234] group-hover:text-[#44883E]">Biosecurity Basics</p>
+            <p class="text-xs text-gray-500">Comprehensive program fundamentals</p>
+          </div>
+        </a>
+      </div>
     </div>
   </section>
 
@@ -718,8 +818,7 @@ const faqSchema = {
         <a
           href="tel:800-608-3755"
           class="inline-flex items-center gap-3 rounded-xl bg-white px-8 py-4 text-2xl font-bold transition-colors hover:bg-green-50 md:text-3xl"
-          style="color: var(--color-title);"
-        >
+                 >
           <svg class="h-8 w-8 text-[#44883E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
           </svg>
@@ -749,3 +848,14 @@ const faqSchema = {
   </CloudinaryHero>
 
 </BaseLayout>
+
+<style>
+  .hex-icon {
+    width: 3rem;
+    height: 3.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  }
+</style>

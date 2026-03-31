@@ -43,7 +43,7 @@ const SEGMENTS = [
     label: 'Poultry',
     audience: 'For Bill, Betty, Bob, Tom & Greg',
     description: 'Flock health, gut biology, equipment, and growing tips for commercial and backyard operations.',
-    icon: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
+    icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
     hub: '/blogs/poultry-biosecurity',
     hubLabel: 'Biosecurity Hub',
     hubNote: 'Looking for biosecurity and flock programs?',
@@ -54,7 +54,7 @@ const SEGMENTS = [
     label: 'Turf & Lawn',
     audience: 'For Taylor, Gary & Hannah',
     description: 'Weed control, humic acid, and soil health for lawn care pros and homeowners.',
-    icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z',
+    icon: 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z',
     hub: '/blogs/humate-hub',
     hubLabel: 'Humate Hub',
     hubNote: 'Need help with soil biology and humate programs?',
@@ -129,7 +129,7 @@ const segmentBadgeColors: Record<string, string> = {
 ---
 
 <BaseLayout
-  title="Blog & Resources | Southland Organics"
+  title="Blog — Farming, Turf & Soil Science | Southland Organics"
   description="Expert resources on poultry farming, soil health, turf care, and sustainable agriculture. Practical guides from people who've been in the field."
   ogImage={getLogoUrl('square', { width: 800 })}
   schema={blogSchema}
@@ -138,7 +138,7 @@ const segmentBadgeColors: Record<string, string> = {
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 1: HERO + SEGMENT TILES                                       -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <section class="bg-gradient-to-br from-southland-green-dark via-[#1f3d24] to-[#162b1b] py-16 md:py-20">
+  <section class="bg-[#111111] py-16 md:py-20">
     <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
       <div class="mb-12 text-center">
         <p class="mb-3 text-sm font-semibold uppercase tracking-wider text-green-400">
@@ -148,7 +148,7 @@ const segmentBadgeColors: Record<string, string> = {
           Blog & Resources
         </h1>
         <p class="mx-auto max-w-2xl text-lg text-white/70">
-          Practical guides from people who've been in the field. <strong class="text-white">{posts.length} articles</strong> across poultry, turf, agriculture, and more.
+          Practical guides from people who've been in the field. Over <strong class="text-white">{posts.length} articles</strong> across poultry, turf, agriculture, and more.
         </p>
       </div>
 
@@ -210,7 +210,7 @@ const segmentBadgeColors: Record<string, string> = {
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="border-b border-gray-100 bg-white py-10" id="latest">
     <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-      <h2 class="mb-6 text-lg font-bold text-gray-900">Latest</h2>
+      <h2 class="mb-6 font-heading text-lg uppercase text-gray-900">Latest</h2>
       <div class="grid gap-4 sm:grid-cols-3">
         {latestPosts.map((post) => {
           const slug = post.id.replace(/\.mdx?$/, '')

@@ -101,14 +101,14 @@ const aboutSchema = {
 <BaseLayout
   title="About Southland Organics | Biology-First Agriculture"
   description="Biology-first programs for commercial poultry, turf and crop growers. In business since 2009 with thousands of farm visits and 99+ dealer locations nationwide."
-  ogImage={getLogoUrl('square', { width: 800 })}
+  ogImage={buildSouthlandUrl('heroes/Farm_Athens_GA_7_jbdjik', { width: 1200, height: 630, crop: 'fill', quality: 'auto', format: 'auto' })}
   schema={aboutSchema}
 >
   <!-- Hero with rotating farm photos -->
   <section class="about-hero relative overflow-hidden">
     <img
       id="hero-bg"
-      alt=""
+      alt="Aerial view of a Southland Organics partner farm in Athens, Georgia"
       class="absolute inset-0 h-full w-full object-cover"
       loading="eager"
       decoding="async"
@@ -212,7 +212,7 @@ const aboutSchema = {
           <p class="mb-3 text-sm font-semibold uppercase tracking-wide text-southland-green">
             How We Started
           </p>
-          <h2 class="mb-6 text-3xl font-bold text-shopify-title md:text-4xl">
+          <h2 class="mb-6 font-heading text-3xl font-bold text-shopify-title md:text-4xl">
             Built on Field Experience, Not Theory
           </h2>
           <div class="space-y-4 text-lg leading-relaxed text-shopify-secondary-text">
@@ -250,7 +250,7 @@ const aboutSchema = {
         <p class="mb-3 text-sm font-semibold uppercase tracking-wide text-southland-green">
           Leadership
         </p>
-        <h2 class="mb-4 text-3xl font-bold text-shopify-title md:text-4xl">
+        <h2 class="mb-4 font-heading text-3xl font-bold text-shopify-title md:text-4xl">
           The Leaders You'll Actually Talk To
         </h2>
         <p class="mx-auto max-w-2xl text-lg text-shopify-secondary-text">
@@ -465,7 +465,7 @@ const aboutSchema = {
         <p class="mb-3 text-sm font-semibold uppercase tracking-wide text-southland-green">
           Our Approach
         </p>
-        <h2 class="mb-4 text-3xl font-bold text-shopify-title md:text-4xl">
+        <h2 class="mb-4 font-heading text-3xl font-bold text-shopify-title md:text-4xl">
           Biology First. Always.
         </h2>
         <p class="mx-auto max-w-2xl text-lg text-shopify-secondary-text">
@@ -567,7 +567,7 @@ const aboutSchema = {
         <p class="mb-3 text-sm font-semibold uppercase tracking-wide text-southland-green">
           Behind the Scenes
         </p>
-        <h2 class="mb-4 text-3xl font-bold text-shopify-title md:text-4xl">See For Yourself</h2>
+        <h2 class="mb-4 font-heading text-3xl font-bold text-shopify-title md:text-4xl">See For Yourself</h2>
         <p class="mx-auto max-w-2xl text-lg text-shopify-secondary-text">
           Short videos. Real personality. This is who we are.
         </p>
@@ -610,7 +610,7 @@ const aboutSchema = {
         <p class="mb-3 text-sm font-semibold uppercase tracking-wide text-southland-green">
           Who We Serve
         </p>
-        <h2 class="mb-4 text-3xl font-bold text-shopify-title md:text-4xl">
+        <h2 class="mb-4 font-heading text-3xl font-bold text-shopify-title md:text-4xl">
           From Backyard to Commercial
         </h2>
         <p class="mx-auto max-w-2xl text-lg text-shopify-secondary-text">
@@ -625,9 +625,13 @@ const aboutSchema = {
           class="group rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all hover:border-southland-green/30 hover:shadow-md"
         >
           <div
-            class="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-southland-green/10 text-xl"
+            class="mb-4 flex h-10 w-10 items-center justify-center bg-[#2C5234]"
+            style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
           >
-            🐔
+            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2 20h20M3 20V9l9-5 9 5v11" />
+              <circle cx="8" cy="14" r="2" /><circle cx="16" cy="14" r="2" />
+            </svg>
           </div>
           <h3
             class="mb-2 text-lg font-bold text-shopify-title transition-colors group-hover:text-southland-green"
@@ -644,9 +648,13 @@ const aboutSchema = {
           class="group rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all hover:border-southland-green/30 hover:shadow-md"
         >
           <div
-            class="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-southland-green/10 text-xl"
+            class="mb-4 flex h-10 w-10 items-center justify-center bg-[#44883E]"
+            style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
           >
-            🌱
+            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 21c-4-4-8-7.5-8-11a8 8 0 0116 0c0 3.5-4 7-8 11z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 11V7" />
+            </svg>
           </div>
           <h3
             class="mb-2 text-lg font-bold text-shopify-title transition-colors group-hover:text-southland-green"
@@ -663,9 +671,12 @@ const aboutSchema = {
           class="group rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all hover:border-southland-green/30 hover:shadow-md"
         >
           <div
-            class="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-southland-green/10 text-xl"
+            class="mb-4 flex h-10 w-10 items-center justify-center bg-[#2C5234]"
+            style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
           >
-            🐖
+            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 21c-3 0-5-1.5-5-4 0-1.5.5-3 2-4l1-4c.5-2 1-4 2-5 1 1 1.5 3 2 5l1 4c1.5 1 2 2.5 2 4 0 2.5-2 4-5 4z" />
+            </svg>
           </div>
           <h3
             class="mb-2 text-lg font-bold text-shopify-title transition-colors group-hover:text-southland-green"
@@ -682,9 +693,12 @@ const aboutSchema = {
           class="group rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all hover:border-southland-green/30 hover:shadow-md"
         >
           <div
-            class="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-southland-green/10 text-xl"
+            class="mb-4 flex h-10 w-10 items-center justify-center bg-[#44883E]"
+            style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
           >
-            ♻️
+            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
           </div>
           <h3
             class="mb-2 text-lg font-bold text-shopify-title transition-colors group-hover:text-southland-green"
@@ -714,7 +728,7 @@ const aboutSchema = {
         <p class="mb-3 text-sm font-semibold uppercase tracking-wide text-southland-green">
           The Full Team
         </p>
-        <h2 class="mb-4 text-3xl font-bold text-shopify-title md:text-4xl">Meet Our Team</h2>
+        <h2 class="mb-4 font-heading text-3xl font-bold text-shopify-title md:text-4xl">Meet Our Team</h2>
         <p class="mx-auto max-w-2xl text-lg text-shopify-secondary-text">
           Behind every program and farm visit is a team that obsesses over biology, logistics and
           service so you don't have to.

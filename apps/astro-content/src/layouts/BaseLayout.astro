@@ -4,6 +4,7 @@ import Header from '../components/shared/Header.astro';
 import Footer from '../components/shared/Footer.astro';
 import SocialMeta from '../components/shared/SocialMeta.astro';
 import PersonaBanner from '../components/cdp/PersonaBanner.astro';
+import { getLogoUrl } from '../lib/cloudinary';
 
 interface Props {
   title: string;
@@ -22,7 +23,7 @@ interface Props {
 const {
   title,
   description,
-  ogImage = '/images/podcast/og-default.jpg',
+  ogImage = getLogoUrl('square', { width: 800 }),
   ogType = 'website',
   canonicalUrl,
   noIndex = false,

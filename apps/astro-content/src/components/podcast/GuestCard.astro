@@ -2,6 +2,7 @@
 /**
  * Guest card component - displays guest info with links
  */
+import { buildSouthlandUrl } from '../../lib/cloudinary'
 
 interface GuestLink {
   website?: string
@@ -43,6 +44,18 @@ const defaultPhoto = '/images/podcast/guests/default-avatar.jpg'
 
 const isCompact = variant === 'compact'
 const isSidebar = variant === 'sidebar'
+
+// Convert Cloudinary public IDs to URLs (same pattern as TeamCard)
+const photoUrl = photo && !photo.startsWith('http') && !photo.startsWith('/')
+  ? buildSouthlandUrl(photo, {
+      width: isCompact || isSidebar ? 128 : 256,
+      height: isCompact || isSidebar ? 128 : 256,
+      crop: 'fill',
+      gravity: 'face',
+      quality: 'auto',
+      format: 'auto',
+    })
+  : photo
 ---
 
 <div
@@ -57,7 +70,7 @@ const isSidebar = variant === 'sidebar'
         class={`${isSidebar ? 'w-16 h-16' : isCompact ? 'w-12 h-12' : 'aspect-square'} rounded-full overflow-hidden bg-gray-100`}
       >
         <img
-          src={photo || defaultPhoto}
+          src={photoUrl || defaultPhoto}
           alt={name}
           class="h-full w-full object-cover"
           loading="lazy"
@@ -68,11 +81,11 @@ const isSidebar = variant === 'sidebar'
     {/* Info */}
     <div class={`${isSidebar || isCompact ? 'flex-1' : 'p-4'}`}>
       <a href={guestUrl} class="block">
-        <h4
-          class={`font-semibold text-gray-900 hover:text-southland-green transition-colors ${isSidebar ? 'text-sm' : ''}`}
+        <h3
+          class={`font-semibold text-gray-900 hover:text-southland-green transition-colors ${isSidebar ? 'text-sm' : 'text-base'}`}
         >
           {name}
-        </h4>
+        </h3>
       </a>
 
       {

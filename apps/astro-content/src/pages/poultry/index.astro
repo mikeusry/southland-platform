@@ -9,7 +9,9 @@
  * Copy source: BB-Persona/poultry-hub-copy.md
  */
 import { createClient, getProductByHandle } from '@southland/shopify-storefront'
+import { getCollection } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import BlogCard from '../../components/blog/BlogCard.astro'
 import CloudinaryHero from '../../components/CloudinaryHero.astro'
 
 // ── Fetch products ──────────────────────────────────────────────────────────
@@ -24,6 +26,7 @@ const handles = [
   'poultry-litter-amendment',                       // Litter Life
   'catalyst-poultry-vitamin',                       // Catalyst
   'natural-mite-control-livestock-poultry',         // Desecticide
+  'zeropoint-industrial',                           // ZeroPoint Industrial
   'backyard-poultry-bundle-chicken-supplements',    // Backyard Bundle
   'apple-cider-vinegar-for-chickens',                // Mother Load ACV
 ] as const
@@ -37,14 +40,35 @@ function formatPrice(amount: string) {
   return num % 1 === 0 ? `$${num}` : `$${num.toFixed(2)}`
 }
 
-const title = 'Organic Poultry Solutions | Southland Organics'
+// Product → segment mapping for "Best for" badges
+const productSegments: Record<string, string[]> = {
+  'poultry-probiotic': ['Commercial', 'Turkey', 'Breeders'],
+  'hen-helper': ['Backyard'],
+  'poultry-litter-amendment': ['Commercial', 'Turkey'],
+  'catalyst-poultry-vitamin': ['Commercial', 'Backyard', 'Turkey'],
+  'natural-mite-control-livestock-poultry': ['Backyard', 'Game Birds'],
+  'zeropoint-industrial': ['Commercial', 'Breeders', 'Turkey'],
+  'backyard-poultry-bundle-chicken-supplements': ['Backyard'],
+  'apple-cider-vinegar-for-chickens': ['Commercial', 'Backyard'],
+}
+
+// Latest poultry blog posts — exclude placeholder images
+const placeholderImg = 'DSC_0137_dco2wk'
+const poultryPosts = (await getCollection('blog', ({ data }) =>
+  data.draft !== true && data.segment === 'poultry'
+))
+  .filter((p) => p.data.featuredImage && !p.data.featuredImage.includes(placeholderImg))
+  .sort((a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime())
+  .slice(0, 3)
+
+const title = 'Poultry Supplements & Probiotics | Southland Organics'
 const description =
-  'Probiotics, litter treatments, and gut health products for broiler growers, turkey producers, game bird operations, and backyard flock owners. USDA Organic certified. Zero withdrawal. Since 2009.'
+  'Poultry supplements and chicken probiotics built for real farms. Gut health, litter treatment, biosecurity. USDA Organic. Zero withdrawal. Ships same day.'
 
 const schema = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
-  name: 'Organic Poultry Solutions',
+  name: 'Poultry Supplements & Probiotics',
   description: description,
   url: 'https://southlandorganics.com/poultry/',
   provider: {
@@ -56,14 +80,14 @@ const schema = {
 }
 
 const stats = [
-  { number: '2009', label: 'Formulating organic poultry products', source: '' },
+  { number: '2009', label: 'Making poultry supplements in Georgia', source: '' },
   {
-    number: '6.2%',
-    label: 'Mortality reduction in UGA-validated study',
-    source: 'C. Stephen Roney DVM',
+    number: '1,000+',
+    label: 'Farms helped since day one',
+    source: '',
   },
-  { number: '0', label: 'Withdrawal period on every product', source: 'USDA Organic' },
-  { number: '500+', label: 'Farms using Southland products', source: '' },
+  { number: '0', label: 'Days withdrawal on every product we sell', source: '' },
+  { number: '500+', label: 'Commercial farms running our program', source: '' },
 ]
 ---
 
@@ -79,25 +103,23 @@ const stats = [
     overlayOpacity={88}
     priority={true}
   >
-    <div class="mx-auto max-w-6xl px-4 py-20 text-center md:py-28">
+    <div class="mx-auto max-w-6xl px-4 py-14 text-center md:py-20">
       <span
-        class="mb-6 inline-block rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-green-200"
+        class="mb-5 inline-block rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-green-200"
       >
-        Organic Poultry Solutions Since 2009
+        Helped 1,000+ farms since 2009
       </span>
 
-      <h1 class="font-heading mb-6 text-4xl uppercase text-white md:text-5xl lg:text-6xl">
-        Organic poultry health products that work.
+      <h1 class="font-heading mb-5 text-3xl uppercase text-white md:text-4xl lg:text-5xl">
+        Poultry supplements that actually move your numbers.
       </h1>
 
-      <p class="mx-auto mb-8 max-w-3xl text-lg leading-relaxed text-green-100 md:text-xl">
-        Probiotics, litter treatments, and gut health products for broilers, turkeys, game birds, and
-        backyard flocks. Used on millions of birds. USDA Organic certified. Zero withdrawal. Results
-        you can measure.
+      <p class="mx-auto mb-7 max-w-2xl text-base leading-relaxed text-green-100 md:text-lg">
+        Southland Organics manufactures poultry probiotics, poultry litter treatment products, and gut health supplements to help your birds stay healthy and grow. Our beneficial bacteria supports feed conversion and helps fight mortality &mdash; proven results, proven time and again. Zero withdrawal on every product.
       </p>
 
       <div
-        class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-medium uppercase tracking-wider text-green-200/80"
+        class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-medium uppercase tracking-wider text-green-200/80"
       >
         <span class="flex items-center gap-1.5">
           <svg class="h-3.5 w-3.5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
@@ -106,7 +128,7 @@ const stats = [
               d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
               clip-rule="evenodd"></path>
           </svg>
-          USDA Organic
+          WSDA Approved
         </span>
         <span class="flex items-center gap-1.5">
           <svg class="h-3.5 w-3.5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
@@ -133,7 +155,7 @@ const stats = [
               d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
               clip-rule="evenodd"></path>
           </svg>
-          Family-Owned Since 2009
+          1,000+ Farms Helped
         </span>
       </div>
     </div>
@@ -149,42 +171,31 @@ const stats = [
         class="font-heading mb-3 text-center text-3xl uppercase md:text-4xl"
         style="color: #2C5234;"
       >
-        What kind of birds do you raise?
+        What does your farm operation look like?
       </h2>
       <p class="mx-auto mb-12 max-w-2xl text-center text-base leading-relaxed text-gray-500">
-        Same biology, different operations. Pick your path for products, dosing, and support built
-        for how you actually raise birds.
+        The gut biology is the same across all poultry. The dosing, the timing, and the problems are not. Choose your operation and we'll guide you to the poultry supplements that fit your needs.
       </p>
 
       <!-- Primary cards: Commercial + Backyard (full-size, mini-hero treatment) -->
       <div class="grid gap-8 md:grid-cols-2">
         <!-- Card A: Commercial Broilers -->
         <div class="overflow-hidden rounded-xl border border-[#2C5234]/15 bg-[#F8FAF8] transition-all hover:border-[#2C5234]/30 hover:shadow-md">
-          <div class="p-8">
-            <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-lg bg-[#2C5234]/10">
-              <svg
-                class="h-7 w-7 text-[#2C5234]"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="1.5"
-                  d="M3 21h18M4 21V10l8-6 8 6v11M9 21v-6h6v6"></path>
-              </svg>
-            </div>
-
+          <img
+            src="https://res.cloudinary.com/southland-organics/image/upload/c_fill,w_600,h_220,g_auto,f_auto,q_auto/v1772456410/Southland%20Website/poultry/Poultry_house_e515fc_jxbulv"
+            alt="Commercial poultry houses"
+            class="h-36 w-full object-cover"
+            loading="lazy"
+          />
+          <div class="p-6">
             <h3 class="mb-2 text-xl font-bold" style="color: #2C5234;">Commercial Broilers</h3>
 
             <p class="mb-4 text-sm font-medium text-gray-700">
-              Lower mortality, better FCR, stronger settlements.
+              Lower mortality. Tighter FCR. Settlements that make the math work.
             </p>
 
             <p class="mb-5 text-sm leading-relaxed text-gray-600">
-              Contract growers running 2–8 houses. You're measured on every tenth of a point — our
-              system is built for that math.
+              You are running commercial broiler houses and your integrator measures every little bit that counts toward your feed conversion ratio. A bad grow-out doesn't just cost birds &mdash; it really costs you on your settlement check. Our products are designed with you in mind, helping you alleviate stress and keep more money in your pocket.
             </p>
 
             <div
@@ -196,7 +207,7 @@ const stats = [
                   d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                   clip-rule="evenodd"></path>
               </svg>
-              6.2% mortality reduction — UGA validated
+              Case studies show results like 6.2% mortality reduction &mdash; UGA validated
             </div>
 
             <div>
@@ -205,7 +216,7 @@ const stats = [
                 class="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:opacity-90"
                 style="background: #44883E;"
               >
-                See the Broiler System
+                Commercial Poultry Program
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
@@ -213,39 +224,28 @@ const stats = [
             </div>
 
             <p class="mt-4 text-xs text-gray-400">
-              Talk to Allen Reynolds — 10+ years in the houses.
+              Allen Reynolds has walked hundreds of poultry houses. He'll walk yours too.
             </p>
           </div>
         </div>
 
         <!-- Card B: Backyard -->
         <div class="overflow-hidden rounded-xl border border-[#44883E]/15 bg-[#F8FAF8] transition-all hover:border-[#44883E]/30 hover:shadow-md">
-          <div class="p-8">
-            <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-lg bg-[#44883E]/10">
-              <svg
-                class="h-7 w-7 text-[#44883E]"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="1.5"
-                  d="M12 19c-4 0-7-2.5-7-6 0-2 1-3.5 2-4.5-.5-1-.5-2.5 0-3.5 1 0 2 .5 2.5 1 .5-1 1.5-2 3-2s2.5 1 3 2c.5-.5 1.5-1 2.5-1 .5 1 .5 2.5 0 3.5 1 1 2 2.5 2 4.5 0 3.5-3 6-7 6z"
-                ></path>
-              </svg>
-            </div>
-
+          <img
+            src="https://res.cloudinary.com/southland-organics/image/upload/c_fill,w_600,h_220,g_auto,f_auto,q_auto/v1772720860/Southland%20Website/poultry/backyard/Backyard_poultry_products"
+            alt="Backyard chickens in a flock"
+            class="h-36 w-full object-cover"
+            loading="lazy"
+          />
+          <div class="p-6">
             <h3 class="mb-2 text-xl font-bold" style="color: #2C5234;">Backyard Flocks</h3>
 
             <p class="mb-4 text-sm font-medium text-gray-700">
-              Healthier birds, more eggs, less guesswork.
+              Stronger birds. More eggs. One simple routine.
             </p>
 
             <p class="mb-5 text-sm leading-relaxed text-gray-600">
-              5–50 birds in the yard. You want happy chickens and consistent eggs — without a
-              chemistry degree or a cabinet full of supplements.
+              You've got a wonderful little flock that you love, and you want to care for them deeply. But you didn't sign up for a chemistry degree. Our chicken supplements use the same beneficial bacteria that commercial operations depend on &mdash; just sized for your backyard coop. Healthy gut flora means healthier, happier birds.
             </p>
 
             <div
@@ -257,7 +257,7 @@ const stats = [
                   d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                   clip-rule="evenodd"></path>
               </svg>
-              Same biology used on millions of commercial birds — sized for your flock
+              Same probiotics used on millions of commercial birds &mdash; dosed for your flock
             </div>
 
             <div>
@@ -274,7 +274,7 @@ const stats = [
             </div>
 
             <p class="mt-4 text-xs text-gray-400">
-              Free shipping over $50. Most keepers start with the Backyard Bundle.
+              Most keepers start with the Backyard Bundle.
             </p>
           </div>
         </div>
@@ -283,26 +283,18 @@ const stats = [
       <!-- Secondary cards: Breeders, Turkey, Game Birds (upgraded with outcome lines + CTA buttons) -->
       <div class="mt-8 grid gap-6 md:grid-cols-3">
         <!-- Card C: Breeders -->
-        <div class="overflow-hidden rounded-xl border border-[#2C5234]/10 bg-[#F8FAF8] p-6 transition-all hover:border-[#2C5234]/25 hover:shadow-md">
-          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[#2C5234]/10">
-            <svg
-              class="h-6 w-6 text-[#2C5234]"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="1.5"
-                d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
-              ></path>
-            </svg>
-          </div>
+        <div class="overflow-hidden rounded-xl border border-[#2C5234]/10 bg-[#F8FAF8] transition-all hover:border-[#2C5234]/25 hover:shadow-md">
+          <img
+            src="https://res.cloudinary.com/southland-organics/image/upload/c_fill,w_400,h_160,g_auto,f_auto,q_auto/v1772721454/Southland%20Website/poultry/breeders-layers/Breeders_Header"
+            alt="Breeder flock"
+            class="h-28 w-full object-cover"
+            loading="lazy"
+          />
+          <div class="p-5">
           <h3 class="mb-1 text-base font-bold" style="color: #2C5234;">Breeders</h3>
-          <p class="mb-3 text-sm text-gray-700">Better hatchability, stronger egg quality.</p>
+          <p class="mb-3 text-sm text-gray-700">As a poultry breeder, egg quality means everything.</p>
           <p class="mb-4 text-xs leading-relaxed text-gray-500">
-            Biosecurity and gut health products built for breeder operations.
+            We focus on poultry biosecurity and gut health supplements to make your breeder operation stand out and become more profitable. Stronger beneficial bacteria helps you gain optimal production.
           </p>
           <a
             href="/poultry/breeders/"
@@ -314,29 +306,22 @@ const stats = [
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
             </svg>
           </a>
+          </div>
         </div>
 
         <!-- Card D: Turkey -->
-        <div class="overflow-hidden rounded-xl border border-[#2C5234]/10 bg-[#F8FAF8] p-6 transition-all hover:border-[#2C5234]/25 hover:shadow-md">
-          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[#2C5234]/10">
-            <svg
-              class="h-6 w-6 text-[#2C5234]"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="1.5"
-                d="M12 3c-1.5 0-3 1-3.5 2.5C7 6 5.5 7 5 8.5c-.5 2 0 4 1.5 5.5 1 1 2 2.5 2 4v3h7v-3c0-1.5 1-3 2-4 1.5-1.5 2-3.5 1.5-5.5-.5-1.5-2-2.5-3.5-3C14.5 4 13.5 3 12 3z"
-              ></path>
-            </svg>
-          </div>
+        <div class="overflow-hidden rounded-xl border border-[#2C5234]/10 bg-[#F8FAF8] transition-all hover:border-[#2C5234]/25 hover:shadow-md">
+          <img
+            src="https://res.cloudinary.com/southland-organics/image/upload/c_fill,w_400,h_140,g_auto,f_auto,q_auto/Southland Website/poultry/turkey/Turkey_Header"
+            alt="Turkey flock"
+            class="h-28 w-full object-cover"
+            loading="lazy"
+          />
+          <div class="p-5">
           <h3 class="mb-1 text-base font-bold" style="color: #2C5234;">Turkey</h3>
-          <p class="mb-3 text-sm text-gray-700">Lower mortality across longer grow-outs.</p>
+          <p class="mb-3 text-sm text-gray-700">16 weeks of grow-out. No room for a bad week.</p>
           <p class="mb-4 text-xs leading-relaxed text-gray-500">
-            Heavier birds, higher stakes per head. Products dosed for turkey-scale operations.
+            As a turkey operator you want bigger, heavier, healthier birds. You need better tolerance for ammonia, heat stress, and disease suppression. Our poultry supplements are geared for your turkey operation.
           </p>
           <a
             href="/poultry/turkey/"
@@ -348,28 +333,22 @@ const stats = [
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
             </svg>
           </a>
+          </div>
         </div>
 
         <!-- Card E: Game Birds -->
-        <div class="overflow-hidden rounded-xl border border-[#2C5234]/10 bg-[#F8FAF8] p-6 transition-all hover:border-[#2C5234]/25 hover:shadow-md">
-          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[#2C5234]/10">
-            <svg
-              class="h-6 w-6 text-[#2C5234]"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="1.5"
-                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-            </svg>
-          </div>
+        <div class="overflow-hidden rounded-xl border border-[#2C5234]/10 bg-[#F8FAF8] transition-all hover:border-[#2C5234]/25 hover:shadow-md">
+          <img
+            src="https://res.cloudinary.com/southland-organics/image/upload/c_fill,w_400,h_140,g_auto,f_auto,q_auto/Southland Website/poultry/game-birds/Quail_Header"
+            alt="Quail game birds"
+            class="h-28 w-full object-cover"
+            loading="lazy"
+          />
+          <div class="p-5">
           <h3 class="mb-1 text-base font-bold" style="color: #2C5234;">Game Birds</h3>
-          <p class="mb-3 text-sm text-gray-700">Healthier quail, pheasant, and chukar.</p>
+          <p class="mb-3 text-sm text-gray-700">Quail, pheasant &mdash; same gut biology.</p>
           <p class="mb-4 text-xs leading-relaxed text-gray-500">
-            Trusted by Tuck Farms. Same proven biology, adjusted for game bird operations.
+            Game bird operations run tighter margins and have more sensitive birds. Our probiotics and vitamins that work on broilers work here as well. Just ask Tuck Farms in Alabama.
           </p>
           <a
             href="/poultry/game-birds/"
@@ -381,6 +360,7 @@ const stats = [
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
             </svg>
           </a>
+          </div>
         </div>
       </div>
     </div>
@@ -396,14 +376,13 @@ const stats = [
         class="font-heading mb-3 text-center text-3xl uppercase md:text-4xl"
         style="color: #2C5234;"
       >
-        Our poultry products
+        Poultry supplements &amp; chicken probiotics
       </h2>
       <p class="mx-auto mb-4 max-w-2xl text-center text-base leading-relaxed text-gray-500">
-        Every product here is used across multiple bird types. The best starting point depends on
-        your operation — pick your path above if you're not sure.
+        Probiotics for poultry gut health, litter amendments that knock down ammonia fast, and poultry vitamins that fill the gap antibiotics used to cover. Our products work across all bird types &mdash; the difference is dosing. Not sure where to start? Pick your operation above.
       </p>
       <p class="mx-auto mb-12 max-w-2xl text-center text-sm text-gray-400">
-        USDA Organic certified. Zero withdrawal. All products ship same-day.
+        USDA Organic certified. OMRI Listed. Zero withdrawal period. Ships same day.
       </p>
 
       <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -413,7 +392,7 @@ const stats = [
             class="group flex flex-col rounded-xl border border-gray-200 bg-white p-4 transition-all hover:border-[#44883E]/30 hover:shadow-md"
           >
             {product.images?.[0] && (
-              <div class="mb-4 aspect-square overflow-hidden rounded-lg bg-gray-50">
+              <div class="relative mb-4 aspect-square overflow-hidden rounded-lg bg-gray-50">
                 <img
                   src={product.images[0].url}
                   alt={product.images[0].altText || product.title}
@@ -428,6 +407,15 @@ const stats = [
               <h3 class="mb-1 text-sm font-bold text-gray-900 group-hover:text-[#2C5234]">
                 {product.title.includes('|') ? product.title.split('|')[0].trim() : product.title}
               </h3>
+              {productSegments[product.handle] && (
+                <div class="mb-2 flex flex-wrap gap-1">
+                  {productSegments[product.handle].map((seg) => (
+                    <span class="rounded-full bg-[#2C5234]/8 px-2 py-0.5 text-[10px] font-medium text-[#2C5234]">
+                      {seg}
+                    </span>
+                  ))}
+                </div>
+              )}
               <p class="mb-3 flex-1 text-xs leading-relaxed text-gray-500">
                 {product.description?.slice(0, 100)}{product.description && product.description.length > 100 ? '…' : ''}
               </p>
@@ -455,7 +443,7 @@ const stats = [
       <h2
         class="font-heading mb-10 text-center text-3xl uppercase text-white md:text-4xl"
       >
-        Why poultry people trust us
+        Numbers, not promises
       </h2>
 
       <div class="grid grid-cols-2 gap-8 md:grid-cols-4">
@@ -479,7 +467,63 @@ const stats = [
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════
-       SECTION 5: FINAL CTA
+       SECTION 5: LATEST POULTRY INSIGHTS
+       Background: white
+       ═══════════════════════════════════════════════════════════════════════ -->
+  {poultryPosts.length > 0 && (
+    <section class="bg-white py-16 md:py-20">
+      <div class="mx-auto max-w-6xl px-4">
+        <div class="mb-10 flex items-end justify-between">
+          <div>
+            <h2
+              class="font-heading text-2xl uppercase md:text-3xl"
+              style="color: #2C5234;"
+            >
+              From the field
+            </h2>
+            <p class="mt-2 max-w-lg text-sm text-gray-500">
+              We have poultry health guides covering ammonia control research, biosecurity walkthroughs, and real grower stories. These articles are written by people who've been in the houses.
+            </p>
+          </div>
+          <a
+            href="/blog/?tag=Poultry"
+            class="hidden items-center gap-1.5 text-sm font-semibold text-[#44883E] transition-colors hover:text-[#2C5234] md:inline-flex"
+          >
+            All poultry articles
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+        <div class="grid gap-6 md:grid-cols-3">
+          {poultryPosts.map((post) => (
+            <BlogCard
+              title={post.data.title}
+              slug={post.id.replace(/\.mdx?$/, '')}
+              description={post.data.description}
+              publishDate={post.data.publishDate}
+              featuredImage={post.data.featuredImage}
+              segment={post.data.segment}
+            />
+          ))}
+        </div>
+        <div class="mt-8 text-center md:hidden">
+          <a
+            href="/blog/?tag=Poultry"
+            class="inline-flex items-center gap-1.5 text-sm font-semibold text-[#44883E]"
+          >
+            All poultry articles
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       SECTION 6: FINAL CTA
        Background: CloudinaryHero (interior poultry house photo)
        ═══════════════════════════════════════════════════════════════════════ -->
   <CloudinaryHero
@@ -491,11 +535,11 @@ const stats = [
   >
     <div class="mx-auto max-w-4xl px-4 py-16 text-center md:py-20">
       <h2 class="font-heading mb-4 text-3xl uppercase text-white md:text-4xl">
-        Not sure where to start?
+        Your birds don't wait. Neither do we.
       </h2>
 
       <p class="mx-auto mb-8 max-w-xl text-lg leading-relaxed text-green-100">
-        If you're not sure which system fits, call and we'll match products to your birds and houses.
+        Tell us about your operation, what you've got going on, and what's giving you trouble. We'll match the right supplements to your operation &mdash; no sales pitch, just the products and dosing that fits.
       </p>
 
       <div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -512,19 +556,19 @@ const stats = [
               d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
             ></path>
           </svg>
-          Talk to a Poultry Expert
+          Call Allen — 800-608-3755
         </a>
 
         <a
           href="#products"
           class="inline-flex items-center gap-2 rounded-lg border-2 border-white/30 px-6 py-3.5 text-base font-semibold text-white transition-colors hover:border-white/60 hover:bg-white/10"
         >
-          See All Poultry Products
+          Shop Poultry Products
         </a>
       </div>
 
       <p class="mt-6 text-xs text-green-200/50">
-        Family-owned in Georgia since 2009. Real people answer the phone.
+        Family-owned in Bogart, Georgia since 2009. A real person picks up the phone.
       </p>
     </div>
   </CloudinaryHero>

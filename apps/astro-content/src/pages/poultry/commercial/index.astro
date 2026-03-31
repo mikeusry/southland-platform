@@ -26,7 +26,7 @@ const allenPhoto = buildSouthlandUrl('team/ALLEN_Reynolds', {
   format: 'auto',
 })
 
-const title = 'Commercial Poultry Solutions | Southland Organics'
+const title = 'Commercial Poultry Supplements | Southland Organics'
 const description =
   'Proven organic gut health, litter treatment, and stress management for contract broiler growers. USDA Organic, zero withdrawal, integrator-friendly.'
 
@@ -170,14 +170,14 @@ const faqSchema = {
 }
 ---
 
-<BaseLayout title={title} description={description} schema={[pageSchema, faqSchema]}>
+<BaseLayout title={title} description={description} schema={[pageSchema, faqSchema]} ogImage={buildSouthlandUrl('poultry/broilers/broiler_farm_sxnkd0', { width: 1200, height: 630, crop: 'fill', quality: 'auto', format: 'auto' })}>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 1: HERO — "You're the one keeping them alive"                 -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <CloudinaryHero
-    publicId="Southland Website/poultry/Poultry_Industry_dcsedd_wyrhru"
-    alt="Inside a commercial broiler house — healthy birds at feeders under warm house lighting"
+    publicId="Southland Website/poultry/broilers/broiler_farm_sxnkd0"
+    alt="Commercial broiler farm — Southland Organics poultry programs"
     height={600}
     minHeight="500px"
     overlay="gradient"
@@ -288,9 +288,9 @@ const faqSchema = {
       <div class="grid gap-8 md:grid-cols-3">
         <!-- External Problem -->
         <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
-          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[#2C5234]/10">
-            <svg class="h-6 w-6 text-[#2C5234]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          <div class="mb-4 flex h-12 w-12 flex-shrink-0 items-center justify-center bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
+            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
           </div>
           <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">What you can't control</h3>
@@ -300,9 +300,9 @@ const faqSchema = {
         </div>
         <!-- Internal Problem -->
         <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
-          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[#44883E]/10">
-            <svg class="h-6 w-6 text-[#44883E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          <div class="mb-4 flex h-12 w-12 flex-shrink-0 items-center justify-center bg-[#44883E]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
+            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
             </svg>
           </div>
           <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">What keeps you up at 3 AM</h3>
@@ -312,9 +312,9 @@ const faqSchema = {
         </div>
         <!-- Philosophical Problem -->
         <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
-          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[#2C5234]/10">
-            <svg class="h-6 w-6 text-[#2C5234]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <div class="mb-4 flex h-12 w-12 flex-shrink-0 items-center justify-center bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
+            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
           <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">What's not right about it</h3>
@@ -451,9 +451,9 @@ const faqSchema = {
               </span>
             )}
 
-            <!-- Job icon -->
-            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
-              <svg class="h-6 w-6 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- Job icon (hex) -->
+            <div class="mb-4 flex h-12 w-12 flex-shrink-0 items-center justify-center bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
+              <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <Fragment set:html={job.icon} />
               </svg>
             </div>

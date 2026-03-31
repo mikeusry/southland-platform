@@ -1,105 +1,657 @@
 ---
 /**
- * /lawn/homeowners/ — Homeowners Collection
- * Replaces /collections/homeowners/
+ * /lawn/homeowners/ — Homeowner Lawn Care StoryBrand Landing Page
+ *
+ * StoryBrand framework: Hero (homeowner) → Problem (chemical treadmill)
+ * → Guide (Mike/Southland) → JTBD (3 jobs with real products) → Shop Grid
+ * → Proof → Plan → Objections → CTA
+ *
+ * Products fetched dynamically from Shopify Storefront API.
+ * Homeowner-specific framing: safe for kids/pets, soil health, stop the chemical cycle.
  */
+import { createClient, getProductByHandle, getCollectionProducts } from '@southland/shopify-storefront'
+import type { Product } from '@southland/shopify-storefront'
 import { getCollection } from 'astro:content'
-import { createClient, getCollectionProducts } from '@southland/shopify-storefront'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import CloudinaryHero from '../../../components/CloudinaryHero.astro'
-import CollectionGrid from '../../../components/shop/CollectionGrid.astro'
 import AccordionFaq from '../../../components/shop/AccordionFaq.astro'
-import Breadcrumbs from '../../../components/shared/Breadcrumbs.astro'
+import CollectionProductCard from '../../../components/shop/CollectionProductCard.astro'
+import { buildSouthlandUrl } from '../../../lib/cloudinary'
 
-const HANDLE = 'homeowners'
+// ── Mike Usry photo ─────────────────────────────────────────────────────────
+const mikePhoto = buildSouthlandUrl('team/MIKE_Usry', {
+  width: 600,
+  height: 750,
+  crop: 'fill',
+  gravity: 'face',
+  quality: 'auto',
+  format: 'auto',
+})
 
-const allCollections = await getCollection('shopCollections')
-const tinaDoc =
-  allCollections.find(
-    (c) => c.data.handle === HANDLE || c.id.replace(/\.mdx?$/, '') === HANDLE,
-  ) ?? null
+const title = 'Organic Lawn Care for Homeowners | Southland Organics'
+const description =
+  'Natural lawn care products that restore soil health. Organic fertilizers, soil conditioners & microbe-based solutions safe for kids, pets, and the planet.'
 
+// ── Fetch products ──────────────────────────────────────────────────────────
 const client = createClient({
   storeDomain: import.meta.env.PUBLIC_SHOPIFY_STORE_DOMAIN,
   publicAccessToken: import.meta.env.PUBLIC_SHOPIFY_STOREFRONT_TOKEN,
 })
-const shopifyCollection = await getCollectionProducts(client, HANDLE)
 
-if (!shopifyCollection) {
-  return Astro.redirect('/')
+const jtbdHandles = [
+  'genesis',                                // Genesis soil conditioner
+  'omega-soil-activator',                   // Omega
+  'fertalive',                              // FertAlive fertilizer
+  'veridian-humate-liquid-iron-for-lawns',  // Veridian
+  'torched-all-natural-weed-killer',        // Torched
+  'dog-spot-for-lawns',                     // Dog Spot
+  'turf-revival',                           // Revival
+] as const
+
+const jtbdProducts = await Promise.all(
+  jtbdHandles.map((h) => getProductByHandle(client, h))
+)
+const productMap = new Map(
+  jtbdProducts.filter(Boolean).map((p) => [p!.handle, p!])
+)
+
+const homeownerCollection = await getCollectionProducts(client, 'homeowners')
+const allProducts: Product[] = homeownerCollection?.products ?? []
+
+function getProduct(handle: string) {
+  return productMap.get(handle) ?? null
 }
 
-const title = tinaDoc?.data.title || shopifyCollection.title
-const seoDescription =
-  tinaDoc?.data.seoDescription ||
-  shopifyCollection.description ||
-  `Shop ${title} from Southland Organics.`
-const heroHeadline = tinaDoc?.data.heroHeadline || undefined
-const heroSubheadline = tinaDoc?.data.heroSubheadline || undefined
+function formatPrice(amount: string) {
+  const num = parseFloat(amount)
+  return num % 1 === 0 ? `$${num}` : `$${num.toFixed(2)}`
+}
+
+// ── Get FAQ from TinaCMS MDX ────────────────────────────────────────────────
+const allCollections = await getCollection('shopCollections')
+const tinaDoc = allCollections.find(
+  (c) => c.data.handle === 'homeowners' || c.id.replace(/\.mdx?$/, '') === 'homeowners',
+) ?? null
 const faq = tinaDoc?.data.faq ?? []
-const heroImage = tinaDoc?.data.heroImage ?? null
-const Content = tinaDoc ? (await tinaDoc.render()).Content : null
-const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
-const canonicalUrl = `${siteUrl}/lawn/homeowners/`
 
-const schema = {
+// ── JTBD data ───────────────────────────────────────────────────────────────
+const jobs = [
+  {
+    title: 'Build the soil your grass actually needs.',
+    struggle:
+      "Years of synthetic fertilizer have killed the microbes that naturally feed your lawn. You're stuck on a chemical treadmill — more fertilizer, more water, more problems. The grass looks green for two weeks, then fades. The soil underneath is dead.",
+    bestFor: 'Thin grass, compacted soil, or lawns dependent on synthetic fertilizer',
+    products: [getProduct('genesis'), getProduct('omega-soil-activator')].filter(Boolean),
+    proof: 'Billions of beneficial microbes per application',
+    proofSource: 'Lab-verified CFU counts',
+    recommended: true,
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>`,
+  },
+  {
+    title: 'Feed your grass without feeding the weeds.',
+    struggle:
+      "Synthetic fertilizers push fast top growth but starve the root system. Weeds love that — they outcompete weak grass every time. You end up spending more on weed killer to fix what the fertilizer caused.",
+    bestFor: 'Steady nutrition, deeper green color, or replacing synthetic fertilizer',
+    products: [getProduct('fertalive'), getProduct('veridian-humate-liquid-iron-for-lawns')].filter(Boolean),
+    proof: 'Humic acid increases nutrient uptake by up to 30%',
+    proofSource: 'Soil science research',
+    recommended: false,
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>`,
+  },
+  {
+    title: 'Solve lawn problems without chemicals.',
+    struggle:
+      "Dog spots, bare patches, stubborn weeds — the usual fix is more chemicals. But you've got kids playing in the yard and a dog rolling in the grass. You need solutions that work without worrying about what's soaking into the ground.",
+    bestFor: 'Dog spots, weed pressure, bare patches, or pet/family safety concerns',
+    products: [getProduct('torched-all-natural-weed-killer'), getProduct('dog-spot-for-lawns'), getProduct('turf-revival')].filter(Boolean),
+    proof: 'Zero synthetic chemicals, safe for kids & pets immediately after application',
+    proofSource: 'USDA Organic certified ingredients',
+    recommended: false,
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>`,
+  },
+]
+
+// ── Objections ──────────────────────────────────────────────────────────────
+const objections = faq.length > 0 ? faq : [
+  {
+    question: 'Do organic lawn products really work as well as synthetic?',
+    answer: "Yes — when you focus on soil health first. Organic products work by feeding beneficial soil microbes that naturally cycle nutrients to your grass roots. While synthetic fertilizers provide a quick green-up, organic solutions build long-term soil structure and drought resistance that actually outperforms chemicals over time.",
+  },
+  {
+    question: 'How long before I see results?',
+    answer: "You'll see initial greening within 1-2 weeks. But the real transformation happens over 2-3 months as soil biology rebuilds. By the second season, most homeowners notice their lawn needs less water, fights off weeds better, and stays green longer between applications. The biology compounds — it gets better every year.",
+  },
+  {
+    question: "Is this safe for my kids and pets?",
+    answer: "Yes. Every product is made from natural, USDA Organic certified ingredients. No synthetic chemicals, no warning labels telling you to keep kids off the lawn for 48 hours. Your family can be on the grass immediately after application.",
+  },
+  {
+    question: "I don't know anything about soil biology. Is this complicated?",
+    answer: "Not at all. Hook up a hose-end sprayer, apply Genesis or FertAlive to your lawn, and water it in. The microbes do the work underground — you don't need to understand the science to get the results. If you want help, call us and we'll walk you through a simple program for your specific lawn.",
+  },
+]
+
+// ── Schema.org ──────────────────────────────────────────────────────────────
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+
+const ogImage = buildSouthlandUrl('Southland Website/heroes/Farm_Athens_GA_7_jbdjik', {
+  width: 1200,
+  height: 630,
+  crop: 'fill',
+  gravity: 'auto',
+  quality: 'auto',
+  format: 'auto',
+})
+
+const pageSchema = {
   '@context': 'https://schema.org',
-  '@type': 'CollectionPage',
-  name: title,
-  description: seoDescription,
-  url: canonicalUrl,
+  '@type': 'WebPage',
+  name: 'Organic Lawn Care for Homeowners',
+  description,
+  url: `${siteUrl}/lawn/homeowners/`,
+  provider: {
+    '@type': 'Organization',
+    name: 'Southland Organics',
+  },
 }
-const faqSchema =
-  faq.length > 0
-    ? {
-        '@context': 'https://schema.org',
-        '@type': 'FAQPage',
-        mainEntity: faq.map((item) => ({
-          '@type': 'Question',
-          name: item.question,
-          acceptedAnswer: { '@type': 'Answer', text: item.answer },
-        })),
-      }
-    : null
-const fullSchema = faqSchema ? [schema, faqSchema] : schema
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: objections.map((item) => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.answer,
+    },
+  })),
+}
 ---
 
-<BaseLayout
-  title={title}
-  description={seoDescription}
-  schema={fullSchema}
-  canonicalUrl={canonicalUrl}
->
-  {heroImage && <CloudinaryHero publicId={heroImage} alt={title} />}
-  <main class="mx-auto max-w-7xl px-4 py-8">
-    <Breadcrumbs
-      items={[
-        { label: 'Lawn & Garden', href: '/lawn/' },
-        { label: title },
-      ]}
-    />
-    <h1 class="font-heading text-3xl text-brand-dark mb-2">
-      {heroHeadline || title}
-    </h1>
-    {heroSubheadline && (
-      <p class="text-lg text-gray-600 mb-8">{heroSubheadline}</p>
-    )}
+<BaseLayout title={title} description={description} ogImage={ogImage} schema={[pageSchema, faqSchema]}>
 
-    {Content && (
-      <div class="prose prose-green max-w-none mb-12">
-        <Content />
+  <!-- HERO -->
+  <CloudinaryHero
+    publicId="Southland Website/heroes/grass_kvxy54"
+    alt="Lush green grass — organic lawn care by Southland Organics"
+    height={600}
+    minHeight="500px"
+    overlay="gradient"
+    overlayOpacity={88}
+    contentAlign="center"
+    contentJustify="start"
+    priority={true}
+  >
+    <div class="mx-auto w-full max-w-6xl pb-12 pt-12 md:pt-20">
+      <div class="max-w-3xl">
+        <div class="mb-3 flex flex-wrap items-center gap-2">
+          <span class="inline-block rounded-full bg-white/15 px-4 py-1 text-sm font-medium text-green-300">
+            For Homeowners
+          </span>
+          <span class="inline-block rounded-full bg-green-400/20 px-3 py-1 text-sm font-semibold text-green-300">
+            Safe for Kids & Pets
+          </span>
+        </div>
+        <h1 class="mb-4 font-heading text-4xl uppercase leading-tight text-white md:text-5xl lg:text-6xl">
+          Your lawn doesn't need more chemicals. It needs better biology.
+        </h1>
+        <p class="mb-5 text-lg text-white/70 md:text-xl">
+          Organic soil conditioners, natural fertilizers, and microbe-based solutions that build the soil your grass actually needs — without the synthetic treadmill.
+        </p>
+        <div class="mb-6 flex flex-wrap gap-x-6 gap-y-2">
+          <span class="flex items-center gap-2 text-lg font-semibold text-white">
+            <span class="inline-block h-2 w-2 rounded-full bg-green-400"></span>
+            Soil Health
+          </span>
+          <span class="flex items-center gap-2 text-lg font-semibold text-white">
+            <span class="inline-block h-2 w-2 rounded-full bg-green-400"></span>
+            Natural Nutrition
+          </span>
+          <span class="flex items-center gap-2 text-lg font-semibold text-white">
+            <span class="inline-block h-2 w-2 rounded-full bg-green-400"></span>
+            Family Safe
+          </span>
+        </div>
+        <div class="flex flex-wrap items-center gap-4">
+          <a
+            href="#homeowner-products"
+            class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3.5 font-semibold text-white transition-colors hover:bg-[#44883E]/85"
+          >
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+            Shop Lawn Products
+          </a>
+          <a
+            href="#proof"
+            class="inline-flex items-center gap-2 rounded-lg border-2 border-white/30 px-6 py-3.5 font-semibold text-white transition-colors hover:border-white/60 hover:bg-white/5"
+          >
+            See How It Works
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          </a>
+        </div>
+        <div class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-white/10 pt-4 text-sm text-white/80">
+          <span class="flex items-center gap-1.5">
+            <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+            </svg>
+            USDA Organic
+          </span>
+          <span class="flex items-center gap-1.5">
+            <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+            </svg>
+            Family & Pet Safe
+          </span>
+          <span class="flex items-center gap-1.5">
+            <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+            </svg>
+            Free Shipping on Orders $75+
+          </span>
+        </div>
       </div>
-    )}
+    </div>
+  </CloudinaryHero>
 
-    <CollectionGrid products={shopifyCollection.products} />
+  <!-- PROBLEM -->
+  <section class="bg-white py-16 md:py-20">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="mb-4 text-center font-heading text-3xl uppercase text-shopify-title md:text-4xl">
+        The chemical lawn care trap.
+      </h2>
+      <p class="mx-auto mb-12 max-w-2xl text-center text-gray-600">
+        Synthetic fertilizers give you a quick green-up — and a long-term problem. Here's why your lawn never seems to get ahead.
+      </p>
+      <div class="grid gap-8 md:grid-cols-3">
+        <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
+          <div class="hex-icon mb-4 bg-[#2C5234]/10">
+            <svg class="h-6 w-6 text-[#2C5234]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <h3 class="mb-3 text-lg font-bold text-shopify-title">The synthetic treadmill</h3>
+          <p class="leading-relaxed text-gray-600">
+            Synthetic fertilizers kill the soil microbes that naturally feed your grass. So you need more fertilizer. And more water. And more weed killer. Every season costs more and delivers less.
+          </p>
+        </div>
+        <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
+          <div class="hex-icon mb-4 bg-[#44883E]/10">
+            <svg class="h-6 w-6 text-[#44883E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+          </div>
+          <h3 class="mb-3 text-lg font-bold text-shopify-title">The weekend warrior guilt</h3>
+          <p class="leading-relaxed text-gray-600">
+            You're spending Saturday mornings spreading chemicals while your kids wait inside. The bag says "keep off lawn for 24-48 hours." You just want a yard your family can actually use.
+          </p>
+        </div>
+        <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
+          <div class="hex-icon mb-4 bg-[#2C5234]/10">
+            <svg class="h-6 w-6 text-[#2C5234]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="mb-3 text-lg font-bold text-shopify-title">The money pit</h3>
+          <p class="leading-relaxed text-gray-600">
+            Between fertilizer, weed killer, grub treatment, and overseeding, you're spending hundreds every year on a lawn that never quite looks like the neighbor's. There's a better way.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    {faq.length > 0 && (
-      <section class="mt-16">
-        <h2 class="font-heading text-2xl text-brand-dark mb-6">
-          Frequently Asked Questions
-        </h2>
-        <AccordionFaq items={faq} />
-      </section>
-    )}
-  </main>
+  <!-- GUIDE -->
+  <section class="bg-gray-50 py-16 md:py-20">
+    <div class="mx-auto max-w-6xl px-4">
+      <div class="grid items-center gap-12 md:grid-cols-[1fr_auto]">
+        <div class="order-2 md:order-1">
+          <span class="mb-2 inline-block text-sm font-semibold uppercase tracking-wider text-green-700">
+            Your guide
+          </span>
+          <h2 class="mb-6 font-heading text-3xl uppercase text-shopify-title md:text-4xl">
+            We've been fixing soil for 15 years.
+          </h2>
+          <p class="mb-4 text-lg leading-relaxed text-gray-700">
+            Southland Organics started in commercial agriculture — helping poultry farmers and turf professionals rebuild soil biology that decades of chemicals had destroyed. The science is the same in your backyard.
+          </p>
+          <p class="mb-4 text-lg leading-relaxed text-gray-600">
+            Every product we make is built around one idea: feed the soil, and the soil feeds the grass. No synthetic shortcuts. No salt buildup. Just biology that works the way nature intended.
+          </p>
+          <p class="mb-8 leading-relaxed text-gray-600">
+            If you're not sure where to start, call us. We'll ask about your soil, your grass type, and what's frustrating you — then recommend 1-2 products to try first.
+          </p>
+          <div class="mb-8 flex flex-wrap gap-2">
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
+              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+              </svg>
+              Family-owned since 2009
+            </span>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
+              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+              </svg>
+              USDA Organic certified
+            </span>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
+              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+              </svg>
+              A+ BBB Rating
+            </span>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
+              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+              </svg>
+              Real humans answer the phone
+            </span>
+          </div>
+          <div class="flex flex-wrap items-center gap-4">
+            <a
+              href="tel:800-608-3755"
+              class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#44883E]/85"
+            >
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+              Call Us
+            </a>
+            <a
+              href="/contact/"
+              class="text-sm font-medium text-green-700 underline decoration-green-300 underline-offset-2 hover:text-green-600"
+            >
+              Or send us a message
+            </a>
+          </div>
+        </div>
+        <div class="order-1 md:order-2">
+          <div class="relative mx-auto w-64 md:w-72 lg:w-80">
+            <img
+              src={mikePhoto}
+              alt="Mike Usry, Founder of Southland Organics"
+              width="600"
+              height="750"
+              class="rounded-2xl object-cover shadow-lg"
+              loading="lazy"
+            />
+            <div class="absolute bottom-0 left-0 right-0 rounded-b-2xl bg-gradient-to-t from-black/70 to-transparent px-5 pb-4 pt-10">
+              <p class="text-lg font-bold text-white">Mike Usry</p>
+              <p class="text-sm text-green-300">Founder & CEO</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- JTBD GRID -->
+  <section class="bg-[#F8FAF8] py-16 md:py-20">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="mb-4 text-center font-heading text-4xl uppercase text-shopify-title md:text-5xl">
+        Three jobs. Real solutions.
+      </h2>
+      <p class="mx-auto mb-4 max-w-2xl text-center text-gray-600">
+        Every product exists to do one of three jobs for your lawn. Pick the job you need help with.
+      </p>
+      <p class="mb-12 text-center">
+        <a href="#homeowner-products" class="inline-flex items-center gap-1 text-sm font-medium text-green-700 hover:text-green-600 hover:underline">
+          Skip to all products
+          <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+        </a>
+      </p>
+      <div class="grid gap-8 md:grid-cols-3">
+        {jobs.map((job) => (
+          <div class:list={[
+            'relative flex flex-col rounded-xl border bg-white p-8 shadow-sm',
+            job.recommended ? 'border-green-300 ring-1 ring-green-200' : 'border-gray-200',
+          ]}>
+            {job.recommended && (
+              <span class="absolute -top-3 left-6 rounded-full bg-[#44883E] px-3 py-0.5 text-xs font-bold uppercase tracking-wide text-white">
+                Start here
+              </span>
+            )}
+            <div class="hex-icon mb-4 bg-green-100">
+              <svg class="h-6 w-6 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <Fragment set:html={job.icon} />
+              </svg>
+            </div>
+            <h3 class="mb-2 text-xl font-bold text-shopify-title">
+              {job.title}
+            </h3>
+            <p class="mb-3 text-sm text-gray-600">{job.struggle}</p>
+            <p class="mb-6 text-xs font-medium uppercase tracking-wide text-green-700">
+              Best for: {job.bestFor}
+            </p>
+            <div class="mb-6 flex-1 space-y-4">
+              {job.products.map((product) => (
+                <a
+                  href={`/products/${product!.handle}/`}
+                  class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3 transition-colors hover:border-green-200 hover:bg-green-50"
+                >
+                  {product!.images?.[0] && (
+                    <img
+                      src={product!.images[0].url}
+                      alt={product!.images[0].altText || product!.title}
+                      width="56"
+                      height="56"
+                      class="h-14 w-14 rounded-md object-cover"
+                      loading="lazy"
+                    />
+                  )}
+                  <div class="min-w-0 flex-1">
+                    <div class="truncate text-sm font-semibold text-gray-900">
+                      {product!.title.includes('|') ? product!.title.split('|')[0].trim() : product!.title}
+                    </div>
+                    <div class="text-sm text-green-700">
+                      From {formatPrice(product!.priceRange.minVariantPrice.amount)}
+                    </div>
+                  </div>
+                  <svg class="h-4 w-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
+              ))}
+            </div>
+            <div class="border-t border-gray-100 pt-4">
+              <div class="flex items-start gap-2">
+                <svg class="mt-0.5 h-4 w-4 shrink-0 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+                </svg>
+                <div>
+                  <span class="text-sm font-semibold text-green-700">{job.proof}</span>
+                  <span class="block text-xs text-gray-500">{job.proofSource}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- SHOP PRODUCTS -->
+  <section id="homeowner-products" class="bg-white py-16 md:py-20">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="mb-4 text-center font-heading text-3xl uppercase text-shopify-title md:text-4xl">
+        Shop Lawn Care Products
+      </h2>
+      <p class="mx-auto mb-10 max-w-2xl text-center text-gray-600">
+        Everything here is organic, family-safe, and designed to build soil health — not destroy it.
+      </p>
+      {allProducts.length > 0 ? (
+        <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
+          {allProducts.map((product) => (
+            <CollectionProductCard product={product} persona="betty" />
+          ))}
+        </div>
+      ) : (
+        <div class="text-center">
+          <a
+            href="/collections/homeowners/"
+            class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#44883E]/85"
+          >
+            Browse All Lawn Products
+          </a>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- PROOF BAND -->
+  <section id="proof" class="bg-[#2C5234] py-12 md:py-16">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="mb-3 text-center font-heading text-3xl uppercase text-white md:text-4xl">
+        The biology difference.
+      </h2>
+      <p class="mx-auto mb-10 max-w-lg text-center text-sm text-green-200/80">
+        What happens when you stop killing your soil and start feeding it.
+      </p>
+      <div class="grid grid-cols-2 gap-8 md:grid-cols-4">
+        <div class="text-center">
+          <div class="text-3xl font-bold text-green-300 md:text-4xl">30%</div>
+          <div class="mt-1 text-sm font-medium text-white">Better nutrient uptake</div>
+          <div class="mt-0.5 text-xs text-green-200/70">With humic acid application</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-green-300 md:text-4xl">Billions</div>
+          <div class="mt-1 text-sm font-medium text-white">Beneficial microbes per app</div>
+          <div class="mt-0.5 text-xs text-green-200/70">Lab-verified CFU counts</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-green-300 md:text-4xl">Zero</div>
+          <div class="mt-1 text-sm font-medium text-white">Synthetic chemicals</div>
+          <div class="mt-0.5 text-xs text-green-200/70">USDA Organic certified</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-green-300 md:text-4xl">15+ yr</div>
+          <div class="mt-1 text-sm font-medium text-white">Soil biology expertise</div>
+          <div class="mt-0.5 text-xs text-green-200/70">Commercial & residential</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLAN -->
+  <section class="bg-white py-16 md:py-20">
+    <div class="mx-auto max-w-4xl px-4">
+      <h2 class="mb-4 text-center font-heading text-3xl uppercase text-shopify-title md:text-4xl">
+        Three steps to a better lawn.
+      </h2>
+      <p class="mx-auto mb-12 max-w-xl text-center text-gray-600">
+        You don't need to overhaul everything. Start small, see results, then decide.
+      </p>
+      <div class="space-y-8">
+        <div class="flex items-start gap-6">
+          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700">1</div>
+          <div>
+            <h3 class="mb-1 text-lg font-bold text-shopify-title"><span class="text-[#44883E]">Pick</span> one product for your biggest frustration.</h3>
+            <p class="text-gray-600">Thin grass? Start with Genesis. Brown spots? Try Revival. Weeds? Torched. Don't overthink it — one product, one problem.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-6">
+          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700">2</div>
+          <div>
+            <h3 class="mb-1 text-lg font-bold text-shopify-title"><span class="text-[#44883E]">Apply</span> it and wait 2-3 weeks.</h3>
+            <p class="text-gray-600">Most products are hose-end sprayer or granular — 15 minutes for your whole yard. Water it in, then let the biology work.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-6">
+          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700">3</div>
+          <div>
+            <h3 class="mb-1 text-lg font-bold text-shopify-title"><span class="text-[#44883E]">See</span> the difference — then build from there.</h3>
+            <p class="text-gray-600">If you like what you see, add a second product next month. Most homeowners end up on a simple 3-product program that covers the whole year.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OBJECTIONS / FAQ -->
+  <section class="bg-gray-50 py-16 md:py-20">
+    <div class="mx-auto max-w-3xl px-4">
+      <h2 class="mb-4 text-center font-heading text-3xl uppercase text-shopify-title md:text-4xl">
+        Questions we hear every week.
+      </h2>
+      <p class="mx-auto mb-10 max-w-xl text-center text-gray-600">
+        Switching from synthetic to organic feels like a leap. Here are straight answers.
+      </p>
+      <AccordionFaq items={objections} persona="betty" />
+    </div>
+  </section>
+
+  <!-- CROSS-LINKS -->
+  <section class="bg-white py-12">
+    <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+      <p class="mb-6 text-center text-sm font-medium uppercase tracking-wider text-shopify-secondary-text">
+        More from our lawn & garden program
+      </p>
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <a href="/lawn/" class="group rounded-xl border border-gray-100 p-4 transition-shadow hover:shadow-md">
+          <p class="font-semibold text-shopify-title group-hover:text-southland-green">Lawn & Garden Hub</p>
+          <p class="text-xs text-shopify-secondary-text">All lawn resources</p>
+        </a>
+        <a href="/lawn/turf-pros/" class="group rounded-xl border border-gray-100 p-4 transition-shadow hover:shadow-md">
+          <p class="font-semibold text-shopify-title group-hover:text-southland-green">Turf Professionals</p>
+          <p class="text-xs text-shopify-secondary-text">Commercial lawn programs</p>
+        </a>
+        <a href="/lawn/golf-courses/" class="group rounded-xl border border-gray-100 p-4 transition-shadow hover:shadow-md">
+          <p class="font-semibold text-shopify-title group-hover:text-southland-green">Golf Courses</p>
+          <p class="text-xs text-shopify-secondary-text">Superintendent programs</p>
+        </a>
+        <a href="/blog/" class="group rounded-xl border border-gray-100 p-4 transition-shadow hover:shadow-md">
+          <p class="font-semibold text-shopify-title group-hover:text-southland-green">Lawn Care Blog</p>
+          <p class="text-xs text-shopify-secondary-text">Tips & guides</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="bg-southland-green-dark py-16">
+    <div class="mx-auto max-w-4xl px-4 text-center">
+      <h2 class="mb-4 font-heading text-3xl uppercase text-white md:text-4xl">
+        Your soil is waiting.
+      </h2>
+      <p class="mx-auto mb-8 max-w-xl text-lg text-green-100">
+        One product. One application. See what biology can do for your lawn.
+      </p>
+      <div class="flex flex-wrap items-center justify-center gap-4">
+        <a
+          href="#homeowner-products"
+          class="inline-flex items-center gap-2 rounded-lg bg-white px-8 py-4 font-bold text-[#2C5234] transition-all hover:bg-gray-50 hover:shadow-md"
+        >
+          Shop Now
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </a>
+        <a
+          href="tel:800-608-3755"
+          class="inline-flex items-center gap-2 text-sm font-medium text-white/70 hover:text-white"
+        >
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+          </svg>
+          Need help? 800-608-3755
+        </a>
+      </div>
+    </div>
+  </section>
 </BaseLayout>
+
+<style>
+  .hex-icon {
+    width: 3rem;
+    height: 3.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  }
+</style>

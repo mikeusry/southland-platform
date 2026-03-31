@@ -1,105 +1,757 @@
 ---
 /**
- * /lawn/golf-courses/ — Golf Courses Collection
- * Replaces /collections/golf-courses/
+ * /lawn/golf-courses/ — Golf Course Superintendent StoryBrand Landing Page
+ *
+ * StoryBrand framework: Hero (superintendent) → Problem (chemical treadmill)
+ * → Guide (Philip/Southland) → JTBD (3 jobs with real products) → Shop Grid
+ * → Proof → Plan → Objections → CTA
+ *
+ * Products fetched dynamically from Shopify Storefront API.
  */
-import { getCollection } from 'astro:content'
-import { createClient, getCollectionProducts } from '@southland/shopify-storefront'
+import { createClient, getProductByHandle, getCollectionProducts } from '@southland/shopify-storefront'
+import type { Product } from '@southland/shopify-storefront'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import CloudinaryHero from '../../../components/CloudinaryHero.astro'
-import CollectionGrid from '../../../components/shop/CollectionGrid.astro'
 import AccordionFaq from '../../../components/shop/AccordionFaq.astro'
-import Breadcrumbs from '../../../components/shared/Breadcrumbs.astro'
+import CollectionProductCard from '../../../components/shop/CollectionProductCard.astro'
+import { buildSouthlandUrl } from '../../../lib/cloudinary'
 
-const HANDLE = 'golf-courses'
+// ── Philip McWhirter photo ──────────────────────────────────────────────────
+const philipPhoto = buildSouthlandUrl('team/Philip_McWhirter', {
+  width: 600,
+  height: 750,
+  crop: 'fill',
+  gravity: 'face',
+  quality: 'auto',
+  format: 'auto',
+})
 
-const allCollections = await getCollection('shopCollections')
-const tinaDoc =
-  allCollections.find(
-    (c) => c.data.handle === HANDLE || c.id.replace(/\.mdx?$/, '') === HANDLE,
-  ) ?? null
+const title = 'Organic Golf Course Turf Products | Southland Organics'
+const description =
+  'Organic soil conditioners and fertilizers for golf course superintendents. Build resilient greens, reduce chemical dependency, and lower input costs.'
 
+// ── Fetch products ──────────────────────────────────────────────────────────
 const client = createClient({
   storeDomain: import.meta.env.PUBLIC_SHOPIFY_STORE_DOMAIN,
   publicAccessToken: import.meta.env.PUBLIC_SHOPIFY_STOREFRONT_TOKEN,
 })
-const shopifyCollection = await getCollectionProducts(client, HANDLE)
 
-if (!shopifyCollection) {
-  return Astro.redirect('/')
+// Fetch JTBD-featured products individually (need full detail)
+const jtbdHandles = [
+  'genesis',                       // Humic acid soil conditioner
+  'omega-soil-activator',          // Liquid aeration
+  'c-fix-biochar-soil-amendment',  // Biochar carbon matrix
+  'fertalive',                     // Liquid organic fertilizer
+  'turf-revival',                  // Stress recovery
+  'soil-sulfur',                   // pH management
+] as const
+
+const jtbdProducts = await Promise.all(
+  jtbdHandles.map((h) => getProductByHandle(client, h))
+)
+const productMap = new Map(
+  jtbdProducts.filter(Boolean).map((p) => [p!.handle, p!])
+)
+
+// Fetch ALL products in the golf-courses collection for the shop grid
+const golfCollection = await getCollectionProducts(client, 'golf-courses')
+
+// Filter out non-turf products that ops mis-assigned to this collection
+const EXCLUDED_HANDLES = new Set([
+  'chicken-manure-fertilizer',
+])
+const allGolfProducts: Product[] = (golfCollection?.products ?? []).filter(
+  (p) => !EXCLUDED_HANDLES.has(p.handle)
+)
+
+/** Helper: get product or null */
+function getProduct(handle: string) {
+  return productMap.get(handle) ?? null
 }
 
-const title = tinaDoc?.data.title || shopifyCollection.title
-const seoDescription =
-  tinaDoc?.data.seoDescription ||
-  shopifyCollection.description ||
-  `Shop ${title} from Southland Organics.`
-const heroHeadline = tinaDoc?.data.heroHeadline || undefined
-const heroSubheadline = tinaDoc?.data.heroSubheadline || undefined
-const faq = tinaDoc?.data.faq ?? []
-const heroImage = tinaDoc?.data.heroImage ?? null
-const Content = tinaDoc ? (await tinaDoc.render()).Content : null
+/** Helper: format price from Shopify Money */
+function formatPrice(amount: string) {
+  const num = parseFloat(amount)
+  return num % 1 === 0 ? `$${num}` : `$${num.toFixed(2)}`
+}
+
+// ── JTBD data ───────────────────────────────────────────────────────────────
+const jobs = [
+  {
+    title: 'Build soil biology that holds up under 200 rounds a week.',
+    struggle:
+      'Sand-based greens drain fast and hold almost nothing. Low CEC means nutrients wash through before roots can use them. You keep applying more because the soil can\'t hold what you gave it last week.',
+    bestFor: 'Low CEC in sand rootzones, poor nutrient retention, or declining organic matter',
+    products: [getProduct('genesis'), getProduct('c-fix-biochar-soil-amendment')].filter(Boolean),
+    proof: '20-40% CEC increase in sand-based rootzones',
+    proofSource: 'Humic acid research, Soil Science Society of America',
+    recommended: true,
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>`,
+  },
+  {
+    title: 'Break the chemical cycle without losing playability.',
+    struggle:
+      'Every synthetic app kills a little more soil biology. You know it. But the board wants green greens and the members want firm roll — so you keep spraying. The inputs go up, the biology goes down, and the cycle tightens.',
+    bestFor: 'Transitioning from synthetic programs, reducing fungicide dependency, or rebuilding after fumigation',
+    products: [getProduct('omega-soil-activator'), getProduct('fertalive')].filter(Boolean),
+    proof: '15-30% improvement in water infiltration rates',
+    proofSource: 'USGA-spec green superintendent trials',
+    recommended: false,
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>`,
+  },
+  {
+    title: 'Recover from heat, traffic, and aerification — faster.',
+    struggle:
+      'Summer stress hits in July. Aerification disrupts play in September. Overseed transition drags into November. Your turf spends half the year recovering from something. You need recovery tools that work with biology, not against it.',
+    bestFor: 'Post-aerification recovery, summer stress management, or overseed transition support',
+    products: [getProduct('turf-revival'), getProduct('soil-sulfur')].filter(Boolean),
+    proof: 'Ball roll consistency within weeks of starting program',
+    proofSource: 'Superintendent recovery program data, 2023-2024',
+    recommended: false,
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>`,
+  },
+]
+
+// ── Objections (FAQ) ────────────────────────────────────────────────────────
+const objections = [
+  {
+    question: 'What organic products improve golf course turf health?',
+    answer:
+      'Humic acid soil conditioners and biological soil activators enhance soil biology and create firm, true-rolling putting surfaces. These treatments increase cation exchange capacity (CEC) by 20-40% in sand-based rootzones and feed beneficial microorganisms that support healthy turf root systems.',
+  },
+  {
+    question: 'Can liquid aeration replace mechanical aeration on golf courses?',
+    answer:
+      'Liquid aeration products improve soil porosity and oxygen diffusion rates without the surface disruption of mechanical coring. They do not fully replace traditional aeration, but most superintendents report extending core aeration intervals from 2-3 times per year to once annually while maintaining USGA-spec infiltration rates.',
+  },
+  {
+    question: 'How much does an organic turf program cost compared to conventional?',
+    answer:
+      'Organic turf programs typically cost 15-20% more than conventional programs in the first year due to biological product inputs and transition management. By year 2-3, input costs equalize as soil biology reduces the need for synthetic fertilizers and fungicides. Most superintendents report breakeven by year 3 with lower long-term chemical spend.',
+  },
+  {
+    question: 'How does biochar improve soil structure on golf courses?',
+    answer:
+      'Biochar soil amendments create a permanent carbon matrix that improves water retention 15-20% and nutrient holding capacity in sand-based greens. The porous structure (surface area of 200-400 m²/g) resists compaction while providing habitat for beneficial microbes that cycle nutrients and suppress root pathogens.',
+  },
+  {
+    question: 'What application rates should I use for humic acid on bermuda greens?',
+    answer:
+      'Apply humic acid at 2-4 oz per 1,000 sq ft every 2-4 weeks during the active growing season. On sand-based USGA-spec greens, use the lower end of the rate range (2 oz) to avoid excessive organic matter accumulation. Reduce frequency to monthly during dormancy or overseed transition periods.',
+  },
+  {
+    question: 'Will my members notice a difference during the transition?',
+    answer:
+      'Most superintendents report no visible quality drop during transition when products are introduced gradually alongside existing programs. Start by replacing one synthetic input at a time — typically the soil conditioner first. Members notice when greens get better, not when the chemistry changes underneath.',
+  },
+  {
+    question: 'Can organic amendments improve water retention on sand-based greens?',
+    answer:
+      'Yes. Humic substances increase CEC in sand rootzones from a baseline of 1-3 meq/100g to 5-8 meq/100g, which directly improves water-holding capacity. Superintendents using humic acid programs on USGA greens typically report 15-25% reductions in irrigation volume while maintaining consistent moisture profiles at the 4-6 inch root depth.',
+  },
+]
+
+// ── Schema.org ──────────────────────────────────────────────────────────────
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
-const canonicalUrl = `${siteUrl}/lawn/golf-courses/`
 
-const schema = {
+const pageSchema = {
   '@context': 'https://schema.org',
-  '@type': 'CollectionPage',
-  name: title,
-  description: seoDescription,
-  url: canonicalUrl,
+  '@type': 'WebPage',
+  name: 'Organic Golf Course Turf Products',
+  description,
+  url: `${siteUrl}/lawn/golf-courses/`,
+  provider: {
+    '@type': 'Organization',
+    name: 'Southland Organics',
+  },
 }
-const faqSchema =
-  faq.length > 0
-    ? {
-        '@context': 'https://schema.org',
-        '@type': 'FAQPage',
-        mainEntity: faq.map((item) => ({
-          '@type': 'Question',
-          name: item.question,
-          acceptedAnswer: { '@type': 'Answer', text: item.answer },
-        })),
-      }
-    : null
-const fullSchema = faqSchema ? [schema, faqSchema] : schema
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: objections.map((item) => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.answer,
+    },
+  })),
+}
 ---
 
 <BaseLayout
   title={title}
-  description={seoDescription}
-  schema={fullSchema}
-  canonicalUrl={canonicalUrl}
+  description={description}
+  schema={[pageSchema, faqSchema]}
+  ogImage={buildSouthlandUrl('heroes/golf_bv89x8', { width: 1200, height: 630, crop: 'fill', gravity: 'south', quality: 'auto', format: 'auto' })}
 >
-  {heroImage && <CloudinaryHero publicId={heroImage} alt={title} />}
-  <main class="mx-auto max-w-7xl px-4 py-8">
-    <Breadcrumbs
-      items={[
-        { label: 'Lawn & Garden', href: '/lawn/' },
-        { label: title },
-      ]}
-    />
-    <h1 class="font-heading text-3xl text-brand-dark mb-2">
-      {heroHeadline || title}
-    </h1>
-    {heroSubheadline && (
-      <p class="text-lg text-gray-600 mb-8">{heroSubheadline}</p>
-    )}
 
-    {Content && (
-      <div class="prose prose-green max-w-none mb-12">
-        <Content />
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 1: HERO                                                       -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <CloudinaryHero
+    publicId="Southland Website/heroes/golf_bv89x8"
+    alt="Golf course fairway with pristine green turf"
+    height={600}
+    minHeight="500px"
+    overlay="gradient"
+    overlayOpacity={90}
+    gravity="south"
+  >
+    <div class="mx-auto w-full max-w-6xl px-4">
+      <div class="max-w-3xl">
+        <div class="mb-3 flex flex-wrap items-center gap-2">
+          <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1 text-sm font-medium text-green-300">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            For Golf Course Superintendents
+          </span>
+          <span class="inline-block rounded-full bg-green-400/20 px-3 py-1 text-sm font-semibold text-green-300">
+            USDA Organic &bull; Science-Backed
+          </span>
+        </div>
+        <h1 class="mb-4 font-heading text-4xl uppercase leading-tight text-white md:text-5xl lg:text-6xl">
+          Better greens start below the surface.
+        </h1>
+        <p class="mb-5 text-lg text-white/70 md:text-xl">
+          Organic soil conditioners, liquid aeration, and biological fertilizers that build resilient playing surfaces from the rootzone up.
+        </p>
+        <!-- Three levers — scannable -->
+        <div class="mb-5 flex flex-wrap gap-x-6 gap-y-2">
+          <span class="flex items-center gap-2 text-lg font-semibold text-white">
+            <span class="inline-block h-2 w-2 rounded-full bg-green-400"></span>
+            Soil Biology
+          </span>
+          <span class="flex items-center gap-2 text-lg font-semibold text-white">
+            <span class="inline-block h-2 w-2 rounded-full bg-green-400"></span>
+            Nutrient Retention
+          </span>
+          <span class="flex items-center gap-2 text-lg font-semibold text-white">
+            <span class="inline-block h-2 w-2 rounded-full bg-green-400"></span>
+            Stress Recovery
+          </span>
+        </div>
+        <!-- CTAs -->
+        <div class="flex flex-wrap items-center gap-3">
+          <a
+            href="tel:800-608-3755"
+            class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#44883E]/85"
+          >
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+            </svg>
+            Talk to Philip
+          </a>
+          <a
+            href="#golf-products"
+            class="inline-flex items-center gap-2 rounded-lg bg-white/10 px-6 py-3 font-semibold text-white transition-colors hover:bg-white/20"
+          >
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+            Shop Turf Products
+          </a>
+          <a
+            href="#proof"
+            class="inline-flex items-center gap-2 rounded-lg border-2 border-white/30 px-6 py-3 font-semibold text-white transition-colors hover:border-white/60 hover:bg-white/5"
+          >
+            See the Science
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          </a>
+        </div>
+        <!-- Trust bar -->
+        <div class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-white/10 pt-4 text-sm text-white/80">
+          <span class="flex items-center gap-1.5">
+            <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+            </svg>
+            USDA Organic
+          </span>
+          <span class="flex items-center gap-1.5">
+            <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+            </svg>
+            USGA-Spec Compatible
+          </span>
+          <span class="flex items-center gap-1.5">
+            <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+            </svg>
+            No Disruption to Play
+          </span>
+        </div>
       </div>
-    )}
+    </div>
+  </CloudinaryHero>
 
-    <CollectionGrid products={shopifyCollection.products} />
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 2: PROBLEM — "The chemical treadmill"                         -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <section class="bg-white py-16 md:py-20">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
+        The chemical treadmill is real.
+      </h2>
+      <p class="mx-auto mb-12 max-w-2xl text-center text-gray-600">
+        You know the cycle. More synthetics, less biology, higher inputs, same problems. Here's what's actually happening under your greens.
+      </p>
+      <div class="grid gap-8 md:grid-cols-3">
+        <!-- External Problem -->
+        <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
+          <div class="mb-4 flex h-12 w-12 flex-shrink-0 items-center justify-center bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
+            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">The dead rootzone</h3>
+          <p class="leading-relaxed text-gray-600">
+            Years of synthetic inputs have sterilized your soil biology. <a href="/blog/how-do-plants-get-nutrients-cation-exchange-capacity-cec-explained/" class="text-green-700 underline decoration-green-300 underline-offset-2 hover:text-green-600">CEC in sand-based greens</a> sits at 1-3 meq/100g — nutrients wash straight through. You're feeding the drain, not the roots.
+          </p>
+        </div>
+        <!-- Internal Problem -->
+        <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
+          <div class="mb-4 flex h-12 w-12 flex-shrink-0 items-center justify-center bg-[#44883E]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
+            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+          </div>
+          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">The budget squeeze</h3>
+          <p class="leading-relaxed text-gray-600">
+            Chemical costs go up every year. The board wants the same results for less money. You know there's a better way, but switching feels risky when members expect perfection on every green, every day.
+          </p>
+        </div>
+        <!-- Philosophical Problem -->
+        <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
+          <div class="mb-4 flex h-12 w-12 flex-shrink-0 items-center justify-center bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
+            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">What's not right about it</h3>
+          <p class="leading-relaxed text-gray-600">
+            Championship turf shouldn't depend on a chemical IV drip. A superintendent who manages 150 acres of living soil deserves tools that work <em>with</em> biology, not tools that kill it.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    {faq.length > 0 && (
-      <section class="mt-16">
-        <h2 class="font-heading text-2xl text-brand-dark mb-6">
-          Frequently Asked Questions
-        </h2>
-        <AccordionFaq items={faq} />
-      </section>
-    )}
-  </main>
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 3: GUIDE — Philip McWhirter                                   -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <section class="bg-gray-50 py-16 md:py-20">
+    <div class="mx-auto max-w-6xl px-4">
+      <div class="grid items-center gap-12 md:grid-cols-[1fr_auto]">
+        <div class="order-2 md:order-1">
+          <span class="mb-2 inline-block text-sm font-semibold uppercase tracking-wider text-green-700">
+            Your guide
+          </span>
+          <h2 class="mb-6 font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
+            Turf science, not a sales pitch.
+          </h2>
+          <p class="mb-4 text-lg leading-relaxed text-gray-700">
+            Philip McWhirter works with golf course superintendents to build <a href="/blog/organic-soil-health-bermuda-grass-fairways/" class="text-green-700 underline decoration-green-300 underline-offset-2 hover:text-green-600">organic turf programs</a> that actually hold up under heavy play. He understands rootzone chemistry, USGA specs, and the reality of managing a course where members notice everything.
+          </p>
+          <p class="mb-4 text-lg leading-relaxed text-gray-600">
+            The conversation starts with your soil, not our products. What's your rootzone mix? What are your infiltration rates? What problems keep showing up despite your current program? Philip will help you build a plan around your course's specific conditions.
+          </p>
+          <p class="mb-8 leading-relaxed text-gray-600">
+            See how our <a href="/lawn/" class="text-green-700 underline decoration-green-300 underline-offset-2 hover:text-green-600">full lawn and garden line</a> supports turf professionals at every level.
+          </p>
+
+          <!-- Credential chips -->
+          <div class="mb-8 flex flex-wrap gap-2">
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
+              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+              </svg>
+              Turf program specialist
+            </span>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
+              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+              </svg>
+              USGA rootzone experience
+            </span>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
+              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+              </svg>
+              Organic transition programs
+            </span>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
+              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+              </svg>
+              Actually answers the phone
+            </span>
+          </div>
+
+          <!-- Quick contact -->
+          <div class="flex flex-wrap items-center gap-4">
+            <a
+              href="tel:800-608-3755"
+              class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#44883E]/85"
+            >
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+              Call Philip
+            </a>
+            <!-- TODO: Replace with Philip's actual email -->
+            <a
+              href="mailto:philip@southlandorganics.com"
+              class="text-sm font-medium text-green-700 underline decoration-green-300 underline-offset-2 hover:text-green-600"
+            >
+              philip@southlandorganics.com
+            </a>
+          </div>
+        </div>
+
+        <!-- Philip's photo -->
+        <div class="order-1 md:order-2">
+          <div class="relative mx-auto w-64 md:w-72 lg:w-80">
+            <img
+              src={philipPhoto}
+              alt="Philip McWhirter, Southland Organics turf specialist"
+              width="600"
+              height="750"
+              class="rounded-2xl object-cover shadow-lg"
+              loading="lazy"
+            />
+            <div class="absolute bottom-0 left-0 right-0 rounded-b-2xl bg-gradient-to-t from-black/70 to-transparent px-5 pb-4 pt-10">
+              <p class="text-lg font-bold text-white">Philip McWhirter</p>
+              <!-- TODO: Replace with Philip's actual title -->
+              <p class="text-sm text-green-300">Turf Program Specialist</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 4: JTBD GRID — "Three jobs. Real solutions."                  -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <section class="bg-[#F8FAF8] py-16 md:py-20">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="mb-4 text-center font-heading text-4xl uppercase md:text-5xl" style="color: var(--color-title);">
+        Three jobs. Real solutions.
+      </h2>
+      <p class="mx-auto mb-4 max-w-2xl text-center text-gray-600">
+        Every product here exists to do one of three jobs on your course. Pick the job you need help with — we'll show you the right tools.
+      </p>
+      <p class="mb-12 text-center">
+        <a href="#golf-products" class="inline-flex items-center gap-1 text-sm font-medium text-green-700 hover:text-green-600 hover:underline">
+          Skip to all golf course products
+          <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+        </a>
+      </p>
+      <div class="grid gap-8 md:grid-cols-3">
+        {jobs.map((job) => (
+          <div class:list={[
+            'relative flex flex-col rounded-xl border bg-white p-8 shadow-sm',
+            job.recommended ? 'border-green-300 ring-1 ring-green-200' : 'border-gray-200',
+          ]}>
+            {job.recommended && (
+              <span class="absolute -top-3 left-6 rounded-full bg-[#44883E] px-3 py-0.5 text-xs font-bold uppercase tracking-wide text-white">
+                Recommended starting point
+              </span>
+            )}
+
+            <!-- Job icon (hex) -->
+            <div class="mb-4 flex h-12 w-12 flex-shrink-0 items-center justify-center bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
+              <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <Fragment set:html={job.icon} />
+              </svg>
+            </div>
+
+            <!-- Job title + struggle -->
+            <h3 class="mb-2 text-xl font-bold" style="color: var(--color-title);">
+              {job.title}
+            </h3>
+            <p class="mb-3 text-sm text-gray-600">{job.struggle}</p>
+
+            <!-- Best for -->
+            <p class="mb-6 text-xs font-medium uppercase tracking-wide text-green-700">
+              Best for: {job.bestFor}
+            </p>
+
+            <!-- Products -->
+            <div class="mb-6 flex-1 space-y-4">
+              {job.products.map((product) => (
+                <a
+                  href={`/products/${product!.handle}/`}
+                  class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3 transition-colors hover:border-green-200 hover:bg-green-50"
+                >
+                  {product!.images?.[0] && (
+                    <img
+                      src={product!.images[0].url}
+                      alt={product!.images[0].altText || product!.title}
+                      width="56"
+                      height="56"
+                      class="h-14 w-14 rounded-md object-cover"
+                      loading="lazy"
+                    />
+                  )}
+                  <div class="min-w-0 flex-1">
+                    <div class="truncate text-sm font-semibold text-gray-900">
+                      {product!.title.includes('|') ? product!.title.split('|')[0].trim() : product!.title}
+                    </div>
+                    <div class="text-sm text-green-700">
+                      From {formatPrice(product!.priceRange.minVariantPrice.amount)}
+                    </div>
+                  </div>
+                  <svg class="h-4 w-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
+              ))}
+            </div>
+
+            <!-- Proof line -->
+            <div class="border-t border-gray-100 pt-4">
+              <div class="flex items-start gap-2">
+                <svg class="mt-0.5 h-4 w-4 shrink-0 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+                </svg>
+                <div>
+                  <span class="text-sm font-semibold text-green-700">{job.proof}</span>
+                  <span class="block text-xs text-gray-500">{job.proofSource}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 4B: SHOP GOLF PRODUCTS — Full product grid                    -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <section id="golf-products" class="bg-white py-16 md:py-20">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
+        Shop Golf Course Products
+      </h2>
+      <p class="mx-auto mb-6 max-w-2xl text-center text-gray-600">
+        Everything on this shelf exists to do one of the three jobs above. Start with one product on one green or run the full program.
+      </p>
+
+      <!-- System vs Individual callout -->
+      <div class="mx-auto mb-10 max-w-3xl rounded-xl border border-green-200 bg-green-50 p-5 md:p-6">
+        <div class="grid gap-4 md:grid-cols-2">
+          <div>
+            <div class="mb-1 flex items-center gap-2">
+              <svg class="h-5 w-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+              <span class="font-bold text-[#2C5234]">Full Program</span>
+            </div>
+            <p class="text-sm text-gray-600">
+              <a href="/blog/the-benefits-of-humic-acid-for-lawns/" class="text-green-700 underline decoration-green-300 underline-offset-2 hover:text-green-600">Genesis</a> + Omega + C-Fix covers soil biology, aeration, and carbon across greens and fairways. Most supers start here.
+            </p>
+          </div>
+          <div>
+            <div class="mb-1 flex items-center gap-2">
+              <svg class="h-5 w-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              <span class="font-bold text-[#2C5234]">Start with One Green</span>
+            </div>
+            <p class="text-sm text-gray-600">
+              Pick one product, test it on your worst green for one season. If the infiltration rates and ball roll don't improve, don't reorder.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {allGolfProducts.length > 0 ? (
+        <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
+          {allGolfProducts.map((product) => (
+            <CollectionProductCard product={product} persona="lawn" />
+          ))}
+        </div>
+      ) : (
+        <div class="text-center">
+          <a
+            href="/collections/golf-courses/"
+            class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#44883E]/85"
+          >
+            Browse All Golf Course Products
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </a>
+        </div>
+      )}
+
+      <div class="mt-8 text-center">
+        <a
+          href="tel:800-608-3755"
+          class="inline-flex items-center gap-2 text-sm font-medium text-green-700 hover:text-green-600"
+        >
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+          </svg>
+          Not sure where to start? Call Philip — he'll build a program around your course.
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 5: PROOF BAND — "Numbers, not promises"                       -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <section id="proof" class="bg-[#2C5234] py-12 md:py-16">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="mb-3 text-center font-heading text-3xl uppercase text-white md:text-4xl">
+        Numbers, not promises.
+      </h2>
+      <p class="mx-auto mb-10 max-w-lg text-center text-sm text-green-200/80">
+        These results are from superintendents running organic soil programs on USGA-spec greens and bermuda fairways.
+      </p>
+      <div class="grid grid-cols-2 gap-8 md:grid-cols-4">
+        <div class="text-center">
+          <div class="text-3xl font-bold text-green-300 md:text-4xl">20-40%</div>
+          <div class="mt-1 text-sm font-medium text-white">CEC increase</div>
+          <div class="mt-0.5 text-xs text-green-200/70">Humic acid research, Soil Science Society of America</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-green-300 md:text-4xl">15-30%</div>
+          <div class="mt-1 text-sm font-medium text-white">Better infiltration</div>
+          <div class="mt-0.5 text-xs text-green-200/70">USGA-spec green superintendent trials</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-green-300 md:text-4xl">15-25%</div>
+          <div class="mt-1 text-sm font-medium text-white">Less irrigation</div>
+          <div class="mt-0.5 text-xs text-green-200/70">USGA Green Section Record, field data</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-green-300 md:text-4xl">Yr 3</div>
+          <div class="mt-1 text-sm font-medium text-white">Input cost breakeven</div>
+          <div class="mt-0.5 text-xs text-green-200/70">Superintendent program cost analysis</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 6: PLAN — "Three steps"                                       -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <section class="bg-white py-16 md:py-20">
+    <div class="mx-auto max-w-4xl px-4">
+      <h2 class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
+        Three steps. Not a sales pitch.
+      </h2>
+      <p class="mx-auto mb-12 max-w-xl text-center text-gray-600">
+        We don't ask you to overhaul your maintenance program. We ask you to test one thing on one green.
+      </p>
+      <div class="space-y-8">
+        <div class="flex items-start gap-6">
+          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700">
+            1
+          </div>
+          <div>
+            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);"><span class="text-[#44883E]">Call</span> Philip and tell him about your course.</h3>
+            <p class="text-gray-600">
+              What's your rootzone mix? What are your infiltration rates? What problems keep coming back despite your current program? He'll listen first and build a plan around your greens.
+            </p>
+          </div>
+        </div>
+        <div class="flex items-start gap-6">
+          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700">
+            2
+          </div>
+          <div>
+            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);"><span class="text-[#44883E]">Test</span> on one green, one season.</h3>
+            <p class="text-gray-600">
+              No commitment beyond that. No contract, no minimum order. Pick your worst green and let the soil biology tell the story.
+            </p>
+          </div>
+        </div>
+        <div class="flex items-start gap-6">
+          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700">
+            3
+          </div>
+          <div>
+            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);"><span class="text-[#44883E]">Measure</span> the difference.</h3>
+            <p class="text-gray-600">
+              Pull your <a href="/blog/best-organic-fertilizers-warm-season-grass/" class="text-green-700 underline decoration-green-300 underline-offset-2 hover:text-green-600">soil tests</a>. Check your infiltration rates. Watch the ball roll. If the numbers move, you'll know it. If they don't, we'll shake hands and part ways.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 7: OBJECTIONS — "We know what you're thinking"                -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <section class="bg-gray-50 py-16 md:py-20">
+    <div class="mx-auto max-w-3xl px-4">
+      <h2 class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
+        We know what you're thinking.
+      </h2>
+      <p class="mx-auto mb-10 max-w-xl text-center text-gray-600">
+        Superintendents ask tough questions. Here are the straight answers.
+      </p>
+      <AccordionFaq items={objections} persona="lawn" />
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 8: FINAL CTA                                                  -->
+  <!-- TODO: Swap to <CloudinaryHero> once golf course image is uploaded     -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <section class="relative overflow-hidden bg-gradient-to-br from-[#1a3a22] via-[#2C5234] to-[#1e4a2a] py-16 md:py-20">
+    <div class="absolute inset-0 opacity-[0.04]" style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 40px 40px;"></div>
+    <div class="relative mx-auto max-w-4xl px-4 text-center">
+      <h2 class="mb-4 font-heading text-3xl uppercase text-white md:text-4xl">
+        Your greens won't wait. Neither will we.
+      </h2>
+      <p class="mx-auto mb-8 max-w-xl text-lg text-green-100">
+        One conversation about your course. Philip's on the other end of this number.
+      </p>
+      <div class="mb-8">
+        <a
+          href="tel:800-608-3755"
+          class="inline-flex items-center gap-3 rounded-xl bg-white px-8 py-4 text-2xl font-bold transition-colors hover:bg-green-50 md:text-3xl"
+          style="color: var(--color-title);"
+        >
+          <svg class="h-8 w-8 text-[#44883E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+          </svg>
+          800-608-3755
+        </a>
+      </div>
+      <p class="mb-4 text-green-200">
+        Call Philip — he'll answer.
+      </p>
+      <a
+        href="sms:800-608-3755"
+        class="mb-6 inline-flex items-center gap-2 text-sm font-medium text-green-300 underline decoration-green-300/40 underline-offset-2 transition-colors hover:text-white"
+      >
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+        Prefer text? Message Philip at 800-608-3755
+      </a>
+      <div class="flex flex-wrap items-center justify-center gap-4 text-sm text-green-300/80">
+        <span>Family-owned since 2009</span>
+        <span class="hidden md:inline">&middot;</span>
+        <span>USDA Organic</span>
+        <span class="hidden md:inline">&middot;</span>
+        <span>A+ BBB Rating</span>
+      </div>
+    </div>
+  </section>
+
 </BaseLayout>
