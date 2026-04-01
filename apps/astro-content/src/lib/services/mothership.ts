@@ -222,20 +222,57 @@ export async function scorePersonas(
       broilerBill: 0,
       backyardBetty: 0,
       turfTaylor: 0,
-      mosquitoMary: 0,
+      septicSam: 0,
+      greenskeeperGary: 0,
+      homeownerHannah: 0,
+      marketGardenerMaggie: 0,
+      breederBob: 0,
+      turkeyTom: 0,
+      gameBirdGreg: 0,
     }
 
     const nameMap: Record<string, string> = {
+      // Broiler Bill
       'broiler-bill': 'broilerBill',
+      'broiler bill': 'broilerBill',
       commercial: 'broilerBill',
+      // Backyard Betty
       'backyard-betty': 'backyardBetty',
+      'backyard betty': 'backyardBetty',
       backyard: 'backyardBetty',
+      // Turf Pro Taylor
       'turf-taylor': 'turfTaylor',
       'turf-pro-taylor': 'turfTaylor',
       'turf pro taylor': 'turfTaylor',
       lawn: 'turfTaylor',
-      'mosquito-mary': 'mosquitoMary',
-      'mosquito mary': 'mosquitoMary',
+      // Septic Sam
+      'septic-sam': 'septicSam',
+      'septic sam': 'septicSam',
+      waste: 'septicSam',
+      // Greenskeeper Gary
+      'greenskeeper-gary': 'greenskeeperGary',
+      'greenskeeper gary': 'greenskeeperGary',
+      golf: 'greenskeeperGary',
+      // Homeowner Hannah
+      'homeowner-hannah': 'homeownerHannah',
+      'homeowner hannah': 'homeownerHannah',
+      homeowner: 'homeownerHannah',
+      // Market Gardener Maggie
+      'market-gardener-maggie': 'marketGardenerMaggie',
+      'market gardener maggie': 'marketGardenerMaggie',
+      garden: 'marketGardenerMaggie',
+      // Breeder Bob
+      'breeder-bob': 'breederBob',
+      'breeder bob': 'breederBob',
+      breeder: 'breederBob',
+      // Turkey Tom
+      'turkey-tom': 'turkeyTom',
+      'turkey tom': 'turkeyTom',
+      turkey: 'turkeyTom',
+      // Game Bird Greg
+      'game-bird-greg': 'gameBirdGreg',
+      'game bird greg': 'gameBirdGreg',
+      'game-birds': 'gameBirdGreg',
     }
 
     for (const persona of personas) {
@@ -255,7 +292,13 @@ export async function scorePersonas(
       broilerBill: 'Broiler Bill',
       backyardBetty: 'Backyard Betty',
       turfTaylor: 'Turf Pro Taylor',
-      mosquitoMary: 'Mosquito Mary',
+      septicSam: 'Septic Sam',
+      greenskeeperGary: 'Greenskeeper Gary',
+      homeownerHannah: 'Homeowner Hannah',
+      marketGardenerMaggie: 'Market Gardener Maggie',
+      breederBob: 'Breeder Bob',
+      turkeyTom: 'Turkey Tom',
+      gameBirdGreg: 'Game Bird Greg',
     }
 
     return {

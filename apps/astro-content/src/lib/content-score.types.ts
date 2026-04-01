@@ -81,7 +81,13 @@ export interface PersonaScores {
     broilerBill: number // Commercial poultry
     backyardBetty: number // Backyard flock
     turfTaylor: number // Lawn professionals
-    mosquitoMary: number // Pest/mosquito control
+    septicSam: number // Waste treatment
+    greenskeeperGary: number // Golf course superintendents
+    homeownerHannah: number // Suburban homeowners
+    marketGardenerMaggie: number // Small-scale growers
+    breederBob: number // Poultry breeders
+    turkeyTom: number // Turkey growers
+    gameBirdGreg: number // Quail/pheasant producers
   }
   /** Is primary score above threshold (0.6)? */
   aligned: boolean
@@ -89,7 +95,18 @@ export interface PersonaScores {
   recommendation?: string
 }
 
-export type PersonaName = 'Broiler Bill' | 'Backyard Betty' | 'Turf Pro Taylor' | 'Mosquito Mary' | 'Unknown'
+export type PersonaName =
+  | 'Broiler Bill'
+  | 'Backyard Betty'
+  | 'Turf Pro Taylor'
+  | 'Septic Sam'
+  | 'Greenskeeper Gary'
+  | 'Homeowner Hannah'
+  | 'Market Gardener Maggie'
+  | 'Breeder Bob'
+  | 'Turkey Tom'
+  | 'Game Bird Greg'
+  | 'Unknown'
 
 // ============================================================================
 // CONTENT GAP STATUS (from Mothership SQL)
