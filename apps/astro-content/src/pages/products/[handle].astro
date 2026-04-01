@@ -12,11 +12,13 @@ import {
   getCollectionProducts,
 } from '@southland/shopify-storefront'
 import type { Product } from '@southland/shopify-storefront'
+import { getCollection, render } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Breadcrumbs from '../../components/shared/Breadcrumbs.astro'
 import ImageGallery from '../../components/product/ImageGallery'
 import AddToCartButton from '../../components/product/AddToCartButton'
 import CollectionProductCard from '../../components/shop/CollectionProductCard.astro'
+import AccordionFaq from '../../components/shop/AccordionFaq.astro'
 import { isValidPersonaId, type PersonaId } from '../../lib/persona'
 
 // SSR — do not prerender
@@ -55,90 +57,213 @@ if (product.productType) {
   }
 }
 
+// ── Load TinaCMS editorial content (if enriched MDX exists) ────────────────
+const allProducts = await getCollection('products')
+const tinaProduct =
+  allProducts.find((p) => p.data.shopifyHandle === handle || p.id.replace(/\.mdx?$/, '') === handle) ?? null
+
+const hasTinaContent = !!tinaProduct
+// TinaContent rendered for Phase 3 (full StoryBrand mode)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+let TinaContent: Awaited<ReturnType<typeof render>>['Content'] | null = null
+if (tinaProduct) {
+  const rendered = await render(tinaProduct)
+  TinaContent = rendered.Content
+}
+const tina = tinaProduct?.data ?? null
+
+// ── Collection FAQ fallback (with dedup guardrail) ─────────────────────────
+// Load FAQ from TinaCMS product first, then fall back to collection-level FAQ
+// Only use collection FAQ if ≤2 products share that collection (prevents near-dupes)
+let faqItems: Array<{ question: string; answer: string }> = tina?.faq ?? []
+let faqFromCollection = false
+if (faqItems.length === 0 && product.productType) {
+  const typeHandle = product.productType.toLowerCase().replace(/\s+/g, '-')
+  const allCollectionDocs = await getCollection('shopCollections')
+  const collectionDoc = allCollectionDocs.find(
+    (c) => c.data.handle === typeHandle || c.id.replace(/\.mdx?$/, '') === typeHandle
+  )
+  if (collectionDoc?.data.faq?.length) {
+    // Dedup guardrail: count how many products share this collection
+    const collectionProducts = await getCollectionProducts(client, typeHandle, 20)
+    const productCount = collectionProducts?.products.length ?? 0
+    if (productCount <= 2) {
+      faqItems = collectionDoc.data.faq
+      faqFromCollection = true
+    }
+  }
+}
+
+// ── Trust badges (TinaCMS override → segment defaults → system defaults) ───
+const SEGMENT_BADGES: Record<string, string[]> = {
+  poultry: ['USDA Organic Compliant', 'A+ BBB Rating', 'Free Shipping on Cases'],
+  turf: ['Safe for Kids & Pets', 'A+ BBB Rating', 'Free Shipping'],
+  agriculture: ['Soil Health Focused', 'A+ BBB Rating', 'Free Shipping'],
+}
+const DEFAULT_BADGES = ['A+ BBB Rating', 'Since 2009', 'Free Shipping']
+const segment = tina?.segment ?? null
+const inferredSegment = product.productType?.toLowerCase().includes('poultry')
+  ? 'poultry'
+  : product.productType?.toLowerCase().includes('turf') || product.productType?.toLowerCase().includes('lawn')
+    ? 'turf'
+    : product.productType?.toLowerCase().includes('agri') || product.productType?.toLowerCase().includes('soil')
+      ? 'agriculture'
+      : null
+const trustBadges = tina?.trustBadges?.length
+  ? tina.trustBadges
+  : SEGMENT_BADGES[segment ?? inferredSegment ?? ''] ?? DEFAULT_BADGES
+
+// ── Display title (strip pipe-delimited SEO keywords) ──────────────────────
+const displayTitle = tina?.headline || (product.title.includes('|') ? product.title.split('|')[0].trim() : product.title)
+
 // ── SEO metadata ────────────────────────────────────────────────────────────
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
 const canonicalUrl = `${siteUrl}/products/${handle}/`
 
-const pageTitle = product.seo.title || `${product.title} | Southland Organics`
+const pageTitle = tina?.seoTitle || product.seo.title || `${product.title} | Southland Organics`
 const pageDescription =
-  product.seo.description || product.description.slice(0, 160).replace(/\s+/g, ' ').trim()
+  tina?.seoDescription || product.seo.description || product.description.slice(0, 160).replace(/\s+/g, ' ').trim()
 
 const ogImage = product.images[0]?.url ?? '/images/podcast/og-default.jpg'
 
 // ── Schema.org Product ──────────────────────────────────────────────────────
 const hasMultipleVariants = product.variants.length > 1
-const productSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'Product',
-  name: product.title,
-  description: product.description,
-  url: canonicalUrl,
-  image: product.images.map((img) => img.url),
-  brand: {
-    '@type': 'Brand',
-    name: product.vendor || 'Southland Organics',
+
+// Shared shipping details for all offers
+const shippingDetails = {
+  '@type': 'OfferShippingDetails' as const,
+  shippingDestination: {
+    '@type': 'DefinedRegion' as const,
+    addressCountry: 'US',
   },
-  category: product.productType || undefined,
-  offers: hasMultipleVariants
-    ? {
-        '@type': 'AggregateOffer',
-        lowPrice: product.priceRange.minVariantPrice.amount,
-        highPrice: Math.max(...product.variants.map((v) => parseFloat(v.price.amount))).toFixed(2),
-        priceCurrency: product.priceRange.minVariantPrice.currencyCode || 'USD',
-        offerCount: product.variants.length,
-        offers: product.variants.map((variant) => ({
+  deliveryTime: {
+    '@type': 'ShippingDeliveryTime' as const,
+    handlingTime: { '@type': 'QuantitativeValue' as const, minValue: 1, maxValue: 2, unitCode: 'DAY' },
+    transitTime: { '@type': 'QuantitativeValue' as const, minValue: 2, maxValue: 7, unitCode: 'DAY' },
+  },
+}
+const seller = { '@type': 'Organization' as const, name: 'Southland Organics' }
+
+// Build per-variant offers
+const variantOffers = product.variants.map((variant) => ({
+  '@type': 'Offer' as const,
+  name: variant.title !== 'Default Title' ? variant.title : product.title,
+  price: variant.price.amount,
+  priceCurrency: variant.price.currencyCode || 'USD',
+  availability: variant.availableForSale
+    ? 'https://schema.org/InStock'
+    : 'https://schema.org/OutOfStock',
+  url: canonicalUrl,
+  seller,
+  shippingDetails,
+}))
+
+// Determine if variants represent a true ProductGroup (size/type options)
+const hasNamedVariants = hasMultipleVariants && product.variants.some(
+  (v) => v.title !== 'Default Title'
+)
+
+// ProductGroup + hasVariant for multi-variant products with named options
+const productSchema = hasNamedVariants
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'ProductGroup',
+      name: product.title,
+      description: product.description,
+      url: canonicalUrl,
+      image: product.images.map((img) => img.url),
+      brand: {
+        '@type': 'Brand',
+        name: product.vendor || 'Southland Organics',
+      },
+      category: product.productType || undefined,
+      productGroupID: product.id,
+      hasVariant: product.variants.map((variant) => ({
+        '@type': 'Product',
+        name: variant.title !== 'Default Title' ? `${product.title} — ${variant.title}` : product.title,
+        image: variant.image?.url || product.images[0]?.url,
+        offers: {
           '@type': 'Offer',
-          name: variant.title !== 'Default Title' ? variant.title : product.title,
           price: variant.price.amount,
           priceCurrency: variant.price.currencyCode || 'USD',
           availability: variant.availableForSale
             ? 'https://schema.org/InStock'
             : 'https://schema.org/OutOfStock',
           url: canonicalUrl,
-          seller: { '@type': 'Organization', name: 'Southland Organics' },
-          shippingDetails: {
-            '@type': 'OfferShippingDetails',
-            shippingDestination: {
-              '@type': 'DefinedRegion',
-              addressCountry: 'US',
-            },
-            deliveryTime: {
-              '@type': 'ShippingDeliveryTime',
-              handlingTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 2, unitCode: 'DAY' },
-              transitTime: { '@type': 'QuantitativeValue', minValue: 2, maxValue: 7, unitCode: 'DAY' },
-            },
-          },
-        })),
-      }
-    : {
-        '@type': 'Offer',
-        price: product.variants[0]?.price.amount,
-        priceCurrency: product.variants[0]?.price.currencyCode || 'USD',
-        availability: product.variants[0]?.availableForSale
-          ? 'https://schema.org/InStock'
-          : 'https://schema.org/OutOfStock',
-        url: canonicalUrl,
-        seller: { '@type': 'Organization', name: 'Southland Organics' },
-        shippingDetails: {
-          '@type': 'OfferShippingDetails',
-          shippingDestination: {
-            '@type': 'DefinedRegion',
-            addressCountry: 'US',
-          },
-          deliveryTime: {
-            '@type': 'ShippingDeliveryTime',
-            handlingTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 2, unitCode: 'DAY' },
-            transitTime: { '@type': 'QuantitativeValue', minValue: 2, maxValue: 7, unitCode: 'DAY' },
-          },
+          seller,
+          shippingDetails,
         },
+      })),
+      offers: {
+        '@type': 'AggregateOffer',
+        lowPrice: product.priceRange.minVariantPrice.amount,
+        highPrice: Math.max(...product.variants.map((v) => parseFloat(v.price.amount))).toFixed(2),
+        priceCurrency: product.priceRange.minVariantPrice.currencyCode || 'USD',
+        offerCount: product.variants.length,
       },
+    }
+  : {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: product.title,
+      description: product.description,
+      url: canonicalUrl,
+      image: product.images.map((img) => img.url),
+      brand: {
+        '@type': 'Brand',
+        name: product.vendor || 'Southland Organics',
+      },
+      category: product.productType || undefined,
+      offers: hasMultipleVariants
+        ? {
+            '@type': 'AggregateOffer',
+            lowPrice: product.priceRange.minVariantPrice.amount,
+            highPrice: Math.max(...product.variants.map((v) => parseFloat(v.price.amount))).toFixed(2),
+            priceCurrency: product.priceRange.minVariantPrice.currencyCode || 'USD',
+            offerCount: product.variants.length,
+            offers: variantOffers,
+          }
+        : variantOffers[0],
+    }
+
+// ── Schema.org BreadcrumbList ──────────────────────────────────────────────
+const collectionHandle = product.productType?.toLowerCase().replace(/\s+/g, '-')
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: 'Home',
+      item: siteUrl,
+    },
+    ...(collectionHandle
+      ? [
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: product.productType,
+            item: `${siteUrl}/collections/${collectionHandle}/`,
+          },
+        ]
+      : []),
+    {
+      '@type': 'ListItem',
+      position: collectionHandle ? 3 : 2,
+      name: displayTitle,
+      item: canonicalUrl,
+    },
+  ],
 }
 
 // ── Breadcrumb items ────────────────────────────────────────────────────────
 const breadcrumbItems = [
   { label: 'Home', href: '/' },
-  { label: 'Collections', href: '/collections/' },
-  { label: product.title.includes('|') ? product.title.split('|')[0].trim() : product.title, href: `/products/${handle}/` },
+  ...(collectionHandle
+    ? [{ label: product.productType!, href: `/collections/${collectionHandle}/` }]
+    : [{ label: 'Collections', href: '/collections/' }]),
+  { label: displayTitle, href: `/products/${handle}/` },
 ]
 
 // ── Price display for static rendering ──────────────────────────────────────
@@ -148,12 +273,19 @@ const priceFormatted = new Intl.NumberFormat('en-US', {
   currency: minPrice.currencyCode || 'USD',
 }).format(Number(minPrice.amount))
 
-// ── Product video map (Mux playback IDs) ────────────────────────────────────
+// ── Product video (TinaCMS override → hardcoded map) ───────────────────────
 const PRODUCT_VIDEOS: Record<string, string> = {
-  'poultry-litter-amendment': 'BGIagRt3O5MXoFdzHejUiCr124usH69oqTl9jB4ZpC4',
-  'catalyst-poultry-vitamin': 'uM9Q00XQD5puYDVFf00800tC00lpUrc19ZbP5JTuO7gtgUw',
+  'poultry-probiotic': 'kisHZ3H00cgwwtbYpNFTuJvpX3aQjYktRPognZMCkl8A',
+  'hen-helper': 'lhqXJEfCsnDBe2EFT1tXmF8p3yus2Hlr3uVY4LrxPKo',
+  'catalyst-poultry-vitamin': 'xbWo4DayyMYxp9qOFQFZX800n2T00GpiZjCKfJufAIabc',
+  'poultry-litter-amendment': '3mUEyNwpZJEOGfANXLYqzPgnYyx4HWgaQHEAozTAMqM',
+  'natural-mite-control-livestock-poultry': '602A01013ey02O5fulCavm3sTKucUhv02fBMGiitIZafJ7rM',
+  'veridian-humate-liquid-iron-for-lawns': '3nN6ccBWE00s00iYw6501y00XjZs2HCGoS4gRyOL3pHDxDE',
+  'genesis': 'ESZbDKvLaZ9mCwsVr3TJ01yf14ga62xt6DdKVcD0000SVw',
+  'torched-all-natural-weed-killer': 'qrxyFtXf6q4fAzJw3wdww00LDdYeXVPaP3YCU15qLKxg',
 }
-const muxPlaybackId = PRODUCT_VIDEOS[handle] ?? null
+const muxPlaybackId = tina?.muxPlaybackId || PRODUCT_VIDEOS[handle] || null
+const videoTitle = tina?.videoTitle || displayTitle
 
 // ── Strip Gumlet/Wistia iframes from Shopify description HTML ───────────────
 const cleanDescriptionHtml = product.descriptionHtml
@@ -161,6 +293,65 @@ const cleanDescriptionHtml = product.descriptionHtml
   ?.replace(/<div[^>]*(?:gumlet|wistia)[^>]*>[\s\S]*?<\/div>/gi, '')
   ?.replace(/<script[^>]*(?:gumlet|wistia)[^>]*>[\s\S]*?<\/script>/gi, '')
   ?.trim()
+
+// ── FAQ schema (conditional) ───────────────────────────────────────────────
+const shouldEmitFaqSchema = faqItems.length > 0 && !faqFromCollection && (tina?.allowFaqSchema !== false)
+const faqSchema = shouldEmitFaqSchema
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faqItems.map((item) => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: item.answer,
+        },
+      })),
+    }
+  : null
+
+// ── Aggregate all schemas ──────────────────────────────────────────────────
+const schemas = [productSchema, breadcrumbSchema, ...(faqSchema ? [faqSchema] : [])]
+
+// ── Proof stats (TinaCMS → generic defaults) ───────────────────────────────
+const proofStats = tina?.proofStats?.length
+  ? tina.proofStats
+  : [
+      { value: '2009', label: 'Founded', source: undefined },
+      { value: 'A+', label: 'BBB Rating', source: undefined },
+      { value: '1,000+', label: 'Farms Helped', source: undefined },
+      { value: '17+', label: 'Years Experience', source: undefined },
+    ]
+
+// ── Related blog posts (TinaCMS curated) ───────────────────────────────────
+const relatedBlogSlugs = tina?.relatedBlogSlugs ?? []
+let relatedBlogPosts: Array<{ slug: string; title: string; description: string }> = []
+if (relatedBlogSlugs.length > 0) {
+  const allBlog = await getCollection('blog')
+  relatedBlogPosts = relatedBlogSlugs
+    .map((slug) => {
+      const post = allBlog.find((p) => p.id.replace(/\.mdx?$/, '') === slug)
+      return post
+        ? { slug: post.id.replace(/\.mdx?$/, ''), title: post.data.title, description: post.data.description }
+        : null
+    })
+    .filter((p): p is NonNullable<typeof p> => p !== null)
+}
+
+// ── Hub link for cross-linking ─────────────────────────────────────────────
+const SEGMENT_HUBS: Record<string, { label: string; href: string }> = {
+  poultry: { label: 'Poultry Health Hub', href: '/poultry/' },
+  turf: { label: 'Lawn & Turf Hub', href: '/lawn/' },
+  agriculture: { label: 'Agriculture Hub', href: '/agriculture/crops/' },
+}
+const hubLink = SEGMENT_HUBS[segment ?? inferredSegment ?? ''] ?? null
+
+// ── PDP tier (for analytics) ───────────────────────────────────────────────
+const pdpTier = hasTinaContent ? 'enriched' : 'baseline'
+
+// ── Cache: anonymous PDP HTML cacheable at edge (persona swap is client-side) ─
+Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400')
 ---
 
 <BaseLayout
@@ -168,17 +359,19 @@ const cleanDescriptionHtml = product.descriptionHtml
   description={pageDescription}
   ogImage={ogImage}
   canonicalUrl={canonicalUrl}
-  schema={productSchema}
+  schema={schemas}
 >
-  {/* Breadcrumbs */}
+  <main data-pdp-tier={pdpTier}>
+
+  {/* S0: Breadcrumbs */}
   <div class="bg-gray-50 px-4 py-3">
     <div class="mx-auto max-w-6xl">
       <Breadcrumbs items={breadcrumbItems} />
     </div>
   </div>
 
-  {/* Product hero section */}
-  <section class="mx-auto max-w-6xl px-4 py-8 sm:py-12">
+  {/* S1: HERO — two-column, always */}
+  <section id="pdp-hero" class="mx-auto max-w-6xl px-4 py-8 sm:py-12" data-section="pdp-hero">
     <div class="grid gap-8 md:grid-cols-2 md:gap-12">
       {/* Left: Image gallery */}
       <div>
@@ -197,12 +390,24 @@ const cleanDescriptionHtml = product.descriptionHtml
         }
 
         <h1 class="font-heading text-3xl text-gray-900 sm:text-4xl">
-          {product.title.includes('|') ? product.title.split('|')[0].trim() : product.title}
+          {displayTitle}
         </h1>
-        {product.title.includes('|') && (
+        {product.title.includes('|') && !tina?.headline && (
           <p class="mt-1 text-base text-gray-500">
             {product.title.split('|').slice(1).join('|').trim()}
           </p>
+        )}
+
+        {/* Hero bullets (TinaCMS enriched only) */}
+        {tina?.heroBullets && tina.heroBullets.length > 0 && (
+          <ul class="mt-3 space-y-1">
+            {tina.heroBullets.map((bullet) => (
+              <li class="flex items-start gap-2 text-sm text-gray-600">
+                <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-green-light" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                <span>{bullet}</span>
+              </li>
+            ))}
+          </ul>
         )}
 
         {/* Product type tag */}
@@ -217,7 +422,7 @@ const cleanDescriptionHtml = product.descriptionHtml
           )
         }
 
-        {/* Price (shown in static HTML, also in AddToCartButton for selected variant) */}
+        {/* Price */}
         {
           !hasMultipleVariants && (
             <p class="mt-4 text-2xl font-bold text-gray-900">{priceFormatted}</p>
@@ -226,47 +431,45 @@ const cleanDescriptionHtml = product.descriptionHtml
         {hasMultipleVariants && <p class="mt-4 text-sm text-gray-500">From {priceFormatted}</p>}
 
         {/* Add to cart island */}
-        <div class="mt-6">
+        <div class="mt-6" id="pdp-atc">
           <AddToCartButton client:load variants={product.variants} />
         </div>
 
-        {/* Short description (plain text) */}
+        {/* Trust badges row — always */}
+        <div class="mt-5 flex flex-wrap items-center gap-3 border-t border-gray-100 pt-5">
+          {trustBadges.map((badge) => (
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-brand-green-dark">
+              <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+              {badge}
+            </span>
+          ))}
+        </div>
+
+        {/* Short description */}
         {
           product.description && (
-            <p class="mt-6 text-sm leading-relaxed text-gray-600">
+            <p class="mt-5 text-sm leading-relaxed text-gray-600">
               {product.description.length > 300
                 ? product.description.slice(0, 300).trim() + '...'
                 : product.description}
             </p>
           )
         }
-
-        {/* Tags */}
-        {
-          product.tags.length > 0 && (
-            <div class="mt-6 flex flex-wrap gap-2">
-              {product.tags.map((tag) => (
-                <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )
-        }
       </div>
     </div>
   </section>
 
-  {/* Product video (Mux) */}
+  {/* S2: VIDEO — conditional */}
   {
     muxPlaybackId && (
-      <section class="border-t border-gray-100 bg-gray-50 py-8 md:py-12">
+      <section class="border-t border-gray-100 bg-gray-50 py-8 md:py-12" data-section="pdp-video">
         <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <h2 class="font-heading mb-4 text-center text-xl text-gray-900">See {videoTitle} in Action</h2>
           <div class="aspect-video overflow-hidden rounded-xl shadow-lg">
             <mux-player
               playback-id={muxPlaybackId}
               accent-color="#44883e"
-              metadata-video-title={product.title}
+              metadata-video-title={videoTitle}
               default-hidden-captions
               poster={`https://image.mux.com/${muxPlaybackId}/thumbnail.jpg?time=10`}
               style="width:100%;height:100%;--media-object-fit:cover;"
@@ -278,10 +481,79 @@ const cleanDescriptionHtml = product.descriptionHtml
   }
   {muxPlaybackId && <script>import '@mux/mux-player';</script>}
 
-  {/* Full HTML description */}
-  {
+  {/* S3: PAS / PROBLEM — full mode only */}
+  {tina?.problemCards && tina.problemCards.length > 0 && (
+    <section class="border-t border-gray-100 bg-gray-50 py-10 md:py-14" data-section="pdp-pas">
+      <div class="mx-auto max-w-6xl px-4">
+        {tina.problemHeadline && (
+          <h2 class="font-heading mb-8 text-center text-2xl text-gray-900 sm:text-3xl">{tina.problemHeadline}</h2>
+        )}
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {tina.problemCards.map((card) => (
+            <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+              <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-red-50">
+                <svg class="h-5 w-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
+              </div>
+              <h3 class="font-heading text-lg text-gray-900">{card.title}</h3>
+              <p class="mt-2 text-sm leading-relaxed text-gray-600">{card.body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {/* S4: FEATURES / PRODUCT DETAILS */}
+  {/* Full mode: TinaCMS features→benefits table + optional dosing + MDX body */}
+  {/* Baseline mode: cleaned Shopify descriptionHtml */}
+  {hasTinaContent && (tina?.features?.length || tina?.dosingInstructions || TinaContent) ? (
+    <section class="border-t border-gray-100 py-8 sm:py-12" data-section="pdp-features">
+      <div class="mx-auto max-w-6xl px-4">
+        <h2 class="font-heading text-2xl text-gray-900">How It Works</h2>
+
+        {/* Features → Benefits two-column table */}
+        {tina?.features && tina.features.length > 0 && (
+          <div class="mt-6 overflow-x-auto overflow-hidden rounded-xl border border-gray-200">
+            <table class="w-full text-left text-sm">
+              <thead>
+                <tr class="bg-gray-50">
+                  <th class="px-4 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">Feature</th>
+                  <th class="px-4 py-3 font-heading text-xs uppercase tracking-wider text-gray-500">What It Means for You</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                {tina.features.map((row) => (
+                  <tr class="hover:bg-gray-50/50">
+                    <td class="px-4 py-3 font-medium text-gray-900">{row.feature}</td>
+                    <td class="px-4 py-3 text-gray-600">{row.benefit}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Dosing / Application */}
+        {tina?.dosingInstructions && (
+          <div class="mt-8 rounded-xl border border-green-200 bg-green-50 p-6">
+            <h3 class="font-heading text-lg text-brand-green-dark">
+              {tina.applicationMethod ? `Application: ${tina.applicationMethod}` : 'Dosing & Application'}
+            </h3>
+            <p class="mt-2 whitespace-pre-line text-sm leading-relaxed text-gray-700">{tina.dosingInstructions}</p>
+          </div>
+        )}
+
+        {/* TinaCMS MDX body content */}
+        {TinaContent && (
+          <div class="prose prose-sm prose-headings:font-heading prose-a:text-brand-green-light mt-8 max-w-none">
+            <TinaContent />
+          </div>
+        )}
+      </div>
+    </section>
+  ) : (
     cleanDescriptionHtml && cleanDescriptionHtml !== '<p></p>' && (
-      <section class="border-t border-gray-100">
+      <section class="border-t border-gray-100" data-section="pdp-features">
         <div class="mx-auto max-w-3xl px-4 py-8 sm:py-12">
           <h2 class="font-heading text-2xl text-gray-900">Product Details</h2>
           <div
@@ -291,21 +563,320 @@ const cleanDescriptionHtml = product.descriptionHtml
         </div>
       </section>
     )
-  }
+  )}
 
-  {/* Related products */}
-  {
-    relatedProducts.length > 0 && (
-      <section class="border-t border-gray-100 bg-gray-50">
-        <div class="mx-auto max-w-6xl px-4 py-8 sm:py-12">
-          <h2 class="font-heading text-2xl text-gray-900">Related Products</h2>
-          <div class="mt-6 grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-4">
-            {relatedProducts.map((related) => (
-              <CollectionProductCard product={related} persona={persona} />
+  {/* S5: PROOF BAND — always (stats + testimonials for enriched) */}
+  <section class="border-t border-gray-100 bg-brand-green-dark py-10 md:py-14" data-section="pdp-proof">
+    <div class="mx-auto max-w-6xl px-4">
+      {/* Proof stats grid */}
+      <div class="grid grid-cols-2 gap-6 sm:gap-8 md:grid-cols-4">
+        {proofStats.map((stat) => (
+          <div class="text-center">
+            <p class="font-heading text-3xl text-white sm:text-4xl">{stat.value}</p>
+            <p class="mt-1 text-sm text-green-200">{stat.label}</p>
+            {stat.source && (
+              <p class="mt-0.5 text-xs text-green-300/60">{stat.source}</p>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Testimonials (full mode only) */}
+      {tina?.testimonials && tina.testimonials.length > 0 && (
+        <div class="mt-10 border-t border-green-700 pt-10">
+          <div class={`grid gap-6 ${tina.testimonials.length === 1 ? 'max-w-2xl mx-auto' : 'sm:grid-cols-2 lg:grid-cols-3'}`}>
+            {tina.testimonials.map((t) => (
+              <blockquote class="rounded-xl bg-white/10 p-6 backdrop-blur-sm">
+                <svg class="mb-3 h-6 w-6 text-green-300/50" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" /></svg>
+                <p class="text-sm leading-relaxed text-green-50">{t.quote}</p>
+                <footer class="mt-4">
+                  <p class="text-sm font-semibold text-white">{t.name}</p>
+                  {t.role && <p class="text-xs text-green-300">{t.role}</p>}
+                </footer>
+              </blockquote>
             ))}
           </div>
+        </div>
+      )}
+    </div>
+  </section>
+
+  {/* S6: FAQ — conditional */}
+  {
+    faqItems.length > 0 && (
+      <section class="border-t border-gray-100 bg-gray-50 py-8 md:py-12" data-section="pdp-faq">
+        <div class="mx-auto max-w-3xl px-4">
+          <h2 class="font-heading mb-6 text-2xl text-gray-900">Frequently Asked Questions</h2>
+          <AccordionFaq items={faqItems} persona={segment ?? inferredSegment} />
         </div>
       </section>
     )
   }
+
+  {/* S7: RELATED PRODUCTS + CROSS-LINKS — always */}
+  {
+    (relatedProducts.length > 0 || relatedBlogPosts.length > 0 || hubLink) && (
+      <section class="border-t border-gray-100" data-section="pdp-related">
+        <div class="mx-auto max-w-6xl px-4 py-8 sm:py-12">
+          {/* Related products */}
+          {relatedProducts.length > 0 && (
+            <div>
+              <h2 class="font-heading text-2xl text-gray-900">Related Products</h2>
+              <div class="mt-6 grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-4">
+                {relatedProducts.map((related) => (
+                  <CollectionProductCard product={related} persona={persona} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Cross-links: blog posts + hub link */}
+          {(relatedBlogPosts.length > 0 || hubLink) && (
+            <div class={relatedProducts.length > 0 ? 'mt-10 border-t border-gray-100 pt-8' : ''}>
+              <h3 class="font-heading text-lg text-gray-900">Learn More</h3>
+              <div class="mt-4 flex flex-wrap gap-3">
+                {relatedBlogPosts.map((post) => (
+                  <a
+                    href={`/blog/${post.slug}/`}
+                    class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 transition hover:border-brand-green-light hover:text-brand-green-dark"
+                  >
+                    <svg class="h-4 w-4 text-brand-green-light" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" /></svg>
+                    {post.title}
+                  </a>
+                ))}
+                {hubLink && (
+                  <a
+                    href={hubLink.href}
+                    class="inline-flex items-center gap-2 rounded-lg border border-brand-green-light bg-green-50 px-4 py-2.5 text-sm font-medium text-brand-green-dark transition hover:bg-green-100"
+                  >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                    {hubLink.label}
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+    )
+  }
+
+  {/* S8: FINAL CTA — always, server-rendered default, persona-swapped client-side */}
+  <section id="pdp-final-cta" class="border-t border-gray-100 bg-brand-green-dark py-12 md:py-16" data-section="pdp-cta">
+    <div class="mx-auto max-w-3xl px-4 text-center">
+      {tina?.guideName && tina?.guidePhoto && (
+        <img
+          src={`https://res.cloudinary.com/southland-organics/image/upload/w_80,h_80,c_fill,g_face,q_auto,f_auto/${tina.guidePhoto}`}
+          alt={tina.guideName}
+          width="80"
+          height="80"
+          class="mx-auto mb-4 rounded-full border-2 border-green-300"
+          loading="lazy"
+        />
+      )}
+      <h2 class="font-heading text-2xl text-white sm:text-3xl">
+        {tina?.guideName
+          ? `Talk to ${tina.guideName}`
+          : 'Ready to Get Started?'}
+      </h2>
+      <p class="mx-auto mt-3 max-w-xl text-green-200">
+        Have questions about {displayTitle}? Our team has helped over 1,000 farms find the right solution. Call us or shop now.
+      </p>
+      <div class="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <a
+          href="tel:800-608-3755"
+          class="inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 text-sm font-semibold text-brand-green-dark transition hover:bg-green-50"
+          data-cta-type="phone"
+        >
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+          Call 800-608-3755
+        </a>
+        <a
+          href={`/products/${handle}/`}
+          class="inline-flex items-center gap-2 rounded-lg border-2 border-white px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+          data-cta-type="shop"
+          onclick="document.getElementById('pdp-atc')?.scrollIntoView({behavior:'smooth'});return false;"
+        >
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" /></svg>
+          Add to Cart
+        </a>
+      </div>
+    </div>
+  </section>
+
+  {/* Sticky mobile ATC — fixed bottom bar, shows after hero scrolls away */}
+  <div
+    id="sticky-atc"
+    class="fixed inset-x-0 bottom-0 z-40 translate-y-full border-t border-gray-200 bg-white px-4 py-3 shadow-lg transition-transform duration-300 md:hidden"
+  >
+    <div class="flex items-center justify-between gap-3">
+      <div class="min-w-0 flex-1">
+        <p class="truncate text-sm font-semibold text-gray-900">{displayTitle}</p>
+        <p class="text-sm font-bold text-brand-green-dark">{priceFormatted}</p>
+      </div>
+      <button
+        id="sticky-atc-btn"
+        class="flex-shrink-0 rounded-lg bg-brand-green-light px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-green-dark"
+      >
+        Add to Cart
+      </button>
+    </div>
+  </div>
+
+  </main>
 </BaseLayout>
+
+<script>
+  // ── Sticky mobile ATC ────────────────────────────────────────────────────
+  const hero = document.getElementById('pdp-hero')
+  const stickyBar = document.getElementById('sticky-atc')
+  const stickyBtn = document.getElementById('sticky-atc-btn')
+  const atcSection = document.getElementById('pdp-atc')
+
+  if (hero && stickyBar) {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          stickyBar.classList.add('translate-y-full')
+          stickyBar.classList.remove('translate-y-0')
+        } else {
+          stickyBar.classList.remove('translate-y-full')
+          stickyBar.classList.add('translate-y-0')
+        }
+      },
+      { threshold: 0 }
+    )
+    observer.observe(hero)
+  }
+
+  if (stickyBtn && atcSection) {
+    stickyBtn.addEventListener('click', () => {
+      atcSection.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
+  }
+
+  // ── Persona CTA client-side swap ─────────────────────────────────────────
+  // Swaps CTA text in S8 based on persona cookie. HTML source stays default.
+  const PERSONA_CTA: Record<string, { headline: string; shopLabel: string }> = {
+    betty:  { headline: 'Your Flock Deserves the Best', shopLabel: 'Shop Backyard Products' },
+    bill:   { headline: 'Talk to a Poultry Specialist', shopLabel: 'See Commercial Solutions' },
+    taylor: { headline: 'Build Your Turf Program', shopLabel: 'Shop Turf Products' },
+  }
+
+  function getPersonaCookie(): string | null {
+    const match = document.cookie.match(/(?:^|;\s*)sl_persona=([^;]+)/)
+    return match ? decodeURIComponent(match[1]) : null
+  }
+
+  function swapPersonaCTA() {
+    const raw = getPersonaCookie()
+    if (!raw) return
+    const LEGACY: Record<string, string> = { backyard: 'betty', commercial: 'bill', lawn: 'taylor' }
+    const persona = LEGACY[raw] ?? raw
+    const config = PERSONA_CTA[persona]
+    if (!config) return
+
+    const ctaSection = document.getElementById('pdp-final-cta')
+    if (!ctaSection) return
+
+    const h2 = ctaSection.querySelector('h2')
+    if (h2) h2.textContent = config.headline
+
+    const shopBtn = ctaSection.querySelector('[data-cta-type="shop"]')
+    if (shopBtn) {
+      const svg = shopBtn.querySelector('svg')
+      shopBtn.textContent = ''
+      if (svg) shopBtn.prepend(svg)
+      shopBtn.append(document.createTextNode(` ${config.shopLabel}`))
+    }
+  }
+  swapPersonaCTA()
+
+  // ── Section-level analytics ──────────────────────────────────────────────
+  function trackEvent(name: string, data: Record<string, unknown> = {}) {
+    const handle = window.location.pathname.split('/products/')[1]?.replace(/\/$/, '') ?? ''
+    const tier = document.querySelector('main')?.dataset.pdpTier ?? 'unknown'
+    const persona = getPersonaCookie() ?? 'none'
+    const payload = { handle, tier, persona, ...data }
+
+    // Fire to point.dog pixel if available
+    if (typeof (window as any).pdPixel?.track === 'function') {
+      ;(window as any).pdPixel.track(name, payload)
+    }
+    // Also fire as CustomEvent for any listeners
+    window.dispatchEvent(new CustomEvent(name, { detail: payload }))
+  }
+
+  // Intersection-based impressions
+  const sectionObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return
+        const section = entry.target as HTMLElement
+        const sectionName = section.dataset.section
+        if (!sectionName) return
+
+        // Fire impression once per section
+        if (section.dataset.tracked) return
+        section.dataset.tracked = '1'
+
+        if (sectionName === 'pdp-video') trackEvent('pdp_video_impression')
+        if (sectionName === 'pdp-hero') trackEvent('pdp_hero_atc_view')
+      })
+    },
+    { threshold: 0.3 }
+  )
+
+  document.querySelectorAll('[data-section]').forEach((el) => sectionObserver.observe(el))
+
+  // Scroll depth tracking
+  let maxDepth = 0
+  const depthThresholds = [25, 50, 75, 100]
+  function checkScrollDepth() {
+    const scrollTop = window.scrollY
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight
+    if (docHeight <= 0) return
+    const pct = Math.round((scrollTop / docHeight) * 100)
+    for (const threshold of depthThresholds) {
+      if (pct >= threshold && maxDepth < threshold) {
+        maxDepth = threshold
+        trackEvent('pdp_scroll_depth', { percent: threshold })
+      }
+    }
+  }
+  window.addEventListener('scroll', checkScrollDepth, { passive: true })
+
+  // FAQ open tracking
+  document.querySelectorAll('[data-section="pdp-faq"] details').forEach((el, i) => {
+    el.addEventListener('toggle', () => {
+      if ((el as HTMLDetailsElement).open) {
+        trackEvent('pdp_faq_open', { question_index: i })
+      }
+    })
+  })
+
+  // Related product click tracking
+  document.querySelectorAll('[data-section="pdp-related"] a[href*="/products/"]').forEach((el) => {
+    el.addEventListener('click', () => {
+      const href = (el as HTMLAnchorElement).getAttribute('href') ?? ''
+      const relatedHandle = href.split('/products/')[1]?.replace(/\/$/, '') ?? ''
+      trackEvent('pdp_related_product_click', { related_handle: relatedHandle })
+    })
+  })
+
+  // Related blog click tracking
+  document.querySelectorAll('[data-section="pdp-related"] a[href*="/blog/"]').forEach((el) => {
+    el.addEventListener('click', () => {
+      const href = (el as HTMLAnchorElement).getAttribute('href') ?? ''
+      const blogSlug = href.split('/blog/')[1]?.replace(/\/$/, '') ?? ''
+      trackEvent('pdp_related_blog_click', { blog_slug: blogSlug })
+    })
+  })
+
+  // Final CTA click tracking
+  document.querySelectorAll('[data-section="pdp-cta"] a[data-cta-type]').forEach((el) => {
+    el.addEventListener('click', () => {
+      trackEvent('pdp_final_cta_click', { cta_type: (el as HTMLElement).dataset.ctaType })
+    })
+  })
+</script>

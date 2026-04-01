@@ -1,0 +1,441 @@
+---
+/**
+ * Products SEO Admin — PDP Audit Dashboard
+ *
+ * Cross-references live Shopify product data with TinaCMS enrichment.
+ * Shows SEO coverage, schema status, video, and content tier for every product.
+ */
+import AdminLayout from '../../../layouts/AdminLayout.astro'
+import {
+  createClient,
+  getProductByHandle,
+} from '@southland/shopify-storefront'
+import { getCollection, render } from 'astro:content'
+
+// ── Shopify client ──────────────────────────────────────────────────────────
+const client = createClient({
+  storeDomain: import.meta.env.PUBLIC_SHOPIFY_STORE_DOMAIN,
+  publicAccessToken: import.meta.env.PUBLIC_SHOPIFY_STOREFRONT_TOKEN,
+})
+
+// ── Fetch ALL products from Shopify via Storefront API ──────────────────────
+const STOREFRONT_QUERY = `{
+  products(first: 100) {
+    edges {
+      node {
+        id
+        handle
+        title
+        description
+        productType
+        vendor
+        tags
+        seo { title description }
+        images(first: 5) { edges { node { url altText width height } } }
+        variants(first: 20) { edges { node { title availableForSale price { amount currencyCode } compareAtPrice { amount } selectedOptions { name value } } } }
+        priceRange { minVariantPrice { amount currencyCode } }
+      }
+    }
+  }
+}`
+
+let shopifyProducts: any[] = []
+let fetchError: string | null = null
+try {
+  const res = await fetch(
+    `https://${import.meta.env.PUBLIC_SHOPIFY_STORE_DOMAIN}/api/2024-01/graphql.json`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Storefront-Access-Token': import.meta.env.PUBLIC_SHOPIFY_STOREFRONT_TOKEN,
+      },
+      body: JSON.stringify({ query: STOREFRONT_QUERY }),
+    }
+  )
+  const json = await res.json()
+  shopifyProducts = json.data?.products?.edges?.map((e: any) => e.node) ?? []
+} catch (e: any) {
+  fetchError = e.message
+}
+
+// ── Load TinaCMS content collection ─────────────────────────────────────────
+const allTinaProducts = await getCollection('products')
+const tinaByHandle = new Map<string, any>()
+for (const tp of allTinaProducts) {
+  tinaByHandle.set(tp.data.shopifyHandle, tp)
+}
+
+// ── Video map (same as PDP template) ────────────────────────────────────────
+const PRODUCT_VIDEOS: Record<string, string> = {
+  'poultry-probiotic': 'kisHZ3H00cgwwtbYpNFTuJvpX3aQjYktRPognZMCkl8A',
+  'hen-helper': 'lhqXJEfCsnDBe2EFT1tXmF8p3yus2Hlr3uVY4LrxPKo',
+  'catalyst-poultry-vitamin': 'xbWo4DayyMYxp9qOFQFZX800n2T00GpiZjCKfJufAIabc',
+  'poultry-litter-amendment': '3mUEyNwpZJEOGfANXLYqzPgnYyx4HWgaQHEAozTAMqM',
+  'natural-mite-control-livestock-poultry': '602A01013ey02O5fulCavm3sTKucUhv02fBMGiitIZafJ7rM',
+  'veridian-humate-liquid-iron-for-lawns': '3nN6ccBWE00s00iYw6501y00XjZs2HCGoS4gRyOL3pHDxDE',
+  'genesis': 'ESZbDKvLaZ9mCwsVr3TJ01yf14ga62xt6DdKVcD0000SVw',
+  'torched-all-natural-weed-killer': 'qrxyFtXf6q4fAzJw3wdww00LDdYeXVPaP3YCU15qLKxg',
+}
+
+// ── Build audit rows ────────────────────────────────────────────────────────
+interface AuditRow {
+  handle: string
+  title: string
+  productType: string
+  seoTitle: string
+  seoTitleSource: 'tina' | 'shopify' | 'fallback'
+  seoDesc: string
+  seoDescSource: 'tina' | 'shopify' | 'fallback'
+  tier: 'enriched' | 'stub' | 'shopify-only'
+  hasVideo: boolean
+  videoSource: 'tina' | 'map' | 'none'
+  imageCount: number
+  missingAlt: boolean
+  variantCount: number
+  available: boolean
+  hasFaq: boolean
+  hasProof: boolean
+  hasTestimonials: boolean
+  hasPAS: boolean
+  hasFeatures: boolean
+  hasDosing: boolean
+  hasGuide: boolean
+  hasCrossLinks: boolean
+  issues: string[]
+  grade: 'A' | 'B' | 'C' | 'D'
+}
+
+const MERCH_HANDLES = ['so-measuring-cup', 'southland-organics-sticker', 'southland-organics-hat', 'premium-adjustable-trigger-spray-bottle-32-oz']
+
+const rows: AuditRow[] = shopifyProducts.map((p: any) => {
+  const tina = tinaByHandle.get(p.handle)?.data ?? null
+  const isMerch = MERCH_HANDLES.includes(p.handle)
+
+  // Determine tier
+  const hasFullContent = tina && (tina.headline || tina.problemCards?.length || tina.features?.length || tina.testimonials?.length)
+  const tier: AuditRow['tier'] = hasFullContent ? 'enriched' : tina ? 'stub' : 'shopify-only'
+
+  // SEO title resolution
+  const seoTitle = tina?.seoTitle || p.seo?.title || `${p.title} | Southland Organics`
+  const seoTitleSource: AuditRow['seoTitleSource'] = tina?.seoTitle ? 'tina' : p.seo?.title ? 'shopify' : 'fallback'
+
+  // SEO desc resolution
+  const seoDesc = tina?.seoDescription || p.seo?.description || (p.description?.slice(0, 160) || '')
+  const seoDescSource: AuditRow['seoDescSource'] = tina?.seoDescription ? 'tina' : p.seo?.description ? 'shopify' : 'fallback'
+
+  // Video
+  const muxId = tina?.muxPlaybackId || PRODUCT_VIDEOS[p.handle] || null
+  const hasVideo = !!muxId
+  const videoSource: AuditRow['videoSource'] = tina?.muxPlaybackId ? 'tina' : PRODUCT_VIDEOS[p.handle] ? 'map' : 'none'
+
+  // Images
+  const images = p.images?.edges?.map((e: any) => e.node) ?? []
+  const missingAlt = images.some((img: any) => !img.altText)
+
+  // Variants
+  const variants = p.variants?.edges?.map((e: any) => e.node) ?? []
+  const available = variants.some((v: any) => v.availableForSale)
+
+  // Content sections
+  const hasFaq = (tina?.faq?.length ?? 0) > 0
+  const hasProof = (tina?.proofStats?.length ?? 0) > 0
+  const hasTestimonials = (tina?.testimonials?.length ?? 0) > 0
+  const hasPAS = (tina?.problemCards?.length ?? 0) > 0
+  const hasFeatures = (tina?.features?.length ?? 0) > 0
+  const hasDosing = !!tina?.dosingInstructions
+  const hasGuide = !!tina?.guideName
+  const hasCrossLinks = (tina?.relatedBlogSlugs?.length ?? 0) > 0
+
+  // Issues
+  const issues: string[] = []
+  if (seoTitleSource === 'fallback') issues.push('No SEO title')
+  if (seoDescSource === 'fallback') issues.push('No SEO description')
+  if (seoTitle.length > 70) issues.push(`Title long (${seoTitle.length}ch)`)
+  if (seoDesc.length > 160) issues.push(`Desc long (${seoDesc.length}ch)`)
+  if (seoDesc.length < 50 && seoDesc.length > 0) issues.push(`Desc short (${seoDesc.length}ch)`)
+  if (missingAlt) issues.push('Missing image alt')
+  if (!p.productType && !isMerch) issues.push('No product type')
+  if (!available) issues.push('Sold out')
+  if (!hasVideo && !isMerch) issues.push('No video')
+  if (images.length === 0) issues.push('No images')
+
+  // Grade
+  let grade: AuditRow['grade'] = 'A'
+  if (isMerch) grade = 'B'
+  else if (tier === 'enriched' && issues.length === 0) grade = 'A'
+  else if (tier === 'enriched' && issues.length <= 2) grade = 'A'
+  else if (tier === 'stub' && issues.length <= 1) grade = 'B'
+  else if (tier === 'stub') grade = 'C'
+  else if (tier === 'shopify-only' && issues.length === 0) grade = 'B'
+  else if (tier === 'shopify-only' && issues.length <= 2) grade = 'C'
+  else grade = 'D'
+
+  return {
+    handle: p.handle,
+    title: p.title.includes('|') ? p.title.split('|')[0].trim() : p.title,
+    productType: p.productType || '',
+    seoTitle,
+    seoTitleSource,
+    seoDesc,
+    seoDescSource,
+    tier,
+    hasVideo,
+    videoSource,
+    imageCount: images.length,
+    missingAlt,
+    variantCount: variants.length,
+    available,
+    hasFaq,
+    hasProof,
+    hasTestimonials,
+    hasPAS,
+    hasFeatures,
+    hasDosing,
+    hasGuide,
+    hasCrossLinks,
+    issues,
+    grade,
+  }
+})
+
+// ── Summary stats ───────────────────────────────────────────────────────────
+const total = rows.length
+const enriched = rows.filter(r => r.tier === 'enriched').length
+const stubs = rows.filter(r => r.tier === 'stub').length
+const shopifyOnly = rows.filter(r => r.tier === 'shopify-only').length
+const withVideo = rows.filter(r => r.hasVideo).length
+const withFaq = rows.filter(r => r.hasFaq).length
+const gradeA = rows.filter(r => r.grade === 'A').length
+const gradeB = rows.filter(r => r.grade === 'B').length
+const gradeC = rows.filter(r => r.grade === 'C').length
+const gradeD = rows.filter(r => r.grade === 'D').length
+const totalIssues = rows.reduce((sum, r) => sum + r.issues.length, 0)
+
+// ── Lookup maps (used in template) ──────────────────────────────────────────
+const gradeColors: Record<string, string> = {
+  A: 'background:#dcfce7;color:#166534;',
+  B: 'background:#dbeafe;color:#1e40af;',
+  C: 'background:#fef3c7;color:#854d0e;',
+  D: 'background:#fecaca;color:#991b1b;',
+}
+const tierColors: Record<string, string> = {
+  enriched: 'background:#dcfce7;color:#166534;',
+  stub: 'background:#dbeafe;color:#1e40af;',
+  'shopify-only': 'background:#f3f4f6;color:#6b7280;',
+}
+const tierLabels: Record<string, string> = {
+  enriched: 'Enriched',
+  stub: 'SEO Stub',
+  'shopify-only': 'Shopify',
+}
+
+function getSectionCount(row: AuditRow): number {
+  return [row.hasPAS, row.hasFeatures, row.hasDosing, row.hasProof, row.hasTestimonials, row.hasFaq, row.hasGuide, row.hasCrossLinks].filter(Boolean).length
+}
+
+// Pre-sort rows
+const sortedRows = [...rows].sort((a, b) => {
+  const go = { A: 0, B: 1, C: 2, D: 3 }
+  return go[a.grade] - go[b.grade] || a.title.localeCompare(b.title)
+})
+const enrichedRows = rows.filter(r => r.tier === 'enriched').sort((a, b) => a.title.localeCompare(b.title))
+const alphaRows = [...rows].sort((a, b) => a.title.localeCompare(b.title))
+---
+
+<AdminLayout title="Products SEO" activeNav="/admin/products-seo">
+
+  <!-- Header -->
+  <header style="margin-bottom: 2rem;">
+    <h1 style="font-family: var(--font-heading, 'Eveleth Dot', sans-serif); font-size: 1.75rem; color: var(--text, #191d21); margin: 0;">Products SEO Dashboard</h1>
+    <p style="color: var(--text-muted, #686363); margin-top: 0.25rem;">{total} products from Shopify Storefront API &bull; Cross-referenced with {allTinaProducts.length} TinaCMS entries</p>
+  </header>
+
+  {fetchError ? (
+    <div style="background: #fef2f2; border: 1px solid #fca5a5; border-radius: 0.5rem; padding: 1rem;">
+      <p style="color: #dc2626; margin: 0;">Shopify API Error: {fetchError}</p>
+    </div>
+  ) : (
+    <>
+
+  <!-- Summary Cards -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 0.75rem; padding: 1.25rem; text-align: center;">
+      <p style="font-family: var(--font-heading); font-size: 2rem; color: #166534; margin: 0;">{enriched}</p>
+      <p style="font-size: 0.75rem; color: #15803d; margin: 0.25rem 0 0;">Enriched (StoryBrand)</p>
+    </div>
+    <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 0.75rem; padding: 1.25rem; text-align: center;">
+      <p style="font-family: var(--font-heading); font-size: 2rem; color: #1e40af; margin: 0;">{stubs}</p>
+      <p style="font-size: 0.75rem; color: #2563eb; margin: 0.25rem 0 0;">SEO Stubs</p>
+    </div>
+    <div style="background: #fefce8; border: 1px solid #fde68a; border-radius: 0.75rem; padding: 1.25rem; text-align: center;">
+      <p style="font-family: var(--font-heading); font-size: 2rem; color: #854d0e; margin: 0;">{shopifyOnly}</p>
+      <p style="font-size: 0.75rem; color: #a16207; margin: 0.25rem 0 0;">Shopify Only</p>
+    </div>
+    <div style="background: #faf5ff; border: 1px solid #d8b4fe; border-radius: 0.75rem; padding: 1.25rem; text-align: center;">
+      <p style="font-family: var(--font-heading); font-size: 2rem; color: #6b21a8; margin: 0;">{withVideo}</p>
+      <p style="font-size: 0.75rem; color: #7c3aed; margin: 0.25rem 0 0;">With Video</p>
+    </div>
+    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 0.75rem; padding: 1.25rem; text-align: center;">
+      <p style="font-family: var(--font-heading); font-size: 2rem; color: #166534; margin: 0;">{gradeA}</p>
+      <p style="font-size: 0.75rem; color: #15803d; margin: 0.25rem 0 0;">Grade A</p>
+    </div>
+    <div style="background: #fff7ed; border: 1px solid #fed7aa; border-radius: 0.75rem; padding: 1.25rem; text-align: center;">
+      <p style="font-family: var(--font-heading); font-size: 2rem; color: #9a3412; margin: 0;">{totalIssues}</p>
+      <p style="font-size: 0.75rem; color: #c2410c; margin: 0.25rem 0 0;">Total Issues</p>
+    </div>
+  </div>
+
+  <!-- Grade Distribution Bar -->
+  <div style="background: white; border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 2rem;">
+    <p style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; margin: 0 0 0.75rem;">Grade Distribution</p>
+    <div style="display: flex; height: 2rem; border-radius: 0.5rem; overflow: hidden;">
+      {gradeA > 0 && <div style={`flex: ${gradeA}; background: #22c55e; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem; font-weight: 700;`}>A: {gradeA}</div>}
+      {gradeB > 0 && <div style={`flex: ${gradeB}; background: #3b82f6; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem; font-weight: 700;`}>B: {gradeB}</div>}
+      {gradeC > 0 && <div style={`flex: ${gradeC}; background: #f59e0b; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem; font-weight: 700;`}>C: {gradeC}</div>}
+      {gradeD > 0 && <div style={`flex: ${gradeD}; background: #ef4444; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem; font-weight: 700;`}>D: {gradeD}</div>}
+    </div>
+  </div>
+
+  <!-- Product Table -->
+  <div style="background: white; border: 1px solid #e5e7eb; border-radius: 0.75rem; overflow: hidden;">
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.8125rem;">
+        <thead>
+          <tr style="background: #f9fafb; border-bottom: 2px solid #e5e7eb;">
+            <th style="padding: 0.75rem 1rem; text-align: left; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">Grade</th>
+            <th style="padding: 0.75rem 1rem; text-align: left; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">Product</th>
+            <th style="padding: 0.75rem 1rem; text-align: left; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">Tier</th>
+            <th style="padding: 0.75rem 1rem; text-align: center; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">SEO</th>
+            <th style="padding: 0.75rem 1rem; text-align: center; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">Sections</th>
+            <th style="padding: 0.75rem 1rem; text-align: center; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">Video</th>
+            <th style="padding: 0.75rem 1rem; text-align: center; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">Imgs</th>
+            <th style="padding: 0.75rem 1rem; text-align: left; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">Issues</th>
+          </tr>
+        </thead>
+        <tbody>
+          {sortedRows.map((row, i) => (
+              <tr style={`border-bottom: 1px solid #f3f4f6; background: ${i % 2 === 0 ? 'white' : '#f9fafb'};`}>
+                <td style="padding: 0.625rem 1rem;">
+                  <span style={`display: inline-flex; align-items: center; justify-content: center; width: 1.75rem; height: 1.75rem; border-radius: 0.375rem; font-size: 0.75rem; font-weight: 700; ${gradeColors[row.grade]}`}>{row.grade}</span>
+                </td>
+                <td style="padding: 0.625rem 1rem;">
+                  <a href={`/products/${row.handle}/`} style="color: #2c5234; text-decoration: none; font-weight: 500;" target="_blank">{row.title}</a>
+                  <br />
+                  <span style="font-size: 0.6875rem; color: #9ca3af;">{row.handle}</span>
+                  {row.productType && <span style="font-size: 0.6875rem; color: #9ca3af;"> &bull; {row.productType}</span>}
+                </td>
+                <td style="padding: 0.625rem 1rem;">
+                  <span style={`display: inline-block; padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 0.6875rem; font-weight: 500; ${tierColors[row.tier]}`}>{tierLabels[row.tier]}</span>
+                </td>
+                <td style="padding: 0.625rem 1rem; text-align: center;">
+                  <span style={`font-size: 0.75rem; ${row.seoTitleSource === 'fallback' || row.seoDescSource === 'fallback' ? 'color:#dc2626;' : 'color:#16a34a;'}`}>
+                    {row.seoTitleSource === 'fallback' || row.seoDescSource === 'fallback' ? 'Partial' : 'Full'}
+                  </span>
+                </td>
+                <td style="padding: 0.625rem 1rem; text-align: center;">
+                  {row.tier === 'enriched' ? (
+                    <span style="font-size: 0.75rem; color: #16a34a; font-weight: 600;">{getSectionCount(row)}/8</span>
+                  ) : (
+                    <span style="font-size: 0.75rem; color: #9ca3af;">&mdash;</span>
+                  )}
+                </td>
+                <td style="padding: 0.625rem 1rem; text-align: center;">
+                  {row.hasVideo ? (
+                    <span style="color: #16a34a;">&#9654;</span>
+                  ) : (
+                    <span style="color: #d1d5db;">&mdash;</span>
+                  )}
+                </td>
+                <td style="padding: 0.625rem 1rem; text-align: center;">
+                  <span style={`font-size: 0.75rem; ${row.missingAlt ? 'color:#dc2626;' : 'color:#6b7280;'}`}>
+                    {row.imageCount}{row.missingAlt ? '*' : ''}
+                  </span>
+                </td>
+                <td style="padding: 0.625rem 1rem;">
+                  {row.issues.length > 0 ? (
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.25rem;">
+                      {row.issues.map((issue: string) => (
+                        <span style="display: inline-block; padding: 0.0625rem 0.375rem; background: #fef2f2; border: 1px solid #fecaca; border-radius: 0.25rem; font-size: 0.625rem; color: #991b1b;">{issue}</span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span style="font-size: 0.75rem; color: #16a34a;">Clean</span>
+                  )}
+                </td>
+              </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Enriched Products Detail -->
+  <h2 style="font-family: var(--font-heading); font-size: 1.25rem; color: var(--text); margin: 2.5rem 0 1rem;">Enriched Products — StoryBrand Sections</h2>
+  <div style="background: white; border: 1px solid #e5e7eb; border-radius: 0.75rem; overflow: hidden;">
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.8125rem;">
+        <thead>
+          <tr style="background: #f9fafb; border-bottom: 2px solid #e5e7eb;">
+            <th style="padding: 0.75rem 1rem; text-align: left; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">Product</th>
+            <th style="padding: 0.5rem 0.5rem; text-align: center; font-size: 0.625rem; font-weight: 600; text-transform: uppercase; color: #6b7280;">Hero Bullets</th>
+            <th style="padding: 0.5rem 0.5rem; text-align: center; font-size: 0.625rem; font-weight: 600; text-transform: uppercase; color: #6b7280;">Video</th>
+            <th style="padding: 0.5rem 0.5rem; text-align: center; font-size: 0.625rem; font-weight: 600; text-transform: uppercase; color: #6b7280;">PAS</th>
+            <th style="padding: 0.5rem 0.5rem; text-align: center; font-size: 0.625rem; font-weight: 600; text-transform: uppercase; color: #6b7280;">Features</th>
+            <th style="padding: 0.5rem 0.5rem; text-align: center; font-size: 0.625rem; font-weight: 600; text-transform: uppercase; color: #6b7280;">Dosing</th>
+            <th style="padding: 0.5rem 0.5rem; text-align: center; font-size: 0.625rem; font-weight: 600; text-transform: uppercase; color: #6b7280;">Proof</th>
+            <th style="padding: 0.5rem 0.5rem; text-align: center; font-size: 0.625rem; font-weight: 600; text-transform: uppercase; color: #6b7280;">Testimonials</th>
+            <th style="padding: 0.5rem 0.5rem; text-align: center; font-size: 0.625rem; font-weight: 600; text-transform: uppercase; color: #6b7280;">FAQ</th>
+            <th style="padding: 0.5rem 0.5rem; text-align: center; font-size: 0.625rem; font-weight: 600; text-transform: uppercase; color: #6b7280;">Guide</th>
+            <th style="padding: 0.5rem 0.5rem; text-align: center; font-size: 0.625rem; font-weight: 600; text-transform: uppercase; color: #6b7280;">Cross-Links</th>
+          </tr>
+        </thead>
+        <tbody>
+          {enrichedRows.map((row, i) => (
+              <tr style={`border-bottom: 1px solid #f3f4f6; background: ${i % 2 === 0 ? 'white' : '#f9fafb'};`}>
+                <td style="padding: 0.625rem 1rem; font-weight: 500;">
+                  <a href={`/products/${row.handle}/`} style="color: #2c5234; text-decoration: none;" target="_blank">{row.title}</a>
+                  {tinaByHandle.get(row.handle)?.data?.primaryPersona && <span style="display: block; font-size: 0.625rem; color: #9ca3af; margin-top: 0.125rem;">Persona: {tinaByHandle.get(row.handle)?.data?.primaryPersona}</span>}
+                </td>
+                <td style="padding: 0.5rem; text-align: center;" set:html={tinaByHandle.get(row.handle)?.data?.heroBullets?.length ? '&#10003;' : '&mdash;'} />
+                <td style="padding: 0.5rem; text-align: center;" set:html={row.hasVideo ? '&#10003;' : '&mdash;'} />
+                <td style="padding: 0.5rem; text-align: center;" set:html={row.hasPAS ? '&#10003;' : '&mdash;'} />
+                <td style="padding: 0.5rem; text-align: center;" set:html={row.hasFeatures ? '&#10003;' : '&mdash;'} />
+                <td style="padding: 0.5rem; text-align: center;" set:html={row.hasDosing ? '&#10003;' : '&mdash;'} />
+                <td style="padding: 0.5rem; text-align: center;" set:html={row.hasProof ? '&#10003;' : '&mdash;'} />
+                <td style="padding: 0.5rem; text-align: center;" set:html={row.hasTestimonials ? '&#10003;' : '&mdash;'} />
+                <td style="padding: 0.5rem; text-align: center;" set:html={row.hasFaq ? '&#10003;' : '&mdash;'} />
+                <td style="padding: 0.5rem; text-align: center;" set:html={row.hasGuide ? '&#10003;' : '&mdash;'} />
+                <td style="padding: 0.5rem; text-align: center;" set:html={row.hasCrossLinks ? '&#10003;' : '&mdash;'} />
+              </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SEO Title/Desc Preview -->
+  <h2 style="font-family: var(--font-heading); font-size: 1.25rem; color: var(--text); margin: 2.5rem 0 1rem;">SEO Preview — Google SERP Simulation</h2>
+  <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+    {alphaRows.map((row) => (
+      <div style="background: white; border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1.25rem; max-width: 600px;">
+        <p style="font-size: 0.6875rem; color: #16a34a; margin: 0;">southlandorganics.com/products/{row.handle}/</p>
+        <p style={`font-size: 1.125rem; color: #1a0dab; margin: 0.25rem 0; text-decoration: underline; cursor: pointer; ${row.seoTitle.length > 70 ? 'font-weight:700;' : ''}`}>
+          {row.seoTitle.length > 70 ? row.seoTitle.slice(0, 67) + '...' : row.seoTitle}
+        </p>
+        <p style="font-size: 0.8125rem; color: #545454; margin: 0; line-height: 1.4;">
+          {row.seoDesc.length > 160 ? row.seoDesc.slice(0, 157) + '...' : row.seoDesc}
+        </p>
+        <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem; align-items: center;">
+          <span style={`display: inline-block; padding: 0.0625rem 0.375rem; border-radius: 0.25rem; font-size: 0.625rem; font-weight: 500; ${row.seoTitleSource === 'tina' ? 'background:#dcfce7;color:#166534;' : row.seoTitleSource === 'shopify' ? 'background:#dbeafe;color:#1e40af;' : 'background:#fef2f2;color:#991b1b;'}`}>title: {row.seoTitleSource}</span>
+          <span style={`display: inline-block; padding: 0.0625rem 0.375rem; border-radius: 0.25rem; font-size: 0.625rem; font-weight: 500; ${row.seoDescSource === 'tina' ? 'background:#dcfce7;color:#166534;' : row.seoDescSource === 'shopify' ? 'background:#dbeafe;color:#1e40af;' : 'background:#fef2f2;color:#991b1b;'}`}>desc: {row.seoDescSource}</span>
+          {row.seoTitle.length > 60 && <span style="font-size: 0.625rem; color: #9ca3af;">{row.seoTitle.length}ch</span>}
+        </div>
+      </div>
+    ))}
+  </div>
+
+    </>
+  )}
+
+</AdminLayout>

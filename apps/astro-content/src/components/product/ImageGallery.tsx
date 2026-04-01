@@ -5,7 +5,7 @@
  * Clicking a thumbnail swaps the main image.
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { ProductImage } from '@southland/shopify-storefront'
 
 interface Props {
@@ -15,6 +15,18 @@ interface Props {
 
 export default function ImageGallery({ images, productTitle }: Props) {
   const [activeIndex, setActiveIndex] = useState(0)
+
+  // Listen for variant changes from AddToCartButton
+  useEffect(() => {
+    function handleVariantImage(e: Event) {
+      const url = (e as CustomEvent).detail?.url
+      if (!url) return
+      const idx = images.findIndex((img) => img.url === url)
+      if (idx !== -1) setActiveIndex(idx)
+    }
+    window.addEventListener('pdp-variant-image', handleVariantImage)
+    return () => window.removeEventListener('pdp-variant-image', handleVariantImage)
+  }, [images])
 
   if (images.length === 0) {
     return (

@@ -333,11 +333,13 @@ const homepageCollection = defineCollection({
   }),
 })
 
-// Products schema - links to Shopify products with content enrichment
+// Products schema - links to Shopify products with editorial enrichment for PDP
+// Two-tier rendering: full mode (MDX enriched) vs baseline (Shopify-only improved)
 // Note: slug is auto-generated from filename in Astro v5
 const productsCollection = defineCollection({
   type: 'content',
   schema: z.object({
+    // --- Core (existing) ---
     name: z.string(),
     shopifyHandle: z.string(),
     segment: z.enum(['poultry', 'turf', 'agriculture']),
@@ -346,6 +348,92 @@ const productsCollection = defineCollection({
     useCases: z.array(z.string()).optional().default([]),
     topics: z.array(z.string()).optional().default([]),
     featured: z.boolean().optional().default(false),
+
+    // --- PDP Hero ---
+    headline: z.string().optional(), // Benefit headline, not SKU name
+    heroBullets: z.array(z.string()).optional().default([]),
+
+    // --- SEO (editorial override) ---
+    seoTitle: z.string().optional(), // <title> override
+    seoDescription: z.string().optional(), // <meta description> override
+
+    // --- Video ---
+    muxPlaybackId: z.string().optional(),
+    videoTitle: z.string().optional(),
+
+    // --- PAS Section ---
+    problemHeadline: z.string().optional(),
+    problemCards: z
+      .array(
+        z.object({
+          title: z.string(),
+          body: z.string(),
+        })
+      )
+      .optional()
+      .default([]),
+
+    // --- Features/Benefits ---
+    features: z
+      .array(
+        z.object({
+          feature: z.string(),
+          benefit: z.string(),
+        })
+      )
+      .optional()
+      .default([]),
+
+    // --- Dosing (only for complex application products) ---
+    dosingInstructions: z.string().optional(),
+    applicationMethod: z.string().optional(),
+
+    // --- Proof ---
+    proofStats: z
+      .array(
+        z.object({
+          value: z.string(),
+          label: z.string(),
+          source: z.string().optional(),
+        })
+      )
+      .optional()
+      .default([]),
+    testimonials: z
+      .array(
+        z.object({
+          quote: z.string(),
+          name: z.string(),
+          role: z.string().optional(),
+        })
+      )
+      .optional()
+      .default([]),
+
+    // --- FAQ ---
+    faq: z
+      .array(
+        z.object({
+          question: z.string(),
+          answer: z.string(),
+        })
+      )
+      .optional()
+      .default([]),
+    allowFaqSchema: z.boolean().optional().default(true), // Editorial kill switch
+
+    // --- Trust + Persona ---
+    trustBadges: z.array(z.string()).optional().default([]),
+    primaryPersona: z.string().optional(),
+    guideName: z.string().optional(),
+    guidePhoto: z.string().optional(), // Cloudinary public ID
+
+    // --- Related ---
+    relatedProductHandles: z.array(z.string()).optional().default([]),
+    relatedBlogSlugs: z.array(z.string()).optional().default([]),
+
+    // --- Image alt overrides ---
+    imageAltOverrides: z.array(z.string()).optional().default([]),
   }),
 })
 

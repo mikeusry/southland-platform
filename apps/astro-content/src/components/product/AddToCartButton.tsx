@@ -38,6 +38,21 @@ export default function AddToCartButton({ variants }: Props) {
   )
   const hasMultipleVariants = variants.length > 1
 
+  // Notify ImageGallery when variant changes
+  const handleVariantChange = useCallback(
+    (variantId: string) => {
+      setSelectedVariantId(variantId)
+      setAdded(false)
+      const variant = variants.find((v) => v.id === variantId)
+      if (variant?.image?.url) {
+        window.dispatchEvent(
+          new CustomEvent('pdp-variant-image', { detail: { url: variant.image.url } })
+        )
+      }
+    },
+    [variants]
+  )
+
   const handleAddToCart = useCallback(async () => {
     if (!selectedVariant || !isAvailable) return
     setAdding(true)
@@ -84,10 +99,7 @@ export default function AddToCartButton({ variants }: Props) {
                     <button
                       key={variant.id}
                       type="button"
-                      onClick={() => {
-                        setSelectedVariantId(variant.id)
-                        setAdded(false)
-                      }}
+                      onClick={() => handleVariantChange(variant.id)}
                       disabled={isDisabled}
                       className={`rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
                         isSelected
@@ -112,10 +124,7 @@ export default function AddToCartButton({ variants }: Props) {
               <select
                 id="variant-select"
                 value={selectedVariantId}
-                onChange={(e) => {
-                  setSelectedVariantId(e.target.value)
-                  setAdded(false)
-                }}
+                onChange={(e) => handleVariantChange(e.target.value)}
                 className="focus:border-brand-green-light focus:ring-brand-green-light mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-sm"
               >
                 {variants.map((variant) => (
