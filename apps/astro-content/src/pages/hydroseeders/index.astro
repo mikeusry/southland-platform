@@ -14,6 +14,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 import CloudinaryHero from '../../components/CloudinaryHero.astro'
 import AccordionFaq from '../../components/shop/AccordionFaq.astro'
 import CollectionProductCard from '../../components/shop/CollectionProductCard.astro'
+import Breadcrumbs from '../../components/shared/Breadcrumbs.astro'
 import { buildSouthlandUrl } from '../../lib/cloudinary'
 
 const bradPhoto = buildSouthlandUrl('team/BRAD_Broxton', { width: 600 })
@@ -166,6 +167,13 @@ const faqSchema = {
     priority={true}
   >
     <div class="mx-auto w-full max-w-6xl pb-16 pt-12 md:pb-24 md:pt-20">
+      <Breadcrumbs
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'Hydroseeders' },
+        ]}
+        class="mb-4 [&_a]:text-white/80 [&_span]:text-white/60 [&_*]:text-sm"
+      />
       <div class="max-w-3xl">
         <div class="mb-3 flex flex-wrap items-center gap-2">
           <span class="inline-block rounded-full bg-white/15 px-4 py-1 text-sm font-medium text-green-300">
