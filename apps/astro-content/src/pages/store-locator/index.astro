@@ -609,18 +609,45 @@ const storeLocatorSchema = {
       return
     }
 
-    geocoder.geocode(
-      { address: query, componentRestrictions: { country: 'US' } },
-      function (results, status) {
-        if (status === 'OK' && results[0]) {
-          var loc = results[0].geometry.location
-          searchOrigin = { lat: loc.lat(), lng: loc.lng() }
-        } else {
-          searchOrigin = null
+    // If geocoder is available (Maps API loaded), use it
+    if (geocoder) {
+      geocoder.geocode(
+        { address: query, componentRestrictions: { country: 'US' } },
+        function (results, status) {
+          if (status === 'OK' && results[0]) {
+            var loc = results[0].geometry.location
+            searchOrigin = { lat: loc.lat(), lng: loc.lng() }
+          } else {
+            // Geocode failed — fall back to text search
+            searchOrigin = null
+            textSearchFallback(query)
+            return
+          }
+          filterAndDisplay()
         }
-        filterAndDisplay()
-      }
-    )
+      )
+    } else {
+      // No geocoder (Maps API failed to load) — use text search
+      textSearchFallback(query)
+    }
+  }
+
+  // ─── Text-based search fallback (no Maps API needed) ──────
+  function textSearchFallback(query) {
+    var dealers = getDealers()
+    var q = query.toLowerCase()
+    var filtered = dealers.filter(function (d) {
+      return (
+        (d.city && d.city.toLowerCase().indexOf(q) !== -1) ||
+        (d.state && d.state.toLowerCase().indexOf(q) !== -1) ||
+        (d.zip && d.zip.indexOf(q) !== -1) ||
+        (d.name && d.name.toLowerCase().indexOf(q) !== -1) ||
+        (d.address && d.address.toLowerCase().indexOf(q) !== -1)
+      )
+    })
+    searchOrigin = null
+    renderDealers(filtered)
+    if (map) updateMarkers(filtered)
   }
 
   // ─── Use my location ──────────────────────────────────────
@@ -687,7 +714,13 @@ const storeLocatorSchema = {
       }
     })
 
-    // Event listeners
+    initSearchListeners()
+    filterAndDisplay()
+  }
+
+  // ─── Attach search event listeners (works with or without Maps) ───
+  function initSearchListeners() {
+    var input = document.getElementById('location-search')
     document.getElementById('search-btn').addEventListener('click', searchByText)
     input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') {
@@ -697,8 +730,21 @@ const storeLocatorSchema = {
     })
     document.getElementById('category-filter').addEventListener('change', filterAndDisplay)
     document.getElementById('use-location-btn').addEventListener('click', useMyLocation)
-
-    // Initial render — show all dealers
-    filterAndDisplay()
   }
+
+  // ─── Fallback init if Google Maps fails to load ───────────────
+  window.addEventListener('load', function () {
+    // If initStoreLocator hasn't run after 5 seconds, Maps API failed
+    setTimeout(function () {
+      if (!map) {
+        console.warn('Google Maps API failed to load — running text-only search mode')
+        document.getElementById('dealer-map').innerHTML =
+          '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#f3f4f6;color:#686363;font-size:14px;text-align:center;padding:2rem;">' +
+          '<div><p style="font-weight:600;margin-bottom:4px;">Map unavailable</p>' +
+          '<p>Search by city, state, or zip below to find dealers.</p></div></div>'
+        initSearchListeners()
+        renderDealers(getDealers())
+      }
+    }, 5000)
+  })
 </script>
