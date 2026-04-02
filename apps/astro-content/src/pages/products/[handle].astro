@@ -275,6 +275,7 @@ const priceFormatted = new Intl.NumberFormat('en-US', {
 
 // ── Product video (TinaCMS override → hardcoded map) ───────────────────────
 const PRODUCT_VIDEOS: Record<string, string> = {
+  // Enriched products (also in MDX)
   'poultry-probiotic': 'kisHZ3H00cgwwtbYpNFTuJvpX3aQjYktRPognZMCkl8A',
   'hen-helper': 'lhqXJEfCsnDBe2EFT1tXmF8p3yus2Hlr3uVY4LrxPKo',
   'catalyst-poultry-vitamin': 'xbWo4DayyMYxp9qOFQFZX800n2T00GpiZjCKfJufAIabc',
@@ -283,6 +284,17 @@ const PRODUCT_VIDEOS: Record<string, string> = {
   'veridian-humate-liquid-iron-for-lawns': '3nN6ccBWE00s00iYw6501y00XjZs2HCGoS4gRyOL3pHDxDE',
   'genesis': 'ESZbDKvLaZ9mCwsVr3TJ01yf14ga62xt6DdKVcD0000SVw',
   'torched-all-natural-weed-killer': 'qrxyFtXf6q4fAzJw3wdww00LDdYeXVPaP3YCU15qLKxg',
+  // Baseline products (video from Supabase voice_videos)
+  'apple-cider-vinegar-for-chickens': 'g7O7CYd00ZTSYrsvFNB5D1sW01CROAWLBNDBN01bT9ptuk',
+  'dog-spot-for-lawns': 'ZqoNlN5xEDBDz01qw8h4yseQShdw6gZSPxPk5VzRvnVc',
+  'omega-soil-activator': 'ASnZzDrBC6tnDdCH5LWdaIMXm1CaB9c8KusLGO84vNg',
+  'zeropoint-industrial': 'J01c01V5t8P9w02edLkbxA3jGQarZ00Pp1z2Pizr01uiMGuQ',
+  'chicken-manure-fertilizer': 'bB3FPoLyDNCqBWCu01xDq7kPbS24siLsp02UL3ZaMhHv00',
+  'defender-natural-insecticide': 'LwP00wsXzr8uzr3QT02UAse7egL7jscCuuFX6Ey01okXMQ',
+  'turf-revival': 'X4efuotTtKPAd8ExF2VVClXLgFuHSxKWk95wYP6TD7Q',
+  'pour-the-port-septic-tank-treatment': '01TvhzW02skkwis101e1Emkc2867bZ9901FQoFqu2daRsHM',
+  'holding-tank-treatment': 'USPh02jRQZUsMKGTbiOhJTomav02gGxjtbmGBYV3s01Edc',
+  'fertalive': 'd7GcWLervUFQEFiUKfduYVer4k012h2NVJGY6pnEHQ01c',
 }
 const muxPlaybackId = tina?.muxPlaybackId || PRODUCT_VIDEOS[handle] || null
 const videoTitle = tina?.videoTitle || displayTitle
