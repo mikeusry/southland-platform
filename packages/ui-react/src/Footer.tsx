@@ -129,7 +129,7 @@ export function Footer({
                 </li>
                 <li>
                   <a
-                    href="/blogs/news"
+                    href="/blog/"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Blog Posts
@@ -177,7 +177,7 @@ export function Footer({
                 </li>
                 <li>
                   <a
-                    href="/pages/faqs"
+                    href="/contact/"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     FAQs
@@ -185,7 +185,7 @@ export function Footer({
                 </li>
                 <li>
                   <a
-                    href="/pages/southland-organics-rewards"
+                    href="/about/"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Rewards Program
@@ -208,7 +208,7 @@ export function Footer({
                 </li>
                 <li>
                   <a
-                    href="/collections/poultry-broilers"
+                    href="/poultry/commercial/"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Broilers
@@ -216,7 +216,7 @@ export function Footer({
                 </li>
                 <li>
                   <a
-                    href="/collections/backyard-birds"
+                    href="/poultry/backyard/"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Backyard Birds
@@ -224,7 +224,7 @@ export function Footer({
                 </li>
                 <li>
                   <a
-                    href="/collections/turkey"
+                    href="/poultry/turkey/"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Turkey
@@ -232,7 +232,7 @@ export function Footer({
                 </li>
                 <li>
                   <a
-                    href="/collections/turf"
+                    href="/lawn/"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Lawn & Garden
@@ -240,7 +240,7 @@ export function Footer({
                 </li>
                 <li>
                   <a
-                    href="/collections/crops"
+                    href="/agriculture/crops/"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Crops
@@ -248,7 +248,7 @@ export function Footer({
                 </li>
                 <li>
                   <a
-                    href="/collections/waste"
+                    href="/products/waste-treatment/"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Septic & Waste
@@ -256,7 +256,7 @@ export function Footer({
                 </li>
                 <li>
                   <a
-                    href="/collections/pig-and-swine-supplements"
+                    href="/livestock/swine/"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Swine
@@ -592,15 +592,15 @@ export function Footer({
             <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-white/90 sm:justify-end">
               <span>{copyright}</span>
               <span className="hidden sm:inline">|</span>
-              <a href="/pages/terms-of-service" className="transition-colors hover:text-white">
+              <a href="https://www.southlandorganics.com/pages/terms-of-service" className="transition-colors hover:text-white">
                 Terms Of Use
               </a>
               <span>|</span>
-              <a href="/pages/privacy-policy" className="transition-colors hover:text-white">
+              <a href="https://www.southlandorganics.com/pages/privacy-policy" className="transition-colors hover:text-white">
                 Privacy Policy
               </a>
               <span>|</span>
-              <a href="/pages/shipping-policy" className="transition-colors hover:text-white">
+              <a href="https://www.southlandorganics.com/pages/shipping-policy" className="transition-colors hover:text-white">
                 Shipping & Returns
               </a>
             </div>
