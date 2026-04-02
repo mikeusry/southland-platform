@@ -113,6 +113,14 @@ const trustBadges = tina?.trustBadges?.length
   ? tina.trustBadges
   : SEGMENT_BADGES[segment ?? inferredSegment ?? ''] ?? DEFAULT_BADGES
 
+// ── Resolved product type (Shopify → TinaCMS segment fallback) ─────────────
+const SEGMENT_TO_TYPE: Record<string, string> = {
+  poultry: 'Poultry',
+  turf: 'Turf',
+  agriculture: 'Crops',
+}
+const resolvedProductType = product.productType || (tina?.segment ? SEGMENT_TO_TYPE[tina.segment] : '') || ''
+
 // ── Display title (strip pipe-delimited SEO keywords) ──────────────────────
 const displayTitle = tina?.headline || (product.title.includes('|') ? product.title.split('|')[0].trim() : product.title)
 
@@ -176,7 +184,7 @@ const productSchema = hasNamedVariants
         '@type': 'Brand',
         name: product.vendor || 'Southland Organics',
       },
-      category: product.productType || undefined,
+      category: resolvedProductType || undefined,
       productGroupID: product.id,
       hasVariant: product.variants.map((variant) => ({
         '@type': 'Product',
@@ -213,7 +221,7 @@ const productSchema = hasNamedVariants
         '@type': 'Brand',
         name: product.vendor || 'Southland Organics',
       },
-      category: product.productType || undefined,
+      category: resolvedProductType || undefined,
       offers: hasMultipleVariants
         ? {
             '@type': 'AggregateOffer',
@@ -227,7 +235,7 @@ const productSchema = hasNamedVariants
     }
 
 // ── Schema.org BreadcrumbList ──────────────────────────────────────────────
-const collectionHandle = product.productType?.toLowerCase().replace(/\s+/g, '-')
+const collectionHandle = resolvedProductType ? resolvedProductType.toLowerCase().replace(/\s+/g, '-') : ''
 const breadcrumbSchema = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
@@ -243,7 +251,7 @@ const breadcrumbSchema = {
           {
             '@type': 'ListItem',
             position: 2,
-            name: product.productType,
+            name: resolvedProductType,
             item: `${siteUrl}/collections/${collectionHandle}/`,
           },
         ]
@@ -261,7 +269,7 @@ const breadcrumbSchema = {
 const breadcrumbItems = [
   { label: 'Home', href: '/' },
   ...(collectionHandle
-    ? [{ label: product.productType!, href: `/collections/${collectionHandle}/` }]
+    ? [{ label: resolvedProductType, href: `/collections/${collectionHandle}/` }]
     : [{ label: 'Collections', href: '/collections/' }]),
   { label: displayTitle, href: `/products/${handle}/` },
 ]
@@ -427,12 +435,12 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
 
         {/* Product type tag */}
         {
-          product.productType && (
+          resolvedProductType && (
             <a
-              href={`/collections/${product.productType.toLowerCase().replace(/\s+/g, '-')}/`}
+              href={`/collections/${resolvedProductType.toLowerCase().replace(/\s+/g, '-')}/`}
               class="text-brand-green-light mt-2 inline-block text-sm hover:underline"
             >
-              {product.productType}
+              {resolvedProductType}
             </a>
           )
         }
