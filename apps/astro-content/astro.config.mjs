@@ -41,26 +41,15 @@ export default defineConfig({
     routes: {
       extend: {
         exclude: [
-          // Prerendered Phase 1 pages — static files (fastest)
-          { pattern: '/blog/*' },
-          { pattern: '/blogs/*' },
-          { pattern: '/team/*' },
-          { pattern: '/about/*' },
-          { pattern: '/contact/*' },
-          { pattern: '/distribution/*' },
-          { pattern: '/store-locator/*' },
-          { pattern: '/podcast/*' },
-          // Persona landing pages
+          // Persona landing pages (not auto-detected by adapter)
           { pattern: '/poultry/*' },
           { pattern: '/lawn/*' },
           { pattern: '/agriculture/*' },
           { pattern: '/livestock/*' },
           { pattern: '/hydroseeders/*' },
-          // Commerce
+          // Commerce pages
           { pattern: '/build-a-case/*' },
           { pattern: '/products/*' },
-          // Partials for HTMLRewriter
-          { pattern: '/_partials/*' },
         ],
       },
     },
