@@ -207,6 +207,7 @@ const teamCollection = defineCollection({
           'soil-health',
           'organic-farming',
           'waste-management',
+          'operations',
         ])
       )
       .optional()

@@ -28,20 +28,37 @@ export default defineConfig({
     react(),
     tailwind(),
     mdx(),
-    sitemap(),
+    sitemap({
+      filter: (page) =>
+        !page.includes('/admin/') &&
+        !page.includes('/account') &&
+        !page.includes('/survey/') &&
+        !page.includes('/homepage-b'),
+    }),
   ],
   output: 'server',
   adapter: cloudflare({
     routes: {
       extend: {
         exclude: [
-          // Prerendered Phase 1 pages — serve as static files (fastest)
+          // Prerendered Phase 1 pages — static files (fastest)
           { pattern: '/blog/*' },
+          { pattern: '/blogs/*' },
           { pattern: '/team/*' },
           { pattern: '/about/*' },
           { pattern: '/contact/*' },
           { pattern: '/distribution/*' },
           { pattern: '/store-locator/*' },
+          { pattern: '/podcast/*' },
+          // Persona landing pages
+          { pattern: '/poultry/*' },
+          { pattern: '/lawn/*' },
+          { pattern: '/agriculture/*' },
+          { pattern: '/livestock/*' },
+          { pattern: '/hydroseeders/*' },
+          // Commerce
+          { pattern: '/build-a-case/*' },
+          { pattern: '/products/*' },
           // Partials for HTMLRewriter
           { pattern: '/_partials/*' },
         ],

@@ -92,6 +92,15 @@ const REDIRECTS: Record<string, string> = {
   '/collections/waste/': '/products/waste-treatment/',
   '/collections/other': '/',
   '/collections/other/': '/',
+  // /pages/ → new Astro routes
+  '/pages/about-us': '/about/',
+  '/pages/contact-us': '/contact/',
+  '/pages/distribution': '/distribution/',
+  '/pages/store-locator': '/store-locator/',
+  '/pages/build-a-case': '/build-a-case/',
+  '/pages/faqs': '/contact/',
+  '/pages/shipping-policy': '/contact/',
+  '/pages/southland-organics-rewards': '/',
 }
 
 // Module-level cache for partials (persists across requests in same isolate)
@@ -132,6 +141,15 @@ export const onRequest = defineMiddleware(async (context, next) => {
     })
   }
 
+  // /blogs/[category]/[slug] → /blog/[slug]/ (old Shopify blog article URLs)
+  const blogArticleMatch = pathname.match(/^\/blogs\/[^/]+\/(.+?)\/?\s*$/)
+  if (blogArticleMatch) {
+    return new Response(null, {
+      status: 301,
+      headers: { location: `/blog/${blogArticleMatch[1]}/` },
+    })
+  }
+
   // Astro routes — let Astro handle them
   if (isAstroRoute(pathname)) {
     return next()
@@ -169,7 +187,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
   shopifyRequest.headers.delete('host')
 
   try {
-    const response = await fetch(shopifyRequest)
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 15000)
+    const response = await fetch(shopifyRequest, { signal: controller.signal })
+    clearTimeout(timeout)
 
     // Handle redirects — rewrite Shopify domain back to ours
     if (response.status >= 300 && response.status < 400) {
@@ -310,6 +331,15 @@ export const onRequest = defineMiddleware(async (context, next) => {
     })
   } catch (error) {
     console.error('Shopify proxy error:', error)
-    return new Response('Error connecting to origin', { status: 502 })
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      return new Response('Origin server timed out. Please try again.', {
+        status: 504,
+        headers: { 'Retry-After': '30', 'Content-Type': 'text/plain' },
+      })
+    }
+    return new Response('Error connecting to store. Please try again.', {
+      status: 502,
+      headers: { 'Retry-After': '10', 'Content-Type': 'text/plain' },
+    })
   }
 })
