@@ -8,7 +8,11 @@
  * Products fetched dynamically from Shopify Storefront API.
  * Canonical destination for /collections/backyard-birds (301 redirect).
  */
-import { createClient, getProductByHandle, getCollectionProducts } from '@southland/shopify-storefront'
+import {
+  createClient,
+  getProductByHandle,
+  getCollectionProducts,
+} from '@southland/shopify-storefront'
 import type { Product } from '@southland/shopify-storefront'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import CloudinaryHero from '../../../components/CloudinaryHero.astro'
@@ -36,20 +40,16 @@ const client = createClient({
 })
 
 const handles = [
-  'poultry-probiotic',                          // Big Ole Bird
+  'poultry-probiotic', // Big Ole Bird
   'hen-helper',
-  'poultry-litter-amendment',                   // Litter Life
-  'catalyst-poultry-vitamin',                   // Catalyst
-  'natural-mite-control-livestock-poultry',     // Desecticide
+  'poultry-litter-amendment', // Litter Life
+  'catalyst-poultry-vitamin', // Catalyst
+  'natural-mite-control-livestock-poultry', // Desecticide
   'backyard-poultry-bundle-chicken-supplements', // Backyard Bundle
 ] as const
 
-const products = await Promise.all(
-  handles.map((h) => getProductByHandle(client, h))
-)
-const productMap = new Map(
-  products.filter(Boolean).map((p) => [p!.handle, p!])
-)
+const products = await Promise.all(handles.map((h) => getProductByHandle(client, h)))
+const productMap = new Map(products.filter(Boolean).map((p) => [p!.handle, p!]))
 
 // Fetch ALL products in the backyard collection for the shop grid
 const backyardCollection = await getCollectionProducts(client, 'backyard-birds')
@@ -78,8 +78,11 @@ const jobs = [
   {
     title: 'Fix the coop smell without harsh chemicals.',
     struggle:
-      "The coop smells and you feel bad about it — for the birds, for your family, for the neighbors.",
-    products: [getProduct('poultry-litter-amendment'), getProduct('natural-mite-control-livestock-poultry')].filter(Boolean),
+      'The coop smells and you feel bad about it — for the birds, for your family, for the neighbors.',
+    products: [
+      getProduct('poultry-litter-amendment'),
+      getProduct('natural-mite-control-livestock-poultry'),
+    ].filter(Boolean),
     proof: 'Active biology tackles ammonia and odor at the source',
     proofSource: 'Southland Organics product research',
     icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>`,
@@ -98,7 +101,7 @@ const jobs = [
 // ── Objections (FAQ) ────────────────────────────────────────────────────────
 const objections = [
   {
-    question: "Is this safe around my kids and other pets?",
+    question: 'Is this safe around my kids and other pets?',
     answer:
       "Yes. Every Southland product is USDA Organic certified and OMRI Listed for organic production. There's no withdrawal period — you can collect and eat eggs the same day you treat. No harsh chemicals, no residues, no warnings to keep kids or dogs away. These are beneficial bacteria and organic acids, not pesticides.",
   },
@@ -113,12 +116,12 @@ const objections = [
       "It was originally developed for commercial poultry, which is actually a good thing — it means the biology is proven at scale. We've adapted the dosing and packaging for backyard flocks. The Backyard Bundle is specifically sized for small flocks. Same science, backyard-friendly format.",
   },
   {
-    question: "I can just use apple cider vinegar from the grocery store, right?",
+    question: 'I can just use apple cider vinegar from the grocery store, right?',
     answer:
       "ACV has some benefits, but store-bought vinegar doesn't contain the specific probiotic strains that colonize poultry gut lining. It's like comparing a multivitamin to a targeted prescription. ACV helps with pH; Big Ole Bird actually populates the digestive tract with beneficial microbes that improve nutrient absorption and immune function. That said, if you like ACV, our Mother Load ($21/gallon) is formulated specifically for poultry — pair it with Big Ole Bird for gut health plus pH balance.",
   },
   {
-    question: "How do I know what dose for only 6 hens?",
+    question: 'How do I know what dose for only 6 hens?',
     answer:
       "Every product ships with backyard dosing instructions — not just commercial rates divided down. The Backyard Bundle guide walks you through exact amounts per bird count, from 4 hens to 50. Most customers with small flocks use a capful per waterer change. It's designed to be simple, not math homework.",
   },
@@ -151,11 +154,14 @@ const faqSchema = {
     },
   })),
 }
-
 ---
 
-<BaseLayout title={title} description={description} ogImage={ogImage} schema={[pageSchema, faqSchema]}>
-
+<BaseLayout
+  title={title}
+  description={description}
+  ogImage={ogImage}
+  schema={[pageSchema, faqSchema]}
+>
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 1: HERO — "Healthy chickens shouldn't require a vet degree"   -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
@@ -174,19 +180,24 @@ const faqSchema = {
     <div class="mx-auto w-full max-w-6xl pb-12 pt-12 md:pt-20">
       <div class="max-w-3xl">
         <div class="mb-4 flex flex-wrap items-center gap-3">
-          <span class="inline-block rounded-full bg-southland-green px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-white">
+          <span
+            class="inline-block rounded-full bg-southland-green px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-white"
+          >
             For Backyard Flock Owners
           </span>
           <span class="text-sm font-semibold text-white/90">
             5 Minutes a Week · Family-Safe & OMRI Listed
           </span>
         </div>
-        <h1 class="mb-4 font-heading text-4xl uppercase leading-tight text-white md:text-5xl lg:text-6xl">
+        <h1
+          class="mb-4 font-heading text-4xl uppercase leading-tight text-white md:text-5xl lg:text-6xl"
+        >
           Healthy chickens shouldn't require a veterinary degree.
         </h1>
         <p class="mb-5 text-lg text-white/70 md:text-xl">
-          You got chickens for the joy of it — fresh eggs, happy birds, kids learning where food comes from.
-          Not for the 2 AM panic when someone looks "off" and Google gives you 47 different answers.
+          You got chickens for the joy of it — fresh eggs, happy birds, kids learning where food
+          comes from. Not for the 2 AM panic when someone looks "off" and Google gives you 47
+          different answers.
         </p>
         <!-- Three levers — scannable -->
         <div class="mb-6 flex flex-wrap gap-x-6 gap-y-2">
@@ -210,7 +221,11 @@ const faqSchema = {
             class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3.5 font-semibold text-white transition-colors hover:bg-[#44883E]/85"
           >
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
             </svg>
             Shop Backyard Products
           </a>
@@ -220,27 +235,60 @@ const faqSchema = {
           >
             See How It Works
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
             </svg>
           </a>
         </div>
         <!-- Trust bar -->
-        <div class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-white/10 pt-4 text-sm text-white/80">
+        <div
+          class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-white/10 pt-4 text-sm text-white/80"
+        >
           <span class="flex items-center gap-1.5">
-            <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+            <svg
+              class="h-3.5 w-3.5 text-green-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4"></path>
             </svg>
             USDA Organic
           </span>
           <span class="flex items-center gap-1.5">
-            <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+            <svg
+              class="h-3.5 w-3.5 text-green-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4"></path>
             </svg>
             OMRI Listed
           </span>
           <span class="flex items-center gap-1.5">
-            <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+            <svg
+              class="h-3.5 w-3.5 text-green-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4"></path>
             </svg>
             Safe for Kids & Pets
           </span>
@@ -254,7 +302,10 @@ const faqSchema = {
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-white py-16 md:py-20">
     <div class="mx-auto max-w-6xl px-4">
-      <h2 class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
+      <h2
+        class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl"
+        style="color: var(--color-title);"
+      >
         You love your birds. The internet isn't helping.
       </h2>
       <p class="mx-auto mb-12 max-w-2xl text-center text-gray-600">
@@ -263,38 +314,92 @@ const faqSchema = {
       <div class="grid gap-8 md:grid-cols-3">
         <!-- External Problem -->
         <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
-          <div class="mb-4 flex h-12 w-12 flex-shrink-0 items-center justify-center bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
-            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          <div
+            class="mb-4 flex h-12 w-12 flex-shrink-0 items-center justify-center bg-[#2C5234]"
+            style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
+          >
+            <svg
+              class="h-5 w-5 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+              ></path>
             </svg>
           </div>
-          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">Sick birds, no clear answers</h3>
+          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">
+            Sick birds, no clear answers
+          </h3>
           <p class="leading-relaxed text-gray-600">
-            A hen looks "off" and you start Googling. Forty-seven results, half contradicting each other. By the time you pick a remedy, you've lost two days and you're not sure it's working.
+            A hen looks "off" and you start Googling. Forty-seven results, half contradicting each
+            other. By the time you pick a remedy, you've lost two days and you're not sure it's
+            working.
           </p>
         </div>
         <!-- Internal Problem -->
         <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
-          <div class="mb-4 flex h-12 w-12 flex-shrink-0 items-center justify-center bg-[#44883E]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
-            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          <div
+            class="mb-4 flex h-12 w-12 flex-shrink-0 items-center justify-center bg-[#44883E]"
+            style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
+          >
+            <svg
+              class="h-5 w-5 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+              ></path>
             </svg>
           </div>
-          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">The guilt when something goes wrong</h3>
+          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">
+            The guilt when something goes wrong
+          </h3>
           <p class="leading-relaxed text-gray-600">
-            You named them. You know their personalities. When one gets sick, it's not just a chicken problem — it's heartbreak. And you wonder if you should have done something sooner.
+            You named them. You know their personalities. When one gets sick, it's not just a
+            chicken problem — it's heartbreak. And you wonder if you should have done something
+            sooner.
           </p>
         </div>
         <!-- Philosophical Problem -->
         <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
-          <div class="mb-4 flex h-12 w-12 flex-shrink-0 items-center justify-center bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
-            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <div
+            class="mb-4 flex h-12 w-12 flex-shrink-0 items-center justify-center bg-[#2C5234]"
+            style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
+          >
+            <svg
+              class="h-5 w-5 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
             </svg>
           </div>
-          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">It shouldn't be this complicated</h3>
+          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">
+            It shouldn't be this complicated
+          </h3>
           <p class="leading-relaxed text-gray-600">
-            You got chickens for the joy of it — fresh eggs, happy birds, teaching your kids about food. Not for a second job of amateur veterinary science. Simple, natural care should be simple.
+            You got chickens for the joy of it — fresh eggs, happy birds, teaching your kids about
+            food. Not for a second job of amateur veterinary science. Simple, natural care should be
+            simple.
           </p>
         </div>
       </div>
@@ -308,32 +413,55 @@ const faqSchema = {
     <div class="mx-auto max-w-6xl px-4">
       <div class="grid items-center gap-12 md:grid-cols-[1fr_auto]">
         <div class="order-2 md:order-1">
-          <span class="mb-2 inline-block text-sm font-semibold uppercase tracking-wider text-green-700">
+          <span
+            class="mb-2 inline-block text-sm font-semibold uppercase tracking-wider text-green-700"
+          >
             Your guide
           </span>
-          <h2 class="mb-6 font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
+          <h2
+            class="mb-6 font-heading text-3xl uppercase md:text-4xl"
+            style="color: var(--color-title);"
+          >
             We raise chickens too.
           </h2>
           <p class="mb-4 text-lg leading-relaxed text-gray-700">
-            Southland Organics started in 2009 on a farm in Georgia. We didn't set out to build a supplement company — we set out to solve a problem: how to keep birds healthy without chemicals that made us uncomfortable.
+            Southland Organics started in 2009 on a farm in Georgia. We didn't set out to build a
+            supplement company — we set out to solve a problem: how to keep birds healthy without
+            chemicals that made us uncomfortable.
           </p>
           <p class="mb-4 text-lg leading-relaxed text-gray-600">
-            Seventeen years later, our products are used on millions of commercial birds every year. But we never forgot where we started — with a small flock and a lot of questions.
+            Seventeen years later, our products are used on millions of commercial birds every year.
+            But we never forgot where we started — with a small flock and a lot of questions.
           </p>
           <p class="mb-8 leading-relaxed text-gray-600">
-            Every product we sell is USDA Organic certified, safe for your family, and backed by the same biology that works at commercial scale. The difference? We sized the doses and instructions for backyard keepers like you.
+            Every product we sell is USDA Organic certified, safe for your family, and backed by the
+            same biology that works at commercial scale. The difference? We sized the doses and
+            instructions for backyard keepers like you.
           </p>
 
           <!-- Credential chips -->
           <div class="mb-8 flex flex-wrap gap-2">
-            {['USDA Organic Certified', 'OMRI Listed', 'Family-Owned Since 2009', 'Used on Millions of Birds', 'Formulated in Georgia'].map((cred) => (
-              <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
-                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
-                </svg>
-                {cred}
-              </span>
-            ))}
+            {
+              [
+                'USDA Organic Certified',
+                'OMRI Listed',
+                'Family-Owned Since 2009',
+                'Used on Millions of Birds',
+                'Formulated in Georgia',
+              ].map((cred) => (
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
+                  <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12l2 2 4-4"
+                    />
+                  </svg>
+                  {cred}
+                </span>
+              ))
+            }
           </div>
 
           <a
@@ -364,78 +492,120 @@ const faqSchema = {
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section id="jobs" class="bg-[#F8FAF8] py-16 md:py-20">
     <div class="mx-auto max-w-6xl px-4">
-      <h2 class="mb-4 text-center font-heading text-4xl uppercase md:text-5xl" style="color: var(--color-title);">
+      <h2
+        class="mb-4 text-center font-heading text-4xl uppercase md:text-5xl"
+        style="color: var(--color-title);"
+      >
         Three jobs. Real solutions.
       </h2>
       <p class="mx-auto mb-4 max-w-2xl text-center text-gray-600">
         You don't need 47 opinions. You need products that do a specific job and actually work.
       </p>
       <p class="mb-12 text-center">
-        <a href="#backyard-products" class="inline-flex items-center gap-1 text-sm font-medium text-[#44883E] hover:text-green-600 hover:underline">
+        <a
+          href="#backyard-products"
+          class="inline-flex items-center gap-1 text-sm font-medium text-[#44883E] hover:text-green-600 hover:underline"
+        >
           Skip to all backyard products
           <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
           </svg>
         </a>
       </p>
       <div class="grid gap-8 md:grid-cols-3">
-        {jobs.map((job) => (
-          <div class="flex flex-col rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-            <div class="mb-4 flex h-12 w-12 flex-shrink-0 items-center justify-center bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
-              <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <Fragment set:html={job.icon} />
-              </svg>
-            </div>
-
-            <h3 class="mb-3 text-xl font-bold" style="color: var(--color-title);">
-              {job.title}
-            </h3>
-            <p class="mb-6 text-gray-600">{job.struggle}</p>
-
-            <div class="mb-6 flex-1 space-y-4">
-              {job.products.map((product) => (
-                <a
-                  href={`/products/${product!.handle}/`}
-                  class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3 transition-colors hover:border-green-200 hover:bg-green-50"
+        {
+          jobs.map((job) => (
+            <div class="flex flex-col rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+              <div
+                class="mb-4 flex h-12 w-12 flex-shrink-0 items-center justify-center bg-[#2C5234]"
+                style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
+              >
+                <svg
+                  class="h-5 w-5 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  {product!.images?.[0] && (
-                    <img
-                      src={product!.images[0].url}
-                      alt={product!.images[0].altText || product!.title}
-                      width="56"
-                      height="56"
-                      class="h-14 w-14 rounded-md object-cover"
-                      loading="lazy"
-                    />
-                  )}
-                  <div class="min-w-0 flex-1">
-                    <div class="truncate text-sm font-semibold text-gray-900">
-                      {product!.title.includes('|') ? product!.title.split('|')[0].trim() : product!.title}
-                    </div>
-                    <div class="text-sm text-green-700">
-                      From {formatPrice(product!.priceRange.minVariantPrice.amount)}
-                    </div>
-                  </div>
-                  <svg class="h-4 w-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                </a>
-              ))}
-            </div>
-
-            <div class="border-t border-gray-100 pt-4">
-              <div class="flex items-start gap-2">
-                <svg class="mt-0.5 h-4 w-4 shrink-0 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+                  <Fragment set:html={job.icon} />
                 </svg>
-                <div>
-                  <span class="text-sm font-semibold text-green-700">{job.proof}</span>
-                  <span class="block text-xs text-gray-500">{job.proofSource}</span>
+              </div>
+
+              <h3 class="mb-3 text-xl font-bold" style="color: var(--color-title);">
+                {job.title}
+              </h3>
+              <p class="mb-6 text-gray-600">{job.struggle}</p>
+
+              <div class="mb-6 flex-1 space-y-4">
+                {job.products.map((product) => (
+                  <a
+                    href={`/products/${product!.handle}/`}
+                    class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3 transition-colors hover:border-green-200 hover:bg-green-50"
+                  >
+                    {product!.images?.[0] && (
+                      <img
+                        src={product!.images[0].url}
+                        alt={product!.images[0].altText || product!.title}
+                        width="56"
+                        height="56"
+                        class="h-14 w-14 rounded-md object-cover"
+                        loading="lazy"
+                      />
+                    )}
+                    <div class="min-w-0 flex-1">
+                      <div class="truncate text-sm font-semibold text-gray-900">
+                        {product!.title.includes('|')
+                          ? product!.title.split('|')[0].trim()
+                          : product!.title}
+                      </div>
+                      <div class="text-sm text-green-700">
+                        From {formatPrice(product!.priceRange.minVariantPrice.amount)}
+                      </div>
+                    </div>
+                    <svg
+                      class="h-4 w-4 shrink-0 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </a>
+                ))}
+              </div>
+
+              <div class="border-t border-gray-100 pt-4">
+                <div class="flex items-start gap-2">
+                  <svg
+                    class="mt-0.5 h-4 w-4 shrink-0 text-green-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12l2 2 4-4"
+                    />
+                  </svg>
+                  <div>
+                    <span class="text-sm font-semibold text-green-700">{job.proof}</span>
+                    <span class="block text-xs text-gray-500">{job.proofSource}</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        }
       </div>
     </div>
   </section>
@@ -445,61 +615,95 @@ const faqSchema = {
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section id="backyard-products" class="bg-white py-16 md:py-20">
     <div class="mx-auto max-w-6xl px-4">
-      <h2 class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
+      <h2
+        class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl"
+        style="color: var(--color-title);"
+      >
         Shop the Backyard Line
       </h2>
       <p class="mx-auto mb-6 max-w-2xl text-center text-gray-600">
-        Every backyard flock product we make — probiotics, litter treatments, vitamins, and pest control. All USDA Organic, all sized for small flocks. Nothing hidden.
+        Every backyard flock product we make — probiotics, litter treatments, vitamins, and pest
+        control. All USDA Organic, all sized for small flocks. Nothing hidden.
       </p>
 
       <!-- Bundle vs Individual callout -->
-      <div class="mx-auto mb-10 max-w-3xl rounded-xl border border-green-200 bg-green-50 p-5 md:p-6">
+      <div
+        class="mx-auto mb-10 max-w-3xl rounded-xl border border-green-200 bg-green-50 p-5 md:p-6"
+      >
         <div class="grid gap-4 md:grid-cols-2">
           <div>
             <div class="mb-1 flex items-center gap-2">
-              <svg class="h-5 w-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              <svg
+                class="h-5 w-5 text-green-700"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
               </svg>
               <span class="font-bold text-[#2C5234]">Backyard Bundle</span>
             </div>
             <p class="text-sm text-gray-600">
-              Big Ole Bird + Litter Life + Catalyst in one box. Everything you need to start — most backyard keepers begin here. Starting at $52.
+              Big Ole Bird + Litter Life + Catalyst in one box. Everything you need to start — most
+              backyard keepers begin here. Starting at $52.
             </p>
           </div>
           <div>
             <div class="mb-1 flex items-center gap-2">
-              <svg class="h-5 w-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              <svg
+                class="h-5 w-5 text-green-700"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                ></path>
               </svg>
               <span class="font-bold text-[#2C5234]">Pick What You Need</span>
             </div>
             <p class="text-sm text-gray-600">
-              Know exactly what your flock needs? Grab individual products. Every one comes with backyard dosing instructions.
+              Know exactly what your flock needs? Grab individual products. Every one comes with
+              backyard dosing instructions.
             </p>
           </div>
         </div>
       </div>
 
-      {allBackyardProducts.length > 0 ? (
-        <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
-          {allBackyardProducts.map((product) => (
-            <CollectionProductCard product={product} persona="betty" />
-          ))}
-        </div>
-      ) : (
-        <div class="text-center">
-          <p class="mb-4 text-gray-500">Products loading from Shopify...</p>
-          <a
-            href="https://southlandorganics.com/collections/backyard-birds"
-            class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#44883E]/85"
-          >
-            Browse All Backyard Products
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </a>
-        </div>
-      )}
+      {
+        allBackyardProducts.length > 0 ? (
+          <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
+            {allBackyardProducts.map((product) => (
+              <CollectionProductCard product={product} persona="betty" />
+            ))}
+          </div>
+        ) : (
+          <div class="text-center">
+            <p class="mb-4 text-gray-500">Products loading from Shopify...</p>
+            <a
+              href="https://southlandorganics.com/collections/backyard-birds"
+              class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#44883E]/85"
+            >
+              Browse All Backyard Products
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M14 5l7 7m0 0l-7 7m7-7H3"
+                />
+              </svg>
+            </a>
+          </div>
+        )
+      }
     </div>
   </section>
 
@@ -541,7 +745,10 @@ const faqSchema = {
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-white py-16 md:py-20">
     <div class="mx-auto max-w-4xl px-4">
-      <h2 class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
+      <h2
+        class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl"
+        style="color: var(--color-title);"
+      >
         Three steps to a healthier flock.
       </h2>
       <p class="mx-auto mb-12 max-w-xl text-center text-gray-600">
@@ -549,37 +756,51 @@ const faqSchema = {
       </p>
       <div class="space-y-8">
         <div class="flex items-start gap-6">
-          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700">
+          <div
+            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700"
+          >
             1
           </div>
           <div>
-            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);"><span class="text-[#44883E]">Pick</span> your starting point.</h3>
+            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);">
+              <span class="text-[#44883E]">Pick</span> your starting point.
+            </h3>
             <p class="text-gray-600">
-              Most backyard keepers start with the Backyard Bundle — it covers gut health, litter, and vitamins in one box.
-              Not sure what your flock needs? Our products page shows you exactly which product matches which problem.
+              Most backyard keepers start with the Backyard Bundle — it covers gut health, litter,
+              and vitamins in one box. Not sure what your flock needs? Our products page shows you
+              exactly which product matches which problem.
             </p>
           </div>
         </div>
         <div class="flex items-start gap-6">
-          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700">
+          <div
+            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700"
+          >
             2
           </div>
           <div>
-            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);"><span class="text-[#44883E]">Follow</span> the simple routine.</h3>
+            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);">
+              <span class="text-[#44883E]">Follow</span> the simple routine.
+            </h3>
             <p class="text-gray-600">
-              Every product comes with clear, backyard-sized dosing instructions. Five minutes a week.
-              No complicated schedules. A capful per waterer change is all it takes.
+              Every product comes with clear, backyard-sized dosing instructions. Five minutes a
+              week. No complicated schedules. A capful per waterer change is all it takes.
             </p>
           </div>
         </div>
         <div class="flex items-start gap-6">
-          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700">
+          <div
+            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700"
+          >
             3
           </div>
           <div>
-            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);"><span class="text-[#44883E]">Watch</span> your flock thrive.</h3>
+            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);">
+              <span class="text-[#44883E]">Watch</span> your flock thrive.
+            </h3>
             <p class="text-gray-600">
-              Healthier birds. Fresher coop. Steadier eggs. And when someone in your chicken group asks for advice, you'll know exactly what to tell them.
+              Healthier birds. Fresher coop. Steadier eggs. And when someone in your chicken group
+              asks for advice, you'll know exactly what to tell them.
             </p>
           </div>
         </div>
@@ -592,7 +813,10 @@ const faqSchema = {
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-gray-50 py-16 md:py-20">
     <div class="mx-auto max-w-3xl px-4">
-      <h2 class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
+      <h2
+        class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl"
+        style="color: var(--color-title);"
+      >
         Fair questions. Straight answers.
       </h2>
       <p class="mx-auto mb-10 max-w-xl text-center text-gray-600">
@@ -607,24 +831,51 @@ const faqSchema = {
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="py-16 md:py-20">
     <div class="mx-auto max-w-4xl px-4">
-      <h2 class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
+      <h2
+        class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl"
+        style="color: var(--color-title);"
+      >
         Free guides for backyard keepers
       </h2>
       <p class="mx-auto mb-10 max-w-xl text-center text-gray-600">
         Written for small flocks. No commercial jargon, no guessing on dosing.
       </p>
       <div class="grid gap-6 md:grid-cols-3">
-        <a href="/blog/whats-wrong-with-my-chicken-symptom-guide/" class="group block rounded-xl border border-gray-200 p-6 transition-colors hover:border-green-300 hover:bg-green-50/30">
-          <h3 class="mb-2 text-lg font-bold" style="color: var(--color-title);">What's Wrong With My Chicken?</h3>
-          <p class="text-sm text-gray-600">Symptom-by-symptom diagnostic guide. Lethargy, sneezing, feather loss, pale combs, egg drops — what each one means and what to do first.</p>
+        <a
+          href="/blog/whats-wrong-with-my-chicken-symptom-guide/"
+          class="group block rounded-xl border border-gray-200 p-6 transition-colors hover:border-green-300 hover:bg-green-50/30"
+        >
+          <h3 class="mb-2 text-lg font-bold" style="color: var(--color-title);">
+            What's Wrong With My Chicken?
+          </h3>
+          <p class="text-sm text-gray-600">
+            Symptom-by-symptom diagnostic guide. Lethargy, sneezing, feather loss, pale combs, egg
+            drops — what each one means and what to do first.
+          </p>
         </a>
-        <a href="/blog/backyard-chicken-dosing-guide/" class="group block rounded-xl border border-gray-200 p-6 transition-colors hover:border-green-300 hover:bg-green-50/30">
-          <h3 class="mb-2 text-lg font-bold" style="color: var(--color-title);">Dosing Guide for Small Flocks</h3>
-          <p class="text-sm text-gray-600">Exact amounts for flocks of 3 to 25 birds. Every product, every waterer size, seasonal schedules included.</p>
+        <a
+          href="/blog/backyard-chicken-dosing-guide/"
+          class="group block rounded-xl border border-gray-200 p-6 transition-colors hover:border-green-300 hover:bg-green-50/30"
+        >
+          <h3 class="mb-2 text-lg font-bold" style="color: var(--color-title);">
+            Dosing Guide for Small Flocks
+          </h3>
+          <p class="text-sm text-gray-600">
+            Exact amounts for flocks of 3 to 25 birds. Every product, every waterer size, seasonal
+            schedules included.
+          </p>
         </a>
-        <a href="/blog/new-chicken-owner-first-30-days/" class="group block rounded-xl border border-gray-200 p-6 transition-colors hover:border-green-300 hover:bg-green-50/30">
-          <h3 class="mb-2 text-lg font-bold" style="color: var(--color-title);">Your First 30 Days With Chickens</h3>
-          <p class="text-sm text-gray-600">Week-by-week guide for new owners. What to do, what to watch for, and when to start supplements.</p>
+        <a
+          href="/blog/new-chicken-owner-first-30-days/"
+          class="group block rounded-xl border border-gray-200 p-6 transition-colors hover:border-green-300 hover:bg-green-50/30"
+        >
+          <h3 class="mb-2 text-lg font-bold" style="color: var(--color-title);">
+            Your First 30 Days With Chickens
+          </h3>
+          <p class="text-sm text-gray-600">
+            Week-by-week guide for new owners. What to do, what to watch for, and when to start
+            supplements.
+          </p>
         </a>
       </div>
     </div>
@@ -648,7 +899,8 @@ const faqSchema = {
         Your flock is counting on you. Start here.
       </h2>
       <p class="mx-auto mb-8 max-w-xl text-lg text-green-100">
-        Everything your backyard flock needs — probiotics, litter treatment, vitamins, and pest control. USDA Organic, family-safe, sized for small flocks.
+        Everything your backyard flock needs — probiotics, litter treatment, vitamins, and pest
+        control. USDA Organic, family-safe, sized for small flocks.
       </p>
       <div class="mb-8">
         <a
@@ -657,7 +909,11 @@ const faqSchema = {
           style="color: var(--color-title);"
         >
           <svg class="h-7 w-7 text-[#44883E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
           </svg>
           Shop Backyard Products
         </a>
@@ -671,5 +927,4 @@ const faqSchema = {
       </div>
     </div>
   </CloudinaryHero>
-
 </BaseLayout>

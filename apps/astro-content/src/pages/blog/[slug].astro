@@ -48,7 +48,14 @@ if (post.data.author) {
     if (teamMember) {
       authorEntry = teamMember
       const photoUrl = teamMember.data.photo
-        ? buildSouthlandUrl(teamMember.data.photo, { width: 80, height: 80, crop: 'fill', gravity: 'face', quality: 'auto', format: 'auto' })
+        ? buildSouthlandUrl(teamMember.data.photo, {
+            width: 80,
+            height: 80,
+            crop: 'fill',
+            gravity: 'face',
+            quality: 'auto',
+            format: 'auto',
+          })
         : null
       author = {
         ...teamMember.data,
@@ -71,7 +78,14 @@ if (post.data.reviewer) {
     if (teamMember) {
       reviewerEntry = teamMember
       const reviewerPhotoUrl = teamMember.data.photo
-        ? buildSouthlandUrl(teamMember.data.photo, { width: 80, height: 80, crop: 'fill', gravity: 'face', quality: 'auto', format: 'auto' })
+        ? buildSouthlandUrl(teamMember.data.photo, {
+            width: 80,
+            height: 80,
+            crop: 'fill',
+            gravity: 'face',
+            quality: 'auto',
+            format: 'auto',
+          })
         : null
       reviewer = {
         ...teamMember.data,
@@ -192,18 +206,21 @@ const faqItems = tocHeadings
     name: h.text,
   }))
 
-const faqSchema = faqItems.length >= 2 ? {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: faqItems.map((q) => ({
-    ...q,
-    acceptedAnswer: {
-      '@type': 'Answer',
-      name: 'See full answer in article',
-      text: `Read the full explanation in our article: ${post.data.title}`,
-    },
-  })),
-} : null
+const faqSchema =
+  faqItems.length >= 2
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faqItems.map((q) => ({
+          ...q,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            name: 'See full answer in article',
+            text: `Read the full explanation in our article: ${post.data.title}`,
+          },
+        })),
+      }
+    : null
 
 // Persona-aware CTA copy
 type SegmentCta = {
@@ -217,9 +234,11 @@ type SegmentCta = {
 }
 const segmentCtas: Record<string, SegmentCta> = {
   poultry: {
-    heading: 'Ready to Improve Your Flock\'s Performance?',
-    description: 'Our team of poultry specialists can help you find the right organic solutions for healthier birds and better results.',
-    promise: 'Field-tested probiotics and supplements trusted by commercial growers and backyard flocks alike.',
+    heading: "Ready to Improve Your Flock's Performance?",
+    description:
+      'Our team of poultry specialists can help you find the right organic solutions for healthier birds and better results.',
+    promise:
+      'Field-tested probiotics and supplements trusted by commercial growers and backyard flocks alike.',
     primaryHref: '/contact/',
     primaryLabel: 'Talk to a Poultry Specialist',
     heroLink: '/collections/poultry-broilers/',
@@ -227,8 +246,10 @@ const segmentCtas: Record<string, SegmentCta> = {
   },
   turf: {
     heading: 'Ready to Build Better Soil?',
-    description: 'Our turf and soil health experts can help you choose the right organic products for a healthier lawn and garden.',
-    promise: 'Field-tested biology and fertilizers that pair perfectly with the practices in this article.',
+    description:
+      'Our turf and soil health experts can help you choose the right organic products for a healthier lawn and garden.',
+    promise:
+      'Field-tested biology and fertilizers that pair perfectly with the practices in this article.',
     primaryHref: '/collections/turf/',
     primaryLabel: 'Shop Lawn & Garden Products',
     heroLink: '/collections/turf/',
@@ -236,8 +257,10 @@ const segmentCtas: Record<string, SegmentCta> = {
   },
   agriculture: {
     heading: 'Ready to Grow Healthier Crops?',
-    description: 'Our agriculture team can help you find organic solutions to improve soil biology and crop performance.',
-    promise: 'Liquid biologicals and soil conditioners built for real field conditions, not just lab results.',
+    description:
+      'Our agriculture team can help you find organic solutions to improve soil biology and crop performance.',
+    promise:
+      'Liquid biologicals and soil conditioners built for real field conditions, not just lab results.',
     primaryHref: '/contact/',
     primaryLabel: 'Talk to an Ag Specialist',
     heroLink: '/collections/crops/',
@@ -245,8 +268,10 @@ const segmentCtas: Record<string, SegmentCta> = {
   },
   general: {
     heading: 'Need Help With Your Operation?',
-    description: 'Our team of experts is here to help you find the right organic solutions for your needs.',
-    promise: 'Biology-first products backed by university trials, trusted by growers across the Southeast.',
+    description:
+      'Our team of experts is here to help you find the right organic solutions for your needs.',
+    promise:
+      'Biology-first products backed by university trials, trusted by growers across the Southeast.',
     primaryHref: '/contact/',
     primaryLabel: 'Contact Us',
     heroLink: '/products/',
@@ -258,12 +283,16 @@ const cta = segmentCtas[post.data.segment || 'general']
 
 <BaseLayout
   title={post.data.title}
-  description={post.data.description.length > 160 ? post.data.description.slice(0, 157) + '...' : post.data.description}
+  description={post.data.description.length > 160
+    ? post.data.description.slice(0, 157) + '...'
+    : post.data.description}
   ogImage={post.data.featuredImage}
   ogType="article"
   schema={articleSchema}
   articlePublishedTime={new Date(post.data.publishDate).toISOString()}
-  articleModifiedTime={post.data.updatedDate ? new Date(post.data.updatedDate).toISOString() : new Date(post.data.publishDate).toISOString()}
+  articleModifiedTime={post.data.updatedDate
+    ? new Date(post.data.updatedDate).toISOString()
+    : new Date(post.data.publishDate).toISOString()}
   articleAuthor={author?.name}
   articleSection={segmentLabels[post.data.segment || 'general']}
 >
@@ -309,7 +338,9 @@ const cta = segmentCtas[post.data.segment || 'general']
           </a>
 
           <!-- Title -->
-          <h1 class="mb-3 font-heading text-2xl uppercase leading-tight text-white md:text-3xl lg:text-4xl">
+          <h1
+            class="mb-3 font-heading text-2xl uppercase leading-tight text-white md:text-3xl lg:text-4xl"
+          >
             {post.data.title}
           </h1>
 
@@ -320,32 +351,38 @@ const cta = segmentCtas[post.data.segment || 'general']
 
           <!-- Author mini-bio + meta -->
           <div class="flex items-start gap-3">
-            {author?.photo && (
-              <a href={author.slug ? `/team/${author.slug}/` : '#'} class="flex-shrink-0">
-                <img
-                  src={author.photo}
-                  alt={author.name}
-                  class="h-10 w-10 rounded-full object-cover ring-2 ring-white/20"
-                  loading="eager"
-                />
-              </a>
-            )}
+            {
+              author?.photo && (
+                <a href={author.slug ? `/team/${author.slug}/` : '#'} class="flex-shrink-0">
+                  <img
+                    src={author.photo}
+                    alt={author.name}
+                    class="h-10 w-10 rounded-full object-cover ring-2 ring-white/20"
+                    loading="eager"
+                  />
+                </a>
+              )
+            }
             <div>
               <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-white/80">
-                {author && (
-                  author.slug ? (
-                    <a href={`/team/${author.slug}/`} class="font-medium text-white transition-colors hover:text-southland-green">
-                      {author.name}
-                    </a>
-                  ) : (
-                    <span class="font-medium text-white">{author.name}</span>
-                  )
-                )}
-                {author?.role && (
-                  <span class="text-white/50">— {author.role}</span>
-                )}
+                {
+                  author &&
+                    (author.slug ? (
+                      <a
+                        href={`/team/${author.slug}/`}
+                        class="font-medium text-white transition-colors hover:text-southland-green"
+                      >
+                        {author.name}
+                      </a>
+                    ) : (
+                      <span class="font-medium text-white">{author.name}</span>
+                    ))
+                }
+                {author?.role && <span class="text-white/50">— {author.role}</span>}
               </div>
-              <div class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-white/50">
+              <div
+                class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-white/50"
+              >
                 <time datetime={new Date(post.data.publishDate).toISOString()}>
                   {formattedDate}
                 </time>
@@ -366,47 +403,54 @@ const cta = segmentCtas[post.data.segment || 'general']
 
         <!-- Right: media (image or video) -->
         <div class="mt-8 lg:mt-0">
-          {post.data.muxPlaybackIds && post.data.muxPlaybackIds.length > 0 ? (
-            <div class="aspect-video overflow-hidden rounded-xl shadow-2xl ring-1 ring-white/10">
-              <mux-player
-                playback-id={post.data.muxPlaybackIds[0]}
-                accent-color="#44883e"
-                metadata-video-title={post.data.title}
-                default-hidden-captions
-                poster={`https://image.mux.com/${post.data.muxPlaybackIds[0]}/thumbnail.jpg?time=10`}
-                style="width:100%;height:100%;--media-object-fit:cover;"
+          {
+            post.data.muxPlaybackIds && post.data.muxPlaybackIds.length > 0 ? (
+              <div class="aspect-video overflow-hidden rounded-xl shadow-2xl ring-1 ring-white/10">
+                <mux-player
+                  playback-id={post.data.muxPlaybackIds[0]}
+                  accent-color="#44883e"
+                  metadata-video-title={post.data.title}
+                  default-hidden-captions
+                  poster={`https://image.mux.com/${post.data.muxPlaybackIds[0]}/thumbnail.jpg?time=10`}
+                  style="width:100%;height:100%;--media-object-fit:cover;"
+                />
+              </div>
+            ) : post.data.featuredImage ? (
+              <img
+                src={post.data.featuredImage}
+                alt={post.data.title}
+                class="aspect-video w-full rounded-xl object-cover shadow-2xl ring-1 ring-white/10"
+                loading="eager"
               />
-            </div>
-          ) : post.data.featuredImage ? (
-            <img
-              src={post.data.featuredImage}
-              alt={post.data.title}
-              class="aspect-video w-full rounded-xl object-cover shadow-2xl ring-1 ring-white/10"
-              loading="eager"
-            />
-          ) : null}
+            ) : null
+          }
           <a
             href={cta.heroLink}
             class="mt-3 inline-flex items-center gap-1.5 text-sm text-white/60 transition-colors hover:text-white"
           >
             {cta.heroLinkLabel}
             <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"
+              ></path>
             </svg>
           </a>
         </div>
       </div>
     </div>
   </header>
-  {post.data.muxPlaybackIds && post.data.muxPlaybackIds.length > 0 && (
-    <script>import '@mux/mux-player';</script>
-  )}
+  {
+    post.data.muxPlaybackIds && post.data.muxPlaybackIds.length > 0 && (
+      <script>import '@mux/mux-player';</script>
+    )
+  }
 
   <!-- Extra structured data -->
   <script is:inline type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
-  {faqSchema && (
-    <script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
-  )}
+  {
+    faqSchema && (
+      <script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+    )
+  }
 
   <!-- Additional video embeds (if multiple) -->
   {
@@ -439,58 +483,68 @@ const cta = segmentCtas[post.data.segment || 'general']
         <!-- Main content -->
         <div class="mx-auto max-w-4xl lg:mx-0">
           <div
-            class="prose prose-lg prose-headings:text-shopify-title prose-headings:font-bold prose-h2:font-heading prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-6 prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-4 prose-p:text-shopify-secondary-text prose-p:leading-relaxed prose-a:text-southland-green prose-a:no-underline hover:prose-a:underline prose-strong:text-shopify-title prose-ul:my-6 prose-li:text-shopify-secondary-text prose-img:rounded-lg prose-img:shadow-md prose-blockquote:border-l-4 prose-blockquote:border-southland-green prose-blockquote:bg-gray-50 prose-blockquote:py-2 prose-blockquote:px-6 prose-blockquote:rounded-r-lg max-w-none"
+            class="prose prose-lg max-w-none prose-headings:font-bold prose-headings:text-shopify-title prose-h2:mb-6 prose-h2:mt-12 prose-h2:font-heading prose-h2:text-2xl prose-h3:mb-4 prose-h3:mt-8 prose-h3:text-xl prose-p:leading-relaxed prose-p:text-shopify-secondary-text prose-a:text-southland-green prose-a:no-underline hover:prose-a:underline prose-blockquote:rounded-r-lg prose-blockquote:border-l-4 prose-blockquote:border-southland-green prose-blockquote:bg-gray-50 prose-blockquote:px-6 prose-blockquote:py-2 prose-strong:text-shopify-title prose-ul:my-6 prose-li:text-shopify-secondary-text prose-img:rounded-lg prose-img:shadow-md"
           >
             <Content />
           </div>
         </div>
 
         <!-- Table of Contents (desktop sidebar) -->
-        {tocHeadings.length >= 3 && (
-          <aside class="hidden lg:block">
-            <nav class="sticky top-24" aria-label="Table of contents">
-              <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">On this page</h4>
-              <ul class="space-y-2 border-l border-gray-200 text-sm">
-                {tocHeadings.map((h) => (
-                  <li>
-                    <a
-                      href={`#${h.slug}`}
-                      class:list={[
-                        'block border-l-2 transition-colors hover:border-southland-green hover:text-southland-green',
-                        h.depth === 2 ? 'border-transparent py-1 pl-4 text-gray-600' : 'border-transparent py-0.5 pl-7 text-gray-400 text-xs',
-                      ]}
-                    >
-                      {h.text}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          </aside>
-        )}
+        {
+          tocHeadings.length >= 3 && (
+            <aside class="hidden lg:block">
+              <nav class="sticky top-24" aria-label="Table of contents">
+                <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                  On this page
+                </h4>
+                <ul class="space-y-2 border-l border-gray-200 text-sm">
+                  {tocHeadings.map((h) => (
+                    <li>
+                      <a
+                        href={`#${h.slug}`}
+                        class:list={[
+                          'block border-l-2 transition-colors hover:border-southland-green hover:text-southland-green',
+                          h.depth === 2
+                            ? 'border-transparent py-1 pl-4 text-gray-600'
+                            : 'border-transparent py-0.5 pl-7 text-xs text-gray-400',
+                        ]}
+                      >
+                        {h.text}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            </aside>
+          )
+        }
       </div>
 
       <!-- Mobile TOC (collapsible, above content on small screens) -->
-      {tocHeadings.length >= 3 && (
-        <details class="mx-auto mb-8 max-w-4xl rounded-lg border border-gray-200 bg-gray-50 p-4 lg:hidden">
-          <summary class="cursor-pointer text-sm font-semibold text-gray-600">Table of Contents</summary>
-          <ul class="mt-3 space-y-2 text-sm">
-            {tocHeadings.map((h) => (
-              <li>
-                <a
-                  href={`#${h.slug}`}
-                  class:list={[
-                    'block text-gray-600 hover:text-southland-green',
-                    h.depth === 3 && 'pl-4 text-xs text-gray-400',
-                  ]}
-                >
-                  {h.text}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </details>
-      )}
+      {
+        tocHeadings.length >= 3 && (
+          <details class="mx-auto mb-8 max-w-4xl rounded-lg border border-gray-200 bg-gray-50 p-4 lg:hidden">
+            <summary class="cursor-pointer text-sm font-semibold text-gray-600">
+              Table of Contents
+            </summary>
+            <ul class="mt-3 space-y-2 text-sm">
+              {tocHeadings.map((h) => (
+                <li>
+                  <a
+                    href={`#${h.slug}`}
+                    class:list={[
+                      'block text-gray-600 hover:text-southland-green',
+                      h.depth === 3 && 'pl-4 text-xs text-gray-400',
+                    ]}
+                  >
+                    {h.text}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </details>
+        )
+      }
     </div>
 
     <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
@@ -664,7 +718,9 @@ const cta = segmentCtas[post.data.segment || 'general']
   <!-- CTA (persona-aware) -->
   <section class="border-t border-gray-100 bg-gradient-to-b from-white to-gray-50 py-16">
     <div class="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-      <h2 class="mb-3 font-heading text-2xl uppercase text-shopify-title md:text-3xl">{cta.heading}</h2>
+      <h2 class="mb-3 font-heading text-2xl uppercase text-shopify-title md:text-3xl">
+        {cta.heading}
+      </h2>
       <p class="mx-auto mb-2 max-w-xl text-base text-shopify-secondary-text">
         {cta.description}
       </p>

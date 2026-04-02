@@ -8,7 +8,11 @@
  * Primary CTA: Shop / Build Your Program. Phone secondary.
  * Canonical destination for /collections/hydroseeders (301 redirect).
  */
-import { createClient, getProductByHandle, getCollectionProducts } from '@southland/shopify-storefront'
+import {
+  createClient,
+  getProductByHandle,
+  getCollectionProducts,
+} from '@southland/shopify-storefront'
 import type { Product } from '@southland/shopify-storefront'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import CloudinaryHero from '../../components/CloudinaryHero.astro'
@@ -40,12 +44,8 @@ const handles = [
   'torched-all-natural-weed-killer',
 ] as const
 
-const products = await Promise.all(
-  handles.map((h) => getProductByHandle(client, h))
-)
-const productMap = new Map(
-  products.filter(Boolean).map((p) => [p!.handle, p!])
-)
+const products = await Promise.all(handles.map((h) => getProductByHandle(client, h)))
+const productMap = new Map(products.filter(Boolean).map((p) => [p!.handle, p!]))
 
 // Fetch full collection for shop grid
 const hydroCollection = await getCollectionProducts(client, 'hydroseeders')
@@ -83,7 +83,7 @@ const jobs = [
   {
     title: 'Stop eating callbacks on thin stands.',
     struggle:
-      "Thin, patchy results after 30 days mean callbacks, re-seeding, and lost margin. Synthetic fertilizer burns tender seedlings. You need sustained nutrition without the risk.",
+      'Thin, patchy results after 30 days mean callbacks, re-seeding, and lost margin. Synthetic fertilizer burns tender seedlings. You need sustained nutrition without the risk.',
     products: [getProduct('chicken-manure-fertilizer'), getProduct('turf-revival')].filter(Boolean),
     proof: 'Slow-release nitrogen without burn risk',
     proofSource: 'Organic matter + beneficial microbes',
@@ -94,17 +94,17 @@ const jobs = [
 // -- Objections (FAQ) ------------------------------------------------------
 const objections = [
   {
-    question: "I already have a slurry recipe that works. Why change?",
+    question: 'I already have a slurry recipe that works. Why change?',
     answer:
       "You're not changing your recipe — you're adding to it. Genesis and Omega go into your existing tank with your existing mulch and fertilizer. Same equipment, same process. The difference is what happens in the soil after you spray. If your current recipe delivers consistent day-6 breakthrough and zero callbacks, don't change a thing. If not, test it on one job.",
   },
   {
-    question: "How does this mix with my existing mulch and fertilizer?",
+    question: 'How does this mix with my existing mulch and fertilizer?',
     answer:
-      "Add it before water so it coats seeds and mulch in the agitator. 1 gallon of Omega per 500 gallons of slurry. Genesis at 10-12 oz per 1,000 sq ft. Compatible with all standard hydroseeding mulches and fertilizer programs. No pH issues, no clumping, no equipment modifications.",
+      'Add it before water so it coats seeds and mulch in the agitator. 1 gallon of Omega per 500 gallons of slurry. Genesis at 10-12 oz per 1,000 sq ft. Compatible with all standard hydroseeding mulches and fertilizer programs. No pH issues, no clumping, no equipment modifications.',
   },
   {
-    question: "155% germination improvement sounds too good. Is that real?",
+    question: '155% germination improvement sounds too good. Is that real?',
     answer:
       "That's from a third-party study by TRI Environmental — not our marketing department. They tested Genesis-treated seeds against untreated control. The mechanism is straightforward: humic acid chelates nutrients, adds carbon, and feeds beneficial microbes that accelerate root development. It's soil biology, not magic.",
   },
@@ -114,7 +114,7 @@ const objections = [
       "You can't afford to keep re-spraying failed jobs either. Start with a $19 jug of Genesis on your next small project. At 10-12 oz per 1,000 sq ft, one jug covers a meaningful test area. If it doesn't outperform your current results, you're out $19. If it does, you've found your competitive edge.",
   },
   {
-    question: "Can I get this from my normal supplier?",
+    question: 'Can I get this from my normal supplier?',
     answer:
       "Order direct at southlandorganics.com — ships same day, arrives in 2-5 business days. No minimum order. If you want to stock it through your distributor, call us at 800-608-3755 and we'll set that up.",
   },
@@ -150,7 +150,6 @@ const faqSchema = {
 ---
 
 <BaseLayout title={title} description={description} schema={[pageSchema, faqSchema]}>
-
   <!-- ======================================================================= -->
   <!-- SECTION 1: HERO                                                         -->
   <!-- ======================================================================= -->
@@ -168,27 +167,31 @@ const faqSchema = {
   >
     <div class="mx-auto w-full max-w-6xl pb-16 pt-12 md:pb-24 md:pt-20">
       <Breadcrumbs
-        items={[
-          { label: 'Home', href: '/' },
-          { label: 'Hydroseeders' },
-        ]}
-        class="mb-4 [&_a]:text-white/80 [&_span]:text-white/60 [&_*]:text-sm"
+        items={[{ label: 'Home', href: '/' }, { label: 'Hydroseeders' }]}
+        class="mb-4 [&_*]:text-sm [&_a]:text-white/80 [&_span]:text-white/60"
       />
       <div class="max-w-3xl">
         <div class="mb-3 flex flex-wrap items-center gap-2">
-          <span class="inline-block rounded-full bg-white/15 px-4 py-1 text-sm font-medium text-green-300">
+          <span
+            class="inline-block rounded-full bg-white/15 px-4 py-1 text-sm font-medium text-green-300"
+          >
             For Professional Hydroseeders
           </span>
-          <span class="inline-block rounded-full bg-green-400/20 px-3 py-1 text-sm font-semibold text-green-300">
+          <span
+            class="inline-block rounded-full bg-green-400/20 px-3 py-1 text-sm font-semibold text-green-300"
+          >
             Third-Party Tested · Ships Same Day
           </span>
         </div>
-        <h1 class="mb-4 font-heading text-4xl uppercase leading-tight text-white md:text-5xl lg:text-6xl">
+        <h1
+          class="mb-4 font-heading text-4xl uppercase leading-tight text-white md:text-5xl lg:text-6xl"
+        >
           Your slurry is only as good as the soil beneath it.
         </h1>
         <p class="mb-5 text-lg text-white/70 md:text-xl">
-          Dead soil starves seeds. Our hydroseeding soil amendments add the carbon, microbes, and organic acids
-          that turn your mix into a biological engine — faster germination, stronger roots, fewer callbacks.
+          Dead soil starves seeds. Our hydroseeding soil amendments add the carbon, microbes, and
+          organic acids that turn your mix into a biological engine — faster germination, stronger
+          roots, fewer callbacks.
         </p>
         <!-- Three levers -->
         <div class="mb-6 flex flex-wrap gap-x-6 gap-y-2">
@@ -212,7 +215,11 @@ const faqSchema = {
             class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3.5 font-semibold text-white transition-colors hover:bg-[#44883E]/85"
           >
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
             </svg>
             Shop Hydroseeding Products
           </a>
@@ -221,29 +228,63 @@ const faqSchema = {
             class="inline-flex items-center gap-2 rounded-lg bg-white/10 px-6 py-3.5 font-semibold text-white transition-colors hover:bg-white/20"
           >
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              ></path>
             </svg>
             See the Germination Study
           </a>
         </div>
         <p class="mt-2 text-sm text-white/50">No minimum order — test it on your next job</p>
         <!-- Trust bar -->
-        <div class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-white/10 pt-4 text-sm text-white/80">
+        <div
+          class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-white/10 pt-4 text-sm text-white/80"
+        >
           <span class="flex items-center gap-1.5">
-            <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+            <svg
+              class="h-3.5 w-3.5 text-green-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4"></path>
             </svg>
             155% Germination Improvement
           </span>
           <span class="flex items-center gap-1.5">
-            <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+            <svg
+              class="h-3.5 w-3.5 text-green-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4"></path>
             </svg>
             Third-Party Tested
           </span>
           <span class="flex items-center gap-1.5">
-            <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+            <svg
+              class="h-3.5 w-3.5 text-green-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4"></path>
             </svg>
             Family-Owned Since 2009
           </span>
@@ -257,47 +298,101 @@ const faqSchema = {
   <!-- ======================================================================= -->
   <section class="bg-white py-16 md:py-20">
     <div class="mx-auto max-w-6xl px-4">
-      <h2 class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
+      <h2
+        class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl"
+        style="color: var(--color-title);"
+      >
         Your reputation rides on every job.
       </h2>
       <p class="mx-auto mb-12 max-w-2xl text-center text-gray-600">
-        Hydroseeding is competitive. The contractors who win repeat business aren't just cheaper — they deliver faster green-up and fewer callbacks. Three problems define the gap.
+        Hydroseeding is competitive. The contractors who win repeat business aren't just cheaper —
+        they deliver faster green-up and fewer callbacks. Three problems define the gap.
       </p>
       <div class="grid gap-8 md:grid-cols-3">
         <!-- External Problem -->
         <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
-          <div class="mb-4 flex h-12 w-12 flex-shrink-0 items-center justify-center bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
-            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          <div
+            class="mb-4 flex h-12 w-12 flex-shrink-0 items-center justify-center bg-[#2C5234]"
+            style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
+          >
+            <svg
+              class="h-5 w-5 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+              ></path>
             </svg>
           </div>
-          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">Dead soil kills germination</h3>
+          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">
+            Dead soil kills germination
+          </h3>
           <p class="leading-relaxed text-gray-600">
-            Stripped, compacted ground has no carbon and no biology. You're spraying seeds onto a surface that can't support life. No amount of mulch fixes what's missing underneath.
+            Stripped, compacted ground has no carbon and no biology. You're spraying seeds onto a
+            surface that can't support life. No amount of mulch fixes what's missing underneath.
           </p>
         </div>
         <!-- Internal Problem -->
         <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
-          <div class="mb-4 flex h-12 w-12 flex-shrink-0 items-center justify-center bg-[#44883E]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
-            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <div
+            class="mb-4 flex h-12 w-12 flex-shrink-0 items-center justify-center bg-[#44883E]"
+            style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
+          >
+            <svg
+              class="h-5 w-5 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
             </svg>
           </div>
-          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">Callbacks eat your margin</h3>
+          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">
+            Callbacks eat your margin
+          </h3>
           <p class="leading-relaxed text-gray-600">
-            Every re-spray costs labor, materials, and the job you could have been running instead. Failed establishment doesn't just cost money — it costs your reputation and your next bid.
+            Every re-spray costs labor, materials, and the job you could have been running instead.
+            Failed establishment doesn't just cost money — it costs your reputation and your next
+            bid.
           </p>
         </div>
         <!-- Philosophical Problem -->
         <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
-          <div class="mb-4 flex h-12 w-12 flex-shrink-0 items-center justify-center bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
-            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+          <div
+            class="mb-4 flex h-12 w-12 flex-shrink-0 items-center justify-center bg-[#2C5234]"
+            style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
+          >
+            <svg
+              class="h-5 w-5 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"
+              ></path>
             </svg>
           </div>
-          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">Synthetic fertilizer burns seedlings</h3>
+          <h3 class="mb-3 text-lg font-bold" style="color: var(--color-title);">
+            Synthetic fertilizer burns seedlings
+          </h3>
           <p class="leading-relaxed text-gray-600">
-            Hot fertilizer in your slurry risks burning tender seedlings during the most critical establishment window. You need sustained nutrition without the risk — especially on high-visibility jobs.
+            Hot fertilizer in your slurry risks burning tender seedlings during the most critical
+            establishment window. You need sustained nutrition without the risk — especially on
+            high-visibility jobs.
           </p>
         </div>
       </div>
@@ -311,37 +406,62 @@ const faqSchema = {
     <div class="mx-auto max-w-6xl px-4">
       <div class="grid items-center gap-12 md:grid-cols-2">
         <div>
-          <span class="mb-2 inline-block text-sm font-semibold uppercase tracking-wider text-[#44883E]">
+          <span
+            class="mb-2 inline-block text-sm font-semibold uppercase tracking-wider text-[#44883E]"
+          >
             Your guide
           </span>
-          <h2 class="mb-6 font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
+          <h2
+            class="mb-6 font-heading text-3xl uppercase md:text-4xl"
+            style="color: var(--color-title);"
+          >
             Soil biology products built with contractors, not just for them.
           </h2>
           <p class="mb-4 text-lg leading-relaxed text-gray-700">
-            Since 2009, Southland Organics has developed soil biology products used by professional contractors, golf course superintendents, and erosion control specialists. Our hydroseeding line was built with input from contractors like Sandy Creek Hydroseeding, who tested our products on real municipal projects.
+            Since 2009, Southland Organics has developed soil biology products used by professional
+            contractors, golf course superintendents, and erosion control specialists. Our
+            hydroseeding line was built with input from contractors like Sandy Creek Hydroseeding,
+            who tested our products on real municipal projects.
           </p>
           <p class="mb-4 leading-relaxed text-gray-600">
-            Genesis and Omega aren't lab experiments. They're field-proven formulations that go into your existing tank, mix with your existing mulch, and deliver measurable results — backed by a third-party germination study from TRI Environmental.
+            Genesis and Omega aren't lab experiments. They're field-proven formulations that go into
+            your existing tank, mix with your existing mulch, and deliver measurable results —
+            backed by a third-party germination study from TRI Environmental.
           </p>
 
           <!-- Proof callout -->
           <div class="mb-6 rounded-lg border border-green-200 bg-green-50 px-5 py-3">
             <p class="text-sm font-semibold text-[#2C5234]">
-              "On my first hydroseed job with the product I started noticing breakthrough at day six. It certainly produces better results in the first few critical weeks after spraying."
-              <span class="block mt-1 font-normal text-gray-600">— Bill, South Carolina</span>
+              "On my first hydroseed job with the product I started noticing breakthrough at day
+              six. It certainly produces better results in the first few critical weeks after
+              spraying."
+              <span class="mt-1 block font-normal text-gray-600">— Bill, South Carolina</span>
             </p>
           </div>
 
           <!-- Credential chips -->
           <div class="mb-8 flex flex-wrap gap-2">
-            {['Third-party tested (TRI Environmental)', 'Contractor-proven', 'Family-owned since 2009', 'A+ BBB Rating', 'Ships same day'].map((cred) => (
-              <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
-                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
-                </svg>
-                {cred}
-              </span>
-            ))}
+            {
+              [
+                'Third-party tested (TRI Environmental)',
+                'Contractor-proven',
+                'Family-owned since 2009',
+                'A+ BBB Rating',
+                'Ships same day',
+              ].map((cred) => (
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
+                  <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12l2 2 4-4"
+                    />
+                  </svg>
+                  {cred}
+                </span>
+              ))
+            }
           </div>
 
           <div class="flex flex-wrap items-center gap-4">
@@ -350,7 +470,11 @@ const faqSchema = {
               class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#44883E]/85"
             >
               <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
               </svg>
               Shop Products
             </a>
@@ -379,19 +503,42 @@ const faqSchema = {
             </div>
           </a>
           <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h3 class="mb-4 text-lg font-bold" style="color: var(--color-title);">How it works in your tank</h3>
+            <h3 class="mb-4 text-lg font-bold" style="color: var(--color-title);">
+              How it works in your tank
+            </h3>
             <div class="space-y-4">
               <div class="flex items-start gap-3">
-                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#2C5234]/10 text-sm font-bold text-[#2C5234]">1</div>
-                <p class="text-sm text-gray-600"><span class="font-semibold text-gray-900">Add before water</span> — coats seeds and mulch in the agitator.</p>
+                <div
+                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#2C5234]/10 text-sm font-bold text-[#2C5234]"
+                >
+                  1
+                </div>
+                <p class="text-sm text-gray-600">
+                  <span class="font-semibold text-gray-900">Add before water</span> — coats seeds and
+                  mulch in the agitator.
+                </p>
               </div>
               <div class="flex items-start gap-3">
-                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#2C5234]/10 text-sm font-bold text-[#2C5234]">2</div>
-                <p class="text-sm text-gray-600"><span class="font-semibold text-gray-900">Simple ratio</span> — 1 gal Omega per 500 gal slurry. Genesis at 10-12 oz / 1,000 sq ft.</p>
+                <div
+                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#2C5234]/10 text-sm font-bold text-[#2C5234]"
+                >
+                  2
+                </div>
+                <p class="text-sm text-gray-600">
+                  <span class="font-semibold text-gray-900">Simple ratio</span> — 1 gal Omega per 500
+                  gal slurry. Genesis at 10-12 oz / 1,000 sq ft.
+                </p>
               </div>
               <div class="flex items-start gap-3">
-                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#2C5234]/10 text-sm font-bold text-[#2C5234]">3</div>
-                <p class="text-sm text-gray-600"><span class="font-semibold text-gray-900">Same equipment</span> — compatible with all standard mulches and fertilizers.</p>
+                <div
+                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#2C5234]/10 text-sm font-bold text-[#2C5234]"
+                >
+                  3
+                </div>
+                <p class="text-sm text-gray-600">
+                  <span class="font-semibold text-gray-900">Same equipment</span> — compatible with all
+                  standard mulches and fertilizers.
+                </p>
               </div>
             </div>
           </div>
@@ -405,78 +552,122 @@ const faqSchema = {
   <!-- ======================================================================= -->
   <section id="jobs" class="bg-[#F8FAF8] py-16 md:py-20">
     <div class="mx-auto max-w-6xl px-4">
-      <h2 class="mb-4 text-center font-heading text-4xl uppercase md:text-5xl" style="color: var(--color-title);">
+      <h2
+        class="mb-4 text-center font-heading text-4xl uppercase md:text-5xl"
+        style="color: var(--color-title);"
+      >
         Three jobs. Real solutions.
       </h2>
       <p class="mx-auto mb-4 max-w-2xl text-center text-gray-600">
-        Soil biology products that go into your existing slurry and deliver measurable results on your next job.
+        Soil biology products that go into your existing slurry and deliver measurable results on
+        your next job.
       </p>
       <p class="mb-12 text-center">
-        <a href="#hydroseed-products" class="inline-flex items-center gap-1 text-sm font-medium text-[#44883E] hover:text-[#2C5234] hover:underline">
+        <a
+          href="#hydroseed-products"
+          class="inline-flex items-center gap-1 text-sm font-medium text-[#44883E] hover:text-[#2C5234] hover:underline"
+        >
           Skip to all hydroseeding products
           <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
           </svg>
         </a>
       </p>
       <div class="grid gap-8 md:grid-cols-3">
-        {jobs.map((job) => (
-          <div class="flex flex-col rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-            <div class="mb-4 flex h-12 w-12 flex-shrink-0 items-center justify-center bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
-              <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                <Fragment set:html={job.icon} />
-              </svg>
-            </div>
-
-            <h3 class="mb-3 text-xl font-bold" style="color: var(--color-title);">
-              {job.title}
-            </h3>
-            <p class="mb-6 text-gray-600">{job.struggle}</p>
-
-            <div class="mb-6 flex-1 space-y-4">
-              {job.products.map((product) => (
-                <a
-                  href={`/products/${product!.handle}/`}
-                  class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3 transition-colors hover:border-green-200 hover:bg-green-50"
+        {
+          jobs.map((job) => (
+            <div class="flex flex-col rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+              <div
+                class="mb-4 flex h-12 w-12 flex-shrink-0 items-center justify-center bg-[#2C5234]"
+                style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
+              >
+                <svg
+                  class="h-5 w-5 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
                 >
-                  {product!.images?.[0] && (
-                    <img
-                      src={product!.images[0].url}
-                      alt={product!.images[0].altText || product!.title}
-                      width="56"
-                      height="56"
-                      class="h-14 w-14 rounded-md object-cover"
-                      loading="lazy"
-                    />
-                  )}
-                  <div class="min-w-0 flex-1">
-                    <div class="truncate text-sm font-semibold text-gray-900">
-                      {product!.title.includes('|') ? product!.title.split('|')[0].trim() : product!.title}
-                    </div>
-                    <div class="text-sm text-[#44883E]">
-                      From {formatPrice(product!.priceRange.minVariantPrice.amount)}
-                    </div>
-                  </div>
-                  <svg class="h-4 w-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                </a>
-              ))}
-            </div>
-
-            <div class="border-t border-gray-100 pt-4">
-              <div class="flex items-start gap-2">
-                <svg class="mt-0.5 h-4 w-4 shrink-0 text-[#44883E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+                  <Fragment set:html={job.icon} />
                 </svg>
-                <div>
-                  <span class="text-sm font-semibold text-[#2C5234]">{job.proof}</span>
-                  <span class="block text-xs text-gray-500">{job.proofSource}</span>
+              </div>
+
+              <h3 class="mb-3 text-xl font-bold" style="color: var(--color-title);">
+                {job.title}
+              </h3>
+              <p class="mb-6 text-gray-600">{job.struggle}</p>
+
+              <div class="mb-6 flex-1 space-y-4">
+                {job.products.map((product) => (
+                  <a
+                    href={`/products/${product!.handle}/`}
+                    class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3 transition-colors hover:border-green-200 hover:bg-green-50"
+                  >
+                    {product!.images?.[0] && (
+                      <img
+                        src={product!.images[0].url}
+                        alt={product!.images[0].altText || product!.title}
+                        width="56"
+                        height="56"
+                        class="h-14 w-14 rounded-md object-cover"
+                        loading="lazy"
+                      />
+                    )}
+                    <div class="min-w-0 flex-1">
+                      <div class="truncate text-sm font-semibold text-gray-900">
+                        {product!.title.includes('|')
+                          ? product!.title.split('|')[0].trim()
+                          : product!.title}
+                      </div>
+                      <div class="text-sm text-[#44883E]">
+                        From {formatPrice(product!.priceRange.minVariantPrice.amount)}
+                      </div>
+                    </div>
+                    <svg
+                      class="h-4 w-4 shrink-0 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </a>
+                ))}
+              </div>
+
+              <div class="border-t border-gray-100 pt-4">
+                <div class="flex items-start gap-2">
+                  <svg
+                    class="mt-0.5 h-4 w-4 shrink-0 text-[#44883E]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12l2 2 4-4"
+                    />
+                  </svg>
+                  <div>
+                    <span class="text-sm font-semibold text-[#2C5234]">{job.proof}</span>
+                    <span class="block text-xs text-gray-500">{job.proofSource}</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        }
       </div>
 
       <!-- Transitional CTA repeat -->
@@ -486,7 +677,12 @@ const faqSchema = {
           class="inline-flex items-center gap-2 text-sm font-medium text-[#44883E] hover:text-[#2C5234] hover:underline"
         >
           <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            ></path>
           </svg>
           Read the full hydroseeding guide + germination study
         </a>
@@ -499,61 +695,95 @@ const faqSchema = {
   <!-- ======================================================================= -->
   <section id="hydroseed-products" class="bg-[#F8FAF8] py-16 md:py-20">
     <div class="mx-auto max-w-6xl px-4">
-      <h2 class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
+      <h2
+        class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl"
+        style="color: var(--color-title);"
+      >
         Shop Hydroseeding Products
       </h2>
       <p class="mx-auto mb-6 max-w-2xl text-center text-gray-600">
-        Soil conditioners, biochar, organic fertilizers, and site prep — everything you need to add biological power to your slurry.
+        Soil conditioners, biochar, organic fertilizers, and site prep — everything you need to add
+        biological power to your slurry.
       </p>
 
       <!-- System callout -->
-      <div class="mx-auto mb-10 max-w-3xl rounded-xl border border-green-200 bg-green-50 p-5 md:p-6">
+      <div
+        class="mx-auto mb-10 max-w-3xl rounded-xl border border-green-200 bg-green-50 p-5 md:p-6"
+      >
         <div class="grid gap-4 md:grid-cols-2">
           <div>
             <div class="mb-1 flex items-center gap-2">
-              <svg class="h-5 w-5 text-[#2C5234]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              <svg
+                class="h-5 w-5 text-[#2C5234]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
               </svg>
               <span class="font-bold text-[#2C5234]">Full System</span>
             </div>
             <p class="text-sm text-gray-600">
-              Genesis + C-Fix + Chicken Manure Fertilizer covers soil biology, carbon foundation, and sustained nutrition. Most contractors start here.
+              Genesis + C-Fix + Chicken Manure Fertilizer covers soil biology, carbon foundation,
+              and sustained nutrition. Most contractors start here.
             </p>
           </div>
           <div>
             <div class="mb-1 flex items-center gap-2">
-              <svg class="h-5 w-5 text-[#2C5234]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              <svg
+                class="h-5 w-5 text-[#2C5234]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                ></path>
               </svg>
               <span class="font-bold text-[#2C5234]">Start with One</span>
             </div>
             <p class="text-sm text-gray-600">
-              Not ready for the whole system? Grab a $19 jug of Genesis, test it on one job. If it doesn't outperform your current results, don't reorder.
+              Not ready for the whole system? Grab a $19 jug of Genesis, test it on one job. If it
+              doesn't outperform your current results, don't reorder.
             </p>
           </div>
         </div>
       </div>
 
-      {allHydroProducts.length > 0 ? (
-        <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
-          {allHydroProducts.map((product) => (
-            <CollectionProductCard product={product} persona="taylor" />
-          ))}
-        </div>
-      ) : (
-        <div class="text-center">
-          <p class="mb-4 text-gray-500">Products loading from Shopify...</p>
-          <a
-            href="https://southlandorganics.com/collections/hydroseeders"
-            class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#44883E]/85"
-          >
-            Browse All Hydroseeding Products
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </a>
-        </div>
-      )}
+      {
+        allHydroProducts.length > 0 ? (
+          <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
+            {allHydroProducts.map((product) => (
+              <CollectionProductCard product={product} persona="taylor" />
+            ))}
+          </div>
+        ) : (
+          <div class="text-center">
+            <p class="mb-4 text-gray-500">Products loading from Shopify...</p>
+            <a
+              href="https://southlandorganics.com/collections/hydroseeders"
+              class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#44883E]/85"
+            >
+              Browse All Hydroseeding Products
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M14 5l7 7m0 0l-7 7m7-7H3"
+                />
+              </svg>
+            </a>
+          </div>
+        )
+      }
     </div>
   </section>
 
@@ -611,7 +841,9 @@ const faqSchema = {
           />
         </div>
       </div>
-      <p class="mt-4 text-center text-sm text-green-200/70">Source: TRI Environmental third-party germination study on Genesis soil conditioner</p>
+      <p class="mt-4 text-center text-sm text-green-200/70">
+        Source: TRI Environmental third-party germination study on Genesis soil conditioner
+      </p>
     </div>
   </section>
 
@@ -620,43 +852,62 @@ const faqSchema = {
   <!-- ======================================================================= -->
   <section class="bg-white py-16 md:py-20">
     <div class="mx-auto max-w-4xl px-4">
-      <h2 class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
+      <h2
+        class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl"
+        style="color: var(--color-title);"
+      >
         Test it on one job.
       </h2>
       <p class="mx-auto mb-12 max-w-xl text-center text-gray-600">
-        We don't ask you to overhaul your slurry recipe. We ask you to add one thing to one tank and compare.
+        We don't ask you to overhaul your slurry recipe. We ask you to add one thing to one tank and
+        compare.
       </p>
       <div class="space-y-8">
         <div class="flex items-start gap-6">
-          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#2C5234]/10 text-xl font-bold text-[#2C5234]">
+          <div
+            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#2C5234]/10 text-xl font-bold text-[#2C5234]"
+          >
             1
           </div>
           <div>
-            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);"><span class="text-[#44883E]">Pick</span> your toughest upcoming job.</h3>
+            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);">
+              <span class="text-[#44883E]">Pick</span> your toughest upcoming job.
+            </h3>
             <p class="text-gray-600">
-              Bad soil, steep slope, tight timeline — whatever bid you're most worried about. That's where you'll see the biggest difference vs. your standard recipe.
+              Bad soil, steep slope, tight timeline — whatever bid you're most worried about. That's
+              where you'll see the biggest difference vs. your standard recipe.
             </p>
           </div>
         </div>
         <div class="flex items-start gap-6">
-          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#2C5234]/10 text-xl font-bold text-[#2C5234]">
+          <div
+            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#2C5234]/10 text-xl font-bold text-[#2C5234]"
+          >
             2
           </div>
           <div>
-            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);"><span class="text-[#44883E]">Add</span> to your tank.</h3>
+            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);">
+              <span class="text-[#44883E]">Add</span> to your tank.
+            </h3>
             <p class="text-gray-600">
-              Genesis or Omega goes in before water. Your existing mulch, fertilizer, and equipment stay the same. 1 gallon per 500 gallons of slurry — that's it.
+              Genesis or Omega goes in before water. Your existing mulch, fertilizer, and equipment
+              stay the same. 1 gallon per 500 gallons of slurry — that's it.
             </p>
           </div>
         </div>
         <div class="flex items-start gap-6">
-          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#2C5234]/10 text-xl font-bold text-[#2C5234]">
+          <div
+            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#2C5234]/10 text-xl font-bold text-[#2C5234]"
+          >
             3
           </div>
           <div>
-            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);"><span class="text-[#44883E]">Compare</span> the results.</h3>
+            <h3 class="mb-1 text-lg font-bold" style="color: var(--color-title);">
+              <span class="text-[#44883E]">Compare</span> the results.
+            </h3>
             <p class="text-gray-600">
-              Track germination timing, establishment density, and callbacks vs. your standard jobs. The numbers make the decision for you. If they don't move, don't reorder.
+              Track germination timing, establishment density, and callbacks vs. your standard jobs.
+              The numbers make the decision for you. If they don't move, don't reorder.
             </p>
           </div>
         </div>
@@ -669,7 +920,10 @@ const faqSchema = {
   <!-- ======================================================================= -->
   <section class="bg-gray-50 py-16 md:py-20">
     <div class="mx-auto max-w-3xl px-4">
-      <h2 class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
+      <h2
+        class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl"
+        style="color: var(--color-title);"
+      >
         Questions we hear from contractors.
       </h2>
       <p class="mx-auto mb-10 max-w-xl text-center text-gray-600">
@@ -697,8 +951,8 @@ const faqSchema = {
         Your next job is the test.
       </h2>
       <p class="mx-auto mb-8 max-w-xl text-lg text-green-100">
-        One jug. One project. Compare the results to everything you've sprayed before.
-        If the germination doesn't speak for itself, don't reorder.
+        One jug. One project. Compare the results to everything you've sprayed before. If the
+        germination doesn't speak for itself, don't reorder.
       </p>
       <div class="mb-6 flex flex-wrap items-center justify-center gap-4">
         <a
@@ -707,7 +961,11 @@ const faqSchema = {
           style="color: var(--color-title);"
         >
           <svg class="h-5 w-5 text-[#44883E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
           </svg>
           Shop Hydroseeding Products
         </a>
@@ -716,7 +974,12 @@ const faqSchema = {
           class="inline-flex items-center gap-2 rounded-lg border-2 border-white/30 px-8 py-4 text-lg font-bold text-white transition-colors hover:border-white/60 hover:bg-white/5"
         >
           <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+            ></path>
           </svg>
           Call 800-608-3755
         </a>
@@ -732,5 +995,4 @@ const faqSchema = {
       </div>
     </div>
   </CloudinaryHero>
-
 </BaseLayout>

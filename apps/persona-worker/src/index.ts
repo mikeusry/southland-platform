@@ -42,7 +42,7 @@ const DEFAULT_PERSONA_SCORES = {
   hannah: 0.06,
   maggie: 0.04,
   sam: 0.06,
-  general: 0.30,
+  general: 0.3,
 }
 
 const DEFAULT_SEGMENT_SCORES = {

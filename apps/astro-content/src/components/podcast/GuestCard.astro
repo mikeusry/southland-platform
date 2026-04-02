@@ -46,16 +46,17 @@ const isCompact = variant === 'compact'
 const isSidebar = variant === 'sidebar'
 
 // Convert Cloudinary public IDs to URLs (same pattern as TeamCard)
-const photoUrl = photo && !photo.startsWith('http') && !photo.startsWith('/')
-  ? buildSouthlandUrl(photo, {
-      width: isCompact || isSidebar ? 128 : 256,
-      height: isCompact || isSidebar ? 128 : 256,
-      crop: 'fill',
-      gravity: 'face',
-      quality: 'auto',
-      format: 'auto',
-    })
-  : photo
+const photoUrl =
+  photo && !photo.startsWith('http') && !photo.startsWith('/')
+    ? buildSouthlandUrl(photo, {
+        width: isCompact || isSidebar ? 128 : 256,
+        height: isCompact || isSidebar ? 128 : 256,
+        crop: 'fill',
+        gravity: 'face',
+        quality: 'auto',
+        format: 'auto',
+      })
+    : photo
 ---
 
 <div

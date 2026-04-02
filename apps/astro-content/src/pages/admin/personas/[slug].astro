@@ -116,9 +116,8 @@ const funnelGroups = [
 ]
 
 // Mission progress
-const missionProgress = persona.mission.target > 0
-  ? Math.round((persona.mission.done / persona.mission.target) * 100)
-  : 0
+const missionProgress =
+  persona.mission.target > 0 ? Math.round((persona.mission.done / persona.mission.target) * 100) : 0
 
 // Coverage percentages for the segmented bar
 const coveredPct = coverage.total > 0 ? (coverage.covered / coverage.total) * 100 : 0
@@ -131,9 +130,9 @@ function pipelineLabel(pipeline?: string): string {
     'no-copy': 'No Copy',
     'copy-draft': 'Copy Draft',
     'copy-approved': 'Copy Approved',
-    'built': 'Built',
+    built: 'Built',
     'design-review': 'Design Review',
-    'shipped': 'Shipped',
+    shipped: 'Shipped',
   }
   return pipeline ? map[pipeline] || pipeline : 'Not started'
 }
@@ -147,11 +146,13 @@ function pipelineClass(pipeline?: string): string {
 ---
 
 <AdminLayout title={`${persona.name} Command Center`} activeNav="/admin/personas">
-
   <!-- ================================================================== -->
   <!-- SECTION 1: Mission Banner                                          -->
   <!-- ================================================================== -->
-  <div class="mission-banner" style={`background: ${persona.bgColor}; border-left: 4px solid ${persona.color};`}>
+  <div
+    class="mission-banner"
+    style={`background: ${persona.bgColor}; border-left: 4px solid ${persona.color};`}
+  >
     <div class="mission-content">
       <div class="mission-label" style={`color: ${persona.color};`}>MISSION (next 30 days)</div>
       <div class="mission-text">{persona.mission.text}</div>
@@ -160,9 +161,15 @@ function pipelineClass(pipeline?: string): string {
       </div>
     </div>
     <div class="mission-progress">
-      <div class="mission-progress-label">{persona.mission.done}/{persona.mission.target} assets shipped</div>
+      <div class="mission-progress-label">
+        {persona.mission.done}/{persona.mission.target} assets shipped
+      </div>
       <div class="mission-progress-bar">
-        <div class="mission-progress-fill" style={`width: ${missionProgress}%; background: ${persona.color};`}></div>
+        <div
+          class="mission-progress-fill"
+          style={`width: ${missionProgress}%; background: ${persona.color};`}
+        >
+        </div>
       </div>
     </div>
   </div>
@@ -181,21 +188,26 @@ function pipelineClass(pipeline?: string): string {
       <div class="jtbd-meter-header">
         <span class="jtbd-meter-title">Jobs covered: {coverage.covered} / {coverage.total}</span>
         <span class="jtbd-meter-breakdown">
-          <span class="jtbd-legend-dot" style="background: #16a34a;"></span> {coverage.covered} covered
-          <span class="jtbd-legend-dot" style="background: #f59e0b;"></span> {coverage.partial} partial
-          <span class="jtbd-legend-dot" style="background: #ef4444;"></span> {coverage.gap} gap
+          <span class="jtbd-legend-dot" style="background: #16a34a;"></span>
+          {coverage.covered} covered
+          <span class="jtbd-legend-dot" style="background: #f59e0b;"></span>
+          {coverage.partial} partial
+          <span class="jtbd-legend-dot" style="background: #ef4444;"></span>
+          {coverage.gap} gap
         </span>
       </div>
       <div class="jtbd-bar">
-        {coveredPct > 0 && (
-          <div class="jtbd-bar-segment jtbd-bar-covered" style={`flex: ${coveredPct};`}></div>
-        )}
-        {partialPct > 0 && (
-          <div class="jtbd-bar-segment jtbd-bar-partial" style={`flex: ${partialPct};`}></div>
-        )}
-        {gapPct > 0 && (
-          <div class="jtbd-bar-segment jtbd-bar-gap" style={`flex: ${gapPct};`}></div>
-        )}
+        {
+          coveredPct > 0 && (
+            <div class="jtbd-bar-segment jtbd-bar-covered" style={`flex: ${coveredPct};`} />
+          )
+        }
+        {
+          partialPct > 0 && (
+            <div class="jtbd-bar-segment jtbd-bar-partial" style={`flex: ${partialPct};`} />
+          )
+        }
+        {gapPct > 0 && <div class="jtbd-bar-segment jtbd-bar-gap" style={`flex: ${gapPct};`} />}
       </div>
     </div>
   </section>
@@ -206,20 +218,24 @@ function pipelineClass(pipeline?: string): string {
   <section class="section">
     <div class="section-header">Last Touched</div>
 
-    {persona.lastActivity.length > 0 ? (
-      <div class="activity-strip">
-        {persona.lastActivity.map((act) => (
-          <div class="activity-item">
-            <span class="activity-label">{act.label}</span>
-            <span class="activity-date">({relativeDate(act.date)})</span>
+    {
+      persona.lastActivity.length > 0 ? (
+        <div class="activity-strip">
+          {persona.lastActivity.map((act) => (
+            <div class="activity-item">
+              <span class="activity-label">{act.label}</span>
+              <span class="activity-date">({relativeDate(act.date)})</span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div class="activity-strip">
+          <div class="activity-item activity-empty">
+            No activity recorded yet for {persona.name}.
           </div>
-        ))}
-      </div>
-    ) : (
-      <div class="activity-strip">
-        <div class="activity-item activity-empty">No activity recorded yet for {persona.name}.</div>
-      </div>
-    )}
+        </div>
+      )
+    }
   </section>
 
   <!-- ================================================================== -->
@@ -238,7 +254,14 @@ function pipelineClass(pipeline?: string): string {
         <div class="stat-label">Customer Count</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">${persona.avgLTV.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+        <div class="stat-value">
+          ${
+            persona.avgLTV.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })
+          }
+        </div>
         <div class="stat-label">Avg LTV</div>
       </div>
       <div class="stat-card">
@@ -258,55 +281,59 @@ function pipelineClass(pipeline?: string): string {
   <section class="section">
     <div class="section-header">Funnel Snapshot</div>
 
-    {hasCDPData ? (
-      <div class="cdp-metrics-grid">
-        <div class="cdp-metric">
-          <div class="cdp-metric-value">{cdpMetrics.customerCount}</div>
-          <div class="cdp-metric-label">Customers</div>
+    {
+      hasCDPData ? (
+        <div class="cdp-metrics-grid">
+          <div class="cdp-metric">
+            <div class="cdp-metric-value">{cdpMetrics.customerCount}</div>
+            <div class="cdp-metric-label">Customers</div>
+          </div>
+          <div class="cdp-metric">
+            <div class="cdp-metric-value">{cdpMetrics.active90d}</div>
+            <div class="cdp-metric-label">Active (90d)</div>
+          </div>
+          <div class="cdp-metric">
+            <div class="cdp-metric-value">{cdpMetrics.repeatBuyers}</div>
+            <div class="cdp-metric-label">Repeat Buyers</div>
+          </div>
+          <div class="cdp-metric">
+            <div class="cdp-metric-value">{cdpMetrics.repeatRatePct}%</div>
+            <div class="cdp-metric-label">Repeat Rate</div>
+          </div>
+          <div class="cdp-metric">
+            <div class="cdp-metric-value">{cdpMetrics.dormant60_180d}</div>
+            <div class="cdp-metric-label">Dormant (60-180d)</div>
+          </div>
+          <div class="cdp-metric">
+            <div class="cdp-metric-value">{cdpMetrics.dormant180Plus}</div>
+            <div class="cdp-metric-label">Dormant (180d+)</div>
+          </div>
+          <div class="cdp-metric">
+            <div class="cdp-metric-value">${cdpMetrics.totalRevenue?.toLocaleString()}</div>
+            <div class="cdp-metric-label">Total Revenue</div>
+          </div>
+          <div class="cdp-metric">
+            <div class="cdp-metric-value">{cdpMetrics.avgDaysSinceOrder}d</div>
+            <div class="cdp-metric-label">Avg Days Since Order</div>
+          </div>
         </div>
-        <div class="cdp-metric">
-          <div class="cdp-metric-value">{cdpMetrics.active90d}</div>
-          <div class="cdp-metric-label">Active (90d)</div>
+      ) : (
+        <div class="placeholder-card">
+          <div class="placeholder-icon">&#x1F50C;</div>
+          <div class="placeholder-text">
+            Run <code>node scripts/cdp/persona-metrics.js --json</code> in mothership to populate.
+          </div>
+          <details class="placeholder-details">
+            <summary>What this will unlock</summary>
+            <ul>
+              <li>Customer count, active/dormant split, repeat rate</li>
+              <li>Total revenue, avg days since order</li>
+              <li>Play target sizing with real numbers</li>
+            </ul>
+          </details>
         </div>
-        <div class="cdp-metric">
-          <div class="cdp-metric-value">{cdpMetrics.repeatBuyers}</div>
-          <div class="cdp-metric-label">Repeat Buyers</div>
-        </div>
-        <div class="cdp-metric">
-          <div class="cdp-metric-value">{cdpMetrics.repeatRatePct}%</div>
-          <div class="cdp-metric-label">Repeat Rate</div>
-        </div>
-        <div class="cdp-metric">
-          <div class="cdp-metric-value">{cdpMetrics.dormant60_180d}</div>
-          <div class="cdp-metric-label">Dormant (60-180d)</div>
-        </div>
-        <div class="cdp-metric">
-          <div class="cdp-metric-value">{cdpMetrics.dormant180Plus}</div>
-          <div class="cdp-metric-label">Dormant (180d+)</div>
-        </div>
-        <div class="cdp-metric">
-          <div class="cdp-metric-value">${cdpMetrics.totalRevenue?.toLocaleString()}</div>
-          <div class="cdp-metric-label">Total Revenue</div>
-        </div>
-        <div class="cdp-metric">
-          <div class="cdp-metric-value">{cdpMetrics.avgDaysSinceOrder}d</div>
-          <div class="cdp-metric-label">Avg Days Since Order</div>
-        </div>
-      </div>
-    ) : (
-      <div class="placeholder-card">
-        <div class="placeholder-icon">&#x1F50C;</div>
-        <div class="placeholder-text">Run <code>node scripts/cdp/persona-metrics.js --json</code> in mothership to populate.</div>
-        <details class="placeholder-details">
-          <summary>What this will unlock</summary>
-          <ul>
-            <li>Customer count, active/dormant split, repeat rate</li>
-            <li>Total revenue, avg days since order</li>
-            <li>Play target sizing with real numbers</li>
-          </ul>
-        </details>
-      </div>
-    )}
+      )
+    }
   </section>
 
   <!-- ================================================================== -->
@@ -318,7 +345,10 @@ function pipelineClass(pipeline?: string): string {
     <div class="placeholder-card">
       <div class="placeholder-icon">&#x1F50C;</div>
       <div class="placeholder-text">Radar chart: Are we serving {persona.name} evenly?</div>
-      <p class="placeholder-note">6 spokes: Awareness, Consideration, Purchase, Post-purchase, E-E-A-T/Trust, Technical Quality. Derived from site audit badges on persona-tagged pages.</p>
+      <p class="placeholder-note">
+        6 spokes: Awareness, Consideration, Purchase, Post-purchase, E-E-A-T/Trust, Technical
+        Quality. Derived from site audit badges on persona-tagged pages.
+      </p>
       <details class="placeholder-details">
         <summary>What this will unlock</summary>
         <ul>
@@ -366,17 +396,13 @@ function pipelineClass(pipeline?: string): string {
       <div class="col-card">
         <div class="col-card-title">Values</div>
         <ul class="col-list">
-          {persona.values.map((v) => (
-            <li>{v}</li>
-          ))}
+          {persona.values.map((v) => <li>{v}</li>)}
         </ul>
       </div>
       <div class="col-card">
         <div class="col-card-title">Fears</div>
         <ul class="col-list">
-          {persona.fears.map((f) => (
-            <li>{f}</li>
-          ))}
+          {persona.fears.map((f) => <li>{f}</li>)}
         </ul>
       </div>
     </div>
@@ -388,38 +414,48 @@ function pipelineClass(pipeline?: string): string {
   <section class="section">
     <div class="section-header">Pain Points + Jobs to Be Done</div>
 
-    {nextMove && (
-      <div class="next-move-callout" style={`border-left: 3px solid ${persona.color};`}>
-        <div class="next-move-label">Next Best Move</div>
-        <div class="next-move-text">
-          For {persona.name} this week: Fill JTBD {nextMove.status === 'gap' ? 'gap' : 'partial gap'} &ldquo;{nextMove.statement}&rdquo; with a mid-funnel article.
+    {
+      nextMove && (
+        <div class="next-move-callout" style={`border-left: 3px solid ${persona.color};`}>
+          <div class="next-move-label">Next Best Move</div>
+          <div class="next-move-text">
+            For {persona.name} this week: Fill JTBD{' '}
+            {nextMove.status === 'gap' ? 'gap' : 'partial gap'} &ldquo;{nextMove.statement}&rdquo;
+            with a mid-funnel article.
+          </div>
         </div>
-      </div>
-    )}
+      )
+    }
 
     <div class="pain-points-box">
       <div class="col-card-title">Pain Points</div>
       <ul class="col-list">
-        {persona.painPoints.map((pp) => (
-          <li>{pp}</li>
-        ))}
+        {persona.painPoints.map((pp) => <li>{pp}</li>)}
       </ul>
     </div>
 
     <div class="jtbd-detail">
       <div class="col-card-title">JTBD Checklist</div>
       <div class="jtbd-list">
-        {persona.jtbd.map((job) => (
-          <div class="jtbd-item">
-            <span class={`jtbd-status-icon jtbd-status-${job.status}`}>
-              {job.status === 'covered' ? '\u2713' : job.status === 'partial' ? '\u25CB' : '\u2717'}
-            </span>
-            <span class="jtbd-statement">{job.statement}</span>
-            <span class={`badge ${job.status === 'covered' ? 'badge-success' : job.status === 'partial' ? 'badge-warning' : 'badge-error'}`}>
-              {job.status}
-            </span>
-          </div>
-        ))}
+        {
+          persona.jtbd.map((job) => (
+            <div class="jtbd-item">
+              <span class={`jtbd-status-icon jtbd-status-${job.status}`}>
+                {job.status === 'covered'
+                  ? '\u2713'
+                  : job.status === 'partial'
+                    ? '\u25CB'
+                    : '\u2717'}
+              </span>
+              <span class="jtbd-statement">{job.statement}</span>
+              <span
+                class={`badge ${job.status === 'covered' ? 'badge-success' : job.status === 'partial' ? 'badge-warning' : 'badge-error'}`}
+              >
+                {job.status}
+              </span>
+            </div>
+          ))
+        }
       </div>
     </div>
   </section>
@@ -434,17 +470,13 @@ function pipelineClass(pipeline?: string): string {
       <div class="col-card">
         <div class="col-card-title">Buying Triggers</div>
         <ul class="col-list">
-          {persona.buyingTriggers.map((bt) => (
-            <li>{bt}</li>
-          ))}
+          {persona.buyingTriggers.map((bt) => <li>{bt}</li>)}
         </ul>
       </div>
       <div class="col-card">
         <div class="col-card-title">Objections</div>
         <ul class="col-list">
-          {persona.objections.map((obj) => (
-            <li>{obj}</li>
-          ))}
+          {persona.objections.map((obj) => <li>{obj}</li>)}
         </ul>
       </div>
     </div>
@@ -458,9 +490,7 @@ function pipelineClass(pipeline?: string): string {
 
     <div class="trust-list-card">
       <ol class="trust-list">
-        {persona.trustHierarchy.map((item) => (
-          <li>{item}</li>
-        ))}
+        {persona.trustHierarchy.map((item) => <li>{item}</li>)}
       </ol>
     </div>
   </section>
@@ -475,17 +505,13 @@ function pipelineClass(pipeline?: string): string {
       <div class="col-card">
         <div class="col-card-title">Preferred Channels</div>
         <ul class="col-list">
-          {persona.preferredChannels.map((ch) => (
-            <li>{ch}</li>
-          ))}
+          {persona.preferredChannels.map((ch) => <li>{ch}</li>)}
         </ul>
       </div>
       <div class="col-card">
         <div class="col-card-title">Content Preferences</div>
         <ul class="col-list">
-          {persona.contentPreferences.map((cp) => (
-            <li>{cp}</li>
-          ))}
+          {persona.contentPreferences.map((cp) => <li>{cp}</li>)}
         </ul>
       </div>
     </div>
@@ -500,12 +526,19 @@ function pipelineClass(pipeline?: string): string {
           </tr>
         </thead>
         <tbody>
-          {Array.from({ length: Math.max(persona.languageRules.use.length, persona.languageRules.avoid.length) }).map((_, i) => (
-            <tr>
-              <td class="lang-use-cell">{persona.languageRules.use[i] || ''}</td>
-              <td class="lang-avoid-cell">{persona.languageRules.avoid[i] || ''}</td>
-            </tr>
-          ))}
+          {
+            Array.from({
+              length: Math.max(
+                persona.languageRules.use.length,
+                persona.languageRules.avoid.length
+              ),
+            }).map((_, i) => (
+              <tr>
+                <td class="lang-use-cell">{persona.languageRules.use[i] || ''}</td>
+                <td class="lang-avoid-cell">{persona.languageRules.avoid[i] || ''}</td>
+              </tr>
+            ))
+          }
         </tbody>
       </table>
     </div>
@@ -513,42 +546,47 @@ function pipelineClass(pipeline?: string): string {
     <div class="skepticism-section">
       <div class="col-card-title">Skepticism Triggers</div>
       <ul class="col-list">
-        {persona.skepticismTriggers.map((st) => (
-          <li>{st}</li>
-        ))}
+        {persona.skepticismTriggers.map((st) => <li>{st}</li>)}
       </ul>
     </div>
 
     <div class="copy-sandbox-section">
       <div class="col-card-title">Copy Sandbox</div>
-      <p class="sandbox-description">Paste a draft headline or intro below. The checklist will light up based on {persona.name}&apos;s language rules.</p>
+      <p class="sandbox-description">
+        Paste a draft headline or intro below. The checklist will light up based on {
+          persona.name
+        }&apos;s language rules.
+      </p>
       <textarea
         id="copy-sandbox-input"
         class="sandbox-textarea"
         placeholder={`Paste draft copy for ${persona.name} here...`}
-        rows="4"
-      ></textarea>
+        rows="4"></textarea>
       <div class="sandbox-rules-grid">
         <div class="sandbox-rules-col">
           <div class="sandbox-rules-title sandbox-use-title">Use words found</div>
           <div id="sandbox-use-results" class="sandbox-results">
-            {persona.languageRules.use.map((word) => (
-              <div class="sandbox-rule-item" data-sandbox-use={word.toLowerCase()}>
-                <span class="sandbox-rule-icon sandbox-rule-inactive">&mdash;</span>
-                <span class="sandbox-rule-word">{word}</span>
-              </div>
-            ))}
+            {
+              persona.languageRules.use.map((word) => (
+                <div class="sandbox-rule-item" data-sandbox-use={word.toLowerCase()}>
+                  <span class="sandbox-rule-icon sandbox-rule-inactive">&mdash;</span>
+                  <span class="sandbox-rule-word">{word}</span>
+                </div>
+              ))
+            }
           </div>
         </div>
         <div class="sandbox-rules-col">
           <div class="sandbox-rules-title sandbox-avoid-title">Avoid words found</div>
           <div id="sandbox-avoid-results" class="sandbox-results">
-            {persona.languageRules.avoid.map((word) => (
-              <div class="sandbox-rule-item" data-sandbox-avoid={word.toLowerCase()}>
-                <span class="sandbox-rule-icon sandbox-rule-inactive">&mdash;</span>
-                <span class="sandbox-rule-word">{word}</span>
-              </div>
-            ))}
+            {
+              persona.languageRules.avoid.map((word) => (
+                <div class="sandbox-rule-item" data-sandbox-avoid={word.toLowerCase()}>
+                  <span class="sandbox-rule-icon sandbox-rule-inactive">&mdash;</span>
+                  <span class="sandbox-rule-word">{word}</span>
+                </div>
+              ))
+            }
           </div>
         </div>
       </div>
@@ -562,19 +600,24 @@ function pipelineClass(pipeline?: string): string {
     <div class="section-header">Top Products</div>
 
     <div class="product-cards">
-      {persona.topProducts.map((prod) => (
-        <div class="product-card">
-          <span class="product-name">{prod.name}</span>
-          <span class="product-handle">{prod.handle}</span>
-          {prod.roas && <span class="product-roas">{prod.roas}x ROAS</span>}
-        </div>
-      ))}
+      {
+        persona.topProducts.map((prod) => (
+          <div class="product-card">
+            <span class="product-name">{prod.name}</span>
+            <span class="product-handle">{prod.handle}</span>
+            {prod.roas && <span class="product-roas">{prod.roas}x ROAS</span>}
+          </div>
+        ))
+      }
     </div>
 
     <div class="placeholder-card" style="margin-top: 16px;">
       <div class="placeholder-icon">&#x1F50C;</div>
       <div class="placeholder-text">Persona x Product Matrix</div>
-      <p class="placeholder-note">Cross-persona view showing which products are heroes for whom. Surfaces white space where a persona&apos;s JTBD has no strong product match.</p>
+      <p class="placeholder-note">
+        Cross-persona view showing which products are heroes for whom. Surfaces white space where a
+        persona&apos;s JTBD has no strong product match.
+      </p>
       <details class="placeholder-details">
         <summary>What this will unlock</summary>
         <ul>
@@ -597,17 +640,23 @@ function pipelineClass(pipeline?: string): string {
       {hiddenBlogCount > 0 ? ` Showing top ${LINEUP_CAP} blog posts by date.` : ''}
     </p>
 
-    {!hasBlogPosts && slug === 'betty' && (
-      <div class="lineup-notice">
-        No blog posts explicitly targeting Backyard Betty yet. Add a <code>Backyard Poultry</code> tag to blog posts written for small flock owners.
-      </div>
-    )}
+    {
+      !hasBlogPosts && slug === 'betty' && (
+        <div class="lineup-notice">
+          No blog posts explicitly targeting Backyard Betty yet. Add a <code>Backyard Poultry</code>{' '}
+          tag to blog posts written for small flock owners.
+        </div>
+      )
+    }
 
-    {!hasBlogPosts && !allPersonaBlogPosts.length && slug !== 'betty' && (
-      <div class="lineup-notice">
-        No blog posts matched for {persona.name}. Posts are matched by tags ({slug === 'taylor' ? 'Turf' : 'Poultry'}).
-      </div>
-    )}
+    {
+      !hasBlogPosts && !allPersonaBlogPosts.length && slug !== 'betty' && (
+        <div class="lineup-notice">
+          No blog posts matched for {persona.name}. Posts are matched by tags (
+          {slug === 'taylor' ? 'Turf' : 'Poultry'}).
+        </div>
+      )
+    }
 
     <table class="lineup-table">
       <thead>
@@ -621,59 +670,70 @@ function pipelineClass(pipeline?: string): string {
         </tr>
       </thead>
       <tbody>
-        {funnelGroups.map((group) => (
-          <>
-            <tr class="lt-stage-row">
-              <td colspan="6">
-                <span class="lt-stage-label">{group.label}</span>
-                <span class="lt-stage-count">{group.pages.length}</span>
-              </td>
-            </tr>
-            {group.pages.length > 0 ? (
-              group.pages.map((page) => (
-                <tr class="lt-page-row">
-                  <td class="lt-page">
-                    <a href={page.route} target="_blank">{page.name}</a>
-                  </td>
-                  <td class="lt-route"><code>{page.route}</code></td>
-                  <td class="lt-source">
-                    <span class={`source-label source-${page.source}`}>{page.source}</span>
-                  </td>
-                  <td class="lt-type">{page.pageType}</td>
-                  <td class="lt-pipeline">
-                    <span class={`pipeline-text ${pipelineClass(page.pipeline)}`}>
-                      {pipelineLabel(page.pipeline)}
-                    </span>
-                  </td>
-                  <td class="lt-health">&mdash;</td>
+        {
+          funnelGroups.map((group) => (
+            <>
+              <tr class="lt-stage-row">
+                <td colspan="6">
+                  <span class="lt-stage-label">{group.label}</span>
+                  <span class="lt-stage-count">{group.pages.length}</span>
+                </td>
+              </tr>
+              {group.pages.length > 0 ? (
+                group.pages.map((page) => (
+                  <tr class="lt-page-row">
+                    <td class="lt-page">
+                      <a href={page.route} target="_blank">
+                        {page.name}
+                      </a>
+                    </td>
+                    <td class="lt-route">
+                      <code>{page.route}</code>
+                    </td>
+                    <td class="lt-source">
+                      <span class={`source-label source-${page.source}`}>{page.source}</span>
+                    </td>
+                    <td class="lt-type">{page.pageType}</td>
+                    <td class="lt-pipeline">
+                      <span class={`pipeline-text ${pipelineClass(page.pipeline)}`}>
+                        {pipelineLabel(page.pipeline)}
+                      </span>
+                    </td>
+                    <td class="lt-health">&mdash;</td>
+                  </tr>
+                ))
+              ) : (
+                <tr class="lt-empty-row">
+                  <td colspan="6">No pages at this stage yet.</td>
                 </tr>
-              ))
-            ) : (
-              <tr class="lt-empty-row">
-                <td colspan="6">No pages at this stage yet.</td>
-              </tr>
-            )}
-            {jtbdGaps.map((gap) => (
-              <tr class="lt-gap-row">
-                <td colspan="6">No content for: &ldquo;{gap.statement}&rdquo;</td>
-              </tr>
-            ))}
-          </>
-        ))}
+              )}
+              {jtbdGaps.map((gap) => (
+                <tr class="lt-gap-row">
+                  <td colspan="6">No content for: &ldquo;{gap.statement}&rdquo;</td>
+                </tr>
+              ))}
+            </>
+          ))
+        }
       </tbody>
     </table>
 
-    {hiddenBlogCount > 0 && (
-      <div class="lineup-more">
-        + {hiddenBlogCount} more blog posts not shown. <a href="/admin/site-audit">View all in Site Audit</a>
-      </div>
-    )}
+    {
+      hiddenBlogCount > 0 && (
+        <div class="lineup-more">
+          + {hiddenBlogCount} more blog posts not shown.{' '}
+          <a href="/admin/site-audit">View all in Site Audit</a>
+        </div>
+      )
+    }
 
-    {untaggedCount > 0 && (
-      <div class="lineup-untagged">
-        {untaggedCount} blog posts have no tags and can't be assigned to any persona.
-      </div>
-    )}
+    {
+      untaggedCount > 0 && (
+        <div class="lineup-untagged">
+          {untaggedCount} blog posts have no tags and can't be assigned to any persona.
+        </div>
+      )
+    }
   </section>
 
   <!-- ================================================================== -->
@@ -683,29 +743,37 @@ function pipelineClass(pipeline?: string): string {
     <div class="section-header">Plays</div>
 
     <div class="plays-grid">
-      {persona.plays.map((play) => (
-        <div class="play-card">
-          <div class="play-title">{play.title}</div>
-          <div class="play-description">{play.description}</div>
-          <div class="play-estimates">
-            {play.targetEstimate && (
-              <span class="play-estimate-item">
-                <span class="play-estimate-label">Target:</span> {play.targetEstimate}
-              </span>
-            )}
-            {play.expectedLift && (
-              <span class="play-estimate-item">
-                <span class="play-estimate-label">Expected lift:</span> {play.expectedLift}
-              </span>
-            )}
+      {
+        persona.plays.map((play) => (
+          <div class="play-card">
+            <div class="play-title">{play.title}</div>
+            <div class="play-description">{play.description}</div>
+            <div class="play-estimates">
+              {play.targetEstimate && (
+                <span class="play-estimate-item">
+                  <span class="play-estimate-label">Target:</span> {play.targetEstimate}
+                </span>
+              )}
+              {play.expectedLift && (
+                <span class="play-estimate-item">
+                  <span class="play-estimate-label">Expected lift:</span> {play.expectedLift}
+                </span>
+              )}
+            </div>
+            <div class="play-actions">
+              <button class="btn btn-secondary" disabled>
+                Export Audience
+              </button>
+              <button class="btn btn-secondary" disabled>
+                Generate Brief
+              </button>
+              <button class="btn btn-secondary" disabled>
+                Create UTM Bundle
+              </button>
+            </div>
           </div>
-          <div class="play-actions">
-            <button class="btn btn-secondary" disabled>Export Audience</button>
-            <button class="btn btn-secondary" disabled>Generate Brief</button>
-            <button class="btn btn-secondary" disabled>Create UTM Bundle</button>
-          </div>
-        </div>
-      ))}
+        ))
+      }
     </div>
   </section>
 
@@ -719,7 +787,9 @@ function pipelineClass(pipeline?: string): string {
       <div class="placeholder-card">
         <div class="placeholder-icon">&#x1F50C;</div>
         <div class="placeholder-text">Persona Drift</div>
-        <p class="placeholder-note">X% of {persona.name} sessions in last 90d browsed other persona content.</p>
+        <p class="placeholder-note">
+          X% of {persona.name} sessions in last 90d browsed other persona content.
+        </p>
         <details class="placeholder-details">
           <summary>What this will unlock</summary>
           <ul>
@@ -784,7 +854,6 @@ function pipelineClass(pipeline?: string): string {
       })
     })()
   </script>
-
 </AdminLayout>
 
 <style>
@@ -1488,12 +1557,26 @@ function pipelineClass(pipeline?: string): string {
     color: var(--text-tertiary);
     border-bottom: 1px solid var(--border);
   }
-  .lt-page { min-width: 180px; }
-  .lt-route { min-width: 140px; }
-  .lt-source { width: 60px; text-align: center; }
-  .lt-type { width: 70px; }
-  .lt-pipeline { width: 80px; }
-  .lt-health { width: 55px; text-align: center; }
+  .lt-page {
+    min-width: 180px;
+  }
+  .lt-route {
+    min-width: 140px;
+  }
+  .lt-source {
+    width: 60px;
+    text-align: center;
+  }
+  .lt-type {
+    width: 70px;
+  }
+  .lt-pipeline {
+    width: 80px;
+  }
+  .lt-health {
+    width: 55px;
+    text-align: center;
+  }
 
   .lt-stage-row td {
     padding: 10px 10px 6px;
@@ -1522,13 +1605,18 @@ function pipelineClass(pipeline?: string): string {
     border-bottom: 1px solid var(--border-subtle);
     vertical-align: middle;
   }
-  .lt-page-row:hover td { background: #f8fafc; }
+  .lt-page-row:hover td {
+    background: #f8fafc;
+  }
   .lt-page-row a {
     color: var(--text);
     text-decoration: none;
     font-weight: 500;
   }
-  .lt-page-row a:hover { color: var(--accent); text-decoration: underline; }
+  .lt-page-row a:hover {
+    color: var(--accent);
+    text-decoration: underline;
+  }
   .lt-page-row code {
     font-size: 11px;
     color: var(--text-tertiary);
@@ -1540,17 +1628,41 @@ function pipelineClass(pipeline?: string): string {
     padding: 1px 5px;
     border-radius: 3px;
   }
-  .source-page { color: #475569; background: #f1f5f9; }
-  .source-blog { color: #7c3aed; background: #f5f3ff; }
-  .source-collection { color: #0369a1; background: #f0f9ff; }
+  .source-page {
+    color: #475569;
+    background: #f1f5f9;
+  }
+  .source-blog {
+    color: #7c3aed;
+    background: #f5f3ff;
+  }
+  .source-collection {
+    color: #0369a1;
+    background: #f0f9ff;
+  }
 
-  .pipeline-text { font-size: 12px; font-weight: 600; }
-  .pipeline-text.stage-shipped { color: #16a34a; }
-  .pipeline-text.stage-built { color: #2563eb; }
-  .pipeline-text.stage-design-review { color: #7c3aed; }
-  .pipeline-text.stage-copy-approved { color: #d97706; }
-  .pipeline-text.stage-copy-draft { color: #9ca3af; }
-  .pipeline-text.stage-no-copy { color: #d4d4d8; }
+  .pipeline-text {
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .pipeline-text.stage-shipped {
+    color: #16a34a;
+  }
+  .pipeline-text.stage-built {
+    color: #2563eb;
+  }
+  .pipeline-text.stage-design-review {
+    color: #7c3aed;
+  }
+  .pipeline-text.stage-copy-approved {
+    color: #d97706;
+  }
+  .pipeline-text.stage-copy-draft {
+    color: #9ca3af;
+  }
+  .pipeline-text.stage-no-copy {
+    color: #d4d4d8;
+  }
 
   .lt-empty-row td {
     padding: 10px;
@@ -1579,7 +1691,9 @@ function pipelineClass(pipeline?: string): string {
     text-decoration: none;
     font-weight: 500;
   }
-  .lineup-more a:hover { text-decoration: underline; }
+  .lineup-more a:hover {
+    text-decoration: underline;
+  }
 
   .lineup-untagged {
     margin-top: 12px;
@@ -1680,7 +1794,10 @@ function pipelineClass(pipeline?: string): string {
       grid-template-columns: 1fr;
     }
 
-    .lt-route, .lt-source, .lt-type, .lt-health {
+    .lt-route,
+    .lt-source,
+    .lt-type,
+    .lt-health {
       display: none;
     }
 

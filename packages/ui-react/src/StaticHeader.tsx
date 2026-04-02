@@ -31,20 +31,51 @@ const isPrimary = (label: string) => label.startsWith('Shop All')
  * - data-sl-nav-href for client-side active highlighting
  * - Inline styles for mega-menu grid (no Tailwind dependency)
  */
-export function StaticHeader({ logoUrl, logoAlt, navigation, phoneNumber = '800-608-3755' }: StaticHeaderProps) {
+export function StaticHeader({
+  logoUrl,
+  logoAlt,
+  navigation,
+  phoneNumber = '800-608-3755',
+}: StaticHeaderProps) {
   const phoneHref = `tel:${phoneNumber.startsWith('1-') ? phoneNumber : `1-${phoneNumber}`}`
   return (
     <header className="sl-header sticky top-0 z-50 border-b border-gray-100 bg-white">
       {/* Phone utility bar — desktop only */}
       {phoneNumber && (
-        <div className="sl-phone-bar" style={{ display: 'none', background: '#2C5234', textAlign: 'center', padding: '0.375rem 1rem' }}>
+        <div
+          className="sl-phone-bar"
+          style={{
+            display: 'none',
+            background: '#2C5234',
+            textAlign: 'center',
+            padding: '0.375rem 1rem',
+          }}
+        >
           <a
             href={phoneHref}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.875rem', fontWeight: 500, color: 'rgba(255,255,255,0.9)', textDecoration: 'none' }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.375rem',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              color: 'rgba(255,255,255,0.9)',
+              textDecoration: 'none',
+            }}
             aria-label={`Call Southland Organics at ${phoneNumber}`}
           >
-            <svg style={{ width: '0.875rem', height: '0.875rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+            <svg
+              style={{ width: '0.875rem', height: '0.875rem' }}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"
+              />
             </svg>
             {phoneNumber}
           </a>
@@ -293,13 +324,38 @@ export function StaticHeader({ logoUrl, logoAlt, navigation, phoneNumber = '800-
         <div className="px-4 py-4">
           {/* Mobile phone link */}
           {phoneNumber && (
-            <div style={{ marginBottom: '0.75rem', paddingBottom: '0.75rem', borderBottom: '1px solid #f3f4f6' }}>
+            <div
+              style={{
+                marginBottom: '0.75rem',
+                paddingBottom: '0.75rem',
+                borderBottom: '1px solid #f3f4f6',
+              }}
+            >
               <a
                 href={phoneHref}
-                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 0', fontSize: '1rem', fontWeight: 600, color: '#2c5234', textDecoration: 'none' }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.5rem 0',
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  color: '#2c5234',
+                  textDecoration: 'none',
+                }}
               >
-                <svg style={{ width: '1.25rem', height: '1.25rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                <svg
+                  style={{ width: '1.25rem', height: '1.25rem' }}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"
+                  />
                 </svg>
                 Call Us: {phoneNumber}
               </a>

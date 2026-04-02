@@ -106,63 +106,6 @@ fragment TopicsParts on Topics {
   body
 }
 
-fragment ProductsParts on Products {
-  __typename
-  name
-  shopifyHandle
-  segment
-  shortDescription
-  benefits
-  useCases
-  topics
-  featured
-  headline
-  heroBullets
-  seoTitle
-  seoDescription
-  muxPlaybackId
-  videoTitle
-  problemHeadline
-  problemCards {
-    __typename
-    title
-    body
-  }
-  features {
-    __typename
-    feature
-    benefit
-  }
-  dosingInstructions
-  applicationMethod
-  proofStats {
-    __typename
-    value
-    label
-    source
-  }
-  testimonials {
-    __typename
-    quote
-    name
-    role
-  }
-  faq {
-    __typename
-    question
-    answer
-  }
-  allowFaqSchema
-  trustBadges
-  primaryPersona
-  guideName
-  guidePhoto
-  relatedProductHandles
-  relatedBlogSlugs
-  imageAltOverrides
-  body
-}
-
 fragment ShopCollectionsParts on ShopCollections {
   __typename
   title

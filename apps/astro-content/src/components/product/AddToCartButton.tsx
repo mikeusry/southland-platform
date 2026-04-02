@@ -106,7 +106,7 @@ export default function AddToCartButton({ variants }: Props) {
                           ? 'border-brand-green-dark bg-brand-green-dark text-white'
                           : isDisabled
                             ? 'cursor-not-allowed border-gray-200 bg-gray-50 text-gray-400 line-through'
-                            : 'hover:border-brand-green-light border-gray-300 bg-white text-gray-700'
+                            : 'border-gray-300 bg-white text-gray-700 hover:border-brand-green-light'
                       }`}
                     >
                       {optionValue ?? variant.title}
@@ -125,7 +125,7 @@ export default function AddToCartButton({ variants }: Props) {
                 id="variant-select"
                 value={selectedVariantId}
                 onChange={(e) => handleVariantChange(e.target.value)}
-                className="focus:border-brand-green-light focus:ring-brand-green-light mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-sm"
+                className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-sm focus:border-brand-green-light focus:ring-brand-green-light"
               >
                 {variants.map((variant) => (
                   <option key={variant.id} value={variant.id} disabled={!variant.availableForSale}>

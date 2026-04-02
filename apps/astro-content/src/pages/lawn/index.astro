@@ -32,9 +32,9 @@ const handles = [
   'dog-spot-for-lawns',
 ] as const
 
-const products = (
-  await Promise.all(handles.map((h) => getProductByHandle(client, h)))
-).filter(Boolean) as NonNullable<Awaited<ReturnType<typeof getProductByHandle>>>[]
+const products = (await Promise.all(handles.map((h) => getProductByHandle(client, h)))).filter(
+  Boolean
+) as NonNullable<Awaited<ReturnType<typeof getProductByHandle>>>[]
 
 function formatPrice(amount: string) {
   const num = parseFloat(amount)
@@ -55,9 +55,9 @@ const productSegments: Record<string, string[]> = {
 
 // Latest lawn blog posts
 const placeholderImg = 'DSC_0137_dco2wk'
-const lawnPosts = (await getCollection('blog', ({ data }) =>
-  data.draft !== true && data.segment === 'turf'
-))
+const lawnPosts = (
+  await getCollection('blog', ({ data }) => data.draft !== true && data.segment === 'turf')
+)
   .filter((p) => p.data.featuredImage && !p.data.featuredImage.includes(placeholderImg))
   .sort((a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime())
   .slice(0, 3)
@@ -88,9 +88,21 @@ const ogImage = buildCloudinaryUrl('Southland Website/heroes/lawn_result_ait3ra'
 })
 
 const stats = [
-  { number: '20-40%', label: 'CEC increase with humic acid programs', source: 'Soil Science Society of America' },
-  { number: '15-30%', label: 'Water infiltration improvement', source: 'Superintendent field data' },
-  { number: 'Year 2-3', label: 'Cost equalization vs. conventional', source: 'Program cost analysis' },
+  {
+    number: '20-40%',
+    label: 'CEC increase with humic acid programs',
+    source: 'Soil Science Society of America',
+  },
+  {
+    number: '15-30%',
+    label: 'Water infiltration improvement',
+    source: 'Superintendent field data',
+  },
+  {
+    number: 'Year 2-3',
+    label: 'Cost equalization vs. conventional',
+    source: 'Program cost analysis',
+  },
   { number: '2009', label: 'Formulating organic turf products', source: '' },
 ]
 ---
@@ -119,12 +131,15 @@ const stats = [
         Organic Lawn Fertilizer &amp; Soil Conditioner
       </span>
 
-      <h1 class="font-heading mb-5 text-3xl uppercase text-white md:text-4xl lg:text-5xl">
+      <h1 class="mb-5 font-heading text-3xl uppercase text-white md:text-4xl lg:text-5xl">
         The key to a beautiful lawn is healthy soil.
       </h1>
 
       <p class="mx-auto mb-7 max-w-2xl text-base leading-relaxed text-green-100 md:text-lg">
-        Our natural lawn fertilizers are made from a unique deposit of humic acid material found in coastal Georgia — organic acids, activated carbon, and beneficial microbes that build the biology your turf needs to thrive. Kids and pets can play on the lawn even right after you spray it.
+        Our natural lawn fertilizers are made from a unique deposit of humic acid material found in
+        coastal Georgia — organic acids, activated carbon, and beneficial microbes that build the
+        biology your turf needs to thrive. Kids and pets can play on the lawn even right after you
+        spray it.
       </p>
 
       <div
@@ -132,25 +147,37 @@ const stats = [
       >
         <span class="flex items-center gap-1.5">
           <svg class="h-3.5 w-3.5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            <path
+              fill-rule="evenodd"
+              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+              clip-rule="evenodd"></path>
           </svg>
           Safe for Kids &amp; Pets
         </span>
         <span class="flex items-center gap-1.5">
           <svg class="h-3.5 w-3.5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            <path
+              fill-rule="evenodd"
+              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+              clip-rule="evenodd"></path>
           </svg>
           Humic Acid from Coastal Georgia
         </span>
         <span class="flex items-center gap-1.5">
           <svg class="h-3.5 w-3.5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            <path
+              fill-rule="evenodd"
+              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+              clip-rule="evenodd"></path>
           </svg>
           20-40% CEC Increase
         </span>
         <span class="flex items-center gap-1.5">
           <svg class="h-3.5 w-3.5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            <path
+              fill-rule="evenodd"
+              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+              clip-rule="evenodd"></path>
           </svg>
           Family-Owned Since 2009
         </span>
@@ -164,19 +191,23 @@ const stats = [
   <section class="bg-white py-16 md:py-20">
     <div class="mx-auto max-w-6xl px-4">
       <h2
-        class="font-heading mb-3 text-center text-3xl uppercase md:text-4xl"
+        class="mb-3 text-center font-heading text-3xl uppercase md:text-4xl"
         style="color: #2C5234;"
       >
         What kind of turf do you manage?
       </h2>
       <p class="mx-auto mb-12 max-w-2xl text-center text-base leading-relaxed text-gray-500">
-        Same activated carbon, organic acids, and beneficial microbes — different programs. Whether you're a superintendent managing fairways or a homeowner who wants the yard your neighbors ask about, pick your path below.
+        Same activated carbon, organic acids, and beneficial microbes — different programs. Whether
+        you're a superintendent managing fairways or a homeowner who wants the yard your neighbors
+        ask about, pick your path below.
       </p>
 
       <!-- Primary cards: Turf Pros + Homeowners -->
       <div class="grid gap-8 md:grid-cols-2">
         <!-- Card A: Turf Pros -->
-        <div class="overflow-hidden rounded-xl border border-[#2C5234]/15 bg-[#F8FAF8] transition-all hover:border-[#2C5234]/30 hover:shadow-md">
+        <div
+          class="overflow-hidden rounded-xl border border-[#2C5234]/15 bg-[#F8FAF8] transition-all hover:border-[#2C5234]/30 hover:shadow-md"
+        >
           <img
             src="https://res.cloudinary.com/southland-organics/image/upload/c_fill,w_600,h_220,g_auto,f_auto,q_auto/v1774914801/Southland%20Website/heroes/lawn_result_ait3ra"
             alt="Professional turf field with deep green grass"
@@ -191,14 +222,20 @@ const stats = [
             </p>
 
             <p class="mb-5 text-sm leading-relaxed text-gray-600">
-              Your surfaces take a beating from traffic, heat, and inconsistent rain. Conventional programs mask the problem — our humic acid soil conditioners counteract stress by energizing soil with organic acids, carbon, and beneficial microbes. Deeper roots, faster recovery, lower input costs over time.
+              Your surfaces take a beating from traffic, heat, and inconsistent rain. Conventional
+              programs mask the problem — our humic acid soil conditioners counteract stress by
+              energizing soil with organic acids, carbon, and beneficial microbes. Deeper roots,
+              faster recovery, lower input costs over time.
             </p>
 
             <div
-              class="mb-6 inline-flex items-center gap-1.5 rounded-md bg-[#2C5234]/8 px-2.5 py-1 text-xs font-medium text-[#2C5234]"
+              class="bg-[#2C5234]/8 mb-6 inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-[#2C5234]"
             >
               <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                <path
+                  fill-rule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clip-rule="evenodd"></path>
               </svg>
               20-40% CEC increase — Soil Science Society of America
             </div>
@@ -211,7 +248,11 @@ const stats = [
               >
                 See the Turf Pro System
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 5l7 7-7 7"></path>
                 </svg>
               </a>
             </div>
@@ -223,7 +264,9 @@ const stats = [
         </div>
 
         <!-- Card B: Homeowners -->
-        <div class="overflow-hidden rounded-xl border border-[#44883E]/15 bg-[#F8FAF8] transition-all hover:border-[#44883E]/30 hover:shadow-md">
+        <div
+          class="overflow-hidden rounded-xl border border-[#44883E]/15 bg-[#F8FAF8] transition-all hover:border-[#44883E]/30 hover:shadow-md"
+        >
           <img
             src="https://res.cloudinary.com/southland-organics/image/upload/c_fill,w_600,h_220,g_auto,f_auto,q_auto/v1774912156/Southland%20Website/heroes/grass_kvxy54"
             alt="Lush green residential lawn — organic lawn care"
@@ -238,14 +281,21 @@ const stats = [
             </p>
 
             <p class="mb-5 text-sm leading-relaxed text-gray-600">
-              Other programs may seem to work quickly, but they strip your soil of vital organic matter. Our natural lawn fertilizer does the opposite — humic acid adds nutrient value, improves water-holding capacity, and stimulates root growth. Your grass gets stronger every season, not weaker. And your kids and pets can be on it right after you spray.
+              Other programs may seem to work quickly, but they strip your soil of vital organic
+              matter. Our natural lawn fertilizer does the opposite — humic acid adds nutrient
+              value, improves water-holding capacity, and stimulates root growth. Your grass gets
+              stronger every season, not weaker. And your kids and pets can be on it right after you
+              spray.
             </p>
 
             <div
-              class="mb-6 inline-flex items-center gap-1.5 rounded-md bg-[#44883E]/8 px-2.5 py-1 text-xs font-medium text-[#44883E]"
+              class="bg-[#44883E]/8 mb-6 inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-[#44883E]"
             >
               <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                <path
+                  fill-rule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clip-rule="evenodd"></path>
               </svg>
               Safe for kids, pets, and pollinators — apply and play
             </div>
@@ -258,7 +308,11 @@ const stats = [
               >
                 Shop Homeowner Products
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 5l7 7-7 7"></path>
                 </svg>
               </a>
             </div>
@@ -273,17 +327,30 @@ const stats = [
       <!-- Secondary cards: Landscapers + Golf Courses -->
       <div class="mt-8 grid gap-6 md:grid-cols-2">
         <!-- Card C: Landscapers -->
-        <div class="overflow-hidden rounded-xl border border-[#2C5234]/10 bg-[#F8FAF8] transition-all hover:border-[#2C5234]/25 hover:shadow-md">
+        <div
+          class="overflow-hidden rounded-xl border border-[#2C5234]/10 bg-[#F8FAF8] transition-all hover:border-[#2C5234]/25 hover:shadow-md"
+        >
           <div class="p-6">
-            <div class="mb-3 flex h-10 w-10 flex-shrink-0 items-center justify-center bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
+            <div
+              class="mb-3 flex h-10 w-10 flex-shrink-0 items-center justify-center bg-[#2C5234]"
+              style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
+            >
               <svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                ></path>
               </svg>
             </div>
             <h3 class="mb-1 text-base font-bold" style="color: #2C5234;">Landscapers</h3>
-            <p class="mb-3 text-sm text-gray-700">Fewer callbacks. Healthier properties. Better margins.</p>
+            <p class="mb-3 text-sm text-gray-700">
+              Fewer callbacks. Healthier properties. Better margins.
+            </p>
             <p class="mb-4 text-xs leading-relaxed text-gray-500">
-              Organic soil programs that build results across multiple properties — so your work speaks for itself.
+              Organic soil programs that build results across multiple properties — so your work
+              speaks for itself.
             </p>
             <a
               href="/lawn/landscapers/"
@@ -292,24 +359,40 @@ const stats = [
             >
               Landscaper Solutions
               <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"></path>
               </svg>
             </a>
           </div>
         </div>
 
         <!-- Card D: Golf Courses -->
-        <div class="overflow-hidden rounded-xl border border-[#2C5234]/10 bg-[#F8FAF8] transition-all hover:border-[#2C5234]/25 hover:shadow-md">
+        <div
+          class="overflow-hidden rounded-xl border border-[#2C5234]/10 bg-[#F8FAF8] transition-all hover:border-[#2C5234]/25 hover:shadow-md"
+        >
           <div class="p-6">
-            <div class="mb-3 flex h-10 w-10 flex-shrink-0 items-center justify-center bg-[#44883E]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
+            <div
+              class="mb-3 flex h-10 w-10 flex-shrink-0 items-center justify-center bg-[#44883E]"
+              style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
+            >
               <svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"></path>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"></path>
               </svg>
             </div>
             <h3 class="mb-1 text-base font-bold" style="color: #2C5234;">Golf Courses</h3>
-            <p class="mb-3 text-sm text-gray-700">Championship surfaces with sustainable biology.</p>
+            <p class="mb-3 text-sm text-gray-700">
+              Championship surfaces with sustainable biology.
+            </p>
             <p class="mb-4 text-xs leading-relaxed text-gray-500">
-              Humic acid and biochar programs built for sand-based rootzones, fairways, and greens complexes.
+              Humic acid and biochar programs built for sand-based rootzones, fairways, and greens
+              complexes.
             </p>
             <a
               href="/lawn/golf-courses/"
@@ -318,7 +401,11 @@ const stats = [
             >
               Golf Course Solutions
               <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"></path>
               </svg>
             </a>
           </div>
@@ -333,63 +420,69 @@ const stats = [
   <section id="products" class="border-t border-gray-100 bg-[#F8FAF8] py-16 md:py-20">
     <div class="mx-auto max-w-6xl px-4">
       <h2
-        class="font-heading mb-3 text-center text-3xl uppercase md:text-4xl"
+        class="mb-3 text-center font-heading text-3xl uppercase md:text-4xl"
         style="color: #2C5234;"
       >
         Organic lawn care products
       </h2>
       <p class="mx-auto mb-4 max-w-2xl text-center text-base leading-relaxed text-gray-500">
-        Every product below is made from humic acid sourced in coastal Georgia — a natural deposit of organic matter laid down hundreds of thousands of years ago. We turn it into soil conditioners, organic fertilizers, and microbial treatments that rebuild what conventional programs take away.
+        Every product below is made from humic acid sourced in coastal Georgia — a natural deposit
+        of organic matter laid down hundreds of thousands of years ago. We turn it into soil
+        conditioners, organic fertilizers, and microbial treatments that rebuild what conventional
+        programs take away.
       </p>
       <p class="mx-auto mb-12 max-w-2xl text-center text-sm text-gray-400">
         No residue. Safe for kids, pets, and pollinators. Ships same-day from Athens, GA.
       </p>
 
       <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {products.map((product) => (
-          <a
-            href={`/products/${product.handle}/`}
-            class="group flex flex-col rounded-xl border border-gray-200 bg-white p-4 transition-all hover:border-[#44883E]/30 hover:shadow-md"
-          >
-            {product.images?.[0] && (
-              <div class="relative mb-4 aspect-square overflow-hidden rounded-lg bg-gray-50">
-                <img
-                  src={product.images[0].url}
-                  alt={product.images[0].altText || product.title}
-                  width="300"
-                  height="300"
-                  class="h-full w-full object-contain transition-transform group-hover:scale-105"
-                  loading="lazy"
-                />
-              </div>
-            )}
-            <div class="flex flex-1 flex-col">
-              <h3 class="mb-1 text-sm font-bold text-gray-900 group-hover:text-[#2C5234]">
-                {product.title.includes('|') ? product.title.split('|')[0].trim() : product.title}
-              </h3>
-              {productSegments[product.handle] && (
-                <div class="mb-2 flex flex-wrap gap-1">
-                  {productSegments[product.handle].map((seg) => (
-                    <span class="rounded-full bg-[#2C5234]/8 px-2 py-0.5 text-[10px] font-medium text-[#2C5234]">
-                      {seg}
-                    </span>
-                  ))}
+        {
+          products.map((product) => (
+            <a
+              href={`/products/${product.handle}/`}
+              class="group flex flex-col rounded-xl border border-gray-200 bg-white p-4 transition-all hover:border-[#44883E]/30 hover:shadow-md"
+            >
+              {product.images?.[0] && (
+                <div class="relative mb-4 aspect-square overflow-hidden rounded-lg bg-gray-50">
+                  <img
+                    src={product.images[0].url}
+                    alt={product.images[0].altText || product.title}
+                    width="300"
+                    height="300"
+                    class="h-full w-full object-contain transition-transform group-hover:scale-105"
+                    loading="lazy"
+                  />
                 </div>
               )}
-              <p class="mb-3 flex-1 text-xs leading-relaxed text-gray-500">
-                {product.description?.slice(0, 100)}{product.description && product.description.length > 100 ? '…' : ''}
-              </p>
-              <div class="flex items-center justify-between">
-                <span class="text-sm font-semibold" style="color: #2C5234;">
-                  From {formatPrice(product.priceRange.minVariantPrice.amount)}
-                </span>
-                <span class="text-xs font-semibold text-[#44883E] group-hover:underline">
-                  View &rarr;
-                </span>
+              <div class="flex flex-1 flex-col">
+                <h3 class="mb-1 text-sm font-bold text-gray-900 group-hover:text-[#2C5234]">
+                  {product.title.includes('|') ? product.title.split('|')[0].trim() : product.title}
+                </h3>
+                {productSegments[product.handle] && (
+                  <div class="mb-2 flex flex-wrap gap-1">
+                    {productSegments[product.handle].map((seg) => (
+                      <span class="bg-[#2C5234]/8 rounded-full px-2 py-0.5 text-[10px] font-medium text-[#2C5234]">
+                        {seg}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <p class="mb-3 flex-1 text-xs leading-relaxed text-gray-500">
+                  {product.description?.slice(0, 100)}
+                  {product.description && product.description.length > 100 ? '…' : ''}
+                </p>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-semibold" style="color: #2C5234;">
+                    From {formatPrice(product.priceRange.minVariantPrice.amount)}
+                  </span>
+                  <span class="text-xs font-semibold text-[#44883E] group-hover:underline">
+                    View &rarr;
+                  </span>
+                </div>
               </div>
-            </div>
-          </a>
-        ))}
+            </a>
+          ))
+        }
       </div>
     </div>
   </section>
@@ -399,9 +492,7 @@ const stats = [
        ═══════════════════════════════════════════════════════════════════════ -->
   <section class="py-12 md:py-16" style="background: #2C5234;">
     <div class="mx-auto max-w-6xl px-4">
-      <h2
-        class="font-heading mb-10 text-center text-3xl uppercase text-white md:text-4xl"
-      >
+      <h2 class="mb-10 text-center font-heading text-3xl uppercase text-white md:text-4xl">
         The numbers behind the biology
       </h2>
 
@@ -411,16 +502,15 @@ const stats = [
             <div class="text-center">
               <div class="mb-1 text-3xl font-bold text-green-300 md:text-4xl">{stat.number}</div>
               <div class="text-sm leading-snug text-white">{stat.label}</div>
-              {stat.source && (
-                <div class="mt-1 text-xs text-green-200/60">{stat.source}</div>
-              )}
+              {stat.source && <div class="mt-1 text-xs text-green-200/60">{stat.source}</div>}
             </div>
           ))
         }
       </div>
 
       <div class="mt-8 text-center text-xs text-green-200/50">
-        Soil Science Society of America &middot; Superintendent field data &middot; Family-owned since 2009
+        Soil Science Society of America &middot; Superintendent field data &middot; Family-owned
+        since 2009
       </div>
     </div>
   </section>
@@ -428,64 +518,74 @@ const stats = [
   <!-- ═══════════════════════════════════════════════════════════════════════
        SECTION 5: LATEST LAWN & TURF INSIGHTS
        ═══════════════════════════════════════════════════════════════════════ -->
-  {lawnPosts.length > 0 && (
-    <section class="bg-white py-16 md:py-20">
-      <div class="mx-auto max-w-6xl px-4">
-        <div class="mb-10 flex items-end justify-between">
-          <div>
-            <h2
-              class="font-heading text-2xl uppercase md:text-3xl"
-              style="color: #2C5234;"
+  {
+    lawnPosts.length > 0 && (
+      <section class="bg-white py-16 md:py-20">
+        <div class="mx-auto max-w-6xl px-4">
+          <div class="mb-10 flex items-end justify-between">
+            <div>
+              <h2 class="font-heading text-2xl uppercase md:text-3xl" style="color: #2C5234;">
+                Latest lawn & turf insights
+              </h2>
+              <p class="mt-2 max-w-lg text-sm text-gray-500">
+                Guides, soil science, and field-tested advice from our team and the turf managers we
+                work with.
+              </p>
+            </div>
+            <a
+              href="/blog/?tag=Turf"
+              class="hidden items-center gap-1.5 text-sm font-semibold text-[#44883E] transition-colors hover:text-[#2C5234] md:inline-flex"
             >
-              Latest lawn & turf insights
-            </h2>
-            <p class="mt-2 max-w-lg text-sm text-gray-500">
-              Guides, soil science, and field-tested advice from our team and the turf managers we work with.
-            </p>
+              All turf articles
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </a>
           </div>
-          <a
-            href="/blog/?tag=Turf"
-            class="hidden items-center gap-1.5 text-sm font-semibold text-[#44883E] transition-colors hover:text-[#2C5234] md:inline-flex"
-          >
-            All turf articles
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-          </a>
+          <div class="grid gap-6 md:grid-cols-3">
+            {lawnPosts.map((post) => (
+              <BlogCard
+                title={post.data.title}
+                slug={post.id.replace(/\.mdx?$/, '')}
+                description={post.data.description}
+                publishDate={post.data.publishDate}
+                featuredImage={post.data.featuredImage}
+                segment={post.data.segment}
+              />
+            ))}
+          </div>
+          <div class="mt-8 text-center md:hidden">
+            <a
+              href="/blog/?tag=Turf"
+              class="inline-flex items-center gap-1.5 text-sm font-semibold text-[#44883E]"
+            >
+              All turf articles
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </a>
+          </div>
         </div>
-        <div class="grid gap-6 md:grid-cols-3">
-          {lawnPosts.map((post) => (
-            <BlogCard
-              title={post.data.title}
-              slug={post.id.replace(/\.mdx?$/, '')}
-              description={post.data.description}
-              publishDate={post.data.publishDate}
-              featuredImage={post.data.featuredImage}
-              segment={post.data.segment}
-            />
-          ))}
-        </div>
-        <div class="mt-8 text-center md:hidden">
-          <a
-            href="/blog/?tag=Turf"
-            class="inline-flex items-center gap-1.5 text-sm font-semibold text-[#44883E]"
-          >
-            All turf articles
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-          </a>
-        </div>
-      </div>
-    </section>
-  )}
+      </section>
+    )
+  }
 
   <!-- ═══════════════════════════════════════════════════════════════════════
        SECTION 6: FINAL CTA
        ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-[#2C5234] py-16 md:py-20">
     <div class="mx-auto max-w-4xl px-4 text-center">
-      <h2 class="font-heading mb-4 text-3xl uppercase text-white md:text-4xl">
+      <h2 class="mb-4 font-heading text-3xl uppercase text-white md:text-4xl">
         Not sure where to start?
       </h2>
 
@@ -519,16 +619,19 @@ const stats = [
         </a>
       </div>
 
-      <p class="mt-4 text-green-200">
-        Call or text Brad — he talks soil, not sales.
-      </p>
+      <p class="mt-4 text-green-200">Call or text Brad — he talks soil, not sales.</p>
 
       <a
         href="mailto:info@southlandorganics.com"
         class="mt-2 inline-flex items-center gap-2 text-sm font-medium text-green-300 underline decoration-green-300/40 underline-offset-2 transition-colors hover:text-white"
       >
         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+          ></path>
         </svg>
         Prefer email? info@southlandorganics.com
       </a>

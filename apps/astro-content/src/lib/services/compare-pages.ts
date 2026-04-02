@@ -151,11 +151,13 @@ function extractPageData(html: string, url: string, urlPath: string): PageData {
   const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i)
   const title = titleMatch ? titleMatch[1].trim() : ''
 
-  const metaDescMatch = html.match(/<meta\s+name=["']description["']\s+content=["']([^"']+)["']/i)
-    || html.match(/<meta\s+content=["']([^"']+)["']\s+name=["']description["']/i)
+  const metaDescMatch =
+    html.match(/<meta\s+name=["']description["']\s+content=["']([^"']+)["']/i) ||
+    html.match(/<meta\s+content=["']([^"']+)["']\s+name=["']description["']/i)
   const metaDescription = metaDescMatch ? metaDescMatch[1] : ''
 
-  const bodyMatch = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i) || html.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
+  const bodyMatch =
+    html.match(/<main[^>]*>([\s\S]*?)<\/main>/i) || html.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
   const rawBody = bodyMatch ? bodyMatch[1] : html
   const bodyText = rawBody
     .replace(/<script[\s\S]*?<\/script>/gi, '')
@@ -173,7 +175,7 @@ function extractPageData(html: string, url: string, urlPath: string): PageData {
   const imgCount = (html.match(/<img\s/gi) || []).length
 
   const productLinks = html.match(/\/products\/([a-z0-9-]+)/gi) || []
-  const productHandles = [...new Set(productLinks.map(l => l.replace('/products/', '')))]
+  const productHandles = [...new Set(productLinks.map((l) => l.replace('/products/', '')))]
 
   const allLinks = html.match(/<a\s[^>]*href=["']([^"']+)["']/gi) || []
   let internalLinks = 0
@@ -188,15 +190,20 @@ function extractPageData(html: string, url: string, urlPath: string): PageData {
   }
 
   const schemaTypes: string[] = []
-  const ldJsonMatches = html.match(/<script\s+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi) || []
+  const ldJsonMatches =
+    html.match(/<script\s+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi) || []
   for (const block of ldJsonMatches) {
     const content = block.replace(/<[^>]+>/g, '')
     try {
       const parsed = JSON.parse(content)
       if (Array.isArray(parsed)) {
-        for (const item of parsed) { if (item['@type']) schemaTypes.push(item['@type']) }
+        for (const item of parsed) {
+          if (item['@type']) schemaTypes.push(item['@type'])
+        }
       } else if (parsed['@type']) schemaTypes.push(parsed['@type'])
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }
 
   let pageType = 'page'
@@ -238,13 +245,22 @@ export async function fetchNewPageData(urlPath: string, origin: string): Promise
     const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i)
     const title = titleMatch ? titleMatch[1].trim() : ''
 
-    const metaDescMatch = html.match(/<meta\s+name=["']description["']\s+content=["']([^"']+)["']/i)
-      || html.match(/<meta\s+content=["']([^"']+)["']\s+name=["']description["']/i)
+    const metaDescMatch =
+      html.match(/<meta\s+name=["']description["']\s+content=["']([^"']+)["']/i) ||
+      html.match(/<meta\s+content=["']([^"']+)["']\s+name=["']description["']/i)
     const metaDescription = metaDescMatch ? metaDescMatch[1] : ''
 
-    const bodyMatch = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i) || html.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
+    const bodyMatch =
+      html.match(/<main[^>]*>([\s\S]*?)<\/main>/i) || html.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
     const rawBody = bodyMatch ? bodyMatch[1] : html
-    const bodyText = rawBody.replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<nav[\s\S]*?<\/nav>/gi, '').replace(/<footer[\s\S]*?<\/footer>/gi, '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+    const bodyText = rawBody
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[\s\S]*?<\/style>/gi, '')
+      .replace(/<nav[\s\S]*?<\/nav>/gi, '')
+      .replace(/<footer[\s\S]*?<\/footer>/gi, '')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
 
     const h1Match = html.match(/<h1[^>]*>([^<]+)<\/h1>/i)
     const h1 = h1Match ? h1Match[1].trim() : ''
@@ -254,7 +270,7 @@ export async function fetchNewPageData(urlPath: string, origin: string): Promise
 
     // Extract product handles from links
     const productLinks = html.match(/\/products\/([a-z0-9-]+)/gi) || []
-    const productHandles = [...new Set(productLinks.map(l => l.replace('/products/', '')))]
+    const productHandles = [...new Set(productLinks.map((l) => l.replace('/products/', '')))]
 
     // Count links
     const allLinks = html.match(/<a\s[^>]*href=["']([^"']+)["']/gi) || []
@@ -271,7 +287,8 @@ export async function fetchNewPageData(urlPath: string, origin: string): Promise
 
     // Detect schema types
     const schemaTypes: string[] = []
-    const ldJsonMatches = html.match(/<script\s+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi) || []
+    const ldJsonMatches =
+      html.match(/<script\s+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi) || []
     for (const block of ldJsonMatches) {
       const content = block.replace(/<[^>]+>/g, '')
       try {
@@ -283,14 +300,22 @@ export async function fetchNewPageData(urlPath: string, origin: string): Promise
         } else if (parsed['@type']) {
           schemaTypes.push(parsed['@type'])
         }
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
 
     // Detect page type
     let pageType = 'page'
     if (urlPath.startsWith('/blog/')) pageType = 'blog'
     else if (urlPath.startsWith('/products/')) pageType = 'product'
-    else if (urlPath.includes('/collections/') || urlPath.startsWith('/lawn/') || urlPath.startsWith('/agriculture/') || urlPath.startsWith('/livestock/')) pageType = 'collection'
+    else if (
+      urlPath.includes('/collections/') ||
+      urlPath.startsWith('/lawn/') ||
+      urlPath.startsWith('/agriculture/') ||
+      urlPath.startsWith('/livestock/')
+    )
+      pageType = 'collection'
     else if (urlPath.startsWith('/poultry/') && urlPath !== '/poultry/') pageType = 'landing'
     else if (urlPath === '/') pageType = 'homepage'
 
@@ -321,18 +346,19 @@ export async function fetchNewPageData(urlPath: string, origin: string): Promise
 // =============================================================================
 
 export function computeDelta(live: PageData, new_: PageData): ComparisonDelta {
-  const productsKept = live.productHandles.filter(h => new_.productHandles.includes(h))
-  const productsLost = live.productHandles.filter(h => !new_.productHandles.includes(h))
-  const productsAdded = new_.productHandles.filter(h => !live.productHandles.includes(h))
+  const productsKept = live.productHandles.filter((h) => new_.productHandles.includes(h))
+  const productsLost = live.productHandles.filter((h) => !new_.productHandles.includes(h))
+  const productsAdded = new_.productHandles.filter((h) => !live.productHandles.includes(h))
 
-  const schemaKept = live.schemaTypes.filter(s => new_.schemaTypes.includes(s))
-  const schemaLost = live.schemaTypes.filter(s => !new_.schemaTypes.includes(s))
-  const schemaAdded = new_.schemaTypes.filter(s => !live.schemaTypes.includes(s))
+  const schemaKept = live.schemaTypes.filter((s) => new_.schemaTypes.includes(s))
+  const schemaLost = live.schemaTypes.filter((s) => !new_.schemaTypes.includes(s))
+  const schemaAdded = new_.schemaTypes.filter((s) => !live.schemaTypes.includes(s))
 
   const pageTypeChanged = live.pageType !== new_.pageType
   const pageTypeNote = pageTypeChanged ? `${live.pageType} → ${new_.pageType}` : ''
 
-  const primaryProductKept = !live.primaryProduct || new_.productHandles.includes(live.primaryProduct)
+  const primaryProductKept =
+    !live.primaryProduct || new_.productHandles.includes(live.primaryProduct)
 
   return {
     wordCountDelta: new_.wordCount - live.wordCount,
@@ -356,7 +382,11 @@ export function computeDelta(live: PageData, new_: PageData): ComparisonDelta {
 // COMPUTE VERDICT
 // =============================================================================
 
-export function computeVerdict(live: PageData | null, new_: PageData | null, delta: ComparisonDelta | null): Verdict {
+export function computeVerdict(
+  live: PageData | null,
+  new_: PageData | null,
+  delta: ComparisonDelta | null
+): Verdict {
   // No new page mapped
   if (!new_) {
     return {
@@ -386,8 +416,8 @@ export function computeVerdict(live: PageData | null, new_: PageData | null, del
 
   // Semantic similarity (if available)
   if (delta.semanticSimilarity !== null) {
-    if (delta.semanticSimilarity > 0.80) score += 25
-    else if (delta.semanticSimilarity > 0.70) score += 15
+    if (delta.semanticSimilarity > 0.8) score += 25
+    else if (delta.semanticSimilarity > 0.7) score += 15
     else score += 5
   } else {
     score += 15 // neutral if no embedding
@@ -414,7 +444,7 @@ export function computeVerdict(live: PageData | null, new_: PageData | null, del
 
   // Critical schema
   const criticalSchema = ['Product', 'FAQPage', 'BreadcrumbList']
-  const critSchemaLost = delta.schemaLost.filter(s => criticalSchema.includes(s))
+  const critSchemaLost = delta.schemaLost.filter((s) => criticalSchema.includes(s))
   if (critSchemaLost.length === 0) {
     score += 15
   } else {
@@ -425,10 +455,16 @@ export function computeVerdict(live: PageData | null, new_: PageData | null, del
   // Word count
   if (delta.wordCountDelta >= 0) {
     score += 10
-    if (delta.wordCountDelta > 500) improvements.push(`+${delta.wordCountDelta} words (more comprehensive)`)
-  } else if (delta.wordCountDelta < -(live.wordCount * 0.5) && (delta.semanticSimilarity === null || delta.semanticSimilarity < 0.70)) {
+    if (delta.wordCountDelta > 500)
+      improvements.push(`+${delta.wordCountDelta} words (more comprehensive)`)
+  } else if (
+    delta.wordCountDelta < -(live.wordCount * 0.5) &&
+    (delta.semanticSimilarity === null || delta.semanticSimilarity < 0.7)
+  ) {
     score -= 15
-    issues.push(`Word count dropped ${Math.abs(delta.wordCountDelta)} words (${Math.round(Math.abs(delta.wordCountDelta) / live.wordCount * 100)}% reduction)`)
+    issues.push(
+      `Word count dropped ${Math.abs(delta.wordCountDelta)} words (${Math.round((Math.abs(delta.wordCountDelta) / live.wordCount) * 100)}% reduction)`
+    )
   }
 
   // Meta description
@@ -466,7 +502,16 @@ export function computeVerdict(live: PageData | null, new_: PageData | null, del
 // GET ALL LIVE URLS
 // =============================================================================
 
-export async function getAllLiveUrls(): Promise<{ url: string; urlPath: string; pageType: string; title: string; wordCount: number; crawlTimestamp: string }[]> {
+export async function getAllLiveUrls(): Promise<
+  {
+    url: string
+    urlPath: string
+    pageType: string
+    title: string
+    wordCount: number
+    crawlTimestamp: string
+  }[]
+> {
   const client = getSouthlandClient()
   if (!client) return []
 

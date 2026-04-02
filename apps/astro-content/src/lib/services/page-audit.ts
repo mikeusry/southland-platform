@@ -9,13 +9,7 @@
 // TYPES
 // =============================================================================
 
-export type PageArchetype =
-  | 'storybrand-landing'
-  | 'hub'
-  | 'utility'
-  | 'content'
-  | 'shop'
-  | 'proxy'
+export type PageArchetype = 'storybrand-landing' | 'hub' | 'utility' | 'content' | 'shop' | 'proxy'
 
 export type PersonaId = 'bill' | 'betty' | 'taylor' | 'sam' | 'general'
 
@@ -47,7 +41,7 @@ export interface AuditResult {
     seo: AuditCategory
     products: AuditCategory | null
     originality: AuditCategory | null // stub
-    voice: AuditCategory | null       // stub
+    voice: AuditCategory | null // stub
   }
   overallGrade: Grade
   verdict: AuditVerdict
@@ -155,10 +149,9 @@ function extractText(html: string): string {
     .trim()
 }
 
-/** Check for emoji characters in text (Unicode ranges for common emoji) */
+/** Check for emoji characters in text */
 function hasEmoji(text: string): boolean {
-  // Matches common emoji ranges
-  return /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{231A}\u{231B}\u{23E9}-\u{23F3}\u{23F8}-\u{23FA}\u{25AA}\u{25AB}\u{25B6}\u{25C0}\u{25FB}-\u{25FE}\u{2614}\u{2615}\u{2648}-\u{2653}\u{267F}\u{2693}\u{26A1}\u{26AA}\u{26AB}\u{26BD}\u{26BE}\u{26C4}\u{26C5}\u{26CE}\u{26D4}\u{26EA}\u{26F2}\u{26F3}\u{26F5}\u{26FA}\u{26FD}]/u.test(text)
+  return /\p{Emoji_Presentation}/u.test(text)
 }
 
 export function extractPageData(html: string): ExtractedPageData {
@@ -171,44 +164,60 @@ export function extractPageData(html: string): ExtractedPageData {
   const title = titleMatch ? titleMatch[1].trim() : ''
 
   // Meta description — use separate patterns for " and ' to handle apostrophes in content
-  const metaDescMatch = head.match(/<meta\s+name=["']description["']\s+content="([^"]+)"/i)
-    || head.match(/<meta\s+name=["']description["']\s+content='([^']+)'/i)
-    || head.match(/<meta\s+content="([^"]+)"\s+name=["']description["']/i)
-    || head.match(/<meta\s+content='([^']+)'\s+name=["']description["']/i)
+  const metaDescMatch =
+    head.match(/<meta\s+name=["']description["']\s+content="([^"]+)"/i) ||
+    head.match(/<meta\s+name=["']description["']\s+content='([^']+)'/i) ||
+    head.match(/<meta\s+content="([^"]+)"\s+name=["']description["']/i) ||
+    head.match(/<meta\s+content='([^']+)'\s+name=["']description["']/i)
   const metaDescription = metaDescMatch ? metaDescMatch[1] : ''
 
   // Canonical
-  const canonicalMatch = head.match(/<link\s+rel=["']canonical["']\s+href=["']([^"']+)["']/i)
-    || head.match(/<link\s+href=["']([^"']+)["']\s+rel=["']canonical["']/i)
+  const canonicalMatch =
+    head.match(/<link\s+rel=["']canonical["']\s+href=["']([^"']+)["']/i) ||
+    head.match(/<link\s+href=["']([^"']+)["']\s+rel=["']canonical["']/i)
   const canonical = canonicalMatch ? canonicalMatch[1] : null
 
   // OG tags
   const ogTags: Record<string, string> = {}
-  const ogMatches = head.matchAll(/<meta\s+(?:property|name)=["'](og:[^"']+)["']\s+content=["']([^"']+)["']/gi)
+  const ogMatches = head.matchAll(
+    /<meta\s+(?:property|name)=["'](og:[^"']+)["']\s+content=["']([^"']+)["']/gi
+  )
   for (const m of ogMatches) ogTags[m[1]] = m[2]
   // Also try reversed attribute order
-  const ogMatches2 = head.matchAll(/<meta\s+content=["']([^"']+)["']\s+(?:property|name)=["'](og:[^"']+)["']/gi)
+  const ogMatches2 = head.matchAll(
+    /<meta\s+content=["']([^"']+)["']\s+(?:property|name)=["'](og:[^"']+)["']/gi
+  )
   for (const m of ogMatches2) ogTags[m[2]] = m[1]
 
   // Twitter tags
   const twitterTags: Record<string, string> = {}
-  const twMatches = head.matchAll(/<meta\s+(?:property|name)=["'](twitter:[^"']+)["']\s+content=["']([^"']+)["']/gi)
+  const twMatches = head.matchAll(
+    /<meta\s+(?:property|name)=["'](twitter:[^"']+)["']\s+content=["']([^"']+)["']/gi
+  )
   for (const m of twMatches) twitterTags[m[1]] = m[2]
-  const twMatches2 = head.matchAll(/<meta\s+content=["']([^"']+)["']\s+(?:property|name)=["'](twitter:[^"']+)["']/gi)
+  const twMatches2 = head.matchAll(
+    /<meta\s+content=["']([^"']+)["']\s+(?:property|name)=["'](twitter:[^"']+)["']/gi
+  )
   for (const m of twMatches2) twitterTags[m[2]] = m[1]
 
   // Schema.org JSON-LD
   const schemaTypes: string[] = []
   const schemaData: any[] = []
-  const ldMatches = html.matchAll(/<script\s+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)
+  const ldMatches = html.matchAll(
+    /<script\s+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi
+  )
   for (const m of ldMatches) {
     try {
       const parsed = JSON.parse(m[1])
       schemaData.push(parsed)
       if (Array.isArray(parsed)) {
-        for (const item of parsed) { if (item['@type']) schemaTypes.push(item['@type']) }
+        for (const item of parsed) {
+          if (item['@type']) schemaTypes.push(item['@type'])
+        }
       } else if (parsed['@type']) schemaTypes.push(parsed['@type'])
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }
 
   // Detect prose containers that apply font-heading via CSS (prose-headings:font-heading)
@@ -242,7 +251,10 @@ export function extractPageData(html: string): ExtractedPageData {
     const tag = match[1].toLowerCase()
     const attrs = match[2]
     const text = match[3].replace(/<[^>]+>/g, '').trim()
-    const hasFH = /font-heading/.test(attrs) || /class=["'][^"']*font-heading/.test(match[0]) || proseHeadingFHContent.has(text)
+    const hasFH =
+      /font-heading/.test(attrs) ||
+      /class=["'][^"']*font-heading/.test(match[0]) ||
+      proseHeadingFHContent.has(text)
     headings.push({ tag, text, hasFontHeading: hasFH })
     if (tag === 'h1') {
       h1Count++
@@ -308,27 +320,31 @@ export function extractPageData(html: string): ExtractedPageData {
 
   // Architecture detection (StoryBrand sections)
   // Note: check full `html` for clip-path/polygon since they may be in <style> blocks
-  const hasCloudinaryHero = /CloudinaryHero|cloudinary.*hero/i.test(html) ||
+  const hasCloudinaryHero =
+    /CloudinaryHero|cloudinary.*hero/i.test(html) ||
     (/<div[^>]*class="[^"]*hero[^"]*"/.test(body) && /<h1/.test(body))
   const hasHexInPage = /clip-path[:\s]*polygon\(50% 0%/i.test(html)
-  const hasProblemSection = (
+  const hasProblemSection =
     // Check for problem card patterns: 3-card grid with problem language
     (/problem|external.*internal.*philosophical|treadmill|guilt|frustrat/i.test(body) &&
       (body.match(/md:grid-cols-3|grid-cols-3/gi) || []).length >= 1) ||
     // Or explicit problem/challenge section with hex icons
     (/problem|challenge/i.test(body) && hasHexInPage)
-  )
-  const hasJtbdSection = /job|jtbd|product-card|CollectionProductCard/i.test(body) &&
+  const hasJtbdSection =
+    /job|jtbd|product-card|CollectionProductCard/i.test(body) &&
     (body.match(/<img/gi) || []).length > 2
-  const hasShopGrid = /product-grid|collection-grid|CollectionProductCard/i.test(body) ||
+  const hasShopGrid =
+    /product-grid|collection-grid|CollectionProductCard/i.test(body) ||
     (body.match(/\/products\//gi) || []).length >= 3
-  const hasProofBand = /bg-\[#2C5234\]|bg-\[#2c5234\]/.test(body) &&
-    (body.match(/\d+[+%x]/g) || []).length >= 2
+  const hasProofBand =
+    /bg-\[#2C5234\]|bg-\[#2c5234\]/.test(body) && (body.match(/\d+[+%x]/g) || []).length >= 2
   const hasFaqSection = /<details|AccordionFaq|accordion/i.test(body)
   const hasFinalCta = (() => {
     const lastThird = body.slice(Math.floor(body.length * 0.66))
-    return (/bg-\[#2C5234\]|bg-\[#2c5234\]/.test(lastThird) || /bg-brand-dark/.test(lastThird)) &&
+    return (
+      (/bg-\[#2C5234\]|bg-\[#2c5234\]/.test(lastThird) || /bg-brand-dark/.test(lastThird)) &&
       /<a\s/.test(lastThird)
+    )
   })()
 
   // Hex icons — check full html since clip-path may be in <style>
@@ -338,12 +354,13 @@ export function extractPageData(html: string): ExtractedPageData {
   const hasEmojiIcons = hasEmoji(body)
 
   // Section count (top-level <section> tags or py-16/py-20 divs)
-  const sectionCount = (body.match(/<section[\s>]/gi) || []).length +
+  const sectionCount =
+    (body.match(/<section[\s>]/gi) || []).length +
     (body.match(/class="[^"]*py-(?:16|20)[^"]*"/gi) || []).length
 
   // Generic template detection: few sections + prose + grid = boring
-  const isGenericTemplate = sectionCount < 5 &&
-    !hasCloudinaryHero && !hasProblemSection && !hasFaqSection
+  const isGenericTemplate =
+    sectionCount < 5 && !hasCloudinaryHero && !hasProblemSection && !hasFaqSection
 
   // Brand colors in classes/styles — scan full HTML since proof bands
   // and CTA sections with brand colors often sit outside <main>
@@ -359,14 +376,15 @@ export function extractPageData(html: string): ExtractedPageData {
 
   // Product handles
   const productLinks = body.match(/\/products\/([a-z0-9-]+)/gi) || []
-  const productHandles = [...new Set(productLinks.map(l => l.replace('/products/', '')))]
+  const productHandles = [...new Set(productLinks.map((l) => l.replace('/products/', '')))]
 
   // ── Voice / Copy analysis ──────────────────────────────────────────────────
 
   // CTA text extraction (buttons and styled links that look like CTAs)
   // Match: <a/button> with btn class, rounded-*/px- (Tailwind button pattern), or role="button"
   // Scan full HTML since CTAs often live in sections outside <main> (proof bands, final CTA)
-  const ctaRegex = /<(?:a|button)\s[^>]*(?:class="[^"]*(?:btn|rounded-(?:lg|xl|full)[^"]*px-)[^"]*"|role="button")[^>]*>([\s\S]*?)<\/(?:a|button)>/gi
+  const ctaRegex =
+    /<(?:a|button)\s[^>]*(?:class="[^"]*(?:btn|rounded-(?:lg|xl|full)[^"]*px-)[^"]*"|role="button")[^>]*>([\s\S]*?)<\/(?:a|button)>/gi
   const ctaTexts: string[] = []
   while ((match = ctaRegex.exec(html)) !== null) {
     const text = match[1].replace(/<[^>]+>/g, '').trim()
@@ -374,33 +392,64 @@ export function extractPageData(html: string): ExtractedPageData {
   }
 
   // Generic CTAs vs specific
-  const genericCtaPatterns = /^(submit|learn more|click here|read more|get started|contact us|sign up)$/i
-  const hasGenericCTAs = ctaTexts.some(t => genericCtaPatterns.test(t))
-  const hasSpecificCTAs = ctaTexts.some(t => !genericCtaPatterns.test(t) && t.length > 3)
+  const genericCtaPatterns =
+    /^(submit|learn more|click here|read more|get started|contact us|sign up)$/i
+  const hasGenericCTAs = ctaTexts.some((t) => genericCtaPatterns.test(t))
+  const hasSpecificCTAs = ctaTexts.some((t) => !genericCtaPatterns.test(t) && t.length > 3)
 
   // Social proof signals
   const hasTestimonials = /testimonial|"[^"]{20,}".*—|quote|customer.*said|grower.*said/i.test(body)
-  const hasStats = (bodyText.match(/\d+[+%x]|\d+\s*(?:percent|million|thousand|acres|birds|houses|flocks)/gi) || []).length >= 2
+  const hasStats =
+    (
+      bodyText.match(/\d+[+%x]|\d+\s*(?:percent|million|thousand|acres|birds|houses|flocks)/gi) ||
+      []
+    ).length >= 2
   const hasCaseStudies = /case\s*stud|success\s*stor|spotlight|real.*result/i.test(body)
-  const hasResearchCitations = /university|uga|study|research|peer.*review|published|journal/i.test(bodyText)
+  const hasResearchCitations = /university|uga|study|research|peer.*review|published|journal/i.test(
+    bodyText
+  )
 
   // Problem-first detection: does the page lead with problem before solution?
   // Check first 20% of body text
   const firstFifth = bodyText.substring(0, Math.floor(bodyText.length * 0.2)).toLowerCase()
-  const problemSignals = (firstFifth.match(/problem|challenge|struggle|frustrat|worry|risk|loss|mortalit|ammonia|stress|cost|expense|fail|wrong/g) || []).length
-  const solutionSignals = (firstFifth.match(/solution|product|buy|shop|order|our.*product|we offer/g) || []).length
+  const problemSignals = (
+    firstFifth.match(
+      /problem|challenge|struggle|frustrat|worry|risk|loss|mortalit|ammonia|stress|cost|expense|fail|wrong/g
+    ) || []
+  ).length
+  const solutionSignals = (
+    firstFifth.match(/solution|product|buy|shop|order|our.*product|we offer/g) || []
+  ).length
   const isProblemFirst = problemSignals > solutionSignals || problemSignals >= 2
 
   // Persona keyword detection
   const personaKeywords: Record<string, RegExp[]> = {
-    bill: [/fcr/i, /mortality/i, /settlement/i, /integrator/i, /broiler/i, /operation/i, /house/i, /flock/i, /grower/i],
+    bill: [
+      /fcr/i,
+      /mortality/i,
+      /settlement/i,
+      /integrator/i,
+      /broiler/i,
+      /operation/i,
+      /house/i,
+      /flock/i,
+      /grower/i,
+    ],
     betty: [/backyard/i, /flock/i, /healthy.*egg/i, /coop/i, /hen/i, /chick/i, /roost/i],
-    taylor: [/turf/i, /fairway/i, /application.*rate/i, /coverage/i, /green.*up/i, /soil.*test/i, /lawn/i],
+    taylor: [
+      /turf/i,
+      /fairway/i,
+      /application.*rate/i,
+      /coverage/i,
+      /green.*up/i,
+      /soil.*test/i,
+      /lawn/i,
+    ],
     sam: [/lagoon/i, /waste/i, /swine/i, /odor/i, /sludge/i, /treatment/i],
   }
   const personaKeywordHits: Record<string, number> = {}
   for (const [persona, patterns] of Object.entries(personaKeywords)) {
-    personaKeywordHits[persona] = patterns.filter(p => p.test(bodyText)).length
+    personaKeywordHits[persona] = patterns.filter((p) => p.test(bodyText)).length
   }
 
   return {
@@ -463,8 +512,8 @@ export function extractPageData(html: string): ExtractedPageData {
 // =============================================================================
 
 function gradeFromChecks(checks: AuditCheck[]): Grade {
-  const fails = checks.filter(c => c.status === 'fail').length
-  const warns = checks.filter(c => c.status === 'warn').length
+  const fails = checks.filter((c) => c.status === 'fail').length
+  const warns = checks.filter((c) => c.status === 'warn').length
   if (fails === 0 && warns === 0) return 'A'
   if (fails === 0 && warns <= 2) return 'B'
   if (fails <= 1) return 'C'
@@ -484,12 +533,16 @@ export function auditArchitecture(data: ExtractedPageData): AuditCategory {
     {
       label: 'Problem section (3 hex-icon cards)',
       status: data.hasProblemSection ? 'pass' : 'fail',
-      detail: data.hasProblemSection ? undefined : 'Missing problem cards (External, Internal, Philosophical)',
+      detail: data.hasProblemSection
+        ? undefined
+        : 'Missing problem cards (External, Internal, Philosophical)',
     },
     {
       label: 'JTBD / Product sections',
       status: data.hasJtbdSection ? 'pass' : 'fail',
-      detail: data.hasJtbdSection ? undefined : 'Missing job-to-be-done cards with product images + prices',
+      detail: data.hasJtbdSection
+        ? undefined
+        : 'Missing job-to-be-done cards with product images + prices',
     },
     {
       label: 'Shop grid (filtered product cards)',
@@ -531,21 +584,28 @@ export function auditArchitecture(data: ExtractedPageData): AuditCategory {
 // --- Design Audit ---
 
 export function auditDesign(data: ExtractedPageData): AuditCategory {
-  const h1h2Headings = data.headings.filter(h => h.tag === 'h1' || h.tag === 'h2')
-  const h1h2WithFontHeading = h1h2Headings.filter(h => h.hasFontHeading)
-  const allH1H2HaveFH = h1h2Headings.length > 0 && h1h2WithFontHeading.length === h1h2Headings.length
+  const h1h2Headings = data.headings.filter((h) => h.tag === 'h1' || h.tag === 'h2')
+  const h1h2WithFontHeading = h1h2Headings.filter((h) => h.hasFontHeading)
+  const allH1H2HaveFH =
+    h1h2Headings.length > 0 && h1h2WithFontHeading.length === h1h2Headings.length
 
   const checks: AuditCheck[] = [
     {
       label: 'H1/H2 use font-heading (Eveleth Dot)',
       status: allH1H2HaveFH ? 'pass' : 'fail',
-      detail: allH1H2HaveFH ? `${h1h2WithFontHeading.length}/${h1h2Headings.length} have font-heading` :
-        `${h1h2WithFontHeading.length}/${h1h2Headings.length} have font-heading. Missing: ${h1h2Headings.filter(h => !h.hasFontHeading).map(h => `${h.tag} "${h.text.substring(0, 30)}"`).join(', ')}`,
+      detail: allH1H2HaveFH
+        ? `${h1h2WithFontHeading.length}/${h1h2Headings.length} have font-heading`
+        : `${h1h2WithFontHeading.length}/${h1h2Headings.length} have font-heading. Missing: ${h1h2Headings
+            .filter((h) => !h.hasFontHeading)
+            .map((h) => `${h.tag} "${h.text.substring(0, 30)}"`)
+            .join(', ')}`,
     },
     {
       label: 'No emoji in icon positions',
       status: data.hasEmojiIcons ? 'fail' : 'pass',
-      detail: data.hasEmojiIcons ? 'Emoji detected — replace with SVG in hex containers' : undefined,
+      detail: data.hasEmojiIcons
+        ? 'Emoji detected — replace with SVG in hex containers'
+        : undefined,
     },
     {
       label: 'Hex clip-path icon containers',
@@ -554,7 +614,7 @@ export function auditDesign(data: ExtractedPageData): AuditCategory {
     },
     {
       label: 'Brand colors present',
-      status: (data.brandColors.darkGreen > 0 || data.brandColors.lightGreen > 0) ? 'pass' : 'warn',
+      status: data.brandColors.darkGreen > 0 || data.brandColors.lightGreen > 0 ? 'pass' : 'warn',
       detail: `Dark green: ${data.brandColors.darkGreen}, Light green: ${data.brandColors.lightGreen}`,
     },
     {
@@ -570,7 +630,10 @@ export function auditDesign(data: ExtractedPageData): AuditCategory {
     {
       label: 'Cloudinary optimization (f_auto, q_auto)',
       status: data.cloudinaryUnoptimized === 0 ? 'pass' : 'warn',
-      detail: data.cloudinaryUnoptimized > 0 ? `${data.cloudinaryUnoptimized} Cloudinary images missing f_auto/q_auto` : undefined,
+      detail:
+        data.cloudinaryUnoptimized > 0
+          ? `${data.cloudinaryUnoptimized} Cloudinary images missing f_auto/q_auto`
+          : undefined,
     },
   ]
 
@@ -586,26 +649,40 @@ export function auditDesign(data: ExtractedPageData): AuditCategory {
 // --- SEO Audit ---
 
 export function auditSeo(data: ExtractedPageData): AuditCategory {
-  const ogComplete = !!(data.ogTags['og:title'] && data.ogTags['og:description'] && data.ogTags['og:image'])
+  const ogComplete = !!(
+    data.ogTags['og:title'] &&
+    data.ogTags['og:description'] &&
+    data.ogTags['og:image']
+  )
   const twComplete = !!(data.twitterTags['twitter:card'] || data.twitterTags['twitter:title'])
   const isPodcastDefault = data.ogTags['og:image']?.includes('podcast') || false
   const bodyLinkCount = data.bodyInternalLinks.length
-  const hasDiverseLinks = (data.bodyLinkDiversity.blog > 0 ? 1 : 0) +
-    (data.bodyLinkDiversity.hubs > 0 ? 1 : 0) +
-    (data.bodyLinkDiversity.products > 0 ? 1 : 0) +
-    (data.bodyLinkDiversity.other > 0 ? 1 : 0) >= 2
+  const hasDiverseLinks =
+    (data.bodyLinkDiversity.blog > 0 ? 1 : 0) +
+      (data.bodyLinkDiversity.hubs > 0 ? 1 : 0) +
+      (data.bodyLinkDiversity.products > 0 ? 1 : 0) +
+      (data.bodyLinkDiversity.other > 0 ? 1 : 0) >=
+    2
 
   const checks: AuditCheck[] = [
     {
       label: 'Title tag present, <60 chars',
-      status: data.title && data.titleLength <= 60 ? 'pass' :
-        data.title && data.titleLength > 60 ? 'warn' : 'fail',
+      status:
+        data.title && data.titleLength <= 60
+          ? 'pass'
+          : data.title && data.titleLength > 60
+            ? 'warn'
+            : 'fail',
       detail: data.title ? `"${data.title}" (${data.titleLength} chars)` : 'Missing title tag',
     },
     {
       label: 'Meta description (120-160 chars)',
-      status: data.metaDescription && data.metaDescLength >= 120 && data.metaDescLength <= 160 ? 'pass' :
-        data.metaDescription && data.metaDescLength > 0 ? 'warn' : 'fail',
+      status:
+        data.metaDescription && data.metaDescLength >= 120 && data.metaDescLength <= 160
+          ? 'pass'
+          : data.metaDescription && data.metaDescLength > 0
+            ? 'warn'
+            : 'fail',
       detail: data.metaDescription ? `${data.metaDescLength} chars` : 'Missing meta description',
     },
     {
@@ -616,7 +693,9 @@ export function auditSeo(data: ExtractedPageData): AuditCategory {
     {
       label: 'OG tags complete',
       status: ogComplete ? 'pass' : 'warn',
-      detail: ogComplete ? undefined : `Missing: ${['og:title', 'og:description', 'og:image'].filter(k => !data.ogTags[k]).join(', ')}`,
+      detail: ogComplete
+        ? undefined
+        : `Missing: ${['og:title', 'og:description', 'og:image'].filter((k) => !data.ogTags[k]).join(', ')}`,
     },
     {
       label: 'OG image not podcast default',
@@ -631,7 +710,10 @@ export function auditSeo(data: ExtractedPageData): AuditCategory {
     {
       label: 'Schema.org JSON-LD',
       status: data.schemaTypes.length > 0 ? 'pass' : 'warn',
-      detail: data.schemaTypes.length > 0 ? `Types: ${data.schemaTypes.join(', ')}` : 'No JSON-LD schema found',
+      detail:
+        data.schemaTypes.length > 0
+          ? `Types: ${data.schemaTypes.join(', ')}`
+          : 'No JSON-LD schema found',
     },
     {
       label: 'Single H1',
@@ -651,12 +733,17 @@ export function auditSeo(data: ExtractedPageData): AuditCategory {
     {
       label: 'Link diversity (2+ categories)',
       status: hasDiverseLinks ? 'pass' : 'warn',
-      detail: hasDiverseLinks ? undefined : 'All links point to same section — add mix of blog, hubs, products',
+      detail: hasDiverseLinks
+        ? undefined
+        : 'All links point to same section — add mix of blog, hubs, products',
     },
     {
       label: 'Image alt text',
       status: data.imagesWithoutAlt === 0 ? 'pass' : 'warn',
-      detail: data.imagesWithoutAlt > 0 ? `${data.imagesWithoutAlt} images missing alt text` : `All ${data.imagesWithAlt} images have alt text`,
+      detail:
+        data.imagesWithoutAlt > 0
+          ? `${data.imagesWithoutAlt} images missing alt text`
+          : `All ${data.imagesWithAlt} images have alt text`,
     },
   ]
 
@@ -675,21 +762,64 @@ export function auditSeo(data: ExtractedPageData): AuditCategory {
 // Keep broad — false negatives (flagging good products as irrelevant) are worse than false positives.
 const PERSONA_PRODUCT_MAP: Record<string, string[]> = {
   bill: [
-    'poultry', 'big-ole-bird', 'litter', 'mite', 'desecticide', 'hen-helper',
-    'catalyst', 'apple-cider-vinegar', 'coop-recuperate', 'roost',
-    'alpet', 'sanitiz', 'surface', 'zeropoint', 'biosecurity',
-    'backyard', 'bundle', 'torched', // cross-sell items shown in grids are fine
+    'poultry',
+    'big-ole-bird',
+    'litter',
+    'mite',
+    'desecticide',
+    'hen-helper',
+    'catalyst',
+    'apple-cider-vinegar',
+    'coop-recuperate',
+    'roost',
+    'alpet',
+    'sanitiz',
+    'surface',
+    'zeropoint',
+    'biosecurity',
+    'backyard',
+    'bundle',
+    'torched', // cross-sell items shown in grids are fine
   ],
   betty: [
-    'poultry', 'big-ole-bird', 'litter', 'mite', 'desecticide', 'hen-helper',
-    'catalyst', 'apple-cider-vinegar', 'coop-recuperate', 'roost',
-    'backyard', 'bundle', 'torched', 'sanitiz', 'zeropoint',
+    'poultry',
+    'big-ole-bird',
+    'litter',
+    'mite',
+    'desecticide',
+    'hen-helper',
+    'catalyst',
+    'apple-cider-vinegar',
+    'coop-recuperate',
+    'roost',
+    'backyard',
+    'bundle',
+    'torched',
+    'sanitiz',
+    'zeropoint',
   ],
   taylor: [
-    'soil', 'turf', 'humic', 'humate', 'hume', 'carbon', 'genesis', 'omega',
-    'jump-start', 'fertalive', 'veridian', 'revival', 'torched',
-    'compost', 'sulfur', 'elemental', 'biochar', 'c-fix', 'lawn',
-    'chicken-manure', 'manure', // organic fertilizer, cross-sold on turf pages
+    'soil',
+    'turf',
+    'humic',
+    'humate',
+    'hume',
+    'carbon',
+    'genesis',
+    'omega',
+    'jump-start',
+    'fertalive',
+    'veridian',
+    'revival',
+    'torched',
+    'compost',
+    'sulfur',
+    'elemental',
+    'biochar',
+    'c-fix',
+    'lawn',
+    'chicken-manure',
+    'manure', // organic fertilizer, cross-sold on turf pages
   ],
   sam: ['lagoon', 'waste', 'swine', 'odor'],
   general: [], // no filtering for general
@@ -703,7 +833,13 @@ export function auditProducts(data: ExtractedPageData, persona: PersonaId): Audi
     return {
       name: 'Products',
       grade: 'B',
-      checks: [{ label: 'No products shown on page', status: 'pass', detail: 'Page may not need products' }],
+      checks: [
+        {
+          label: 'No products shown on page',
+          status: 'pass',
+          detail: 'Page may not need products',
+        },
+      ],
     }
   }
 
@@ -711,13 +847,27 @@ export function auditProducts(data: ExtractedPageData, persona: PersonaId): Audi
 
   // Check each product for relevance
   if (persona !== 'general' && relevantProducts.length > 0) {
-    const irrelevant = handles.filter(h => !relevantProducts.some(r => h.toLowerCase().includes(r.toLowerCase()) || r.toLowerCase().includes(h.toLowerCase())))
-    const relevant = handles.filter(h => relevantProducts.some(r => h.toLowerCase().includes(r.toLowerCase()) || r.toLowerCase().includes(h.toLowerCase())))
+    const irrelevant = handles.filter(
+      (h) =>
+        !relevantProducts.some(
+          (r) =>
+            h.toLowerCase().includes(r.toLowerCase()) || r.toLowerCase().includes(h.toLowerCase())
+        )
+    )
+    const relevant = handles.filter((h) =>
+      relevantProducts.some(
+        (r) =>
+          h.toLowerCase().includes(r.toLowerCase()) || r.toLowerCase().includes(h.toLowerCase())
+      )
+    )
 
     checks.push({
       label: 'Products match persona',
       status: irrelevant.length === 0 ? 'pass' : irrelevant.length <= 2 ? 'warn' : 'fail',
-      detail: irrelevant.length > 0 ? `Irrelevant: ${irrelevant.join(', ')}` : `All ${handles.length} products relevant`,
+      detail:
+        irrelevant.length > 0
+          ? `Irrelevant: ${irrelevant.join(', ')}`
+          : `All ${handles.length} products relevant`,
     })
 
     checks.push({
@@ -737,7 +887,9 @@ export function auditProducts(data: ExtractedPageData, persona: PersonaId): Audi
   checks.push({
     label: 'JTBD-curated (not raw grid dump)',
     status: data.hasJtbdSection ? 'pass' : 'warn',
-    detail: data.hasJtbdSection ? 'Products appear in job-to-be-done sections' : 'Products shown as raw grid only — add JTBD curation',
+    detail: data.hasJtbdSection
+      ? 'Products appear in job-to-be-done sections'
+      : 'Products shown as raw grid only — add JTBD curation',
   })
 
   return { name: 'Products', grade: gradeFromChecks(checks), checks }
@@ -750,14 +902,17 @@ export function auditVoiceLocal(data: ExtractedPageData, persona: PersonaId): Au
     {
       label: 'Problem-first copy',
       status: data.isProblemFirst ? 'pass' : 'warn',
-      detail: data.isProblemFirst ? 'Page leads with problem/challenge before solution' : 'Copy leads with solution/product — reorder to lead with the problem',
+      detail: data.isProblemFirst
+        ? 'Page leads with problem/challenge before solution'
+        : 'Copy leads with solution/product — reorder to lead with the problem',
     },
     {
       label: 'Specific CTAs (not generic)',
       status: data.hasGenericCTAs ? 'warn' : data.hasSpecificCTAs ? 'pass' : 'warn',
-      detail: data.ctaTexts.length > 0
-        ? `CTAs: ${data.ctaTexts.slice(0, 5).join(', ')}${data.hasGenericCTAs ? ' — replace generic CTAs (Submit, Learn More)' : ''}`
-        : 'No CTA buttons found',
+      detail:
+        data.ctaTexts.length > 0
+          ? `CTAs: ${data.ctaTexts.slice(0, 5).join(', ')}${data.hasGenericCTAs ? ' — replace generic CTAs (Submit, Learn More)' : ''}`
+          : 'No CTA buttons found',
     },
     {
       label: 'Proof points (numbers, stats)',
@@ -766,17 +921,22 @@ export function auditVoiceLocal(data: ExtractedPageData, persona: PersonaId): Au
     },
     {
       label: 'Social proof present',
-      status: (data.hasTestimonials || data.hasCaseStudies) ? 'pass' : 'warn',
-      detail: [
-        data.hasTestimonials ? 'testimonials' : null,
-        data.hasCaseStudies ? 'case studies' : null,
-        data.hasResearchCitations ? 'research citations' : null,
-      ].filter(Boolean).join(', ') || 'No testimonials, case studies, or research citations found',
+      status: data.hasTestimonials || data.hasCaseStudies ? 'pass' : 'warn',
+      detail:
+        [
+          data.hasTestimonials ? 'testimonials' : null,
+          data.hasCaseStudies ? 'case studies' : null,
+          data.hasResearchCitations ? 'research citations' : null,
+        ]
+          .filter(Boolean)
+          .join(', ') || 'No testimonials, case studies, or research citations found',
     },
     {
       label: 'Research/authority citations',
       status: data.hasResearchCitations ? 'pass' : 'warn',
-      detail: data.hasResearchCitations ? 'References university research or published studies' : 'Add UGA studies, research data, or authority citations',
+      detail: data.hasResearchCitations
+        ? 'References university research or published studies'
+        : 'Add UGA studies, research data, or authority citations',
     },
   ]
 
@@ -788,8 +948,11 @@ export function auditVoiceLocal(data: ExtractedPageData, persona: PersonaId): Au
     checks.push({
       label: `Persona language (${persona})`,
       status: isAligned ? 'pass' : 'warn',
-      detail: `${hits} keyword matches for ${persona}` +
-        (totalKeywords > 0 ? ` (${Math.round(hits / totalKeywords * 100)}% of all persona signals)` : ''),
+      detail:
+        `${hits} keyword matches for ${persona}` +
+        (totalKeywords > 0
+          ? ` (${Math.round((hits / totalKeywords) * 100)}% of all persona signals)`
+          : ''),
     })
   }
 
@@ -812,7 +975,10 @@ function numToGrade(n: number): Grade {
   return 'F'
 }
 
-export function computeOverallGrade(categories: AuditResult['categories']): { grade: Grade; verdict: AuditVerdict } {
+export function computeOverallGrade(categories: AuditResult['categories']): {
+  grade: Grade
+  verdict: AuditVerdict
+} {
   const grades: Grade[] = []
   if (categories.architecture) grades.push(categories.architecture.grade)
   grades.push(categories.design.grade)
@@ -822,13 +988,19 @@ export function computeOverallGrade(categories: AuditResult['categories']): { gr
   // Originality is advisory — doesn't affect overall grade
 
   // Overall = min of non-null grades
-  const minGrade = grades.reduce((min, g) => gradeToNum(g) < gradeToNum(min) ? g : min, 'A' as Grade)
+  const minGrade = grades.reduce(
+    (min, g) => (gradeToNum(g) < gradeToNum(min) ? g : min),
+    'A' as Grade
+  )
 
   // Verdict
   let verdict: AuditVerdict
-  if (grades.every(g => gradeToNum(g) >= 3)) {
+  if (grades.every((g) => gradeToNum(g) >= 3)) {
     verdict = 'ship'
-  } else if (categories.architecture?.grade === 'F' || grades.filter(g => gradeToNum(g) <= 1).length >= 2) {
+  } else if (
+    categories.architecture?.grade === 'F' ||
+    grades.filter((g) => gradeToNum(g) <= 1).length >= 2
+  ) {
     verdict = 'rewrite'
   } else {
     verdict = 'fix'
@@ -849,9 +1021,19 @@ export function generateActions(categories: AuditResult['categories']): AuditAct
     if (!cat) return
     for (const check of cat.checks) {
       if (check.status === 'fail') {
-        actions.push({ index: idx++, action: check.detail || check.label, type: cat.grade === 'F' ? 'rewrite' : 'fix', impact: 'high' })
+        actions.push({
+          index: idx++,
+          action: check.detail || check.label,
+          type: cat.grade === 'F' ? 'rewrite' : 'fix',
+          impact: 'high',
+        })
       } else if (check.status === 'warn') {
-        actions.push({ index: idx++, action: check.detail || check.label, type: defaultType, impact: 'medium' })
+        actions.push({
+          index: idx++,
+          action: check.detail || check.label,
+          type: defaultType,
+          impact: 'medium',
+        })
       }
     }
   }
@@ -869,7 +1051,7 @@ export function generateActions(categories: AuditResult['categories']): AuditAct
   })
 
   // Re-index
-  actions.forEach((a, i) => a.index = i + 1)
+  actions.forEach((a, i) => (a.index = i + 1))
 
   return actions
 }
@@ -880,8 +1062,13 @@ export function generateActions(categories: AuditResult['categories']): AuditAct
 
 export function runAudit(
   html: string,
-  classification: { path: string; archetype: PageArchetype; persona: PersonaId; referencePage: string | null },
-  sourceLines?: number,
+  classification: {
+    path: string
+    archetype: PageArchetype
+    persona: PersonaId
+    referencePage: string | null
+  },
+  sourceLines?: number
 ): AuditResult {
   const data = extractPageData(html)
 

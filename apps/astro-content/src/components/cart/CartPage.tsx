@@ -97,7 +97,7 @@ function CartLineItem({
           <div>
             <a
               href={`/products/${merchandise.product.handle}/`}
-              className="hover:text-brand-green-dark text-sm font-semibold text-gray-900"
+              className="text-sm font-semibold text-gray-900 hover:text-brand-green-dark"
             >
               {merchandise.product.title}
             </a>
@@ -268,7 +268,7 @@ export default function CartPage() {
     return (
       <div className="flex min-h-[300px] items-center justify-center">
         <div className="text-center">
-          <div className="border-t-brand-green-dark mx-auto h-8 w-8 animate-spin rounded-full border-4 border-gray-200" />
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-brand-green-dark" />
           <p className="mt-3 text-sm text-gray-500">Loading your cart...</p>
         </div>
       </div>
@@ -299,7 +299,7 @@ export default function CartPage() {
         </p>
         <a
           href="/products/"
-          className="bg-brand-green-dark mt-6 inline-block rounded-md px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-green-800"
+          className="mt-6 inline-block rounded-md bg-brand-green-dark px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-green-800"
         >
           Browse Products
         </a>
@@ -375,7 +375,7 @@ export default function CartPage() {
                   <dd className="text-right">
                     {estimateLoading ? (
                       <span className="inline-flex items-center gap-1.5 text-xs">
-                        <span className="border-t-brand-green-dark h-3 w-3 animate-spin rounded-full border-2 border-gray-300" />
+                        <span className="h-3 w-3 animate-spin rounded-full border-2 border-gray-300 border-t-brand-green-dark" />
                         Estimating...
                       </span>
                     ) : shippingEstimate?.estimate ? (
@@ -409,7 +409,7 @@ export default function CartPage() {
                       setZip(v)
                       if (v.length === 5 && cart) fetchShippingEstimate(v, cart)
                     }}
-                    className="focus:border-brand-green-light focus:ring-brand-green-light w-full rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1"
+                    className="w-full rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-900 placeholder-gray-400 focus:border-brand-green-light focus:outline-none focus:ring-1 focus:ring-brand-green-light"
                   />
                   <button
                     type="submit"
@@ -487,7 +487,7 @@ export default function CartPage() {
           {/* Checkout button */}
           <a
             href={cart.checkoutUrl}
-            className="bg-brand-green-dark mt-6 block w-full rounded-md px-6 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-green-800"
+            className="mt-6 block w-full rounded-md bg-brand-green-dark px-6 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-green-800"
           >
             Proceed to Checkout
           </a>
@@ -495,7 +495,7 @@ export default function CartPage() {
           {/* Continue shopping */}
           <a
             href="/products/"
-            className="text-brand-green-light mt-3 block text-center text-sm hover:underline"
+            className="mt-3 block text-center text-sm text-brand-green-light hover:underline"
           >
             Continue Shopping
           </a>

@@ -270,7 +270,13 @@ const tunnelSchema = z.object({
   heroHeadline: z.string(),
   heroSubheadline: z.string(),
   heroCTAs: z
-    .array(z.object({ label: z.string(), href: z.string(), style: z.enum(['primary', 'secondary']).default('primary') }))
+    .array(
+      z.object({
+        label: z.string(),
+        href: z.string(),
+        style: z.enum(['primary', 'secondary']).default('primary'),
+      })
+    )
     .default([]),
   heroCredentials: z.array(z.string()).optional().default([]),
   productsHeadline: z.string(),
@@ -281,7 +287,13 @@ const tunnelSchema = z.object({
   ctaBody: z.string(),
   ctaPhone: z.string().optional(),
   ctaCTAs: z
-    .array(z.object({ label: z.string(), href: z.string(), style: z.enum(['primary', 'secondary']).default('primary') }))
+    .array(
+      z.object({
+        label: z.string(),
+        href: z.string(),
+        style: z.enum(['primary', 'secondary']).default('primary'),
+      })
+    )
     .default([]),
 })
 
@@ -298,17 +310,27 @@ const homepageCollection = defineCollection({
     // Science section
     scienceHeadline: z.string().optional(),
     scienceSubheadline: z.string().optional(),
-    scienceColumns: z.array(z.object({
-      title: z.string(),
-      body: z.string(),
-    })).optional().default([]),
+    scienceColumns: z
+      .array(
+        z.object({
+          title: z.string(),
+          body: z.string(),
+        })
+      )
+      .optional()
+      .default([]),
     // Benefits band
     benefitsHeadline: z.string().optional(),
     benefitsSubheadline: z.string().optional(),
-    benefits: z.array(z.object({
-      title: z.string(),
-      body: z.string(),
-    })).optional().default([]),
+    benefits: z
+      .array(
+        z.object({
+          title: z.string(),
+          body: z.string(),
+        })
+      )
+      .optional()
+      .default([]),
     // Trust section
     trustHeadline: z.string().optional(),
     trustSubheadline: z.string().optional(),
@@ -318,11 +340,16 @@ const homepageCollection = defineCollection({
     humanHeadline: z.string().optional(),
     humanSubheadline: z.string().optional(),
     humanBody: z.string().optional(),
-    humanCTAs: z.array(z.object({
-      label: z.string(),
-      href: z.string(),
-      style: z.enum(['primary', 'secondary']).default('primary'),
-    })).optional().default([]),
+    humanCTAs: z
+      .array(
+        z.object({
+          label: z.string(),
+          href: z.string(),
+          style: z.enum(['primary', 'secondary']).default('primary'),
+        })
+      )
+      .optional()
+      .default([]),
     // Default-only sections
     decisionEngineHeadline: z.string().optional(),
     decisionEngineSubheadline: z.string().optional(),

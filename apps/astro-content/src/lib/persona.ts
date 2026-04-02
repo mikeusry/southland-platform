@@ -387,7 +387,7 @@ export function getSegmentId(): SegmentId | null {
  */
 export function setPersona(
   personaId: Exclude<PersonaId, null>,
-  source: PersonaData['source'] = 'manual',
+  source: PersonaData['source'] = 'manual'
 ): void {
   if (typeof window === 'undefined' || !personaId) return
 
@@ -412,7 +412,7 @@ export function setPersona(
  */
 export function setSegment(
   segmentId: SegmentId,
-  source: PersonaData['source'] = 'decision_engine',
+  source: PersonaData['source'] = 'decision_engine'
 ): void {
   if (typeof window === 'undefined' || !segmentId) return
 

@@ -122,7 +122,9 @@ export async function scoreBrandVoice(content: string): Promise<BrandVoiceScore>
   try {
     const embedding = await generateLargeEmbedding(content)
     if (!embedding) {
-      console.error('[mothership] scoreBrandVoice: embedding generation failed — OpenAI text-embedding-3-large may not be accessible')
+      console.error(
+        '[mothership] scoreBrandVoice: embedding generation failed — OpenAI text-embedding-3-large may not be accessible'
+      )
       return { alignment: 0, topMatches: [], available: false }
     }
 
@@ -133,12 +135,17 @@ export async function scoreBrandVoice(content: string): Promise<BrandVoiceScore>
     })
 
     if (error) {
-      console.error('[mothership] scoreBrandVoice: search_voice_chunks RPC error:', error.message || error)
+      console.error(
+        '[mothership] scoreBrandVoice: search_voice_chunks RPC error:',
+        error.message || error
+      )
       return { alignment: 0, topMatches: [], available: false }
     }
 
     if (!chunks || chunks.length === 0) {
-      console.info('[mothership] scoreBrandVoice: no transcript chunks found — run embed-chunks.js in mothership to populate')
+      console.info(
+        '[mothership] scoreBrandVoice: no transcript chunks found — run embed-chunks.js in mothership to populate'
+      )
       return { alignment: 0, topMatches: [], available: false }
     }
 
@@ -280,7 +287,9 @@ export async function scorePersonas(
       if (key) {
         scores[key] = Math.max(scores[key], persona.similarity)
       } else {
-        console.warn(`[mothership] scorePersonas: unmapped persona slug="${persona.slug}" name="${persona.name}" similarity=${persona.similarity}`)
+        console.warn(
+          `[mothership] scorePersonas: unmapped persona slug="${persona.slug}" name="${persona.name}" similarity=${persona.similarity}`
+        )
       }
     }
 

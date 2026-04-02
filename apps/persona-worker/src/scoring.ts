@@ -35,7 +35,7 @@ const DEFAULT_PERSONA_SCORES: PersonaScores = {
   hannah: 0.06,
   maggie: 0.04,
   sam: 0.06,
-  general: 0.30,
+  general: 0.3,
 }
 
 const DEFAULT_SEGMENT_SCORES: SegmentScores = {
@@ -105,10 +105,10 @@ export function computePersonaScores(visitor: VisitorData): PersonaScores {
 
     const segment = PERSONA_TO_SEGMENT[personaId]
     const sameSegmentPersonas = ALL_PERSONA_IDS.filter(
-      (p) => p !== personaId && p !== 'general' && PERSONA_TO_SEGMENT[p] === segment,
+      (p) => p !== personaId && p !== 'general' && PERSONA_TO_SEGMENT[p] === segment
     )
     const hasStrongerCompetitor = sameSegmentPersonas.some(
-      (p) => (signalCountByPersona[p] || 0) >= 3,
+      (p) => (signalCountByPersona[p] || 0) >= 3
     )
     if (hasStrongerCompetitor) {
       rawScores[personaId] *= 0.5

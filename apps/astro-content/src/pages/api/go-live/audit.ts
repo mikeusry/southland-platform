@@ -24,10 +24,10 @@ export const POST: APIRoute = async ({ request }) => {
     const body = (await request.json()) as AuditRequest
 
     if (!body.path || !body.archetype) {
-      return new Response(
-        JSON.stringify({ error: true, message: 'Missing path or archetype' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } },
-      )
+      return new Response(JSON.stringify({ error: true, message: 'Missing path or archetype' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      })
     }
 
     // Fetch the rendered HTML from ourselves
@@ -42,7 +42,7 @@ export const POST: APIRoute = async ({ request }) => {
           message: `Page returned ${res.status}: ${body.path}`,
           httpStatus: res.status,
         }),
-        { status: 200, headers: { 'Content-Type': 'application/json' } },
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
       )
     }
 
@@ -57,17 +57,22 @@ export const POST: APIRoute = async ({ request }) => {
     })
 
     const duration = Date.now() - startTime
-    console.log(`[go-live] audited ${body.path}: ${result.overallGrade} (${result.verdict}) in ${duration}ms`)
-
-    return new Response(
-      JSON.stringify({ ...result, duration }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } },
+    console.log(
+      `[go-live] audited ${body.path}: ${result.overallGrade} (${result.verdict}) in ${duration}ms`
     )
+
+    return new Response(JSON.stringify({ ...result, duration }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
   } catch (err) {
     console.error('[go-live] audit error:', err)
     return new Response(
-      JSON.stringify({ error: true, message: err instanceof Error ? err.message : 'Unknown error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } },
+      JSON.stringify({
+        error: true,
+        message: err instanceof Error ? err.message : 'Unknown error',
+      }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
     )
   }
 }

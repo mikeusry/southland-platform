@@ -56,14 +56,18 @@ const { position = 'bottom', showChangeLink = true, class: className = '' } = As
         <span class="persona-modal__option-icon" style="color: #166534;">&#x1F413;</span>
         <div>
           <span class="persona-modal__option-label">Poultry</span>
-          <span class="persona-modal__option-sub">Commercial, backyard, turkeys, breeders, game birds</span>
+          <span class="persona-modal__option-sub"
+            >Commercial, backyard, turkeys, breeders, game birds</span
+          >
         </div>
       </button>
       <button class="persona-modal__option" data-segment="turf" data-hub="/lawn/">
         <span class="persona-modal__option-icon" style="color: #065f46;">&#x1F33F;</span>
         <div>
           <span class="persona-modal__option-label">Turf & Soil</span>
-          <span class="persona-modal__option-sub">Lawn care pros, golf courses, homeowners, market gardens</span>
+          <span class="persona-modal__option-sub"
+            >Lawn care pros, golf courses, homeowners, market gardens</span
+          >
         </div>
       </button>
       <button class="persona-modal__option" data-segment="waste" data-hub="/waste/">
@@ -257,7 +261,9 @@ const { position = 'bottom', showChangeLink = true, class: className = '' } = As
   const banner = document.getElementById('persona-banner')
   const nameEl = banner?.querySelector('.persona-banner__name')
   const refineEl = banner?.querySelector('.persona-banner__refine') as HTMLElement | null
-  const refineLinkEl = banner?.querySelector('.persona-banner__refine-link') as HTMLAnchorElement | null
+  const refineLinkEl = banner?.querySelector(
+    '.persona-banner__refine-link'
+  ) as HTMLAnchorElement | null
   const changeBtn = banner?.querySelector('.persona-banner__change')
   const modal = document.getElementById('persona-modal')
   const modalBackdrop = modal?.querySelector('.persona-modal__backdrop')

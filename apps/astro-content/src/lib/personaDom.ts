@@ -15,7 +15,7 @@ import type { PersonaId, SegmentId, PersonaData } from './persona'
 export function attachPersonaHandlers(
   root: HTMLElement,
   source: PersonaData['source'] = 'decision_engine',
-  scrollTarget: string = 'featured-products',
+  scrollTarget: string = 'featured-products'
 ): void {
   root.querySelectorAll<HTMLElement>('[data-persona-select]').forEach((el) => {
     el.addEventListener('click', () => {
@@ -81,7 +81,7 @@ export function highlightActivePersona(root: HTMLElement): void {
 export function attachSegmentHandlers(
   root: HTMLElement,
   source: PersonaData['source'] = 'decision_engine',
-  scrollTarget: string = 'featured-products',
+  scrollTarget: string = 'featured-products'
 ): void {
   root.querySelectorAll<HTMLElement>('[data-segment-select]').forEach((el) => {
     el.addEventListener('click', () => {

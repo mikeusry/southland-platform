@@ -131,7 +131,8 @@ const rows: AuditRow[] = shopifyProducts.map((p: any) => {
 
   // Images
   const images = p.images?.edges?.map((e: any) => e.node) ?? []
-  const missingAlt = images.some((img: any) => !img.altText)
+  const altOverrides = tina?.imageAltOverrides ?? []
+  const missingAlt = images.some((img: any, idx: number) => !img.altText && !altOverrides[idx])
 
   // Variants
   const variants = p.variants?.edges?.map((e: any) => e.node) ?? []
@@ -147,18 +148,18 @@ const rows: AuditRow[] = shopifyProducts.map((p: any) => {
   const hasGuide = !!tina?.guideName
   const hasCrossLinks = (tina?.relatedBlogSlugs?.length ?? 0) > 0
 
-  // Issues
+  // Issues — merch is exempt from all checks (auto grade B)
   const issues: string[] = []
-  if (seoTitleSource === 'fallback') issues.push('No SEO title')
-  if (seoDescSource === 'fallback') issues.push('No SEO description')
-  if (seoTitle.length > 70) issues.push(`Title long (${seoTitle.length}ch)`)
-  if (seoDesc.length > 160) issues.push(`Desc long (${seoDesc.length}ch)`)
-  if (seoDesc.length < 50 && seoDesc.length > 0) issues.push(`Desc short (${seoDesc.length}ch)`)
-  if (missingAlt) issues.push('Missing image alt')
-  if (!p.productType && !isMerch) issues.push('No product type')
-  if (!available) issues.push('Sold out')
-  if (!hasVideo && !isMerch) issues.push('No video')
-  if (images.length === 0) issues.push('No images')
+  if (!isMerch) {
+    if (seoTitleSource === 'fallback') issues.push('No SEO title')
+    if (seoDescSource === 'fallback') issues.push('No SEO description')
+    if (seoTitle.length > 70) issues.push(`Title long (${seoTitle.length}ch)`)
+    if (seoDesc.length > 160) issues.push(`Desc long (${seoDesc.length}ch)`)
+    if (seoDesc.length < 50 && seoDesc.length > 0) issues.push(`Desc short (${seoDesc.length}ch)`)
+    if (missingAlt) issues.push('Missing image alt')
+    if (images.length === 0) issues.push('No images')
+    if (!hasVideo) issues.push('No video')
+  }
 
   // Grade
   let grade: AuditRow['grade'] = 'A'

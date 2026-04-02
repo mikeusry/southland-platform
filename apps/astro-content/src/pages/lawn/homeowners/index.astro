@@ -9,7 +9,11 @@
  * Products fetched dynamically from Shopify Storefront API.
  * Homeowner-specific framing: safe for kids/pets, soil health, stop the chemical cycle.
  */
-import { createClient, getProductByHandle, getCollectionProducts } from '@southland/shopify-storefront'
+import {
+  createClient,
+  getProductByHandle,
+  getCollectionProducts,
+} from '@southland/shopify-storefront'
 import type { Product } from '@southland/shopify-storefront'
 import { getCollection } from 'astro:content'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
@@ -40,21 +44,17 @@ const client = createClient({
 })
 
 const jtbdHandles = [
-  'genesis',                                // Genesis soil conditioner
-  'omega-soil-activator',                   // Omega
-  'fertalive',                              // FertAlive fertilizer
-  'veridian-humate-liquid-iron-for-lawns',  // Veridian
-  'torched-all-natural-weed-killer',        // Torched
-  'dog-spot-for-lawns',                     // Dog Spot
-  'turf-revival',                           // Revival
+  'genesis', // Genesis soil conditioner
+  'omega-soil-activator', // Omega
+  'fertalive', // FertAlive fertilizer
+  'veridian-humate-liquid-iron-for-lawns', // Veridian
+  'torched-all-natural-weed-killer', // Torched
+  'dog-spot-for-lawns', // Dog Spot
+  'turf-revival', // Revival
 ] as const
 
-const jtbdProducts = await Promise.all(
-  jtbdHandles.map((h) => getProductByHandle(client, h))
-)
-const productMap = new Map(
-  jtbdProducts.filter(Boolean).map((p) => [p!.handle, p!])
-)
+const jtbdProducts = await Promise.all(jtbdHandles.map((h) => getProductByHandle(client, h)))
+const productMap = new Map(jtbdProducts.filter(Boolean).map((p) => [p!.handle, p!]))
 
 const homeownerCollection = await getCollectionProducts(client, 'homeowners')
 const allProducts: Product[] = homeownerCollection?.products ?? []
@@ -70,9 +70,10 @@ function formatPrice(amount: string) {
 
 // ── Get FAQ from TinaCMS MDX ────────────────────────────────────────────────
 const allCollections = await getCollection('shopCollections')
-const tinaDoc = allCollections.find(
-  (c) => c.data.handle === 'homeowners' || c.id.replace(/\.mdx?$/, '') === 'homeowners',
-) ?? null
+const tinaDoc =
+  allCollections.find(
+    (c) => c.data.handle === 'homeowners' || c.id.replace(/\.mdx?$/, '') === 'homeowners'
+  ) ?? null
 const faq = tinaDoc?.data.faq ?? []
 
 // ── JTBD data ───────────────────────────────────────────────────────────────
@@ -91,9 +92,11 @@ const jobs = [
   {
     title: 'Feed your grass without feeding the weeds.',
     struggle:
-      "Synthetic fertilizers push fast top growth but starve the root system. Weeds love that — they outcompete weak grass every time. You end up spending more on weed killer to fix what the fertilizer caused.",
+      'Synthetic fertilizers push fast top growth but starve the root system. Weeds love that — they outcompete weak grass every time. You end up spending more on weed killer to fix what the fertilizer caused.',
     bestFor: 'Steady nutrition, deeper green color, or replacing synthetic fertilizer',
-    products: [getProduct('fertalive'), getProduct('veridian-humate-liquid-iron-for-lawns')].filter(Boolean),
+    products: [getProduct('fertalive'), getProduct('veridian-humate-liquid-iron-for-lawns')].filter(
+      Boolean
+    ),
     proof: 'Humic acid increases nutrient uptake by up to 30%',
     proofSource: 'Soil science research',
     recommended: false,
@@ -104,7 +107,11 @@ const jobs = [
     struggle:
       "Dog spots, bare patches, stubborn weeds — the usual fix is more chemicals. But you've got kids playing in the yard and a dog rolling in the grass. You need solutions that work without worrying about what's soaking into the ground.",
     bestFor: 'Dog spots, weed pressure, bare patches, or pet/family safety concerns',
-    products: [getProduct('torched-all-natural-weed-killer'), getProduct('dog-spot-for-lawns'), getProduct('turf-revival')].filter(Boolean),
+    products: [
+      getProduct('torched-all-natural-weed-killer'),
+      getProduct('dog-spot-for-lawns'),
+      getProduct('turf-revival'),
+    ].filter(Boolean),
     proof: 'Zero synthetic chemicals, safe for kids & pets immediately after application',
     proofSource: 'USDA Organic certified ingredients',
     recommended: false,
@@ -113,24 +120,31 @@ const jobs = [
 ]
 
 // ── Objections ──────────────────────────────────────────────────────────────
-const objections = faq.length > 0 ? faq : [
-  {
-    question: 'Do organic lawn products really work as well as synthetic?',
-    answer: "Yes — when you focus on soil health first. Organic products work by feeding beneficial soil microbes that naturally cycle nutrients to your grass roots. While synthetic fertilizers provide a quick green-up, organic solutions build long-term soil structure and drought resistance that actually outperforms chemicals over time.",
-  },
-  {
-    question: 'How long before I see results?',
-    answer: "You'll see initial greening within 1-2 weeks. But the real transformation happens over 2-3 months as soil biology rebuilds. By the second season, most homeowners notice their lawn needs less water, fights off weeds better, and stays green longer between applications. The biology compounds — it gets better every year.",
-  },
-  {
-    question: "Is this safe for my kids and pets?",
-    answer: "Yes. Every product is made from natural, USDA Organic certified ingredients. No synthetic chemicals, no warning labels telling you to keep kids off the lawn for 48 hours. Your family can be on the grass immediately after application.",
-  },
-  {
-    question: "I don't know anything about soil biology. Is this complicated?",
-    answer: "Not at all. Hook up a hose-end sprayer, apply Genesis or FertAlive to your lawn, and water it in. The microbes do the work underground — you don't need to understand the science to get the results. If you want help, call us and we'll walk you through a simple program for your specific lawn.",
-  },
-]
+const objections =
+  faq.length > 0
+    ? faq
+    : [
+        {
+          question: 'Do organic lawn products really work as well as synthetic?',
+          answer:
+            'Yes — when you focus on soil health first. Organic products work by feeding beneficial soil microbes that naturally cycle nutrients to your grass roots. While synthetic fertilizers provide a quick green-up, organic solutions build long-term soil structure and drought resistance that actually outperforms chemicals over time.',
+        },
+        {
+          question: 'How long before I see results?',
+          answer:
+            "You'll see initial greening within 1-2 weeks. But the real transformation happens over 2-3 months as soil biology rebuilds. By the second season, most homeowners notice their lawn needs less water, fights off weeds better, and stays green longer between applications. The biology compounds — it gets better every year.",
+        },
+        {
+          question: 'Is this safe for my kids and pets?',
+          answer:
+            'Yes. Every product is made from natural, USDA Organic certified ingredients. No synthetic chemicals, no warning labels telling you to keep kids off the lawn for 48 hours. Your family can be on the grass immediately after application.',
+        },
+        {
+          question: "I don't know anything about soil biology. Is this complicated?",
+          answer:
+            "Not at all. Hook up a hose-end sprayer, apply Genesis or FertAlive to your lawn, and water it in. The microbes do the work underground — you don't need to understand the science to get the results. If you want help, call us and we'll walk you through a simple program for your specific lawn.",
+        },
+      ]
 
 // ── Schema.org ──────────────────────────────────────────────────────────────
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
@@ -170,8 +184,12 @@ const faqSchema = {
 }
 ---
 
-<BaseLayout title={title} description={description} ogImage={ogImage} schema={[pageSchema, faqSchema]}>
-
+<BaseLayout
+  title={title}
+  description={description}
+  ogImage={ogImage}
+  schema={[pageSchema, faqSchema]}
+>
   <!-- HERO -->
   <CloudinaryHero
     publicId="Southland Website/heroes/grass_kvxy54"
@@ -191,22 +209,29 @@ const faqSchema = {
           { label: 'Lawn & Turf', href: '/lawn/' },
           { label: 'Homeowners' },
         ]}
-        class="mb-4 [&_a]:text-white/80 [&_span]:text-white/60 [&_*]:text-sm"
+        class="mb-4 [&_*]:text-sm [&_a]:text-white/80 [&_span]:text-white/60"
       />
       <div class="max-w-3xl">
         <div class="mb-3 flex flex-wrap items-center gap-2">
-          <span class="inline-block rounded-full bg-white/15 px-4 py-1 text-sm font-medium text-green-300">
+          <span
+            class="inline-block rounded-full bg-white/15 px-4 py-1 text-sm font-medium text-green-300"
+          >
             For Homeowners
           </span>
-          <span class="inline-block rounded-full bg-green-400/20 px-3 py-1 text-sm font-semibold text-green-300">
+          <span
+            class="inline-block rounded-full bg-green-400/20 px-3 py-1 text-sm font-semibold text-green-300"
+          >
             Safe for Kids & Pets
           </span>
         </div>
-        <h1 class="mb-4 font-heading text-4xl uppercase leading-tight text-white md:text-5xl lg:text-6xl">
+        <h1
+          class="mb-4 font-heading text-4xl uppercase leading-tight text-white md:text-5xl lg:text-6xl"
+        >
           Your lawn doesn't need more chemicals. It needs better biology.
         </h1>
         <p class="mb-5 text-lg text-white/70 md:text-xl">
-          Organic soil conditioners, natural fertilizers, and microbe-based solutions that build the soil your grass actually needs — without the synthetic treadmill.
+          Organic soil conditioners, natural fertilizers, and microbe-based solutions that build the
+          soil your grass actually needs — without the synthetic treadmill.
         </p>
         <div class="mb-6 flex flex-wrap gap-x-6 gap-y-2">
           <span class="flex items-center gap-2 text-lg font-semibold text-white">
@@ -228,7 +253,11 @@ const faqSchema = {
             class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3.5 font-semibold text-white transition-colors hover:bg-[#44883E]/85"
           >
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
             </svg>
             Shop Lawn Products
           </a>
@@ -238,26 +267,59 @@ const faqSchema = {
           >
             See How It Works
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
             </svg>
           </a>
         </div>
-        <div class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-white/10 pt-4 text-sm text-white/80">
+        <div
+          class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-white/10 pt-4 text-sm text-white/80"
+        >
           <span class="flex items-center gap-1.5">
-            <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+            <svg
+              class="h-3.5 w-3.5 text-green-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4"></path>
             </svg>
             USDA Organic
           </span>
           <span class="flex items-center gap-1.5">
-            <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+            <svg
+              class="h-3.5 w-3.5 text-green-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4"></path>
             </svg>
             Family & Pet Safe
           </span>
           <span class="flex items-center gap-1.5">
-            <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+            <svg
+              class="h-3.5 w-3.5 text-green-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4"></path>
             </svg>
             Free Shipping on Orders $75+
           </span>
@@ -273,40 +335,77 @@ const faqSchema = {
         The chemical lawn care trap.
       </h2>
       <p class="mx-auto mb-12 max-w-2xl text-center text-gray-600">
-        Synthetic fertilizers give you a quick green-up — and a long-term problem. Here's why your lawn never seems to get ahead.
+        Synthetic fertilizers give you a quick green-up — and a long-term problem. Here's why your
+        lawn never seems to get ahead.
       </p>
       <div class="grid gap-8 md:grid-cols-3">
         <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
           <div class="hex-icon mb-4 bg-[#2C5234]/10">
-            <svg class="h-6 w-6 text-[#2C5234]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            <svg
+              class="h-6 w-6 text-[#2C5234]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+              ></path>
             </svg>
           </div>
           <h3 class="mb-3 text-lg font-bold text-shopify-title">The synthetic treadmill</h3>
           <p class="leading-relaxed text-gray-600">
-            Synthetic fertilizers kill the soil microbes that naturally feed your grass. So you need more fertilizer. And more water. And more weed killer. Every season costs more and delivers less.
+            Synthetic fertilizers kill the soil microbes that naturally feed your grass. So you need
+            more fertilizer. And more water. And more weed killer. Every season costs more and
+            delivers less.
           </p>
         </div>
         <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
           <div class="hex-icon mb-4 bg-[#44883E]/10">
-            <svg class="h-6 w-6 text-[#44883E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            <svg
+              class="h-6 w-6 text-[#44883E]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+              ></path>
             </svg>
           </div>
           <h3 class="mb-3 text-lg font-bold text-shopify-title">The weekend warrior guilt</h3>
           <p class="leading-relaxed text-gray-600">
-            You're spending Saturday mornings spreading chemicals while your kids wait inside. The bag says "keep off lawn for 24-48 hours." You just want a yard your family can actually use.
+            You're spending Saturday mornings spreading chemicals while your kids wait inside. The
+            bag says "keep off lawn for 24-48 hours." You just want a yard your family can actually
+            use.
           </p>
         </div>
         <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
           <div class="hex-icon mb-4 bg-[#2C5234]/10">
-            <svg class="h-6 w-6 text-[#2C5234]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              class="h-6 w-6 text-[#2C5234]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
             </svg>
           </div>
           <h3 class="mb-3 text-lg font-bold text-shopify-title">The money pit</h3>
           <p class="leading-relaxed text-gray-600">
-            Between fertilizer, weed killer, grub treatment, and overseeding, you're spending hundreds every year on a lawn that never quite looks like the neighbor's. There's a better way.
+            Between fertilizer, weed killer, grub treatment, and overseeding, you're spending
+            hundreds every year on a lawn that never quite looks like the neighbor's. There's a
+            better way.
           </p>
         </div>
       </div>
@@ -318,43 +417,74 @@ const faqSchema = {
     <div class="mx-auto max-w-6xl px-4">
       <div class="grid items-center gap-12 md:grid-cols-[1fr_auto]">
         <div class="order-2 md:order-1">
-          <span class="mb-2 inline-block text-sm font-semibold uppercase tracking-wider text-green-700">
+          <span
+            class="mb-2 inline-block text-sm font-semibold uppercase tracking-wider text-green-700"
+          >
             Your guide
           </span>
           <h2 class="mb-6 font-heading text-3xl uppercase text-shopify-title md:text-4xl">
             We've been fixing soil for 15 years.
           </h2>
           <p class="mb-4 text-lg leading-relaxed text-gray-700">
-            Southland Organics started in commercial agriculture — helping poultry farmers and turf professionals rebuild soil biology that decades of chemicals had destroyed. The science is the same in your backyard.
+            Southland Organics started in commercial agriculture — helping poultry farmers and turf
+            professionals rebuild soil biology that decades of chemicals had destroyed. The science
+            is the same in your backyard.
           </p>
           <p class="mb-4 text-lg leading-relaxed text-gray-600">
-            Every product we make is built around one idea: feed the soil, and the soil feeds the grass. No synthetic shortcuts. No salt buildup. Just biology that works the way nature intended.
+            Every product we make is built around one idea: feed the soil, and the soil feeds the
+            grass. No synthetic shortcuts. No salt buildup. Just biology that works the way nature
+            intended.
           </p>
           <p class="mb-8 leading-relaxed text-gray-600">
-            If you're not sure where to start, call us. We'll ask about your soil, your grass type, and what's frustrating you — then recommend 1-2 products to try first.
+            If you're not sure where to start, call us. We'll ask about your soil, your grass type,
+            and what's frustrating you — then recommend 1-2 products to try first.
           </p>
           <div class="mb-8 flex flex-wrap gap-2">
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
+            <span
+              class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]"
+            >
               <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4"></path>
               </svg>
               Family-owned since 2009
             </span>
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
+            <span
+              class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]"
+            >
               <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4"></path>
               </svg>
               USDA Organic certified
             </span>
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
+            <span
+              class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]"
+            >
               <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4"></path>
               </svg>
               A+ BBB Rating
             </span>
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
+            <span
+              class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]"
+            >
               <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4"></path>
               </svg>
               Real humans answer the phone
             </span>
@@ -365,7 +495,12 @@ const faqSchema = {
               class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#44883E]/85"
             >
               <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                ></path>
               </svg>
               Call Us
             </a>
@@ -387,7 +522,9 @@ const faqSchema = {
               class="rounded-2xl object-cover shadow-lg"
               loading="lazy"
             />
-            <div class="absolute bottom-0 left-0 right-0 rounded-b-2xl bg-gradient-to-t from-black/70 to-transparent px-5 pb-4 pt-10">
+            <div
+              class="absolute bottom-0 left-0 right-0 rounded-b-2xl bg-gradient-to-t from-black/70 to-transparent px-5 pb-4 pt-10"
+            >
               <p class="text-lg font-bold text-white">Mike Usry</p>
               <p class="text-sm text-green-300">Founder & CEO</p>
             </div>
@@ -407,79 +544,115 @@ const faqSchema = {
         Every product exists to do one of three jobs for your lawn. Pick the job you need help with.
       </p>
       <p class="mb-12 text-center">
-        <a href="#homeowner-products" class="inline-flex items-center gap-1 text-sm font-medium text-green-700 hover:text-green-600 hover:underline">
+        <a
+          href="#homeowner-products"
+          class="inline-flex items-center gap-1 text-sm font-medium text-green-700 hover:text-green-600 hover:underline"
+        >
           Skip to all products
           <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
           </svg>
         </a>
       </p>
       <div class="grid gap-8 md:grid-cols-3">
-        {jobs.map((job) => (
-          <div class:list={[
-            'relative flex flex-col rounded-xl border bg-white p-8 shadow-sm',
-            job.recommended ? 'border-green-300 ring-1 ring-green-200' : 'border-gray-200',
-          ]}>
-            {job.recommended && (
-              <span class="absolute -top-3 left-6 rounded-full bg-[#44883E] px-3 py-0.5 text-xs font-bold uppercase tracking-wide text-white">
-                Start here
-              </span>
-            )}
-            <div class="hex-icon mb-4 bg-green-100">
-              <svg class="h-6 w-6 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <Fragment set:html={job.icon} />
-              </svg>
-            </div>
-            <h3 class="mb-2 text-xl font-bold text-shopify-title">
-              {job.title}
-            </h3>
-            <p class="mb-3 text-sm text-gray-600">{job.struggle}</p>
-            <p class="mb-6 text-xs font-medium uppercase tracking-wide text-green-700">
-              Best for: {job.bestFor}
-            </p>
-            <div class="mb-6 flex-1 space-y-4">
-              {job.products.map((product) => (
-                <a
-                  href={`/products/${product!.handle}/`}
-                  class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3 transition-colors hover:border-green-200 hover:bg-green-50"
+        {
+          jobs.map((job) => (
+            <div
+              class:list={[
+                'relative flex flex-col rounded-xl border bg-white p-8 shadow-sm',
+                job.recommended ? 'border-green-300 ring-1 ring-green-200' : 'border-gray-200',
+              ]}
+            >
+              {job.recommended && (
+                <span class="absolute -top-3 left-6 rounded-full bg-[#44883E] px-3 py-0.5 text-xs font-bold uppercase tracking-wide text-white">
+                  Start here
+                </span>
+              )}
+              <div class="hex-icon mb-4 bg-green-100">
+                <svg
+                  class="h-6 w-6 text-green-700"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  {product!.images?.[0] && (
-                    <img
-                      src={product!.images[0].url}
-                      alt={product!.images[0].altText || product!.title}
-                      width="56"
-                      height="56"
-                      class="h-14 w-14 rounded-md object-cover"
-                      loading="lazy"
-                    />
-                  )}
-                  <div class="min-w-0 flex-1">
-                    <div class="truncate text-sm font-semibold text-gray-900">
-                      {product!.title.includes('|') ? product!.title.split('|')[0].trim() : product!.title}
-                    </div>
-                    <div class="text-sm text-green-700">
-                      From {formatPrice(product!.priceRange.minVariantPrice.amount)}
-                    </div>
-                  </div>
-                  <svg class="h-4 w-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                </a>
-              ))}
-            </div>
-            <div class="border-t border-gray-100 pt-4">
-              <div class="flex items-start gap-2">
-                <svg class="mt-0.5 h-4 w-4 shrink-0 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+                  <Fragment set:html={job.icon} />
                 </svg>
-                <div>
-                  <span class="text-sm font-semibold text-green-700">{job.proof}</span>
-                  <span class="block text-xs text-gray-500">{job.proofSource}</span>
+              </div>
+              <h3 class="mb-2 text-xl font-bold text-shopify-title">{job.title}</h3>
+              <p class="mb-3 text-sm text-gray-600">{job.struggle}</p>
+              <p class="mb-6 text-xs font-medium uppercase tracking-wide text-green-700">
+                Best for: {job.bestFor}
+              </p>
+              <div class="mb-6 flex-1 space-y-4">
+                {job.products.map((product) => (
+                  <a
+                    href={`/products/${product!.handle}/`}
+                    class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3 transition-colors hover:border-green-200 hover:bg-green-50"
+                  >
+                    {product!.images?.[0] && (
+                      <img
+                        src={product!.images[0].url}
+                        alt={product!.images[0].altText || product!.title}
+                        width="56"
+                        height="56"
+                        class="h-14 w-14 rounded-md object-cover"
+                        loading="lazy"
+                      />
+                    )}
+                    <div class="min-w-0 flex-1">
+                      <div class="truncate text-sm font-semibold text-gray-900">
+                        {product!.title.includes('|')
+                          ? product!.title.split('|')[0].trim()
+                          : product!.title}
+                      </div>
+                      <div class="text-sm text-green-700">
+                        From {formatPrice(product!.priceRange.minVariantPrice.amount)}
+                      </div>
+                    </div>
+                    <svg
+                      class="h-4 w-4 shrink-0 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </a>
+                ))}
+              </div>
+              <div class="border-t border-gray-100 pt-4">
+                <div class="flex items-start gap-2">
+                  <svg
+                    class="mt-0.5 h-4 w-4 shrink-0 text-green-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12l2 2 4-4"
+                    />
+                  </svg>
+                  <div>
+                    <span class="text-sm font-semibold text-green-700">{job.proof}</span>
+                    <span class="block text-xs text-gray-500">{job.proofSource}</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        }
       </div>
     </div>
   </section>
@@ -493,22 +666,24 @@ const faqSchema = {
       <p class="mx-auto mb-10 max-w-2xl text-center text-gray-600">
         Everything here is organic, family-safe, and designed to build soil health — not destroy it.
       </p>
-      {allProducts.length > 0 ? (
-        <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
-          {allProducts.map((product) => (
-            <CollectionProductCard product={product} persona="betty" />
-          ))}
-        </div>
-      ) : (
-        <div class="text-center">
-          <a
-            href="/collections/homeowners/"
-            class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#44883E]/85"
-          >
-            Browse All Lawn Products
-          </a>
-        </div>
-      )}
+      {
+        allProducts.length > 0 ? (
+          <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
+            {allProducts.map((product) => (
+              <CollectionProductCard product={product} persona="betty" />
+            ))}
+          </div>
+        ) : (
+          <div class="text-center">
+            <a
+              href="/collections/homeowners/"
+              class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#44883E]/85"
+            >
+              Browse All Lawn Products
+            </a>
+          </div>
+        )
+      }
     </div>
   </section>
 
@@ -557,24 +732,51 @@ const faqSchema = {
       </p>
       <div class="space-y-8">
         <div class="flex items-start gap-6">
-          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700">1</div>
+          <div
+            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700"
+          >
+            1
+          </div>
           <div>
-            <h3 class="mb-1 text-lg font-bold text-shopify-title"><span class="text-[#44883E]">Pick</span> one product for your biggest frustration.</h3>
-            <p class="text-gray-600">Thin grass? Start with Genesis. Brown spots? Try Revival. Weeds? Torched. Don't overthink it — one product, one problem.</p>
+            <h3 class="mb-1 text-lg font-bold text-shopify-title">
+              <span class="text-[#44883E]">Pick</span> one product for your biggest frustration.
+            </h3>
+            <p class="text-gray-600">
+              Thin grass? Start with Genesis. Brown spots? Try Revival. Weeds? Torched. Don't
+              overthink it — one product, one problem.
+            </p>
           </div>
         </div>
         <div class="flex items-start gap-6">
-          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700">2</div>
+          <div
+            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700"
+          >
+            2
+          </div>
           <div>
-            <h3 class="mb-1 text-lg font-bold text-shopify-title"><span class="text-[#44883E]">Apply</span> it and wait 2-3 weeks.</h3>
-            <p class="text-gray-600">Most products are hose-end sprayer or granular — 15 minutes for your whole yard. Water it in, then let the biology work.</p>
+            <h3 class="mb-1 text-lg font-bold text-shopify-title">
+              <span class="text-[#44883E]">Apply</span> it and wait 2-3 weeks.
+            </h3>
+            <p class="text-gray-600">
+              Most products are hose-end sprayer or granular — 15 minutes for your whole yard. Water
+              it in, then let the biology work.
+            </p>
           </div>
         </div>
         <div class="flex items-start gap-6">
-          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700">3</div>
+          <div
+            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700"
+          >
+            3
+          </div>
           <div>
-            <h3 class="mb-1 text-lg font-bold text-shopify-title"><span class="text-[#44883E]">See</span> the difference — then build from there.</h3>
-            <p class="text-gray-600">If you like what you see, add a second product next month. Most homeowners end up on a simple 3-product program that covers the whole year.</p>
+            <h3 class="mb-1 text-lg font-bold text-shopify-title">
+              <span class="text-[#44883E]">See</span> the difference — then build from there.
+            </h3>
+            <p class="text-gray-600">
+              If you like what you see, add a second product next month. Most homeowners end up on a
+              simple 3-product program that covers the whole year.
+            </p>
           </div>
         </div>
       </div>
@@ -597,24 +799,46 @@ const faqSchema = {
   <!-- CROSS-LINKS -->
   <section class="bg-white py-12">
     <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-      <p class="mb-6 text-center text-sm font-medium uppercase tracking-wider text-shopify-secondary-text">
+      <p
+        class="mb-6 text-center text-sm font-medium uppercase tracking-wider text-shopify-secondary-text"
+      >
         More from our lawn & garden program
       </p>
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <a href="/lawn/" class="group rounded-xl border border-gray-100 p-4 transition-shadow hover:shadow-md">
-          <p class="font-semibold text-shopify-title group-hover:text-southland-green">Lawn & Garden Hub</p>
+        <a
+          href="/lawn/"
+          class="group rounded-xl border border-gray-100 p-4 transition-shadow hover:shadow-md"
+        >
+          <p class="font-semibold text-shopify-title group-hover:text-southland-green">
+            Lawn & Garden Hub
+          </p>
           <p class="text-xs text-shopify-secondary-text">All lawn resources</p>
         </a>
-        <a href="/lawn/turf-pros/" class="group rounded-xl border border-gray-100 p-4 transition-shadow hover:shadow-md">
-          <p class="font-semibold text-shopify-title group-hover:text-southland-green">Turf Professionals</p>
+        <a
+          href="/lawn/turf-pros/"
+          class="group rounded-xl border border-gray-100 p-4 transition-shadow hover:shadow-md"
+        >
+          <p class="font-semibold text-shopify-title group-hover:text-southland-green">
+            Turf Professionals
+          </p>
           <p class="text-xs text-shopify-secondary-text">Commercial lawn programs</p>
         </a>
-        <a href="/lawn/golf-courses/" class="group rounded-xl border border-gray-100 p-4 transition-shadow hover:shadow-md">
-          <p class="font-semibold text-shopify-title group-hover:text-southland-green">Golf Courses</p>
+        <a
+          href="/lawn/golf-courses/"
+          class="group rounded-xl border border-gray-100 p-4 transition-shadow hover:shadow-md"
+        >
+          <p class="font-semibold text-shopify-title group-hover:text-southland-green">
+            Golf Courses
+          </p>
           <p class="text-xs text-shopify-secondary-text">Superintendent programs</p>
         </a>
-        <a href="/blog/" class="group rounded-xl border border-gray-100 p-4 transition-shadow hover:shadow-md">
-          <p class="font-semibold text-shopify-title group-hover:text-southland-green">Lawn Care Blog</p>
+        <a
+          href="/blog/"
+          class="group rounded-xl border border-gray-100 p-4 transition-shadow hover:shadow-md"
+        >
+          <p class="font-semibold text-shopify-title group-hover:text-southland-green">
+            Lawn Care Blog
+          </p>
           <p class="text-xs text-shopify-secondary-text">Tips & guides</p>
         </a>
       </div>
@@ -637,7 +861,11 @@ const faqSchema = {
         >
           Shop Now
           <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
           </svg>
         </a>
         <a
@@ -645,7 +873,12 @@ const faqSchema = {
           class="inline-flex items-center gap-2 text-sm font-medium text-white/70 hover:text-white"
         >
           <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+            ></path>
           </svg>
           Need help? 800-608-3755
         </a>

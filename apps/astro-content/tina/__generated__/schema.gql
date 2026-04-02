@@ -64,8 +64,6 @@ type Query {
   guestsConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: GuestsFilter): GuestsConnection!
   topics(relativePath: String): Topics!
   topicsConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: TopicsFilter): TopicsConnection!
-  products(relativePath: String): Products!
-  productsConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: ProductsFilter): ProductsConnection!
   shopCollections(relativePath: String): ShopCollections!
   shopCollectionsConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: ShopCollectionsFilter): ShopCollectionsConnection!
 }
@@ -76,7 +74,6 @@ input DocumentFilter {
   episodes: EpisodesFilter
   guests: GuestsFilter
   topics: TopicsFilter
-  products: ProductsFilter
   shopCollections: ShopCollectionsFilter
 }
 
@@ -103,7 +100,7 @@ type Collection {
   documents(before: String, after: String, first: Float, last: Float, sort: String, filter: DocumentFilter, folder: String): DocumentConnection!
 }
 
-union DocumentNode = Blog | Team | Episodes | Guests | Topics | Products | ShopCollections | Folder
+union DocumentNode = Blog | Team | Episodes | Guests | Topics | ShopCollections | Folder
 
 type Blog implements Node & Document {
   title: String!
@@ -423,142 +420,6 @@ type TopicsConnection implements Connection {
   edges: [TopicsConnectionEdges]
 }
 
-type ProductsProblemCards {
-  title: String!
-  body: String!
-}
-
-type ProductsFeatures {
-  feature: String!
-  benefit: String!
-}
-
-type ProductsProofStats {
-  value: String!
-  label: String!
-  source: String
-}
-
-type ProductsTestimonials {
-  quote: String!
-  name: String!
-  role: String
-}
-
-type ProductsFaq {
-  question: String!
-  answer: String!
-}
-
-type Products implements Node & Document {
-  name: String!
-  shopifyHandle: String!
-  segment: String!
-  shortDescription: String!
-  benefits: [String]
-  useCases: [String]
-  topics: [String]
-  featured: Boolean
-  headline: String
-  heroBullets: [String]
-  seoTitle: String
-  seoDescription: String
-  muxPlaybackId: String
-  videoTitle: String
-  problemHeadline: String
-  problemCards: [ProductsProblemCards]
-  features: [ProductsFeatures]
-  dosingInstructions: String
-  applicationMethod: String
-  proofStats: [ProductsProofStats]
-  testimonials: [ProductsTestimonials]
-  faq: [ProductsFaq]
-  allowFaqSchema: Boolean
-  trustBadges: [String]
-  primaryPersona: String
-  guideName: String
-  guidePhoto: String
-  relatedProductHandles: [String]
-  relatedBlogSlugs: [String]
-  imageAltOverrides: [String]
-  body: JSON
-  id: ID!
-  _sys: SystemInfo!
-  _values: JSON!
-}
-
-input ProductsProblemCardsFilter {
-  title: StringFilter
-  body: StringFilter
-}
-
-input ProductsFeaturesFilter {
-  feature: StringFilter
-  benefit: StringFilter
-}
-
-input ProductsProofStatsFilter {
-  value: StringFilter
-  label: StringFilter
-  source: StringFilter
-}
-
-input ProductsTestimonialsFilter {
-  quote: StringFilter
-  name: StringFilter
-  role: StringFilter
-}
-
-input ProductsFaqFilter {
-  question: StringFilter
-  answer: StringFilter
-}
-
-input ProductsFilter {
-  name: StringFilter
-  shopifyHandle: StringFilter
-  segment: StringFilter
-  shortDescription: StringFilter
-  benefits: StringFilter
-  useCases: StringFilter
-  topics: StringFilter
-  featured: BooleanFilter
-  headline: StringFilter
-  heroBullets: StringFilter
-  seoTitle: StringFilter
-  seoDescription: StringFilter
-  muxPlaybackId: StringFilter
-  videoTitle: StringFilter
-  problemHeadline: StringFilter
-  problemCards: ProductsProblemCardsFilter
-  features: ProductsFeaturesFilter
-  dosingInstructions: StringFilter
-  applicationMethod: StringFilter
-  proofStats: ProductsProofStatsFilter
-  testimonials: ProductsTestimonialsFilter
-  faq: ProductsFaqFilter
-  allowFaqSchema: BooleanFilter
-  trustBadges: StringFilter
-  primaryPersona: StringFilter
-  guideName: StringFilter
-  guidePhoto: StringFilter
-  relatedProductHandles: StringFilter
-  relatedBlogSlugs: StringFilter
-  imageAltOverrides: StringFilter
-  body: RichTextFilter
-}
-
-type ProductsConnectionEdges {
-  cursor: String!
-  node: Products
-}
-
-type ProductsConnection implements Connection {
-  pageInfo: PageInfo!
-  totalCount: Float!
-  edges: [ProductsConnectionEdges]
-}
-
 type ShopCollectionsFaq {
   question: String!
   answer: String!
@@ -623,8 +484,6 @@ type Mutation {
   createGuests(relativePath: String!, params: GuestsMutation!): Guests!
   updateTopics(relativePath: String!, params: TopicsMutation!): Topics!
   createTopics(relativePath: String!, params: TopicsMutation!): Topics!
-  updateProducts(relativePath: String!, params: ProductsMutation!): Products!
-  createProducts(relativePath: String!, params: ProductsMutation!): Products!
   updateShopCollections(relativePath: String!, params: ShopCollectionsMutation!): ShopCollections!
   createShopCollections(relativePath: String!, params: ShopCollectionsMutation!): ShopCollections!
 }
@@ -635,7 +494,6 @@ input DocumentUpdateMutation {
   episodes: EpisodesMutation
   guests: GuestsMutation
   topics: TopicsMutation
-  products: ProductsMutation
   shopCollections: ShopCollectionsMutation
   relativePath: String
 }
@@ -646,7 +504,6 @@ input DocumentMutation {
   episodes: EpisodesMutation
   guests: GuestsMutation
   topics: TopicsMutation
-  products: ProductsMutation
   shopCollections: ShopCollectionsMutation
 }
 
@@ -753,67 +610,6 @@ input TopicsMutation {
   description: String
   icon: String
   segment: String
-  body: JSON
-}
-
-input ProductsProblemCardsMutation {
-  title: String
-  body: String
-}
-
-input ProductsFeaturesMutation {
-  feature: String
-  benefit: String
-}
-
-input ProductsProofStatsMutation {
-  value: String
-  label: String
-  source: String
-}
-
-input ProductsTestimonialsMutation {
-  quote: String
-  name: String
-  role: String
-}
-
-input ProductsFaqMutation {
-  question: String
-  answer: String
-}
-
-input ProductsMutation {
-  name: String
-  shopifyHandle: String
-  segment: String
-  shortDescription: String
-  benefits: [String]
-  useCases: [String]
-  topics: [String]
-  featured: Boolean
-  headline: String
-  heroBullets: [String]
-  seoTitle: String
-  seoDescription: String
-  muxPlaybackId: String
-  videoTitle: String
-  problemHeadline: String
-  problemCards: [ProductsProblemCardsMutation]
-  features: [ProductsFeaturesMutation]
-  dosingInstructions: String
-  applicationMethod: String
-  proofStats: [ProductsProofStatsMutation]
-  testimonials: [ProductsTestimonialsMutation]
-  faq: [ProductsFaqMutation]
-  allowFaqSchema: Boolean
-  trustBadges: [String]
-  primaryPersona: String
-  guideName: String
-  guidePhoto: String
-  relatedProductHandles: [String]
-  relatedBlogSlugs: [String]
-  imageAltOverrides: [String]
   body: JSON
 }
 

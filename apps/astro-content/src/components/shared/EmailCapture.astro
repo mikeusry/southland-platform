@@ -14,7 +14,15 @@ interface Props {
   headline?: string
   description?: string
   listId?: string
-  source?: 'episode_page' | 'hub' | 'footer' | 'blog' | 'website' | 'biosecurity' | 'lawn' | 'case-study'
+  source?:
+    | 'episode_page'
+    | 'hub'
+    | 'footer'
+    | 'blog'
+    | 'website'
+    | 'biosecurity'
+    | 'lawn'
+    | 'case-study'
   episodeSlug?: string
   buttonText?: string
   variant?: 'inline' | 'card' | 'banner'
@@ -192,7 +200,15 @@ const buttonClasses =
               data: {
                 type: 'subscription',
                 attributes: {
-                  custom_source: isPodcastSource ? 'Podcast Signup' : source === 'biosecurity' ? 'Biosecurity Signup' : source === 'lawn' ? 'Lawn Care Signup' : source === 'case-study' ? 'Case Study Signup' : 'Website Signup',
+                  custom_source: isPodcastSource
+                    ? 'Podcast Signup'
+                    : source === 'biosecurity'
+                      ? 'Biosecurity Signup'
+                      : source === 'lawn'
+                        ? 'Lawn Care Signup'
+                        : source === 'case-study'
+                          ? 'Case Study Signup'
+                          : 'Website Signup',
                   profile: {
                     data: {
                       type: 'profile',

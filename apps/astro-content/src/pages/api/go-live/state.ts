@@ -52,10 +52,10 @@ export const GET: APIRoute = async () => {
         headers: { 'Content-Type': 'application/json' },
       })
     }
-    return new Response(
-      JSON.stringify({ error: true, message: err.message }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } },
-    )
+    return new Response(JSON.stringify({ error: true, message: err.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 }
 
@@ -68,14 +68,14 @@ export const POST: APIRoute = async ({ request }) => {
     } else {
       memoryState = json
     }
-    return new Response(
-      JSON.stringify({ ok: true, savedAt: new Date().toISOString() }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } },
-    )
+    return new Response(JSON.stringify({ ok: true, savedAt: new Date().toISOString() }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
   } catch (err: any) {
-    return new Response(
-      JSON.stringify({ error: true, message: err.message }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } },
-    )
+    return new Response(JSON.stringify({ error: true, message: err.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 }

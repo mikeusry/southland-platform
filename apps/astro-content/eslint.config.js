@@ -50,6 +50,8 @@ export default [
         HTMLRewriter: 'readonly',
         HTMLElement: 'readonly',
         NodeListOf: 'readonly',
+        AbortController: 'readonly',
+        DOMException: 'readonly',
       },
     },
     plugins: {

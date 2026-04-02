@@ -116,7 +116,8 @@ export const PERSONAS: PersonaProfile[] = [
     avgLTV: 902.94,
     revenueGoalPct: 55,
 
-    narrative: 'Bill is 44% of the customer base with $903 avg LTV. Strong awareness content and persona landers shipped. Major JTBD gap in post-placement troubleshooting and utility cost reduction. No live re-engagement campaigns yet.',
+    narrative:
+      'Bill is 44% of the customer base with $903 avg LTV. Strong awareness content and persona landers shipped. Major JTBD gap in post-placement troubleshooting and utility cost reduction. No live re-engagement campaigns yet.',
 
     mission: {
       text: 'Add 2 consideration articles and close the post-placement troubleshooting gap for Bill.',
@@ -126,7 +127,10 @@ export const PERSONAS: PersonaProfile[] = [
     },
 
     lastActivity: [
-      { label: 'New page: /blog/how-to-reduce-ammonia-in-poultry-house-naturally/', date: '2026-03-15' },
+      {
+        label: 'New page: /blog/how-to-reduce-ammonia-in-poultry-house-naturally/',
+        date: '2026-03-15',
+      },
       { label: 'Persona lander shipped: /poultry/commercial/', date: '2026-03-01' },
     ],
 
@@ -140,7 +144,7 @@ export const PERSONAS: PersonaProfile[] = [
     values: [
       'Family legacy and farm continuity',
       'Top settlement rankings among peers',
-      'Financial security for kids\' college',
+      "Financial security for kids' college",
       'Community respect and neighbor relationships',
       'Independence and self-reliance',
     ],
@@ -197,8 +201,28 @@ export const PERSONAS: PersonaProfile[] = [
     ],
 
     languageRules: {
-      use: ['placement', 'mortality', 'FCR', 'livability', 'grow-out', 'house ranking', 'settlement', 'cents per bird'],
-      avoid: ['putting chicks in', 'death rate', 'feed efficiency', 'survival rate', 'raising period', 'performance comparison', 'payment', 'synergistic', 'revolutionary', 'sustainable agriculture'],
+      use: [
+        'placement',
+        'mortality',
+        'FCR',
+        'livability',
+        'grow-out',
+        'house ranking',
+        'settlement',
+        'cents per bird',
+      ],
+      avoid: [
+        'putting chicks in',
+        'death rate',
+        'feed efficiency',
+        'survival rate',
+        'raising period',
+        'performance comparison',
+        'payment',
+        'synergistic',
+        'revolutionary',
+        'sustainable agriculture',
+      ],
     },
 
     skepticismTriggers: [
@@ -206,7 +230,7 @@ export const PERSONAS: PersonaProfile[] = [
       '"Guaranteed to...," "revolutionary breakthrough"',
       'Suit and tie on farm, clean boots, rental car with out-of-state plates',
       'West Coast company, no local dealers, requires apps, MLM structure',
-      'Doesn\'t ask about his operation first',
+      "Doesn't ask about his operation first",
     ],
 
     trustHierarchy: [
@@ -242,19 +266,22 @@ export const PERSONAS: PersonaProfile[] = [
     plays: [
       {
         title: 'Re-engage lapsed Bill buyers with ammonia pillar page',
-        description: 'Target Bill customers who bought in last 12 months but haven\'t returned in 90 days. Send email with the new ammonia reduction article + Litter Life CTA.',
+        description:
+          "Target Bill customers who bought in last 12 months but haven't returned in 90 days. Send email with the new ammonia reduction article + Litter Life CTA.",
         targetEstimate: '~340 customers',
         expectedLift: 'Based on Litter Life ROAS, expect $4-6K in 30 days',
       },
       {
         title: 'Upsell Big Ole Bird buyers to Catalyst',
-        description: 'Bill customers who buy Big Ole Bird but have never purchased Catalyst. Stress-period product for placement week.',
+        description:
+          'Bill customers who buy Big Ole Bird but have never purchased Catalyst. Stress-period product for placement week.',
         targetEstimate: '~180 customers',
         expectedLift: 'Catalyst 6.62x ROAS, avg order $85',
       },
       {
         title: 'Post-settlement follow-up campaign',
-        description: 'Automated email 3 days after estimated settlement date. "How was your last flock?" with outcome survey link + reorder CTA.',
+        description:
+          'Automated email 3 days after estimated settlement date. "How was your last flock?" with outcome survey link + reorder CTA.',
         targetEstimate: 'All active Bill customers',
         expectedLift: 'Shorten reorder cycle from 45 to 38 days',
       },
@@ -277,7 +304,8 @@ export const PERSONAS: PersonaProfile[] = [
     avgLTV: 77.38,
     revenueGoalPct: 30,
 
-    narrative: 'Betty is 48% of customers but only 30% of revenue due to low LTV ($77). Highest volume, lowest spend. Online-native — her entire purchase loop is digital. Lander shipped. No re-engagement campaigns live. Major JTBD gaps: sick bird diagnosis and small flock dosing guides.',
+    narrative:
+      'Betty is 48% of customers but only 30% of revenue due to low LTV ($77). Highest volume, lowest spend. Online-native — her entire purchase loop is digital. Lander shipped. No re-engagement campaigns live. Major JTBD gaps: sick bird diagnosis and small flock dosing guides.',
 
     mission: {
       text: 'Create 1 consideration-stage guide for Betty and launch first re-engagement campaign.',
@@ -288,7 +316,10 @@ export const PERSONAS: PersonaProfile[] = [
 
     lastActivity: [
       { label: 'Lander page built: /poultry/backyard/', date: '2026-03-10' },
-      { label: 'Betty lander copy doc complete: BB-Persona/betty-storybrand.md', date: '2026-03-05' },
+      {
+        label: 'Betty lander copy doc complete: BB-Persona/betty-storybrand.md',
+        date: '2026-03-05',
+      },
     ],
 
     demographics: {
@@ -307,9 +338,9 @@ export const PERSONAS: PersonaProfile[] = [
     ],
 
     fears: [
-      'Losing birds to illness she can\'t diagnose',
+      "Losing birds to illness she can't diagnose",
       'Exposing family to chemicals near food source',
-      'Not knowing what\'s wrong when birds act sick',
+      "Not knowing what's wrong when birds act sick",
       'Predator attacks wiping out the flock',
       'Being judged as a "bad chicken mom"',
     ],
@@ -357,8 +388,26 @@ export const PERSONAS: PersonaProfile[] = [
     ],
 
     languageRules: {
-      use: ['flock', 'girls', 'coop', 'healthy', 'natural', 'safe for family', 'easy to use', 'keep your family safe'],
-      avoid: ['commercial', 'production', 'mortality rate', 'FCR', 'ROI', 'operation', 'grow-out', 'tonnage'],
+      use: [
+        'flock',
+        'girls',
+        'coop',
+        'healthy',
+        'natural',
+        'safe for family',
+        'easy to use',
+        'keep your family safe',
+      ],
+      avoid: [
+        'commercial',
+        'production',
+        'mortality rate',
+        'FCR',
+        'ROI',
+        'operation',
+        'grow-out',
+        'tonnage',
+      ],
     },
 
     skepticismTriggers: [
@@ -366,7 +415,7 @@ export const PERSONAS: PersonaProfile[] = [
       'No clear dosing instructions for small flocks',
       'Aggressive sales tactics',
       'No community reviews or social proof',
-      'Complex application requiring equipment she doesn\'t have',
+      "Complex application requiring equipment she doesn't have",
     ],
 
     trustHierarchy: [
@@ -381,11 +430,11 @@ export const PERSONAS: PersonaProfile[] = [
 
     jtbd: [
       { statement: 'Keep my birds healthy without chemicals near my family', status: 'covered' },
-      { statement: 'Diagnose what\'s wrong when a bird acts sick', status: 'covered' },
+      { statement: "Diagnose what's wrong when a bird acts sick", status: 'covered' },
       { statement: 'Prevent seasonal health problems before they start', status: 'partial' },
       { statement: 'Get reliable advice without a poultry vet', status: 'covered' },
       { statement: 'Know the right product and dose for my small flock', status: 'covered' },
-      { statement: 'Feel confident I\'m doing right by my birds', status: 'partial' },
+      { statement: "Feel confident I'm doing right by my birds", status: 'partial' },
     ],
 
     topProducts: [
@@ -397,19 +446,22 @@ export const PERSONAS: PersonaProfile[] = [
     plays: [
       {
         title: 'New chicken owner welcome sequence',
-        description: 'Email sequence for first-time buyers: Day 1 getting started, Day 7 first week check, Day 30 seasonal tips. Each email links to relevant blog content.',
+        description:
+          'Email sequence for first-time buyers: Day 1 getting started, Day 7 first week check, Day 30 seasonal tips. Each email links to relevant blog content.',
         targetEstimate: '~200 new customers/quarter',
         expectedLift: 'Increase 90-day repeat rate from 12% to 25%',
       },
       {
         title: 'Seasonal prep campaign (Spring/Fall)',
-        description: 'Email + social push 2 weeks before season change. Spring: new chick supplies + biosecurity. Fall: winterization + immune support.',
+        description:
+          'Email + social push 2 weeks before season change. Spring: new chick supplies + biosecurity. Fall: winterization + immune support.',
         targetEstimate: 'All active Betty customers',
         expectedLift: 'Seasonal spike in Hen Helper + Big Ole Bird sales',
       },
       {
         title: 'Facebook group seeding',
-        description: 'Identify top 5 backyard chicken Facebook groups. Share educational content (not product) to build trust. Link to blog, not product pages.',
+        description:
+          'Identify top 5 backyard chicken Facebook groups. Share educational content (not product) to build trust. Link to blog, not product pages.',
         targetEstimate: '500K+ group members across top groups',
         expectedLift: 'Brand awareness, organic traffic to backyard content',
       },
@@ -432,7 +484,8 @@ export const PERSONAS: PersonaProfile[] = [
     avgLTV: 0,
     revenueGoalPct: 15,
 
-    narrative: 'Taylor is 8% weight with no labeled customers yet — the greenfield opportunity. Turf lander copy not started. 4 collection pages exist (golf, homeowners, landscapers, turf) but all on legacy /collections/ URLs needing migration. No campaigns.',
+    narrative:
+      'Taylor is 8% weight with no labeled customers yet — the greenfield opportunity. Turf lander copy not started. 4 collection pages exist (golf, homeowners, landscapers, turf) but all on legacy /collections/ URLs needing migration. No campaigns.',
 
     mission: {
       text: 'Ship Taylor lander and migrate 4 turf collection pages to /lawn/* URLs.',
@@ -509,8 +562,27 @@ export const PERSONAS: PersonaProfile[] = [
     ],
 
     languageRules: {
-      use: ['program', 'turf', 'soil biology', 'application rate', 'results', 'clients', 'accounts', 'warm-season', 'transition zone'],
-      avoid: ['lawn', 'grass', 'yard', 'homeowner', 'easy', 'simple', 'green thumb', 'natural gardening'],
+      use: [
+        'program',
+        'turf',
+        'soil biology',
+        'application rate',
+        'results',
+        'clients',
+        'accounts',
+        'warm-season',
+        'transition zone',
+      ],
+      avoid: [
+        'lawn',
+        'grass',
+        'yard',
+        'homeowner',
+        'easy',
+        'simple',
+        'green thumb',
+        'natural gardening',
+      ],
     },
 
     skepticismTriggers: [
@@ -531,9 +603,15 @@ export const PERSONAS: PersonaProfile[] = [
     ],
 
     jtbd: [
-      { statement: 'Build an organic turf program that competes with chemical results', status: 'gap' },
+      {
+        statement: 'Build an organic turf program that competes with chemical results',
+        status: 'gap',
+      },
       { statement: 'Fix compacted southern clay soil for lasting turf health', status: 'partial' },
-      { statement: 'Transition existing accounts from chemical to organic without callbacks', status: 'gap' },
+      {
+        statement: 'Transition existing accounts from chemical to organic without callbacks',
+        status: 'gap',
+      },
       { statement: 'Price organic services competitively', status: 'gap' },
       { statement: 'Show clients measurable soil improvement (before/after)', status: 'gap' },
       { statement: 'Reduce chemical liability and stay ahead of regulations', status: 'partial' },
@@ -548,19 +626,22 @@ export const PERSONAS: PersonaProfile[] = [
     plays: [
       {
         title: 'Golf course super outreach',
-        description: 'Direct mail + follow-up call to golf course superintendents in GA, AL, NC, SC. Include soil test offer and case study from a peer course.',
+        description:
+          'Direct mail + follow-up call to golf course superintendents in GA, AL, NC, SC. Include soil test offer and case study from a peer course.',
         targetEstimate: '~500 courses in target geography',
         expectedLift: '10-15 trial accounts at $2-5K annual value each',
       },
       {
         title: 'Trade show presence (GIS, Southern turf)',
-        description: 'Booth at 2 major turf trade shows. Demo soil biology before/after. Collect leads for follow-up program builder consultation.',
+        description:
+          'Booth at 2 major turf trade shows. Demo soil biology before/after. Collect leads for follow-up program builder consultation.',
         targetEstimate: '200-400 qualified leads per show',
         expectedLift: 'Pipeline for $50-100K in annual recurring turf revenue',
       },
       {
         title: '"Organic Program Builder" landing page',
-        description: 'Interactive page where Taylor selects grass type, soil type, and acreage. Outputs a 12-month application schedule with products and rates. Captures lead info.',
+        description:
+          'Interactive page where Taylor selects grass type, soil type, and acreage. Outputs a 12-month application schedule with products and rates. Captures lead info.',
         targetEstimate: 'Organic search + paid traffic',
         expectedLift: 'Convert informational searches into qualified leads',
       },
@@ -599,7 +680,8 @@ export const PERSONAS: PersonaProfile[] = [
       age: '35-65',
       income: '$50-120K',
       location: 'Rural and suburban US, nationwide',
-      operation: 'Residential septic system, RV park, campground, apartment complex, or industrial facility',
+      operation:
+        'Residential septic system, RV park, campground, apartment complex, or industrial facility',
     },
 
     values: [
@@ -661,8 +743,26 @@ export const PERSONAS: PersonaProfile[] = [
     ],
 
     languageRules: {
-      use: ['septic', 'drain', 'odor', 'bacteria', 'treatment', 'maintenance', 'holding tank', 'vault toilet', 'grease trap', 'TSS', 'beneficial bacteria'],
-      avoid: ['industrial-grade', 'commercial operations', 'wastewater engineering', 'bioremediation protocol', 'anaerobic digestion kinetics'],
+      use: [
+        'septic',
+        'drain',
+        'odor',
+        'bacteria',
+        'treatment',
+        'maintenance',
+        'holding tank',
+        'vault toilet',
+        'grease trap',
+        'TSS',
+        'beneficial bacteria',
+      ],
+      avoid: [
+        'industrial-grade',
+        'commercial operations',
+        'wastewater engineering',
+        'bioremediation protocol',
+        'anaerobic digestion kinetics',
+      ],
     },
 
     skepticismTriggers: [
@@ -687,8 +787,11 @@ export const PERSONAS: PersonaProfile[] = [
       { statement: 'Eliminate odor from holding tanks and vault toilets', status: 'covered' },
       { statement: 'Clear slow drains without killing tank bacteria', status: 'covered' },
       { statement: 'Meet industrial wastewater discharge limits (TSS/CBOD)', status: 'covered' },
-      { statement: 'Understand what maintenance my septic system actually needs', status: 'partial' },
-      { statement: 'Find a treatment I can trust that isn\'t snake oil', status: 'partial' },
+      {
+        statement: 'Understand what maintenance my septic system actually needs',
+        status: 'partial',
+      },
+      { statement: "Find a treatment I can trust that isn't snake oil", status: 'partial' },
     ],
 
     topProducts: [
@@ -750,7 +853,10 @@ export const PERSONAS: PersonaProfile[] = [
     },
 
     lastActivity: [
-      { label: 'Pillar page shipped: /blog/organic-soil-health-bermuda-grass-fairways/', date: '2026-03-15' },
+      {
+        label: 'Pillar page shipped: /blog/organic-soil-health-bermuda-grass-fairways/',
+        date: '2026-03-15',
+      },
     ],
 
     demographics: {
@@ -819,15 +925,39 @@ export const PERSONAS: PersonaProfile[] = [
     ],
 
     languageRules: {
-      use: ['fairway', 'greens', 'tees', 'bentgrass', 'bermuda', 'zoysia', 'MLSN', 'CEC', 'infiltration rate', 'soil biology', 'program', 'application calendar', 'superintendent'],
-      avoid: ['lawn', 'yard', 'grass', 'homeowner', 'easy', 'simple', 'DIY', 'natural gardening', 'green thumb'],
+      use: [
+        'fairway',
+        'greens',
+        'tees',
+        'bentgrass',
+        'bermuda',
+        'zoysia',
+        'MLSN',
+        'CEC',
+        'infiltration rate',
+        'soil biology',
+        'program',
+        'application calendar',
+        'superintendent',
+      ],
+      avoid: [
+        'lawn',
+        'yard',
+        'grass',
+        'homeowner',
+        'easy',
+        'simple',
+        'DIY',
+        'natural gardening',
+        'green thumb',
+      ],
     },
 
     skepticismTriggers: [
       'Consumer-grade packaging or branding',
       'No rate charts or application schedules for turf',
       'Claims without soil test data or university trials',
-      'Salesperson who doesn\'t know warm-season vs cool-season',
+      "Salesperson who doesn't know warm-season vs cool-season",
       'Products marketed to homeowners, not professionals',
     ],
 
@@ -841,12 +971,27 @@ export const PERSONAS: PersonaProfile[] = [
     ],
 
     jtbd: [
-      { statement: 'Transition fairways from chemical to organic without visible quality loss', status: 'partial' },
+      {
+        statement: 'Transition fairways from chemical to organic without visible quality loss',
+        status: 'partial',
+      },
       { statement: 'Improve water infiltration on compacted clay fairways', status: 'covered' },
-      { statement: 'Reduce chemical input costs while maintaining conditioning standards', status: 'partial' },
-      { statement: 'Build a 12-month organic turf program I can present to my board', status: 'gap' },
-      { statement: 'Show measurable soil biology improvement with before/after data', status: 'gap' },
-      { statement: 'Meet environmental regulations on chemical runoff without sacrificing turf', status: 'partial' },
+      {
+        statement: 'Reduce chemical input costs while maintaining conditioning standards',
+        status: 'partial',
+      },
+      {
+        statement: 'Build a 12-month organic turf program I can present to my board',
+        status: 'gap',
+      },
+      {
+        statement: 'Show measurable soil biology improvement with before/after data',
+        status: 'gap',
+      },
+      {
+        statement: 'Meet environmental regulations on chemical runoff without sacrificing turf',
+        status: 'partial',
+      },
     ],
 
     topProducts: [
@@ -888,7 +1033,7 @@ export const PERSONAS: PersonaProfile[] = [
   {
     slug: 'hannah',
     name: 'Homeowner Hannah',
-    tagline: 'Suburban homeowner who wants a beautiful yard that\'s safe for kids and pets',
+    tagline: "Suburban homeowner who wants a beautiful yard that's safe for kids and pets",
     color: '#be185d',
     bgColor: '#fdf2f8',
     landerUrl: '/lawn/homeowner/',
@@ -927,10 +1072,10 @@ export const PERSONAS: PersonaProfile[] = [
 
     fears: [
       'Chemical lawn treatments harming kids or pets',
-      'Wasting money on products that don\'t work',
+      "Wasting money on products that don't work",
       'Neighbors judging a brown or weedy yard',
       'Fire ants, ticks, or pests threatening family safety',
-      'Not knowing what\'s wrong when grass turns brown',
+      "Not knowing what's wrong when grass turns brown",
     ],
 
     painPoints: [
@@ -946,7 +1091,7 @@ export const PERSONAS: PersonaProfile[] = [
       'Spring lawn prep season (March-April)',
       'Brown spots or visible lawn decline',
       'New home purchase (fresh start on lawn)',
-      'Seeing neighbor\'s great lawn and asking what they use',
+      "Seeing neighbor's great lawn and asking what they use",
       'Pet or child health concern about chemicals',
       'Facebook group or Instagram recommendation',
     ],
@@ -976,8 +1121,36 @@ export const PERSONAS: PersonaProfile[] = [
     ],
 
     languageRules: {
-      use: ['lawn', 'yard', 'grass', 'green', 'safe', 'family', 'pets', 'kids', 'easy', 'simple', 'organic', 'natural', 'DIY', 'brown spots', 'weeds', 'fire ants'],
-      avoid: ['turf', 'program', 'application rate', 'accounts', 'clients', 'CEC', 'infiltration', 'superintendent', 'warm-season cultivar', 'MLSN'],
+      use: [
+        'lawn',
+        'yard',
+        'grass',
+        'green',
+        'safe',
+        'family',
+        'pets',
+        'kids',
+        'easy',
+        'simple',
+        'organic',
+        'natural',
+        'DIY',
+        'brown spots',
+        'weeds',
+        'fire ants',
+      ],
+      avoid: [
+        'turf',
+        'program',
+        'application rate',
+        'accounts',
+        'clients',
+        'CEC',
+        'infiltration',
+        'superintendent',
+        'warm-season cultivar',
+        'MLSN',
+      ],
     },
 
     skepticismTriggers: [
@@ -1056,7 +1229,7 @@ export const PERSONAS: PersonaProfile[] = [
     revenueGoalPct: 0,
 
     narrative:
-      'Maggie is the regenerative/permaculture small farmer — 0.5 to 5 acres, sells at farmers markets and through CSA boxes. Shares Betty\'s values (natural, family, self-sufficiency) and channels (Instagram, Facebook, podcasts) but buys soil and crop products. Collection pages exist (produce, crops) but content is entirely beginner/homeowner-focused. Zero market gardener pillar pages. Reachable digitally — this is not a Frank situation.',
+      "Maggie is the regenerative/permaculture small farmer — 0.5 to 5 acres, sells at farmers markets and through CSA boxes. Shares Betty's values (natural, family, self-sufficiency) and channels (Instagram, Facebook, podcasts) but buys soil and crop products. Collection pages exist (produce, crops) but content is entirely beginner/homeowner-focused. Zero market gardener pillar pages. Reachable digitally — this is not a Frank situation.",
 
     mission: {
       text: 'Build /garden/ lander and create 1 pillar page targeting "market garden soil health."',
@@ -1071,7 +1244,8 @@ export const PERSONAS: PersonaProfile[] = [
       age: '28-50',
       income: '$35-80K (often supplemented by off-farm work)',
       location: 'Nationwide, peri-urban and rural (within 1 hour of a farmers market)',
-      operation: '0.5-5 acres intensive, 30-200 beds, hand tools or walk-behind tractor, $20-150K annual gross',
+      operation:
+        '0.5-5 acres intensive, 30-200 beds, hand tools or walk-behind tractor, $20-150K annual gross',
     },
 
     values: [
@@ -1083,7 +1257,7 @@ export const PERSONAS: PersonaProfile[] = [
     ],
 
     fears: [
-      'Crop failure wiping out a season\'s income',
+      "Crop failure wiping out a season's income",
       'Soil-borne disease building up in intensive beds',
       'Not being able to compete on price with conventional produce',
       'Burnout — the physical toll of small-scale farming',
@@ -1133,8 +1307,34 @@ export const PERSONAS: PersonaProfile[] = [
     ],
 
     languageRules: {
-      use: ['soil biology', 'beds', 'compost', 'cover crop', 'no-till', 'regenerative', 'market garden', 'CSA', 'farmers market', 'intensive', 'microbes', 'humus', 'carbon', 'living soil'],
-      avoid: ['lawn', 'turf', 'homeowner', 'acres of production', 'commodity', 'bushels per acre', 'yield optimization', 'precision agriculture', 'industrial', 'commercial grower'],
+      use: [
+        'soil biology',
+        'beds',
+        'compost',
+        'cover crop',
+        'no-till',
+        'regenerative',
+        'market garden',
+        'CSA',
+        'farmers market',
+        'intensive',
+        'microbes',
+        'humus',
+        'carbon',
+        'living soil',
+      ],
+      avoid: [
+        'lawn',
+        'turf',
+        'homeowner',
+        'acres of production',
+        'commodity',
+        'bushels per acre',
+        'yield optimization',
+        'precision agriculture',
+        'industrial',
+        'commercial grower',
+      ],
     },
 
     skepticismTriggers: [
@@ -1155,12 +1355,21 @@ export const PERSONAS: PersonaProfile[] = [
     ],
 
     jtbd: [
-      { statement: 'Build living soil fast enough to see results in the first growing season', status: 'partial' },
+      {
+        statement: 'Build living soil fast enough to see results in the first growing season',
+        status: 'partial',
+      },
       { statement: 'Create a soil amendment program for intensive bed rotation', status: 'gap' },
-      { statement: 'Fix heavy clay soil for raised bed or in-ground production', status: 'partial' },
+      {
+        statement: 'Fix heavy clay soil for raised bed or in-ground production',
+        status: 'partial',
+      },
       { statement: 'Replace or supplement compost with concentrated biology', status: 'partial' },
       { statement: 'Understand what my soil test results mean and what to buy', status: 'gap' },
-      { statement: 'Justify the cost of organic inputs against market produce prices', status: 'gap' },
+      {
+        statement: 'Justify the cost of organic inputs against market produce prices',
+        status: 'gap',
+      },
     ],
 
     topProducts: [
@@ -1214,7 +1423,7 @@ export const PERSONAS: PersonaProfile[] = [
     revenueGoalPct: 0,
 
     narrative:
-      'Bob runs breeder or pullet operations where the JTBD is fundamentally different from Bill\'s grow-out focus. His birds live 40+ weeks, not 6-8. Hatchability, egg quality, and reproductive function are his metrics — not FCR or settlement. Dedicated collection page, stub lander at /poultry/breeders/ (95% built), and blog content on pullet challenges. Real customers already buying.',
+      "Bob runs breeder or pullet operations where the JTBD is fundamentally different from Bill's grow-out focus. His birds live 40+ weeks, not 6-8. Hatchability, egg quality, and reproductive function are his metrics — not FCR or settlement. Dedicated collection page, stub lander at /poultry/breeders/ (95% built), and blog content on pullet challenges. Real customers already buying.",
 
     mission: {
       text: 'Finalize /poultry/breeders/ lander copy and create 1 breeder-specific content piece.',
@@ -1223,15 +1432,14 @@ export const PERSONAS: PersonaProfile[] = [
       deadline: '2026-05-01',
     },
 
-    lastActivity: [
-      { label: 'Lander page built: /poultry/breeders/', date: '2026-03-01' },
-    ],
+    lastActivity: [{ label: 'Lander page built: /poultry/breeders/', date: '2026-03-01' }],
 
     demographics: {
       age: '35-55',
       income: '$80-150K',
       location: 'Southeast US (GA, AR, AL, NC, MS)',
-      operation: 'Breeder houses or pullet farms, contracted to integrators, 10K-50K breeders or 50K-200K pullets',
+      operation:
+        'Breeder houses or pullet farms, contracted to integrators, 10K-50K breeders or 50K-200K pullets',
     },
 
     values: [
@@ -1293,8 +1501,28 @@ export const PERSONAS: PersonaProfile[] = [
     ],
 
     languageRules: {
-      use: ['hatchability', 'settable eggs', 'egg quality', 'breeder', 'pullet', 'lay cycle', 'peak production', 'uniformity', 'cull rate', 'reproductive performance', 'brood stock'],
-      avoid: ['FCR', 'feed conversion', 'settlement', 'grow-out', 'placement to processing', 'cents per bird', 'tournament ranking'],
+      use: [
+        'hatchability',
+        'settable eggs',
+        'egg quality',
+        'breeder',
+        'pullet',
+        'lay cycle',
+        'peak production',
+        'uniformity',
+        'cull rate',
+        'reproductive performance',
+        'brood stock',
+      ],
+      avoid: [
+        'FCR',
+        'feed conversion',
+        'settlement',
+        'grow-out',
+        'placement to processing',
+        'cents per bird',
+        'tournament ranking',
+      ],
     },
 
     skepticismTriggers: [
@@ -1315,12 +1543,18 @@ export const PERSONAS: PersonaProfile[] = [
     ],
 
     jtbd: [
-      { statement: 'Maximize hatchability and egg quality through the full lay cycle', status: 'partial' },
+      {
+        statement: 'Maximize hatchability and egg quality through the full lay cycle',
+        status: 'partial',
+      },
       { statement: 'Maintain breeder house litter quality for 40+ weeks', status: 'covered' },
       { statement: 'Achieve pullet uniformity from day 1 to placement', status: 'partial' },
       { statement: 'Control ammonia impact on reproductive performance', status: 'covered' },
       { statement: 'Prevent malabsorption syndrome in young pullets', status: 'partial' },
-      { statement: 'Find products with breeder-specific data, not just broiler crossover', status: 'gap' },
+      {
+        statement: 'Find products with breeder-specific data, not just broiler crossover',
+        status: 'gap',
+      },
     ],
 
     topProducts: [
@@ -1376,9 +1610,7 @@ export const PERSONAS: PersonaProfile[] = [
       deadline: '2026-05-01',
     },
 
-    lastActivity: [
-      { label: 'Lander page built: /poultry/turkey/', date: '2026-03-01' },
-    ],
+    lastActivity: [{ label: 'Lander page built: /poultry/turkey/', date: '2026-03-01' }],
 
     demographics: {
       age: '38-55',
@@ -1446,13 +1678,31 @@ export const PERSONAS: PersonaProfile[] = [
     ],
 
     languageRules: {
-      use: ['poult', 'tom', 'hen (turkey)', 'grow-out', 'processing weight', 'condemnation rate', 'breast blister', 'clostridial', 'necrotic enteritis', 'turkey house'],
-      avoid: ['chick', 'placement (broiler context)', 'FCR (broiler metric)', 'settlement (broiler term)', 'backyard', 'hobby flock'],
+      use: [
+        'poult',
+        'tom',
+        'hen (turkey)',
+        'grow-out',
+        'processing weight',
+        'condemnation rate',
+        'breast blister',
+        'clostridial',
+        'necrotic enteritis',
+        'turkey house',
+      ],
+      avoid: [
+        'chick',
+        'placement (broiler context)',
+        'FCR (broiler metric)',
+        'settlement (broiler term)',
+        'backyard',
+        'hobby flock',
+      ],
     },
 
     skepticismTriggers: [
       'Products with only broiler data and no turkey references',
-      'Dosing instructions that don\'t account for turkey body weight',
+      "Dosing instructions that don't account for turkey body weight",
       'Salespeople who say "it works the same on turkeys"',
       'No understanding of turkey-specific diseases',
       'Consumer or backyard branding on products',
@@ -1469,7 +1719,10 @@ export const PERSONAS: PersonaProfile[] = [
 
     jtbd: [
       { statement: 'Keep poults alive through the critical first 14 days', status: 'partial' },
-      { statement: 'Prevent clostridial dermatitis and necrotic enteritis naturally', status: 'partial' },
+      {
+        statement: 'Prevent clostridial dermatitis and necrotic enteritis naturally',
+        status: 'partial',
+      },
       { statement: 'Manage turkey house litter and ammonia for 15-20 weeks', status: 'covered' },
       { statement: 'Optimize processing weight and reduce condemnations', status: 'gap' },
       { statement: 'Get turkey-specific product data, not just broiler crossover', status: 'gap' },
@@ -1528,9 +1781,7 @@ export const PERSONAS: PersonaProfile[] = [
       deadline: '2026-05-01',
     },
 
-    lastActivity: [
-      { label: 'Lander page built: /poultry/game-birds/', date: '2026-03-01' },
-    ],
+    lastActivity: [{ label: 'Lander page built: /poultry/game-birds/', date: '2026-03-01' }],
 
     demographics: {
       age: '35-60',
@@ -1556,7 +1807,7 @@ export const PERSONAS: PersonaProfile[] = [
     ],
 
     painPoints: [
-      'Ulcerative enteritis (quail) — industry\'s #1 killer, antibiotic resistance growing',
+      "Ulcerative enteritis (quail) — industry's #1 killer, antibiotic resistance growing",
       'Respiratory stress in flight pens and brood houses',
       'Transport stress during shipment to hunting preserves',
       'Ammonia in enclosed brood houses affecting respiratory health',
@@ -1598,8 +1849,31 @@ export const PERSONAS: PersonaProfile[] = [
     ],
 
     languageRules: {
-      use: ['quail', 'pheasant', 'chukar', 'bobwhite', 'flight pen', 'brood house', 'preserve', 'release', 'transport', 'hatch', 'ulcerative enteritis', 'covey'],
-      avoid: ['broiler', 'settlement', 'FCR', 'integrator', 'grow-out', 'processing plant', 'backyard', 'hobby', 'pet'],
+      use: [
+        'quail',
+        'pheasant',
+        'chukar',
+        'bobwhite',
+        'flight pen',
+        'brood house',
+        'preserve',
+        'release',
+        'transport',
+        'hatch',
+        'ulcerative enteritis',
+        'covey',
+      ],
+      avoid: [
+        'broiler',
+        'settlement',
+        'FCR',
+        'integrator',
+        'grow-out',
+        'processing plant',
+        'backyard',
+        'hobby',
+        'pet',
+      ],
     },
 
     skepticismTriggers: [
@@ -1624,7 +1898,10 @@ export const PERSONAS: PersonaProfile[] = [
       { statement: 'Keep mortality low from hatch to release', status: 'covered' },
       { statement: 'Reduce transport stress and arrival mortality', status: 'partial' },
       { statement: 'Control ammonia in flight pens and brood houses', status: 'covered' },
-      { statement: 'Get species-specific protocols for quail vs pheasant vs chukar', status: 'gap' },
+      {
+        statement: 'Get species-specific protocols for quail vs pheasant vs chukar',
+        status: 'gap',
+      },
       { statement: 'Produce birds with flight quality (not just weight)', status: 'gap' },
     ],
 
@@ -1670,7 +1947,12 @@ export function getPersona(slug: string): PersonaProfile | undefined {
   return PERSONAS.find((p) => p.slug === slug)
 }
 
-export function getJTBDCoverage(persona: PersonaProfile): { covered: number; partial: number; gap: number; total: number } {
+export function getJTBDCoverage(persona: PersonaProfile): {
+  covered: number
+  partial: number
+  gap: number
+  total: number
+} {
   const covered = persona.jtbd.filter((j) => j.status === 'covered').length
   const partial = persona.jtbd.filter((j) => j.status === 'partial').length
   const gap = persona.jtbd.filter((j) => j.status === 'gap').length
@@ -1678,5 +1960,9 @@ export function getJTBDCoverage(persona: PersonaProfile): { covered: number; par
 }
 
 export function getNextBestMove(persona: PersonaProfile): PersonaJTBD | null {
-  return persona.jtbd.find((j) => j.status === 'gap') || persona.jtbd.find((j) => j.status === 'partial') || null
+  return (
+    persona.jtbd.find((j) => j.status === 'gap') ||
+    persona.jtbd.find((j) => j.status === 'partial') ||
+    null
+  )
 }

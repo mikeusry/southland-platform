@@ -19,36 +19,42 @@ const accentColor: Record<string, string> = {
   commercial: 'text-green-700',
   lawn: 'text-emerald-600',
 }
-const chevronAccent = persona && accentColor[persona] ? accentColor[persona] : 'text-brand-green-light'
+const chevronAccent =
+  persona && accentColor[persona] ? accentColor[persona] : 'text-brand-green-light'
 ---
 
 <div class:list={['accordion divide-y divide-gray-200', className]}>
-  {items.map((item) => (
-    <details class="accordion-item group">
-      <summary class="flex cursor-pointer items-center justify-between gap-4 py-5 text-left">
-        <span class="text-base font-semibold text-gray-900 group-hover:text-gray-700">
-          {item.question}
-        </span>
-        <svg
-          class:list={[
-            'accordion-chevron h-5 w-5 shrink-0 transition-transform duration-200',
-            chevronAccent,
-          ]}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
-      </summary>
-      <div class="accordion-content overflow-hidden">
-        <p class="pb-5 pr-12 text-sm leading-relaxed text-gray-600">
-          {item.answer}
-        </p>
-      </div>
-    </details>
-  ))}
+  {
+    items.map((item) => (
+      <details class="accordion-item group">
+        <summary class="flex cursor-pointer items-center justify-between gap-4 py-5 text-left">
+          <span class="text-base font-semibold text-gray-900 group-hover:text-gray-700">
+            {item.question}
+          </span>
+          <svg
+            class:list={[
+              'accordion-chevron h-5 w-5 shrink-0 transition-transform duration-200',
+              chevronAccent,
+            ]}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </summary>
+        <div class="accordion-content overflow-hidden">
+          <p class="pb-5 pr-12 text-sm leading-relaxed text-gray-600">{item.answer}</p>
+        </div>
+      </details>
+    ))
+  }
 </div>
 
 <style>

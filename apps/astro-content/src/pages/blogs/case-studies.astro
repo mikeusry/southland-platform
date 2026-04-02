@@ -33,7 +33,9 @@ const posts = allPosts.sort(
 
 // Group by segment
 const poultryStudies = posts.filter((p) => p.data.segment === 'poultry')
-const turfStudies = posts.filter((p) => p.data.segment === 'turf' || p.data.segment === 'agriculture')
+const turfStudies = posts.filter(
+  (p) => p.data.segment === 'turf' || p.data.segment === 'agriculture'
+)
 const wasteStudies = posts.filter((p) => p.data.segment === 'general') // PORT/waste studies are general-tagged
 
 // ── SEO ─────────────────────────────────────────────────────────────────────
@@ -63,11 +65,12 @@ const schema = {
   ogImage={getLogoUrl('square', { width: 800 })}
   schema={schema}
 >
-
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 1: HERO                                                       -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <section class="bg-gradient-to-br from-southland-green-dark via-[#1f3d24] to-[#162b1b] py-16 md:py-20">
+  <section
+    class="bg-gradient-to-br from-southland-green-dark via-[#1f3d24] to-[#162b1b] py-16 md:py-20"
+  >
     <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
       <p class="mb-3 text-sm font-semibold uppercase tracking-wider text-green-400">
         Proof, Not Promises
@@ -81,17 +84,19 @@ const schema = {
 
       <!-- Quick stats -->
       <div class="mx-auto grid max-w-3xl grid-cols-2 gap-4 md:grid-cols-4">
-        {[
-          { num: '6.2%', label: 'Mortality reduction (UGA)' },
-          { num: '60%', label: 'TSS reduction (paper mill)' },
-          { num: '70%', label: 'Water savings (car wash)' },
-          { num: '15+', label: 'Documented studies' },
-        ].map((stat) => (
-          <div class="rounded-lg bg-white/10 px-4 py-3">
-            <p class="font-heading text-xl text-white md:text-2xl">{stat.num}</p>
-            <p class="text-xs text-white/50">{stat.label}</p>
-          </div>
-        ))}
+        {
+          [
+            { num: '6.2%', label: 'Mortality reduction (UGA)' },
+            { num: '60%', label: 'TSS reduction (paper mill)' },
+            { num: '70%', label: 'Water savings (car wash)' },
+            { num: '15+', label: 'Documented studies' },
+          ].map((stat) => (
+            <div class="rounded-lg bg-white/10 px-4 py-3">
+              <p class="font-heading text-xl text-white md:text-2xl">{stat.num}</p>
+              <p class="text-xs text-white/50">{stat.label}</p>
+            </div>
+          ))
+        }
       </div>
     </div>
   </section>
@@ -99,65 +104,92 @@ const schema = {
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 2: POULTRY PROOF                                              -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  {poultryStudies.length > 0 && (
-    <section class="bg-white py-14 md:py-16">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="mb-8 flex items-end justify-between">
-          <div>
-            <span class="mb-1 block text-sm font-semibold uppercase tracking-wider text-green-600">Poultry</span>
-            <h2 class="font-heading text-2xl uppercase md:text-3xl" style="color: var(--color-title);">
-              Flock Performance Studies
-            </h2>
+  {
+    poultryStudies.length > 0 && (
+      <section class="bg-white py-14 md:py-16">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div class="mb-8 flex items-end justify-between">
+            <div>
+              <span class="mb-1 block text-sm font-semibold uppercase tracking-wider text-green-600">
+                Poultry
+              </span>
+              <h2
+                class="font-heading text-2xl uppercase md:text-3xl"
+                style="color: var(--color-title);"
+              >
+                Flock Performance Studies
+              </h2>
+            </div>
+            <a
+              href="/poultry/commercial/"
+              class="hidden text-sm font-medium text-southland-green hover:underline sm:block"
+            >
+              Commercial programs &rarr;
+            </a>
           </div>
-          <a href="/poultry/commercial/" class="hidden text-sm font-medium text-southland-green hover:underline sm:block">
-            Commercial programs &rarr;
-          </a>
+          <BlogGrid posts={poultryStudies} columns={3} />
         </div>
-        <BlogGrid posts={poultryStudies} columns={3} />
-      </div>
-    </section>
-  )}
+      </section>
+    )
+  }
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 3: TURF & AGRICULTURE PROOF                                   -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  {turfStudies.length > 0 && (
-    <section class="bg-gray-50 py-14 md:py-16">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="mb-8 flex items-end justify-between">
-          <div>
-            <span class="mb-1 block text-sm font-semibold uppercase tracking-wider text-emerald-600">Turf & Agriculture</span>
-            <h2 class="font-heading text-2xl uppercase md:text-3xl" style="color: var(--color-title);">
-              Soil & Germination Trials
-            </h2>
+  {
+    turfStudies.length > 0 && (
+      <section class="bg-gray-50 py-14 md:py-16">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div class="mb-8 flex items-end justify-between">
+            <div>
+              <span class="mb-1 block text-sm font-semibold uppercase tracking-wider text-emerald-600">
+                Turf & Agriculture
+              </span>
+              <h2
+                class="font-heading text-2xl uppercase md:text-3xl"
+                style="color: var(--color-title);"
+              >
+                Soil & Germination Trials
+              </h2>
+            </div>
+            <a
+              href="/lawn/"
+              class="hidden text-sm font-medium text-southland-green hover:underline sm:block"
+            >
+              Lawn programs &rarr;
+            </a>
           </div>
-          <a href="/lawn/" class="hidden text-sm font-medium text-southland-green hover:underline sm:block">
-            Lawn programs &rarr;
-          </a>
+          <BlogGrid posts={turfStudies} columns={3} />
         </div>
-        <BlogGrid posts={turfStudies} columns={3} />
-      </div>
-    </section>
-  )}
+      </section>
+    )
+  }
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 4: WASTE & INDUSTRIAL PROOF                                   -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  {wasteStudies.length > 0 && (
-    <section class="bg-white py-14 md:py-16">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="mb-8 flex items-end justify-between">
-          <div>
-            <span class="mb-1 block text-sm font-semibold uppercase tracking-wider text-blue-600">Waste & Industrial</span>
-            <h2 class="font-heading text-2xl uppercase md:text-3xl" style="color: var(--color-title);">
-              PORT Treatment Results
-            </h2>
+  {
+    wasteStudies.length > 0 && (
+      <section class="bg-white py-14 md:py-16">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div class="mb-8 flex items-end justify-between">
+            <div>
+              <span class="mb-1 block text-sm font-semibold uppercase tracking-wider text-blue-600">
+                Waste & Industrial
+              </span>
+              <h2
+                class="font-heading text-2xl uppercase md:text-3xl"
+                style="color: var(--color-title);"
+              >
+                PORT Treatment Results
+              </h2>
+            </div>
           </div>
+          <BlogGrid posts={wasteStudies} columns={3} />
         </div>
-        <BlogGrid posts={wasteStudies} columns={3} />
-      </div>
-    </section>
-  )}
+      </section>
+    )
+  }
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 5: LEAD CAPTURE                                               -->
@@ -170,7 +202,8 @@ const schema = {
             Want results like these?
           </h2>
           <p class="text-white/70">
-            Every operation is different. Tell us about yours and we'll recommend a program based on what's actually worked — not guesswork.
+            Every operation is different. Tell us about yours and we'll recommend a program based on
+            what's actually worked — not guesswork.
           </p>
           <p class="mt-3 text-xs text-white/40">
             Or call directly: <a href="tel:800-608-3755" class="underline">800-608-3755</a>
@@ -189,5 +222,4 @@ const schema = {
       </div>
     </div>
   </section>
-
 </BaseLayout>

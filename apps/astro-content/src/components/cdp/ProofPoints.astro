@@ -88,11 +88,19 @@ const proofPointsByPersona = {
 
 // Map new persona slugs to proof point data keys (legacy keys until per-persona data exists)
 const personaToProofKey: Record<string, string> = {
-  bill: 'commercial', bob: 'commercial', tom: 'commercial', greg: 'commercial',
+  bill: 'commercial',
+  bob: 'commercial',
+  tom: 'commercial',
+  greg: 'commercial',
   betty: 'backyard',
-  taylor: 'lawn', gary: 'lawn', hannah: 'lawn', maggie: 'lawn',
+  taylor: 'lawn',
+  gary: 'lawn',
+  hannah: 'lawn',
+  maggie: 'lawn',
   // Legacy keys map to themselves
-  backyard: 'backyard', commercial: 'commercial', lawn: 'lawn',
+  backyard: 'backyard',
+  commercial: 'commercial',
+  lawn: 'lawn',
 }
 const proofKey = personaToProofKey[persona] ?? persona
 const points = proofPointsByPersona[proofKey as keyof typeof proofPointsByPersona] || []

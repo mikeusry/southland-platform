@@ -17,8 +17,8 @@ import { checkOriginality } from '../../../lib/services/originality'
 import { scorePersonas, scoreBrandVoice } from '../../../lib/services/mothership'
 
 function gradeFromChecks(checks: AuditCheck[]): Grade {
-  const fails = checks.filter(c => c.status === 'fail').length
-  const warns = checks.filter(c => c.status === 'warn').length
+  const fails = checks.filter((c) => c.status === 'fail').length
+  const warns = checks.filter((c) => c.status === 'warn').length
   if (fails === 0 && warns === 0) return 'A'
   if (fails === 0 && warns <= 2) return 'B'
   if (fails <= 1) return 'C'
@@ -30,29 +30,32 @@ export const POST: APIRoute = async ({ request }) => {
   const startTime = Date.now()
 
   try {
-    const body = await request.json() as { path: string; persona: string; bodyText?: string }
+    const body = (await request.json()) as { path: string; persona: string; bodyText?: string }
 
     if (!body.path) {
-      return new Response(
-        JSON.stringify({ error: true, message: 'Missing path' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } },
-      )
+      return new Response(JSON.stringify({ error: true, message: 'Missing path' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      })
     }
 
     // If bodyText not provided, fetch the page and extract it
     let bodyText = body.bodyText
     if (!bodyText) {
       const origin = new URL(request.url).origin
-      const res = await fetch(new URL(body.path, origin).toString(), { headers: { Accept: 'text/html' } })
+      const res = await fetch(new URL(body.path, origin).toString(), {
+        headers: { Accept: 'text/html' },
+      })
       if (!res.ok) {
         return new Response(
           JSON.stringify({ error: true, message: `Page returned ${res.status}` }),
-          { status: 200, headers: { 'Content-Type': 'application/json' } },
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
         )
       }
       const html = await res.text()
       // Extract body text
-      const mainMatch = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i) || html.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
+      const mainMatch =
+        html.match(/<main[^>]*>([\s\S]*?)<\/main>/i) || html.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
       const rawBody = mainMatch ? mainMatch[1] : html
       bodyText = rawBody
         .replace(/<script[\s\S]*?<\/script>/gi, '')
@@ -73,7 +76,8 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Build Layer 2: Originality — only show if actually ran (not skipped)
     const origChecks: AuditCheck[] = []
-    const origSkipped = originalityResult.originality.skipped && originalityResult.aiDetection.skipped
+    const origSkipped =
+      originalityResult.originality.skipped && originalityResult.aiDetection.skipped
 
     if (!originalityResult.originality.skipped) {
       origChecks.push({
@@ -91,11 +95,13 @@ export const POST: APIRoute = async ({ request }) => {
       })
     }
 
-    const originality: AuditCategory | null = origSkipped ? null : {
-      name: 'Originality',
-      grade: gradeFromChecks(origChecks),
-      checks: origChecks,
-    }
+    const originality: AuditCategory | null = origSkipped
+      ? null
+      : {
+          name: 'Originality',
+          grade: gradeFromChecks(origChecks),
+          checks: origChecks,
+        }
 
     // Build Layer 3: Persona + Voice alignment (vector-based)
     const voiceChecks: AuditCheck[] = []
@@ -106,7 +112,8 @@ export const POST: APIRoute = async ({ request }) => {
       voiceChecks.push({
         label: `Persona alignment: ${personaResult.primary.name}`,
         status: pScore >= 60 ? 'pass' : pScore >= 40 ? 'warn' : 'fail',
-        detail: `${pScore}% match` +
+        detail:
+          `${pScore}% match` +
           (personaResult.recommendation ? ` — ${personaResult.recommendation}` : ''),
       })
 
@@ -131,7 +138,8 @@ export const POST: APIRoute = async ({ request }) => {
     if (voiceResult.available) {
       voiceChecks.push({
         label: `Brand voice alignment (target: 60%+)`,
-        status: voiceResult.alignment >= 60 ? 'pass' : voiceResult.alignment >= 40 ? 'warn' : 'fail',
+        status:
+          voiceResult.alignment >= 60 ? 'pass' : voiceResult.alignment >= 40 ? 'warn' : 'fail',
         detail: `${voiceResult.alignment}% match to Southland transcript library`,
       })
 
@@ -139,7 +147,7 @@ export const POST: APIRoute = async ({ request }) => {
       if (voiceResult.topMatches.length > 0) {
         const matchList = voiceResult.topMatches
           .slice(0, 3)
-          .map(m => `${m.videoTitle} (${m.similarity}%)`)
+          .map((m) => `${m.videoTitle} (${m.similarity}%)`)
           .join('; ')
         voiceChecks.push({
           label: 'Closest voice samples',
@@ -162,7 +170,9 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     const duration = Date.now() - startTime
-    console.log(`[go-live] deep audit ${body.path}: orig=${originality?.grade ?? 'skipped'} voice=${voiceDeep.grade} in ${duration}ms`)
+    console.log(
+      `[go-live] deep audit ${body.path}: orig=${originality?.grade ?? 'skipped'} voice=${voiceDeep.grade} in ${duration}ms`
+    )
 
     return new Response(
       JSON.stringify({
@@ -171,13 +181,16 @@ export const POST: APIRoute = async ({ request }) => {
         voiceDeep,
         duration,
       }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } },
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
     )
   } catch (err) {
     console.error('[go-live] deep audit error:', err)
     return new Response(
-      JSON.stringify({ error: true, message: err instanceof Error ? err.message : 'Unknown error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } },
+      JSON.stringify({
+        error: true,
+        message: err instanceof Error ? err.message : 'Unknown error',
+      }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
     )
   }
 }

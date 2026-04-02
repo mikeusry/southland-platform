@@ -22,10 +22,10 @@ export const POST: APIRoute = async ({ request }) => {
     const { livePath } = (await request.json()) as { livePath: string }
 
     if (!livePath) {
-      return new Response(
-        JSON.stringify({ error: true, message: 'Missing livePath' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } },
-      )
+      return new Response(JSON.stringify({ error: true, message: 'Missing livePath' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      })
     }
 
     const origin = new URL(request.url).origin
@@ -44,7 +44,9 @@ export const POST: APIRoute = async ({ request }) => {
     const verdict = computeVerdict(live, new_, delta)
 
     const duration = Date.now() - startTime
-    console.log(`[go-live] compared ${livePath} → ${newPath}: score=${verdict.score} (${verdict.status}) in ${duration}ms`)
+    console.log(
+      `[go-live] compared ${livePath} → ${newPath}: score=${verdict.score} (${verdict.status}) in ${duration}ms`
+    )
 
     return new Response(
       JSON.stringify({
@@ -57,13 +59,16 @@ export const POST: APIRoute = async ({ request }) => {
         comparedAt: new Date().toISOString(),
         duration,
       }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } },
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
     )
   } catch (err) {
     console.error('[go-live] compare error:', err)
     return new Response(
-      JSON.stringify({ error: true, message: err instanceof Error ? err.message : 'Unknown error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } },
+      JSON.stringify({
+        error: true,
+        message: err instanceof Error ? err.message : 'Unknown error',
+      }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
     )
   }
 }

@@ -73,10 +73,7 @@ const SEGMENT_MAP: Record<string, string> = {
  * Infer persona from blog post tags and segment.
  * Returns null if no persona can be determined (post needs tagging).
  */
-export function inferPersonaFromBlog(
-  tags: string[],
-  segment: string,
-): PersonaMatch | null {
+export function inferPersonaFromBlog(tags: string[], segment: string): PersonaMatch | null {
   // Tags first — more specific, medium confidence
   for (const [tag, persona] of TAG_PRECEDENCE) {
     if (tags.includes(tag)) {

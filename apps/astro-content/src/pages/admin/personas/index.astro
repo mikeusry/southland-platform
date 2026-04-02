@@ -7,11 +7,7 @@
  * Click row → navigate to /admin/personas/[slug]/
  */
 import AdminLayout from '../../../layouts/AdminLayout.astro'
-import {
-  PERSONAS,
-  getJTBDCoverage,
-  getNextBestMove,
-} from '../../../lib/persona-profiles'
+import { PERSONAS, getJTBDCoverage, getNextBestMove } from '../../../lib/persona-profiles'
 import { PAGE_GROUPS } from '../../../lib/site-audit-pages'
 import type { PersonaProfile } from '../../../lib/persona-profiles'
 
@@ -29,15 +25,22 @@ const SEGMENTS = [
 type LanderStatus = 'live' | 'building' | 'greenfield'
 
 function getLanderStatus(p: PersonaProfile): LanderStatus {
-  const hasShipped = p.lastActivity.some((a) => a.label.toLowerCase().includes('shipped') || a.label.toLowerCase().includes('lander page built'))
+  const hasShipped = p.lastActivity.some(
+    (a) =>
+      a.label.toLowerCase().includes('shipped') ||
+      a.label.toLowerCase().includes('lander page built')
+  )
   if (hasShipped) return 'live'
   if (p.mission.done > 0) return 'building'
   return 'greenfield'
 }
 
-const STATUS_TOKEN: Record<LanderStatus, { label: string; bg: string; text: string; border: string }> = {
-  live:       { label: 'Live',       bg: '#ecfdf5', text: '#065f46', border: '#a7f3d0' },
-  building:   { label: 'Building',   bg: '#fffbeb', text: '#92400e', border: '#fde68a' },
+const STATUS_TOKEN: Record<
+  LanderStatus,
+  { label: string; bg: string; text: string; border: string }
+> = {
+  live: { label: 'Live', bg: '#ecfdf5', text: '#065f46', border: '#a7f3d0' },
+  building: { label: 'Building', bg: '#fffbeb', text: '#92400e', border: '#fde68a' },
   greenfield: { label: 'Greenfield', bg: '#fef2f2', text: '#991b1b', border: '#fecaca' },
 }
 
@@ -98,28 +101,36 @@ const coveredJobs = rows.reduce((sum, r) => sum + r.coverage.covered, 0)
 
 <AdminLayout title="Personas">
   <div class="pipeline-page">
-
     <!-- ── Header ──────────────────────────────────────────────────────── -->
     <header class="page-header">
       <h1>Persona Pipeline</h1>
-      <p class="subtitle">{rows.length} personas &middot; {liveCount} live &middot; {buildingCount} building &middot; {greenfieldCount} greenfield &middot; {totalCustomers.toLocaleString()} customers &middot; {coveredJobs}/{totalJobs} jobs covered</p>
+      <p class="subtitle">
+        {rows.length} personas &middot; {liveCount} live &middot; {buildingCount} building &middot; {
+          greenfieldCount
+        } greenfield &middot; {totalCustomers.toLocaleString()} customers &middot; {coveredJobs}/{
+          totalJobs
+        } jobs covered
+      </p>
     </header>
 
     <!-- ── Underline tabs ──────────────────────────────────────────────── -->
     <nav class="tab-bar">
       <div class="tab-group" data-group="segment">
-        {SEGMENTS.map((seg) => {
-          const count = seg.key === 'all' ? rows.length : rows.filter((r) => r.segment === seg.key).length
-          return (
-            <button
-              class="tab"
-              data-filter={seg.key}
-              aria-selected={seg.key === 'all' ? 'true' : 'false'}
-            >
-              {seg.label} ({count})
-            </button>
-          )
-        })}
+        {
+          SEGMENTS.map((seg) => {
+            const count =
+              seg.key === 'all' ? rows.length : rows.filter((r) => r.segment === seg.key).length
+            return (
+              <button
+                class="tab"
+                data-filter={seg.key}
+                aria-selected={seg.key === 'all' ? 'true' : 'false'}
+              >
+                {seg.label} ({count})
+              </button>
+            )
+          })
+        }
       </div>
       <div class="tab-group" data-group="status">
         <button class="tab" data-status="all" aria-selected="true">All</button>
@@ -145,62 +156,67 @@ const coveredJobs = rows.reduce((sum, r) => sum + r.coverage.covered, 0)
           </tr>
         </thead>
         <tbody>
-          {rows.map((r) => {
-            const tok = STATUS_TOKEN[r.status]
-            return (
-              <tr
-                class="pipeline-row"
-                data-segment={r.segment}
-                data-status={r.status}
-                data-href={`/admin/personas/${r.slug}/`}
-                style={`border-left: 4px solid ${r.healthColor}`}
-              >
-                <td class="col-persona">
-                  <a href={`/admin/personas/${r.slug}/`} class="persona-name">{r.name}</a>
-                  <span class="persona-tagline">{r.tagline}</span>
-                </td>
-                <td class="col-num">
-                  <span class="num-primary">{(r.weight * 100).toFixed(0)}%</span>
-                </td>
-                <td class="col-num">
-                  <span class="num-primary">{r.customerCount.toLocaleString()}</span>
-                </td>
-                <td class="col-num">
-                  <span class="num-primary">${r.avgLTV.toFixed(0)}</span>
-                </td>
-                <td class="col-jtbd">
-                  <div class="jtbd-bar">
-                    <div class="jtbd-seg seg-covered" style={`width: ${r.coveredPct}%`} />
-                    <div class="jtbd-seg seg-partial" style={`width: ${r.partialPct}%`} />
-                    <div class="jtbd-seg seg-gap" style={`width: ${r.gapPct}%`} />
-                  </div>
-                  <span class="jtbd-label">{r.coverage.covered}/{r.coverage.total}</span>
-                </td>
-                <td class="col-num hide-mobile">
-                  <span class="num-secondary">{r.pageCount}</span>
-                </td>
-                <td class="col-status">
-                  <span
-                    class="status-token"
-                    style={`background: ${tok.bg}; color: ${tok.text}; border-color: ${tok.border}`}
-                  >
-                    {tok.label}
-                  </span>
-                </td>
-                <td class="col-next">
-                  {r.nextMove ? (
-                    <span class="next-text">{r.nextMove.statement}</span>
-                  ) : (
-                    <span class="next-none">All covered</span>
-                  )}
-                </td>
-              </tr>
-            )
-          })}
+          {
+            rows.map((r) => {
+              const tok = STATUS_TOKEN[r.status]
+              return (
+                <tr
+                  class="pipeline-row"
+                  data-segment={r.segment}
+                  data-status={r.status}
+                  data-href={`/admin/personas/${r.slug}/`}
+                  style={`border-left: 4px solid ${r.healthColor}`}
+                >
+                  <td class="col-persona">
+                    <a href={`/admin/personas/${r.slug}/`} class="persona-name">
+                      {r.name}
+                    </a>
+                    <span class="persona-tagline">{r.tagline}</span>
+                  </td>
+                  <td class="col-num">
+                    <span class="num-primary">{(r.weight * 100).toFixed(0)}%</span>
+                  </td>
+                  <td class="col-num">
+                    <span class="num-primary">{r.customerCount.toLocaleString()}</span>
+                  </td>
+                  <td class="col-num">
+                    <span class="num-primary">${r.avgLTV.toFixed(0)}</span>
+                  </td>
+                  <td class="col-jtbd">
+                    <div class="jtbd-bar">
+                      <div class="jtbd-seg seg-covered" style={`width: ${r.coveredPct}%`} />
+                      <div class="jtbd-seg seg-partial" style={`width: ${r.partialPct}%`} />
+                      <div class="jtbd-seg seg-gap" style={`width: ${r.gapPct}%`} />
+                    </div>
+                    <span class="jtbd-label">
+                      {r.coverage.covered}/{r.coverage.total}
+                    </span>
+                  </td>
+                  <td class="col-num hide-mobile">
+                    <span class="num-secondary">{r.pageCount}</span>
+                  </td>
+                  <td class="col-status">
+                    <span
+                      class="status-token"
+                      style={`background: ${tok.bg}; color: ${tok.text}; border-color: ${tok.border}`}
+                    >
+                      {tok.label}
+                    </span>
+                  </td>
+                  <td class="col-next">
+                    {r.nextMove ? (
+                      <span class="next-text">{r.nextMove.statement}</span>
+                    ) : (
+                      <span class="next-none">All covered</span>
+                    )}
+                  </td>
+                </tr>
+              )
+            })
+          }
         </tbody>
       </table>
     </div>
-
   </div>
 </AdminLayout>
 
@@ -301,14 +317,16 @@ const coveredJobs = rows.reduce((sum, r) => sum + r.coverage.covered, 0)
     font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
-    transition: color 0.15s ease, border-color 0.15s ease;
+    transition:
+      color 0.15s ease,
+      border-color 0.15s ease;
   }
 
   .tab:hover {
     color: var(--text);
   }
 
-  .tab[aria-selected="true"] {
+  .tab[aria-selected='true'] {
     color: var(--text);
     border-bottom-color: var(--text);
   }
@@ -419,10 +437,18 @@ const coveredJobs = rows.reduce((sum, r) => sum + r.coverage.covered, 0)
     margin-bottom: 0.2rem;
   }
 
-  .jtbd-seg { height: 100%; }
-  .seg-covered { background: #16a34a; }
-  .seg-partial { background: #d97706; }
-  .seg-gap { background: #dc2626; }
+  .jtbd-seg {
+    height: 100%;
+  }
+  .seg-covered {
+    background: #16a34a;
+  }
+  .seg-partial {
+    background: #d97706;
+  }
+  .seg-gap {
+    background: #dc2626;
+  }
 
   .jtbd-label {
     font-size: 0.68rem;
@@ -463,8 +489,14 @@ const coveredJobs = rows.reduce((sum, r) => sum + r.coverage.covered, 0)
 
   /* ── Responsive ──────────────────────────────────────────────────────────── */
   @media (max-width: 768px) {
-    .hide-mobile { display: none; }
-    .persona-tagline { display: none; }
-    .col-next { display: none; }
+    .hide-mobile {
+      display: none;
+    }
+    .persona-tagline {
+      display: none;
+    }
+    .col-next {
+      display: none;
+    }
   }
 </style>

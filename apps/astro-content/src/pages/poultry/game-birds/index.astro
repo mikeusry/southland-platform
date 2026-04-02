@@ -8,7 +8,11 @@
  * Persona: commercial (same as Broiler Bill — these are production operations).
  * Canonical destination for /collections/game-birds (301 redirect).
  */
-import { createClient, getProductByHandle, getCollectionProducts } from '@southland/shopify-storefront'
+import {
+  createClient,
+  getProductByHandle,
+  getCollectionProducts,
+} from '@southland/shopify-storefront'
 import type { Product } from '@southland/shopify-storefront'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import CloudinaryHero from '../../../components/CloudinaryHero.astro'
@@ -47,19 +51,15 @@ const client = createClient({
 })
 
 const handles = [
-  'poultry-probiotic',                      // Big Ole Bird
+  'poultry-probiotic', // Big Ole Bird
   'hen-helper',
-  'poultry-litter-amendment',               // Litter Life
-  'catalyst-poultry-vitamin',               // Catalyst
+  'poultry-litter-amendment', // Litter Life
+  'catalyst-poultry-vitamin', // Catalyst
   'natural-mite-control-livestock-poultry', // Desecticide
 ] as const
 
-const products = await Promise.all(
-  handles.map((h) => getProductByHandle(client, h))
-)
-const productMap = new Map(
-  products.filter(Boolean).map((p) => [p!.handle, p!])
-)
+const products = await Promise.all(handles.map((h) => getProductByHandle(client, h)))
+const productMap = new Map(products.filter(Boolean).map((p) => [p!.handle, p!]))
 
 // Fetch ALL products in the game-birds collection for the shop grid
 const gameBirdCollection = await getCollectionProducts(client, 'game-birds')
@@ -96,7 +96,10 @@ const jobs = [
     title: 'Control ammonia in flight pens and brood houses.',
     struggle:
       "Game bird houses run tight and flight pens hold litter longer. Ammonia builds fast, disinfectants nuke beneficial biology along with the bad, and you're back to square one every cleanout.",
-    products: [getProduct('poultry-litter-amendment'), getProduct('natural-mite-control-livestock-poultry')].filter(Boolean),
+    products: [
+      getProduct('poultry-litter-amendment'),
+      getProduct('natural-mite-control-livestock-poultry'),
+    ].filter(Boolean),
     proof: 'Biological ammonia reduction within 48 hours',
     proofSource: 'Grower field reports',
     icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>`,
@@ -105,7 +108,9 @@ const jobs = [
     title: 'Survive moves, shipment, and high-stress events.',
     struggle:
       "Pen moves, transport to preserves, weather swings, and housing transitions — game birds are more stress-sensitive than broilers. By the time you see symptoms, you've already lost days and birds.",
-    products: [getProduct('catalyst-poultry-vitamin'), getProduct('poultry-probiotic')].filter(Boolean),
+    products: [getProduct('catalyst-poultry-vitamin'), getProduct('poultry-probiotic')].filter(
+      Boolean
+    ),
     proof: 'Targeted nutrition during stress reduces immune suppression',
     proofSource: 'Southland Organics product research',
     icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>`,
@@ -115,24 +120,25 @@ const jobs = [
 // ── Objections (FAQ) ────────────────────────────────────────────────────────
 const objections = [
   {
-    question: "These products are made for chickens. Do they work on quail and pheasant?",
+    question: 'These products are made for chickens. Do they work on quail and pheasant?',
     answer:
       "Yes. The biology is the same — Bacillus-based probiotics colonize avian gut lining regardless of species. Big Ole Bird was developed for poultry gut health broadly, not just broilers. Game bird operations including Tuck Farms (the world's largest bobwhite quail hatchery) use our products on quail and pheasant. The dosing scales down naturally for smaller birds.",
   },
   {
-    question: "I can't be in the house constantly — will these products work with minimal interaction?",
+    question:
+      "I can't be in the house constantly — will these products work with minimal interaction?",
     answer:
       "That's actually the point. Game bird operations need preventive systems that work without daily intervention. Big Ole Bird goes in the water line — dose it at water change and the probiotics do the work. Litter Life treats the litter biology once and keeps working between visits. These are set-and-forget systems designed for operations where less human contact means better birds.",
   },
   {
-    question: "My operation is smaller than a commercial broiler farm. Is this cost-effective?",
+    question: 'My operation is smaller than a commercial broiler farm. Is this cost-effective?',
     answer:
-      "Big Ole Bird costs roughly $0.02-0.05 per bird. Even on a small game bird operation, the math works if it prevents one disease event per grow-out cycle. Tuck Farms runs 1.4 million chicks a year and uses our products because the ROI scales — but it works at any size. Start with one barn, one cycle.",
+      'Big Ole Bird costs roughly $0.02-0.05 per bird. Even on a small game bird operation, the math works if it prevents one disease event per grow-out cycle. Tuck Farms runs 1.4 million chicks a year and uses our products because the ROI scales — but it works at any size. Start with one barn, one cycle.',
   },
   {
     question: "Will this affect the birds' flight ability or wildness?",
     answer:
-      "No. These are probiotics, vitamins, and litter biology — not drugs or hormones. They support gut health and immune function. They have zero effect on behavior, flight instinct, or wildness. USDA Organic certified, zero withdrawal, zero residue.",
+      'No. These are probiotics, vitamins, and litter biology — not drugs or hormones. They support gut health and immune function. They have zero effect on behavior, flight instinct, or wildness. USDA Organic certified, zero withdrawal, zero residue.',
   },
   {
     question: "What about ulcerative enteritis? That's our biggest killer.",
@@ -170,8 +176,12 @@ const faqSchema = {
 }
 ---
 
-<BaseLayout title={title} description={description} ogImage={ogImage} schema={[pageSchema, faqSchema]}>
-
+<BaseLayout
+  title={title}
+  description={description}
+  ogImage={ogImage}
+  schema={[pageSchema, faqSchema]}
+>
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 1: HERO                                                       -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
@@ -190,19 +200,26 @@ const faqSchema = {
     <div class="mx-auto w-full max-w-6xl pb-12 pt-12 md:pt-20">
       <div class="max-w-3xl">
         <div class="mb-3 flex flex-wrap items-center gap-2">
-          <span class="inline-block rounded-full bg-white/15 px-4 py-1 text-sm font-medium text-green-300">
+          <span
+            class="inline-block rounded-full bg-white/15 px-4 py-1 text-sm font-medium text-green-300"
+          >
             For Game Bird Operations
           </span>
-          <span class="inline-block rounded-full bg-green-400/20 px-3 py-1 text-sm font-semibold text-green-300">
+          <span
+            class="inline-block rounded-full bg-green-400/20 px-3 py-1 text-sm font-semibold text-green-300"
+          >
             USDA Organic · Zero Withdrawal · Zero Residue
           </span>
         </div>
-        <h1 class="mb-4 font-heading text-4xl uppercase leading-tight text-white md:text-5xl lg:text-6xl">
+        <h1
+          class="mb-4 font-heading text-4xl uppercase leading-tight text-white md:text-5xl lg:text-6xl"
+        >
           Your birds can't tell you what's wrong. Your biology can.
         </h1>
         <p class="mb-5 text-lg text-white/70 md:text-xl">
           Game birds are sensitive, fast-growing, and unforgiving when something goes wrong.
-          Preventive gut health and litter biology are cheaper than treating your way out of a crisis.
+          Preventive gut health and litter biology are cheaper than treating your way out of a
+          crisis.
         </p>
         <!-- Three levers -->
         <div class="mb-6 flex flex-wrap gap-x-6 gap-y-2">
@@ -226,7 +243,12 @@ const faqSchema = {
             class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3.5 font-semibold text-white transition-colors hover:bg-[#44883E]/85"
           >
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+              ></path>
             </svg>
             Talk to Allen
           </a>
@@ -235,7 +257,11 @@ const faqSchema = {
             class="inline-flex items-center gap-2 rounded-lg bg-white/10 px-6 py-3.5 font-semibold text-white transition-colors hover:bg-white/20"
           >
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
             </svg>
             Shop Game Bird Products
           </a>
@@ -245,28 +271,63 @@ const faqSchema = {
           >
             See the Proof
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
             </svg>
           </a>
         </div>
-        <p class="mt-2 text-sm text-white/50">No sales script — just a conversation about your operation</p>
+        <p class="mt-2 text-sm text-white/50">
+          No sales script — just a conversation about your operation
+        </p>
         <!-- Trust bar -->
-        <div class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-white/10 pt-4 text-sm text-white/80">
+        <div
+          class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-white/10 pt-4 text-sm text-white/80"
+        >
           <span class="flex items-center gap-1.5">
-            <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+            <svg
+              class="h-3.5 w-3.5 text-green-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4"></path>
             </svg>
             USDA Organic
           </span>
           <span class="flex items-center gap-1.5">
-            <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+            <svg
+              class="h-3.5 w-3.5 text-green-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4"></path>
             </svg>
             Zero Withdrawal
           </span>
           <span class="flex items-center gap-1.5">
-            <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+            <svg
+              class="h-3.5 w-3.5 text-green-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4"></path>
             </svg>
             Trusted by Tuck Farms
           </span>
@@ -284,43 +345,85 @@ const faqSchema = {
         Game birds don't give you second chances.
       </h2>
       <p class="mx-auto mb-12 max-w-2xl text-center text-gray-600">
-        Quail, pheasant, and chukar are faster, more sensitive, and less forgiving than broilers. Three problems define game bird production.
+        Quail, pheasant, and chukar are faster, more sensitive, and less forgiving than broilers.
+        Three problems define game bird production.
       </p>
       <div class="grid gap-8 md:grid-cols-3">
         <!-- External Problem -->
         <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
           <div class="hex-icon mb-4 bg-[#2C5234]/10">
-            <svg class="h-6 w-6 text-[#2C5234]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            <svg
+              class="h-6 w-6 text-[#2C5234]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+              ></path>
             </svg>
           </div>
-          <h3 class="mb-3 text-lg font-bold text-shopify-title">Disease moves faster than you can</h3>
+          <h3 class="mb-3 text-lg font-bold text-shopify-title">
+            Disease moves faster than you can
+          </h3>
           <p class="leading-relaxed text-gray-600">
-            Ulcerative enteritis, respiratory issues in young chicks, coccidiosis — by the time you see symptoms, you've already lost birds. Game bird production demands prevention, not reaction.
+            Ulcerative enteritis, respiratory issues in young chicks, coccidiosis — by the time you
+            see symptoms, you've already lost birds. Game bird production demands prevention, not
+            reaction.
           </p>
         </div>
         <!-- Internal Problem -->
         <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
           <div class="hex-icon mb-4 bg-[#44883E]/10">
-            <svg class="h-6 w-6 text-[#44883E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            <svg
+              class="h-6 w-6 text-[#44883E]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+              ></path>
             </svg>
           </div>
-          <h3 class="mb-3 text-lg font-bold text-shopify-title">You can't be in the house every day</h3>
+          <h3 class="mb-3 text-lg font-bold text-shopify-title">
+            You can't be in the house every day
+          </h3>
           <p class="leading-relaxed text-gray-600">
-            Game birds need minimal human interaction — imprinting kills flight instinct and market value. You need systems that work without constant presence. Walk in twice a week, not twice a day.
+            Game birds need minimal human interaction — imprinting kills flight instinct and market
+            value. You need systems that work without constant presence. Walk in twice a week, not
+            twice a day.
           </p>
         </div>
         <!-- Philosophical Problem -->
         <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
           <div class="hex-icon mb-4 bg-[#2C5234]/10">
-            <svg class="h-6 w-6 text-[#2C5234]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              class="h-6 w-6 text-[#2C5234]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
             </svg>
           </div>
-          <h3 class="mb-3 text-lg font-bold text-shopify-title">Disinfectants are making it worse</h3>
+          <h3 class="mb-3 text-lg font-bold text-shopify-title">
+            Disinfectants are making it worse
+          </h3>
           <p class="leading-relaxed text-gray-600">
-            Nuking everything — good bacteria and bad — just creates a vacuum for pathogens to fill. Game bird houses need biological balance, not chemical scorched earth.
+            Nuking everything — good bacteria and bad — just creates a vacuum for pathogens to fill.
+            Game bird houses need biological balance, not chemical scorched earth.
           </p>
         </div>
       </div>
@@ -334,38 +437,59 @@ const faqSchema = {
     <div class="mx-auto max-w-6xl px-4">
       <div class="grid items-center gap-12 md:grid-cols-[1fr_auto]">
         <div class="order-2 md:order-1">
-          <span class="mb-2 inline-block text-sm font-semibold uppercase tracking-wider text-[#44883E]">
+          <span
+            class="mb-2 inline-block text-sm font-semibold uppercase tracking-wider text-[#44883E]"
+          >
             Your guide
           </span>
           <h2 class="mb-6 font-heading text-3xl uppercase text-shopify-title md:text-4xl">
             We've worked with the biggest names in game birds.
           </h2>
           <p class="mb-4 text-lg leading-relaxed text-gray-700">
-            Allen Reynolds has spent 10+ years inside poultry houses — commercial broilers, turkeys, and game bird operations. When John Tuck at Tuck Farms needed a probiotic system that worked for quail, he called us.
+            Allen Reynolds has spent 10+ years inside poultry houses — commercial broilers, turkeys,
+            and game bird operations. When John Tuck at Tuck Farms needed a probiotic system that
+            worked for quail, he called us.
           </p>
           <p class="mb-4 text-lg leading-relaxed text-gray-600">
-            Game birds aren't just small chickens. They have different gut biology, different stress responses, and different management constraints. We understand the differences because we've been in the barns.
+            Game birds aren't just small chickens. They have different gut biology, different stress
+            responses, and different management constraints. We understand the differences because
+            we've been in the barns.
           </p>
           <!-- Scope proof -->
           <div class="mb-6 rounded-lg border border-green-200 bg-green-50 px-5 py-3">
             <p class="text-sm font-semibold text-[#2C5234]">
-              Used across 1.4 million+ quail chicks per year at Tuck Farms — the world's largest bobwhite quail hatchery — plus pheasant and chukar operations nationwide.
+              Used across 1.4 million+ quail chicks per year at Tuck Farms — the world's largest
+              bobwhite quail hatchery — plus pheasant and chukar operations nationwide.
             </p>
           </div>
           <p class="mb-8 leading-relaxed text-gray-600">
-            Every product is USDA Organic certified with zero withdrawal period. Same biology that works on millions of commercial broilers, adapted for game bird operations.
+            Every product is USDA Organic certified with zero withdrawal period. Same biology that
+            works on millions of commercial broilers, adapted for game bird operations.
           </p>
 
           <!-- Credential chips -->
           <div class="mb-8 flex flex-wrap gap-2">
-            {['10+ years on farms', 'Trusted by Tuck Farms', 'USDA Organic Certified', 'Zero Withdrawal', 'Family-owned since 2009'].map((cred) => (
-              <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
-                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
-                </svg>
-                {cred}
-              </span>
-            ))}
+            {
+              [
+                '10+ years on farms',
+                'Trusted by Tuck Farms',
+                'USDA Organic Certified',
+                'Zero Withdrawal',
+                'Family-owned since 2009',
+              ].map((cred) => (
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
+                  <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12l2 2 4-4"
+                    />
+                  </svg>
+                  {cred}
+                </span>
+              ))
+            }
           </div>
 
           <div class="flex flex-wrap items-center gap-4">
@@ -374,7 +498,12 @@ const faqSchema = {
               class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#44883E]/85"
             >
               <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                ></path>
               </svg>
               Call Allen
             </a>
@@ -399,7 +528,9 @@ const faqSchema = {
               loading="lazy"
             />
             <!-- Name badge overlay -->
-            <div class="absolute bottom-0 left-0 right-0 rounded-b-2xl bg-gradient-to-t from-black/70 to-transparent px-5 pb-4 pt-10">
+            <div
+              class="absolute bottom-0 left-0 right-0 rounded-b-2xl bg-gradient-to-t from-black/70 to-transparent px-5 pb-4 pt-10"
+            >
               <p class="text-lg font-bold text-white">Allen Reynolds</p>
               <p class="text-sm text-green-300">VP & Director of Operations</p>
             </div>
@@ -418,74 +549,109 @@ const faqSchema = {
         Three jobs. Real solutions.
       </h2>
       <p class="mx-auto mb-4 max-w-2xl text-center text-gray-600">
-        Same biology proven on millions of commercial birds. Adapted for quail, pheasant, and chukar operations.
+        Same biology proven on millions of commercial birds. Adapted for quail, pheasant, and chukar
+        operations.
       </p>
       <p class="mb-12 text-center">
-        <a href="#game-bird-products" class="inline-flex items-center gap-1 text-sm font-medium text-[#44883E] hover:text-[#2C5234] hover:underline">
+        <a
+          href="#game-bird-products"
+          class="inline-flex items-center gap-1 text-sm font-medium text-[#44883E] hover:text-[#2C5234] hover:underline"
+        >
           Skip to all game bird products
           <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
           </svg>
         </a>
       </p>
       <div class="grid gap-8 md:grid-cols-3">
-        {jobs.map((job) => (
-          <div class="flex flex-col rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-            <div class="hex-icon mb-4 bg-[#2C5234]/10">
-              <svg class="h-6 w-6 text-[#2C5234]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <Fragment set:html={job.icon} />
-              </svg>
-            </div>
-
-            <h3 class="mb-3 text-xl font-bold text-shopify-title">
-              {job.title}
-            </h3>
-            <p class="mb-6 text-gray-600">{job.struggle}</p>
-
-            <div class="mb-6 flex-1 space-y-4">
-              {job.products.map((product) => (
-                <a
-                  href={`/products/${product!.handle}/`}
-                  class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3 transition-colors hover:border-green-200 hover:bg-green-50"
+        {
+          jobs.map((job) => (
+            <div class="flex flex-col rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+              <div class="hex-icon mb-4 bg-[#2C5234]/10">
+                <svg
+                  class="h-6 w-6 text-[#2C5234]"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  {product!.images?.[0] && (
-                    <img
-                      src={product!.images[0].url}
-                      alt={product!.images[0].altText || product!.title}
-                      width="56"
-                      height="56"
-                      class="h-14 w-14 rounded-md object-cover"
-                      loading="lazy"
-                    />
-                  )}
-                  <div class="min-w-0 flex-1">
-                    <div class="truncate text-sm font-semibold text-gray-900">
-                      {product!.title.includes('|') ? product!.title.split('|')[0].trim() : product!.title}
-                    </div>
-                    <div class="text-sm text-[#44883E]">
-                      From {formatPrice(product!.priceRange.minVariantPrice.amount)}
-                    </div>
-                  </div>
-                  <svg class="h-4 w-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                </a>
-              ))}
-            </div>
-
-            <div class="border-t border-gray-100 pt-4">
-              <div class="flex items-start gap-2">
-                <svg class="mt-0.5 h-4 w-4 shrink-0 text-[#44883E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+                  <Fragment set:html={job.icon} />
                 </svg>
-                <div>
-                  <span class="text-sm font-semibold text-[#2C5234]">{job.proof}</span>
-                  <span class="block text-xs text-gray-500">{job.proofSource}</span>
+              </div>
+
+              <h3 class="mb-3 text-xl font-bold text-shopify-title">{job.title}</h3>
+              <p class="mb-6 text-gray-600">{job.struggle}</p>
+
+              <div class="mb-6 flex-1 space-y-4">
+                {job.products.map((product) => (
+                  <a
+                    href={`/products/${product!.handle}/`}
+                    class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3 transition-colors hover:border-green-200 hover:bg-green-50"
+                  >
+                    {product!.images?.[0] && (
+                      <img
+                        src={product!.images[0].url}
+                        alt={product!.images[0].altText || product!.title}
+                        width="56"
+                        height="56"
+                        class="h-14 w-14 rounded-md object-cover"
+                        loading="lazy"
+                      />
+                    )}
+                    <div class="min-w-0 flex-1">
+                      <div class="truncate text-sm font-semibold text-gray-900">
+                        {product!.title.includes('|')
+                          ? product!.title.split('|')[0].trim()
+                          : product!.title}
+                      </div>
+                      <div class="text-sm text-[#44883E]">
+                        From {formatPrice(product!.priceRange.minVariantPrice.amount)}
+                      </div>
+                    </div>
+                    <svg
+                      class="h-4 w-4 shrink-0 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </a>
+                ))}
+              </div>
+
+              <div class="border-t border-gray-100 pt-4">
+                <div class="flex items-start gap-2">
+                  <svg
+                    class="mt-0.5 h-4 w-4 shrink-0 text-[#44883E]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12l2 2 4-4"
+                    />
+                  </svg>
+                  <div>
+                    <span class="text-sm font-semibold text-[#2C5234]">{job.proof}</span>
+                    <span class="block text-xs text-gray-500">{job.proofSource}</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        }
       </div>
     </div>
   </section>
@@ -496,10 +662,18 @@ const faqSchema = {
   <section class="bg-white py-16 md:py-20">
     <div class="mx-auto max-w-4xl px-4">
       <!-- Featured quote — large, visual priority -->
-      <div class="relative rounded-2xl border border-[#44883E]/20 bg-[#F8FAF8] p-8 shadow-sm md:p-12">
+      <div
+        class="relative rounded-2xl border border-[#44883E]/20 bg-[#F8FAF8] p-8 shadow-sm md:p-12"
+      >
         <!-- Quote mark -->
-        <svg class="absolute -top-4 left-8 h-10 w-10 text-[#44883E]/20" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H14.017zM0 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H0z" />
+        <svg
+          class="absolute -top-4 left-8 h-10 w-10 text-[#44883E]/20"
+          fill="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H14.017zM0 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H0z"
+          ></path>
         </svg>
 
         <!-- The pull quote -->
@@ -511,7 +685,9 @@ const faqSchema = {
 
         <!-- Attribution — bold, not buried -->
         <div class="mb-8 flex items-center gap-4">
-          <div class="flex h-12 w-12 items-center justify-center rounded-full bg-[#2C5234] text-lg font-bold text-white">
+          <div
+            class="flex h-12 w-12 items-center justify-center rounded-full bg-[#2C5234] text-lg font-bold text-white"
+          >
             DB
           </div>
           <div>
@@ -528,10 +704,11 @@ const faqSchema = {
 
           <div class="space-y-3 text-gray-700">
             <p>
-              It started with a few quail getting sick in one pen. The sickness progressed until it reached
-              <strong class="text-[#2C5234]">100% mortality</strong>. Dennis treated the ground with every product,
-              additive, supplement, and antibiotic he could find — then added more birds for a second time.
-              Same result. 100% mortality.
+              It started with a few quail getting sick in one pen. The sickness progressed until it
+              reached
+              <strong class="text-[#2C5234]">100% mortality</strong>. Dennis treated the ground with
+              every product, additive, supplement, and antibiotic he could find — then added more
+              birds for a second time. Same result. 100% mortality.
             </p>
             <p>
               He tried another "claim to fame" product. Same result. Total losses exceeded
@@ -561,23 +738,25 @@ const faqSchema = {
 
           <div class="space-y-3 text-gray-700">
             <p>
-              After the first application of Litter Life, mortality was decreasing within 5 days. Within 2 weeks,
-              losses dropped to 1%. A second application two weeks later, and over the course of a month,
+              After the first application of Litter Life, mortality was decreasing within 5 days.
+              Within 2 weeks, losses dropped to 1%. A second application two weeks later, and over
+              the course of a month,
               <strong class="text-[#2C5234]">mortality was eradicated</strong>.
             </p>
           </div>
 
           <!-- Dennis's closing — italic, personal -->
           <blockquote class="border-l-4 border-[#44883E] pl-4 italic text-gray-600">
-            "I was not only impressed with the product but also the ongoing customer support from Allen Reynolds.
-            He worked with me to not only solve the problem but to save my business as well. I will continue to
-            use Litter Life as long as both of us are in business."
+            "I was not only impressed with the product but also the ongoing customer support from
+            Allen Reynolds. He worked with me to not only solve the problem but to save my business
+            as well. I will continue to use Litter Life as long as both of us are in business."
           </blockquote>
 
           <!-- Validated by -->
           <p class="text-xs text-gray-500">
-            Validated in collaboration with Dr. Chris Seabury (Texas A&M), U of Arizona Diagnostic Lab,
-            University of Mississippi, University of Georgia, University of Arkansas, and San Diego State.
+            Validated in collaboration with Dr. Chris Seabury (Texas A&M), U of Arizona Diagnostic
+            Lab, University of Mississippi, University of Georgia, University of Arkansas, and San
+            Diego State.
           </p>
         </div>
       </div>
@@ -598,57 +777,88 @@ const faqSchema = {
         Shop Game Bird Products
       </h2>
       <p class="mx-auto mb-6 max-w-2xl text-center text-gray-600">
-        This is the full line for game birds — probiotics, litter treatments, vitamins, and pest control. No hidden products. All USDA Organic, all zero withdrawal.
+        This is the full line for game birds — probiotics, litter treatments, vitamins, and pest
+        control. No hidden products. All USDA Organic, all zero withdrawal.
       </p>
 
       <!-- System callout -->
-      <div class="mx-auto mb-10 max-w-3xl rounded-xl border border-green-200 bg-green-50 p-5 md:p-6">
+      <div
+        class="mx-auto mb-10 max-w-3xl rounded-xl border border-green-200 bg-green-50 p-5 md:p-6"
+      >
         <div class="grid gap-4 md:grid-cols-2">
           <div>
             <div class="mb-1 flex items-center gap-2">
-              <svg class="h-5 w-5 text-[#2C5234]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              <svg
+                class="h-5 w-5 text-[#2C5234]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
               </svg>
               <span class="font-bold text-[#2C5234]">Full System</span>
             </div>
             <p class="text-sm text-gray-600">
-              Big Ole Bird + Litter Life + Catalyst covers gut health, litter, and stress. Most game bird operations start here and see results within one grow-out cycle.
+              Big Ole Bird + Litter Life + Catalyst covers gut health, litter, and stress. Most game
+              bird operations start here and see results within one grow-out cycle.
             </p>
           </div>
           <div>
             <div class="mb-1 flex items-center gap-2">
-              <svg class="h-5 w-5 text-[#2C5234]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              <svg
+                class="h-5 w-5 text-[#2C5234]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                ></path>
               </svg>
               <span class="font-bold text-[#2C5234]">Start with One</span>
             </div>
             <p class="text-sm text-gray-600">
-              Not ready for the whole system? Pick one product, test it on one barn, one cycle. If it doesn't pay for itself, don't reorder.
+              Not ready for the whole system? Pick one product, test it on one barn, one cycle. If
+              it doesn't pay for itself, don't reorder.
             </p>
           </div>
         </div>
       </div>
 
-      {allGameBirdProducts.length > 0 ? (
-        <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
-          {allGameBirdProducts.map((product) => (
-            <CollectionProductCard product={product} persona="greg" />
-          ))}
-        </div>
-      ) : (
-        <div class="text-center">
-          <p class="mb-4 text-gray-500">Products loading from Shopify...</p>
-          <a
-            href="https://southlandorganics.com/collections/game-birds"
-            class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#44883E]/85"
-          >
-            Browse All Game Bird Products
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </a>
-        </div>
-      )}
+      {
+        allGameBirdProducts.length > 0 ? (
+          <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
+            {allGameBirdProducts.map((product) => (
+              <CollectionProductCard product={product} persona="greg" />
+            ))}
+          </div>
+        ) : (
+          <div class="text-center">
+            <p class="mb-4 text-gray-500">Products loading from Shopify...</p>
+            <a
+              href="https://southlandorganics.com/collections/game-birds"
+              class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#44883E]/85"
+            >
+              Browse All Game Bird Products
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M14 5l7 7m0 0l-7 7m7-7H3"
+                />
+              </svg>
+            </a>
+          </div>
+        )
+      }
     </div>
   </section>
 
@@ -698,35 +908,51 @@ const faqSchema = {
       </p>
       <div class="space-y-8">
         <div class="flex items-start gap-6">
-          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#2C5234]/10 text-xl font-bold text-[#2C5234]">
+          <div
+            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#2C5234]/10 text-xl font-bold text-[#2C5234]"
+          >
             1
           </div>
           <div>
-            <h3 class="mb-1 text-lg font-bold text-shopify-title"><span class="text-[#44883E]">Call</span> Allen.</h3>
+            <h3 class="mb-1 text-lg font-bold text-shopify-title">
+              <span class="text-[#44883E]">Call</span> Allen.
+            </h3>
             <p class="text-gray-600">
-              Tell us about your operation — what species, how many birds, what's giving you trouble. We'll listen first and recommend based on what we've seen work in game bird barns.
+              Tell us about your operation — what species, how many birds, what's giving you
+              trouble. We'll listen first and recommend based on what we've seen work in game bird
+              barns.
             </p>
           </div>
         </div>
         <div class="flex items-start gap-6">
-          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#2C5234]/10 text-xl font-bold text-[#2C5234]">
+          <div
+            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#2C5234]/10 text-xl font-bold text-[#2C5234]"
+          >
             2
           </div>
           <div>
-            <h3 class="mb-1 text-lg font-bold text-shopify-title"><span class="text-[#44883E]">Test</span> on one barn, one cycle.</h3>
+            <h3 class="mb-1 text-lg font-bold text-shopify-title">
+              <span class="text-[#44883E]">Test</span> on one barn, one cycle.
+            </h3>
             <p class="text-gray-600">
-              No contract, no minimum order. Put Big Ole Bird in the water line, treat the litter with Litter Life, and run the grow-out. Compare it to your control barn.
+              No contract, no minimum order. Put Big Ole Bird in the water line, treat the litter
+              with Litter Life, and run the grow-out. Compare it to your control barn.
             </p>
           </div>
         </div>
         <div class="flex items-start gap-6">
-          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#2C5234]/10 text-xl font-bold text-[#2C5234]">
+          <div
+            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#2C5234]/10 text-xl font-bold text-[#2C5234]"
+          >
             3
           </div>
           <div>
-            <h3 class="mb-1 text-lg font-bold text-shopify-title"><span class="text-[#44883E]">See</span> the numbers.</h3>
+            <h3 class="mb-1 text-lg font-bold text-shopify-title">
+              <span class="text-[#44883E]">See</span> the numbers.
+            </h3>
             <p class="text-gray-600">
-              Lower mortality, better feed conversion, cleaner litter. If the numbers don't move, don't reorder. The results are the only pitch that matters.
+              Lower mortality, better feed conversion, cleaner litter. If the numbers don't move,
+              don't reorder. The results are the only pitch that matters.
             </p>
           </div>
         </div>
@@ -754,24 +980,46 @@ const faqSchema = {
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-white py-12">
     <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-      <p class="mb-6 text-center text-sm font-medium uppercase tracking-wider text-shopify-secondary-text">
+      <p
+        class="mb-6 text-center text-sm font-medium uppercase tracking-wider text-shopify-secondary-text"
+      >
         More from our poultry program
       </p>
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <a href="/poultry/" class="group rounded-xl border border-gray-100 p-4 transition-shadow hover:shadow-md">
-          <p class="font-semibold text-shopify-title group-hover:text-southland-green">Poultry Hub</p>
+        <a
+          href="/poultry/"
+          class="group rounded-xl border border-gray-100 p-4 transition-shadow hover:shadow-md"
+        >
+          <p class="font-semibold text-shopify-title group-hover:text-southland-green">
+            Poultry Hub
+          </p>
           <p class="text-xs text-shopify-secondary-text">All poultry resources</p>
         </a>
-        <a href="/poultry/commercial/" class="group rounded-xl border border-gray-100 p-4 transition-shadow hover:shadow-md">
-          <p class="font-semibold text-shopify-title group-hover:text-southland-green">Commercial Broilers</p>
+        <a
+          href="/poultry/commercial/"
+          class="group rounded-xl border border-gray-100 p-4 transition-shadow hover:shadow-md"
+        >
+          <p class="font-semibold text-shopify-title group-hover:text-southland-green">
+            Commercial Broilers
+          </p>
           <p class="text-xs text-shopify-secondary-text">Broiler-specific programs</p>
         </a>
-        <a href="/poultry/breeders/" class="group rounded-xl border border-gray-100 p-4 transition-shadow hover:shadow-md">
-          <p class="font-semibold text-shopify-title group-hover:text-southland-green">Poultry Breeders</p>
+        <a
+          href="/poultry/breeders/"
+          class="group rounded-xl border border-gray-100 p-4 transition-shadow hover:shadow-md"
+        >
+          <p class="font-semibold text-shopify-title group-hover:text-southland-green">
+            Poultry Breeders
+          </p>
           <p class="text-xs text-shopify-secondary-text">Breeder flock programs</p>
         </a>
-        <a href="/blog/" class="group rounded-xl border border-gray-100 p-4 transition-shadow hover:shadow-md">
-          <p class="font-semibold text-shopify-title group-hover:text-southland-green">Poultry Blog</p>
+        <a
+          href="/blog/"
+          class="group rounded-xl border border-gray-100 p-4 transition-shadow hover:shadow-md"
+        >
+          <p class="font-semibold text-shopify-title group-hover:text-southland-green">
+            Poultry Blog
+          </p>
           <p class="text-xs text-shopify-secondary-text">Field insights & guides</p>
         </a>
       </div>
@@ -797,29 +1045,37 @@ const faqSchema = {
         Your birds don't wait. Neither do we.
       </h2>
       <p class="mx-auto mb-8 max-w-xl text-lg text-green-100">
-        One conversation. That's all it takes to find out if we can help your game bird operation. Allen's on the other end of this number.
+        One conversation. That's all it takes to find out if we can help your game bird operation.
+        Allen's on the other end of this number.
       </p>
       <div class="mb-8">
         <a
           href="tel:800-608-3755"
           class="inline-flex items-center gap-3 rounded-xl bg-white px-8 py-4 text-2xl font-bold transition-colors hover:bg-green-50 md:text-3xl"
-         
         >
           <svg class="h-8 w-8 text-[#44883E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+            ></path>
           </svg>
           800-608-3755
         </a>
       </div>
-      <p class="mb-4 text-green-200">
-        Call Allen — he'll answer.
-      </p>
+      <p class="mb-4 text-green-200">Call Allen — he'll answer.</p>
       <a
         href="sms:800-608-3755"
         class="mb-6 inline-flex items-center gap-2 text-sm font-medium text-green-300 underline decoration-green-300/40 underline-offset-2 transition-colors hover:text-white"
       >
         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+          ></path>
         </svg>
         Prefer text? Message Allen at 800-608-3755
       </a>
@@ -832,7 +1088,6 @@ const faqSchema = {
       </div>
     </div>
   </CloudinaryHero>
-
 </BaseLayout>
 
 <style>

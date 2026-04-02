@@ -62,7 +62,8 @@ const badge = getPersonaBadge()
 
 // Check if product has a gallon/bulk variant for per-unit pricing (Bill)
 function getPerUnitPrice(): string | null {
-  if (persona !== 'bill' && persona !== 'bob' && persona !== 'tom' && persona !== 'greg') return null
+  if (persona !== 'bill' && persona !== 'bob' && persona !== 'tom' && persona !== 'greg')
+    return null
   const gallonVariant = product.variants.find((v) =>
     v.selectedOptions.some(
       (opt) => opt.name === 'Size' && (opt.value.includes('Gallon') || opt.value.includes('gallon'))
@@ -82,17 +83,34 @@ function getBestFor(): string | null {
   const tags = product.tags.map((t) => t.toLowerCase())
   const title = product.title.toLowerCase()
 
-  if (tags.includes('poultry') || title.includes('poultry') || title.includes('bird') || title.includes('litter') || title.includes('hen')) {
+  if (
+    tags.includes('poultry') ||
+    title.includes('poultry') ||
+    title.includes('bird') ||
+    title.includes('litter') ||
+    title.includes('hen')
+  ) {
     if (tags.includes('backyard') || title.includes('backyard')) return 'Backyard flock health'
     return 'Poultry gut health & litter management'
   }
-  if (tags.includes('lawn') || tags.includes('turf') || title.includes('lawn') || title.includes('turf') || title.includes('soil')) {
+  if (
+    tags.includes('lawn') ||
+    tags.includes('turf') ||
+    title.includes('lawn') ||
+    title.includes('turf') ||
+    title.includes('soil')
+  ) {
     return 'Lawn & turf soil biology'
   }
   if (tags.includes('sanitizer') || title.includes('sanitizer') || title.includes('sanitize')) {
     return 'Farm & food safety sanitation'
   }
-  if (tags.includes('septic') || tags.includes('waste') || title.includes('septic') || title.includes('waste')) {
+  if (
+    tags.includes('septic') ||
+    tags.includes('waste') ||
+    title.includes('septic') ||
+    title.includes('waste')
+  ) {
     return 'Septic & waste treatment'
   }
   return null
@@ -102,9 +120,7 @@ const bestFor = getBestFor()
 
 // Display-friendly name: strip "| SEO keyword stuff" from Shopify titles
 // Full title preserved on PDP for SEO; cards show just the brand name
-const displayName = product.title.includes('|')
-  ? product.title.split('|')[0].trim()
-  : product.title
+const displayName = product.title.includes('|') ? product.title.split('|')[0].trim() : product.title
 ---
 
 <a
@@ -147,8 +163,13 @@ const displayName = product.title.includes('|')
           class:list={[
             'absolute left-3 top-3 rounded-full px-2.5 py-0.5 text-xs font-semibold',
             persona === 'betty' && 'bg-amber-100 text-amber-800',
-            (persona === 'bill' || persona === 'bob' || persona === 'tom' || persona === 'greg') && 'bg-green-100 text-green-800',
-            (persona === 'taylor' || persona === 'gary' || persona === 'hannah' || persona === 'maggie') && 'bg-emerald-100 text-emerald-800',
+            (persona === 'bill' || persona === 'bob' || persona === 'tom' || persona === 'greg') &&
+              'bg-green-100 text-green-800',
+            (persona === 'taylor' ||
+              persona === 'gary' ||
+              persona === 'hannah' ||
+              persona === 'maggie') &&
+              'bg-emerald-100 text-emerald-800',
             persona === 'sam' && 'bg-purple-100 text-purple-800',
           ]}
         >
@@ -160,7 +181,7 @@ const displayName = product.title.includes('|')
 
   {/* Product Info */}
   <div class="p-4">
-    <h3 class="group-hover:text-brand-green-dark text-sm font-semibold text-gray-900">
+    <h3 class="text-sm font-semibold text-gray-900 group-hover:text-brand-green-dark">
       {displayName}
     </h3>
 
@@ -170,9 +191,7 @@ const displayName = product.title.includes('|')
       )
     }
 
-    {bestFor && (
-      <p class="mt-1.5 text-xs font-medium text-[#44883E]">Best for: {bestFor}</p>
-    )}
+    {bestFor && <p class="mt-1.5 text-xs font-medium text-[#44883E]">Best for: {bestFor}</p>}
 
     <div class="mt-3 flex items-baseline gap-2">
       <span class="text-base font-bold text-gray-900">{priceFormatted}</span>
@@ -180,7 +199,7 @@ const displayName = product.title.includes('|')
     </div>
 
     <span
-      class="text-brand-green-light mt-3 inline-block text-sm font-medium group-hover:underline"
+      class="mt-3 inline-block text-sm font-medium text-brand-green-light group-hover:underline"
     >
       View Product &rarr;
     </span>

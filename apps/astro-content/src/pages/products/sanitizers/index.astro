@@ -29,9 +29,8 @@ const lisaPhoto = buildSouthlandUrl('team/Lisa_Davis', {
 // ── TinaCMS content ─────────────────────────────────────────────────────────
 const allCollections = await getCollection('shopCollections')
 const tinaDoc =
-  allCollections.find(
-    (c) => c.data.handle === HANDLE || c.id.replace(/\.mdx?$/, '') === HANDLE,
-  ) ?? null
+  allCollections.find((c) => c.data.handle === HANDLE || c.id.replace(/\.mdx?$/, '') === HANDLE) ??
+  null
 
 const faq = tinaDoc?.data.faq ?? []
 
@@ -60,15 +59,18 @@ const schema = {
   description: seoDescription,
   url: canonicalUrl,
 }
-const faqSchema = faq.length > 0 ? {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: faq.map((item) => ({
-    '@type': 'Question',
-    name: item.question,
-    acceptedAnswer: { '@type': 'Answer', text: item.answer },
-  })),
-} : null
+const faqSchema =
+  faq.length > 0
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faq.map((item) => ({
+          '@type': 'Question',
+          name: item.question,
+          acceptedAnswer: { '@type': 'Answer', text: item.answer },
+        })),
+      }
+    : null
 const fullSchema = faqSchema ? [schema, faqSchema] : schema
 ---
 
@@ -77,23 +79,25 @@ const fullSchema = faqSchema ? [schema, faqSchema] : schema
   description={seoDescription}
   schema={fullSchema}
   canonicalUrl={canonicalUrl}
-  ogImage={buildSouthlandUrl('products/alpet-d2-spray', { width: 1200, height: 630, crop: 'fill', quality: 'auto', format: 'auto' })}
+  ogImage={buildSouthlandUrl('products/alpet-d2-spray', {
+    width: 1200,
+    height: 630,
+    crop: 'fill',
+    quality: 'auto',
+    format: 'auto',
+  })}
 >
-
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 1: HERO                                                       -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <section class="bg-gradient-to-br from-[#1a3a22] via-[#2C5234] to-[#1e4a2a] py-16 md:py-20">
     <div class="mx-auto max-w-6xl px-4">
-      <Breadcrumbs
-        items={[
-          { label: 'Products', href: '/products/' },
-          { label: 'Sanitizers' },
-        ]}
-      />
+      <Breadcrumbs items={[{ label: 'Products', href: '/products/' }, { label: 'Sanitizers' }]} />
       <div class="mt-6 max-w-3xl">
         <div class="mb-3 flex flex-wrap items-center gap-2">
-          <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1 text-sm font-medium text-green-300">
+          <span
+            class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1 text-sm font-medium text-green-300"
+          >
             ZeroPoint Industrial &bull; EPA Registered &bull; No Rinse
           </span>
         </div>
@@ -101,7 +105,11 @@ const fullSchema = faqSchema ? [schema, faqSchema] : schema
           Zero pathogens. Zero evacuation. Zero compromise.
         </h1>
         <p class="mb-5 text-lg text-white/80 md:text-xl">
-          When 50,000+ birds depend on your biosecurity decision, there's no room for products that "might" work. <strong class="text-white">ZeroPoint Industrial</strong> is our EPA-registered hypochlorous acid (HOCl) sanitizer — hospital-grade disinfection that eliminates pathogens in 60 seconds, requires no evacuation, and degrades to salt and water. No rinse, no residue, no resistance development.
+          When 50,000+ birds depend on your biosecurity decision, there's no room for products that
+          "might" work. <strong class="text-white">ZeroPoint Industrial</strong> is our EPA-registered
+          hypochlorous acid (HOCl) sanitizer — hospital-grade disinfection that eliminates pathogens in
+          60 seconds, requires no evacuation, and degrades to salt and water. No rinse, no residue, no
+          resistance development.
         </p>
         <div class="flex flex-wrap items-center gap-3">
           <a
@@ -109,7 +117,12 @@ const fullSchema = faqSchema ? [schema, faqSchema] : schema
             class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#44883E]/85"
           >
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+              ></path>
             </svg>
             Talk to Lisa
           </a>
@@ -120,17 +133,49 @@ const fullSchema = faqSchema ? [schema, faqSchema] : schema
             Shop Sanitizers
           </a>
         </div>
-        <div class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-white/10 pt-4 text-sm text-white/70">
+        <div
+          class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-white/10 pt-4 text-sm text-white/70"
+        >
           <span class="flex items-center gap-1.5">
-            <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" /></svg>
+            <svg
+              class="h-3.5 w-3.5 text-green-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4"></path></svg
+            >
             EPA Registered
           </span>
           <span class="flex items-center gap-1.5">
-            <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" /></svg>
+            <svg
+              class="h-3.5 w-3.5 text-green-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4"></path></svg
+            >
             Food Contact Safe
           </span>
           <span class="flex items-center gap-1.5">
-            <svg class="h-3.5 w-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" /></svg>
+            <svg
+              class="h-3.5 w-3.5 text-green-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4"></path></svg
+            >
             No Rinse Required
           </span>
         </div>
@@ -147,29 +192,71 @@ const fullSchema = faqSchema ? [schema, faqSchema] : schema
         The cost of cutting corners on sanitation
       </h2>
       <p class="mx-auto mb-12 max-w-2xl text-center text-gray-600">
-        You already know that contamination kills margins. But most sanitizers force you to choose between effectiveness and safety. Here's what that trade-off actually costs.
+        You already know that contamination kills margins. But most sanitizers force you to choose
+        between effectiveness and safety. Here's what that trade-off actually costs.
       </p>
       <div class="grid gap-6 md:grid-cols-3">
         <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
-          <div class="mb-4 flex h-12 w-12 items-center justify-center bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
-            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
+          <div
+            class="mb-4 flex h-12 w-12 items-center justify-center bg-[#2C5234]"
+            style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
+          >
+            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"
+              ></path></svg
+            >
           </div>
           <h3 class="mb-2 font-semibold text-[#2C5234]">Residue risk</h3>
-          <p class="text-sm text-gray-600">Harsh chemical sanitizers leave residue on surfaces that come into contact with food or animals. That residue creates compliance headaches and health concerns downstream.</p>
+          <p class="text-sm text-gray-600">
+            Harsh chemical sanitizers leave residue on surfaces that come into contact with food or
+            animals. That residue creates compliance headaches and health concerns downstream.
+          </p>
         </div>
         <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
-          <div class="mb-4 flex h-12 w-12 items-center justify-center bg-[#2C5234]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
-            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+          <div
+            class="mb-4 flex h-12 w-12 items-center justify-center bg-[#2C5234]"
+            style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
+          >
+            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+              ></path></svg
+            >
           </div>
           <h3 class="mb-2 font-semibold text-[#2C5234]">Audit exposure</h3>
-          <p class="text-sm text-gray-600">When inspectors or integrators show up, your sanitation protocol is on the table. Non-EPA-registered products or rinse-required chemicals add unnecessary risk to every audit.</p>
+          <p class="text-sm text-gray-600">
+            When inspectors or integrators show up, your sanitation protocol is on the table.
+            Non-EPA-registered products or rinse-required chemicals add unnecessary risk to every
+            audit.
+          </p>
         </div>
         <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
-          <div class="mb-4 flex h-12 w-12 items-center justify-center bg-[#44883E]" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
-            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          <div
+            class="mb-4 flex h-12 w-12 items-center justify-center bg-[#44883E]"
+            style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
+          >
+            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path></svg
+            >
           </div>
           <h3 class="mb-2 font-semibold text-[#2C5234]">Labor waste</h3>
-          <p class="text-sm text-gray-600">Rinse-required sanitizers double your labor time. Your crew spends hours rinsing surfaces that could be productive — or worse, skips the rinse when they're short on time.</p>
+          <p class="text-sm text-gray-600">
+            Rinse-required sanitizers double your labor time. Your crew spends hours rinsing
+            surfaces that could be productive — or worse, skips the rinse when they're short on
+            time.
+          </p>
         </div>
       </div>
     </div>
@@ -182,47 +269,101 @@ const fullSchema = faqSchema ? [schema, faqSchema] : schema
     <div class="mx-auto max-w-6xl px-4">
       <div class="grid items-center gap-12 md:grid-cols-[1fr_auto]">
         <div class="order-2 md:order-1">
-          <span class="mb-2 inline-block text-sm font-semibold uppercase tracking-wider text-green-700">
+          <span
+            class="mb-2 inline-block text-sm font-semibold uppercase tracking-wider text-green-700"
+          >
             Your guide
           </span>
           <h2 class="mb-6 font-heading text-3xl uppercase md:text-4xl" style="color: #2C5234;">
             We know what's at stake.
           </h2>
           <p class="mb-4 text-lg leading-relaxed text-gray-700">
-            Lisa Davis works directly with farm operations and food processing facilities to find the right sanitation protocol — not just the right product. She understands the difference between a sanitizer that looks good on a spec sheet and one that actually holds up under USDA inspection.
+            Lisa Davis works directly with farm operations and food processing facilities to find
+            the right sanitation protocol — not just the right product. She understands the
+            difference between a sanitizer that looks good on a spec sheet and one that actually
+            holds up under USDA inspection.
           </p>
           <p class="mb-4 text-lg leading-relaxed text-gray-600">
-            For large-scale livestock biosecurity, ZeroPoint Industrial is the go-to — hypochlorous acid that eliminates pathogens in 60 seconds, safe to use with animals present, and degrades to nothing but salt and water. For surface sanitizing, the Alpet D2 line covers everything from spray bottles to bulk containers, all EPA-registered and no-rinse.
+            For large-scale livestock biosecurity, ZeroPoint Industrial is the go-to — hypochlorous
+            acid that eliminates pathogens in 60 seconds, safe to use with animals present, and
+            degrades to nothing but salt and water. For surface sanitizing, the Alpet D2 line covers
+            everything from spray bottles to bulk containers, all EPA-registered and no-rinse.
           </p>
           <p class="mb-8 leading-relaxed text-gray-600">
-            Call Lisa and tell her about your operation. She'll help you match ZeroPoint, Alpet D2, or both to your specific environment — and make sure your protocol is audit-ready.
+            Call Lisa and tell her about your operation. She'll help you match ZeroPoint, Alpet D2,
+            or both to your specific environment — and make sure your protocol is audit-ready.
           </p>
 
           <div class="mb-8 flex flex-wrap gap-2">
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
-              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" /></svg>
+            <span
+              class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]"
+            >
+              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4"></path></svg
+              >
               Sanitation & food safety specialist
             </span>
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
-              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" /></svg>
+            <span
+              class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]"
+            >
+              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4"></path></svg
+              >
               Works with farms & processors
             </span>
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
-              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" /></svg>
+            <span
+              class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]"
+            >
+              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4"></path></svg
+              >
               EPA-registered product expertise
             </span>
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]">
-              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" /></svg>
+            <span
+              class="inline-flex items-center gap-1.5 rounded-full bg-[#44883E]/10 px-3 py-1 text-sm font-medium text-[#2C5234]"
+            >
+              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4"></path></svg
+              >
               Actually answers the phone
             </span>
           </div>
 
           <div class="flex flex-wrap items-center gap-4">
-            <a href="tel:800-608-3755" class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#44883E]/85">
-              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+            <a
+              href="tel:800-608-3755"
+              class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#44883E]/85"
+            >
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                ></path></svg
+              >
               Call Lisa
             </a>
-            <a href="mailto:lisa@southlandorganics.com" class="text-sm font-medium text-green-700 underline decoration-green-300 underline-offset-2 hover:text-green-600">
+            <a
+              href="mailto:lisa@southlandorganics.com"
+              class="text-sm font-medium text-green-700 underline decoration-green-300 underline-offset-2 hover:text-green-600"
+            >
               lisa@southlandorganics.com
             </a>
           </div>
@@ -238,7 +379,9 @@ const fullSchema = faqSchema ? [schema, faqSchema] : schema
               class="rounded-2xl object-cover shadow-lg"
               loading="lazy"
             />
-            <div class="absolute bottom-0 left-0 right-0 rounded-b-2xl bg-gradient-to-t from-black/70 to-transparent px-5 pb-4 pt-10">
+            <div
+              class="absolute bottom-0 left-0 right-0 rounded-b-2xl bg-gradient-to-t from-black/70 to-transparent px-5 pb-4 pt-10"
+            >
               <p class="text-lg font-bold text-white">Lisa Davis</p>
               <p class="text-sm text-green-300">Sanitizer & Food Safety</p>
             </div>
@@ -257,12 +400,12 @@ const fullSchema = faqSchema ? [schema, faqSchema] : schema
         ZeroPoint + Alpet D2 Sanitizer System
       </h2>
       <p class="mx-auto mb-12 max-w-2xl text-center text-gray-600">
-        ZeroPoint Industrial leads the line — hypochlorous acid biosecurity for commercial operations. The full Alpet D2 system covers surface sanitizing in spray, wipe, and bulk formats. Everything is EPA-registered, food contact safe, and no rinse required.
+        ZeroPoint Industrial leads the line — hypochlorous acid biosecurity for commercial
+        operations. The full Alpet D2 system covers surface sanitizing in spray, wipe, and bulk
+        formats. Everything is EPA-registered, food contact safe, and no rinse required.
       </p>
       <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {shopifyCollection.products.map((product) => (
-          <CollectionProductCard product={product} />
-        ))}
+        {shopifyCollection.products.map((product) => <CollectionProductCard product={product} />)}
       </div>
     </div>
   </section>
@@ -296,16 +439,18 @@ const fullSchema = faqSchema ? [schema, faqSchema] : schema
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 6: FAQ                                                        -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  {faq.length > 0 && (
-    <section class="bg-[#F8FAF8] py-16 md:py-20">
-      <div class="mx-auto max-w-4xl px-4">
-        <h2 class="mb-8 text-center font-heading text-2xl uppercase text-[#2C5234] md:text-3xl">
-          Frequently Asked Questions
-        </h2>
-        <AccordionFaq items={faq} />
-      </div>
-    </section>
-  )}
+  {
+    faq.length > 0 && (
+      <section class="bg-[#F8FAF8] py-16 md:py-20">
+        <div class="mx-auto max-w-4xl px-4">
+          <h2 class="mb-8 text-center font-heading text-2xl uppercase text-[#2C5234] md:text-3xl">
+            Frequently Asked Questions
+          </h2>
+          <AccordionFaq items={faq} />
+        </div>
+      </section>
+    )
+  }
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 7: CROSS-LINKS                                                -->
@@ -316,36 +461,90 @@ const fullSchema = faqSchema ? [schema, faqSchema] : schema
         Related programs
       </p>
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <a href="/poultry/commercial/" class="group flex items-center gap-3 rounded-xl border border-[#44883E]/15 bg-[#F8FAF8] p-4 transition-all hover:border-[#44883E]/30 hover:shadow-md">
-          <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#2C5234]">
-            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        <a
+          href="/poultry/commercial/"
+          class="group flex items-center gap-3 rounded-xl border border-[#44883E]/15 bg-[#F8FAF8] p-4 transition-all hover:border-[#44883E]/30 hover:shadow-md"
+        >
+          <div
+            class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#2C5234]"
+          >
+            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path></svg
+            >
           </div>
           <div>
-            <p class="text-sm font-semibold text-[#2C5234] group-hover:text-[#44883E]">Commercial Poultry</p>
+            <p class="text-sm font-semibold text-[#2C5234] group-hover:text-[#44883E]">
+              Commercial Poultry
+            </p>
             <p class="text-xs text-gray-500">Biosecurity programs</p>
           </div>
         </a>
-        <a href="/products/waste-treatment/" class="group flex items-center gap-3 rounded-xl border border-[#44883E]/15 bg-[#F8FAF8] p-4 transition-all hover:border-[#44883E]/30 hover:shadow-md">
-          <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#2C5234]">
-            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+        <a
+          href="/products/waste-treatment/"
+          class="group flex items-center gap-3 rounded-xl border border-[#44883E]/15 bg-[#F8FAF8] p-4 transition-all hover:border-[#44883E]/30 hover:shadow-md"
+        >
+          <div
+            class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#2C5234]"
+          >
+            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+              ></path></svg
+            >
           </div>
           <div>
-            <p class="text-sm font-semibold text-[#2C5234] group-hover:text-[#44883E]">Waste Treatment</p>
+            <p class="text-sm font-semibold text-[#2C5234] group-hover:text-[#44883E]">
+              Waste Treatment
+            </p>
             <p class="text-xs text-gray-500">Septic & lagoon solutions</p>
           </div>
         </a>
-        <a href="/contact/" class="group flex items-center gap-3 rounded-xl border border-[#44883E]/15 bg-[#F8FAF8] p-4 transition-all hover:border-[#44883E]/30 hover:shadow-md">
-          <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#2C5234]">
-            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+        <a
+          href="/contact/"
+          class="group flex items-center gap-3 rounded-xl border border-[#44883E]/15 bg-[#F8FAF8] p-4 transition-all hover:border-[#44883E]/30 hover:shadow-md"
+        >
+          <div
+            class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#2C5234]"
+          >
+            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+              ></path></svg
+            >
           </div>
           <div>
-            <p class="text-sm font-semibold text-[#2C5234] group-hover:text-[#44883E]">Contact Us</p>
+            <p class="text-sm font-semibold text-[#2C5234] group-hover:text-[#44883E]">
+              Contact Us
+            </p>
             <p class="text-xs text-gray-500">Bulk pricing & custom orders</p>
           </div>
         </a>
-        <a href="/blog/" class="group flex items-center gap-3 rounded-xl border border-[#44883E]/15 bg-[#F8FAF8] p-4 transition-all hover:border-[#44883E]/30 hover:shadow-md">
-          <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#2C5234]">
-            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+        <a
+          href="/blog/"
+          class="group flex items-center gap-3 rounded-xl border border-[#44883E]/15 bg-[#F8FAF8] p-4 transition-all hover:border-[#44883E]/30 hover:shadow-md"
+        >
+          <div
+            class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#2C5234]"
+          >
+            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              ></path></svg
+            >
           </div>
           <div>
             <p class="text-sm font-semibold text-[#2C5234] group-hover:text-[#44883E]">Blog</p>
@@ -365,7 +564,8 @@ const fullSchema = faqSchema ? [schema, faqSchema] : schema
         Your sanitation protocol matters. Let's get it right.
       </h2>
       <p class="mx-auto mb-8 max-w-xl text-lg text-green-100">
-        Tell Lisa about your operation — she'll recommend the right Alpet D2 products and formats for your environment. No pressure, just the right protocol.
+        Tell Lisa about your operation — she'll recommend the right Alpet D2 products and formats
+        for your environment. No pressure, just the right protocol.
       </p>
       <a
         href="tel:800-608-3755"
@@ -373,13 +573,16 @@ const fullSchema = faqSchema ? [schema, faqSchema] : schema
         style="color: #2C5234;"
       >
         <svg class="h-6 w-6 text-[#44883E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+          ></path>
         </svg>
         800-608-3755
       </a>
-      <p class="mt-4 text-green-200">
-        Call or text Lisa — she talks sanitation, not sales.
-      </p>
+      <p class="mt-4 text-green-200">Call or text Lisa — she talks sanitation, not sales.</p>
       <div class="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm text-green-300/80">
         <span>Family-owned since 2009</span>
         <span class="hidden md:inline">·</span>
