@@ -90,6 +90,7 @@ const categoryCollections = collections.filter((c) => !skipHandles.has(c.handle)
 const contentHubImages = {
   podcast: buildSouthlandUrl('podcast/episodes/ep-001-invisible-economy', { width: 600, height: 340, crop: 'fill', gravity: 'auto' }),
   blog: buildSouthlandUrl('heroes/Farm_Athens_GA_7_jbdjik', { width: 600 }),
+  pbs: buildSouthlandUrl('Southland Branding/Allen_Reynolds_PBS', { width: 600, height: 340, crop: 'fill', gravity: 'face' }),
 }
 
 // ── SEO Schema ──────────────────────────────────────────────────────────────
@@ -1041,10 +1042,11 @@ function getProducts(filter: string) {
                 {hp.resourcesHeadline}
               </h2>
             </div>
-            <div class="grid gap-6 md:grid-cols-2">
+            <div class="grid gap-6 md:grid-cols-3">
               {[
                 { resource: hp.resources[0], image: contentHubImages.podcast, fallbackIcon: 'mic' },
                 { resource: hp.resources[1], image: contentHubImages.blog, fallbackIcon: 'book' },
+                { resource: hp.resources[2], image: contentHubImages.pbs, fallbackIcon: 'video' },
               ].map(({ resource, image, fallbackIcon }) => resource && (
                 <a
                   href={resource.href}
@@ -1070,6 +1072,11 @@ function getProducts(filter: string) {
                           <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
                         </svg>
                       )}
+                      {fallbackIcon === 'video' && (
+                        <svg class="h-12 w-12 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+                        </svg>
+                      )}
                     </div>
                   </div>
                   <div class="p-5">
@@ -1083,18 +1090,18 @@ function getProducts(filter: string) {
                 </a>
               ))}
             </div>
-            <!-- Third resource card (Store Locator) if present -->
-            {hp.resources[2] && (
+            <!-- Fourth resource (Store Locator) if present -->
+            {hp.resources[3] && (
               <div class="mt-6 text-center">
                 <a
-                  href={hp.resources[2].href}
+                  href={hp.resources[3].href}
                   class="inline-flex items-center gap-2 rounded-lg border-2 border-[#2C5234] px-6 py-3 font-semibold text-[#2C5234] transition hover:bg-[#2C5234] hover:text-white"
                 >
                   <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 0115 0z" />
                   </svg>
-                  {hp.resources[2].title}
+                  {hp.resources[3].title}
                 </a>
               </div>
             )}
