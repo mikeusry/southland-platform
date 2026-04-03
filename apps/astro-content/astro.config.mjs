@@ -40,7 +40,7 @@ export default defineConfig({
   adapter: cloudflare({
     routes: {
       extend: {
-        exclude: [
+        include: [
           // Persona landing pages (not auto-detected by adapter)
           { pattern: '/poultry/*' },
           { pattern: '/lawn/*' },
@@ -50,6 +50,9 @@ export default defineConfig({
           // Commerce pages
           { pattern: '/build-a-case/*' },
           { pattern: '/products/*' },
+          { pattern: '/collections/*' },
+          { pattern: '/cart' },
+          { pattern: '/account' },
         ],
       },
     },
