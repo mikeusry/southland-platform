@@ -1,3 +1,4 @@
+/* global crypto */
 /**
  * Cart State Management
  *
