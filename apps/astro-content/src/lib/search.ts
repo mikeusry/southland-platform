@@ -6,10 +6,7 @@
  */
 
 import { getCollection } from 'astro:content'
-import {
-  createClient,
-  getAllProducts,
-} from '@southland/shopify-storefront'
+import { createClient, getAllProducts } from '@southland/shopify-storefront'
 
 export interface SearchResult {
   type: 'content' | 'product'
@@ -78,12 +75,12 @@ export async function semanticSearch(
 /**
  * Search blog posts from the content collection
  */
-async function searchBlogContent(
-  query: string,
-  maxResults: number
-): Promise<SearchResult[]> {
+async function searchBlogContent(query: string, maxResults: number): Promise<SearchResult[]> {
   const posts = await getCollection('blog')
-  const terms = query.toLowerCase().split(/\s+/).filter((t) => t.length > 1)
+  const terms = query
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((t) => t.length > 1)
 
   const scored = posts
     .map((post) => {
@@ -125,10 +122,7 @@ async function searchBlogContent(
 /**
  * Search Shopify products by title/tags
  */
-async function searchProducts(
-  query: string,
-  maxResults: number
-): Promise<SearchResult[]> {
+async function searchProducts(query: string, maxResults: number): Promise<SearchResult[]> {
   try {
     const storeDomain = import.meta.env.PUBLIC_SHOPIFY_STORE_DOMAIN
     const token = import.meta.env.PUBLIC_SHOPIFY_STOREFRONT_TOKEN
@@ -136,7 +130,10 @@ async function searchProducts(
 
     const client = createClient({ storeDomain, publicAccessToken: token })
     const products = await getAllProducts(client)
-    const terms = query.toLowerCase().split(/\s+/).filter((t) => t.length > 1)
+    const terms = query
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((t) => t.length > 1)
 
     const scored = products
       .map((product) => {
