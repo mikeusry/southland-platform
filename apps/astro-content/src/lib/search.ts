@@ -1,11 +1,15 @@
 /**
  * Search Utilities
  *
- * Text-based search against crawled website_content in Supabase.
- * Falls back gracefully if Supabase is not configured.
+ * Searches blog content collection + Shopify products using text matching.
+ * No external dependencies — uses Astro's content collections directly.
  */
 
-import { supabase } from './supabase'
+import { getCollection } from 'astro:content'
+import {
+  createClient,
+  getAllProducts,
+} from '@southland/shopify-storefront'
 
 export interface SearchResult {
   type: 'content' | 'product'
@@ -38,88 +42,31 @@ const EMPTY_RESPONSE = (query: string, searchId: string): SearchResponse => ({
 })
 
 /**
- * Search crawled website content using Postgres full-text search + ilike fallback
+ * Search blog posts and products by text matching
  */
 export async function semanticSearch(
   query: string,
-  options: { maxContentResults?: number } = {}
+  options: { maxContentResults?: number; maxProductResults?: number } = {}
 ): Promise<SearchResponse> {
-  const { maxContentResults = 10 } = options
+  const { maxContentResults = 8, maxProductResults = 4 } = options
   const searchId = `search_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
 
-  if (!supabase) {
-    console.warn('Supabase not configured — returning empty search results')
-    return EMPTY_RESPONSE(query, searchId)
-  }
+  if (!query.trim()) return EMPTY_RESPONSE(query, searchId)
 
   try {
-    // 1. Try Postgres full-text search first (handles stemming, ranking)
-    const { data: ftsData, error: ftsError } = await supabase
-      .from('website_content')
-      .select('id, title, h1, meta_description, url, url_path, page_type')
-      .textSearch('title', query, { type: 'plain' })
-      .not('title', 'is', null)
-      .limit(maxContentResults)
+    const [contentResults, productResults] = await Promise.all([
+      searchBlogContent(query, maxContentResults),
+      searchProducts(query, maxProductResults),
+    ])
 
-    let results = ftsData || []
-
-    // 2. If FTS returns too few, supplement with ilike on title + h1 + meta_description
-    if (results.length < maxContentResults) {
-      const words = query
-        .split(/\s+/)
-        .filter((w) => w.length > 2)
-        .map((w) => w.replace(/[%_]/g, ''))
-      if (words.length > 0) {
-        const existingIds = new Set(results.map((r) => r.id))
-        const orClauses = words.flatMap((w) => [
-          `title.ilike.%${w}%`,
-          `h1.ilike.%${w}%`,
-          `meta_description.ilike.%${w}%`,
-        ])
-
-        const { data: ilikeData } = await supabase
-          .from('website_content')
-          .select('id, title, h1, meta_description, url, url_path, page_type')
-          .or(orClauses.join(','))
-          .not('title', 'is', null)
-          .limit(maxContentResults * 2)
-
-        if (ilikeData) {
-          for (const row of ilikeData) {
-            if (!existingIds.has(row.id) && results.length < maxContentResults) {
-              results.push(row)
-              existingIds.add(row.id)
-            }
-          }
-        }
-      }
-    }
-
-    // Deduplicate by url_path (crawls may have duplicates)
-    const seen = new Set<string>()
-    results = results.filter((r) => {
-      const key = r.url_path || r.url || r.id
-      if (seen.has(key)) return false
-      seen.add(key)
-      return true
-    })
-
-    const contentResults: SearchResult[] = results.map((item) => ({
-      type: 'content' as const,
-      id: item.id,
-      title: cleanTitle(item.h1 || item.title || ''),
-      description: item.meta_description || '',
-      url: rewriteUrl(item.url_path || item.url || ''),
-      similarity: 1,
-      pageType: formatPageType(item.page_type),
-    }))
+    const allResults = [...contentResults, ...productResults]
 
     return {
       query,
-      results: contentResults,
+      results: allResults,
       content: contentResults,
-      products: [],
-      totalCount: contentResults.length,
+      products: productResults,
+      totalCount: allResults.length,
       searchId,
     }
   } catch (error) {
@@ -128,28 +75,100 @@ export async function semanticSearch(
   }
 }
 
-/** Strip " - Southland Organics" suffix from crawled titles */
-function cleanTitle(title: string): string {
-  return title.replace(/\s*[-–|]\s*Southland Organics\s*$/i, '').trim()
+/**
+ * Search blog posts from the content collection
+ */
+async function searchBlogContent(
+  query: string,
+  maxResults: number
+): Promise<SearchResult[]> {
+  const posts = await getCollection('blog')
+  const terms = query.toLowerCase().split(/\s+/).filter((t) => t.length > 1)
+
+  const scored = posts
+    .map((post) => {
+      const title = (post.data.title || '').toLowerCase()
+      const desc = (post.data.description || '').toLowerCase()
+      const tags = (post.data.tags || []).join(' ').toLowerCase()
+      const body = post.body?.toLowerCase() || ''
+
+      let score = 0
+
+      // Full query match in title (highest weight)
+      if (title.includes(query.toLowerCase())) score += 10
+
+      // Individual term matches
+      for (const term of terms) {
+        if (title.includes(term)) score += 5
+        if (desc.includes(term)) score += 3
+        if (tags.includes(term)) score += 2
+        if (body.includes(term)) score += 1
+      }
+
+      return { post, score }
+    })
+    .filter((s) => s.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, maxResults)
+
+  return scored.map((s) => ({
+    type: 'content' as const,
+    id: s.post.id,
+    title: s.post.data.title || s.post.id,
+    description: s.post.data.description || '',
+    url: `/blog/${s.post.id.replace(/\.mdx?$/, '')}/`,
+    similarity: s.score / 10,
+    pageType: 'Article',
+  }))
 }
 
-/** Rewrite old Shopify URLs to current Astro routes */
-function rewriteUrl(url: string): string {
-  return url
-    .replace(/^https?:\/\/[^/]+/, '') // strip domain
-    .replace(/^\/blogs\/news\//, '/blog/') // /blogs/news/slug → /blog/slug
-    .replace(/^\/pages\//, '/') // /pages/about-us → /about-us
-}
+/**
+ * Search Shopify products by title/tags
+ */
+async function searchProducts(
+  query: string,
+  maxResults: number
+): Promise<SearchResult[]> {
+  try {
+    const storeDomain = import.meta.env.PUBLIC_SHOPIFY_STORE_DOMAIN
+    const token = import.meta.env.PUBLIC_SHOPIFY_STOREFRONT_TOKEN
+    if (!storeDomain || !token) return []
 
-/** Humanize page_type for display */
-function formatPageType(pt: string | null): string {
-  if (!pt) return 'Page'
-  const map: Record<string, string> = {
-    blog: 'Article',
-    collection: 'Collection',
-    product: 'Product',
-    page: 'Page',
-    homepage: 'Page',
+    const client = createClient({ storeDomain, publicAccessToken: token })
+    const products = await getAllProducts(client)
+    const terms = query.toLowerCase().split(/\s+/).filter((t) => t.length > 1)
+
+    const scored = products
+      .map((product) => {
+        const title = product.title.toLowerCase()
+        const tags = product.tags.join(' ').toLowerCase()
+        const type = (product.productType || '').toLowerCase()
+
+        let score = 0
+        if (title.includes(query.toLowerCase())) score += 10
+        for (const term of terms) {
+          if (title.includes(term)) score += 5
+          if (tags.includes(term)) score += 2
+          if (type.includes(term)) score += 2
+        }
+
+        return { product, score }
+      })
+      .filter((s) => s.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, maxResults)
+
+    return scored.map((s) => ({
+      type: 'product' as const,
+      id: s.product.id,
+      title: s.product.title,
+      description: '',
+      url: `/products/${s.product.handle}/`,
+      imageUrl: s.product.images[0]?.url || undefined,
+      similarity: s.score / 10,
+    }))
+  } catch (err) {
+    console.error('Product search failed:', err)
+    return []
   }
-  return map[pt] || pt.charAt(0).toUpperCase() + pt.slice(1)
 }
