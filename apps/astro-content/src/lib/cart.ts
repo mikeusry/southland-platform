@@ -31,6 +31,40 @@ export type { Cart, CartLineInput }
 const CART_ID_KEY = 'southland_cart_id'
 const CART_COOKIE_NAME = 'sl_cart'
 const CART_COOKIE_DAYS = 14 // Shopify carts expire after ~10 days
+const NEXUS_CID_KEY = '_nexus_cid'
+
+// ─── Identity Resolution ────────────────────────────────────────────────────
+
+/**
+ * Get or create a persistent Nexus customer ID for identity resolution.
+ * Stored in localStorage, stamped on every cart line as an attribute.
+ * Nexus reads this from carrier service callbacks and order webhooks
+ * for deterministic matching (match_method = nexus_cid, confidence = high).
+ */
+function getNexusCid(): string {
+  if (typeof window === 'undefined') return crypto.randomUUID()
+  let cid = localStorage.getItem(NEXUS_CID_KEY)
+  if (!cid) {
+    cid = crypto.randomUUID()
+    localStorage.setItem(NEXUS_CID_KEY, cid)
+  }
+  return cid
+}
+
+/**
+ * Inject _nexus_cid attribute into cart line inputs.
+ * Preserves any existing attributes (e.g., bundle attributes).
+ */
+function stampLines(lines: CartLineInput[]): CartLineInput[] {
+  const cid = getNexusCid()
+  return lines.map((line) => ({
+    ...line,
+    attributes: [
+      ...(line.attributes || []).filter((a) => a.key !== NEXUS_CID_KEY),
+      { key: NEXUS_CID_KEY, value: cid },
+    ],
+  }))
+}
 
 function setCookie(name: string, value: string, days: number): void {
   if (typeof document === 'undefined') return
@@ -118,19 +152,20 @@ export async function getCart(): Promise<Cart | null> {
 export async function addToCart(lines: CartLineInput[]): Promise<Cart> {
   const client = getClient()
   const cartId = getCartId()
+  const stamped = stampLines(lines)
 
   let cart: Cart
 
   if (cartId) {
     // Try adding to existing cart
     try {
-      cart = await sfAddToCart(client, cartId, lines)
+      cart = await sfAddToCart(client, cartId, stamped)
     } catch {
       // Cart may have expired — create a new one
-      cart = await sfCreateCart(client, lines)
+      cart = await sfCreateCart(client, stamped)
     }
   } else {
-    cart = await sfCreateCart(client, lines)
+    cart = await sfCreateCart(client, stamped)
   }
 
   setCartId(cart.id)
