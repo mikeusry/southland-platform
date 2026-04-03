@@ -38,24 +38,8 @@ export default defineConfig({
   ],
   output: 'server',
   adapter: cloudflare({
-    routes: {
-      extend: {
-        include: [
-          // Persona landing pages (not auto-detected by adapter)
-          { pattern: '/poultry/*' },
-          { pattern: '/lawn/*' },
-          { pattern: '/agriculture/*' },
-          { pattern: '/livestock/*' },
-          { pattern: '/hydroseeders/*' },
-          // Commerce pages
-          { pattern: '/build-a-case/*' },
-          { pattern: '/products/*' },
-          { pattern: '/collections/*' },
-          { pattern: '/cart' },
-          { pattern: '/account' },
-        ],
-      },
-    },
+    // routes: adapter auto-generates include: ["/*"] which covers all SSR routes.
+    // Do NOT add routes.extend.include — overlapping splat rules cause wrangler deploy to fail.
   }),
   markdown: {
     rehypePlugins: [
