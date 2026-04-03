@@ -22,12 +22,10 @@ export const POST: APIRoute = async ({ request }) => {
       })
     }
 
-    // Perform semantic search
+    // Perform search
     const results = await semanticSearch(query.trim(), {
-      contentTypes: options.contentTypes,
-      matchThreshold: options.matchThreshold ?? 0.65,
-      maxContentResults: options.maxContentResults ?? 5,
-      maxProductResults: options.maxProductResults ?? 3,
+      maxContentResults: options.maxContentResults ?? 8,
+      maxProductResults: options.maxProductResults ?? 4,
     })
 
     // Log to BigQuery (non-blocking)

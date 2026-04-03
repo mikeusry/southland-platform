@@ -142,14 +142,12 @@ async function searchProducts(
       .map((product) => {
         const title = product.title.toLowerCase()
         const tags = product.tags.join(' ').toLowerCase()
-        const type = (product.productType || '').toLowerCase()
 
         let score = 0
         if (title.includes(query.toLowerCase())) score += 10
         for (const term of terms) {
           if (title.includes(term)) score += 5
           if (tags.includes(term)) score += 2
-          if (type.includes(term)) score += 2
         }
 
         return { product, score }
