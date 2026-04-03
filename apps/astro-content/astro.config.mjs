@@ -10,7 +10,7 @@ import { visit } from 'unist-util-visit';
 
 /** Rehype plugin: add loading="lazy" to all images in markdown content */
 function rehypeLazyImages() {
-  return (tree) => {
+  return (/** @type {any} */ tree) => {
     visit(tree, 'element', (node) => {
       if (node.tagName === 'img' && node.properties) {
         node.properties.loading = 'lazy';
