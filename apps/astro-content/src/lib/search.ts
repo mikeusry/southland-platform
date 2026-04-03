@@ -1,12 +1,11 @@
 /**
- * Semantic Search Utilities
+ * Search Utilities
  *
- * Combines OpenAI embeddings with Supabase vector search to provide
- * intent-aware search across content and products.
+ * Text-based search against crawled website_content in Supabase.
+ * Falls back gracefully if Supabase is not configured.
  */
 
-import { generateEmbedding } from './embeddings'
-import { supabase, type WebsiteContent, type Product } from './supabase'
+import { supabase } from './supabase'
 
 export interface SearchResult {
   type: 'content' | 'product'
@@ -29,159 +28,128 @@ export interface SearchResponse {
   searchId: string
 }
 
+const EMPTY_RESPONSE = (query: string, searchId: string): SearchResponse => ({
+  query,
+  results: [],
+  content: [],
+  products: [],
+  totalCount: 0,
+  searchId,
+})
+
 /**
- * Perform semantic search across content and products
+ * Search crawled website content using Postgres full-text search + ilike fallback
  */
 export async function semanticSearch(
   query: string,
-  options: {
-    contentTypes?: string[]
-    matchThreshold?: number
-    maxContentResults?: number
-    maxProductResults?: number
-  } = {}
+  options: { maxContentResults?: number } = {}
 ): Promise<SearchResponse> {
-  const {
-    contentTypes = ['blog', 'page', 'faq', 'guide'],
-    matchThreshold = 0.65,
-    maxContentResults = 5,
-    maxProductResults = 3,
-  } = options
-
-  // Generate unique search ID for tracking
+  const { maxContentResults = 10 } = options
   const searchId = `search_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
 
   if (!supabase) {
-    console.warn('Supabase not configured - returning empty search results')
-    return {
-      query,
-      results: [],
-      content: [],
-      products: [],
-      totalCount: 0,
-      searchId,
-    }
+    console.warn('Supabase not configured — returning empty search results')
+    return EMPTY_RESPONSE(query, searchId)
   }
 
   try {
-    // Generate embedding for the search query
-    const embedding = await generateEmbedding(query)
+    // 1. Try Postgres full-text search first (handles stemming, ranking)
+    const { data: ftsData, error: ftsError } = await supabase
+      .from('website_content')
+      .select('id, title, h1, meta_description, url, url_path, page_type')
+      .textSearch('title', query, { type: 'plain' })
+      .not('title', 'is', null)
+      .limit(maxContentResults)
 
-    // Search content and products in parallel
-    const [contentResults, productResults] = await Promise.all([
-      searchContent(embedding, contentTypes, matchThreshold, maxContentResults),
-      searchProducts(embedding, matchThreshold, maxProductResults),
-    ])
+    let results = ftsData || []
 
-    // Combine and sort by similarity
-    const allResults = [...contentResults, ...productResults].sort(
-      (a, b) => b.similarity - a.similarity
-    )
+    // 2. If FTS returns too few, supplement with ilike on title + h1 + meta_description
+    if (results.length < maxContentResults) {
+      const words = query
+        .split(/\s+/)
+        .filter((w) => w.length > 2)
+        .map((w) => w.replace(/[%_]/g, ''))
+      if (words.length > 0) {
+        const existingIds = new Set(results.map((r) => r.id))
+        const orClauses = words.flatMap((w) => [
+          `title.ilike.%${w}%`,
+          `h1.ilike.%${w}%`,
+          `meta_description.ilike.%${w}%`,
+        ])
+
+        const { data: ilikeData } = await supabase
+          .from('website_content')
+          .select('id, title, h1, meta_description, url, url_path, page_type')
+          .or(orClauses.join(','))
+          .not('title', 'is', null)
+          .limit(maxContentResults * 2)
+
+        if (ilikeData) {
+          for (const row of ilikeData) {
+            if (!existingIds.has(row.id) && results.length < maxContentResults) {
+              results.push(row)
+              existingIds.add(row.id)
+            }
+          }
+        }
+      }
+    }
+
+    // Deduplicate by url_path (crawls may have duplicates)
+    const seen = new Set<string>()
+    results = results.filter((r) => {
+      const key = r.url_path || r.url || r.id
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+
+    const contentResults: SearchResult[] = results.map((item) => ({
+      type: 'content' as const,
+      id: item.id,
+      title: cleanTitle(item.h1 || item.title || ''),
+      description: item.meta_description || '',
+      url: rewriteUrl(item.url_path || item.url || ''),
+      similarity: 1,
+      pageType: formatPageType(item.page_type),
+    }))
 
     return {
       query,
-      results: allResults,
+      results: contentResults,
       content: contentResults,
-      products: productResults,
-      totalCount: allResults.length,
+      products: [],
+      totalCount: contentResults.length,
       searchId,
     }
   } catch (error) {
-    console.error('Semantic search failed:', error)
-    return {
-      query,
-      results: [],
-      content: [],
-      products: [],
-      totalCount: 0,
-      searchId,
-    }
+    console.error('Search failed:', error)
+    return EMPTY_RESPONSE(query, searchId)
   }
 }
 
-/**
- * Search website content using vector similarity
- */
-async function searchContent(
-  embedding: number[],
-  pageTypes: string[],
-  matchThreshold: number,
-  matchCount: number
-): Promise<SearchResult[]> {
-  if (!supabase) return []
-
-  try {
-    const { data, error } = await supabase.rpc('search_website_content', {
-      query_embedding: embedding,
-      page_types: pageTypes,
-      match_threshold: matchThreshold,
-      match_count: matchCount,
-    })
-
-    if (error) {
-      console.error('Content search error:', error)
-      return []
-    }
-
-    return (data || []).map((item: WebsiteContent & { similarity: number }) => ({
-      type: 'content' as const,
-      id: item.id,
-      title: item.title,
-      description: item.description || item.content_text?.slice(0, 200) || '',
-      url: item.url,
-      similarity: item.similarity,
-      pageType: item.page_type,
-      segment: item.segment || undefined,
-    }))
-  } catch (err) {
-    console.error('Content search failed:', err)
-    return []
-  }
+/** Strip " - Southland Organics" suffix from crawled titles */
+function cleanTitle(title: string): string {
+  return title.replace(/\s*[-–|]\s*Southland Organics\s*$/i, '').trim()
 }
 
-/**
- * Search products using vector similarity
- */
-async function searchProducts(
-  embedding: number[],
-  matchThreshold: number,
-  matchCount: number
-): Promise<SearchResult[]> {
-  if (!supabase) return []
-
-  try {
-    const { data, error } = await supabase.rpc('find_products_for_content', {
-      content_embedding: embedding,
-      match_threshold: matchThreshold,
-      match_count: matchCount,
-    })
-
-    if (error) {
-      console.error('Product search error:', error)
-      return []
-    }
-
-    return (data || []).map((item: Product & { similarity: number }) => ({
-      type: 'product' as const,
-      id: item.id,
-      title: item.name,
-      description: item.description || '',
-      url: item.url,
-      imageUrl: item.image_url || undefined,
-      similarity: item.similarity,
-      segment: item.segment,
-    }))
-  } catch (err) {
-    console.error('Product search failed:', err)
-    return []
-  }
+/** Rewrite old Shopify URLs to current Astro routes */
+function rewriteUrl(url: string): string {
+  return url
+    .replace(/^https?:\/\/[^/]+/, '') // strip domain
+    .replace(/^\/blogs\/news\//, '/blog/') // /blogs/news/slug → /blog/slug
+    .replace(/^\/pages\//, '/') // /pages/about-us → /about-us
 }
 
-/**
- * Get search suggestions based on partial query
- * (For future autocomplete - currently returns empty)
- */
-export async function getSearchSuggestions(query: string): Promise<string[]> {
-  // TODO: Implement with popular queries or content titles
-  return []
+/** Humanize page_type for display */
+function formatPageType(pt: string | null): string {
+  if (!pt) return 'Page'
+  const map: Record<string, string> = {
+    blog: 'Article',
+    collection: 'Collection',
+    product: 'Product',
+    page: 'Page',
+    homepage: 'Page',
+  }
+  return map[pt] || pt.charAt(0).toUpperCase() + pt.slice(1)
 }
