@@ -39,6 +39,7 @@ const REDIRECTS: Record<string, string> = {
   '/pages/hydroseeding': '/hydroseeders/',
   // Legacy paths
   '/lawn/hydroseeders': '/hydroseeders/',
+  '/turf': '/lawn/',
 }
 
 // Also match with trailing slashes
