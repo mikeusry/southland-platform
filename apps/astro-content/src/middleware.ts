@@ -71,7 +71,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     })
   }
 
-  // Shopify cart recovery URLs (/cart/c/...) → redirect to Shopify checkout domain
+  // Shopify cart recovery URLs (/cart/c/...) → redirect to Shopify
   if (pathname.startsWith('/cart/c/')) {
     const shopifyUrl = `https://shop.southlandorganics.com${pathname}${context.url.search}`
     return new Response(null, {
@@ -86,6 +86,14 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return new Response(null, {
       status: 302,
       headers: { location: shopifyUrl },
+    })
+  }
+
+  // Bare /checkout → redirect to Shopify checkout
+  if (pathname === '/checkout' || pathname === '/checkout/') {
+    return new Response(null, {
+      status: 302,
+      headers: { location: `https://shop.southlandorganics.com/checkout${context.url.search}` },
     })
   }
 
