@@ -137,12 +137,34 @@ function parseCartLine(node: Record<string, unknown>): CartLine {
   }
 }
 
+/**
+ * Rewrite checkout URLs to the .myshopify.com domain so they go directly
+ * to Shopify instead of through our Cloudflare Pages worker (which would
+ * redirect-loop since southlandorganics.com is both our domain and Shopify's primary).
+ */
+function rewriteCheckoutUrl(url: string): string {
+  try {
+    const parsed = new URL(url)
+    if (
+      parsed.hostname === 'southlandorganics.com' ||
+      parsed.hostname === 'www.southlandorganics.com' ||
+      parsed.hostname === 'shop.southlandorganics.com'
+    ) {
+      parsed.hostname = 'southland-organics.myshopify.com'
+      return parsed.toString()
+    }
+  } catch {
+    // fall through
+  }
+  return url
+}
+
 function parseCart(raw: Record<string, unknown>): Cart {
   const lines = raw.lines as { edges: { node: Record<string, unknown> }[] }
 
   return {
     id: raw.id as string,
-    checkoutUrl: raw.checkoutUrl as string,
+    checkoutUrl: rewriteCheckoutUrl(raw.checkoutUrl as string),
     totalQuantity: raw.totalQuantity as number,
     cost: raw.cost as Cart['cost'],
     lines: lines.edges.map((e) => parseCartLine(e.node)),
