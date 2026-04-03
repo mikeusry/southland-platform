@@ -1,0 +1,90 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { buildSouthlandUrl } from '../lib/cloudinary'
+
+const heroImage = buildSouthlandUrl('heroes/Farm_Athens_GA_4_qaishv', {
+  width: 1200,
+  quality: 'auto',
+  format: 'auto',
+})
+---
+
+<BaseLayout
+  title="Page Not Found"
+  description="This page doesn't exist, but our soil biology does. Let's get you back on track."
+  noIndex={true}
+>
+  <main class="relative flex min-h-[80vh] flex-col items-center justify-center overflow-hidden bg-white px-4">
+
+    <!-- Faded farm background -->
+    <div class="absolute inset-0 z-0 opacity-[0.06]">
+      <img
+        src={heroImage}
+        alt=""
+        class="h-full w-full object-cover"
+        loading="eager"
+      />
+    </div>
+
+    <div class="relative z-10 mx-auto max-w-2xl text-center">
+
+      <!-- Big 404 with soil/dirt texture feel -->
+      <p class="font-heading text-[10rem] font-bold leading-none tracking-tight text-[#2C5234]/10 sm:text-[14rem]">
+        404
+      </p>
+
+      <!-- Headline -->
+      <h1 class="font-heading -mt-8 text-3xl uppercase tracking-wide text-[#2C5234] sm:-mt-12 sm:text-4xl">
+        Looks like this field's been plowed under
+      </h1>
+
+      <!-- Subtext -->
+      <p class="mx-auto mt-4 max-w-md text-lg text-gray-600">
+        Whatever was here has decomposed back into the soil.
+        <br class="hidden sm:block" />
+        The circle of life, really.
+      </p>
+
+      <!-- Allen quote -->
+      <div class="mx-auto mt-8 max-w-md rounded-xl border border-[#2C5234]/10 bg-[#F8FAF8] px-6 py-5">
+        <p class="text-sm italic text-gray-600">
+          "If you can't find what you're looking for, give us a call. That's what we're here for."
+        </p>
+        <p class="mt-2 text-xs font-semibold text-[#2C5234]">
+          Allen Reynolds &middot; <a href="tel:800-608-3755" class="text-[#44883E] hover:underline">800-608-3755</a>
+        </p>
+      </div>
+
+      <!-- CTA buttons -->
+      <div class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
+        <a
+          href="/"
+          class="inline-flex items-center gap-2 rounded-lg bg-[#2C5234] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#44883E]"
+        >
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          Back to Home
+        </a>
+        <a
+          href="/products/"
+          class="inline-flex items-center gap-2 rounded-lg border border-[#2C5234] px-6 py-3 text-sm font-semibold text-[#2C5234] transition-colors hover:bg-[#2C5234]/5"
+        >
+          Browse Products
+        </a>
+        <a
+          href="/blog/"
+          class="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-6 py-3 text-sm font-semibold text-gray-600 transition-colors hover:border-gray-400 hover:text-gray-800"
+        >
+          Read the Blog
+        </a>
+      </div>
+
+      <!-- Tiny footer joke -->
+      <p class="mt-12 text-xs text-gray-400">
+        Error 404 &middot; This page has the same nutrient availability as dead soil &middot; Let's fix that
+      </p>
+
+    </div>
+  </main>
+</BaseLayout>
