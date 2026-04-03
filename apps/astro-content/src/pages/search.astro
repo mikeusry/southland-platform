@@ -8,15 +8,20 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SearchBar from '../components/cdp/SearchBar.astro';
 import SearchFeedback from '../components/cdp/SearchFeedback.astro';
-import { semanticSearch } from '../lib/search';
 
 // Get search query from URL
 const query = Astro.url.searchParams.get('q')?.trim() || '';
 
-// Perform search if query exists
+// Perform search if query exists — semantic search requires OpenAI + Supabase
+// which may not be available in the CF Workers runtime, so wrap defensively
 let searchResults = null;
 if (query) {
-  searchResults = await semanticSearch(query);
+  try {
+    const { semanticSearch } = await import('../lib/search');
+    searchResults = await semanticSearch(query);
+  } catch (err) {
+    console.error('Search unavailable:', err);
+  }
 }
 
 const title = query ? `Search: ${query}` : 'Search';
