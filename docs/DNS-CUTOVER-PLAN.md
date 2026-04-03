@@ -1,115 +1,83 @@
 # DNS Cutover Plan — Shopify → Cloudflare Pages
 
 **Created:** 2026-04-01
-**Status:** BLOCKED — awaiting CNAME creation
-**Blocking:** Production launch of Astro site
+**Updated:** 2026-04-03 — Removed Shopify HTML proxy. Fully headless now.
+**Status:** READY
 
 ---
 
-## The Problem
+## Architecture
 
-When DNS for `southlandorganics.com` points to Shopify, our Cloudflare Pages middleware proxies unhandled routes to `www.southlandorganics.com`. This works because that domain resolves to Shopify.
-
-When we flip DNS to Cloudflare Pages, `www.southlandorganics.com` will resolve to... Cloudflare Pages. The proxy loops back to itself. Infinite redirect.
-
-## The Fix: Origin CNAME
-
-Create a subdomain that always points to Shopify, regardless of where the main domain's DNS goes.
-
-### Step 1: Create CNAME in Cloudflare DNS
+Fully headless. Astro renders every page. Shopify is API-only (Storefront API for products, cart, checkout).
 
 ```
-shopify-proxy.southlandorganics.com  →  shops.myshopify.com  (DNS Only, NOT proxied)
+Customer → southlandorganics.com → Cloudflare Pages
+             ├─ Astro renders ALL pages (content, products, collections, cart)
+             ├─ Shopify Storefront API (products, cart, checkout URLs)
+             ├─ Cloudinary CDN (images)
+             └─ Checkout → Shopify-hosted (via cart.checkoutUrl from API)
 ```
 
-**IMPORTANT:** This must be "DNS Only" (gray cloud), NOT "Proxied" (orange cloud). Cloudflare proxy would add its own TLS termination and break Shopify's certificate.
+No HTML proxying. No HTMLRewriter. No origin subdomain needed.
 
-### Step 2: Update Middleware Proxy Target
+---
 
-In `apps/astro-content/src/middleware.ts`, change the proxy target:
+## Cutover Steps
 
-```typescript
-// Before (works while DNS → Shopify)
-const SHOPIFY_ORIGIN = 'https://www.southlandorganics.com'
+### Step 1: Point DNS to Cloudflare Pages
 
-// After (works after DNS → Cloudflare Pages)
-const SHOPIFY_ORIGIN = 'https://shopify-proxy.southlandorganics.com'
-```
-
-Also update `wrangler.toml` if it has an env-specific override:
-
-```toml
-[vars]
-SHOPIFY_PROXY_ORIGIN = "https://shopify-proxy.southlandorganics.com"
-```
-
-### Step 3: Verify CNAME Works
-
-```bash
-# Should resolve to Shopify's IPs
-dig shopify-proxy.southlandorganics.com
-
-# Should return the Shopify storefront
-curl -I https://shopify-proxy.southlandorganics.com
-```
-
-### Step 4: Add Custom Domain in Shopify
-
-Shopify needs to know about this subdomain so it serves the store (not a 404):
-
-1. Shopify Admin → Settings → Domains
-2. Add `shopify-proxy.southlandorganics.com` as a connected domain
-3. Do NOT set it as primary — it's an origin-only subdomain
-
-### Step 5: Flip DNS
-
-Change the main domain records in Cloudflare:
+In Cloudflare DNS, change:
 
 ```
 southlandorganics.com      →  [Cloudflare Pages CNAME target]
 www.southlandorganics.com  →  [Cloudflare Pages CNAME target]
 ```
 
-Cloudflare Pages will handle routing:
-- Astro routes → rendered by Workers
-- Everything else → proxied to `shopify-proxy.southlandorganics.com`
+### Step 2: Verify
 
-### Step 6: Verify
+| URL | Expected |
+|-----|----------|
+| `/` | Astro homepage |
+| `/products/poultry-probiotic` | Astro PDP (Storefront API data) |
+| `/cart` | Astro cart (Storefront API) |
+| `/blog/` | Astro blog index |
+| `/podcast/` | Astro podcast hub |
+| `/collections/backyard-birds` | 301 → `/poultry/backyard/` |
+| `/pages/about-us` | 301 → `/about/` |
+| Checkout button click | Goes to Shopify checkout (via `cart.checkoutUrl`) |
 
-Test critical paths immediately after DNS propagation:
+### Step 3: Monitor
 
-| URL | Expected | Source |
-|-----|----------|--------|
-| `/` | Homepage (Shopify proxied) | Middleware → Shopify |
-| `/podcast/` | Podcast hub | Astro |
-| `/blog/` | Blog index | Astro |
-| `/products/poultry-probiotic` | PDP (Shopify proxied with Astro header/footer) | Middleware → Shopify |
-| `/cart/` | Cart (Shopify proxied) | Middleware → Shopify |
-| `/collections/all` | Products (Shopify proxied) | Middleware → Shopify |
-| `/admin/` | Admin dashboard | Astro |
-
----
-
-## Rollback Plan
-
-If anything breaks after DNS flip:
-
-1. Change DNS back to Shopify's IPs (instant, TTL-dependent)
-2. The CNAME subdomain stays — it doesn't affect anything when DNS points to Shopify
-3. Debug and retry
+- Watch Cloudflare dashboard for 404s on routes we might have missed
+- Check Google Search Console for crawl errors over next 48 hours
+- Verify checkout completes end-to-end
 
 ---
 
-## Timeline
+## Rollback
 
-| Step | Owner | ETA |
-|------|-------|-----|
-| Create CNAME | Mike (Cloudflare DNS) | 5 min |
-| Add domain in Shopify | Mike (Shopify Admin) | 5 min |
-| Update middleware target | Dev | 5 min |
-| Deploy updated middleware | Auto (git push) | 3 min |
-| Verify CNAME works | Dev | 10 min |
-| Flip DNS | Mike (Cloudflare DNS) | 5 min |
-| Verify all routes | Dev + Mike | 30 min |
+If anything breaks: change DNS back to Shopify's IPs. Instant (TTL-dependent). The old Shopify theme is still there.
 
-**Total estimated downtime:** Zero if CNAME is verified before DNS flip.
+---
+
+## What About Checkout?
+
+Checkout is Shopify-hosted. The Storefront API returns a `checkoutUrl` that points directly to Shopify's checkout domain. Customers click "Proceed to Checkout" → browser goes to Shopify → payment → order confirmed. This flow never touches our server.
+
+---
+
+## Old Shopify URL Redirects
+
+40+ permanent redirects in `middleware.ts` handle old Shopify URLs:
+- `/collections/*` → persona landing pages
+- `/pages/*` → new Astro routes
+- `/blogs/[category]/[slug]` → `/blog/[slug]/`
+
+---
+
+## Cleanup Done (2026-04-03)
+
+- Removed Shopify HTML proxy from middleware (was 346 lines → 75 lines)
+- Removed HTMLRewriter, partials loading, hostname scrubbing
+- Removed SHOPIFY_ORIGIN from wrangler.toml
+- Removed shopify-proxy CNAME concept (Shopify can't serve content from secondary domains)

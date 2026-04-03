@@ -47,11 +47,8 @@ export default [
         atob: 'readonly',
         React: 'readonly',
         RequestInfo: 'readonly',
-        HTMLRewriter: 'readonly',
         HTMLElement: 'readonly',
         NodeListOf: 'readonly',
-        AbortController: 'readonly',
-        DOMException: 'readonly',
       },
     },
     plugins: {
