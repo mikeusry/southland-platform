@@ -25,7 +25,7 @@ import { isValidPersonaId, type PersonaId } from '../../lib/persona'
 const { handle } = Astro.params
 
 if (!handle) {
-  return Astro.redirect('/collections/')
+  return Astro.redirect('/products/')
 }
 
 // ── Read persona from cookie (server-side) ──────────────────────────────────
@@ -35,16 +35,26 @@ const resolvedCookie = personaCookie ? (LEGACY_MAP[personaCookie] ?? personaCook
 const persona: PersonaId =
   resolvedCookie && isValidPersonaId(resolvedCookie) ? (resolvedCookie as PersonaId) : null
 
+// ── Load TinaCMS editorial content (resolves friendly slugs → Shopify handles)
+const allProducts = await getCollection('products')
+const tinaProduct =
+  allProducts.find(
+    (p) => p.data.shopifyHandle === handle || p.id.replace(/\.mdx?$/, '') === handle
+  ) ?? null
+
+// Resolve the Shopify handle: TinaCMS shopifyHandle takes priority, then URL handle
+const shopifyHandle = tinaProduct?.data.shopifyHandle ?? handle
+
 // ── Fetch product from Shopify ──────────────────────────────────────────────
 const client = createClient({
   storeDomain: import.meta.env.PUBLIC_SHOPIFY_STORE_DOMAIN,
   publicAccessToken: import.meta.env.PUBLIC_SHOPIFY_STOREFRONT_TOKEN,
 })
 
-const product = await getProductByHandle(client, handle)
+const product = await getProductByHandle(client, shopifyHandle)
 
 if (!product) {
-  return Astro.redirect('/collections/')
+  return new Response(null, { status: 404, statusText: 'Product not found' })
 }
 
 // ── Related products (same productType collection) ──────────────────────────
@@ -53,16 +63,9 @@ if (product.productType) {
   const typeHandle = product.productType.toLowerCase().replace(/\s+/g, '-')
   const collection = await getCollectionProducts(client, typeHandle, 8)
   if (collection) {
-    relatedProducts = collection.products.filter((p) => p.handle !== handle).slice(0, 4)
+    relatedProducts = collection.products.filter((p) => p.handle !== shopifyHandle).slice(0, 4)
   }
 }
-
-// ── Load TinaCMS editorial content (if enriched MDX exists) ────────────────
-const allProducts = await getCollection('products')
-const tinaProduct =
-  allProducts.find(
-    (p) => p.data.shopifyHandle === handle || p.id.replace(/\.mdx?$/, '') === handle
-  ) ?? null
 
 const hasTinaContent = !!tinaProduct
 // TinaContent rendered for Phase 3 (full StoryBrand mode)
@@ -170,6 +173,14 @@ const shippingDetails = {
   },
 }
 const seller = { '@type': 'Organization' as const, name: 'Southland Organics' }
+const returnPolicy = {
+  '@type': 'MerchantReturnPolicy' as const,
+  applicableCountry: 'US',
+  returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+  merchantReturnDays: 30,
+  returnMethod: 'https://schema.org/ReturnByMail',
+  returnFees: 'https://schema.org/ReturnShippingFees',
+}
 
 // Build per-variant offers
 const variantOffers = product.variants.map((variant) => ({
@@ -183,6 +194,7 @@ const variantOffers = product.variants.map((variant) => ({
   url: canonicalUrl,
   seller,
   shippingDetails,
+  hasMerchantReturnPolicy: returnPolicy,
 }))
 
 // Determine if variants represent a true ProductGroup (size/type options)
@@ -219,6 +231,7 @@ const productSchema = hasNamedVariants
           url: canonicalUrl,
           seller,
           shippingDetails,
+          hasMerchantReturnPolicy: returnPolicy,
         },
       })),
       offers: {
@@ -330,7 +343,7 @@ const PRODUCT_VIDEOS: Record<string, string> = {
   'liquid-catalyst-poultry-vitamin': 'kZFIUpw5g6pJEEiuctE465h21cYEb9xyXOCONJyKAQA',
   'jump-start-soil-conditioner': 'YdqBB002OcYb7d8EircHqXXvOxoEuSlq6D93kkiN01P4k',
 }
-const muxPlaybackId = tina?.muxPlaybackId || PRODUCT_VIDEOS[handle] || null
+const muxPlaybackId = tina?.muxPlaybackId || PRODUCT_VIDEOS[shopifyHandle] || null
 const videoTitle = tina?.videoTitle || displayTitle
 
 // ── Strip Gumlet/Wistia iframes from Shopify description HTML ───────────────
@@ -496,7 +509,14 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
 
           {/* Add to cart island */}
           <div class="mt-6" id="pdp-atc">
-            <AddToCartButton client:load variants={product.variants} />
+            <AddToCartButton
+              client:load
+              variants={product.variants}
+              productHandle={product.handle}
+              productTitle={product.title}
+              productVendor={product.vendor}
+              productType={product.productType}
+            />
           </div>
 
           {/* Trust badges row — always */}
@@ -876,6 +896,29 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
     </div>
   </main>
 </BaseLayout>
+
+<script is:inline define:vars={{
+  ga4Product: {
+    item_id: product.handle,
+    item_name: product.title,
+    item_brand: product.vendor || 'Southland Organics',
+    item_category: resolvedProductType || undefined,
+    price: parseFloat(product.priceRange.minVariantPrice.amount),
+    currency: product.priceRange.minVariantPrice.currencyCode || 'USD',
+  },
+}}>
+  // GA4: view_item on PDP load
+  window.dataLayer = window.dataLayer || []
+  window.dataLayer.push({ ecommerce: null })
+  window.dataLayer.push({
+    event: 'view_item',
+    ecommerce: {
+      currency: ga4Product.currency,
+      value: ga4Product.price,
+      items: [ga4Product],
+    },
+  })
+</script>
 
 <script>
   // ── Sticky mobile ATC ────────────────────────────────────────────────────

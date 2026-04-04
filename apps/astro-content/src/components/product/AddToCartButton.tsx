@@ -8,9 +8,15 @@
 import { useState, useCallback } from 'react'
 import type { ProductVariant, Money } from '@southland/shopify-storefront'
 import { addToCart } from '../../lib/cart'
+import { trackAddToCart } from '../../lib/ecommerce-events'
 
 interface Props {
   variants: ProductVariant[]
+  /** Product-level data for GA4 event tracking */
+  productHandle: string
+  productTitle: string
+  productVendor?: string
+  productType?: string
 }
 
 function formatPrice(money: Money): string {
@@ -20,7 +26,7 @@ function formatPrice(money: Money): string {
   }).format(Number(money.amount))
 }
 
-export default function AddToCartButton({ variants }: Props) {
+export default function AddToCartButton({ variants, productHandle, productTitle, productVendor, productType }: Props) {
   const [selectedVariantId, setSelectedVariantId] = useState(
     variants.find((v) => v.availableForSale)?.id ?? variants[0]?.id ?? ''
   )
@@ -66,6 +72,18 @@ export default function AddToCartButton({ variants }: Props) {
           attributes: [{ key: 'Source', value: 'Product Page' }],
         },
       ])
+      trackAddToCart(
+        {
+          id: productHandle,
+          handle: productHandle,
+          title: productTitle,
+          vendor: productVendor,
+          productType: productType,
+          variants,
+        },
+        selectedVariant,
+        quantity
+      )
       setAdded(true)
       setTimeout(() => setAdded(false), 3000)
     } catch (err) {

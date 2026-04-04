@@ -1,3 +1,4 @@
+/* global crypto */
 /**
  * Cart State Management
  *
@@ -31,6 +32,83 @@ export type { Cart, CartLineInput }
 const CART_ID_KEY = 'southland_cart_id'
 const CART_COOKIE_NAME = 'sl_cart'
 const CART_COOKIE_DAYS = 14 // Shopify carts expire after ~10 days
+const NEXUS_CID_KEY = '_nexus_cid'
+
+// ─── Identity Resolution ────────────────────────────────────────────────────
+
+/**
+ * Get or create a persistent Nexus customer ID for identity resolution.
+ * Stored in localStorage, stamped on every cart line as an attribute.
+ * Nexus reads this from carrier service callbacks and order webhooks
+ * for deterministic matching (match_method = nexus_cid, confidence = high).
+ */
+function getNexusCid(): string {
+  if (typeof window === 'undefined') return crypto.randomUUID()
+  let cid = localStorage.getItem(NEXUS_CID_KEY)
+  if (!cid) {
+    cid = crypto.randomUUID()
+    localStorage.setItem(NEXUS_CID_KEY, cid)
+  }
+  return cid
+}
+
+// ─── Attribution (Self-Owned) ───────────��───────────────────────────────────
+
+const PD_ATTRIBUTION_KEY = '_pd_attribution'
+
+/**
+ * Read attribution data from localStorage (captured on landing page).
+ * Returns key/value pairs prefixed with _pd_ for Nexus extraction.
+ *
+ * This replaces the old Shopify /cart/update.js approach — attribution now
+ * flows via cart line item properties, making it checkout-backend-agnostic.
+ * Works with Shopify, Medusa, or any self-hosted checkout.
+ */
+function getAttributionAttrs(): Array<{ key: string; value: string }> {
+  if (typeof window === 'undefined') return []
+  try {
+    const raw = localStorage.getItem(PD_ATTRIBUTION_KEY)
+    if (!raw) return []
+    const data = JSON.parse(raw) as Record<string, string>
+    const attrs: Array<{ key: string; value: string }> = []
+    const PARAMS = [
+      'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
+      'gclid', 'fbclid', 'msclid', 'ttclid', 'srsltid',
+    ]
+    for (const param of PARAMS) {
+      if (data[param]) {
+        attrs.push({ key: `_pd_${param}`, value: data[param] })
+      }
+    }
+    if (data._landing_page) attrs.push({ key: '_pd_landing_page', value: data._landing_page })
+    if (data._referrer) attrs.push({ key: '_pd_referrer', value: data._referrer })
+    return attrs
+  } catch {
+    return []
+  }
+}
+
+/**
+ * Inject _nexus_cid + attribution into cart line inputs.
+ * Preserves any existing attributes (e.g., bundle attributes).
+ *
+ * Every cart line carries identity + attribution so Nexus can extract
+ * them from Shopify order line_items[].properties on webhook ingest.
+ */
+function stampLines(lines: CartLineInput[]): CartLineInput[] {
+  const cid = getNexusCid()
+  const attrAttrs = getAttributionAttrs()
+  const stampKeys = new Set([NEXUS_CID_KEY, ...attrAttrs.map((a) => a.key)])
+
+  return lines.map((line) => ({
+    ...line,
+    attributes: [
+      ...(line.attributes || []).filter((a) => !stampKeys.has(a.key)),
+      { key: NEXUS_CID_KEY, value: cid },
+      ...attrAttrs,
+    ],
+  }))
+}
 
 function setCookie(name: string, value: string, days: number): void {
   if (typeof document === 'undefined') return
@@ -118,19 +196,20 @@ export async function getCart(): Promise<Cart | null> {
 export async function addToCart(lines: CartLineInput[]): Promise<Cart> {
   const client = getClient()
   const cartId = getCartId()
+  const stamped = stampLines(lines)
 
   let cart: Cart
 
   if (cartId) {
     // Try adding to existing cart
     try {
-      cart = await sfAddToCart(client, cartId, lines)
+      cart = await sfAddToCart(client, cartId, stamped)
     } catch {
       // Cart may have expired — create a new one
-      cart = await sfCreateCart(client, lines)
+      cart = await sfCreateCart(client, stamped)
     }
   } else {
-    cart = await sfCreateCart(client, lines)
+    cart = await sfCreateCart(client, stamped)
   }
 
   setCartId(cart.id)

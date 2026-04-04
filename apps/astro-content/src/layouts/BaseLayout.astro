@@ -98,6 +98,25 @@ const gtmContainerId = import.meta.env.PUBLIC_GTM_CONTAINER_ID;
     <!-- Fonts - Open Sans (body) + Lora (serif/quotes) from Google, Eveleth Dot (headings) loaded via CSS -->
     <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
+    <!-- Attribution Capture (self-owned, replaces Shopify ScriptTag) -->
+    <script is:inline>
+      (function(){
+        'use strict';
+        var KEY='_pd_attribution';
+        var PARAMS=['utm_source','utm_medium','utm_campaign','utm_content','utm_term','gclid','fbclid','msclid','ttclid','srsltid'];
+        try{
+          var url=new URL(window.location.href);
+          var found={},hasNew=false;
+          PARAMS.forEach(function(p){var v=url.searchParams.get(p);if(v){found[p]=v;hasNew=true}});
+          if(found.srsltid&&!found.utm_source){found.utm_source='google';found.utm_medium=found.utm_medium||'cpc';found.utm_campaign=found.utm_campaign||'pmax'}
+          if(found.gclid&&!found.utm_source){found.utm_source='google';found.utm_medium=found.utm_medium||'cpc'}
+          if(found.fbclid&&!found.utm_source){found.utm_source='facebook';found.utm_medium=found.utm_medium||'paid_social'}
+          var stored={};try{stored=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+          if(hasNew){var merged={};for(var k in stored){if(stored.hasOwnProperty(k))merged[k]=stored[k]}for(var j in found){if(found.hasOwnProperty(j))merged[j]=found[j]}merged._timestamp=Date.now();merged._landing_page=url.pathname+url.search;merged._referrer=document.referrer||'';try{localStorage.setItem(KEY,JSON.stringify(merged))}catch(e){}}
+        }catch(e){}
+      })();
+    </script>
+
     <!-- point.dog Pixel -->
     <script is:inline define:vars={{ pixelBrandId, pixelEndpoint }}>
       window.pdPixelConfig = {

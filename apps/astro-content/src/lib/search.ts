@@ -1,12 +1,12 @@
 /**
- * Semantic Search Utilities
+ * Search Utilities
  *
- * Combines OpenAI embeddings with Supabase vector search to provide
- * intent-aware search across content and products.
+ * Searches blog content collection + Shopify products using text matching.
+ * No external dependencies — uses Astro's content collections directly.
  */
 
-import { generateEmbedding } from './embeddings'
-import { supabase, type WebsiteContent, type Product } from './supabase'
+import { getCollection } from 'astro:content'
+import { createClient, getAllProducts } from '@southland/shopify-storefront'
 
 export interface SearchResult {
   type: 'content' | 'product'
@@ -29,54 +29,34 @@ export interface SearchResponse {
   searchId: string
 }
 
+const EMPTY_RESPONSE = (query: string, searchId: string): SearchResponse => ({
+  query,
+  results: [],
+  content: [],
+  products: [],
+  totalCount: 0,
+  searchId,
+})
+
 /**
- * Perform semantic search across content and products
+ * Search blog posts and products by text matching
  */
 export async function semanticSearch(
   query: string,
-  options: {
-    contentTypes?: string[]
-    matchThreshold?: number
-    maxContentResults?: number
-    maxProductResults?: number
-  } = {}
+  options: { maxContentResults?: number; maxProductResults?: number } = {}
 ): Promise<SearchResponse> {
-  const {
-    contentTypes = ['blog', 'page', 'faq', 'guide'],
-    matchThreshold = 0.65,
-    maxContentResults = 5,
-    maxProductResults = 3,
-  } = options
-
-  // Generate unique search ID for tracking
+  const { maxContentResults = 8, maxProductResults = 4 } = options
   const searchId = `search_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
 
-  if (!supabase) {
-    console.warn('Supabase not configured - returning empty search results')
-    return {
-      query,
-      results: [],
-      content: [],
-      products: [],
-      totalCount: 0,
-      searchId,
-    }
-  }
+  if (!query.trim()) return EMPTY_RESPONSE(query, searchId)
 
   try {
-    // Generate embedding for the search query
-    const embedding = await generateEmbedding(query)
-
-    // Search content and products in parallel
     const [contentResults, productResults] = await Promise.all([
-      searchContent(embedding, contentTypes, matchThreshold, maxContentResults),
-      searchProducts(embedding, matchThreshold, maxProductResults),
+      searchBlogContent(query, maxContentResults),
+      searchProducts(query, maxProductResults),
     ])
 
-    // Combine and sort by similarity
-    const allResults = [...contentResults, ...productResults].sort(
-      (a, b) => b.similarity - a.similarity
-    )
+    const allResults = [...contentResults, ...productResults]
 
     return {
       query,
@@ -87,101 +67,103 @@ export async function semanticSearch(
       searchId,
     }
   } catch (error) {
-    console.error('Semantic search failed:', error)
-    return {
-      query,
-      results: [],
-      content: [],
-      products: [],
-      totalCount: 0,
-      searchId,
-    }
+    console.error('Search failed:', error)
+    return EMPTY_RESPONSE(query, searchId)
   }
 }
 
 /**
- * Search website content using vector similarity
+ * Search blog posts from the content collection
  */
-async function searchContent(
-  embedding: number[],
-  pageTypes: string[],
-  matchThreshold: number,
-  matchCount: number
-): Promise<SearchResult[]> {
-  if (!supabase) return []
+async function searchBlogContent(query: string, maxResults: number): Promise<SearchResult[]> {
+  const posts = await getCollection('blog')
+  const terms = query
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((t) => t.length > 1)
 
-  try {
-    const { data, error } = await supabase.rpc('search_website_content', {
-      query_embedding: embedding,
-      page_types: pageTypes,
-      match_threshold: matchThreshold,
-      match_count: matchCount,
+  const scored = posts
+    .map((post) => {
+      const title = (post.data.title || '').toLowerCase()
+      const desc = (post.data.description || '').toLowerCase()
+      const tags = (post.data.tags || []).join(' ').toLowerCase()
+      const body = post.body?.toLowerCase() || ''
+
+      let score = 0
+
+      // Full query match in title (highest weight)
+      if (title.includes(query.toLowerCase())) score += 10
+
+      // Individual term matches
+      for (const term of terms) {
+        if (title.includes(term)) score += 5
+        if (desc.includes(term)) score += 3
+        if (tags.includes(term)) score += 2
+        if (body.includes(term)) score += 1
+      }
+
+      return { post, score }
     })
+    .filter((s) => s.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, maxResults)
 
-    if (error) {
-      console.error('Content search error:', error)
-      return []
-    }
-
-    return (data || []).map((item: WebsiteContent & { similarity: number }) => ({
-      type: 'content' as const,
-      id: item.id,
-      title: item.title,
-      description: item.description || item.content_text?.slice(0, 200) || '',
-      url: item.url,
-      similarity: item.similarity,
-      pageType: item.page_type,
-      segment: item.segment || undefined,
-    }))
-  } catch (err) {
-    console.error('Content search failed:', err)
-    return []
-  }
+  return scored.map((s) => ({
+    type: 'content' as const,
+    id: s.post.id,
+    title: s.post.data.title || s.post.id,
+    description: s.post.data.description || '',
+    url: `/blog/${s.post.id.replace(/\.mdx?$/, '')}/`,
+    similarity: s.score / 10,
+    pageType: 'Article',
+  }))
 }
 
 /**
- * Search products using vector similarity
+ * Search Shopify products by title/tags
  */
-async function searchProducts(
-  embedding: number[],
-  matchThreshold: number,
-  matchCount: number
-): Promise<SearchResult[]> {
-  if (!supabase) return []
-
+async function searchProducts(query: string, maxResults: number): Promise<SearchResult[]> {
   try {
-    const { data, error } = await supabase.rpc('find_products_for_content', {
-      content_embedding: embedding,
-      match_threshold: matchThreshold,
-      match_count: matchCount,
-    })
+    const storeDomain = import.meta.env.PUBLIC_SHOPIFY_STORE_DOMAIN
+    const token = import.meta.env.PUBLIC_SHOPIFY_STOREFRONT_TOKEN
+    if (!storeDomain || !token) return []
 
-    if (error) {
-      console.error('Product search error:', error)
-      return []
-    }
+    const client = createClient({ storeDomain, publicAccessToken: token })
+    const products = await getAllProducts(client)
+    const terms = query
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((t) => t.length > 1)
 
-    return (data || []).map((item: Product & { similarity: number }) => ({
+    const scored = products
+      .map((product) => {
+        const title = product.title.toLowerCase()
+        const tags = product.tags.join(' ').toLowerCase()
+
+        let score = 0
+        if (title.includes(query.toLowerCase())) score += 10
+        for (const term of terms) {
+          if (title.includes(term)) score += 5
+          if (tags.includes(term)) score += 2
+        }
+
+        return { product, score }
+      })
+      .filter((s) => s.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, maxResults)
+
+    return scored.map((s) => ({
       type: 'product' as const,
-      id: item.id,
-      title: item.name,
-      description: item.description || '',
-      url: item.url,
-      imageUrl: item.image_url || undefined,
-      similarity: item.similarity,
-      segment: item.segment,
+      id: s.product.id,
+      title: s.product.title,
+      description: '',
+      url: `/products/${s.product.handle}/`,
+      imageUrl: s.product.images[0]?.url || undefined,
+      similarity: s.score / 10,
     }))
   } catch (err) {
     console.error('Product search failed:', err)
     return []
   }
-}
-
-/**
- * Get search suggestions based on partial query
- * (For future autocomplete - currently returns empty)
- */
-export async function getSearchSuggestions(query: string): Promise<string[]> {
-  // TODO: Implement with popular queries or content titles
-  return []
 }
