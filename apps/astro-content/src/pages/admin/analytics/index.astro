@@ -1,0 +1,225 @@
+---
+/**
+ * Pixel Analytics — Storefront Telemetry (T-80)
+ *
+ * Sessions, top pages, conversion funnel, traffic sources.
+ * Data from BigQuery cdp.pixel_events.
+ *
+ * Two-tier model:
+ *   Nexus /dashboard/revenue = Operational Intelligence (margin, ROAS, SKU performance)
+ *   This page = Storefront Telemetry (traffic, engagement, conversion events)
+ */
+import AdminLayout from '../../../layouts/AdminLayout.astro'
+import { fetchAnalytics } from '../../../lib/bigquery'
+
+const data = await fetchAnalytics(30)
+
+const fmt = (n: number) => n.toLocaleString('en-US')
+const fmtCurrency = (n: number) => '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 })
+const fmtPct = (num: number, denom: number) => denom > 0 ? (num / denom * 100).toFixed(1) + '%' : '—'
+---
+
+<AdminLayout title="Analytics" activeNav="/admin/analytics">
+  <header class="page-header">
+    <h1 class="page-title">Storefront Analytics</h1>
+    <p class="page-subtitle">Last 30 days — southlandorganics.com</p>
+  </header>
+
+  {!data.available ? (
+    <div class="card" style="padding: 2rem; text-align: center; color: #666;">
+      <p>BigQuery credentials not configured. Set <code>GCP_SERVICE_ACCOUNT_JSON</code> environment variable.</p>
+    </div>
+  ) : (
+    <>
+      <!-- KPI Cards -->
+      <div class="stats-grid" style="margin-bottom: 2rem;">
+        <div class="stat-card">
+          <div class="stat-content">
+            <span class="stat-value">{fmt(data.totalSessions30d)}</span>
+            <span class="stat-label">Sessions (30d)</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-content">
+            <span class="stat-value">{fmt(data.totalSessions7d)}</span>
+            <span class="stat-label">Sessions (7d)</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-content">
+            <span class="stat-value">{fmt(data.funnel.purchases)}</span>
+            <span class="stat-label">Purchases (30d)</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-content">
+            <span class="stat-value">{fmtCurrency(data.funnel.purchaseValue)}</span>
+            <span class="stat-label">Purchase Revenue (30d)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conversion Funnel -->
+      <div class="card" style="margin-bottom: 2rem; padding: 1.5rem;">
+        <h2 style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; margin-bottom: 1rem;">Conversion Funnel (30d)</h2>
+        <div style="display: flex; gap: 1rem; align-items: end; flex-wrap: wrap;">
+          {[
+            { label: 'Page Views', value: data.funnel.pageViews, pct: '100%' },
+            { label: 'Product Views', value: data.funnel.productViews, pct: fmtPct(data.funnel.productViews, data.funnel.pageViews) },
+            { label: 'Begin Checkout', value: data.funnel.beginCheckout, pct: fmtPct(data.funnel.beginCheckout, data.funnel.pageViews) },
+            { label: 'Purchases', value: data.funnel.purchases, pct: fmtPct(data.funnel.purchases, data.funnel.pageViews) },
+          ].map(step => (
+            <div style="flex: 1; min-width: 120px; text-align: center;">
+              <div style={`height: ${Math.max(20, (step.value / Math.max(data.funnel.pageViews, 1)) * 200)}px; background: #2C5234; border-radius: 4px 4px 0 0; margin-bottom: 0.5rem; min-height: 20px;`}></div>
+              <div style="font-size: 1.25rem; font-weight: 700;">{fmt(step.value)}</div>
+              <div style="font-size: 0.75rem; color: #6b7280;">{step.label}</div>
+              <div style="font-size: 0.7rem; color: #9ca3af;">{step.pct}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- Two Column: Top Pages + Traffic Sources -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+
+        <!-- Top Pages -->
+        <div class="card" style="padding: 1.5rem;">
+          <h2 style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; margin-bottom: 1rem;">Top Pages (30d)</h2>
+          <table style="width: 100%; font-size: 0.875rem; border-collapse: collapse;">
+            <thead>
+              <tr style="border-bottom: 1px solid #e5e7eb; text-align: left; font-size: 0.75rem; color: #6b7280;">
+                <th style="padding: 0.5rem 0;">Page</th>
+                <th style="padding: 0.5rem 0; text-align: right;">Views</th>
+                <th style="padding: 0.5rem 0; text-align: right;">Visitors</th>
+                <th style="padding: 0.5rem 0; text-align: right;">Scroll</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.topPages.slice(0, 15).map(page => (
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 0.4rem 0; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{page.path || '/'}</td>
+                  <td style="padding: 0.4rem 0; text-align: right;">{fmt(page.views)}</td>
+                  <td style="padding: 0.4rem 0; text-align: right; color: #6b7280;">{fmt(page.uniqueVisitors)}</td>
+                  <td style="padding: 0.4rem 0; text-align: right; color: #6b7280;">{page.avgScrollDepth ? page.avgScrollDepth + '%' : '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Traffic Sources -->
+        <div class="card" style="padding: 1.5rem;">
+          <h2 style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; margin-bottom: 1rem;">Traffic Sources (30d)</h2>
+          <table style="width: 100%; font-size: 0.875rem; border-collapse: collapse;">
+            <thead>
+              <tr style="border-bottom: 1px solid #e5e7eb; text-align: left; font-size: 0.75rem; color: #6b7280;">
+                <th style="padding: 0.5rem 0;">Source / Medium</th>
+                <th style="padding: 0.5rem 0; text-align: right;">Sessions</th>
+                <th style="padding: 0.5rem 0; text-align: right;">Pages</th>
+                <th style="padding: 0.5rem 0; text-align: right;">Conv</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.trafficSources.map(src => (
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 0.4rem 0;">
+                    <span style="font-weight: 500;">{src.source}</span>
+                    <span style="color: #9ca3af; margin-left: 4px;">/ {src.medium}</span>
+                  </td>
+                  <td style="padding: 0.4rem 0; text-align: right;">{fmt(src.sessions)}</td>
+                  <td style="padding: 0.4rem 0; text-align: right; color: #6b7280;">{fmt(src.pageViews)}</td>
+                  <td style="padding: 0.4rem 0; text-align: right; font-weight: 600; color: #2C5234;">{src.conversions > 0 ? src.conversions : '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Daily Sessions Table -->
+      <div class="card" style="padding: 1.5rem;">
+        <h2 style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; margin-bottom: 1rem;">Daily Sessions (Last 14 Days)</h2>
+        <table style="width: 100%; font-size: 0.875rem; border-collapse: collapse;">
+          <thead>
+            <tr style="border-bottom: 1px solid #e5e7eb; text-align: left; font-size: 0.75rem; color: #6b7280;">
+              <th style="padding: 0.5rem 0;">Date</th>
+              <th style="padding: 0.5rem 0; text-align: right;">Sessions</th>
+              <th style="padding: 0.5rem 0; text-align: right;">Page Views</th>
+              <th style="padding: 0.5rem 0; text-align: right;">Unique Visitors</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.dailySessions.slice(0, 14).map(day => (
+              <tr style="border-bottom: 1px solid #f3f4f6;">
+                <td style="padding: 0.4rem 0; font-weight: 500;">{day.date}</td>
+                <td style="padding: 0.4rem 0; text-align: right;">{fmt(day.sessions)}</td>
+                <td style="padding: 0.4rem 0; text-align: right; color: #6b7280;">{fmt(day.pageViews)}</td>
+                <td style="padding: 0.4rem 0; text-align: right; color: #6b7280;">{fmt(day.uniqueVisitors)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  )}
+</AdminLayout>
+
+<style>
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+  }
+
+  .stat-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1.25rem;
+  }
+
+  .stat-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+  }
+
+  .card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+  }
+
+  .page-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+  }
+
+  .page-subtitle {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+  }
+
+  @media (max-width: 768px) {
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>
