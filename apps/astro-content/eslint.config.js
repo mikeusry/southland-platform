@@ -49,6 +49,9 @@ export default [
         RequestInfo: 'readonly',
         HTMLElement: 'readonly',
         NodeListOf: 'readonly',
+        crypto: 'readonly',
+        TextEncoder: 'readonly',
+        Uint8Array: 'readonly',
       },
     },
     plugins: {

@@ -1,0 +1,26 @@
+---
+/**
+ * Catch-all redirect for old Shopify blog URLs.
+ *
+ * Shopify used /blogs/[category]/[slug] — we use /blog/[slug]/.
+ * The three hub pages (case-studies, poultry-biosecurity, humate-hub)
+ * are exact-match .astro files and take priority over this catch-all.
+ *
+ * Because the prerendered /blogs/ pages cause the Cloudflare adapter to
+ * exclude /blogs/* from the Worker (_routes.json), the middleware redirect
+ * never fires for these URLs. This SSR catch-all handles them instead.
+ */
+
+const { slug } = Astro.params
+const parts = slug?.split('/') ?? []
+
+// /blogs/[category]/[slug] → extract the last segment (the article slug)
+const articleSlug = parts.length >= 2 ? parts[parts.length - 1] : parts[0]
+
+if (articleSlug) {
+  return Astro.redirect(`/blog/${articleSlug}/`, 301)
+}
+
+// Bare /blogs/ with no slug — send to blog index
+return Astro.redirect('/blog/', 301)
+---
