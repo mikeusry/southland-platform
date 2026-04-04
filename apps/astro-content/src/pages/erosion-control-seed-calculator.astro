@@ -1,0 +1,226 @@
+---
+/**
+ * /erosion-control-seed-calculator/ — Interactive Seed Calculator
+ *
+ * SEO-rich content page with a React island calculator.
+ * Targets: erosion control seed, Georgia slope seeding, fescue seeding rate.
+ * Sources: GA SWCC Field Manual, UGA Extension, Ernst Seed, P2 InfoHouse.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro'
+import AccordionFaq from '../components/shop/AccordionFaq.astro'
+import ErosionControlCalculator from '../components/calculators/ErosionControlCalculator'
+
+const title = 'Erosion Control Seed Calculator | Southland Organics'
+const description =
+  'Free calculator for erosion control seed mixes. Get the right fescue-rye blend, seeding rate, mulch, and blanket recommendations for your slope, soil type, and region.'
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+const canonicalUrl = `${siteUrl}/erosion-control-seed-calculator/`
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'Erosion Control Seed Calculator',
+  description,
+  url: canonicalUrl,
+  applicationCategory: 'UtilityApplication',
+  operatingSystem: 'Web Browser',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  provider: {
+    '@type': 'Organization',
+    name: 'Southland Organics',
+    url: siteUrl,
+    telephone: '+1-800-608-3755',
+  },
+}
+
+const faqItems = [
+  {
+    question: 'What is the best seed for erosion control on a red clay slope in Georgia?',
+    answer:
+      'For most Georgia red clay slopes, a tall fescue dominant mix with a ryegrass nurse crop provides the best combination of fast establishment and long-term root structure. Tall fescue (75–80%) anchors the slope over time while ryegrass (20–25%) germinates quickly to protect the surface. Adding compost before seeding significantly improves germination on clay soils.',
+  },
+  {
+    question: 'What grass grows fastest for erosion control?',
+    answer:
+      'Annual and perennial ryegrass are the fastest-germinating cool-season grasses used for erosion control in the Southeast, typically showing green in 5–10 days. However, ryegrass alone is a temporary nurse crop — it should be blended with tall fescue for lasting slope stabilization. Our calculator recommends the right blend ratio based on your specific conditions.',
+  },
+  {
+    question: 'Do I need an erosion control blanket?',
+    answer:
+      'Georgia EPD best management practices require erosion control blankets on steep slopes (steeper than 3:1). On moderate slopes with disturbed or compacted soil, blankets are strongly recommended. For flat or mildly sloped areas, straw mulch or hydromulch is usually sufficient. The calculator factors in your slope and soil conditions to make a specific recommendation.',
+  },
+  {
+    question: 'How much seed do I need per 1,000 square feet for erosion control?',
+    answer:
+      'Erosion control seeding rates are typically 7–10 lb per 1,000 sq ft, depending on the mix and site conditions. This is higher than standard lawn establishment rates (5–6 lb) because slope stabilization prioritizes rapid, dense coverage. Our calculator provides a specific rate based on your goal — quick cover, long-term stabilization, mowable turf, or low-maintenance slope.',
+  },
+  {
+    question: 'Can I seed for erosion control in summer in Georgia?',
+    answer:
+      'Summer seeding is possible but carries higher failure risk due to Georgia heat and drought stress. Cool-season fescue and ryegrass mixes establish best in fall (September–November). If you must seed in summer, plan for consistent irrigation, consider temporary erosion protection, and accept that germination rates will be lower than fall seeding.',
+  },
+  {
+    question: 'What is the difference between hydroseeding and broadcast seeding for erosion control?',
+    answer:
+      'Hydroseeding sprays a slurry of seed, mulch, tackifier, and water for uniform coverage — ideal for slopes and large areas where hand-broadcasting is impractical. Broadcast seeding is simpler and cheaper for accessible, smaller areas but requires raking or pressing seed into the soil. Both methods benefit from soil amendments like compost, and biological products like Genesis and Omega can improve germination in either approach.',
+  },
+  {
+    question: 'Does compost help with erosion control seeding?',
+    answer:
+      'Yes. Compost incorporation improves seed-to-soil contact, water retention, and microbial activity — all critical for germination on disturbed or clay soils. On red clay, compost prevents surface crusting that blocks seedlings. On sandy soils, it retains moisture. Georgia erosion control guidance recommends amending poor soils before seeding whenever practical.',
+  },
+  {
+    question: 'What products does Southland Organics offer for hydroseeding?',
+    answer:
+      'Genesis is a soil biology activator that showed 155% greater germination in third-party testing by TRI Environmental. Omega Soil Activator is a liquid soil conditioner applied at 1 gallon per 500 gallons of slurry. Both go into the hydroseeding tank alongside your existing mulch and fertilizer — same equipment, same process, better results in the soil.',
+  },
+]
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  schema={schema}
+  canonicalUrl={canonicalUrl}
+>
+  <!-- Hero -->
+  <section class="bg-[#2C5234] py-16 md:py-20">
+    <div class="mx-auto max-w-6xl px-4 text-center">
+      <span
+        class="mb-4 inline-block rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-green-200"
+      >
+        Free Tool
+      </span>
+      <h1 class="mb-4 font-heading text-3xl uppercase text-white md:text-4xl lg:text-5xl">
+        Erosion Control Seed Calculator
+      </h1>
+      <p class="mx-auto max-w-2xl text-lg text-green-100">
+        Get the right seed mix, seeding rate, and mulch recommendation for your slope and soil
+        conditions. Built on state erosion control guidance and field-tested results.
+      </p>
+      <div class="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+        <a
+          href="#calculator"
+          class="inline-flex items-center rounded-md bg-white px-6 py-3 text-sm font-semibold text-[#2C5234] transition-colors hover:bg-green-50"
+        >
+          Jump to Calculator
+          <svg class="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+        </a>
+        <a
+          href="tel:+18006083755"
+          class="inline-flex items-center rounded-md border border-white/30 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+        >
+          Talk to a Specialist — 800-608-3755
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Educational Intro -->
+  <section class="bg-gray-50 py-16 md:py-20">
+    <div class="mx-auto max-w-4xl px-4">
+      <h2
+        class="mb-8 text-center font-heading text-2xl uppercase md:text-3xl"
+        style="color: var(--color-title);"
+      >
+        Why Seed Selection Matters for Erosion Control
+      </h2>
+      <div class="space-y-5 text-base leading-relaxed text-gray-700">
+        <p>
+          Slope changes everything. A seed mix that works on flat ground can wash off a moderate
+          bank in the first rain. Steeper grades need faster germination, heavier seeding rates,
+          and physical protection — straw mulch, hydromulch, or erosion control blankets — to
+          hold seed in place while roots establish.
+        </p>
+        <p>
+          That's why erosion control seeding uses two categories of grass working together: a
+          <strong>nurse crop</strong> (ryegrass) that germinates in 5–10 days for immediate surface
+          protection, and a <strong>permanent species</strong> (tall fescue) that builds the deep
+          root structure for long-term slope stabilization. The right ratio depends on your goal —
+          quick cover, lasting hold, or both.
+        </p>
+        <p>
+          Soil preparation matters just as much as seed selection. Red clay crusts without
+          amendment. Disturbed subsoil lacks the organic matter roots need. Compost incorporation
+          and proper seedbed prep can be the difference between a green slope in 30 days and a
+          washout in the first storm. For
+          <a
+            href="/hydroseeders/"
+            class="font-semibold text-[#44883E] underline decoration-green-300 underline-offset-2 hover:text-[#2C5234]"
+          >
+            hydroseeding projects</a
+          >, biological amendments like Genesis and Omega improve germination rates by supporting
+          the soil biology that drives root establishment.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Calculator -->
+  <section id="calculator" class="bg-white py-16 md:py-20">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <h2
+        class="mb-2 text-center font-heading text-2xl uppercase md:text-3xl"
+        style="color: var(--color-title);"
+      >
+        Calculate Your Seed Mix
+      </h2>
+      <p class="mx-auto mb-10 max-w-2xl text-center text-sm text-gray-500">
+        Enter your site conditions and the calculator will recommend a seed mix, seeding rate,
+        and products for your erosion control project.
+      </p>
+      <ErosionControlCalculator client:load />
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="bg-gray-50 py-16 md:py-20">
+    <div class="mx-auto max-w-3xl px-4">
+      <h2
+        class="mb-8 text-center font-heading text-2xl uppercase md:text-3xl"
+        style="color: var(--color-title);"
+      >
+        Erosion Control Seeding Questions
+      </h2>
+      <AccordionFaq items={faqItems} persona="lawn" />
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="bg-[#2C5234] py-16 md:py-20">
+    <div class="mx-auto max-w-4xl px-4 text-center">
+      <h2 class="mb-4 font-heading text-2xl uppercase text-white md:text-3xl">
+        Need a Custom Recommendation?
+      </h2>
+      <p class="mx-auto mb-8 max-w-2xl text-lg text-green-100">
+        Every slope is different. If your project involves unusual drainage, regulatory
+        requirements, or conditions outside the calculator's scope, our team can help you build a
+        site-specific erosion control plan.
+      </p>
+      <div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
+        <a
+          href="/contact/"
+          class="inline-flex items-center rounded-md bg-white px-6 py-3 text-sm font-semibold text-[#2C5234] transition-colors hover:bg-green-50"
+        >
+          Request a Custom Recommendation
+        </a>
+        <a
+          href="/hydroseeders/"
+          class="inline-flex items-center rounded-md border border-white/30 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+        >
+          Explore Hydroseeding Products
+        </a>
+      </div>
+      <p class="mt-6 text-sm text-green-200">
+        Or call us directly: <a href="tel:+18006083755" class="font-semibold text-white underline underline-offset-2 hover:text-green-100">800-608-3755</a>
+      </p>
+    </div>
+  </section>
+</BaseLayout>
