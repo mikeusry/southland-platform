@@ -59,8 +59,7 @@ export const MIX_CONFIGS: MixConfig[] = [
       { name: 'Ryegrass', percentMin: 10, percentMax: 15 },
     ],
     ratePer1000: 7,
-    summary:
-      'Best for areas you plan to maintain like a seeded lawn or finished turf zone.',
+    summary: 'Best for areas you plan to maintain like a seeded lawn or finished turf zone.',
   },
   {
     id: 'low-maintenance',
@@ -188,7 +187,9 @@ export const SUN_OVERRIDES: Record<Sun, SunOverride> = {
 export const SEASON_OVERRIDES: Record<Season, SeasonOverride> = {
   fall: {
     warnings: [],
-    notes: ['Fall is the ideal seeding window for cool-season grasses in Georgia and the Southeast.'],
+    notes: [
+      'Fall is the ideal seeding window for cool-season grasses in Georgia and the Southeast.',
+    ],
   },
   spring: {
     warnings: [],
@@ -294,7 +295,8 @@ export const PRODUCT_CATALOG: Record<string, ProductCatalogEntry> = {
   'jump-start-soil-conditioner': {
     name: 'Jump Start Soil Conditioner',
     slug: 'jump-start-soil-conditioner',
-    defaultReason: 'Liquid soil conditioner that breaks down compacted layers and improves root establishment.',
+    defaultReason:
+      'Liquid soil conditioner that breaks down compacted layers and improves root establishment.',
   },
 }
 
@@ -323,7 +325,11 @@ export const SOIL_OPTIONS: InputOption[] = [
 ]
 
 export const GOAL_OPTIONS: InputOption[] = [
-  { value: 'quick-cover', label: 'Quick Cover', description: 'Fast green-up and surface protection' },
+  {
+    value: 'quick-cover',
+    label: 'Quick Cover',
+    description: 'Fast green-up and surface protection',
+  },
   {
     value: 'quick-long-term',
     label: 'Quick + Long-Term Stabilization',

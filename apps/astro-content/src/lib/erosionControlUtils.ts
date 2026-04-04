@@ -192,9 +192,7 @@ export function calculateResult(inputs: CalculatorInputs): CalculatorResult {
   // Build display name — append "(Hydroseed System)" when overlay is active
   const mixName = isHydroseedOverlay ? `${mix.name} — Hydroseed System` : mix.name
 
-  const summary = isHydroseedOverlay
-    ? HYDROSEED_OVERLAY_SUMMARY
-    : mix.summary
+  const summary = isHydroseedOverlay ? HYDROSEED_OVERLAY_SUMMARY : mix.summary
 
   return {
     mixName,

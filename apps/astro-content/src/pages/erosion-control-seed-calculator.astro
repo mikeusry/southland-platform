@@ -65,7 +65,8 @@ const faqItems = [
       'Summer seeding is possible but carries higher failure risk due to Georgia heat and drought stress. Cool-season fescue and ryegrass mixes establish best in fall (September–November). If you must seed in summer, plan for consistent irrigation, consider temporary erosion protection, and accept that germination rates will be lower than fall seeding.',
   },
   {
-    question: 'What is the difference between hydroseeding and broadcast seeding for erosion control?',
+    question:
+      'What is the difference between hydroseeding and broadcast seeding for erosion control?',
     answer:
       'Hydroseeding sprays a slurry of seed, mulch, tackifier, and water for uniform coverage — ideal for slopes and large areas where hand-broadcasting is impractical. Broadcast seeding is simpler and cheaper for accessible, smaller areas but requires raking or pressing seed into the soil. Both methods benefit from soil amendments like compost, and biological products like Genesis and Omega can improve germination in either approach.',
   },
@@ -82,12 +83,7 @@ const faqItems = [
 ]
 ---
 
-<BaseLayout
-  title={title}
-  description={description}
-  schema={schema}
-  canonicalUrl={canonicalUrl}
->
+<BaseLayout title={title} description={description} schema={schema} canonicalUrl={canonicalUrl}>
   <!-- Hero -->
   <section class="bg-[#2C5234] py-16 md:py-20">
     <div class="mx-auto max-w-6xl px-4 text-center">
@@ -110,7 +106,11 @@ const faqItems = [
         >
           Jump to Calculator
           <svg class="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
           </svg>
         </a>
         <a
@@ -135,16 +135,16 @@ const faqItems = [
       <div class="space-y-5 text-base leading-relaxed text-gray-700">
         <p>
           Slope changes everything. A seed mix that works on flat ground can wash off a moderate
-          bank in the first rain. Steeper grades need faster germination, heavier seeding rates,
-          and physical protection — straw mulch, hydromulch, or erosion control blankets — to
-          hold seed in place while roots establish.
+          bank in the first rain. Steeper grades need faster germination, heavier seeding rates, and
+          physical protection — straw mulch, hydromulch, or erosion control blankets — to hold seed
+          in place while roots establish.
         </p>
         <p>
           That's why erosion control seeding uses two categories of grass working together: a
-          <strong>nurse crop</strong> (ryegrass) that germinates in 5–10 days for immediate surface
-          protection, and a <strong>permanent species</strong> (tall fescue) that builds the deep
-          root structure for long-term slope stabilization. The right ratio depends on your goal —
-          quick cover, lasting hold, or both.
+          <strong>nurse crop</strong> (ryegrass) that germinates in 5–10 days for immediate surface protection,
+          and a <strong>permanent species</strong> (tall fescue) that builds the deep root structure for
+          long-term slope stabilization. The right ratio depends on your goal — quick cover, lasting hold,
+          or both.
         </p>
         <p>
           Soil preparation matters just as much as seed selection. Red clay crusts without
@@ -173,8 +173,8 @@ const faqItems = [
         Calculate Your Seed Mix
       </h2>
       <p class="mx-auto mb-10 max-w-2xl text-center text-sm text-gray-500">
-        Enter your site conditions and the calculator will recommend a seed mix, seeding rate,
-        and products for your erosion control project.
+        Enter your site conditions and the calculator will recommend a seed mix, seeding rate, and
+        products for your erosion control project.
       </p>
       <ErosionControlCalculator client:load />
     </div>
@@ -219,7 +219,11 @@ const faqItems = [
         </a>
       </div>
       <p class="mt-6 text-sm text-green-200">
-        Or call us directly: <a href="tel:+18006083755" class="font-semibold text-white underline underline-offset-2 hover:text-green-100">800-608-3755</a>
+        Or call us directly: <a
+          href="tel:+18006083755"
+          class="font-semibold text-white underline underline-offset-2 hover:text-green-100"
+          >800-608-3755</a
+        >
       </p>
     </div>
   </section>

@@ -89,9 +89,7 @@ export default function ErosionControlCalculator() {
 
           {/* Compost */}
           <div className="mb-5">
-            <span className="mb-1.5 block text-sm font-semibold text-gray-700">
-              Compost Added?
-            </span>
+            <span className="mb-1.5 block text-sm font-semibold text-gray-700">Compost Added?</span>
             <div className="flex gap-3">
               <button
                 type="button"
@@ -177,12 +175,10 @@ export default function ErosionControlCalculator() {
                   />
                 </svg>
                 <div>
-                  <p className="text-sm font-semibold text-amber-800">
-                    Custom Review Recommended
-                  </p>
+                  <p className="text-sm font-semibold text-amber-800">Custom Review Recommended</p>
                   <p className="mt-1 text-sm text-amber-700">
-                    Your site conditions fall outside our standard calculator scenarios. We recommend
-                    talking to a specialist for a tailored recommendation.
+                    Your site conditions fall outside our standard calculator scenarios. We
+                    recommend talking to a specialist for a tailored recommendation.
                   </p>
                   <a
                     href="/contact/"
@@ -199,9 +195,7 @@ export default function ErosionControlCalculator() {
           <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
             <div className="mb-4 flex items-start justify-between">
               <div>
-                <h3 className="font-heading text-xl uppercase text-[#2C5234]">
-                  {result.mixName}
-                </h3>
+                <h3 className="font-heading text-xl uppercase text-[#2C5234]">{result.mixName}</h3>
                 <p className="mt-1 text-sm text-gray-600">{result.summary}</p>
               </div>
               {result.isHydroseedOverlay && (
@@ -284,10 +278,7 @@ export default function ErosionControlCalculator() {
           {result.warnings.length > 0 && (
             <div className="space-y-3">
               {result.warnings.map((w, i) => (
-                <div
-                  key={i}
-                  className="rounded-lg border-l-4 border-amber-400 bg-amber-50 p-4"
-                >
+                <div key={i} className="rounded-lg border-l-4 border-amber-400 bg-amber-50 p-4">
                   <p className="text-sm text-amber-800">{w}</p>
                 </div>
               ))}
@@ -376,9 +367,8 @@ export default function ErosionControlCalculator() {
 
           {/* Disclaimer */}
           <p className="text-xs text-gray-400">
-            This tool provides planning guidance for common erosion-control scenarios.
-            Unusual slopes, drainage paths, or regulatory requirements may need site-specific
-            review.
+            This tool provides planning guidance for common erosion-control scenarios. Unusual
+            slopes, drainage paths, or regulatory requirements may need site-specific review.
           </p>
         </div>
       </div>
