@@ -897,16 +897,19 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
   </main>
 </BaseLayout>
 
-<script is:inline define:vars={{
-  ga4Product: {
-    item_id: product.handle,
-    item_name: product.title,
-    item_brand: product.vendor || 'Southland Organics',
-    item_category: resolvedProductType || undefined,
-    price: parseFloat(product.priceRange.minVariantPrice.amount),
-    currency: product.priceRange.minVariantPrice.currencyCode || 'USD',
-  },
-}}>
+<script
+  is:inline
+  define:vars={{
+    ga4Product: {
+      item_id: product.handle,
+      item_name: product.title,
+      item_brand: product.vendor || 'Southland Organics',
+      item_category: resolvedProductType || undefined,
+      price: parseFloat(product.priceRange.minVariantPrice.amount),
+      currency: product.priceRange.minVariantPrice.currencyCode || 'USD',
+    },
+  }}
+>
   // GA4: view_item on PDP load
   window.dataLayer = window.dataLayer || []
   window.dataLayer.push({ ecommerce: null })

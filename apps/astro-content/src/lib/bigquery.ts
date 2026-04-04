@@ -45,7 +45,7 @@ async function createJWT(sa: ServiceAccount): Promise<string> {
     .replace(/-----END PRIVATE KEY-----/g, '')
     .replace(/\s/g, '')
 
-  const binaryKey = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0))
+  const binaryKey = Uint8Array.from(atob(pemContents), (c) => c.charCodeAt(0))
 
   const cryptoKey = await crypto.subtle.importKey(
     'pkcs8',
@@ -85,7 +85,7 @@ async function getAccessToken(sa: ServiceAccount): Promise<string> {
     throw new Error(`Token exchange failed: ${resp.status} ${await resp.text()}`)
   }
 
-  const data = await resp.json() as { access_token: string; expires_in: number }
+  const data = (await resp.json()) as { access_token: string; expires_in: number }
   _cachedToken = {
     token: data.access_token,
     expires: Date.now() + (data.expires_in - 60) * 1000,
@@ -113,7 +113,7 @@ async function query(sql: string, sa: ServiceAccount): Promise<any[]> {
     throw new Error(`BigQuery query failed: ${resp.status} ${await resp.text()}`)
   }
 
-  const result = await resp.json() as any
+  const result = (await resp.json()) as any
 
   if (!result.rows) return []
 
@@ -169,7 +169,9 @@ export interface AnalyticsData {
 }
 
 function getServiceAccount(): ServiceAccount | null {
-  const json = import.meta.env.GCP_SERVICE_ACCOUNT_JSON || (typeof process !== 'undefined' && process.env?.GCP_SERVICE_ACCOUNT_JSON)
+  const json =
+    import.meta.env.GCP_SERVICE_ACCOUNT_JSON ||
+    (typeof process !== 'undefined' && process.env?.GCP_SERVICE_ACCOUNT_JSON)
   if (!json) return null
   try {
     return JSON.parse(json)
@@ -182,9 +184,20 @@ export async function fetchAnalytics(days: number = 30): Promise<AnalyticsData> 
   const sa = getServiceAccount()
   if (!sa) {
     return {
-      dailySessions: [], topPages: [],
-      funnel: { pageViews: 0, productViews: 0, addToCart: 0, beginCheckout: 0, purchases: 0, purchaseValue: 0 },
-      trafficSources: [], totalSessions7d: 0, totalSessions30d: 0, available: false,
+      dailySessions: [],
+      topPages: [],
+      funnel: {
+        pageViews: 0,
+        productViews: 0,
+        addToCart: 0,
+        beginCheckout: 0,
+        purchases: 0,
+        purchaseValue: 0,
+      },
+      trafficSources: [],
+      totalSessions7d: 0,
+      totalSessions30d: 0,
+      available: false,
     }
   }
 
@@ -192,7 +205,8 @@ export async function fetchAnalytics(days: number = 30): Promise<AnalyticsData> 
     const since = `DATE_SUB(CURRENT_DATE(), INTERVAL ${days} DAY)`
 
     const [dailyRows, pageRows, funnelRows, sourceRows] = await Promise.all([
-      query(`
+      query(
+        `
         SELECT
           FORMAT_DATE('%Y-%m-%d', DATE(event_timestamp)) as date,
           COUNT(DISTINCT session_id) as sessions,
@@ -202,9 +216,12 @@ export async function fetchAnalytics(days: number = 30): Promise<AnalyticsData> 
         WHERE DATE(event_timestamp) >= ${since}
           AND event_type = 'page_view' AND brand_id = 'southland'
         GROUP BY date ORDER BY date DESC
-      `, sa),
+      `,
+        sa
+      ),
 
-      query(`
+      query(
+        `
         SELECT
           page_path as path, COUNT(*) as views,
           COUNT(DISTINCT pd_user_id) as unique_visitors,
@@ -213,9 +230,12 @@ export async function fetchAnalytics(days: number = 30): Promise<AnalyticsData> 
         WHERE DATE(event_timestamp) >= ${since}
           AND event_type = 'page_view' AND brand_id = 'southland'
         GROUP BY page_path ORDER BY views DESC LIMIT 20
-      `, sa),
+      `,
+        sa
+      ),
 
-      query(`
+      query(
+        `
         SELECT
           COUNTIF(event_type = 'page_view') as page_views,
           COUNTIF(event_type = 'product_view') as product_views,
@@ -225,9 +245,12 @@ export async function fetchAnalytics(days: number = 30): Promise<AnalyticsData> 
           SUM(IF(event_type = 'purchase', order_value, 0)) as purchase_value
         FROM \`${PROJECT_ID}.cdp.pixel_events\`
         WHERE DATE(event_timestamp) >= ${since} AND brand_id = 'southland'
-      `, sa),
+      `,
+        sa
+      ),
 
-      query(`
+      query(
+        `
         SELECT
           COALESCE(utm_source, CASE
             WHEN referrer LIKE '%google%' THEN 'google'
@@ -242,7 +265,9 @@ export async function fetchAnalytics(days: number = 30): Promise<AnalyticsData> 
         FROM \`${PROJECT_ID}.cdp.pixel_events\`
         WHERE DATE(event_timestamp) >= ${since} AND brand_id = 'southland'
         GROUP BY source, medium ORDER BY sessions DESC LIMIT 15
-      `, sa),
+      `,
+        sa
+      ),
     ])
 
     const dailySessions: DailySessionStats[] = dailyRows.map((r: any) => ({
@@ -253,7 +278,7 @@ export async function fetchAnalytics(days: number = 30): Promise<AnalyticsData> 
     }))
 
     const d7 = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0]
-    const sessions7d = dailySessions.filter(d => d.date >= d7).reduce((s, d) => s + d.sessions, 0)
+    const sessions7d = dailySessions.filter((d) => d.date >= d7).reduce((s, d) => s + d.sessions, 0)
     const sessions30d = dailySessions.reduce((s, d) => s + d.sessions, 0)
 
     const topPages: TopPage[] = pageRows.map((r: any) => ({
@@ -281,13 +306,32 @@ export async function fetchAnalytics(days: number = 30): Promise<AnalyticsData> 
       conversions: Number(r.conversions) || 0,
     }))
 
-    return { dailySessions, topPages, funnel, trafficSources, totalSessions7d: sessions7d, totalSessions30d: sessions30d, available: true }
+    return {
+      dailySessions,
+      topPages,
+      funnel,
+      trafficSources,
+      totalSessions7d: sessions7d,
+      totalSessions30d: sessions30d,
+      available: true,
+    }
   } catch (err) {
     console.error('[analytics] BigQuery query failed:', err)
     return {
-      dailySessions: [], topPages: [],
-      funnel: { pageViews: 0, productViews: 0, addToCart: 0, beginCheckout: 0, purchases: 0, purchaseValue: 0 },
-      trafficSources: [], totalSessions7d: 0, totalSessions30d: 0, available: false,
+      dailySessions: [],
+      topPages: [],
+      funnel: {
+        pageViews: 0,
+        productViews: 0,
+        addToCart: 0,
+        beginCheckout: 0,
+        purchases: 0,
+        purchaseValue: 0,
+      },
+      trafficSources: [],
+      totalSessions7d: 0,
+      totalSessions30d: 0,
+      available: false,
     }
   }
 }

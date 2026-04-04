@@ -26,7 +26,13 @@ function formatPrice(money: Money): string {
   }).format(Number(money.amount))
 }
 
-export default function AddToCartButton({ variants, productHandle, productTitle, productVendor, productType }: Props) {
+export default function AddToCartButton({
+  variants,
+  productHandle,
+  productTitle,
+  productVendor,
+  productType,
+}: Props) {
   const [selectedVariantId, setSelectedVariantId] = useState(
     variants.find((v) => v.availableForSale)?.id ?? variants[0]?.id ?? ''
   )

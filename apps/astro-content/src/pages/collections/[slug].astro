@@ -338,22 +338,25 @@ const displaySubheadline = heroSubheadline || seoDescription
   }
 </BaseLayout>
 
-<script is:inline define:vars={{
-  ga4List: {
-    item_list_id: slug,
-    item_list_name: title,
-    items: shopifyCollection.products.map((p, i) => ({
-      item_id: p.handle,
-      item_name: p.title,
-      item_brand: 'Southland Organics',
-      price: parseFloat(p.priceRange.minVariantPrice.amount),
-      currency: p.priceRange.minVariantPrice.currencyCode || 'USD',
-      index: i,
+<script
+  is:inline
+  define:vars={{
+    ga4List: {
       item_list_id: slug,
       item_list_name: title,
-    })),
-  },
-}}>
+      items: shopifyCollection.products.map((p, i) => ({
+        item_id: p.handle,
+        item_name: p.title,
+        item_brand: 'Southland Organics',
+        price: parseFloat(p.priceRange.minVariantPrice.amount),
+        currency: p.priceRange.minVariantPrice.currencyCode || 'USD',
+        index: i,
+        item_list_id: slug,
+        item_list_name: title,
+      })),
+    },
+  }}
+>
   // GA4: view_item_list on collection page load
   window.dataLayer = window.dataLayer || []
   window.dataLayer.push({ ecommerce: null })

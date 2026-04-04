@@ -244,61 +244,67 @@ export default function CartPage() {
     return () => window.removeEventListener('cart-changed', handleCartChanged)
   }, [])
 
-  const handleUpdateQuantity = useCallback(async (lineId: string, quantity: number) => {
-    const line = cart?.lines.find((l) => l.id === lineId)
-    const oldQty = line?.quantity ?? 0
+  const handleUpdateQuantity = useCallback(
+    async (lineId: string, quantity: number) => {
+      const line = cart?.lines.find((l) => l.id === lineId)
+      const oldQty = line?.quantity ?? 0
 
-    setUpdating(true)
-    try {
-      const updated = await updateCartLines([{ id: lineId, quantity }])
-      if (updated) {
-        setCart(updated)
-        // Track quantity change
-        if (line && oldQty !== quantity) {
-          const direction = quantity > oldQty ? 'increase' : 'decrease'
-          window.dataLayer = window.dataLayer || []
-          window.dataLayer.push({
-            event: 'cart_quantity_change',
-            item_id: line.merchandise.product.handle,
-            item_name: line.merchandise.product.title,
-            old_quantity: oldQty,
-            new_quantity: quantity,
-            direction,
-            line_value: parseFloat(line.merchandise.price.amount) * quantity,
-          })
-          if (typeof window !== 'undefined' && (window as any).pdPixel) {
-            ;(window as any).pdPixel.track('cart_quantity_change', {
+      setUpdating(true)
+      try {
+        const updated = await updateCartLines([{ id: lineId, quantity }])
+        if (updated) {
+          setCart(updated)
+          // Track quantity change
+          if (line && oldQty !== quantity) {
+            const direction = quantity > oldQty ? 'increase' : 'decrease'
+            window.dataLayer = window.dataLayer || []
+            window.dataLayer.push({
+              event: 'cart_quantity_change',
               item_id: line.merchandise.product.handle,
               item_name: line.merchandise.product.title,
               old_quantity: oldQty,
               new_quantity: quantity,
               direction,
+              line_value: parseFloat(line.merchandise.price.amount) * quantity,
             })
+            if (typeof window !== 'undefined' && (window as any).pdPixel) {
+              ;(window as any).pdPixel.track('cart_quantity_change', {
+                item_id: line.merchandise.product.handle,
+                item_name: line.merchandise.product.title,
+                old_quantity: oldQty,
+                new_quantity: quantity,
+                direction,
+              })
+            }
           }
         }
+      } catch (err) {
+        console.error('Failed to update quantity:', err)
+      } finally {
+        setUpdating(false)
       }
-    } catch (err) {
-      console.error('Failed to update quantity:', err)
-    } finally {
-      setUpdating(false)
-    }
-  }, [cart])
+    },
+    [cart]
+  )
 
-  const handleRemove = useCallback(async (lineId: string) => {
-    // Track before removing so we still have the line data
-    const removedLine = cart?.lines.find((l) => l.id === lineId)
-    if (removedLine) trackRemoveFromCart(removedLine)
+  const handleRemove = useCallback(
+    async (lineId: string) => {
+      // Track before removing so we still have the line data
+      const removedLine = cart?.lines.find((l) => l.id === lineId)
+      if (removedLine) trackRemoveFromCart(removedLine)
 
-    setUpdating(true)
-    try {
-      const updated = await removeFromCart([lineId])
-      setCart(updated)
-    } catch (err) {
-      console.error('Failed to remove item:', err)
-    } finally {
-      setUpdating(false)
-    }
-  }, [cart])
+      setUpdating(true)
+      try {
+        const updated = await removeFromCart([lineId])
+        setCart(updated)
+      } catch (err) {
+        console.error('Failed to remove item:', err)
+      } finally {
+        setUpdating(false)
+      }
+    },
+    [cart]
+  )
 
   // ─── Loading ────────────────────────────────────────────────────────────────
 
@@ -526,7 +532,11 @@ export default function CartPage() {
           <a
             href={cart.checkoutUrl}
             onClick={() =>
-              trackBeginCheckout(cart.lines, cart.cost.totalAmount.amount, cart.cost.totalAmount.currencyCode)
+              trackBeginCheckout(
+                cart.lines,
+                cart.cost.totalAmount.amount,
+                cart.cost.totalAmount.currencyCode
+              )
             }
             className="mt-6 block w-full rounded-md bg-brand-green-dark px-6 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-green-800"
           >

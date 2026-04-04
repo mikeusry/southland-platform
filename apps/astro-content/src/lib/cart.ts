@@ -71,8 +71,16 @@ function getAttributionAttrs(): Array<{ key: string; value: string }> {
     const data = JSON.parse(raw) as Record<string, string>
     const attrs: Array<{ key: string; value: string }> = []
     const PARAMS = [
-      'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
-      'gclid', 'fbclid', 'msclid', 'ttclid', 'srsltid',
+      'utm_source',
+      'utm_medium',
+      'utm_campaign',
+      'utm_content',
+      'utm_term',
+      'gclid',
+      'fbclid',
+      'msclid',
+      'ttclid',
+      'srsltid',
     ]
     for (const param of PARAMS) {
       if (data[param]) {

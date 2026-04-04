@@ -50,7 +50,7 @@ interface CartLineData {
     product: {
       handle: string
       title: string
-      vendor?: string      // Not available on CartLineMerchandise from Storefront API
+      vendor?: string // Not available on CartLineMerchandise from Storefront API
       productType?: string // Not available on CartLineMerchandise from Storefront API
     }
   }
@@ -95,8 +95,7 @@ function cartLineToItem(line: CartLineData): GA4Item {
     item_name: line.merchandise.product.title,
     item_brand: line.merchandise.product.vendor || 'Southland Organics',
     item_category: line.merchandise.product.productType || undefined,
-    item_variant:
-      line.merchandise.title !== 'Default Title' ? line.merchandise.title : undefined,
+    item_variant: line.merchandise.title !== 'Default Title' ? line.merchandise.title : undefined,
     price: parseFloat(line.merchandise.price.amount),
     quantity: line.quantity,
     currency: line.merchandise.price.currencyCode || 'USD',
@@ -121,11 +120,7 @@ export function trackViewItem(product: ProductData, variantIndex = 0): void {
 /**
  * view_item_list — fired when a user views a collection / product list
  */
-export function trackViewItemList(
-  listId: string,
-  listName: string,
-  products: ProductData[]
-): void {
+export function trackViewItemList(listId: string, listName: string, products: ProductData[]): void {
   const items = products.map((product, index) => ({
     ...buildItem(product),
     index,
@@ -134,7 +129,11 @@ export function trackViewItemList(
   }))
 
   pushToDataLayer('view_item_list', { item_list_id: listId, item_list_name: listName, items })
-  pushToPixel('view_item_list', { item_list_id: listId, item_list_name: listName, item_count: items.length })
+  pushToPixel('view_item_list', {
+    item_list_id: listId,
+    item_list_name: listName,
+    item_count: items.length,
+  })
 }
 
 /**
@@ -179,7 +178,11 @@ export function trackViewCart(lines: CartLineData[], totalAmount: string, curren
 /**
  * begin_checkout — fired when a user clicks "Proceed to Checkout"
  */
-export function trackBeginCheckout(lines: CartLineData[], totalAmount: string, currency = 'USD'): void {
+export function trackBeginCheckout(
+  lines: CartLineData[],
+  totalAmount: string,
+  currency = 'USD'
+): void {
   const items = lines.map(cartLineToItem)
   const value = parseFloat(totalAmount)
 
