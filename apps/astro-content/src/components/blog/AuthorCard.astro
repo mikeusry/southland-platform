@@ -36,9 +36,9 @@ const {
   label = 'Written by',
 } = Astro.props;
 
-// Build photo URL from Cloudinary
+// Build photo URL from Cloudinary (skip if already a full URL)
 const photoUrl = photo
-  ? buildSouthlandUrl(photo, { width: variant === 'compact' ? 80 : 160, height: variant === 'compact' ? 80 : 160, crop: 'fill', gravity: 'face' })
+  ? photo.startsWith('http') ? photo : buildSouthlandUrl(photo, { width: variant === 'compact' ? 80 : 160, height: variant === 'compact' ? 80 : 160, crop: 'fill', gravity: 'face' })
   : null;
 
 // Build credential string
