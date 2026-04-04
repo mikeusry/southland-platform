@@ -52,17 +52,60 @@ function getNexusCid(): string {
   return cid
 }
 
+// ─── Attribution (Self-Owned) ───────────��───────────────────────────────────
+
+const PD_ATTRIBUTION_KEY = '_pd_attribution'
+
 /**
- * Inject _nexus_cid attribute into cart line inputs.
+ * Read attribution data from localStorage (captured on landing page).
+ * Returns key/value pairs prefixed with _pd_ for Nexus extraction.
+ *
+ * This replaces the old Shopify /cart/update.js approach — attribution now
+ * flows via cart line item properties, making it checkout-backend-agnostic.
+ * Works with Shopify, Medusa, or any self-hosted checkout.
+ */
+function getAttributionAttrs(): Array<{ key: string; value: string }> {
+  if (typeof window === 'undefined') return []
+  try {
+    const raw = localStorage.getItem(PD_ATTRIBUTION_KEY)
+    if (!raw) return []
+    const data = JSON.parse(raw) as Record<string, string>
+    const attrs: Array<{ key: string; value: string }> = []
+    const PARAMS = [
+      'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
+      'gclid', 'fbclid', 'msclid', 'ttclid', 'srsltid',
+    ]
+    for (const param of PARAMS) {
+      if (data[param]) {
+        attrs.push({ key: `_pd_${param}`, value: data[param] })
+      }
+    }
+    if (data._landing_page) attrs.push({ key: '_pd_landing_page', value: data._landing_page })
+    if (data._referrer) attrs.push({ key: '_pd_referrer', value: data._referrer })
+    return attrs
+  } catch {
+    return []
+  }
+}
+
+/**
+ * Inject _nexus_cid + attribution into cart line inputs.
  * Preserves any existing attributes (e.g., bundle attributes).
+ *
+ * Every cart line carries identity + attribution so Nexus can extract
+ * them from Shopify order line_items[].properties on webhook ingest.
  */
 function stampLines(lines: CartLineInput[]): CartLineInput[] {
   const cid = getNexusCid()
+  const attrAttrs = getAttributionAttrs()
+  const stampKeys = new Set([NEXUS_CID_KEY, ...attrAttrs.map((a) => a.key)])
+
   return lines.map((line) => ({
     ...line,
     attributes: [
-      ...(line.attributes || []).filter((a) => a.key !== NEXUS_CID_KEY),
+      ...(line.attributes || []).filter((a) => !stampKeys.has(a.key)),
       { key: NEXUS_CID_KEY, value: cid },
+      ...attrAttrs,
     ],
   }))
 }

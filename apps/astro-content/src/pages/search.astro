@@ -395,15 +395,63 @@ const description = query
   }
 </style>
 
-<script>
-  // Track result clicks
-  document.querySelectorAll('[data-search-id]').forEach((el) => {
-    el.addEventListener('click', () => {
-      const searchId = el.getAttribute('data-search-id');
-      if (window.pdPixel && searchId) {
+<script is:inline define:vars={{
+  searchQuery: query,
+  resultCount: searchResults?.totalCount ?? 0,
+  contentCount: searchResults?.content?.length ?? 0,
+  productCount: searchResults?.products?.length ?? 0,
+  searchId: searchResults?.searchId ?? null,
+}}>
+  // GA4 + point.dog: track search query
+  if (searchQuery) {
+    // GA4 standard search event
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ ecommerce: null });
+    window.dataLayer.push({
+      event: 'search',
+      ecommerce: {
+        search_term: searchQuery,
+      },
+    });
+
+    // point.dog: richer search event
+    if (window.pdPixel) {
+      window.pdPixel.track('site_search', {
+        query: searchQuery,
+        result_count: resultCount,
+        content_results: contentCount,
+        product_results: productCount,
+        search_id: searchId,
+        has_results: resultCount > 0,
+      });
+    }
+  }
+
+  // Track result clicks (with result type + position)
+  document.querySelectorAll('[data-search-id]').forEach(function(el, index) {
+    el.addEventListener('click', function() {
+      var sid = el.getAttribute('data-search-id');
+      var href = el.getAttribute('href') || '';
+      var isProduct = el.classList.contains('product-card');
+
+      // GA4: select_content
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: 'select_content',
+        content_type: isProduct ? 'product' : 'article',
+        content_id: href,
+        search_term: searchQuery,
+        index: index,
+      });
+
+      // point.dog
+      if (window.pdPixel && sid) {
         window.pdPixel.track('search_result_clicked', {
-          search_id: searchId,
-          result_url: (el as HTMLAnchorElement).href,
+          search_id: sid,
+          result_url: href,
+          result_type: isProduct ? 'product' : 'content',
+          result_position: index,
+          query: searchQuery,
         });
       }
     });

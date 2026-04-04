@@ -1,36 +1,131 @@
 /**
- * BigQuery client for Astro admin analytics (storefront telemetry)
+ * BigQuery REST API client for Cloudflare Workers / Astro SSR
  *
- * Queries cdp.pixel_events for sessions, page views, conversions.
- * Supports GCP_SERVICE_ACCOUNT_JSON (Cloudflare Workers) and
- * GOOGLE_APPLICATION_CREDENTIALS (local development).
+ * Uses raw fetch() + JWT auth instead of @google-cloud/bigquery
+ * (which requires Node.js fs/child_process not available in Workers).
+ *
+ * Auth: GCP_SERVICE_ACCOUNT_JSON env var → self-signed JWT → access token
  */
 
-import { BigQuery } from '@google-cloud/bigquery'
-
 const PROJECT_ID = 'southland-warehouse'
+const BQ_API = 'https://bigquery.googleapis.com/bigquery/v2'
+const TOKEN_URL = 'https://oauth2.googleapis.com/token'
+const SCOPE = 'https://www.googleapis.com/auth/bigquery.readonly'
 
-let _client: BigQuery | null = null
-
-function getClient(): BigQuery | null {
-  if (_client) return _client
-
-  const jsonCreds = import.meta.env.GCP_SERVICE_ACCOUNT_JSON || process.env.GCP_SERVICE_ACCOUNT_JSON
-  if (jsonCreds) {
-    try {
-      const credentials = JSON.parse(jsonCreds)
-      _client = new BigQuery({ projectId: PROJECT_ID, credentials })
-      return _client
-    } catch { return null }
-  }
-
-  if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-    _client = new BigQuery({ projectId: PROJECT_ID })
-    return _client
-  }
-
-  return null
+interface ServiceAccount {
+  client_email: string
+  private_key: string
+  token_uri: string
 }
+
+let _cachedToken: { token: string; expires: number } | null = null
+
+function base64url(data: string): string {
+  return btoa(data).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
+}
+
+async function createJWT(sa: ServiceAccount): Promise<string> {
+  const now = Math.floor(Date.now() / 1000)
+  const header = { alg: 'RS256', typ: 'JWT' }
+  const payload = {
+    iss: sa.client_email,
+    scope: SCOPE,
+    aud: TOKEN_URL,
+    iat: now,
+    exp: now + 3600,
+  }
+
+  const headerB64 = base64url(JSON.stringify(header))
+  const payloadB64 = base64url(JSON.stringify(payload))
+  const unsigned = `${headerB64}.${payloadB64}`
+
+  // Import private key and sign
+  const pemContents = sa.private_key
+    .replace(/-----BEGIN PRIVATE KEY-----/g, '')
+    .replace(/-----END PRIVATE KEY-----/g, '')
+    .replace(/\s/g, '')
+
+  const binaryKey = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0))
+
+  const cryptoKey = await crypto.subtle.importKey(
+    'pkcs8',
+    binaryKey,
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['sign']
+  )
+
+  const signature = await crypto.subtle.sign(
+    'RSASSA-PKCS1-v1_5',
+    cryptoKey,
+    new TextEncoder().encode(unsigned)
+  )
+
+  const sigB64 = base64url(String.fromCharCode(...new Uint8Array(signature)))
+  return `${unsigned}.${sigB64}`
+}
+
+async function getAccessToken(sa: ServiceAccount): Promise<string> {
+  if (_cachedToken && _cachedToken.expires > Date.now()) {
+    return _cachedToken.token
+  }
+
+  const jwt = await createJWT(sa)
+
+  const resp = await fetch(TOKEN_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion: jwt,
+    }),
+  })
+
+  if (!resp.ok) {
+    throw new Error(`Token exchange failed: ${resp.status} ${await resp.text()}`)
+  }
+
+  const data = await resp.json() as { access_token: string; expires_in: number }
+  _cachedToken = {
+    token: data.access_token,
+    expires: Date.now() + (data.expires_in - 60) * 1000,
+  }
+  return data.access_token
+}
+
+async function query(sql: string, sa: ServiceAccount): Promise<any[]> {
+  const token = await getAccessToken(sa)
+
+  const resp = await fetch(`${BQ_API}/projects/${PROJECT_ID}/queries`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: sql,
+      useLegacySql: false,
+      maxResults: 1000,
+    }),
+  })
+
+  if (!resp.ok) {
+    throw new Error(`BigQuery query failed: ${resp.status} ${await resp.text()}`)
+  }
+
+  const result = await resp.json() as any
+
+  if (!result.rows) return []
+
+  const fields = result.schema.fields.map((f: any) => f.name)
+  return result.rows.map((row: any) =>
+    Object.fromEntries(fields.map((f: string, i: number) => [f, row.f[i].v]))
+  )
+}
+
+// ============================================================================
+// Public API
+// ============================================================================
 
 export interface DailySessionStats {
   date: string
@@ -73,11 +168,22 @@ export interface AnalyticsData {
   available: boolean
 }
 
+function getServiceAccount(): ServiceAccount | null {
+  const json = import.meta.env.GCP_SERVICE_ACCOUNT_JSON || (typeof process !== 'undefined' && process.env?.GCP_SERVICE_ACCOUNT_JSON)
+  if (!json) return null
+  try {
+    return JSON.parse(json)
+  } catch {
+    return null
+  }
+}
+
 export async function fetchAnalytics(days: number = 30): Promise<AnalyticsData> {
-  const bq = getClient()
-  if (!bq) {
+  const sa = getServiceAccount()
+  if (!sa) {
     return {
-      dailySessions: [], topPages: [], funnel: { pageViews: 0, productViews: 0, addToCart: 0, beginCheckout: 0, purchases: 0, purchaseValue: 0 },
+      dailySessions: [], topPages: [],
+      funnel: { pageViews: 0, productViews: 0, addToCart: 0, beginCheckout: 0, purchases: 0, purchaseValue: 0 },
       trafficSources: [], totalSessions7d: 0, totalSessions30d: 0, available: false,
     }
   }
@@ -86,84 +192,61 @@ export async function fetchAnalytics(days: number = 30): Promise<AnalyticsData> 
     const since = `DATE_SUB(CURRENT_DATE(), INTERVAL ${days} DAY)`
 
     const [dailyRows, pageRows, funnelRows, sourceRows] = await Promise.all([
-      // Daily sessions
-      bq.query({
-        query: `
-          SELECT
-            DATE(event_timestamp) as date,
-            COUNT(DISTINCT session_id) as sessions,
-            COUNT(*) as page_views,
-            COUNT(DISTINCT pd_user_id) as unique_visitors
-          FROM \`${PROJECT_ID}.cdp.pixel_events\`
-          WHERE DATE(event_timestamp) >= ${since}
-            AND event_type = 'page_view'
-            AND brand_id = 'southland'
-          GROUP BY date
-          ORDER BY date DESC
-        `,
-      }).then(r => r[0]),
+      query(`
+        SELECT
+          FORMAT_DATE('%Y-%m-%d', DATE(event_timestamp)) as date,
+          COUNT(DISTINCT session_id) as sessions,
+          COUNT(*) as page_views,
+          COUNT(DISTINCT pd_user_id) as unique_visitors
+        FROM \`${PROJECT_ID}.cdp.pixel_events\`
+        WHERE DATE(event_timestamp) >= ${since}
+          AND event_type = 'page_view' AND brand_id = 'southland'
+        GROUP BY date ORDER BY date DESC
+      `, sa),
 
-      // Top pages
-      bq.query({
-        query: `
-          SELECT
-            page_path as path,
-            COUNT(*) as views,
-            COUNT(DISTINCT pd_user_id) as unique_visitors,
-            AVG(scroll_depth) as avg_scroll_depth
-          FROM \`${PROJECT_ID}.cdp.pixel_events\`
-          WHERE DATE(event_timestamp) >= ${since}
-            AND event_type = 'page_view'
-            AND brand_id = 'southland'
-          GROUP BY page_path
-          ORDER BY views DESC
-          LIMIT 20
-        `,
-      }).then(r => r[0]),
+      query(`
+        SELECT
+          page_path as path, COUNT(*) as views,
+          COUNT(DISTINCT pd_user_id) as unique_visitors,
+          AVG(scroll_depth) as avg_scroll_depth
+        FROM \`${PROJECT_ID}.cdp.pixel_events\`
+        WHERE DATE(event_timestamp) >= ${since}
+          AND event_type = 'page_view' AND brand_id = 'southland'
+        GROUP BY page_path ORDER BY views DESC LIMIT 20
+      `, sa),
 
-      // Conversion funnel
-      bq.query({
-        query: `
-          SELECT
-            COUNTIF(event_type = 'page_view') as page_views,
-            COUNTIF(event_type = 'product_view') as product_views,
-            COUNTIF(event_type = 'add_to_cart') as add_to_cart,
-            COUNTIF(event_type = 'begin_checkout') as begin_checkout,
-            COUNTIF(event_type = 'purchase') as purchases,
-            SUM(IF(event_type = 'purchase', order_value, 0)) as purchase_value
-          FROM \`${PROJECT_ID}.cdp.pixel_events\`
-          WHERE DATE(event_timestamp) >= ${since}
-            AND brand_id = 'southland'
-        `,
-      }).then(r => r[0]),
+      query(`
+        SELECT
+          COUNTIF(event_type = 'page_view') as page_views,
+          COUNTIF(event_type = 'product_view') as product_views,
+          COUNTIF(event_type = 'add_to_cart') as add_to_cart,
+          COUNTIF(event_type = 'begin_checkout') as begin_checkout,
+          COUNTIF(event_type = 'purchase') as purchases,
+          SUM(IF(event_type = 'purchase', order_value, 0)) as purchase_value
+        FROM \`${PROJECT_ID}.cdp.pixel_events\`
+        WHERE DATE(event_timestamp) >= ${since} AND brand_id = 'southland'
+      `, sa),
 
-      // Traffic sources
-      bq.query({
-        query: `
-          SELECT
-            COALESCE(utm_source, CASE
-              WHEN referrer LIKE '%google%' THEN 'google'
-              WHEN referrer LIKE '%facebook%' THEN 'facebook'
-              WHEN referrer LIKE '%bing%' THEN 'bing'
-              WHEN referrer IS NULL OR referrer = '' THEN '(direct)'
-              ELSE 'referral'
-            END) as source,
-            COALESCE(utm_medium, 'organic') as medium,
-            COUNT(DISTINCT session_id) as sessions,
-            COUNT(*) as page_views,
-            COUNTIF(event_type = 'purchase') as conversions
-          FROM \`${PROJECT_ID}.cdp.pixel_events\`
-          WHERE DATE(event_timestamp) >= ${since}
-            AND brand_id = 'southland'
-          GROUP BY source, medium
-          ORDER BY sessions DESC
-          LIMIT 15
-        `,
-      }).then(r => r[0]),
+      query(`
+        SELECT
+          COALESCE(utm_source, CASE
+            WHEN referrer LIKE '%google%' THEN 'google'
+            WHEN referrer LIKE '%facebook%' THEN 'facebook'
+            WHEN referrer IS NULL OR referrer = '' THEN '(direct)'
+            ELSE 'referral'
+          END) as source,
+          COALESCE(utm_medium, 'organic') as medium,
+          COUNT(DISTINCT session_id) as sessions,
+          COUNT(*) as page_views,
+          COUNTIF(event_type = 'purchase') as conversions
+        FROM \`${PROJECT_ID}.cdp.pixel_events\`
+        WHERE DATE(event_timestamp) >= ${since} AND brand_id = 'southland'
+        GROUP BY source, medium ORDER BY sessions DESC LIMIT 15
+      `, sa),
     ])
 
     const dailySessions: DailySessionStats[] = dailyRows.map((r: any) => ({
-      date: r.date?.value || r.date,
+      date: r.date,
       sessions: Number(r.sessions) || 0,
       pageViews: Number(r.page_views) || 0,
       uniqueVisitors: Number(r.unique_visitors) || 0,
@@ -202,7 +285,8 @@ export async function fetchAnalytics(days: number = 30): Promise<AnalyticsData> 
   } catch (err) {
     console.error('[analytics] BigQuery query failed:', err)
     return {
-      dailySessions: [], topPages: [], funnel: { pageViews: 0, productViews: 0, addToCart: 0, beginCheckout: 0, purchases: 0, purchaseValue: 0 },
+      dailySessions: [], topPages: [],
+      funnel: { pageViews: 0, productViews: 0, addToCart: 0, beginCheckout: 0, purchases: 0, purchaseValue: 0 },
       trafficSources: [], totalSessions7d: 0, totalSessions30d: 0, available: false,
     }
   }

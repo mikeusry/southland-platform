@@ -173,6 +173,14 @@ const shippingDetails = {
   },
 }
 const seller = { '@type': 'Organization' as const, name: 'Southland Organics' }
+const returnPolicy = {
+  '@type': 'MerchantReturnPolicy' as const,
+  applicableCountry: 'US',
+  returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+  merchantReturnDays: 30,
+  returnMethod: 'https://schema.org/ReturnByMail',
+  returnFees: 'https://schema.org/ReturnShippingFees',
+}
 
 // Build per-variant offers
 const variantOffers = product.variants.map((variant) => ({
@@ -186,6 +194,7 @@ const variantOffers = product.variants.map((variant) => ({
   url: canonicalUrl,
   seller,
   shippingDetails,
+  hasMerchantReturnPolicy: returnPolicy,
 }))
 
 // Determine if variants represent a true ProductGroup (size/type options)
@@ -222,6 +231,7 @@ const productSchema = hasNamedVariants
           url: canonicalUrl,
           seller,
           shippingDetails,
+          hasMerchantReturnPolicy: returnPolicy,
         },
       })),
       offers: {
@@ -499,7 +509,14 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
 
           {/* Add to cart island */}
           <div class="mt-6" id="pdp-atc">
-            <AddToCartButton client:load variants={product.variants} />
+            <AddToCartButton
+              client:load
+              variants={product.variants}
+              productHandle={product.handle}
+              productTitle={product.title}
+              productVendor={product.vendor}
+              productType={product.productType}
+            />
           </div>
 
           {/* Trust badges row — always */}
@@ -879,6 +896,29 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
     </div>
   </main>
 </BaseLayout>
+
+<script is:inline define:vars={{
+  ga4Product: {
+    item_id: product.handle,
+    item_name: product.title,
+    item_brand: product.vendor || 'Southland Organics',
+    item_category: resolvedProductType || undefined,
+    price: parseFloat(product.priceRange.minVariantPrice.amount),
+    currency: product.priceRange.minVariantPrice.currencyCode || 'USD',
+  },
+}}>
+  // GA4: view_item on PDP load
+  window.dataLayer = window.dataLayer || []
+  window.dataLayer.push({ ecommerce: null })
+  window.dataLayer.push({
+    event: 'view_item',
+    ecommerce: {
+      currency: ga4Product.currency,
+      value: ga4Product.price,
+      items: [ga4Product],
+    },
+  })
+</script>
 
 <script>
   // ── Sticky mobile ATC ────────────────────────────────────────────────────

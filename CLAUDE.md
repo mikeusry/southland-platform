@@ -2,6 +2,17 @@
 
 Monorepo for Southland Organics digital platform.
 
+## Nexus Task System
+
+Tasks are managed in **Southland Nexus** (southland-inventory repo). When Mike references a task number (T-42, T-74, etc.), use `/task T-42` or query the Nexus database directly to read it, then **execute it immediately**.
+
+- **DB:** `https://lmtjxckdcsdymqxpgjxo.supabase.co` (Southland Supabase)
+- **Credentials:** `SUPABASE_SERVICE_ROLE_KEY` in `/Users/mikeusry/CODING/southland-inventory/.env.local`
+- **Skill:** `/task T-42` — reads and manages tasks from any repo
+- **Task URL:** `https://nexus.southlandorganics.com/work/tasks/T-42`
+
+When Mike mentions a task number, **read it and start solving it**. The task description is the brief.
+
 ## Quick Reference
 
 | Item | Value |
