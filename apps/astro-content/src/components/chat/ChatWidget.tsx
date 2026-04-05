@@ -14,8 +14,8 @@ export default function ChatWidget() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null) // eslint-disable-line no-undef
+  const inputRef = useRef<HTMLInputElement>(null) // eslint-disable-line no-undef
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -58,7 +58,7 @@ export default function ChatWidget() {
           confidence: data.confidence,
         },
       ])
-    } catch {
+    } catch (_err) {
       setMessages((prev) => [
         ...prev,
         {

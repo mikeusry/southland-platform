@@ -153,7 +153,9 @@ function stampLines(lines: CartLineInput[]): CartLineInput[] {
       const data = JSON.parse(raw)
       if (data?.id) personaAttr = { key: '_pd_persona', value: data.id }
     }
-  } catch {}
+  } catch (_err) {
+    /* localStorage may be unavailable */
+  }
 
   const stampKeys = new Set([
     NEXUS_CID_KEY,

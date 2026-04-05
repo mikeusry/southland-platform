@@ -76,7 +76,9 @@ function pushToPixel(event: string, data: Record<string, unknown>): void {
       const p = JSON.parse(raw)
       if (p?.id) persona = p.id
     }
-  } catch {}
+  } catch (_err) {
+    /* localStorage may be unavailable */
+  }
   window.pdPixel.track(event, {
     content_type: 'ecommerce',
     ...(persona ? { persona } : {}),
