@@ -101,7 +101,7 @@ const gtmContainerId = import.meta.env.PUBLIC_GTM_CONTAINER_ID;
     <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
     <noscript><link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" /></noscript>
 
-    <!-- Attribution Capture (self-owned, replaces Shopify ScriptTag) -->
+    <!-- Attribution Capture: Last-touch (overwrites on each visit with params) -->
     <script is:inline>
       (function(){
         'use strict';
@@ -116,6 +116,25 @@ const gtmContainerId = import.meta.env.PUBLIC_GTM_CONTAINER_ID;
           if(found.fbclid&&!found.utm_source){found.utm_source='facebook';found.utm_medium=found.utm_medium||'paid_social'}
           var stored={};try{stored=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
           if(hasNew){var merged={};for(var k in stored){if(stored.hasOwnProperty(k))merged[k]=stored[k]}for(var j in found){if(found.hasOwnProperty(j))merged[j]=found[j]}merged._timestamp=Date.now();merged._landing_page=url.pathname+url.search;merged._referrer=document.referrer||'';try{localStorage.setItem(KEY,JSON.stringify(merged))}catch(e){}}
+        }catch(e){}
+      })();
+    </script>
+    <!-- Attribution Capture: First-touch (set once, never overwritten) -->
+    <script is:inline>
+      (function(){
+        'use strict';
+        var FT_KEY='_pd_first_touch';
+        try{
+          if(localStorage.getItem(FT_KEY))return;
+          var url=new URL(window.location.href);
+          var PARAMS=['utm_source','utm_medium','utm_campaign','gclid','fbclid','msclid','ttclid','srsltid'];
+          var data={};
+          PARAMS.forEach(function(p){var v=url.searchParams.get(p);if(v)data[p]=v});
+          if(data.srsltid&&!data.utm_source){data.utm_source='google';data.utm_medium=data.utm_medium||'cpc';data.utm_campaign=data.utm_campaign||'pmax'}
+          if(data.gclid&&!data.utm_source){data.utm_source='google';data.utm_medium=data.utm_medium||'cpc'}
+          if(data.fbclid&&!data.utm_source){data.utm_source='facebook';data.utm_medium=data.utm_medium||'paid_social'}
+          data._timestamp=Date.now();data._landing_page=url.pathname+url.search;data._referrer=document.referrer||'';
+          try{localStorage.setItem(FT_KEY,JSON.stringify(data))}catch(e){}
         }catch(e){}
       })();
     </script>
