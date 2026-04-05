@@ -37,6 +37,11 @@ export async function handleIndex(message: IndexMessage, env: Env): Promise<void
   const result = await upsertVectors(env, records)
   console.log(`Indexed ${result.count} chunks for ${message.type}:${message.id}`)
 
+  // Cache chunk text in KV for RAG retrieval (matches bulk-index.ts pattern)
+  for (const chunk of chunks) {
+    await env.CACHE.put(`chunk:${chunk.id}`, chunk.text, { expirationTtl: 86400 * 90 })
+  }
+
   // Update chunk manifest in D1
   await updateManifest(env, message, chunks.map((c) => c.id))
 }

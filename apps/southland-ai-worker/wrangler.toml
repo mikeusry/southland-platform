@@ -70,6 +70,7 @@ ALLOWED_ORIGINS = "https://southlandorganics.com,https://www.southlandorganics.c
 
 # ─── Secrets (set via wrangler secret put) ──────────────────────────────────
 # NEXUS_API_KEY    — Service key for Nexus API calls
+# OPENAI_API_KEY   — GPT-4o-mini for chat + copilot (fallback: Workers AI Llama)
 # SENDGRID_API_KEY — For email (Phase 5)
 
 # ─── Production ─────────────────────────────────────────────────────────────

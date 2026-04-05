@@ -25,6 +25,7 @@ export interface Env {
 
   // Secrets (set via wrangler secret put)
   NEXUS_API_KEY: string
+  OPENAI_API_KEY: string // GPT-4o-mini for chat + copilot (fallback: Workers AI)
 }
 
 // ─── Queue Message Types ────────────────────────────────────────────────────
@@ -171,6 +172,7 @@ export interface AskRequest {
     subscriptions?: Array<{ id: string; status: string }>
   }
   conversation_history?: Array<{ role: 'user' | 'assistant'; content: string }>
+  page_url?: string // What page the customer is currently viewing
   tenant?: string
 }
 
@@ -186,6 +188,7 @@ export interface AskResponse {
   answerable: boolean // false = "I'll connect you with our team"
   latency_ms: number
   model: string
+  suggested_questions?: string[] // Follow-up suggestions for chat context
 }
 
 // ─── Benchmark Types ────────────────────────────────────────────────────────

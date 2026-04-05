@@ -31,7 +31,9 @@ interface Message {
   content: string
   sources?: Array<{ title: string; url: string; doc_type: string }>
   confidence?: string
+  suggestedQuestions?: string[]
   action?: 'ask_email' | 'tool_activity'
+  streaming?: boolean
 }
 
 export default function ChatWidget() {
@@ -87,27 +89,137 @@ export default function ChatWidget() {
         { role: 'user', content: email },
         { role: 'assistant', content: 'Looking up your account...', action: 'tool_activity' },
       ])
-      // Re-send the original query with the email
       setPendingQuery(null)
-      await doAskWithRetry(pendingQuery, email)
+      await doStreamAsk(pendingQuery, email)
       return
     }
 
     setMessages((prev) => [...prev, { role: 'user', content: query }])
     setLoading(true)
 
-    await doAsk(query, overrideEmail || customerEmail)
+    await doStreamAsk(query, overrideEmail || customerEmail)
   }
 
-  const doAsk = async (query: string, email: string | null) => {
+  // Streaming ask — tokens appear as they arrive
+  const doStreamAsk = async (query: string, email: string | null) => {
     setLoading(true)
+
+    // Add a placeholder streaming message
+    setMessages((prev) => {
+      const filtered = prev.filter((m) => m.action !== 'tool_activity')
+      return [...filtered, { role: 'assistant' as const, content: '', streaming: true }]
+    })
+
     try {
-      const payload: Record<string, unknown> = { query, context: 'chat' }
+      const payload: Record<string, unknown> = {
+        query,
+        context: 'chat',
+        page_url: window.location.pathname,
+      }
       if (email) payload.customer_email = email
 
       // Add conversation history (last 5 turns)
       const history = messages
-        .filter((m) => m.role !== 'system' && !m.action)
+        .filter((m) => m.role !== 'system' && !m.action && !m.streaming)
+        .slice(-5)
+        .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }))
+      if (history.length) payload.conversation_history = history
+
+      const res = await fetch(`${AI_WORKER_URL}/ask/stream`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      if (!res.ok || !res.body) {
+        // Fall back to non-streaming
+        await doAskFallback(query, email)
+        return
+      }
+
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+      let sources: Message['sources'] = []
+      let suggestedQuestions: string[] | undefined
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() || ''
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue
+          const data = line.slice(6).trim()
+          if (!data) continue
+
+          try {
+            const event = JSON.parse(data) as {
+              type: string
+              text?: string
+              sources?: Message['sources']
+              suggested_questions?: string[]
+              confidence?: string
+            }
+
+            if (event.type === 'text' && event.text) {
+              // Append text to the streaming message
+              setMessages((prev) => {
+                const updated = [...prev]
+                const last = updated[updated.length - 1]
+                if (last?.streaming) {
+                  updated[updated.length - 1] = { ...last, content: last.content + event.text }
+                }
+                return updated
+              })
+            } else if (event.type === 'sources') {
+              sources = event.sources
+            } else if (event.type === 'done') {
+              suggestedQuestions = event.suggested_questions
+            }
+          } catch {
+            // Skip malformed events
+          }
+        }
+      }
+
+      // Finalize the streaming message
+      setMessages((prev) => {
+        const updated = [...prev]
+        const last = updated[updated.length - 1]
+        if (last?.streaming) {
+          updated[updated.length - 1] = {
+            ...last,
+            streaming: false,
+            sources: sources?.length ? sources : undefined,
+            suggestedQuestions,
+          }
+        }
+        return updated
+      })
+    } catch (_err) {
+      // Fall back to non-streaming on any error
+      await doAskFallback(query, email)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Non-streaming fallback
+  const doAskFallback = async (query: string, email: string | null) => {
+    try {
+      const payload: Record<string, unknown> = {
+        query,
+        context: 'chat',
+        page_url: window.location.pathname,
+      }
+      if (email) payload.customer_email = email
+
+      const history = messages
+        .filter((m) => m.role !== 'system' && !m.action && !m.streaming)
         .slice(-5)
         .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }))
       if (history.length) payload.conversation_history = history
@@ -122,8 +234,8 @@ export default function ChatWidget() {
 
       const data = await res.json()
       setMessages((prev) => {
-        // Remove "Looking up your account..." if present
-        const filtered = prev.filter((m) => m.action !== 'tool_activity')
+        // Remove streaming placeholder if present
+        const filtered = prev.filter((m) => !m.streaming)
         return [
           ...filtered,
           {
@@ -133,12 +245,13 @@ export default function ChatWidget() {
               "I couldn't find an answer. Please try rephrasing or contact us directly.",
             sources: data.sources?.slice(0, 3),
             confidence: data.confidence,
+            suggestedQuestions: data.suggested_questions,
           },
         ]
       })
-    } catch (_err) {
+    } catch {
       setMessages((prev) => {
-        const filtered = prev.filter((m) => m.action !== 'tool_activity')
+        const filtered = prev.filter((m) => !m.streaming)
         return [
           ...filtered,
           {
@@ -152,15 +265,11 @@ export default function ChatWidget() {
     }
   }
 
-  const doAskWithRetry = async (query: string, email: string) => {
-    await doAsk(query, email)
-  }
-
   const handleEscalate = async () => {
     if (escalated) return
     setEscalated(true)
 
-    const emailToUse = customerEmail || input.includes('@') ? input : null
+    const emailToUse = customerEmail || (input.includes('@') ? input : null)
 
     if (!emailToUse && !customerEmail) {
       setMessages((prev) => [
@@ -200,6 +309,22 @@ export default function ChatWidget() {
     }
   }
 
+  // ─── Suggested questions based on page ──────────────────────────────────
+  const getInitialSuggestions = () => {
+    const path = typeof window !== 'undefined' ? window.location.pathname : ''
+
+    if (path.includes('/poultry') || path.includes('/litter-life') || path.includes('/big-ole-bird'))
+      return ['How do I use Litter Life?', 'What helps with ammonia?', 'Which product is right for my flock?']
+
+    if (path.includes('/lawn') || path.includes('/fertalive') || path.includes('/dog-spot'))
+      return ['How do I fix brown spots?', 'When should I apply FertALive?', 'Is this safe for pets?']
+
+    if (path.includes('/d2') || path.includes('/sanitiz'))
+      return ['How do I dilute D2?', 'Is D2 safe for food surfaces?', 'What does D2 kill?']
+
+    return ['How do I use Litter Life?', 'What helps with ammonia?', 'Where is my order?']
+  }
+
   if (!open) {
     return (
       <button
@@ -227,7 +352,7 @@ export default function ChatWidget() {
   return (
     <div
       className="fixed bottom-5 right-5 z-50 flex w-[380px] max-w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
-      style={{ height: '520px' }}
+      style={{ height: '560px' }}
     >
       {/* Header */}
       <div
@@ -240,7 +365,7 @@ export default function ChatWidget() {
           </div>
           <div>
             <div className="text-sm font-semibold">Southland Assistant</div>
-            <div className="text-[10px] opacity-75">Ask about our products</div>
+            <div className="text-[10px] opacity-75">Product expert &bull; Online now</div>
           </div>
         </div>
         <button
@@ -267,96 +392,100 @@ export default function ChatWidget() {
       {/* Messages */}
       <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
         {messages.length === 0 && (
-          <div className="py-8 text-center">
-            <p className="mb-3 text-sm text-gray-500">How can I help you today?</p>
+          <div className="py-6 text-center">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-green-50">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2c5234" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+            </div>
+            <p className="mb-1 text-sm font-medium text-gray-700">Hi! I'm Southland's product expert.</p>
+            <p className="mb-4 text-xs text-gray-400">Ask me anything about our products, orders, or application tips.</p>
             <div className="flex flex-wrap justify-center gap-2">
-              {['How do I use Litter Life?', 'What helps with ammonia?', 'Where is my order?'].map(
-                (q) => (
-                  <button
-                    key={q}
-                    onClick={() => sendMessage(q)}
-                    className="rounded-full border border-gray-200 px-3 py-1.5 text-xs text-gray-600 transition-colors hover:border-gray-300 hover:bg-gray-50"
-                  >
-                    {q}
-                  </button>
-                )
-              )}
+              {getInitialSuggestions().map((q) => (
+                <button
+                  key={q}
+                  onClick={() => sendMessage(q)}
+                  className="rounded-full border border-gray-200 px-3 py-1.5 text-xs text-gray-600 transition-colors hover:border-green-300 hover:bg-green-50 hover:text-green-800"
+                >
+                  {q}
+                </button>
+              ))}
             </div>
           </div>
         )}
         {messages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div
-              className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
-                msg.role === 'user'
-                  ? 'text-white'
-                  : 'border border-gray-100 bg-gray-50 text-gray-800'
-              }`}
-              style={msg.role === 'user' ? { backgroundColor: '#44883e' } : undefined}
-            >
-              {/* Activity indicator */}
-              {msg.action === 'tool_activity' ? (
-                <div className="flex items-center gap-2 text-gray-500">
-                  <div className="flex gap-1">
-                    <span
-                      className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400"
-                      style={{ animationDelay: '0ms' }}
-                    />
-                    <span
-                      className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400"
-                      style={{ animationDelay: '150ms' }}
-                    />
-                    <span
-                      className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400"
-                      style={{ animationDelay: '300ms' }}
-                    />
+          <div key={i}>
+            <div className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div
+                className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
+                  msg.role === 'user'
+                    ? 'text-white'
+                    : 'border border-gray-100 bg-gray-50 text-gray-800'
+                }`}
+                style={msg.role === 'user' ? { backgroundColor: '#44883e' } : undefined}
+              >
+                {/* Activity indicator */}
+                {msg.action === 'tool_activity' ? (
+                  <div className="flex items-center gap-2 text-gray-500">
+                    <div className="flex gap-1">
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400" style={{ animationDelay: '0ms' }} />
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400" style={{ animationDelay: '150ms' }} />
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400" style={{ animationDelay: '300ms' }} />
+                    </div>
+                    <span className="text-xs">{msg.content}</span>
                   </div>
-                  <span className="text-xs">{msg.content}</span>
-                </div>
-              ) : (
-                <div className="whitespace-pre-wrap">{msg.content}</div>
-              )}
-              {msg.sources && msg.sources.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-1.5 border-t border-gray-200 pt-2">
-                  {msg.sources.map((s, j) => (
-                    <a
-                      key={j}
-                      href={s.url}
-                      className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-[10px] text-gray-500 shadow-sm transition-colors hover:text-gray-700"
-                    >
-                      <span
-                        className={`inline-block h-1.5 w-1.5 rounded-full ${
-                          s.doc_type === 'product'
-                            ? 'bg-green-400'
-                            : s.doc_type === 'sop'
-                              ? 'bg-blue-400'
-                              : 'bg-amber-400'
-                        }`}
-                      />
-                      {s.title.length > 35 ? s.title.slice(0, 35) + '...' : s.title}
-                    </a>
-                  ))}
-                </div>
-              )}
+                ) : (
+                  <div className="whitespace-pre-wrap">{msg.content}{msg.streaming && <span className="inline-block h-4 w-0.5 animate-pulse bg-gray-400 ml-0.5" />}</div>
+                )}
+                {msg.sources && msg.sources.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1.5 border-t border-gray-200 pt-2">
+                    {msg.sources.map((s, j) => (
+                      <a
+                        key={j}
+                        href={s.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-[10px] text-gray-500 shadow-sm transition-colors hover:text-gray-700"
+                      >
+                        <span
+                          className={`inline-block h-1.5 w-1.5 rounded-full ${
+                            s.doc_type === 'product'
+                              ? 'bg-green-400'
+                              : s.doc_type === 'sop'
+                                ? 'bg-blue-400'
+                                : 'bg-amber-400'
+                          }`}
+                        />
+                        {s.title.length > 35 ? s.title.slice(0, 35) + '...' : s.title}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
+            {/* Suggested follow-up questions */}
+            {msg.suggestedQuestions && msg.suggestedQuestions.length > 0 && !msg.streaming && (
+              <div className="mt-2 flex flex-wrap gap-1.5 pl-1">
+                {msg.suggestedQuestions.map((q, j) => (
+                  <button
+                    key={j}
+                    onClick={() => sendMessage(q)}
+                    className="rounded-full border border-gray-200 px-2.5 py-1 text-[11px] text-gray-500 transition-colors hover:border-green-300 hover:bg-green-50 hover:text-green-800"
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         ))}
-        {loading && (
+        {loading && !messages.some((m) => m.streaming) && (
           <div className="flex justify-start">
             <div className="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3">
               <div className="flex gap-1">
-                <span
-                  className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
-                  style={{ animationDelay: '0ms' }}
-                />
-                <span
-                  className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
-                  style={{ animationDelay: '150ms' }}
-                />
-                <span
-                  className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
-                  style={{ animationDelay: '300ms' }}
-                />
+                <span className="h-2 w-2 animate-bounce rounded-full bg-gray-400" style={{ animationDelay: '0ms' }} />
+                <span className="h-2 w-2 animate-bounce rounded-full bg-gray-400" style={{ animationDelay: '150ms' }} />
+                <span className="h-2 w-2 animate-bounce rounded-full bg-gray-400" style={{ animationDelay: '300ms' }} />
               </div>
             </div>
           </div>

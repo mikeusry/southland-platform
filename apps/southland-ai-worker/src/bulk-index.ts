@@ -117,7 +117,7 @@ export async function handleBulkIndex(
       // Cache chunk text in KV for RAG retrieval
       for (let j = 0; j < batch.length; j++) {
         const chunkId = `product:${batch[j].sku}:0`
-        await env.CACHE.put(`chunk:${chunkId}`, batch[j].canonical_text, { expirationTtl: 86400 * 30 })
+        await env.CACHE.put(`chunk:${chunkId}`, batch[j].canonical_text, { expirationTtl: 86400 * 90 })
       }
 
       console.log(`Batch ${Math.floor(i / BATCH_SIZE) + 1}: embedded ${batch.length}, upserted ${result.count}`)
@@ -279,7 +279,7 @@ async function handleBulkIndexSOPs(
 
       // Cache chunk text in KV for RAG retrieval
       for (const chunk of chunks) {
-        await env.CACHE.put(`chunk:${chunk.id}`, chunk.text, { expirationTtl: 86400 * 30 })
+        await env.CACHE.put(`chunk:${chunk.id}`, chunk.text, { expirationTtl: 86400 * 90 })
       }
 
       // Update manifest

@@ -1,7 +1,7 @@
 import type { Env, IndexMessage, SummaryMessage } from './types'
 import { handleSearch } from './search'
 import { handleClassify } from './classify'
-import { handleAsk } from './ask'
+import { handleAsk, handleAskStream } from './ask'
 import { handleBenchmark } from './benchmark'
 import { handleIndex } from './index-worker'
 import { handleBulkIndex } from './bulk-index'
@@ -61,6 +61,10 @@ export default {
         // Layer 5+6: RAG (support drafts, staff copilot, chat)
         case '/ask':
           return handleAsk(request, env, ctx, origin)
+
+        // Layer 5+6: Streaming RAG (SSE for chat widget)
+        case '/ask/stream':
+          return handleAskStream(request, env, ctx, origin)
 
         // Layer 5.3: Conversation summaries
         case '/summarize':
