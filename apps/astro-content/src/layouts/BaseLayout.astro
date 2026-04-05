@@ -4,6 +4,7 @@ import Header from '../components/shared/Header.astro';
 import Footer from '../components/shared/Footer.astro';
 import SocialMeta from '../components/shared/SocialMeta.astro';
 import PersonaBanner from '../components/cdp/PersonaBanner.astro';
+import ChatWidget from '../components/chat/ChatWidget';
 import { getLogoUrl } from '../lib/cloudinary';
 
 interface Props {
@@ -189,6 +190,9 @@ const gtmContainerId = import.meta.env.PUBLIC_GTM_CONTAINER_ID;
       // Initialize persona from URL if present (for tracking links)
       initPersonaFromUrl();
     </script>
+
+    <!-- AI Chat Widget (React island, loads when browser idle) -->
+    <ChatWidget client:idle />
 
     <!-- Service Worker Registration -->
     <script is:inline>
