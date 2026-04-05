@@ -120,6 +120,8 @@ When Mike mentions a task number, **read it and start solving it**. The task des
 | `/collections/[slug]/` | Shopify (proxied) | Collection pages (Astro built, not routed yet) |
 | `/products/[handle]/` | Shopify (proxied) | Product pages |
 | `/build-a-case/` | Astro + Shopify Storefront API | Mix & Match gallon case builder |
+| `/application-rate-calculator/` | Astro + React island | Application rate calculator (12 products, Add to Cart) |
+| `/erosion-control-seed-calculator/` | Astro + React island | Erosion control seed mix calculator |
 | `/cart/` | Shopify (proxied) | Cart page |
 | `/about/` | Astro | About page |
 | `/contact/` | Astro | Contact page |
@@ -354,6 +356,17 @@ Astro 5 content site — Phase 1 LIVE routes:
 - `/admin/` — Admin dashboard (password protected)
 - `/admin/videos/` — Mux video library with transcript search
 - `/build-a-case/` — Mix & Match gallon case builder
+- `/application-rate-calculator/` — Application rate calculator (12 products, 3 segments)
+- `/erosion-control-seed-calculator/` — Erosion control seed mix calculator
+
+Lead Magnets / Calculators:
+
+- Shared `src/lib/leadCapture.ts` — Nexus POST helper, attribution, analytics events
+- Calculators use React islands (`client:load`) with fire-and-forget POST to Nexus
+- Nexus lead types: `erosion_calculator` (22), `roi_calculator` (22) — registered in `southland-inventory/src/lib/leads.ts`
+- Cart import MUST be lazy (`await import('../../lib/cart')`) — static import blocks hydration
+- Product data hardcoded in `src/lib/appRateRules.ts` with Shopify variant GIDs for Add to Cart
+- Nav links: Poultry > Resources and Lawn & Garden > Resources in `layout.json`
 
 Infrastructure:
 
@@ -474,10 +487,27 @@ Platform's role in the Klaviyo flow ecosystem:
 - **Replenishment timing** data from BigQuery CDP informs reorder email scheduling
 - Nexus owns event infrastructure (delivery events, fulfillment sync); Mothership owns flow definitions; Platform owns persona/content strategy
 
+## Lead Magnets & Nexus Integration
+
+**Spec:** [docs/LEAD-MAGNETS.md](docs/LEAD-MAGNETS.md) — UX specs, benchmarks, analytics events, Nexus POST patterns for all lead capture tools.
+
+**4 tools to build:**
+1. **Gate the Erosion Calculator** — add "Save Your Recommendation" email capture below results → POST to Nexus as `lead_type: 'erosion_calculator'`
+2. **Lawn Health Assessment Quiz** — 5-7 question wizard → personalized product recommendations → POST as `lead_type: 'product_quiz'`
+3. **Application Rate Calculator** — product → area → quantities + cost + add-to-cart → POST as `lead_type: 'roi_calculator'`
+4. **Talk to a Rep** — inline form on every product page, pre-filled with product context → POST as `lead_type: 'lead_magnet'`
+
+**Nexus API:** `POST https://nexus.southlandorganics.com/api/leads` — CORS configured for southlandorganics.com. Fire-and-forget, never block UX. Include honeypot (`website` field) + sessionStorage attribution (`sl_gclid`, `sl_utm_*`, `sl_landing_page`).
+
+**Existing forms:** Contact + Distribution forms already dual-write to Nexus. Pattern is proven — follow the same fire-and-forget approach.
+
 ## Related Resources
 
 - **Mothership:** `~/CODING/mothership/` - Orchestration platform
   - `docs/KLAVIYO-FLOW-ROADMAP.md` — Klaviyo flow master checklist (post-purchase, NBA, loyalty, leads)
 - **Nexus (Inventory):** `~/CODING/southland-inventory/` - Order management, shipping, EOS todos
+  - `docs/LEAD-MAGNETS.md` — Canonical lead magnet spec (mirrored in this repo)
+  - `docs/LEAD-SCORING-SOP.md` — How lead scoring and MQL/SQL qualification works
+  - `docs/UARZO-FLOW.md` — Customer journey framework + Revenue Operating Scorecard
 - **point.dog:** CDP/analytics integration
 - **Shopify Store:** southland-organics.myshopify.com

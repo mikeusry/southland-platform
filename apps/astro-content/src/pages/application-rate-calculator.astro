@@ -1,0 +1,222 @@
+---
+/**
+ * /application-rate-calculator/ — Application Rate Calculator
+ *
+ * Select product → enter area → get exact quantities + cost.
+ * Lead magnet: "Save Your Application Plan" email capture below results.
+ * Nexus lead_type: roi_calculator (score 22).
+ */
+import BaseLayout from '../layouts/BaseLayout.astro'
+import AccordionFaq from '../components/shop/AccordionFaq.astro'
+import AppRateCalc from '../components/calculators/ApplicationRateCalculator'
+
+const title = 'Application Rate Calculator | Southland Organics'
+const description =
+  'Free application rate calculator for Southland Organics products. Select your product, enter your area, and get exact quantities, cost, and application frequency.'
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+const canonicalUrl = `${siteUrl}/application-rate-calculator/`
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'Application Rate Calculator',
+  description,
+  url: canonicalUrl,
+  applicationCategory: 'UtilityApplication',
+  operatingSystem: 'Web Browser',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  provider: {
+    '@type': 'Organization',
+    name: 'Southland Organics',
+    url: siteUrl,
+    telephone: '+1-800-608-3755',
+  },
+}
+
+const faqItems = [
+  {
+    question: 'How accurate is this calculator?',
+    answer:
+      'This calculator uses standard label rates for each product and use case. The recommended quantity is based on the midpoint of the label rate range. For unusual conditions — extreme soil depletion, heavy infestations, or non-standard house sizes — contact us for a custom recommendation.',
+  },
+  {
+    question: 'What if my area is between two preset sizes?',
+    answer:
+      "Enter your exact area in the number field. The calculator handles any value — you don't have to use the presets. Use the unit toggle to switch between sq ft, acres, or houses as needed.",
+  },
+  {
+    question: 'Why does the calculator round up to whole containers?',
+    answer:
+      "You can't buy partial containers. The calculator rounds up to the nearest full container so you have enough product for complete coverage. The small overage provides a margin for spots that need a second pass.",
+  },
+  {
+    question: 'What triggers the "commercial pricing" option?',
+    answer:
+      'When your calculated quantity exceeds 10 gallons or $500, the calculator recommends contacting us for pallet or volume pricing. Commercial-scale operations typically save 15-25% through bulk ordering.',
+  },
+  {
+    question: 'How do I know which use case to select?',
+    answer:
+      'Each product has specific rate recommendations for different scenarios. For example, Genesis has different rates for residential lawns vs. new construction vs. golf courses. The use case determines the application rate, frequency, and any special instructions.',
+  },
+  {
+    question: 'Can I use this for a product not listed?',
+    answer:
+      'This calculator covers our most popular products with well-defined application rates. For products not listed, refer to the product label or contact us for specific rate guidance.',
+  },
+  {
+    question: 'What does "per house" mean for poultry products?',
+    answer:
+      'One "house" refers to a standard commercial poultry house — approximately 40 ft × 500 ft (20,000 sq ft). If your houses are significantly larger or smaller, enter the total square footage instead for the most accurate calculation.',
+  },
+]
+---
+
+<BaseLayout title={title} description={description} canonicalUrl={canonicalUrl} schema={schema}>
+  <!-- Hero -->
+  <section class="bg-[#2C5234] py-16 text-white">
+    <div class="mx-auto max-w-4xl px-4 text-center">
+      <h1 class="font-heading text-3xl uppercase tracking-wide md:text-4xl">
+        Application Rate Calculator
+      </h1>
+      <p class="mx-auto mt-4 max-w-2xl text-lg text-green-100">
+        Select your product, enter your area, and get the exact quantity you need — with cost,
+        frequency, and application tips.
+      </p>
+      <div class="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+        <a
+          href="#calculator"
+          class="rounded-md bg-white px-6 py-3 text-sm font-semibold text-[#2C5234] transition-colors hover:bg-green-50"
+        >
+          Calculate Now
+        </a>
+        <a
+          href="tel:+18006083755"
+          class="rounded-md border border-white/30 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+        >
+          Call 800-608-3755
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Use This Calculator -->
+  <section class="bg-gray-50 py-12">
+    <div class="mx-auto max-w-5xl px-4">
+      <div class="grid gap-6 md:grid-cols-3">
+        <div class="rounded-lg bg-white p-6 shadow-sm">
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-[#44883E]/10">
+            <svg
+              class="h-5 w-5 text-[#44883E]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+              ></path>
+            </svg>
+          </div>
+          <h3 class="mt-3 font-heading text-sm uppercase text-[#2C5234]">Exact Quantities</h3>
+          <p class="mt-1 text-sm text-gray-600">
+            No guessing. Get the precise number of containers for your area — rounded up so you have
+            complete coverage.
+          </p>
+        </div>
+        <div class="rounded-lg bg-white p-6 shadow-sm">
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-[#44883E]/10">
+            <svg
+              class="h-5 w-5 text-[#44883E]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+          </div>
+          <h3 class="mt-3 font-heading text-sm uppercase text-[#2C5234]">Cost Estimate</h3>
+          <p class="mt-1 text-sm text-gray-600">
+            See your total cost before you buy. The calculator picks the most cost-effective
+            container size automatically.
+          </p>
+        </div>
+        <div class="rounded-lg bg-white p-6 shadow-sm">
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-[#44883E]/10">
+            <svg
+              class="h-5 w-5 text-[#44883E]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h3 class="mt-3 font-heading text-sm uppercase text-[#2C5234]">Application Schedule</h3>
+          <p class="mt-1 text-sm text-gray-600">
+            Every product has a recommended frequency. The calculator shows you when and how often
+            to apply.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Calculator -->
+  <section id="calculator" class="py-12">
+    <div class="mx-auto max-w-6xl px-4">
+      <AppRateCalc client:load />
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="bg-gray-50 py-12">
+    <div class="mx-auto max-w-3xl px-4">
+      <h2 class="mb-8 text-center font-heading text-2xl uppercase text-[#2C5234]">
+        Frequently Asked Questions
+      </h2>
+      <AccordionFaq items={faqItems} />
+    </div>
+  </section>
+
+  <!-- Bottom CTA -->
+  <section class="bg-[#2C5234] py-12 text-white">
+    <div class="mx-auto max-w-3xl px-4 text-center">
+      <h2 class="font-heading text-2xl uppercase">Need a Custom Recommendation?</h2>
+      <p class="mx-auto mt-3 max-w-xl text-green-100">
+        For unusual conditions, large-scale operations, or products not listed in the calculator,
+        our specialists can build a custom application plan.
+      </p>
+      <div class="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+        <a
+          href="/contact/"
+          class="rounded-md bg-white px-6 py-3 text-sm font-semibold text-[#2C5234] transition-colors hover:bg-green-50"
+        >
+          Contact a Specialist
+        </a>
+        <a
+          href="tel:+18006083755"
+          class="rounded-md border border-white/30 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+        >
+          Call 800-608-3755
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

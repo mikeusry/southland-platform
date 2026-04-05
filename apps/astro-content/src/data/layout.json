@@ -33,6 +33,7 @@
           { "label": "Backyard Birds", "href": "/poultry/backyard/", "group": "By Bird" },
           { "label": "Game Birds", "href": "/poultry/game-birds/", "group": "By Bird" },
           { "label": "Turkey", "href": "/poultry/turkey/", "group": "By Bird" },
+          { "label": "Application Calculator", "href": "/application-rate-calculator/", "group": "Resources" },
           { "label": "Poultry Biosecurity", "href": "/blogs/poultry-biosecurity", "group": "Resources" },
           { "label": "Case Studies", "href": "/blogs/case-studies", "group": "Resources" },
           { "label": "Shop All Poultry", "href": "/poultry/", "group": "Resources" }
@@ -49,6 +50,8 @@
           { "label": "Crops", "href": "/agriculture/crops/", "group": "Specialty" },
           { "label": "Hydroseeders", "href": "/hydroseeders/", "group": "Specialty" },
           { "label": "Shop All Lawn & Garden", "href": "/lawn/", "group": "Specialty" },
+          { "label": "Application Calculator", "href": "/application-rate-calculator/", "group": "Resources" },
+          { "label": "Erosion Seed Calculator", "href": "/erosion-control-seed-calculator/", "group": "Resources" },
           { "label": "Humate Hub", "href": "/blogs/humate-hub", "group": "Resources" },
           { "label": "Case Studies", "href": "/blogs/case-studies", "group": "Resources" }
         ]

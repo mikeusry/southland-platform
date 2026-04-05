@@ -25,6 +25,7 @@ const DEFAULTS: CalculatorInputs = {
 
 export default function ErosionControlCalculator() {
   const [inputs, setInputs] = useState<CalculatorInputs>(DEFAULTS)
+  const [leadSubmitted, setLeadSubmitted] = useState(false)
 
   const result = useMemo(() => calculateResult(inputs), [inputs])
 
@@ -363,6 +364,159 @@ export default function ErosionControlCalculator() {
             >
               Call 800-608-3755
             </a>
+          </div>
+
+          {/* Lead Capture — Save Your Recommendation */}
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            {leadSubmitted ? (
+              <div className="text-center">
+                <svg
+                  className="mx-auto h-10 w-10 text-[#44883E]"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <p className="mt-3 font-heading text-lg uppercase text-[#2C5234]">
+                  Recommendation Saved!
+                </p>
+                <p className="mt-1 text-sm text-gray-600">Check your email.</p>
+              </div>
+            ) : (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  const fd = new FormData(e.currentTarget)
+
+                  // Honeypot check
+                  if (fd.get('website')) return
+
+                  setLeadSubmitted(true)
+
+                  // Build human-readable summary for the lead record
+                  const slopeLabel =
+                    SLOPE_OPTIONS.find((o) => o.value === inputs.slope)?.label ?? inputs.slope
+                  const soilLabel =
+                    SOIL_OPTIONS.find((o) => o.value === inputs.soil)?.label ?? inputs.soil
+                  const goalLabel =
+                    GOAL_OPTIONS.find((o) => o.value === inputs.goal)?.label ?? inputs.goal
+
+                  const attribution = {
+                    gclid:
+                      sessionStorage.getItem('sl_gclid') ||
+                      (() => {
+                        try {
+                          const raw = localStorage.getItem('_pd_attribution')
+                          return raw ? JSON.parse(raw).gclid : null
+                        } catch {
+                          return null
+                        }
+                      })() ||
+                      null,
+                    utm_source: sessionStorage.getItem('sl_utm_source') || null,
+                    utm_medium: sessionStorage.getItem('sl_utm_medium') || null,
+                    utm_campaign: sessionStorage.getItem('sl_utm_campaign') || null,
+                    landing_page:
+                      sessionStorage.getItem('sl_landing_page') || window.location.pathname,
+                  }
+
+                  // Fire-and-forget POST to Nexus
+                  fetch('https://nexus.southlandorganics.com/api/leads', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      source: 'website_form',
+                      form_type: 'contact',
+                      lead_type: 'erosion_calculator',
+                      email: fd.get('email'),
+                      first_name: fd.get('first_name') || null,
+                      phone: fd.get('phone') || null,
+                      message: `Erosion Calculator Results: ${inputs.area.toLocaleString()} sq ft, ${slopeLabel} slope, ${soilLabel} soil, ${goalLabel}. Recommended: ${result.mixName}. Total: ${result.roundedTotalLbs} lbs.`,
+                      ...attribution,
+                      website: '',
+                    }),
+                  }).catch(() => {})
+                }}
+              >
+                <h4 className="font-heading text-lg uppercase text-[#2C5234]">
+                  Save Your Recommendation
+                </h4>
+                <p className="mt-1 text-sm text-gray-600">
+                  Get a PDF of your custom seed recommendation + application timeline.
+                </p>
+
+                {/* Honeypot */}
+                <input
+                  name="website"
+                  style={{ display: 'none' }}
+                  tabIndex={-1}
+                  autoComplete="off"
+                />
+
+                <div className="mt-4 space-y-3">
+                  <div>
+                    <label
+                      htmlFor="lead-email"
+                      className="mb-1 block text-sm font-semibold text-gray-700"
+                    >
+                      Email <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="lead-email"
+                      name="email"
+                      type="email"
+                      required
+                      placeholder="you@example.com"
+                      className="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm text-gray-900 focus:border-[#44883E] focus:outline-none focus:ring-1 focus:ring-[#44883E]"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label
+                        htmlFor="lead-first-name"
+                        className="mb-1 block text-sm font-semibold text-gray-700"
+                      >
+                        First Name
+                      </label>
+                      <input
+                        id="lead-first-name"
+                        name="first_name"
+                        type="text"
+                        placeholder="Optional"
+                        className="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm text-gray-900 focus:border-[#44883E] focus:outline-none focus:ring-1 focus:ring-[#44883E]"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="lead-phone"
+                        className="mb-1 block text-sm font-semibold text-gray-700"
+                      >
+                        Phone
+                      </label>
+                      <input
+                        id="lead-phone"
+                        name="phone"
+                        type="tel"
+                        placeholder="Optional"
+                        className="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm text-gray-900 focus:border-[#44883E] focus:outline-none focus:ring-1 focus:ring-[#44883E]"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full rounded-md bg-[#44883E] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-green-700"
+                  >
+                    Send My Recommendation
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
 
           {/* Disclaimer */}
