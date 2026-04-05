@@ -111,11 +111,23 @@ const aboutSchema = {
   schema={aboutSchema}
 >
   <!-- Hero with rotating farm photos -->
+  <link
+    rel="preload"
+    as="image"
+    href={heroImages[0].src}
+    imagesrcset={heroImages[0].srcset}
+    imagesizes="100vw"
+  />
   <section class="about-hero relative overflow-hidden">
     <img
       id="hero-bg"
+      src={heroImages[0].src}
+      srcset={heroImages[0].srcset}
+      sizes="100vw"
       alt="Aerial view of a Southland Organics partner farm in Athens, Georgia"
       class="absolute inset-0 h-full w-full object-cover"
+      width="1600"
+      height="1067"
       loading="eager"
       decoding="async"
       fetchpriority="high"

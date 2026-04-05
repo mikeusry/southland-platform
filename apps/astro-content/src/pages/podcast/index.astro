@@ -113,12 +113,24 @@ const podcastSchema = {
   showBreadcrumbs={false}
 >
   {/* Hero Section - Earthy textural background */}
+  <link
+    rel="preload"
+    as="image"
+    href={heroImages[0].src}
+    imagesrcset={heroImages[0].srcset}
+    imagesizes="100vw"
+  />
   <section class="podcast-hero relative overflow-hidden">
     {/* Background photo - randomly selected farm scene */}
     <img
       id="hero-bg"
+      src={heroImages[0].src}
+      srcset={heroImages[0].srcset}
+      sizes="100vw"
       alt="Farm landscape — Ag and Culture Podcast by Southland Organics"
       class="absolute inset-0 h-full w-full object-cover"
+      width="1600"
+      height="1067"
       loading="eager"
       decoding="async"
       fetchpriority="high"

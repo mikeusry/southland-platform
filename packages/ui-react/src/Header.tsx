@@ -235,7 +235,7 @@ export function Header({
         <div className="flex h-[75px] items-center justify-between">
           {/* Logo */}
           <a href="/" className="flex-shrink-0">
-            <img src={logoUrl} alt={logoAlt} className="h-12 w-auto" />
+            <img src={logoUrl} alt={logoAlt} width="159" height="48" className="h-12 w-auto" />
           </a>
 
           {/* Desktop Navigation - centered */}

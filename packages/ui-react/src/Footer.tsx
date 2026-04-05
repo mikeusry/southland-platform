@@ -78,7 +78,13 @@ export function Footer({
           {/* Centered Logo */}
           <div className="mb-12 flex justify-center">
             <a href="/" className="inline-block">
-              <img src={logoUrl} alt="Southland Organics" className="h-20 w-auto" />
+              <img
+                src={logoUrl}
+                alt="Southland Organics"
+                width="80"
+                height="80"
+                className="h-20 w-auto"
+              />
             </a>
           </div>
 

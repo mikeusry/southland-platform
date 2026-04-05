@@ -357,6 +357,8 @@ const cta = segmentCtas[post.data.segment || 'general']
                   <img
                     src={author.photo}
                     alt={author.name}
+                    width="40"
+                    height="40"
                     class="h-10 w-10 rounded-full object-cover ring-2 ring-white/20"
                     loading="eager"
                   />
@@ -419,8 +421,11 @@ const cta = segmentCtas[post.data.segment || 'general']
               <img
                 src={post.data.featuredImage}
                 alt={post.data.title}
+                width="800"
+                height="450"
                 class="aspect-video w-full rounded-xl object-cover shadow-2xl ring-1 ring-white/10"
                 loading="eager"
+                fetchpriority="high"
               />
             ) : null
           }
@@ -440,7 +445,7 @@ const cta = segmentCtas[post.data.segment || 'general']
   </header>
   {
     post.data.muxPlaybackIds && post.data.muxPlaybackIds.length > 0 && (
-      <script>import '@mux/mux-player';</script>
+      <script>import '@mux/mux-player'</script>
     )
   }
 
@@ -618,6 +623,8 @@ const cta = segmentCtas[post.data.segment || 'general']
                     <img
                       src={resolveEpisodeCover(ep.data, 256)}
                       alt={ep.data.title}
+                      width="128"
+                      height="80"
                       class="h-20 w-32 flex-shrink-0 rounded-lg object-cover"
                       loading="lazy"
                     />
