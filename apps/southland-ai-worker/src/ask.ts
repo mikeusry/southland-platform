@@ -2,6 +2,7 @@ import type { Env, AskRequest, AskResponse } from './types'
 import { embedQuery } from './lib/embeddings'
 import { queryVectorize } from './lib/vectorize'
 import { generate } from './lib/llm'
+import { verifyAnswer } from './lib/verify'
 import { DRAFT_REPLY_PROMPT, STAFF_COPILOT_PROMPT, CHAT_PROMPT } from './prompts/draft-reply'
 
 // ─── Ask Handler ────────────────────────────────────────────────────────────
@@ -115,25 +116,26 @@ export async function handleAsk(
     }
   )
 
-  // Step 6: Determine if answerable (did the model refuse?)
-  const refusalPhrases = [
-    "don't have specific information",
-    "couldn't find that",
-    "connect you with",
-    "check with",
-    "not in our documentation",
-    "I'm not sure about that",
-  ]
-  const answerable = !refusalPhrases.some((p) => answer.toLowerCase().includes(p))
+  // Step 6: Anti-hallucination verification pipeline (4-layer)
+  const verification = await verifyAnswer(
+    env,
+    body.query,
+    answer,
+    contextParts,
+    context === 'support_draft' || context === 'staff' || context === 'chat' ? context : 'customer'
+  )
 
-  // Compute confidence from retrieval scores + answerability
+  // Merge retrieval confidence with verification confidence
   const topScore = results[0]?.score || 0
-  let confidence: AskResponse['confidence'] = 'low'
-  if (answerable && topScore > 0.7) confidence = 'high'
-  else if (answerable && topScore > 0.5) confidence = 'medium'
+  let confidence: AskResponse['confidence'] = verification.confidence
+  // Downgrade if retrieval scores are low even if verification passed
+  if (topScore < 0.5 && confidence === 'high') confidence = 'medium'
+  if (topScore < 0.3) confidence = 'low'
+
+  const answerable = verification.checks.answerable && verification.checks.faithful
 
   const response: AskResponse = {
-    answer,
+    answer: verification.answer,
     sources: results.slice(0, 5).map((r) => ({
       title: r.title,
       url: r.url,
