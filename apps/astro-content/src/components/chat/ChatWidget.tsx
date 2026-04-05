@@ -51,7 +51,9 @@ export default function ChatWidget() {
         ...prev,
         {
           role: 'assistant',
-          content: data.answer || "I couldn't find an answer to that. Please try rephrasing or contact us directly.",
+          content:
+            data.answer ||
+            "I couldn't find an answer to that. Please try rephrasing or contact us directly.",
           sources: data.sources?.slice(0, 3),
           confidence: data.confidence,
         },
@@ -73,11 +75,20 @@ export default function ChatWidget() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="fixed right-5 bottom-5 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-105"
+        className="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-105"
         style={{ backgroundColor: '#2c5234' }}
         aria-label="Ask a question"
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
         </svg>
       </button>
@@ -85,11 +96,19 @@ export default function ChatWidget() {
   }
 
   return (
-    <div className="fixed right-5 bottom-5 z-50 flex w-[380px] max-w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl" style={{ height: '520px' }}>
+    <div
+      className="fixed bottom-5 right-5 z-50 flex w-[380px] max-w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+      style={{ height: '520px' }}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 text-white" style={{ backgroundColor: '#2c5234' }}>
+      <div
+        className="flex items-center justify-between px-4 py-3 text-white"
+        style={{ backgroundColor: '#2c5234' }}
+      >
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-sm font-bold">S</div>
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-sm font-bold">
+            S
+          </div>
           <div>
             <div className="text-sm font-semibold">Southland Assistant</div>
             <div className="text-[10px] opacity-75">Ask about our products</div>
@@ -100,8 +119,18 @@ export default function ChatWidget() {
           className="rounded-full p-1 transition-colors hover:bg-white/20"
           aria-label="Close chat"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
       </div>
@@ -112,15 +141,20 @@ export default function ChatWidget() {
           <div className="py-8 text-center">
             <p className="mb-3 text-sm text-gray-500">How can I help you today?</p>
             <div className="flex flex-wrap justify-center gap-2">
-              {['How do I use Litter Life?', 'What helps with ammonia?', 'Lawn care products'].map((q) => (
-                <button
-                  key={q}
-                  onClick={() => { setInput(q); setTimeout(sendMessage, 0) }}
-                  className="rounded-full border border-gray-200 px-3 py-1.5 text-xs text-gray-600 transition-colors hover:border-gray-300 hover:bg-gray-50"
-                >
-                  {q}
-                </button>
-              ))}
+              {['How do I use Litter Life?', 'What helps with ammonia?', 'Lawn care products'].map(
+                (q) => (
+                  <button
+                    key={q}
+                    onClick={() => {
+                      setInput(q)
+                      setTimeout(sendMessage, 0)
+                    }}
+                    className="rounded-full border border-gray-200 px-3 py-1.5 text-xs text-gray-600 transition-colors hover:border-gray-300 hover:bg-gray-50"
+                  >
+                    {q}
+                  </button>
+                )
+              )}
             </div>
           </div>
         )}
@@ -143,9 +177,15 @@ export default function ChatWidget() {
                       href={s.url}
                       className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-[10px] text-gray-500 shadow-sm transition-colors hover:text-gray-700"
                     >
-                      <span className={`inline-block h-1.5 w-1.5 rounded-full ${
-                        s.doc_type === 'product' ? 'bg-green-400' : s.doc_type === 'sop' ? 'bg-blue-400' : 'bg-amber-400'
-                      }`} />
+                      <span
+                        className={`inline-block h-1.5 w-1.5 rounded-full ${
+                          s.doc_type === 'product'
+                            ? 'bg-green-400'
+                            : s.doc_type === 'sop'
+                              ? 'bg-blue-400'
+                              : 'bg-amber-400'
+                        }`}
+                      />
                       {s.title.length > 35 ? s.title.slice(0, 35) + '...' : s.title}
                     </a>
                   ))}
@@ -158,9 +198,18 @@ export default function ChatWidget() {
           <div className="flex justify-start">
             <div className="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3">
               <div className="flex gap-1">
-                <span className="h-2 w-2 animate-bounce rounded-full bg-gray-400" style={{ animationDelay: '0ms' }} />
-                <span className="h-2 w-2 animate-bounce rounded-full bg-gray-400" style={{ animationDelay: '150ms' }} />
-                <span className="h-2 w-2 animate-bounce rounded-full bg-gray-400" style={{ animationDelay: '300ms' }} />
+                <span
+                  className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
+                  style={{ animationDelay: '0ms' }}
+                />
+                <span
+                  className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
+                  style={{ animationDelay: '150ms' }}
+                />
+                <span
+                  className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
+                  style={{ animationDelay: '300ms' }}
+                />
               </div>
             </div>
           </div>
@@ -171,7 +220,10 @@ export default function ChatWidget() {
       {/* Input */}
       <div className="border-t border-gray-200 px-3 py-3">
         <form
-          onSubmit={(e) => { e.preventDefault(); sendMessage() }}
+          onSubmit={(e) => {
+            e.preventDefault()
+            sendMessage()
+          }}
           className="flex items-center gap-2"
         >
           <input
@@ -190,8 +242,18 @@ export default function ChatWidget() {
             style={{ backgroundColor: '#2c5234' }}
             aria-label="Send"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" />
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="22" y1="2" x2="11" y2="13" />
+              <polygon points="22 2 15 22 11 13 2 9 22 2" />
             </svg>
           </button>
         </form>
