@@ -19,9 +19,11 @@ function inferBusinessUnit(segment: string, tags: string[]): string {
   if (segment === 'turf') return 'turf'
   if (segment === 'agriculture') return 'agriculture'
   const tagStr = tags.join(' ').toLowerCase()
-  if (tagStr.includes('poultry') || tagStr.includes('chicken') || tagStr.includes('broiler')) return 'poultry'
+  if (tagStr.includes('poultry') || tagStr.includes('chicken') || tagStr.includes('broiler'))
+    return 'poultry'
   if (tagStr.includes('lawn') || tagStr.includes('turf') || tagStr.includes('golf')) return 'turf'
-  if (tagStr.includes('cattle') || tagStr.includes('swine') || tagStr.includes('dairy')) return 'agriculture'
+  if (tagStr.includes('cattle') || tagStr.includes('swine') || tagStr.includes('dairy'))
+    return 'agriculture'
   return 'general'
 }
 

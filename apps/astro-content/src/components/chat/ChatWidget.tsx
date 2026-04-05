@@ -365,11 +365,23 @@ export default function ChatWidget() {
   const getInitialSuggestions = () => {
     const path = typeof window !== 'undefined' ? window.location.pathname : ''
 
-    if (path.includes('/poultry') || path.includes('/litter-life') || path.includes('/big-ole-bird'))
-      return ['How do I use Litter Life?', 'What helps with ammonia?', 'Which product is right for my flock?']
+    if (
+      path.includes('/poultry') ||
+      path.includes('/litter-life') ||
+      path.includes('/big-ole-bird')
+    )
+      return [
+        'How do I use Litter Life?',
+        'What helps with ammonia?',
+        'Which product is right for my flock?',
+      ]
 
     if (path.includes('/lawn') || path.includes('/fertalive') || path.includes('/dog-spot'))
-      return ['How do I fix brown spots?', 'When should I apply FertALive?', 'Is this safe for pets?']
+      return [
+        'How do I fix brown spots?',
+        'When should I apply FertALive?',
+        'Is this safe for pets?',
+      ]
 
     if (path.includes('/d2') || path.includes('/sanitiz'))
       return ['How do I dilute D2?', 'Is D2 safe for food surfaces?', 'What does D2 kill?']
@@ -446,12 +458,25 @@ export default function ChatWidget() {
         {messages.length === 0 && (
           <div className="py-6 text-center">
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-green-50">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2c5234" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#2c5234"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
             </div>
-            <p className="mb-1 text-sm font-medium text-gray-700">Hi! I'm Southland's product expert.</p>
-            <p className="mb-4 text-xs text-gray-400">Ask me anything about our products, orders, or application tips.</p>
+            <p className="mb-1 text-sm font-medium text-gray-700">
+              Hi! I'm Southland's product expert.
+            </p>
+            <p className="mb-4 text-xs text-gray-400">
+              Ask me anything about our products, orders, or application tips.
+            </p>
             <div className="flex flex-wrap justify-center gap-2">
               {getInitialSuggestions().map((q) => (
                 <button
@@ -480,14 +505,28 @@ export default function ChatWidget() {
                 {msg.action === 'tool_activity' ? (
                   <div className="flex items-center gap-2 text-gray-500">
                     <div className="flex gap-1">
-                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400" style={{ animationDelay: '0ms' }} />
-                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400" style={{ animationDelay: '150ms' }} />
-                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400" style={{ animationDelay: '300ms' }} />
+                      <span
+                        className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400"
+                        style={{ animationDelay: '0ms' }}
+                      />
+                      <span
+                        className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400"
+                        style={{ animationDelay: '150ms' }}
+                      />
+                      <span
+                        className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400"
+                        style={{ animationDelay: '300ms' }}
+                      />
                     </div>
                     <span className="text-xs">{msg.content}</span>
                   </div>
                 ) : (
-                  <div className="whitespace-pre-wrap">{msg.content}{msg.streaming && <span className="inline-block h-4 w-0.5 animate-pulse bg-gray-400 ml-0.5" />}</div>
+                  <div className="whitespace-pre-wrap">
+                    {msg.content}
+                    {msg.streaming && (
+                      <span className="ml-0.5 inline-block h-4 w-0.5 animate-pulse bg-gray-400" />
+                    )}
+                  </div>
                 )}
                 {msg.sources && msg.sources.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1.5 border-t border-gray-200 pt-2">
@@ -527,7 +566,16 @@ export default function ChatWidget() {
                     className="flex items-center gap-2.5 rounded-xl border border-green-100 bg-green-50/50 px-3 py-2 transition-colors hover:border-green-200 hover:bg-green-50"
                   >
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2c5234" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#2c5234"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
                         <line x1="3" y1="6" x2="21" y2="6" />
                         <path d="M16 10a4 4 0 0 1-8 0" />
@@ -561,9 +609,18 @@ export default function ChatWidget() {
           <div className="flex justify-start">
             <div className="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3">
               <div className="flex gap-1">
-                <span className="h-2 w-2 animate-bounce rounded-full bg-gray-400" style={{ animationDelay: '0ms' }} />
-                <span className="h-2 w-2 animate-bounce rounded-full bg-gray-400" style={{ animationDelay: '150ms' }} />
-                <span className="h-2 w-2 animate-bounce rounded-full bg-gray-400" style={{ animationDelay: '300ms' }} />
+                <span
+                  className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
+                  style={{ animationDelay: '0ms' }}
+                />
+                <span
+                  className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
+                  style={{ animationDelay: '150ms' }}
+                />
+                <span
+                  className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
+                  style={{ animationDelay: '300ms' }}
+                />
               </div>
             </div>
           </div>
