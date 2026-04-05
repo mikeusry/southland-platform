@@ -130,8 +130,25 @@ export async function handleAsk(
             }
           }
 
-          if (snapshot.last_resolved_summary) {
-            parts.push(`Previous support: ${snapshot.last_resolved_summary}`)
+          // Customer memory: past interactions + open commitments
+          const interactions = (snapshot as unknown as Record<string, unknown>).previous_interactions as Array<{
+            summary: string; products: string[]; date: string
+          }> | undefined
+          if (interactions?.length) {
+            parts.push('Previous interactions:')
+            for (const int of interactions.slice(0, 3)) {
+              parts.push(`  - ${int.summary}${int.products?.length ? ` (products: ${int.products.join(', ')})` : ''}`)
+            }
+          }
+
+          const commitments = (snapshot as unknown as Record<string, unknown>).open_commitments as Array<{
+            type: string; description: string; due_date: string
+          }> | undefined
+          if (commitments?.length) {
+            parts.push('Open commitments:')
+            for (const c of commitments) {
+              parts.push(`  - ${c.description}${c.due_date ? ` (due: ${c.due_date})` : ''}`)
+            }
           }
 
           customerContext = '\n\nCUSTOMER ACCOUNT DATA:\n' + parts.join('\n')
