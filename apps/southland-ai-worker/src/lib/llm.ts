@@ -38,7 +38,7 @@ export async function generate(
   const start = Date.now()
 
   // AI Gateway — disabled until gateway created in CF dashboard
-  const useGateway = env.AI_GATEWAY_SLUG && env.ENVIRONMENT === 'gateway-enabled'
+  const useGateway = env.AI_GATEWAY_SLUG && env.ENVIRONMENT !== 'gateway-disabled'
   const gatewayOpts = useGateway
     ? { gateway: { id: env.AI_GATEWAY_SLUG, skipCache: false, cacheTtl: 0 } }
     : undefined
@@ -77,7 +77,7 @@ export async function generateStream(
   const { model = 'fast', temperature = 0.3, max_tokens = 300 } = options
   const modelId = LLM_MODELS[model]
 
-  const useGateway2 = env.AI_GATEWAY_SLUG && env.ENVIRONMENT === 'gateway-enabled'
+  const useGateway2 = env.AI_GATEWAY_SLUG && env.ENVIRONMENT !== 'gateway-disabled'
   const gatewayOpts2 = useGateway2
     ? { gateway: { id: env.AI_GATEWAY_SLUG, skipCache: true, cacheTtl: 0 } }
     : undefined

@@ -24,7 +24,7 @@ export async function embedText(
   // AI Gateway routing — disabled until gateway is created in CF dashboard.
   // To enable: create gateway "southland-ai" in CF dashboard, then set
   // AI_GATEWAY_ENABLED=true in wrangler.toml vars.
-  const useGateway = env.AI_GATEWAY_SLUG && env.ENVIRONMENT === 'gateway-enabled'
+  const useGateway = env.AI_GATEWAY_SLUG && env.ENVIRONMENT !== 'gateway-disabled'
   const gatewayOpts = useGateway
     ? { gateway: { id: env.AI_GATEWAY_SLUG, skipCache: false, cacheTtl: 300 } }
     : undefined
