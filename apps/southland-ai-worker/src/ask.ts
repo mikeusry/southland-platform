@@ -83,7 +83,14 @@ export async function handleAsk(
   let customerContext = ''
   let identityLevel: import('./types').IdentityLevel = 'anonymous'
 
-  if (body.customer_email || body.order_number) {
+  // Auto-extract order number from query for staff context
+  let orderNumber = body.order_number
+  if (!orderNumber && (context === 'staff' || context === 'support_draft')) {
+    const orderMatch = body.query.match(/(?:SH-|D2-|#)?(\d{4,6})/i)
+    if (orderMatch) orderNumber = orderMatch[0]
+  }
+
+  if (body.customer_email || orderNumber) {
     // Fetch live customer context from Nexus
     try {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' }
@@ -94,7 +101,7 @@ export async function handleAsk(
         headers,
         body: JSON.stringify({
           email: body.customer_email,
-          order_number: body.order_number,
+          order_number: orderNumber,
         }),
       })
 
@@ -166,7 +173,7 @@ export async function handleAsk(
 
   // Step 4: Tool routing (read-only, one turn max)
   let toolResult = ''
-  if (identityLevel !== 'anonymous' && context === 'chat') {
+  if (identityLevel !== 'anonymous') {
     // Check if the query needs a tool (order lookup, tracking, etc.)
     const lower = body.query.toLowerCase()
     const needsTool = lower.includes('order') || lower.includes('track') || lower.includes('ship') ||
@@ -210,7 +217,7 @@ export async function handleAsk(
   // Step 5: Build the full prompt
   // Build system prompt with scenario-specific voice examples
   let systemPrompt = SYSTEM_PROMPTS[context]
-  if (context === 'chat' || context === 'support_draft') {
+  if (context === 'chat' || context === 'support_draft' || context === 'staff') {
     // Classify intents from query for voice example selection
     const intentKeywords: string[] = []
     const lower = body.query.toLowerCase()
