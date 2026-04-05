@@ -8,6 +8,13 @@
 import { useState, useEffect } from 'react'
 import type { ProductImage } from '@southland/shopify-storefront'
 
+/** Proxy Shopify CDN images through Cloudinary fetch for auto WebP + resize */
+function optimizeUrl(url: string, w: number, h?: number): string {
+  if (!url.includes('cdn.shopify.com')) return url
+  const cloudName = 'southland-organics'
+  return `https://res.cloudinary.com/${cloudName}/image/fetch/w_${w},h_${h || w},c_pad,f_auto,q_auto/${url}`
+}
+
 interface Props {
   images: ProductImage[]
   productTitle: string
@@ -55,10 +62,10 @@ export default function ImageGallery({ images, productTitle }: Props) {
       {/* Main image */}
       <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
         <img
-          src={activeImage.url}
+          src={optimizeUrl(activeImage.url, 600)}
           alt={activeImage.altText || productTitle}
-          width={activeImage.width}
-          height={activeImage.height}
+          width={600}
+          height={600}
           className="h-auto w-full object-contain"
           style={{ aspectRatio: '1 / 1' }}
         />
@@ -80,7 +87,7 @@ export default function ImageGallery({ images, productTitle }: Props) {
               aria-label={`View image ${index + 1}`}
             >
               <img
-                src={image.url}
+                src={optimizeUrl(image.url, 80)}
                 alt={image.altText || `${productTitle} image ${index + 1}`}
                 width={80}
                 height={80}

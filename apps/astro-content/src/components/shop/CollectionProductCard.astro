@@ -8,6 +8,7 @@
  * - Universal "View Product" CTA (no persona-specific CTAs on cards)
  */
 import type { Product } from '@southland/shopify-storefront'
+import { optimizeShopifyImage } from '../../lib/cloudinary'
 
 interface Props {
   product: Product
@@ -135,10 +136,10 @@ const displayName = product.title.includes('|') ? product.title.split('|')[0].tr
     {
       image ? (
         <img
-          src={image.url}
+          src={optimizeShopifyImage(image.url, 400, 400)}
           alt={image.altText || product.title}
-          width={image.width}
-          height={image.height}
+          width="400"
+          height="400"
           loading="lazy"
           class="h-full w-full object-contain transition-transform group-hover:scale-105"
         />

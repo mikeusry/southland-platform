@@ -522,6 +522,38 @@ export function getHeroBannerUrl(
 }
 
 // =============================================================================
+// SHOPIFY IMAGE OPTIMIZATION (via Cloudinary fetch)
+// =============================================================================
+
+/**
+ * Proxy a Shopify CDN image through Cloudinary's fetch mode.
+ * Automatically resizes, converts to WebP/AVIF, and applies quality optimization.
+ *
+ * @param shopifyUrl - Full Shopify CDN URL (cdn.shopify.com/s/files/...)
+ * @param width - Target display width
+ * @param height - Target display height (optional, defaults to square)
+ * @returns Optimized Cloudinary fetch URL
+ *
+ * @example
+ * optimizeShopifyImage(product.images[0].url, 300, 300)
+ * // → https://res.cloudinary.com/southland-organics/image/fetch/w_300,h_300,c_pad,f_auto,q_auto/https://cdn.shopify.com/...
+ */
+export function optimizeShopifyImage(
+  shopifyUrl: string,
+  width: number = 400,
+  height?: number,
+  options: { crop?: CropMode; background?: string } = {}
+): string {
+  const cloudName = getCloudName()
+  const h = height || width
+  const crop = options.crop || 'pad'
+  const transforms = [`w_${width}`, `h_${h}`, `c_${crop}`, 'f_auto', 'q_auto']
+  if (options.background) transforms.push(`b_${options.background}`)
+  const transformString = transforms.join(',')
+  return `https://res.cloudinary.com/${cloudName}/image/fetch/${transformString}/${shopifyUrl}`
+}
+
+// =============================================================================
 // VALIDATION
 // =============================================================================
 
