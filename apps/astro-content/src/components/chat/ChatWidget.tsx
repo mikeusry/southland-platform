@@ -4,9 +4,21 @@ const AI_WORKER_URL = 'https://southland-ai-worker.point-dog-digital.workers.dev
 
 // Intents that require customer identity
 const ACCOUNT_INTENTS = [
-  'order', 'tracking', 'shipment', 'delivery', 'subscription',
-  'cancel', 'return', 'refund', 'invoice', 'billing', 'payment',
-  'my account', 'my order', 'where is', 'where\'s',
+  'order',
+  'tracking',
+  'shipment',
+  'delivery',
+  'subscription',
+  'cancel',
+  'return',
+  'refund',
+  'invoice',
+  'billing',
+  'payment',
+  'my account',
+  'my order',
+  'where is',
+  "where's",
 ]
 
 function detectsAccountIntent(query: string): boolean {
@@ -37,8 +49,12 @@ export default function ChatWidget() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [])
 
-  useEffect(() => { scrollToBottom() }, [messages, scrollToBottom])
-  useEffect(() => { if (open) inputRef.current?.focus() }, [open])
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages, scrollToBottom])
+  useEffect(() => {
+    if (open) inputRef.current?.focus()
+  }, [open])
 
   const sendMessage = async (overrideQuery?: string, overrideEmail?: string) => {
     const query = (overrideQuery ?? input).trim()
@@ -53,7 +69,8 @@ export default function ChatWidget() {
         { role: 'user', content: query },
         {
           role: 'assistant',
-          content: 'I\'d love to help with that! What email address did you use for your account or order?',
+          content:
+            "I'd love to help with that! What email address did you use for your account or order?",
           action: 'ask_email',
         },
       ])
@@ -111,7 +128,9 @@ export default function ChatWidget() {
           ...filtered,
           {
             role: 'assistant' as const,
-            content: data.answer || "I couldn't find an answer. Please try rephrasing or contact us directly.",
+            content:
+              data.answer ||
+              "I couldn't find an answer. Please try rephrasing or contact us directly.",
             sources: data.sources?.slice(0, 3),
             confidence: data.confidence,
           },
@@ -160,7 +179,8 @@ export default function ChatWidget() {
       ...prev,
       {
         role: 'assistant',
-        content: "I've connected you with our team. You'll hear back via email shortly. In the meantime, I can still help with product questions!",
+        content:
+          "I've connected you with our team. You'll hear back via email shortly. In the meantime, I can still help with product questions!",
       },
     ])
 
@@ -188,7 +208,16 @@ export default function ChatWidget() {
         style={{ backgroundColor: '#2c5234' }}
         aria-label="Ask a question"
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
         </svg>
       </button>
@@ -201,17 +230,36 @@ export default function ChatWidget() {
       style={{ height: '520px' }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 text-white" style={{ backgroundColor: '#2c5234' }}>
+      <div
+        className="flex items-center justify-between px-4 py-3 text-white"
+        style={{ backgroundColor: '#2c5234' }}
+      >
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-sm font-bold">S</div>
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-sm font-bold">
+            S
+          </div>
           <div>
             <div className="text-sm font-semibold">Southland Assistant</div>
             <div className="text-[10px] opacity-75">Ask about our products</div>
           </div>
         </div>
-        <button onClick={() => setOpen(false)} className="rounded-full p-1 transition-colors hover:bg-white/20" aria-label="Close chat">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+        <button
+          onClick={() => setOpen(false)}
+          className="rounded-full p-1 transition-colors hover:bg-white/20"
+          aria-label="Close chat"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
       </div>
@@ -222,15 +270,17 @@ export default function ChatWidget() {
           <div className="py-8 text-center">
             <p className="mb-3 text-sm text-gray-500">How can I help you today?</p>
             <div className="flex flex-wrap justify-center gap-2">
-              {['How do I use Litter Life?', 'What helps with ammonia?', 'Where is my order?'].map((q) => (
-                <button
-                  key={q}
-                  onClick={() => sendMessage(q)}
-                  className="rounded-full border border-gray-200 px-3 py-1.5 text-xs text-gray-600 transition-colors hover:border-gray-300 hover:bg-gray-50"
-                >
-                  {q}
-                </button>
-              ))}
+              {['How do I use Litter Life?', 'What helps with ammonia?', 'Where is my order?'].map(
+                (q) => (
+                  <button
+                    key={q}
+                    onClick={() => sendMessage(q)}
+                    className="rounded-full border border-gray-200 px-3 py-1.5 text-xs text-gray-600 transition-colors hover:border-gray-300 hover:bg-gray-50"
+                  >
+                    {q}
+                  </button>
+                )
+              )}
             </div>
           </div>
         )}
@@ -238,7 +288,9 @@ export default function ChatWidget() {
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div
               className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
-                msg.role === 'user' ? 'text-white' : 'border border-gray-100 bg-gray-50 text-gray-800'
+                msg.role === 'user'
+                  ? 'text-white'
+                  : 'border border-gray-100 bg-gray-50 text-gray-800'
               }`}
               style={msg.role === 'user' ? { backgroundColor: '#44883e' } : undefined}
             >
@@ -246,9 +298,18 @@ export default function ChatWidget() {
               {msg.action === 'tool_activity' ? (
                 <div className="flex items-center gap-2 text-gray-500">
                   <div className="flex gap-1">
-                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400" style={{ animationDelay: '0ms' }} />
-                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400" style={{ animationDelay: '150ms' }} />
-                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400" style={{ animationDelay: '300ms' }} />
+                    <span
+                      className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400"
+                      style={{ animationDelay: '0ms' }}
+                    />
+                    <span
+                      className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400"
+                      style={{ animationDelay: '150ms' }}
+                    />
+                    <span
+                      className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400"
+                      style={{ animationDelay: '300ms' }}
+                    />
                   </div>
                   <span className="text-xs">{msg.content}</span>
                 </div>
@@ -263,9 +324,15 @@ export default function ChatWidget() {
                       href={s.url}
                       className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-[10px] text-gray-500 shadow-sm transition-colors hover:text-gray-700"
                     >
-                      <span className={`inline-block h-1.5 w-1.5 rounded-full ${
-                        s.doc_type === 'product' ? 'bg-green-400' : s.doc_type === 'sop' ? 'bg-blue-400' : 'bg-amber-400'
-                      }`} />
+                      <span
+                        className={`inline-block h-1.5 w-1.5 rounded-full ${
+                          s.doc_type === 'product'
+                            ? 'bg-green-400'
+                            : s.doc_type === 'sop'
+                              ? 'bg-blue-400'
+                              : 'bg-amber-400'
+                        }`}
+                      />
                       {s.title.length > 35 ? s.title.slice(0, 35) + '...' : s.title}
                     </a>
                   ))}
@@ -278,9 +345,18 @@ export default function ChatWidget() {
           <div className="flex justify-start">
             <div className="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3">
               <div className="flex gap-1">
-                <span className="h-2 w-2 animate-bounce rounded-full bg-gray-400" style={{ animationDelay: '0ms' }} />
-                <span className="h-2 w-2 animate-bounce rounded-full bg-gray-400" style={{ animationDelay: '150ms' }} />
-                <span className="h-2 w-2 animate-bounce rounded-full bg-gray-400" style={{ animationDelay: '300ms' }} />
+                <span
+                  className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
+                  style={{ animationDelay: '0ms' }}
+                />
+                <span
+                  className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
+                  style={{ animationDelay: '150ms' }}
+                />
+                <span
+                  className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
+                  style={{ animationDelay: '300ms' }}
+                />
               </div>
             </div>
           </div>
@@ -290,7 +366,13 @@ export default function ChatWidget() {
 
       {/* Input */}
       <div className="border-t border-gray-200 px-3 py-3">
-        <form onSubmit={(e) => { e.preventDefault(); sendMessage() }} className="flex items-center gap-2">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            sendMessage()
+          }}
+          className="flex items-center gap-2"
+        >
           <input
             ref={inputRef}
             type="text"
@@ -307,8 +389,18 @@ export default function ChatWidget() {
             style={{ backgroundColor: '#2c5234' }}
             aria-label="Send"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" />
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="22" y1="2" x2="11" y2="13" />
+              <polygon points="22 2 15 22 11 13 2 9 22 2" />
             </svg>
           </button>
         </form>
