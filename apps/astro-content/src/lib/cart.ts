@@ -54,6 +54,7 @@ function getNexusCid(): string {
 // ─── Attribution (Self-Owned) ───────────��───────────────────────────────────
 
 const PD_ATTRIBUTION_KEY = '_pd_attribution'
+const PD_FIRST_TOUCH_KEY = '_pd_first_touch'
 
 /**
  * Read attribution data from localStorage (captured on landing page).
@@ -96,6 +97,43 @@ function getAttributionAttrs(): Array<{ key: string; value: string }> {
 }
 
 /**
+ * Read first-touch attribution from localStorage (set once on first visit, never overwritten).
+ * Returns key/value pairs prefixed with _pd_ft_ for Nexus extraction.
+ *
+ * Nexus reads these via extractAttribution() → getFtAttr() to populate ft_* columns
+ * on the orders table, giving us first-touch vs last-touch attribution on every order.
+ */
+function getFirstTouchAttrs(): Array<{ key: string; value: string }> {
+  if (typeof window === 'undefined') return []
+  try {
+    const raw = localStorage.getItem(PD_FIRST_TOUCH_KEY)
+    if (!raw) return []
+    const data = JSON.parse(raw) as Record<string, string>
+    const attrs: Array<{ key: string; value: string }> = []
+    const PARAMS = [
+      'utm_source',
+      'utm_medium',
+      'utm_campaign',
+      'gclid',
+      'fbclid',
+      'msclid',
+      'ttclid',
+    ]
+    for (const param of PARAMS) {
+      if (data[param]) {
+        attrs.push({ key: `_pd_ft_${param}`, value: data[param] })
+      }
+    }
+    if (data._landing_page) attrs.push({ key: '_pd_ft_landing_page', value: data._landing_page })
+    if (data._referrer) attrs.push({ key: '_pd_ft_referrer', value: data._referrer })
+    if (data._timestamp) attrs.push({ key: '_pd_ft_timestamp', value: data._timestamp })
+    return attrs
+  } catch {
+    return []
+  }
+}
+
+/**
  * Inject _nexus_cid + attribution into cart line inputs.
  * Preserves any existing attributes (e.g., bundle attributes).
  *
@@ -105,7 +143,12 @@ function getAttributionAttrs(): Array<{ key: string; value: string }> {
 function stampLines(lines: CartLineInput[]): CartLineInput[] {
   const cid = getNexusCid()
   const attrAttrs = getAttributionAttrs()
-  const stampKeys = new Set([NEXUS_CID_KEY, ...attrAttrs.map((a) => a.key)])
+  const ftAttrs = getFirstTouchAttrs()
+  const stampKeys = new Set([
+    NEXUS_CID_KEY,
+    ...attrAttrs.map((a) => a.key),
+    ...ftAttrs.map((a) => a.key),
+  ])
 
   return lines.map((line) => ({
     ...line,
@@ -113,6 +156,7 @@ function stampLines(lines: CartLineInput[]): CartLineInput[] {
       ...(line.attributes || []).filter((a) => !stampKeys.has(a.key)),
       { key: NEXUS_CID_KEY, value: cid },
       ...attrAttrs,
+      ...ftAttrs,
     ],
   }))
 }
