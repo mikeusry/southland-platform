@@ -1,0 +1,84 @@
+# Southland AI Worker
+# Shared AI knowledge layer: search, classification, support RAG, staff copilot
+# Project: docs/SOUTHLAND-AI-PLATFORM.md
+
+name = "southland-ai-worker"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+account_id = "07f1d3224d68222be7b6f97190608b80"
+
+# ─── Workers AI ─────────────────────────────────────────────────────────────
+# All AI calls routed through AI Gateway for observability
+[ai]
+binding = "AI"
+
+# ─── Vectorize ──────────────────────────────────────────────────────────────
+# Shared knowledge index: products, SOPs, blog, docs, podcasts
+# IMPORTANT: Create metadata indexes BEFORE inserting any vectors
+# Run: wrangler vectorize create southland-knowledge --dimensions=768 --metric=cosine
+[[vectorize]]
+binding = "KNOWLEDGE_INDEX"
+index_name = "southland-knowledge"
+
+# ─── D1 Database ────────────────────────────────────────────────────────────
+# Query logs, chunk manifests, classification feedback, exact-match aliases
+# Run: wrangler d1 create southland-ai
+[[d1_databases]]
+binding = "DB"
+database_name = "southland-ai"
+database_id = "309d4d9d-2c01-4d6f-b55b-dd2cf2822e5e"
+
+# ─── Queues ─────────────────────────────────────────────────────────────────
+# Async pipelines: index updates, doc ingestion, conversation summaries
+
+[[queues.producers]]
+queue = "index-updates"
+binding = "INDEX_QUEUE"
+
+[[queues.producers]]
+queue = "post-resolution"
+binding = "SUMMARY_QUEUE"
+
+[[queues.consumers]]
+queue = "index-updates"
+max_batch_size = 10
+max_batch_timeout = 30
+
+[[queues.consumers]]
+queue = "post-resolution"
+max_batch_size = 5
+max_batch_timeout = 60
+
+# ─── KV ─────────────────────────────────────────────────────────────────────
+# Fast cache for model responses, exact-match lookups
+# Run: wrangler kv namespace create CACHE
+[[kv_namespaces]]
+binding = "CACHE"
+id = "8d6fcfaadd1e4ff8bff84e11f39b6c06"
+
+# ─── Environment Variables ──────────────────────────────────────────────────
+[vars]
+NEXUS_API_URL = "https://nexus.southlandorganics.com"
+ENVIRONMENT = "development"
+
+# AI Gateway slug — create in CF dashboard first
+# Dashboard: https://dash.cloudflare.com > AI > AI Gateway > Create
+AI_GATEWAY_SLUG = "southland-ai"
+
+# CORS origins
+ALLOWED_ORIGINS = "https://southlandorganics.com,https://southland-website.pages.dev,https://nexus.southlandorganics.com"
+
+# ─── Secrets (set via wrangler secret put) ──────────────────────────────────
+# NEXUS_API_KEY    — Service key for Nexus API calls
+# SENDGRID_API_KEY — For email (Phase 5)
+
+# ─── Production ─────────────────────────────────────────────────────────────
+[env.production]
+name = "southland-ai-worker"
+
+[env.production.vars]
+NEXUS_API_URL = "https://nexus.southlandorganics.com"
+ENVIRONMENT = "production"
+AI_GATEWAY_SLUG = "southland-ai"
+ALLOWED_ORIGINS = "https://southlandorganics.com,https://nexus.southlandorganics.com"

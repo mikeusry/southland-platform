@@ -248,6 +248,21 @@ importers:
         specifier: ^6.2.2
         version: 6.4.1(@types/node@22.19.7)(jiti@2.6.1)(yaml@2.8.2)
 
+  apps/southland-ai-worker:
+    devDependencies:
+      '@cloudflare/workers-types':
+        specifier: ^4.20240117.0
+        version: 4.20260227.0
+      typescript:
+        specifier: ^5.3.0
+        version: 5.9.3
+      vitest:
+        specifier: ^1.2.0
+        version: 1.6.1(@types/node@25.1.0)
+      wrangler:
+        specifier: ^3.25.0
+        version: 3.114.17(@cloudflare/workers-types@4.20260227.0)
+
   packages/shopify-storefront:
     dependencies:
       '@shopify/storefront-api-client':
