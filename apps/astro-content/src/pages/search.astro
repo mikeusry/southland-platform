@@ -2,27 +2,63 @@
 /**
  * Search Results Page
  *
- * Displays semantic search results from content and products.
+ * Semantic search powered by Cloudflare Workers AI + Vectorize.
+ * Queries the southland-ai-worker for products, SOPs, and blog content.
  * Includes "Was this helpful?" feedback component.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SearchBar from '../components/cdp/SearchBar.astro';
 import SearchFeedback from '../components/cdp/SearchFeedback.astro';
 
+const AI_WORKER_URL = import.meta.env.AI_WORKER_URL || 'https://southland-ai-worker.point-dog-digital.workers.dev';
+
 // Get search query from URL
 const query = Astro.url.searchParams.get('q')?.trim() || '';
 
-// Perform search if query exists — semantic search requires OpenAI + Supabase
-// which may not be available in the CF Workers runtime, so wrap defensively
-let searchResults = null;
+// Search via AI Worker
+interface AISearchResult {
+  id: string;
+  score: number;
+  title: string;
+  url: string;
+  doc_type: string;
+  snippet: string;
+  business_unit: string;
+}
+
+interface AISearchResponse {
+  results: AISearchResult[];
+  query: string;
+  total: number;
+  latency_ms: number;
+  model: string;
+  exact_match: boolean;
+}
+
+let searchResults: AISearchResponse | null = null;
+let searchError = false;
+
 if (query) {
   try {
-    const { semanticSearch } = await import('../lib/search');
-    searchResults = await semanticSearch(query);
+    const res = await fetch(
+      `${AI_WORKER_URL}/search?q=${encodeURIComponent(query)}&limit=20`
+    );
+    if (res.ok) {
+      searchResults = await res.json();
+    } else {
+      searchError = true;
+    }
   } catch (err) {
-    console.error('Search unavailable:', err);
+    console.error('AI Search error:', err);
+    searchError = true;
   }
 }
+
+// Split results by type
+const productResults = searchResults?.results.filter(r => r.doc_type === 'product') || [];
+const contentResults = searchResults?.results.filter(r => r.doc_type !== 'product') || [];
+const totalCount = searchResults?.total || 0;
+const searchId = `search-${Date.now()}`;
 
 const title = query ? `Search: ${query}` : 'Search';
 const description = query
@@ -48,24 +84,30 @@ const description = query
       </header>
 
       <!-- Results -->
-      {searchResults && searchResults.totalCount > 0 && (
+      {searchResults && totalCount > 0 && (
         <section class="search-results">
           <p class="search-results__count">
-            Found {searchResults.totalCount} result{searchResults.totalCount !== 1 ? 's' : ''}
+            Found {totalCount} result{totalCount !== 1 ? 's' : ''}
+            <span class="search-results__latency">({searchResults.latency_ms}ms)</span>
           </p>
 
-          <!-- Content Results -->
-          {searchResults.content.length > 0 && (
+          <!-- Content Results (SOPs, Blog, Docs) -->
+          {contentResults.length > 0 && (
             <div class="search-results__section">
               <h2 class="search-results__section-title">Articles & Guides</h2>
               <div class="search-results__grid">
-                {searchResults.content.map((result) => (
-                  <a href={result.url} class="result-card" data-search-id={searchResults.searchId}>
-                    <span class="result-card__type">{result.pageType || 'Article'}</span>
+                {contentResults.map((result) => (
+                  <a href={result.url} class="result-card" data-search-id={searchId}>
+                    <div class="result-card__header">
+                      <span class={`result-card__type result-card__type--${result.doc_type}`}>
+                        {result.doc_type === 'sop' ? 'Guide' : result.doc_type === 'blog' ? 'Article' : result.doc_type === 'episode' ? 'Podcast' : 'Resource'}
+                      </span>
+                      <span class="result-card__score">{Math.round(result.score * 100)}% match</span>
+                    </div>
                     <h3 class="result-card__title">{result.title}</h3>
-                    <p class="result-card__description">
-                      {result.description.slice(0, 150)}{result.description.length > 150 ? '...' : ''}
-                    </p>
+                    {result.business_unit && (
+                      <span class="result-card__bu">{result.business_unit}</span>
+                    )}
                     <span class="result-card__link">Read more →</span>
                   </a>
                 ))}
@@ -74,25 +116,20 @@ const description = query
           )}
 
           <!-- Product Results -->
-          {searchResults.products.length > 0 && (
+          {productResults.length > 0 && (
             <div class="search-results__section">
               <h2 class="search-results__section-title">Recommended Products</h2>
               <div class="search-results__grid search-results__grid--products">
-                {searchResults.products.map((result) => (
-                  <a href={result.url} class="product-card" data-search-id={searchResults.searchId}>
-                    {result.imageUrl && (
-                      <img
-                        src={result.imageUrl}
-                        alt={result.title}
-                        class="product-card__image"
-                        loading="lazy"
-                      />
-                    )}
+                {productResults.map((result) => (
+                  <a href={`/products/${result.url.split('/').pop()}`} class="product-card" data-search-id={searchId}>
                     <div class="product-card__content">
+                      <div class="product-card__header">
+                        <span class="product-card__score">{Math.round(result.score * 100)}%</span>
+                      </div>
                       <h3 class="product-card__title">{result.title}</h3>
-                      <p class="product-card__description">
-                        {result.description.slice(0, 100)}{result.description.length > 100 ? '...' : ''}
-                      </p>
+                      {result.business_unit && (
+                        <span class="product-card__bu">{result.business_unit}</span>
+                      )}
                       <span class="product-card__link">View Product →</span>
                     </div>
                   </a>
@@ -102,12 +139,12 @@ const description = query
           )}
 
           <!-- Feedback -->
-          <SearchFeedback searchId={searchResults.searchId} query={query} />
+          <SearchFeedback searchId={searchId} query={query} />
         </section>
       )}
 
       <!-- No Results -->
-      {searchResults && searchResults.totalCount === 0 && (
+      {searchResults && totalCount === 0 && (
         <section class="search-empty">
           <div class="search-empty__icon">🔍</div>
           <h2 class="search-empty__title">No results found</h2>
@@ -115,11 +152,20 @@ const description = query
             We couldn't find anything matching "{query}". Try different keywords or browse our popular topics.
           </p>
           <div class="search-empty__suggestions">
-            <a href="/search?q=gut%20health" class="search-empty__suggestion">Gut Health</a>
+            <a href="/search?q=ammonia%20control" class="search-empty__suggestion">Ammonia Control</a>
             <a href="/search?q=sick%20chickens" class="search-empty__suggestion">Sick Chickens</a>
-            <a href="/search?q=FCR%20improvement" class="search-empty__suggestion">FCR Improvement</a>
-            <a href="/search?q=lawn%20care" class="search-empty__suggestion">Lawn Care</a>
+            <a href="/search?q=lawn%20fertilizer" class="search-empty__suggestion">Lawn Fertilizer</a>
+            <a href="/search?q=sanitizer" class="search-empty__suggestion">Sanitizer</a>
           </div>
+        </section>
+      )}
+
+      <!-- Search Error -->
+      {searchError && query && (
+        <section class="search-empty">
+          <div class="search-empty__icon">⚠️</div>
+          <h2 class="search-empty__title">Search temporarily unavailable</h2>
+          <p class="search-empty__text">Please try again in a moment.</p>
         </section>
       )}
 
@@ -133,13 +179,13 @@ const description = query
                 <span class="example-card__icon">🐔</span>
                 <span class="example-card__text">"My chickens have runny poop"</span>
               </a>
-              <a href="/search?q=improve%20feed%20conversion%20ratio" class="example-card">
-                <span class="example-card__icon">📊</span>
-                <span class="example-card__text">"Improve feed conversion ratio"</span>
+              <a href="/search?q=reduce%20ammonia%20in%20chicken%20house" class="example-card">
+                <span class="example-card__icon">🏠</span>
+                <span class="example-card__text">"Reduce ammonia in chicken house"</span>
               </a>
-              <a href="/search?q=reduce%20flock%20mortality" class="example-card">
-                <span class="example-card__icon">💪</span>
-                <span class="example-card__text">"Reduce flock mortality"</span>
+              <a href="/search?q=organic%20golf%20course%20treatment" class="example-card">
+                <span class="example-card__icon">⛳</span>
+                <span class="example-card__text">"Organic golf course treatment"</span>
               </a>
               <a href="/search?q=natural%20lawn%20fertilizer" class="example-card">
                 <span class="example-card__icon">🌱</span>
@@ -182,10 +228,14 @@ const description = query
     justify-content: center;
   }
 
-  /* Results */
   .search-results__count {
     color: #6b7280;
     margin-bottom: 24px;
+  }
+
+  .search-results__latency {
+    font-size: 12px;
+    color: #9ca3af;
   }
 
   .search-results__section {
@@ -210,7 +260,6 @@ const description = query
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   }
 
-  /* Result Card */
   .result-card {
     display: block;
     background: white;
@@ -226,13 +275,48 @@ const description = query
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 
+  .result-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
   .result-card__type {
     display: inline-block;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
-    color: var(--color-accent, #44883e);
-    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .result-card__type--sop {
+    background: #eff6ff;
+    color: #2563eb;
+  }
+
+  .result-card__type--blog {
+    background: #f0fdf4;
+    color: #16a34a;
+  }
+
+  .result-card__type--episode {
+    background: #fdf4ff;
+    color: #a855f7;
+  }
+
+  .result-card__type--document,
+  .result-card__type--faq,
+  .result-card__type--policy {
+    background: #f5f5f4;
+    color: #78716c;
+  }
+
+  .result-card__score {
+    font-size: 11px;
+    color: #9ca3af;
   }
 
   .result-card__title {
@@ -242,20 +326,24 @@ const description = query
     margin-bottom: 8px;
   }
 
-  .result-card__description {
-    font-size: 14px;
+  .result-card__bu {
+    display: inline-block;
+    font-size: 11px;
+    text-transform: capitalize;
     color: #6b7280;
-    line-height: 1.5;
-    margin-bottom: 12px;
+    background: #f3f4f6;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
   }
 
   .result-card__link {
+    display: block;
     font-size: 14px;
     font-weight: 500;
     color: var(--color-accent, #44883e);
   }
 
-  /* Product Card */
   .product-card {
     display: flex;
     flex-direction: column;
@@ -272,15 +360,20 @@ const description = query
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 
-  .product-card__image {
-    width: 100%;
-    height: 160px;
-    object-fit: cover;
-    background: #f3f4f6;
-  }
-
   .product-card__content {
     padding: 16px;
+  }
+
+  .product-card__header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 4px;
+  }
+
+  .product-card__score {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-accent, #44883e);
   }
 
   .product-card__title {
@@ -290,11 +383,15 @@ const description = query
     margin-bottom: 8px;
   }
 
-  .product-card__description {
-    font-size: 13px;
+  .product-card__bu {
+    display: inline-block;
+    font-size: 11px;
+    text-transform: capitalize;
     color: #6b7280;
-    line-height: 1.4;
-    margin-bottom: 12px;
+    background: #f3f4f6;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
   }
 
   .product-card__link {
@@ -303,7 +400,6 @@ const description = query
     color: var(--color-accent, #44883e);
   }
 
-  /* Empty State */
   .search-empty {
     text-align: center;
     padding: 60px 20px;
@@ -349,7 +445,6 @@ const description = query
     color: white;
   }
 
-  /* Initial State */
   .search-initial {
     padding: 40px 0;
   }
@@ -397,24 +492,19 @@ const description = query
 
 <script is:inline define:vars={{
   searchQuery: query,
-  resultCount: searchResults?.totalCount ?? 0,
-  contentCount: searchResults?.content?.length ?? 0,
-  productCount: searchResults?.products?.length ?? 0,
-  searchId: searchResults?.searchId ?? null,
+  resultCount: totalCount,
+  contentCount: contentResults.length,
+  productCount: productResults.length,
+  searchId: searchId,
 }}>
-  // GA4 + point.dog: track search query
   if (searchQuery) {
-    // GA4 standard search event
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({ ecommerce: null });
     window.dataLayer.push({
       event: 'search',
-      ecommerce: {
-        search_term: searchQuery,
-      },
+      ecommerce: { search_term: searchQuery },
     });
 
-    // point.dog: richer search event
     if (window.pdPixel) {
       window.pdPixel.track('site_search', {
         query: searchQuery,
@@ -423,18 +513,16 @@ const description = query
         product_results: productCount,
         search_id: searchId,
         has_results: resultCount > 0,
+        source: 'ai_worker',
       });
     }
   }
 
-  // Track result clicks (with result type + position)
   document.querySelectorAll('[data-search-id]').forEach(function(el, index) {
     el.addEventListener('click', function() {
-      var sid = el.getAttribute('data-search-id');
       var href = el.getAttribute('href') || '';
       var isProduct = el.classList.contains('product-card');
 
-      // GA4: select_content
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({
         event: 'select_content',
@@ -444,10 +532,9 @@ const description = query
         index: index,
       });
 
-      // point.dog
-      if (window.pdPixel && sid) {
+      if (window.pdPixel) {
         window.pdPixel.track('search_result_clicked', {
-          search_id: sid,
+          search_id: searchId,
           result_url: href,
           result_type: isProduct ? 'product' : 'content',
           result_position: index,

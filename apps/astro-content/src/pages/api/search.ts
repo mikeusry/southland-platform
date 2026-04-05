@@ -1,53 +1,19 @@
 /**
- * Semantic Search API
+ * Search API — proxies to Southland AI Worker
  *
- * POST /api/search
- * Body: { query: string, options?: { contentTypes?, maxResults? } }
+ * GET /api/search?q=query
+ * POST /api/search { query: string }
  *
- * Returns blended results from content and products using vector similarity.
+ * Returns semantic search results from the AI Worker (Vectorize + BGE embeddings).
  */
 
 import type { APIRoute } from 'astro'
-import { semanticSearch } from '../../lib/search'
 
-export const POST: APIRoute = async ({ request }) => {
-  try {
-    const body = await request.json()
-    const { query, options = {} } = body
+const AI_WORKER_URL =
+  import.meta.env.AI_WORKER_URL || 'https://southland-ai-worker.point-dog-digital.workers.dev'
 
-    if (!query || typeof query !== 'string') {
-      return new Response(JSON.stringify({ error: 'Query is required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      })
-    }
-
-    // Perform search
-    const results = await semanticSearch(query.trim(), {
-      maxContentResults: options.maxContentResults ?? 8,
-      maxProductResults: options.maxProductResults ?? 4,
-    })
-
-    // Log to BigQuery (non-blocking)
-    logSearchEvent(results.searchId, query, results.totalCount).catch(console.error)
-
-    return new Response(JSON.stringify(results), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    })
-  } catch (error) {
-    console.error('Search API error:', error)
-    return new Response(JSON.stringify({ error: 'Search failed' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    })
-  }
-}
-
-// GET handler for simple queries
 export const GET: APIRoute = async ({ url }) => {
-  const query = url.searchParams.get('q')
-
+  const query = url.searchParams.get('q')?.trim()
   if (!query) {
     return new Response(JSON.stringify({ error: 'Query parameter "q" is required' }), {
       status: 400,
@@ -55,33 +21,66 @@ export const GET: APIRoute = async ({ url }) => {
     })
   }
 
+  return proxySearch(query, url.searchParams)
+}
+
+export const POST: APIRoute = async ({ request }) => {
   try {
-    const results = await semanticSearch(query.trim())
+    const body = await request.json()
+    const query = body.query?.trim()
+    if (!query) {
+      return new Response(JSON.stringify({ error: 'Query is required' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
 
-    // Log to BigQuery (non-blocking)
-    logSearchEvent(results.searchId, query, results.totalCount).catch(console.error)
+    const params = new URLSearchParams()
+    if (body.options?.type) params.set('type', body.options.type)
+    if (body.options?.business_unit) params.set('business_unit', body.options.business_unit)
+    if (body.options?.limit) params.set('limit', String(body.options.limit))
 
-    return new Response(JSON.stringify(results), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    })
-  } catch (error) {
-    console.error('Search API error:', error)
-    return new Response(JSON.stringify({ error: 'Search failed' }), {
-      status: 500,
+    return proxySearch(query, params)
+  } catch {
+    return new Response(JSON.stringify({ error: 'Invalid request' }), {
+      status: 400,
       headers: { 'Content-Type': 'application/json' },
     })
   }
 }
 
-/**
- * Log search event to BigQuery via webhook
- */
-async function logSearchEvent(
-  searchId: string,
-  query: string,
-  resultsCount: number
-): Promise<void> {
+async function proxySearch(query: string, params: URLSearchParams): Promise<Response> {
+  const limit = params.get('limit') || '20'
+  const type = params.get('type') || ''
+  const bu = params.get('business_unit') || ''
+
+  const workerUrl = new URL(`${AI_WORKER_URL}/search`)
+  workerUrl.searchParams.set('q', query)
+  workerUrl.searchParams.set('limit', limit)
+  if (type) workerUrl.searchParams.set('type', type)
+  if (bu) workerUrl.searchParams.set('business_unit', bu)
+
+  try {
+    const res = await fetch(workerUrl.toString())
+    const data = await res.json()
+
+    // Log to BigQuery (non-blocking)
+    logSearchEvent(query, data.total || 0).catch(console.error)
+
+    return new Response(JSON.stringify(data), {
+      status: res.status,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  } catch (err) {
+    console.error('AI Worker search error:', err)
+    return new Response(JSON.stringify({ error: 'Search service unavailable' }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+}
+
+async function logSearchEvent(query: string, resultsCount: number): Promise<void> {
   const webhookUrl = import.meta.env.BIGQUERY_WEBHOOK_URL
   if (!webhookUrl) return
 
@@ -92,11 +91,10 @@ async function logSearchEvent(
       body: JSON.stringify({
         table: 'search_events',
         row: {
-          search_id: searchId,
           query,
           results_count: resultsCount,
           timestamp: new Date().toISOString(),
-          source: 'website',
+          source: 'website_ai',
         },
       }),
     })

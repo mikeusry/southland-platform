@@ -6,6 +6,7 @@ import { handleBenchmark } from './benchmark'
 import { handleIndex } from './index-worker'
 import { handleBulkIndex } from './bulk-index'
 import { handleSummarize } from './summarize'
+import { handleContentGaps } from './content-gaps'
 
 // ─── CORS ───────────────────────────────────────────────────────────────────
 
@@ -63,6 +64,10 @@ export default {
         // Layer 5.3: Conversation summaries
         case '/summarize':
           return handleSummarize(request, env, ctx, origin)
+
+        // Layer 3.3: Content gap mining
+        case '/content-gaps':
+          return handleContentGaps(request, env, ctx, origin)
 
         // Benchmark: Phase 0 — model latency testing
         case '/benchmark':
