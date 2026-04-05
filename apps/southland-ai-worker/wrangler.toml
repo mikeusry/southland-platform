@@ -60,14 +60,13 @@ id = "8d6fcfaadd1e4ff8bff84e11f39b6c06"
 # ─── Environment Variables ──────────────────────────────────────────────────
 [vars]
 NEXUS_API_URL = "https://nexus.southlandorganics.com"
-ENVIRONMENT = "development"
+ENVIRONMENT = "production"
 
-# AI Gateway slug — create in CF dashboard first
-# Dashboard: https://dash.cloudflare.com > AI > AI Gateway > Create
+# AI Gateway slug
 AI_GATEWAY_SLUG = "southland-ai"
 
 # CORS origins
-ALLOWED_ORIGINS = "https://southlandorganics.com,https://southland-website.pages.dev,https://nexus.southlandorganics.com"
+ALLOWED_ORIGINS = "https://southlandorganics.com,https://www.southlandorganics.com,https://southland-website.pages.dev,https://nexus.southlandorganics.com"
 
 # ─── Secrets (set via wrangler secret put) ──────────────────────────────────
 # NEXUS_API_KEY    — Service key for Nexus API calls
