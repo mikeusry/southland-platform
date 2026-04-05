@@ -68,7 +68,20 @@ function pushToDataLayer(event: string, data: Record<string, unknown>): void {
 
 function pushToPixel(event: string, data: Record<string, unknown>): void {
   if (typeof window === 'undefined' || !window.pdPixel) return
-  window.pdPixel.track(event, { content_type: 'ecommerce', ...data })
+  // Include persona if set (from DecisionEngine → localStorage)
+  let persona: string | undefined
+  try {
+    const raw = localStorage.getItem('southland_persona')
+    if (raw) {
+      const p = JSON.parse(raw)
+      if (p?.id) persona = p.id
+    }
+  } catch {}
+  window.pdPixel.track(event, {
+    content_type: 'ecommerce',
+    ...(persona ? { persona } : {}),
+    ...data,
+  })
 }
 
 function buildItem(

@@ -144,8 +144,20 @@ function stampLines(lines: CartLineInput[]): CartLineInput[] {
   const cid = getNexusCid()
   const attrAttrs = getAttributionAttrs()
   const ftAttrs = getFirstTouchAttrs()
+
+  // Read persona from localStorage (set by DecisionEngine)
+  let personaAttr: { key: string; value: string } | null = null
+  try {
+    const raw = localStorage.getItem('southland_persona')
+    if (raw) {
+      const data = JSON.parse(raw)
+      if (data?.id) personaAttr = { key: '_pd_persona', value: data.id }
+    }
+  } catch {}
+
   const stampKeys = new Set([
     NEXUS_CID_KEY,
+    '_pd_persona',
     ...attrAttrs.map((a) => a.key),
     ...ftAttrs.map((a) => a.key),
   ])
@@ -157,6 +169,7 @@ function stampLines(lines: CartLineInput[]): CartLineInput[] {
       { key: NEXUS_CID_KEY, value: cid },
       ...attrAttrs,
       ...ftAttrs,
+      ...(personaAttr ? [personaAttr] : []),
     ],
   }))
 }
