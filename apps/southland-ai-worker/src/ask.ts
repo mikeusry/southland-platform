@@ -173,12 +173,16 @@ export async function handleAsk(
 
   // Step 4: Tool routing (read-only, one turn max)
   let toolResult = ''
-  if (identityLevel !== 'anonymous') {
-    // Check if the query needs a tool (order lookup, tracking, etc.)
+  // Staff context: always allow tools (customer lookup works without identity)
+  // Chat context: require identity for account tools
+  const toolsAllowed = context === 'staff' || context === 'support_draft' || identityLevel !== 'anonymous'
+  if (toolsAllowed) {
     const lower = body.query.toLowerCase()
     const needsTool = lower.includes('order') || lower.includes('track') || lower.includes('ship') ||
       lower.includes('subscri') || lower.includes('return') || lower.includes('refund') ||
-      lower.includes('where is') || lower.includes('where\'s') || lower.includes('status')
+      lower.includes('where is') || lower.includes('where\'s') || lower.includes('status') ||
+      lower.includes('customer') || lower.includes('account') || lower.includes('who is') ||
+      lower.includes('look up') || lower.includes('find')
 
     if (needsTool) {
       try {

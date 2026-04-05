@@ -25,6 +25,13 @@ export interface ToolResult {
 
 export const READ_TOOLS: ToolDefinition[] = [
   {
+    name: 'customer_lookup',
+    description: 'Find a customer by name, company, or email. Returns contact info, sales rep, recent orders, LTV, and Nexus link.',
+    requires: 'anonymous',
+    type: 'read',
+    parameters: { query: 'string' },
+  },
+  {
     name: 'get_order_status',
     description: 'Look up order status, tracking number, and shipment details by order number',
     requires: 'verified-light',
