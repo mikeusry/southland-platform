@@ -1,0 +1,113 @@
+---
+/**
+ * /tools/lawn-quiz/ — Lawn Health Assessment Quiz
+ *
+ * 5-7 questions → personalized product recommendations.
+ * Lead magnet: "Email My Lawn Plan" after results.
+ * Nexus lead_type: product_quiz (score 20).
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import LawnQuizIsland from '../../components/calculators/LawnQuiz'
+
+const title = 'Lawn Health Assessment | Southland Organics'
+const description =
+  'Take our 60-second lawn health quiz and get personalized product recommendations with application rates and timing. Free — no email required to see results.'
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+const canonicalUrl = `${siteUrl}/tools/lawn-quiz/`
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'Lawn Health Assessment Quiz',
+  description,
+  url: canonicalUrl,
+  applicationCategory: 'UtilityApplication',
+  operatingSystem: 'Web Browser',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  provider: {
+    '@type': 'Organization',
+    name: 'Southland Organics',
+    url: siteUrl,
+    telephone: '+1-800-608-3755',
+  },
+}
+---
+
+<BaseLayout title={title} description={description} canonicalUrl={canonicalUrl} schema={schema}>
+  <!-- Hero -->
+  <section class="bg-[#2C5234] py-16 text-white">
+    <div class="mx-auto max-w-4xl px-4 text-center">
+      <h1 class="font-heading text-3xl uppercase tracking-wide md:text-4xl">
+        Lawn Health Assessment
+      </h1>
+      <p class="mx-auto mt-4 max-w-2xl text-lg text-green-100">
+        Answer a few quick questions and get a personalized lawn care plan — the right products,
+        application rates, and seasonal timing for your situation.
+      </p>
+    </div>
+  </section>
+
+  <!-- Quiz -->
+  <section class="py-12">
+    <div class="mx-auto max-w-3xl px-4">
+      <LawnQuizIsland client:load />
+    </div>
+  </section>
+
+  <!-- Why Soil Biology -->
+  <section class="bg-gray-50 py-12">
+    <div class="mx-auto max-w-4xl px-4">
+      <h2 class="mb-8 text-center font-heading text-2xl uppercase text-[#2C5234]">
+        Why We Start With Soil Biology
+      </h2>
+      <div class="grid gap-6 md:grid-cols-2">
+        <div class="rounded-lg bg-white p-6 shadow-sm">
+          <h3 class="font-heading text-sm uppercase text-[#2C5234]">The Problem</h3>
+          <p class="mt-2 text-sm text-gray-600">
+            Most lawn care programs focus on what goes on top — fertilizer, herbicide, fungicide.
+            But after years of synthetic inputs, the beneficial microbes that make nutrients
+            available, suppress disease, and build root structure are depleted or gone.
+          </p>
+        </div>
+        <div class="rounded-lg bg-white p-6 shadow-sm">
+          <h3 class="font-heading text-sm uppercase text-[#2C5234]">The Fix</h3>
+          <p class="mt-2 text-sm text-gray-600">
+            Rebuilding soil biology restores the natural processes that make lawns self-sustaining.
+            Beneficial bacteria cycle nutrients, fungi extend root networks, and diverse biology
+            suppresses disease — reducing your dependence on inputs over time.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bottom CTA -->
+  <section class="bg-[#2C5234] py-12 text-white">
+    <div class="mx-auto max-w-3xl px-4 text-center">
+      <h2 class="font-heading text-2xl uppercase">Need Expert Help?</h2>
+      <p class="mx-auto mt-3 max-w-xl text-green-100">
+        Our team has helped thousands of homeowners and turf professionals build healthier lawns
+        with biology-first programs.
+      </p>
+      <div class="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+        <a
+          href="/contact/"
+          class="rounded-md bg-white px-6 py-3 text-sm font-semibold text-[#2C5234] transition-colors hover:bg-green-50"
+        >
+          Talk to a Specialist
+        </a>
+        <a
+          href="/application-rate-calculator/"
+          class="rounded-md border border-white/30 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+        >
+          Application Rate Calculator
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

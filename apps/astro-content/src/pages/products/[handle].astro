@@ -20,6 +20,7 @@ import AddToCartButton from '../../components/product/AddToCartButton'
 import CollectionProductCard from '../../components/shop/CollectionProductCard.astro'
 import AccordionFaq from '../../components/shop/AccordionFaq.astro'
 import { isValidPersonaId, type PersonaId } from '../../lib/persona'
+import TalkToRep from '../../components/product/TalkToRep'
 
 // SSR — do not prerender
 const { handle } = Astro.params
@@ -524,6 +525,36 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
             />
           </div>
 
+          {/* Talk to a Rep — inline form */}
+          <div class="mt-4">
+            <TalkToRep
+              client:load
+              productName={tina?.name ?? product.title}
+              productHandle={product.handle}
+              isCommercial={tina?.segment === 'poultry'}
+            />
+          </div>
+
+          {/* Calculate How Much I Need */}
+          {
+            tina?.dosingInstructions && (
+              <a
+                href={`/application-rate-calculator/?product=${product.handle}`}
+                class="mt-3 flex w-full items-center justify-center gap-2 rounded-md bg-gray-100 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 hover:text-[#2C5234]"
+              >
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                  />
+                </svg>
+                Calculate How Much I Need
+              </a>
+            )
+          }
+
           {/* Trust badges row — always */}
           <div class="mt-5 flex flex-wrap items-center gap-3 border-t border-gray-100 pt-5">
             {
@@ -664,6 +695,20 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
                 <p class="mt-2 whitespace-pre-line text-sm leading-relaxed text-gray-700">
                   {tina.dosingInstructions}
                 </p>
+                <a
+                  href={`/application-rate-calculator/?product=${product.handle}`}
+                  class="mt-4 inline-flex items-center gap-2 rounded-md bg-brand-green-dark px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-800"
+                >
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                    />
+                  </svg>
+                  Calculate Exact Quantity for My Area
+                </a>
               </div>
             )}
 

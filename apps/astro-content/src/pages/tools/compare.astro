@@ -1,0 +1,137 @@
+---
+/**
+ * /tools/compare/ — Product Comparison Tool
+ *
+ * Scenario builder → comparison cards → evidence drawer.
+ * Lead magnet: "Email This Comparison" after results.
+ * Nexus lead_type: lead_magnet (score 18).
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import ComparisonTool from '../../components/calculators/ComparisonTool'
+
+const title = 'Biological vs. Conventional: Compare Approaches | Southland Organics'
+const description =
+  'Interactive comparison tool for biological vs. conventional approaches in poultry, turf, and agriculture. See outcome-based comparisons tailored to your scenario.'
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+const canonicalUrl = `${siteUrl}/tools/compare/`
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'Biological vs. Conventional Comparison Tool',
+  description,
+  url: canonicalUrl,
+  applicationCategory: 'UtilityApplication',
+  operatingSystem: 'Web Browser',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  provider: {
+    '@type': 'Organization',
+    name: 'Southland Organics',
+    url: siteUrl,
+    telephone: '+1-800-608-3755',
+  },
+}
+---
+
+<BaseLayout title={title} description={description} canonicalUrl={canonicalUrl} schema={schema}>
+  <!-- Hero -->
+  <section class="bg-[#2C5234] py-16 text-white">
+    <div class="mx-auto max-w-4xl px-4 text-center">
+      <h1 class="font-heading text-3xl uppercase tracking-wide md:text-4xl">
+        Biological vs. Conventional
+      </h1>
+      <p class="mx-auto mt-4 max-w-2xl text-lg text-green-100">
+        Compare approaches for your specific operation. We show outcomes — not ideology. Pick your
+        scenario and see what fits.
+      </p>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="bg-gray-50 py-10">
+    <div class="mx-auto max-w-4xl px-4">
+      <div class="grid gap-4 md:grid-cols-3">
+        <div class="flex items-start gap-3">
+          <span
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#2C5234] text-sm font-bold text-white"
+            >1</span
+          >
+          <div>
+            <p class="text-sm font-semibold text-gray-900">Set your scenario</p>
+            <p class="text-xs text-gray-500">Operation type, goal, and priority</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <span
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#2C5234] text-sm font-bold text-white"
+            >2</span
+          >
+          <div>
+            <p class="text-sm font-semibold text-gray-900">See the comparison</p>
+            <p class="text-xs text-gray-500">Side-by-side on outcomes that matter</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <span
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#2C5234] text-sm font-bold text-white"
+            >3</span
+          >
+          <div>
+            <p class="text-sm font-semibold text-gray-900">Dive into evidence</p>
+            <p class="text-xs text-gray-500">Trial data, field results, citations</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Comparison Tool -->
+  <section class="py-12">
+    <div class="mx-auto max-w-5xl px-4">
+      <ComparisonTool client:load />
+    </div>
+  </section>
+
+  <!-- Disclaimer -->
+  <section class="bg-gray-50 py-8">
+    <div class="mx-auto max-w-3xl px-4">
+      <p class="text-center text-xs text-gray-400">
+        This tool provides general comparisons between biological and conventional approaches.
+        Results are contextual — what works best depends on your specific conditions, history, and
+        goals. Conventional options may act faster in some acute situations; biological programs
+        support longer-term system health. Always consult your agronomist, veterinarian, or turf
+        specialist for situation-specific advice.
+      </p>
+    </div>
+  </section>
+
+  <!-- Bottom CTA -->
+  <section class="bg-[#2C5234] py-12 text-white">
+    <div class="mx-auto max-w-3xl px-4 text-center">
+      <h2 class="font-heading text-2xl uppercase">Ready to Try the Biological Approach?</h2>
+      <p class="mx-auto mt-3 max-w-xl text-green-100">
+        Start with our Application Rate Calculator to see exact quantities and cost for your
+        operation, or talk to a specialist for personalized guidance.
+      </p>
+      <div class="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+        <a
+          href="/application-rate-calculator/"
+          class="rounded-md bg-white px-6 py-3 text-sm font-semibold text-[#2C5234] transition-colors hover:bg-green-50"
+        >
+          Calculate My Rate
+        </a>
+        <a
+          href="/contact/"
+          class="rounded-md border border-white/30 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+        >
+          Talk to a Specialist
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
