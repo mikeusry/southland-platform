@@ -2,7 +2,7 @@ import type { Env, AskRequest, AskResponse } from './types'
 import { embedQuery } from './lib/embeddings'
 import { queryVectorize } from './lib/vectorize'
 import { generate } from './lib/llm'
-import { verifyAnswer } from './lib/verify'
+// import { verifyAnswer } from './lib/verify' // Disabled for latency — enable for autonomy only
 import { DRAFT_REPLY_PROMPT, STAFF_COPILOT_PROMPT, CHAT_PROMPT } from './prompts/draft-reply'
 
 // ─── Ask Handler ────────────────────────────────────────────────────────────
@@ -116,26 +116,29 @@ export async function handleAsk(
     }
   )
 
-  // Step 6: Anti-hallucination verification pipeline (4-layer)
-  const verification = await verifyAnswer(
-    env,
-    body.query,
-    answer,
-    contextParts,
-    context === 'support_draft' || context === 'staff' || context === 'chat' ? context : 'customer'
-  )
-
-  // Merge retrieval confidence with verification confidence
+  // Confidence from retrieval scores
   const topScore = results[0]?.score || 0
-  let confidence: AskResponse['confidence'] = verification.confidence
-  // Downgrade if retrieval scores are low even if verification passed
-  if (topScore < 0.5 && confidence === 'high') confidence = 'medium'
-  if (topScore < 0.3) confidence = 'low'
+  let confidence: AskResponse['confidence'] = 'low'
+  if (topScore > 0.7) confidence = 'high'
+  else if (topScore > 0.5) confidence = 'medium'
 
-  const answerable = verification.checks.answerable && verification.checks.faithful
+  // Check answerability from refusal phrases (lightweight, no extra LLM call)
+  const refusalPhrases = [
+    "don't have specific information",
+    "couldn't find that",
+    "connect you with",
+    "check with",
+    "not in our documentation",
+  ]
+  const answerable = !refusalPhrases.some((p) => answer.toLowerCase().includes(p))
+
+  // NOTE: Full 4-layer verification (lib/verify.ts) is available but disabled
+  // for latency reasons. Enable for autonomous sends only (Layer 5.5).
+  // To enable: uncomment verifyAnswer() call below.
+  // const verification = await verifyAnswer(env, body.query, answer, contextParts, context)
 
   const response: AskResponse = {
-    answer: verification.answer,
+    answer,
     sources: results.slice(0, 5).map((r) => ({
       title: r.title,
       url: r.url,

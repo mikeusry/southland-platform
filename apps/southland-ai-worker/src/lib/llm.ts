@@ -6,7 +6,7 @@ import type { Env } from '../types'
 // Workers AI model IDs — types package may lag behind actual availability.
 // Cast through string to avoid type errors when CF adds new models.
 export const LLM_MODELS = {
-  fast: '@cf/meta/llama-3.1-8b-instruct' as string,    // Drafts, chat, classification, answerability
+  fast: '@cf/meta/llama-3.1-8b-instruct-fp8' as string,    // Drafts, chat, classification, answerability
   quality: '@cf/meta/llama-3.3-70b-instruct-fp8-fast' as string, // Verify, escalation, autonomy QA
 }
 
