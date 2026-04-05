@@ -55,6 +55,8 @@ export default [
         NodeListOf: 'readonly',
         crypto: 'readonly',
         TextEncoder: 'readonly',
+        TextDecoder: 'readonly',
+        ReadableStream: 'readonly',
         Uint8Array: 'readonly',
       },
     },
