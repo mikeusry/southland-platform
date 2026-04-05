@@ -21,7 +21,13 @@ export async function embedText(
   const start = Date.now()
   const input = Array.isArray(text) ? text : [text]
 
-  const result = await env.AI.run(ACTIVE_MODEL, { text: input }) as { data: number[][] }
+  // Route through AI Gateway for observability + caching
+  const gatewaySlug = env.AI_GATEWAY_SLUG
+  const gatewayOpts = gatewaySlug
+    ? { gateway: { id: gatewaySlug, skipCache: false, cacheTtl: 300 } }
+    : undefined
+
+  const result = await env.AI.run(ACTIVE_MODEL, { text: input }, gatewayOpts) as { data: number[][] }
 
   return {
     vectors: result.data,

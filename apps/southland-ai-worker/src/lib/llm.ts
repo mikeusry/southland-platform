@@ -37,6 +37,12 @@ export async function generate(
   const modelId = LLM_MODELS[model]
   const start = Date.now()
 
+  // Route through AI Gateway for observability
+  const gatewaySlug = env.AI_GATEWAY_SLUG
+  const gatewayOpts = gatewaySlug
+    ? { gateway: { id: gatewaySlug, skipCache: false, cacheTtl: 0 } } // No caching for LLM generation
+    : undefined
+
   const result = await env.AI.run(
     modelId as keyof AiModels,
     {
@@ -46,7 +52,8 @@ export async function generate(
       ],
       temperature,
       max_tokens,
-    }
+    },
+    gatewayOpts
   ) as { response?: string }
 
   const text = result?.response ? String(result.response) : ''
@@ -70,6 +77,11 @@ export async function generateStream(
   const { model = 'fast', temperature = 0.3, max_tokens = 300 } = options
   const modelId = LLM_MODELS[model]
 
+  const gatewaySlug = env.AI_GATEWAY_SLUG
+  const gatewayOpts = gatewaySlug
+    ? { gateway: { id: gatewaySlug, skipCache: true, cacheTtl: 0 } }
+    : undefined
+
   const stream = await env.AI.run(
     modelId as keyof AiModels,
     {
@@ -80,7 +92,8 @@ export async function generateStream(
       temperature,
       max_tokens,
       stream: true,
-    }
+    },
+    gatewayOpts
   )
 
   return stream as unknown as ReadableStream
