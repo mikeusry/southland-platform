@@ -92,7 +92,9 @@ const headerScript = `
 })();
 </script>`
 
-const headerHtml = `<div class="sl-hf">${headerMarkup}</div>${headerScript}`
+// Strip preload links — logos are not LCP and compete with hero images for bandwidth
+const cleanedHeaderMarkup = headerMarkup.replace(/<link\s+rel="preload"[^>]*\/>/g, '')
+const headerHtml = `<div class="sl-hf">${cleanedHeaderMarkup}</div>${headerScript}`
 
 writeFileSync(join(partialsDir, 'header.html'), headerHtml)
 console.log('  header.html written')
@@ -153,7 +155,8 @@ const footerElement = createElement(Footer, {
 })
 
 const footerMarkup = renderToStaticMarkup(footerElement)
-const footerHtml = `<div class="sl-hf" style="flex:none">${footerMarkup}</div>`
+const cleanedFooterMarkup = footerMarkup.replace(/<link\s+rel="preload"[^>]*\/>/g, '')
+const footerHtml = `<div class="sl-hf" style="flex:none">${cleanedFooterMarkup}</div>`
 
 writeFileSync(join(partialsDir, 'footer.html'), footerHtml)
 console.log('  footer.html written')
@@ -177,7 +180,8 @@ try { unlinkSync(tailwindInput) } catch {}
 
 // Append scoping CSS and font imports
 const scopingCss = `
-/* Font imports */
+/* Open Sans loaded by BaseLayout.astro — not duplicated here for Astro-served pages.
+   HTMLRewriter-injected pages (Shopify) load it via this partial CSS. */
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
 
 @font-face {

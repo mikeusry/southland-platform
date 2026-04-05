@@ -8,8 +8,7 @@
  * Source: Shopify Admin API - settings_data.json
  */
 
-/* Open Sans - Body Font (Google Fonts) */
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap');
+/* Open Sans - Body Font (loaded in BaseLayout.astro, not duplicated here) */
 
 /* Eveleth Dot - Heading Font (self-hosted, premium) */
 @font-face {
