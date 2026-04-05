@@ -21,10 +21,12 @@ export async function embedText(
   const start = Date.now()
   const input = Array.isArray(text) ? text : [text]
 
-  // Route through AI Gateway for observability + caching
-  const gatewaySlug = env.AI_GATEWAY_SLUG
-  const gatewayOpts = gatewaySlug
-    ? { gateway: { id: gatewaySlug, skipCache: false, cacheTtl: 300 } }
+  // AI Gateway routing — disabled until gateway is created in CF dashboard.
+  // To enable: create gateway "southland-ai" in CF dashboard, then set
+  // AI_GATEWAY_ENABLED=true in wrangler.toml vars.
+  const useGateway = env.AI_GATEWAY_SLUG && env.ENVIRONMENT === 'gateway-enabled'
+  const gatewayOpts = useGateway
+    ? { gateway: { id: env.AI_GATEWAY_SLUG, skipCache: false, cacheTtl: 300 } }
     : undefined
 
   const result = await env.AI.run(ACTIVE_MODEL, { text: input }, gatewayOpts) as { data: number[][] }

@@ -37,10 +37,10 @@ export async function generate(
   const modelId = LLM_MODELS[model]
   const start = Date.now()
 
-  // Route through AI Gateway for observability
-  const gatewaySlug = env.AI_GATEWAY_SLUG
-  const gatewayOpts = gatewaySlug
-    ? { gateway: { id: gatewaySlug, skipCache: false, cacheTtl: 0 } } // No caching for LLM generation
+  // AI Gateway — disabled until gateway created in CF dashboard
+  const useGateway = env.AI_GATEWAY_SLUG && env.ENVIRONMENT === 'gateway-enabled'
+  const gatewayOpts = useGateway
+    ? { gateway: { id: env.AI_GATEWAY_SLUG, skipCache: false, cacheTtl: 0 } }
     : undefined
 
   const result = await env.AI.run(
@@ -77,9 +77,9 @@ export async function generateStream(
   const { model = 'fast', temperature = 0.3, max_tokens = 300 } = options
   const modelId = LLM_MODELS[model]
 
-  const gatewaySlug = env.AI_GATEWAY_SLUG
-  const gatewayOpts = gatewaySlug
-    ? { gateway: { id: gatewaySlug, skipCache: true, cacheTtl: 0 } }
+  const useGateway2 = env.AI_GATEWAY_SLUG && env.ENVIRONMENT === 'gateway-enabled'
+  const gatewayOpts2 = useGateway2
+    ? { gateway: { id: env.AI_GATEWAY_SLUG, skipCache: true, cacheTtl: 0 } }
     : undefined
 
   const stream = await env.AI.run(
@@ -93,7 +93,7 @@ export async function generateStream(
       max_tokens,
       stream: true,
     },
-    gatewayOpts
+    gatewayOpts2
   )
 
   return stream as unknown as ReadableStream
