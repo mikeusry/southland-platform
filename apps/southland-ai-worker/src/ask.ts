@@ -76,22 +76,77 @@ export async function handleAsk(
     }
   }
 
-  // Step 3: Inject customer order data for order-specific queries
-  let orderContext = ''
-  if (body.customer_context?.orders?.length) {
-    orderContext = '\n\nCUSTOMER ORDER DATA:\n' + body.customer_context.orders
+  // Step 3: Resolve customer identity + fetch account snapshot
+  let customerContext = ''
+  let identityLevel: import('./types').IdentityLevel = 'anonymous'
+
+  if (body.customer_email || body.order_number) {
+    // Fetch live customer context from Nexus
+    try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (env.NEXUS_API_KEY) headers['Authorization'] = `Bearer ${env.NEXUS_API_KEY}`
+
+      const ctxRes = await fetch(`${env.NEXUS_API_URL}/api/ai/customer-context`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          email: body.customer_email,
+          order_number: body.order_number,
+        }),
+      })
+
+      if (ctxRes.ok) {
+        const snapshot = (await ctxRes.json()) as import('./types').CustomerSnapshot
+        identityLevel = snapshot.identity_level || 'anonymous'
+
+        if (snapshot.customer_id && identityLevel !== 'anonymous') {
+          const parts: string[] = []
+          parts.push(`Customer: ${snapshot.display_name || 'Unknown'}`)
+
+          if (snapshot.recent_orders?.length) {
+            parts.push('Recent orders:')
+            for (const o of snapshot.recent_orders.slice(0, 3)) {
+              let line = `  - ${o.number}: ${o.status}`
+              if (o.tracking) line += ` (tracking: ${o.tracking}, ${o.carrier || 'unknown carrier'})`
+              if (o.delivery_status) line += ` — ${o.delivery_status}`
+              parts.push(line)
+            }
+          }
+
+          if (snapshot.active_subscriptions?.length) {
+            parts.push('Active subscriptions:')
+            for (const s of snapshot.active_subscriptions) {
+              parts.push(`  - ${s.product}: ${s.status}, next billing: ${s.next_billing || 'unknown'}`)
+            }
+          }
+
+          if (snapshot.shipping_exceptions?.length) {
+            parts.push('Shipping issues:')
+            for (const e of snapshot.shipping_exceptions) {
+              parts.push(`  - Order ${e.order_number}: ${e.status} (${e.carrier} ${e.tracking})`)
+            }
+          }
+
+          if (snapshot.last_resolved_summary) {
+            parts.push(`Previous support: ${snapshot.last_resolved_summary}`)
+          }
+
+          customerContext = '\n\nCUSTOMER ACCOUNT DATA:\n' + parts.join('\n')
+        }
+      }
+    } catch (err) {
+      console.error('Customer context fetch failed (non-blocking):', err)
+    }
+  } else if (body.customer_context?.orders?.length) {
+    // Legacy: pre-built context from support detail page
+    customerContext = '\n\nCUSTOMER ORDER DATA:\n' + body.customer_context.orders
       .map((o) => `- Order ${o.number}: ${o.status} (${o.date})`)
-      .join('\n')
-  }
-  if (body.customer_context?.subscriptions?.length) {
-    orderContext += '\n\nCUSTOMER SUBSCRIPTIONS:\n' + body.customer_context.subscriptions
-      .map((s) => `- Subscription ${s.id}: ${s.status}`)
       .join('\n')
   }
 
   // Step 4: Build the full prompt
   const systemPrompt = SYSTEM_PROMPTS[context]
-  const fullContext = contextParts.join('\n\n') + orderContext
+  const fullContext = contextParts.join('\n\n') + customerContext
 
   const userMessage = `CONTEXT:\n${fullContext}\n\nQUESTION: ${body.query}`
 

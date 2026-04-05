@@ -123,10 +123,49 @@ export interface ClassifyResponse {
 
 // ─── RAG / Ask Types ────────────────────────────────────────────────────────
 
+// Identity confidence levels
+export type IdentityLevel = 'anonymous' | 'claimed' | 'verified-light' | 'verified-strong'
+
+// Customer context from Nexus /api/ai/customer-context
+export interface CustomerSnapshot {
+  customer_id: string | null
+  display_name: string | null
+  identity_level: IdentityLevel
+  identity_expires_at?: string
+  recent_orders?: Array<{
+    number: string
+    status: string
+    date: string
+    total: number | null
+    tracking: string | null
+    carrier: string | null
+    delivery_status: string | null
+  }>
+  active_subscriptions?: Array<{
+    id: string
+    shopify_contract_id: string | null
+    status: string
+    next_billing: string | null
+    product: string
+  }>
+  open_cases?: number
+  last_resolved_summary?: string | null
+  shipping_exceptions?: Array<{
+    order_number: string
+    tracking: string
+    carrier: string
+    status: string
+  }>
+}
+
 export interface AskRequest {
   query: string
   context: 'staff' | 'support_draft' | 'chat'
   conversation_id?: string
+  // New: customer identity for order-aware chat
+  customer_email?: string
+  order_number?: string
+  // Legacy: pre-built context (support detail page)
   customer_context?: {
     orders?: Array<{ id: string; number: string; status: string; date: string }>
     subscriptions?: Array<{ id: string; status: string }>
