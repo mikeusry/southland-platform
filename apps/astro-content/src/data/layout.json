@@ -5,7 +5,7 @@
     "note": "All nav links are relative paths. Middleware routes Astro pages to Astro, everything else to Shopify."
   },
   "header": {
-    "logoUrl": "https://cdn.shopify.com/s/files/1/0794/9519/files/Southland_Orgnaics_Horizontal_a76ce835-f89f-43e6-8a16-9bcf122d4922.png?v=1730460323",
+    "logoUrl": "https://res.cloudinary.com/southland-organics/image/upload/Southland%20Website/Southland%20Branding/logos/Southland_Organics_Horizontal.svg",
     "logoAlt": "Southland Organics",
     "navigation": [
       {
