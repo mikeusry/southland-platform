@@ -7,6 +7,7 @@ import { handleIndex } from './index-worker'
 import { handleBulkIndex } from './bulk-index'
 import { handleSummarize } from './summarize'
 import { handleContentGaps } from './content-gaps'
+import { handleEscalate } from './escalate'
 
 // ─── CORS ───────────────────────────────────────────────────────────────────
 
@@ -68,6 +69,10 @@ export default {
         // Layer 3.3: Content gap mining
         case '/content-gaps':
           return handleContentGaps(request, env, ctx, origin)
+
+        // Phase 3: Chat → human escalation
+        case '/escalate':
+          return handleEscalate(request, env, ctx, origin)
 
         // Benchmark: Phase 0 — model latency testing
         case '/benchmark':
