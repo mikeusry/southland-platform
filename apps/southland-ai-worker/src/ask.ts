@@ -5,6 +5,8 @@ import { generate } from './lib/llm'
 // import { verifyAnswer } from './lib/verify' // Disabled for latency — enable for autonomy only
 import { DRAFT_REPLY_PROMPT, STAFF_COPILOT_PROMPT, CHAT_PROMPT } from './prompts/draft-reply'
 import { selectVoiceExamples, formatVoiceExamples } from './prompts/voice-examples'
+import { READ_TOOLS, executeTool, buildToolSelectionPrompt } from './tools'
+import { parseJSON } from './lib/llm'
 
 // ─── Ask Handler ────────────────────────────────────────────────────────────
 // Layer 5+6: Shared RAG endpoint for support drafts, staff copilot, chat.
@@ -145,7 +147,50 @@ export async function handleAsk(
       .join('\n')
   }
 
-  // Step 4: Build the full prompt
+  // Step 4: Tool routing (read-only, one turn max)
+  let toolResult = ''
+  if (identityLevel !== 'anonymous' && context === 'chat') {
+    // Check if the query needs a tool (order lookup, tracking, etc.)
+    const lower = body.query.toLowerCase()
+    const needsTool = lower.includes('order') || lower.includes('track') || lower.includes('ship') ||
+      lower.includes('subscri') || lower.includes('return') || lower.includes('refund') ||
+      lower.includes('where is') || lower.includes('where\'s') || lower.includes('status')
+
+    if (needsTool) {
+      try {
+        // Ask LLM to select a tool
+        const toolPrompt = buildToolSelectionPrompt(READ_TOOLS)
+        const { text: toolSelection } = await generate(env, toolPrompt, body.query, {
+          model: 'fast',
+          temperature: 0.0,
+          max_tokens: 100,
+        })
+
+        const selection = parseJSON<{ tool: string; arguments?: Record<string, string>; question?: string }>(toolSelection)
+
+        if (selection && selection.tool && selection.tool !== 'none') {
+          if (selection.tool === 'ask_user') {
+            // LLM needs more info — pass the question through as the answer
+            toolResult = `\n\nTOOL NOTE: More information needed from customer: ${selection.question || 'Please provide your order number.'}`
+          } else if (selection.arguments) {
+            // Execute the tool
+            const result = await executeTool(env, selection.tool, selection.arguments, identityLevel)
+            if (result.status === 'success') {
+              toolResult = `\n\nTOOL RESULT (${selection.tool}):\n${JSON.stringify(result.data, null, 2)}`
+            } else if (result.status === 'unauthorized') {
+              toolResult = '\n\nTOOL NOTE: Customer identity needs to be verified further before accessing account details.'
+            } else {
+              toolResult = `\n\nTOOL NOTE: Could not retrieve data — ${result.data?.error || 'service temporarily unavailable'}.`
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Tool routing error (non-blocking):', err)
+      }
+    }
+  }
+
+  // Step 5: Build the full prompt
   // Build system prompt with scenario-specific voice examples
   let systemPrompt = SYSTEM_PROMPTS[context]
   if (context === 'chat' || context === 'support_draft') {
@@ -162,7 +207,7 @@ export async function handleAsk(
     const examples = selectVoiceExamples(intentKeywords, 2)
     systemPrompt += formatVoiceExamples(examples)
   }
-  const fullContext = contextParts.join('\n\n') + customerContext
+  const fullContext = contextParts.join('\n\n') + customerContext + toolResult
 
   const userMessage = `CONTEXT:\n${fullContext}\n\nQUESTION: ${body.query}`
 
