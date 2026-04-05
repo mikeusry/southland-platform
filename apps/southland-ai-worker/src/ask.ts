@@ -4,6 +4,7 @@ import { queryVectorize } from './lib/vectorize'
 import { generate } from './lib/llm'
 // import { verifyAnswer } from './lib/verify' // Disabled for latency — enable for autonomy only
 import { DRAFT_REPLY_PROMPT, STAFF_COPILOT_PROMPT, CHAT_PROMPT } from './prompts/draft-reply'
+import { selectVoiceExamples, formatVoiceExamples } from './prompts/voice-examples'
 
 // ─── Ask Handler ────────────────────────────────────────────────────────────
 // Layer 5+6: Shared RAG endpoint for support drafts, staff copilot, chat.
@@ -145,7 +146,22 @@ export async function handleAsk(
   }
 
   // Step 4: Build the full prompt
-  const systemPrompt = SYSTEM_PROMPTS[context]
+  // Build system prompt with scenario-specific voice examples
+  let systemPrompt = SYSTEM_PROMPTS[context]
+  if (context === 'chat' || context === 'support_draft') {
+    // Classify intents from query for voice example selection
+    const intentKeywords: string[] = []
+    const lower = body.query.toLowerCase()
+    if (lower.includes('order') || lower.includes('ship') || lower.includes('track') || lower.includes('deliver')) intentKeywords.push('shipping', 'order_issue')
+    if (lower.includes('return') || lower.includes('refund') || lower.includes('damaged')) intentKeywords.push('returns')
+    if (lower.includes('subscri') || lower.includes('cancel') || lower.includes('skip')) intentKeywords.push('subscription')
+    if (lower.includes('how') || lower.includes('use') || lower.includes('apply') || lower.includes('rate')) intentKeywords.push('product_question')
+    if (lower.includes('bill') || lower.includes('invoice') || lower.includes('payment')) intentKeywords.push('billing')
+    if (!intentKeywords.length) intentKeywords.push('product_question') // default
+
+    const examples = selectVoiceExamples(intentKeywords, 2)
+    systemPrompt += formatVoiceExamples(examples)
+  }
   const fullContext = contextParts.join('\n\n') + customerContext
 
   const userMessage = `CONTEXT:\n${fullContext}\n\nQUESTION: ${body.query}`
