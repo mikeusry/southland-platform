@@ -438,7 +438,12 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
       <div class="grid gap-8 md:grid-cols-2 md:gap-12">
         {/* Left: Image gallery */}
         <div>
-          <ImageGallery client:load images={product.images} productTitle={product.title} />
+          <ImageGallery
+            client:load
+            images={product.images}
+            productTitle={product.title}
+            productHandle={product.handle}
+          />
         </div>
 
         {/* Right: Product info + add to cart */}

@@ -29,8 +29,8 @@ export default function ChatWidget() {
     if (open) inputRef.current?.focus()
   }, [open])
 
-  const sendMessage = async () => {
-    const query = input.trim()
+  const sendMessage = async (overrideQuery?: string) => {
+    const query = (overrideQuery ?? input).trim()
     if (!query || loading) return
 
     setInput('')
@@ -41,7 +41,7 @@ export default function ChatWidget() {
       const res = await fetch(`${AI_WORKER_URL}/ask`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, context: 'customer' }),
+        body: JSON.stringify({ query, context: 'chat' }),
       })
 
       if (!res.ok) throw new Error(`${res.status}`)
@@ -63,7 +63,7 @@ export default function ChatWidget() {
         ...prev,
         {
           role: 'assistant',
-          content: 'Sorry, something went wrong. Please try again or call us at (706) 800-4001.',
+          content: 'Sorry, something went wrong. Please try again or call us at (800) 608-3755.',
         },
       ])
     } finally {
@@ -146,8 +146,7 @@ export default function ChatWidget() {
                   <button
                     key={q}
                     onClick={() => {
-                      setInput(q)
-                      setTimeout(sendMessage, 0)
+                      sendMessage(q)
                     }}
                     className="rounded-full border border-gray-200 px-3 py-1.5 text-xs text-gray-600 transition-colors hover:border-gray-300 hover:bg-gray-50"
                   >

@@ -522,35 +522,51 @@ export function getHeroBannerUrl(
 }
 
 // =============================================================================
-// SHOPIFY IMAGE OPTIMIZATION (via Cloudinary fetch)
+// SHOPIFY PRODUCT IMAGE OPTIMIZATION (via Cloudinary upload)
 // =============================================================================
 
 /**
- * Proxy a Shopify CDN image through Cloudinary's fetch mode.
+ * Serve a Shopify product image from Cloudinary's upload storage.
+ * Images are mirrored to: Southland Website/products/{handle}/{filename}
+ *
  * Automatically resizes, converts to WebP/AVIF, and applies quality optimization.
+ * Falls back to the original Shopify CDN URL if the image is not from cdn.shopify.com.
  *
  * @param shopifyUrl - Full Shopify CDN URL (cdn.shopify.com/s/files/...)
+ * @param handle - Shopify product handle (used as folder name)
  * @param width - Target display width
  * @param height - Target display height (optional, defaults to square)
- * @returns Optimized Cloudinary fetch URL
+ * @returns Optimized Cloudinary upload URL
  *
  * @example
- * optimizeShopifyImage(product.images[0].url, 300, 300)
- * // → https://res.cloudinary.com/southland-organics/image/fetch/w_300,h_300,c_pad,f_auto,q_auto/https://cdn.shopify.com/...
+ * optimizeShopifyImage(product.images[0].url, product.handle, 300, 300)
+ * // → https://res.cloudinary.com/southland-organics/image/upload/w_300,h_300,c_pad,f_auto,q_auto/Southland%20Website/products/poultry-probiotic/BigOleBird_2.5_biukje
  */
 export function optimizeShopifyImage(
   shopifyUrl: string,
+  handle: string,
   width: number = 400,
   height?: number,
   options: { crop?: CropMode; background?: string } = {}
 ): string {
+  if (!shopifyUrl.includes('cdn.shopify.com')) return shopifyUrl
+
   const cloudName = getCloudName()
   const h = height || width
   const crop = options.crop || 'pad'
   const transforms = [`w_${width}`, `h_${h}`, `c_${crop}`, 'f_auto', 'q_auto']
   if (options.background) transforms.push(`b_${options.background}`)
   const transformString = transforms.join(',')
-  return `https://res.cloudinary.com/${cloudName}/image/fetch/${transformString}/${shopifyUrl}`
+
+  // Extract filename without extension from the Shopify URL
+  const cleanUrl = shopifyUrl.split('?')[0]
+  const fullFilename = cleanUrl.split('/').pop() || ''
+  const filename = fullFilename.replace(/\.[^.]+$/, '')
+  // Clean up URL-encoded chars to match Cloudinary public_id
+  const cleanFilename = decodeURIComponent(filename).replace(/[^a-zA-Z0-9_.-]/g, '_')
+
+  const publicId = `Southland Website/products/${handle}/${cleanFilename}`
+  return `https://res.cloudinary.com/${cloudName}/image/upload/${transformString}/${publicId}`
 }
 
 // =============================================================================

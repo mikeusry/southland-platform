@@ -239,7 +239,7 @@ function getProducts(filter: string) {
                 >
                   {product.images[0] ? (
                     <img
-                      src={optimizeShopifyImage(product.images[0].url, 300, 300)}
+                      src={optimizeShopifyImage(product.images[0].url, product.handle, 300, 300)}
                       alt={product.images[0].altText || product.title}
                       width={300}
                       height={300}
@@ -384,7 +384,7 @@ function getProducts(filter: string) {
                 >
                   {product.images[0] ? (
                     <img
-                      src={optimizeShopifyImage(product.images[0].url, 300, 300)}
+                      src={optimizeShopifyImage(product.images[0].url, product.handle, 300, 300)}
                       alt={product.images[0].altText || product.title}
                       width={300}
                       height={300}
@@ -536,7 +536,7 @@ function getProducts(filter: string) {
                   >
                     {product.images[0] ? (
                       <img
-                        src={optimizeShopifyImage(product.images[0].url, 300, 300)}
+                        src={optimizeShopifyImage(product.images[0].url, product.handle, 300, 300)}
                         alt={product.images[0].altText || product.title}
                         width={300}
                         height={300}
@@ -724,7 +724,7 @@ function getProducts(filter: string) {
               >
                 {featuredProducts[0].images[0] && (
                   <img
-                    src={optimizeShopifyImage(featuredProducts[0].images[0].url, 400, 400)}
+                    src={optimizeShopifyImage(featuredProducts[0].images[0].url, featuredProducts[0].handle, 400, 400)}
                     alt={featuredProducts[0].images[0].altText || featuredProducts[0].title}
                     class="h-full w-full object-cover transition group-hover:scale-105"
                     width="400"
@@ -742,7 +742,7 @@ function getProducts(filter: string) {
               >
                 {product.images[0] ? (
                   <img
-                    src={optimizeShopifyImage(product.images[0].url, 300, 300)}
+                    src={optimizeShopifyImage(product.images[0].url, product.handle, 300, 300)}
                     alt={product.images[0].altText || product.title}
                     class="aspect-square w-full object-cover transition group-hover:scale-105"
                     width="200"

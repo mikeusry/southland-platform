@@ -8,19 +8,25 @@
 import { useState, useEffect } from 'react'
 import type { ProductImage } from '@southland/shopify-storefront'
 
-/** Proxy Shopify CDN images through Cloudinary fetch for auto WebP + resize */
-function optimizeUrl(url: string, w: number, h?: number): string {
+/** Serve Shopify product images from Cloudinary upload storage */
+function optimizeUrl(url: string, handle: string, w: number, h?: number): string {
   if (!url.includes('cdn.shopify.com')) return url
   const cloudName = 'southland-organics'
-  return `https://res.cloudinary.com/${cloudName}/image/fetch/w_${w},h_${h || w},c_pad,f_auto,q_auto/${url}`
+  const cleanUrl = url.split('?')[0]
+  const fullFilename = cleanUrl.split('/').pop() || ''
+  const filename = fullFilename.replace(/\.[^.]+$/, '')
+  const cleanFilename = decodeURIComponent(filename).replace(/[^a-zA-Z0-9_.-]/g, '_')
+  const publicId = `Southland Website/products/${handle}/${cleanFilename}`
+  return `https://res.cloudinary.com/${cloudName}/image/upload/w_${w},h_${h || w},c_pad,f_auto,q_auto/${publicId}`
 }
 
 interface Props {
   images: ProductImage[]
   productTitle: string
+  productHandle: string
 }
 
-export default function ImageGallery({ images, productTitle }: Props) {
+export default function ImageGallery({ images, productTitle, productHandle }: Props) {
   const [activeIndex, setActiveIndex] = useState(0)
 
   // Listen for variant changes from AddToCartButton
@@ -62,7 +68,7 @@ export default function ImageGallery({ images, productTitle }: Props) {
       {/* Main image */}
       <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
         <img
-          src={optimizeUrl(activeImage.url, 600)}
+          src={optimizeUrl(activeImage.url, productHandle, 600)}
           alt={activeImage.altText || productTitle}
           width={600}
           height={600}
@@ -87,7 +93,7 @@ export default function ImageGallery({ images, productTitle }: Props) {
               aria-label={`View image ${index + 1}`}
             >
               <img
-                src={optimizeUrl(image.url, 80)}
+                src={optimizeUrl(image.url, productHandle, 80)}
                 alt={image.altText || `${productTitle} image ${index + 1}`}
                 width={80}
                 height={80}

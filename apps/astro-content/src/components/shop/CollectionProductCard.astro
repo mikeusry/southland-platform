@@ -136,7 +136,7 @@ const displayName = product.title.includes('|') ? product.title.split('|')[0].tr
     {
       image ? (
         <img
-          src={optimizeShopifyImage(image.url, 400, 400)}
+          src={optimizeShopifyImage(image.url, product.handle, 400, 400)}
           alt={image.altText || product.title}
           width="400"
           height="400"

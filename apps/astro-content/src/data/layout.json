@@ -18,7 +18,8 @@
         "children": [
           { "label": "All Products", "href": "/products/", "group": "Browse" },
           { "label": "Build a Case", "href": "/build-a-case/", "group": "Browse" },
-          { "label": "Find a Dealer", "href": "/store-locator/", "group": "Browse" }
+          { "label": "Find a Dealer", "href": "/store-locator/", "group": "Browse" },
+          { "label": "Rewards", "href": "/rewards/", "group": "Browse" }
         ]
       },
       {
