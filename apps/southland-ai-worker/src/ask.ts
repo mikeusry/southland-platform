@@ -69,6 +69,12 @@ export async function handleAsk(
     .filter((r) => r.score > 0.4 && r.url)
     .slice(0, 4)
 
+  // Extract product cards from search results when products are mentioned
+  let productCards: AskResponse['product_cards']
+  if (prepared.context === 'chat') {
+    productCards = extractProductCards(answer, prepared.results, env)
+  }
+
   const response: AskResponse = {
     answer,
     sources: relevantSources.map((r) => ({
@@ -82,6 +88,7 @@ export async function handleAsk(
     latency_ms: Date.now() - start,
     model: llmModel,
     suggested_questions: suggestedQuestions,
+    product_cards: productCards,
   }
 
   ctx.waitUntil(logAskEvent(env, body, response))
@@ -146,9 +153,12 @@ export async function handleAskStream(
     async pull(controller) {
       const { done, value } = await reader.read()
       if (done) {
-        // Generate follow-ups from the accumulated answer
+        // Generate follow-ups and product cards from the accumulated answer
         const suggestedQuestions = context === 'chat'
           ? generateFollowUps(body.query, fullAnswer, prepared.results)
+          : undefined
+        const productCards = context === 'chat'
+          ? extractProductCards(fullAnswer, prepared.results, env)
           : undefined
 
         // Send final metadata event
@@ -158,6 +168,7 @@ export async function handleAskStream(
           latency_ms: Date.now() - start,
           confidence: topScore > 0.7 ? 'high' : topScore > 0.5 ? 'medium' : 'low',
           suggested_questions: suggestedQuestions,
+          product_cards: productCards,
         })}\n\n`))
 
         controller.close()
@@ -381,17 +392,78 @@ async function prepareContext(body: AskRequest, env: Env): Promise<PreparedConte
   return { context, systemPrompt, userMessage, results }
 }
 
+// ─── Product Card Extraction ───────────────────────────────────────────────
+// When the bot mentions products, return structured cards for rich rendering.
+
+function extractProductCards(
+  answer: string,
+  results: VectorSearchResult[],
+  _env: Env
+): AskResponse['product_cards'] {
+  const answerLower = answer.toLowerCase()
+
+  // Find product results whose titles appear in the answer
+  const productResults = results.filter(
+    (r) => r.doc_type === 'product' && r.score > 0.5
+  )
+
+  const cards: NonNullable<AskResponse['product_cards']> = []
+  for (const r of productResults) {
+    // Check if the product name appears in the answer
+    const nameLower = r.title.toLowerCase()
+    if (answerLower.includes(nameLower) || answerLower.includes(nameLower.replace(/\s+/g, ''))) {
+      cards.push({
+        name: r.title,
+        url: r.url.startsWith('http') ? r.url : `https://southlandorganics.com${r.url}`,
+        description: '', // Populated from chunk text below
+        category: r.business_unit,
+      })
+    }
+  }
+
+  // If no exact name matches, check for common product keywords in the answer
+  if (cards.length === 0) {
+    const PRODUCT_KEYWORDS: Record<string, string> = {
+      'litter life': '/products/litter-life',
+      'big ole bird': '/products/big-ole-bird',
+      'fertalive': '/products/fertalive',
+      'dog spot': '/products/dog-spot-solution',
+      'd2 biological': '/products/d2-biological-solution',
+      'hen helper': '/products/hen-helper',
+      'ignition': '/products/ignition',
+      'south40': '/products/south40',
+      'catalyst': '/products/catalyst',
+    }
+
+    for (const [keyword, url] of Object.entries(PRODUCT_KEYWORDS)) {
+      if (answerLower.includes(keyword)) {
+        const displayName = keyword.split(' ').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+        cards.push({
+          name: displayName,
+          url: `https://southlandorganics.com${url}`,
+          description: '',
+          category: '',
+        })
+      }
+    }
+  }
+
+  return cards.length > 0 ? cards.slice(0, 2) : undefined
+}
+
 // ─── Follow-up Question Generation ─────────────────────────────────────────
 // Deterministic — no extra LLM call. Maps query topics to relevant follow-ups.
 
-interface SearchResult {
+interface VectorSearchResult {
   score: number
   title: string
   doc_type: string
   business_unit: string
+  url: string
+  id: string
 }
 
-function generateFollowUps(query: string, answer: string, results: SearchResult[]): string[] {
+function generateFollowUps(query: string, answer: string, results: VectorSearchResult[]): string[] {
   const lower = query.toLowerCase()
   const answerLower = answer.toLowerCase()
   const suggestions: string[] = []

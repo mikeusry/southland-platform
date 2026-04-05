@@ -189,6 +189,12 @@ export interface AskResponse {
   latency_ms: number
   model: string
   suggested_questions?: string[] // Follow-up suggestions for chat context
+  product_cards?: Array<{       // Structured product data for chat widget cards
+    name: string
+    url: string
+    description: string
+    category: string
+  }>
 }
 
 // ─── Benchmark Types ────────────────────────────────────────────────────────

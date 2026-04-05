@@ -26,24 +26,72 @@ function detectsAccountIntent(query: string): boolean {
   return ACCOUNT_INTENTS.some((intent) => lower.includes(intent))
 }
 
+interface ProductCard {
+  name: string
+  url: string
+  description: string
+  category: string
+}
+
 interface Message {
   role: 'user' | 'assistant' | 'system'
   content: string
   sources?: Array<{ title: string; url: string; doc_type: string }>
   confidence?: string
   suggestedQuestions?: string[]
+  productCards?: ProductCard[]
   action?: 'ask_email' | 'tool_activity'
   streaming?: boolean
 }
 
+// Session persistence — conversation survives page navigation
+const SESSION_KEY = 'southland-chat-session'
+const SESSION_TTL = 30 * 60 * 1000 // 30 minutes
+
+function loadSession(): { messages: Message[]; email: string | null } | null {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY)
+    if (!raw) return null
+    const session = JSON.parse(raw) as { messages: Message[]; email: string | null; ts: number }
+    if (Date.now() - session.ts > SESSION_TTL) {
+      localStorage.removeItem(SESSION_KEY)
+      return null
+    }
+    return { messages: session.messages, email: session.email }
+  } catch {
+    return null
+  }
+}
+
+function saveSession(messages: Message[], email: string | null) {
+  try {
+    // Only save non-streaming, non-action messages
+    const saveable = messages.filter((m) => !m.streaming && !m.action)
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ messages: saveable, email, ts: Date.now() }))
+  } catch {
+    // localStorage full or unavailable
+  }
+}
+
 export default function ChatWidget() {
   const [open, setOpen] = useState(false)
-  const [messages, setMessages] = useState<Message[]>([])
+  const [messages, setMessages] = useState<Message[]>(() => {
+    const session = typeof window !== 'undefined' ? loadSession() : null
+    return session?.messages || []
+  })
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const [customerEmail, setCustomerEmail] = useState<string | null>(null)
+  const [customerEmail, setCustomerEmail] = useState<string | null>(() => {
+    const session = typeof window !== 'undefined' ? loadSession() : null
+    return session?.email || null
+  })
   const [pendingQuery, setPendingQuery] = useState<string | null>(null)
   const [escalated, setEscalated] = useState(false)
+
+  // Persist session on message changes
+  useEffect(() => {
+    if (messages.length > 0) saveSession(messages, customerEmail)
+  }, [messages, customerEmail])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -142,6 +190,7 @@ export default function ChatWidget() {
       let buffer = ''
       let sources: Message['sources'] = []
       let suggestedQuestions: string[] | undefined
+      let productCards: ProductCard[] | undefined
 
       while (true) {
         const { done, value } = await reader.read()
@@ -162,11 +211,11 @@ export default function ChatWidget() {
               text?: string
               sources?: Message['sources']
               suggested_questions?: string[]
+              product_cards?: ProductCard[]
               confidence?: string
             }
 
             if (event.type === 'text' && event.text) {
-              // Append text to the streaming message
               setMessages((prev) => {
                 const updated = [...prev]
                 const last = updated[updated.length - 1]
@@ -179,6 +228,7 @@ export default function ChatWidget() {
               sources = event.sources
             } else if (event.type === 'done') {
               suggestedQuestions = event.suggested_questions
+              productCards = event.product_cards
             }
           } catch {
             // Skip malformed events
@@ -196,6 +246,7 @@ export default function ChatWidget() {
             streaming: false,
             sources: sources?.length ? sources : undefined,
             suggestedQuestions,
+            productCards,
           }
         }
         return updated
@@ -246,6 +297,7 @@ export default function ChatWidget() {
             sources: data.sources?.slice(0, 3),
             confidence: data.confidence,
             suggestedQuestions: data.suggested_questions,
+            productCards: data.product_cards,
           },
         ]
       })
@@ -463,6 +515,32 @@ export default function ChatWidget() {
                 )}
               </div>
             </div>
+            {/* Product cards */}
+            {msg.productCards && msg.productCards.length > 0 && !msg.streaming && (
+              <div className="mt-2 flex flex-col gap-1.5 pl-1">
+                {msg.productCards.map((card, j) => (
+                  <a
+                    key={j}
+                    href={card.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2.5 rounded-xl border border-green-100 bg-green-50/50 px-3 py-2 transition-colors hover:border-green-200 hover:bg-green-50"
+                  >
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2c5234" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                        <line x1="3" y1="6" x2="21" y2="6" />
+                        <path d="M16 10a4 4 0 0 1-8 0" />
+                      </svg>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-xs font-medium text-gray-800">{card.name}</div>
+                      <div className="text-[10px] text-green-700">Shop now →</div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            )}
             {/* Suggested follow-up questions */}
             {msg.suggestedQuestions && msg.suggestedQuestions.length > 0 && !msg.streaming && (
               <div className="mt-2 flex flex-wrap gap-1.5 pl-1">
