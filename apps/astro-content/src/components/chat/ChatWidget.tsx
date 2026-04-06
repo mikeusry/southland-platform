@@ -42,6 +42,8 @@ interface Message {
   productCards?: ProductCard[]
   action?: 'ask_email' | 'tool_activity'
   streaming?: boolean
+  statusLabel?: string // "Checking products and articles..." during pre-token gap
+  sourcePreview?: string[] // Muted source type chips shown before answer
   feedback?: 'up' | 'down' | null
   feedbackReason?: string
 }
@@ -255,15 +257,35 @@ export default function ChatWidget() {
     await doStreamAsk(query, overrideEmail || customerEmail)
   }
 
-  // Streaming ask — tokens appear as they arrive
+  // Streaming ask — research-backed loading UX:
+  // 1. Instant ack (assistant row appears immediately)
+  // 2. Status label at 400ms ("Checking products and articles...")
+  // 3. Source preview chips when sources arrive (before answer text)
+  // 4. Sentence-buffered streaming text with live caret
+  // 5. Follow-ups + product cards after stream complete
   const doStreamAsk = async (query: string, email: string | null) => {
     setLoading(true)
 
-    // Add a placeholder streaming message
+    // Step 1: Instant acknowledgment — assistant row appears with no content
     setMessages((prev) => {
       const filtered = prev.filter((m) => m.action !== 'tool_activity')
       return [...filtered, { role: 'assistant' as const, content: '', streaming: true }]
     })
+
+    // Step 2: Show status label after 400ms if no content yet
+    const statusTimer = setTimeout(() => {
+      setMessages((prev) => {
+        const updated = [...prev]
+        const last = updated[updated.length - 1]
+        if (last?.streaming && !last.content) {
+          updated[updated.length - 1] = {
+            ...last,
+            statusLabel: 'Checking products and articles\u2026',
+          }
+        }
+        return updated
+      })
+    }, 400)
 
     try {
       const payload: Record<string, unknown> = {
@@ -273,7 +295,6 @@ export default function ChatWidget() {
       }
       if (email) payload.customer_email = email
 
-      // Add conversation history (last 5 turns)
       const history = messages
         .filter((m) => m.role !== 'system' && !m.action && !m.streaming)
         .slice(-5)
@@ -287,25 +308,49 @@ export default function ChatWidget() {
       })
 
       if (!res.ok || !res.body) {
-        // Fall back to non-streaming
+        clearTimeout(statusTimer)
         await doAskFallback(query, email)
         return
       }
 
       const reader = res.body.getReader()
       const decoder = new TextDecoder()
-      let buffer = ''
+      let sseBuffer = ''
       let sources: Message['sources'] = []
       let suggestedQuestions: string[] | undefined
       let productCards: ProductCard[] | undefined
+      let textBuffer = '' // Sentence-aware buffering
+      let hasStartedText = false
+
+      // Flush text buffer to message on punctuation boundaries
+      const flushText = () => {
+        if (!textBuffer) return
+        const toFlush = textBuffer
+        textBuffer = ''
+        setMessages((prev) => {
+          const updated = [...prev]
+          const last = updated[updated.length - 1]
+          if (last?.streaming) {
+            updated[updated.length - 1] = {
+              ...last,
+              content: last.content + toFlush,
+              statusLabel: undefined, // Clear status once text arrives
+            }
+          }
+          return updated
+        })
+      }
+
+      // Flush every 60ms or on punctuation
+      const flushInterval = setInterval(flushText, 60)
 
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
 
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n')
-        buffer = lines.pop() || ''
+        sseBuffer += decoder.decode(value, { stream: true })
+        const lines = sseBuffer.split('\n')
+        sseBuffer = lines.pop() || ''
 
         for (const line of lines) {
           if (!line.startsWith('data: ')) continue
@@ -319,20 +364,45 @@ export default function ChatWidget() {
               sources?: Message['sources']
               suggested_questions?: string[]
               product_cards?: ProductCard[]
-              confidence?: string
             }
 
             if (event.type === 'text' && event.text) {
+              if (!hasStartedText) {
+                clearTimeout(statusTimer)
+                hasStartedText = true
+              }
+              textBuffer += event.text
+
+              // Flush immediately on sentence boundaries for natural feel
+              if (/[.!?]\s*$/.test(event.text) || /\n/.test(event.text)) {
+                flushText()
+              }
+            } else if (event.type === 'sources' && event.sources?.length) {
+              sources = event.sources
+              // Step 3: Show muted source preview chips before answer
+              const sourceTypes = [
+                ...new Set(
+                  event.sources.map((s) =>
+                    s.doc_type === 'blog'
+                      ? 'Blog article'
+                      : s.doc_type === 'product'
+                        ? 'Product page'
+                        : 'Guide'
+                  )
+                ),
+              ]
               setMessages((prev) => {
                 const updated = [...prev]
                 const last = updated[updated.length - 1]
-                if (last?.streaming) {
-                  updated[updated.length - 1] = { ...last, content: last.content + event.text }
+                if (last?.streaming && !last.content) {
+                  updated[updated.length - 1] = {
+                    ...last,
+                    statusLabel: 'Drafting answer\u2026',
+                    sourcePreview: sourceTypes,
+                  }
                 }
                 return updated
               })
-            } else if (event.type === 'sources') {
-              sources = event.sources
             } else if (event.type === 'done') {
               suggestedQuestions = event.suggested_questions
               productCards = event.product_cards
@@ -343,6 +413,11 @@ export default function ChatWidget() {
         }
       }
 
+      // Final flush
+      clearInterval(flushInterval)
+      clearTimeout(statusTimer)
+      flushText()
+
       // Finalize the streaming message
       setMessages((prev) => {
         const updated = [...prev]
@@ -351,6 +426,8 @@ export default function ChatWidget() {
           updated[updated.length - 1] = {
             ...last,
             streaming: false,
+            statusLabel: undefined,
+            sourcePreview: undefined,
             sources: sources?.length ? sources : undefined,
             suggestedQuestions,
             productCards,
@@ -359,7 +436,7 @@ export default function ChatWidget() {
         return updated
       })
     } catch (_err) {
-      // Fall back to non-streaming on any error
+      clearTimeout(statusTimer)
       await doAskFallback(query, email)
     } finally {
       setLoading(false)
@@ -681,11 +758,51 @@ export default function ChatWidget() {
                     </div>
                     <span className="text-xs">{msg.content}</span>
                   </div>
+                ) : msg.streaming && !msg.content && msg.statusLabel ? (
+                  /* Pre-answer status: "Checking products and articles..." with source chips */
+                  <div>
+                    <div className="flex items-center gap-2 text-gray-400">
+                      <div className="flex gap-0.5">
+                        <span
+                          className="h-1 w-1 animate-pulse rounded-full bg-green-400"
+                          style={{ animationDelay: '0ms' }}
+                        />
+                        <span
+                          className="h-1 w-1 animate-pulse rounded-full bg-green-400"
+                          style={{ animationDelay: '400ms' }}
+                        />
+                        <span
+                          className="h-1 w-1 animate-pulse rounded-full bg-green-400"
+                          style={{ animationDelay: '800ms' }}
+                        />
+                      </div>
+                      <span className="text-xs">{msg.statusLabel}</span>
+                    </div>
+                    {msg.sourcePreview && msg.sourcePreview.length > 0 && (
+                      <div className="mt-1.5 flex flex-wrap gap-1">
+                        {msg.sourcePreview.map((type, j) => (
+                          <span
+                            key={j}
+                            className="rounded-full bg-gray-100 px-2 py-0.5 text-[9px] text-gray-400"
+                          >
+                            {type}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : msg.streaming && !msg.content ? (
+                  /* First 400ms: empty shell, no label yet */
+                  <div className="h-4" />
                 ) : (
+                  /* Answer text with live caret during streaming */
                   <div className="whitespace-pre-wrap">
                     {msg.content}
                     {msg.streaming && (
-                      <span className="ml-0.5 inline-block h-4 w-0.5 animate-pulse bg-gray-400" />
+                      <span
+                        className="ml-0.5 inline-block h-3.5 w-0.5 rounded-full bg-green-600"
+                        style={{ animation: 'pulse 1.1s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}
+                      />
                     )}
                   </div>
                 )}
@@ -833,6 +950,7 @@ export default function ChatWidget() {
             )}
           </div>
         ))}
+        {/* Standalone loading dots — only for non-streaming fallback */}
         {loading && !messages.some((m) => m.streaming) && (
           <div className="flex justify-start">
             <div className="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3">
