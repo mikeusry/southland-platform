@@ -95,6 +95,11 @@ export async function handleAsk(
 
   ctx.waitUntil(logAskEvent(env, body, response))
 
+  // Log conversation to Nexus for AI Review dashboard (fire-and-forget)
+  if (prepared.context === 'chat') {
+    ctx.waitUntil(logToNexus(env, body, response))
+  }
+
   return json(response, env, origin)
 }
 
@@ -180,14 +185,18 @@ export async function handleAskStream(
         })}\n\n`))
 
         // Log async
-        ctx.waitUntil(logAskEvent(env, body, {
+        const streamResponse: AskResponse = {
           answer: fullAnswer,
           sources: relevantSources,
           confidence: topScore > 0.7 ? 'high' : topScore > 0.5 ? 'medium' : 'low',
           answerable: true,
           latency_ms: Date.now() - start,
           model: 'gpt-4o-mini',
-        }))
+        }
+        ctx.waitUntil(logAskEvent(env, body, streamResponse))
+        if (context === 'chat') {
+          ctx.waitUntil(logToNexus(env, body, streamResponse))
+        }
       } catch (err) {
         console.error('Streaming error:', err)
         controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'text', text: 'Sorry, something went wrong. Please try again or call us at (800) 608-3755.' })}\n\n`))
@@ -615,6 +624,38 @@ async function logAskEvent(env: Env, request: AskRequest, response: AskResponse)
       .run()
   } catch {
     console.error('Failed to log ask event')
+  }
+}
+
+// ─── Nexus Conversation Logging ────────────────────────────────────────────
+// Fires after every chat response to log the conversation in Nexus for the
+// AI Review dashboard. Uses session_id to group messages into conversations.
+
+async function logToNexus(env: Env, request: AskRequest, response: AskResponse): Promise<void> {
+  if (!env.NEXUS_API_URL || !env.NEXUS_API_KEY) return
+
+  try {
+    await fetch(`${env.NEXUS_API_URL}/api/ai/log-conversation`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${env.NEXUS_API_KEY}`,
+      },
+      body: JSON.stringify({
+        session_id: request.session_id || `auto-${Date.now()}`,
+        query: request.query,
+        answer: response.answer,
+        page_url: request.page_url,
+        confidence: response.confidence,
+        topic: response.sources?.[0]?.doc_type || null,
+        sources: response.sources,
+        answerable: response.answerable,
+        latency_ms: response.latency_ms,
+        model: response.model,
+      }),
+    })
+  } catch (err) {
+    console.error('Nexus log error (non-blocking):', err)
   }
 }
 

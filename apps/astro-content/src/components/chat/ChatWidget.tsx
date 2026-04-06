@@ -52,26 +52,45 @@ interface Message {
 const SESSION_KEY = 'southland-chat-session'
 const SESSION_TTL = 30 * 60 * 1000 // 30 minutes
 
-function loadSession(): { messages: Message[]; email: string | null } | null {
+function generateSessionId(): string {
+  return 'cs-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8)
+}
+
+function loadSession(): {
+  messages: Message[]
+  email: string | null
+  sessionId: string
+} | null {
   try {
     const raw = localStorage.getItem(SESSION_KEY)
     if (!raw) return null
-    const session = JSON.parse(raw) as { messages: Message[]; email: string | null; ts: number }
+    const session = JSON.parse(raw) as {
+      messages: Message[]
+      email: string | null
+      sessionId: string
+      ts: number
+    }
     if (Date.now() - session.ts > SESSION_TTL) {
       localStorage.removeItem(SESSION_KEY)
       return null
     }
-    return { messages: session.messages, email: session.email }
+    return {
+      messages: session.messages,
+      email: session.email,
+      sessionId: session.sessionId || generateSessionId(),
+    }
   } catch {
     return null
   }
 }
 
-function saveSession(messages: Message[], email: string | null) {
+function saveSession(messages: Message[], email: string | null, sessionId: string) {
   try {
-    // Only save non-streaming, non-action messages
     const saveable = messages.filter((m) => !m.streaming && !m.action)
-    localStorage.setItem(SESSION_KEY, JSON.stringify({ messages: saveable, email, ts: Date.now() }))
+    localStorage.setItem(
+      SESSION_KEY,
+      JSON.stringify({ messages: saveable, email, sessionId, ts: Date.now() })
+    )
   } catch {
     // localStorage full or unavailable
   }
@@ -114,6 +133,10 @@ export default function ChatWidget() {
   const [open, setOpen] = useState(false)
   const [pulse, setPulse] = useState(false) // Gentle attention pulse on fab button
   const [proactiveMessage, setProactiveMessage] = useState<string | null>(null)
+  const [sessionId] = useState<string>(() => {
+    const session = typeof window !== 'undefined' ? loadSession() : null
+    return session?.sessionId || generateSessionId()
+  })
   const [messages, setMessages] = useState<Message[]>(() => {
     const session = typeof window !== 'undefined' ? loadSession() : null
     return session?.messages || []
@@ -129,7 +152,7 @@ export default function ChatWidget() {
 
   // Persist session on message changes
   useEffect(() => {
-    if (messages.length > 0) saveSession(messages, customerEmail)
+    if (messages.length > 0) saveSession(messages, customerEmail, sessionId)
   }, [messages, customerEmail])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -208,6 +231,7 @@ export default function ChatWidget() {
           rating,
           reason: reason || undefined,
           page_url: window.location.pathname,
+          session_id: sessionId,
         }),
       })
     } catch {
@@ -292,6 +316,7 @@ export default function ChatWidget() {
         query,
         context: 'chat',
         page_url: window.location.pathname,
+        session_id: sessionId,
       }
       if (email) payload.customer_email = email
 
@@ -450,6 +475,7 @@ export default function ChatWidget() {
         query,
         context: 'chat',
         page_url: window.location.pathname,
+        session_id: sessionId,
       }
       if (email) payload.customer_email = email
 

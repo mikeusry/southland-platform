@@ -53,6 +53,24 @@ export async function handleFeedback(
       )
       .run()
 
+    // Also log to Nexus for AI Review dashboard (fire-and-forget)
+    if (body.session_id && env.NEXUS_API_URL && env.NEXUS_API_KEY) {
+      ctx.waitUntil(
+        fetch(`${env.NEXUS_API_URL}/api/ai/log-feedback`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${env.NEXUS_API_KEY}`,
+          },
+          body: JSON.stringify({
+            session_id: body.session_id,
+            rating: body.rating,
+            reason: body.reason,
+          }),
+        }).catch((err) => console.error('Nexus feedback log error:', err))
+      )
+    }
+
     return json({ status: 'ok' }, env, origin)
   } catch (err) {
     console.error('Feedback save error:', err)

@@ -174,6 +174,7 @@ export interface AskRequest {
   }
   conversation_history?: Array<{ role: 'user' | 'assistant'; content: string }>
   page_url?: string // What page the customer is currently viewing
+  session_id?: string // Links messages to one conversation for AI Review
   tenant?: string
 }
 
