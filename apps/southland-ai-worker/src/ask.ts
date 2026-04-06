@@ -313,12 +313,11 @@ async function prepareContext(body: AskRequest, env: Env): Promise<PreparedConte
   }))
 
   // Build context from reranked chunk text with structured source blocks
-  // Filter out SOPs for customer chat — internal docs should never influence customer answers
+  // SOPs ARE included in prompt context (the LLM needs the knowledge to answer).
+  // SOPs are only filtered from SOURCE CITATIONS (customers shouldn't click /sops/* links).
   const contextParts: string[] = []
   let sourceNum = 0
   for (const r of reranked) {
-    // Skip internal SOPs in customer-facing chat
-    if (context === 'chat' && (r.doc_type === 'sop' || r.doc_type === 'sops' || r.id.startsWith('sop:'))) continue
     sourceNum++
     if (r.text && r.text !== r.title) {
       contextParts.push(`[SOURCE ${sourceNum}: ${r.title} (${r.doc_type}) — relevance: ${r.relevance_score.toFixed(2)}]\n${r.text}`)
