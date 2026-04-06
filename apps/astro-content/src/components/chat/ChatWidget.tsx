@@ -401,28 +401,60 @@ export default function ChatWidget() {
 
   // ─── Suggested questions based on page ──────────────────────────────────
   const getInitialSuggestions = () => {
-    const path = typeof window !== 'undefined' ? window.location.pathname : ''
+    const path = typeof window !== 'undefined' ? window.location.pathname.toLowerCase() : ''
 
+    // Septic & Waste
+    if (path.includes('/septic') || path.includes('/waste') || path.includes('/port'))
+      return ['How does PORT work?', 'How often do I use it?', 'Will this extend my pump-outs?']
+
+    // Poultry
     if (
       path.includes('/poultry') ||
       path.includes('/litter-life') ||
-      path.includes('/big-ole-bird')
+      path.includes('/big-ole-bird') ||
+      path.includes('/hen-helper') ||
+      path.includes('/south40') ||
+      path.includes('/catalyst')
     )
       return [
-        'How do I use Litter Life?',
+        'How do I use this product?',
         'What helps with ammonia?',
         'Which product is right for my flock?',
       ]
 
-    if (path.includes('/lawn') || path.includes('/fertalive') || path.includes('/dog-spot'))
-      return [
-        'How do I fix brown spots?',
-        'When should I apply FertALive?',
-        'Is this safe for pets?',
-      ]
+    // Lawn & Garden
+    if (
+      path.includes('/lawn') ||
+      path.includes('/garden') ||
+      path.includes('/fertalive') ||
+      path.includes('/dog-spot') ||
+      path.includes('/ignition')
+    )
+      return ['How do I fix brown spots?', 'When should I apply this?', 'Is this safe for pets?']
 
+    // Sanitizers
     if (path.includes('/d2') || path.includes('/sanitiz'))
       return ['How do I dilute D2?', 'Is D2 safe for food surfaces?', 'What does D2 kill?']
+
+    // Livestock
+    if (path.includes('/livestock') || path.includes('/cattle') || path.includes('/swine'))
+      return [
+        'Which products work for cattle?',
+        'How do I improve gut health in livestock?',
+        'What helps with odor control?',
+      ]
+
+    // Any product page
+    if (path.includes('/products/'))
+      return ['How do I use this product?', 'How much do I need?', 'What results should I expect?']
+
+    // Blog
+    if (path.includes('/blog'))
+      return [
+        'What products would help with my situation?',
+        'How do I get started?',
+        'Can I talk to someone?',
+      ]
 
     return ['How do I use Litter Life?', 'What helps with ammonia?', 'Where is my order?']
   }
