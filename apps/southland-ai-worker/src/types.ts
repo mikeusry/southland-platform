@@ -25,7 +25,8 @@ export interface Env {
 
   // Secrets (set via wrangler secret put)
   NEXUS_API_KEY: string
-  OPENAI_API_KEY: string // GPT-4o-mini for chat + copilot (fallback: Workers AI)
+  OPENAI_API_KEY: string  // GPT-4o-mini for chat + copilot (fallback: Workers AI)
+  COHERE_API_KEY: string  // Rerank v3.5 for two-stage retrieval
 }
 
 // ─── Queue Message Types ────────────────────────────────────────────────────

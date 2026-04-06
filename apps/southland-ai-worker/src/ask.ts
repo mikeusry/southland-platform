@@ -2,6 +2,8 @@ import type { Env, AskRequest, AskResponse } from './types'
 import { embedQuery } from './lib/embeddings'
 import { queryVectorize } from './lib/vectorize'
 import { generate, generateStream } from './lib/llm'
+import { rerank } from './lib/rerank'
+import type { RerankCandidate } from './lib/rerank'
 import { DRAFT_REPLY_PROMPT, STAFF_COPILOT_PROMPT, CHAT_PROMPT } from './prompts/draft-reply'
 import { selectVoiceExamples, formatVoiceExamples } from './prompts/voice-examples'
 import { READ_TOOLS, executeTool, buildToolSelectionPrompt } from './tools'
@@ -223,25 +225,54 @@ async function prepareContext(body: AskRequest, env: Env): Promise<PreparedConte
   // Step 1: Embed the query
   const { vector } = await embedQuery(body.query, env)
 
-  // Step 2: Retrieve relevant chunks from Vectorize
+  // Step 2: Two-stage retrieval — over-fetch from Vectorize, then rerank
   const supportOnly = context === 'support_draft' || context === 'chat'
-  const results = await queryVectorize(env, {
+  const rawResults = await queryVectorize(env, {
     vector,
-    topK: 8,
+    topK: 20, // Over-fetch for reranking
     filter: {
       tenant,
       ...(supportOnly ? { support_relevant: true } : {}),
     },
   })
 
-  // Build context from KV chunk text
-  const contextParts: string[] = []
-  for (const result of results) {
+  // Fetch chunk text from KV for reranking (reranker needs actual text, not just titles)
+  const candidates: RerankCandidate[] = []
+  for (const result of rawResults) {
     const cached = await env.CACHE.get(`chunk:${result.id}`)
-    if (cached) {
-      contextParts.push(`[Source: ${result.title}]\n${cached}`)
+    candidates.push({
+      id: result.id,
+      text: cached || result.title, // Fall back to title if no cached text
+      title: result.title,
+      score: result.score,
+      url: result.url,
+      doc_type: result.doc_type,
+      business_unit: result.business_unit,
+    })
+  }
+
+  // Rerank candidates (Cohere Rerank v3.5 → top 6)
+  const reranked = await rerank(env, body.query, candidates, 6)
+
+  // Convert reranked results back to SearchResult format for downstream compatibility
+  const results = reranked.map((r) => ({
+    id: r.id,
+    score: r.relevance_score,
+    title: r.title,
+    url: r.url,
+    doc_type: r.doc_type,
+    snippet: '',
+    business_unit: r.business_unit,
+  }))
+
+  // Build context from reranked chunk text with structured source blocks
+  const contextParts: string[] = []
+  for (let i = 0; i < reranked.length; i++) {
+    const r = reranked[i]
+    if (r.text && r.text !== r.title) {
+      contextParts.push(`[SOURCE ${i + 1}: ${r.title} (${r.doc_type}) — relevance: ${r.relevance_score.toFixed(2)}]\n${r.text}`)
     } else {
-      contextParts.push(`[Source: ${result.title} — ${result.doc_type} in ${result.business_unit}]`)
+      contextParts.push(`[SOURCE ${i + 1}: ${r.title} — ${r.doc_type} in ${r.business_unit}]`)
     }
   }
 

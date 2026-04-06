@@ -62,3 +62,22 @@ CREATE TABLE IF NOT EXISTS product_aliases (
 );
 
 CREATE INDEX IF NOT EXISTS idx_product_aliases_upper ON product_aliases(alias_upper);
+
+-- ─── Chat Feedback ─────────────────────────────────────────────────────────
+-- Per-message thumbs up/down with reason codes for continuous improvement.
+-- Weekly review of thumbs-down conversations reveals retrieval, ranking,
+-- generation, and content-gap issues.
+CREATE TABLE IF NOT EXISTS chat_feedback (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  query TEXT NOT NULL,
+  answer TEXT NOT NULL,
+  rating TEXT NOT NULL CHECK (rating IN ('up', 'down')),
+  reason TEXT CHECK (reason IN ('wrong_answer', 'didnt_answer', 'wrong_product', 'other')),
+  reason_text TEXT,
+  page_url TEXT,
+  session_id TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_feedback_rating ON chat_feedback(rating) WHERE rating = 'down';
+CREATE INDEX IF NOT EXISTS idx_feedback_created ON chat_feedback(created_at);

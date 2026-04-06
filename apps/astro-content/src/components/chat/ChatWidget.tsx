@@ -42,6 +42,8 @@ interface Message {
   productCards?: ProductCard[]
   action?: 'ask_email' | 'tool_activity'
   streaming?: boolean
+  feedback?: 'up' | 'down' | null
+  feedbackReason?: string
 }
 
 // Session persistence — conversation survives page navigation
@@ -105,6 +107,42 @@ export default function ChatWidget() {
   useEffect(() => {
     if (open) inputRef.current?.focus()
   }, [open])
+
+  // ─── Feedback ──────────────────────────────────────────────────────────
+  const [feedbackShown, setFeedbackShown] = useState<number | null>(null)
+
+  const sendFeedback = async (msgIndex: number, rating: 'up' | 'down', reason?: string) => {
+    const msg = messages[msgIndex]
+    const userMsg = messages
+      .slice(0, msgIndex)
+      .reverse()
+      .find((m) => m.role === 'user')
+
+    // Update local state immediately
+    setMessages((prev) => {
+      const updated = [...prev]
+      updated[msgIndex] = { ...updated[msgIndex], feedback: rating, feedbackReason: reason }
+      return updated
+    })
+    setFeedbackShown(null)
+
+    // Send to worker (fire-and-forget)
+    try {
+      await fetch(`${AI_WORKER_URL}/feedback`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: userMsg?.content || '',
+          answer: msg.content,
+          rating,
+          reason: reason || undefined,
+          page_url: window.location.pathname,
+        }),
+      })
+    } catch {
+      // Non-blocking
+    }
+  }
 
   const sendMessage = async (overrideQuery?: string, overrideEmail?: string) => {
     const query = (overrideQuery ?? input).trim()
@@ -553,6 +591,73 @@ export default function ChatWidget() {
                   </div>
                 )}
               </div>
+              {/* Feedback buttons — only on assistant messages, not streaming */}
+              {msg.role === 'assistant' && !msg.streaming && !msg.action && msg.content && (
+                <div className="mt-1 flex items-center gap-1 pl-1">
+                  {msg.feedback ? (
+                    <span className="text-[10px] text-gray-400">
+                      {msg.feedback === 'up' ? 'Thanks!' : 'Thanks for the feedback'}
+                    </span>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => sendFeedback(i, 'up')}
+                        className="rounded p-0.5 text-gray-300 transition-colors hover:text-green-600"
+                        aria-label="Helpful"
+                      >
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => setFeedbackShown(feedbackShown === i ? null : i)}
+                        className="rounded p-0.5 text-gray-300 transition-colors hover:text-red-500"
+                        aria-label="Not helpful"
+                      >
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17" />
+                        </svg>
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+              {/* Feedback reason selector */}
+              {feedbackShown === i && (
+                <div className="mt-1 flex flex-wrap gap-1 pl-1">
+                  {[
+                    { code: 'wrong_answer', label: 'Wrong answer' },
+                    { code: 'didnt_answer', label: "Didn't answer" },
+                    { code: 'wrong_product', label: 'Wrong product' },
+                  ].map((r) => (
+                    <button
+                      key={r.code}
+                      onClick={() => sendFeedback(i, 'down', r.code)}
+                      className="rounded-full border border-red-100 bg-red-50 px-2 py-0.5 text-[10px] text-red-600 transition-colors hover:border-red-200 hover:bg-red-100"
+                    >
+                      {r.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
             {/* Product cards */}
             {msg.productCards && msg.productCards.length > 0 && !msg.streaming && (

@@ -8,6 +8,7 @@ import { handleBulkIndex } from './bulk-index'
 import { handleSummarize } from './summarize'
 import { handleContentGaps } from './content-gaps'
 import { handleEscalate } from './escalate'
+import { handleFeedback } from './feedback'
 
 // ─── CORS ───────────────────────────────────────────────────────────────────
 
@@ -77,6 +78,10 @@ export default {
         // Phase 3: Chat → human escalation
         case '/escalate':
           return handleEscalate(request, env, ctx, origin)
+
+        // Feedback: thumbs up/down per message
+        case '/feedback':
+          return handleFeedback(request, env, ctx, origin)
 
         // Benchmark: Phase 0 — model latency testing
         case '/benchmark':
