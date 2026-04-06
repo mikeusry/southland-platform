@@ -1,11 +1,13 @@
 import type { Env, AskRequest, AskResponse } from './types'
-import { embedQuery } from './lib/embeddings'
+import { embedQuery, embedText } from './lib/embeddings'
 import { queryVectorize } from './lib/vectorize'
 import { generate, generateStream } from './lib/llm'
 import { rerank } from './lib/rerank'
 import type { RerankCandidate } from './lib/rerank'
+import { rewriteQuery } from './lib/query-rewriter'
 import { DRAFT_REPLY_PROMPT, STAFF_COPILOT_PROMPT, CHAT_PROMPT } from './prompts/draft-reply'
 import { selectVoiceExamples, formatVoiceExamples } from './prompts/voice-examples'
+import { TROUBLESHOOTING_FLOWS, isTroubleshootingIntent } from './prompts/troubleshooting'
 import { READ_TOOLS, executeTool, buildToolSelectionPrompt } from './tools'
 import { parseJSON } from './lib/llm'
 
@@ -222,22 +224,42 @@ async function prepareContext(body: AskRequest, env: Env): Promise<PreparedConte
   const context = body.context || 'staff'
   const tenant = body.tenant || 'southland'
 
-  // Step 1: Hybrid retrieval — dense (Vectorize) + lexical (D1 aliases) in parallel
+  // Step 1: Query rewriting + hybrid retrieval in parallel
   const supportOnly = context === 'support_draft' || context === 'chat'
 
-  const [{ vector }, aliasHits] = await Promise.all([
-    embedQuery(body.query, env),
+  // Rewrite complex queries into sub-queries (runs on Workers AI 8B, fast)
+  const [rewrite, aliasHits] = await Promise.all([
+    rewriteQuery(env, body.query),
     findAliasMatches(env, body.query),
   ])
 
-  const rawResults = await queryVectorize(env, {
-    vector,
-    topK: 20,
-    filter: {
-      tenant,
-      ...(supportOnly ? { support_relevant: true } : {}),
-    },
-  })
+  // Embed all queries (original or decomposed) and merge Vectorize results
+  const queriesToEmbed = rewrite.queries
+  const { vectors: queryVectors } = await embedText(queriesToEmbed, env)
+
+  // Fetch from Vectorize for each sub-query, merge and deduplicate
+  const allRawResults: Map<string, (typeof rawResultsArr)[0]> = new Map()
+  const vectorizeFilter = {
+    tenant,
+    ...(supportOnly ? { support_relevant: true } : {}),
+  }
+
+  const rawResultsArr = await Promise.all(
+    queryVectors.map((vector) =>
+      queryVectorize(env, { vector, topK: rewrite.type === 'simple' ? 20 : 12, filter: vectorizeFilter })
+    )
+  ).then((results) => results.flat())
+
+  // Deduplicate by ID, keeping highest score
+  for (const r of rawResultsArr) {
+    const existing = allRawResults.get(r.id)
+    if (!existing || r.score > existing.score) {
+      allRawResults.set(r.id, r)
+    }
+  }
+  const rawResults = Array.from(allRawResults.values())
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 20)
 
   // Step 2: Fuse results — inject alias hits at top, deduplicate by ID
   const seenIds = new Set<string>()
@@ -435,6 +457,11 @@ async function prepareContext(body: AskRequest, env: Env): Promise<PreparedConte
   // Add page context if provided
   if (body.page_url && context === 'chat') {
     systemPrompt += `\n\nPAGE CONTEXT: The customer is currently viewing: ${body.page_url}. If their question seems related to this page, use that context. If they ask a general question, don't force relevance to the page.`
+  }
+
+  // Inject guided troubleshooting flows when the query describes a problem
+  if (context === 'chat' && isTroubleshootingIntent(body.query)) {
+    systemPrompt += '\n\n' + TROUBLESHOOTING_FLOWS
   }
 
   const fullContext = contextParts.join('\n\n') + customerContext + toolResult

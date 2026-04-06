@@ -75,8 +75,43 @@ function saveSession(messages: Message[], email: string | null) {
   }
 }
 
+// Proactive engagement — dwell time + return visitor detection
+const PROACTIVE_KEY = 'southland-chat-proactive'
+const VISIT_COUNT_KEY = 'southland-chat-visits'
+
+function trackVisit(): number {
+  try {
+    const count = parseInt(localStorage.getItem(VISIT_COUNT_KEY) || '0', 10) + 1
+    localStorage.setItem(VISIT_COUNT_KEY, String(count))
+    return count
+  } catch {
+    return 1
+  }
+}
+
+function hasSeenProactive(): boolean {
+  try {
+    const last = localStorage.getItem(PROACTIVE_KEY)
+    if (!last) return false
+    // Don't show again within 24 hours
+    return Date.now() - parseInt(last, 10) < 24 * 60 * 60 * 1000
+  } catch {
+    return false
+  }
+}
+
+function markProactiveSeen() {
+  try {
+    localStorage.setItem(PROACTIVE_KEY, String(Date.now()))
+  } catch {
+    // ignore
+  }
+}
+
 export default function ChatWidget() {
   const [open, setOpen] = useState(false)
+  const [pulse, setPulse] = useState(false) // Gentle attention pulse on fab button
+  const [proactiveMessage, setProactiveMessage] = useState<string | null>(null)
   const [messages, setMessages] = useState<Message[]>(() => {
     const session = typeof window !== 'undefined' ? loadSession() : null
     return session?.messages || []
@@ -106,6 +141,40 @@ export default function ChatWidget() {
   }, [messages, scrollToBottom])
   useEffect(() => {
     if (open) inputRef.current?.focus()
+  }, [open])
+
+  // ─── Proactive engagement ─────────────────────────────────────────────
+  useEffect(() => {
+    if (open || hasSeenProactive()) return // Don't trigger if already open or seen today
+
+    const visits = trackVisit()
+    const path = window.location.pathname.toLowerCase()
+    const isProductPage = path.includes('/products/')
+
+    // Return visitor on a product page: gentle pulse after 15s
+    if (visits >= 2 && isProductPage) {
+      const timer = setTimeout(() => {
+        setPulse(true)
+        setProactiveMessage('Need help choosing the right product?')
+        markProactiveSeen()
+        // Stop pulsing after 8 seconds
+        setTimeout(() => setPulse(false), 8000)
+      }, 15000)
+      return () => clearTimeout(timer)
+    }
+
+    // First-time visitor: dwell 30s on product page → subtle pulse
+    if (isProductPage) {
+      const timer = setTimeout(() => {
+        setPulse(true)
+        setProactiveMessage('Questions about this product?')
+        markProactiveSeen()
+        setTimeout(() => setPulse(false), 8000)
+      }, 30000)
+      return () => clearTimeout(timer)
+    }
+
+    return undefined
   }, [open])
 
   // ─── Feedback ──────────────────────────────────────────────────────────
@@ -461,25 +530,47 @@ export default function ChatWidget() {
 
   if (!open) {
     return (
-      <button
-        onClick={() => setOpen(true)}
-        className="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-105"
-        style={{ backgroundColor: '#2c5234' }}
-        aria-label="Ask a question"
-      >
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="white"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+      <div className="fixed bottom-5 right-5 z-50">
+        {/* Proactive message tooltip */}
+        {proactiveMessage && (
+          <div
+            className="animate-in fade-in slide-in-from-bottom-2 absolute bottom-16 right-0 mb-2 w-56 rounded-xl bg-white px-3 py-2.5 text-sm text-gray-700 shadow-lg ring-1 ring-gray-100"
+            onClick={() => {
+              setOpen(true)
+              setProactiveMessage(null)
+            }}
+            style={{ cursor: 'pointer' }}
+          >
+            {proactiveMessage}
+            <div
+              className="absolute -bottom-1.5 right-6 h-3 w-3 rotate-45 bg-white ring-1 ring-gray-100"
+              style={{ clipPath: 'polygon(0 0, 100% 100%, 100% 0)' }}
+            />
+          </div>
+        )}
+        <button
+          onClick={() => {
+            setOpen(true)
+            setProactiveMessage(null)
+          }}
+          className={`flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-105 ${pulse ? 'animate-pulse ring-4 ring-green-200' : ''}`}
+          style={{ backgroundColor: '#2c5234' }}
+          aria-label="Ask a question"
         >
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
-      </button>
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+        </button>
+      </div>
     )
   }
 
