@@ -67,9 +67,7 @@ export async function handleAsk(
   ]
   const answerable = !refusalPhrases.some((p) => answer.toLowerCase().includes(p))
 
-  const relevantSources = prepared.results
-    .filter((r) => r.score > 0.4 && r.url)
-    .slice(0, 4)
+  const relevantSources = filterSourcesForContext(prepared.results, prepared.context)
 
   // Extract product cards from search results when products are mentioned
   let productCards: AskResponse['product_cards']
@@ -120,9 +118,7 @@ export async function handleAskStream(
   const context = prepared.context
 
   // Get relevant sources for the metadata event
-  const relevantSources = prepared.results
-    .filter((r) => r.score > 0.4 && r.url)
-    .slice(0, 4)
+  const relevantSources = filterSourcesForContext(prepared.results, context)
     .map((r) => ({
       title: r.title,
       url: r.url,
@@ -266,13 +262,17 @@ async function prepareContext(body: AskRequest, env: Env): Promise<PreparedConte
   }))
 
   // Build context from reranked chunk text with structured source blocks
+  // Filter out SOPs for customer chat — internal docs should never influence customer answers
   const contextParts: string[] = []
-  for (let i = 0; i < reranked.length; i++) {
-    const r = reranked[i]
+  let sourceNum = 0
+  for (const r of reranked) {
+    // Skip internal SOPs in customer-facing chat
+    if (context === 'chat' && (r.doc_type === 'sop' || r.id.startsWith('sop:'))) continue
+    sourceNum++
     if (r.text && r.text !== r.title) {
-      contextParts.push(`[SOURCE ${i + 1}: ${r.title} (${r.doc_type}) — relevance: ${r.relevance_score.toFixed(2)}]\n${r.text}`)
+      contextParts.push(`[SOURCE ${sourceNum}: ${r.title} (${r.doc_type}) — relevance: ${r.relevance_score.toFixed(2)}]\n${r.text}`)
     } else {
-      contextParts.push(`[SOURCE ${i + 1}: ${r.title} — ${r.doc_type} in ${r.business_unit}]`)
+      contextParts.push(`[SOURCE ${sourceNum}: ${r.title} — ${r.doc_type} in ${r.business_unit}]`)
     }
   }
 
@@ -561,6 +561,31 @@ async function logAskEvent(env: Env, request: AskRequest, response: AskResponse)
   } catch {
     console.error('Failed to log ask event')
   }
+}
+
+// ─── Source Filtering ──────────────────────────────────────────────────────
+// CRITICAL: SOPs are internal docs — NEVER show to customers.
+// Only show sources that resolve on the public southlandorganics.com site.
+
+function filterSourcesForContext(
+  results: Array<{ score: number; url: string; doc_type: string; title: string; id: string; snippet: string; business_unit: string }>,
+  context: AskRequest['context']
+) {
+  return results
+    .filter((r) => {
+      if (r.score <= 0.4 || !r.url) return false
+
+      if (context === 'chat') {
+        // NEVER show SOPs to customers — internal-only docs, 404 on public site
+        if (r.doc_type === 'sop') return false
+        if (r.url.startsWith('/sops')) return false
+        // Only show URLs that exist on the public site
+        if (!r.url.startsWith('/blog') && !r.url.startsWith('/products') && !r.url.startsWith('http')) return false
+      }
+
+      return true
+    })
+    .slice(0, 4)
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
