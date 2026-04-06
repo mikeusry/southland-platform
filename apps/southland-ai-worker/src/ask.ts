@@ -222,27 +222,52 @@ async function prepareContext(body: AskRequest, env: Env): Promise<PreparedConte
   const context = body.context || 'staff'
   const tenant = body.tenant || 'southland'
 
-  // Step 1: Embed the query
-  const { vector } = await embedQuery(body.query, env)
-
-  // Step 2: Two-stage retrieval — over-fetch from Vectorize, then rerank
+  // Step 1: Hybrid retrieval — dense (Vectorize) + lexical (D1 aliases) in parallel
   const supportOnly = context === 'support_draft' || context === 'chat'
+
+  const [{ vector }, aliasHits] = await Promise.all([
+    embedQuery(body.query, env),
+    findAliasMatches(env, body.query),
+  ])
+
   const rawResults = await queryVectorize(env, {
     vector,
-    topK: 20, // Over-fetch for reranking
+    topK: 20,
     filter: {
       tenant,
       ...(supportOnly ? { support_relevant: true } : {}),
     },
   })
 
-  // Fetch chunk text from KV for reranking (reranker needs actual text, not just titles)
+  // Step 2: Fuse results — inject alias hits at top, deduplicate by ID
+  const seenIds = new Set<string>()
   const candidates: RerankCandidate[] = []
+
+  // Alias hits first (lexical match = high signal for exact product/SKU queries)
+  for (const alias of aliasHits) {
+    const chunkId = `product:${alias.source_id}:0`
+    if (seenIds.has(chunkId)) continue
+    seenIds.add(chunkId)
+    const cached = await env.CACHE.get(`chunk:${chunkId}`)
+    candidates.push({
+      id: chunkId,
+      text: cached || alias.title,
+      title: alias.title,
+      score: 0.95, // High score for exact match
+      url: alias.url,
+      doc_type: alias.doc_type,
+      business_unit: alias.business_unit,
+    })
+  }
+
+  // Dense results
   for (const result of rawResults) {
+    if (seenIds.has(result.id)) continue
+    seenIds.add(result.id)
     const cached = await env.CACHE.get(`chunk:${result.id}`)
     candidates.push({
       id: result.id,
-      text: cached || result.title, // Fall back to title if no cached text
+      text: cached || result.title,
       title: result.title,
       score: result.score,
       url: result.url,
@@ -251,7 +276,7 @@ async function prepareContext(body: AskRequest, env: Env): Promise<PreparedConte
     })
   }
 
-  // Rerank candidates (Cohere Rerank v3.5 → top 6)
+  // Step 3: Rerank fused candidates (Cohere Rerank v3.5 → top 6)
   const reranked = await rerank(env, body.query, candidates, 6)
 
   // Convert reranked results back to SearchResult format for downstream compatibility
@@ -565,6 +590,76 @@ async function logAskEvent(env: Env, request: AskRequest, response: AskResponse)
   } catch {
     console.error('Failed to log ask event')
   }
+}
+
+// ─── Lexical / Alias Matching (Hybrid Retrieval) ───────────────────────────
+// Checks D1 product_aliases for exact and prefix matches on query keywords.
+// Catches product names, SKUs, and terms that dense search might miss.
+
+interface AliasHit {
+  source_id: string
+  title: string
+  url: string
+  doc_type: string
+  business_unit: string
+}
+
+async function findAliasMatches(env: Env, query: string): Promise<AliasHit[]> {
+  const normalized = query.trim().toUpperCase()
+  const words = normalized.split(/\s+/).filter((w) => w.length > 2)
+  if (words.length === 0) return []
+
+  const hits: AliasHit[] = []
+  const seen = new Set<string>()
+
+  try {
+    // Exact match on full query
+    const exact = await env.DB.prepare(
+      'SELECT source_id, title, url, doc_type, business_unit FROM product_aliases WHERE alias_upper = ? LIMIT 1'
+    )
+      .bind(normalized)
+      .first()
+
+    if (exact && !seen.has(String(exact.source_id))) {
+      seen.add(String(exact.source_id))
+      hits.push({
+        source_id: String(exact.source_id),
+        title: String(exact.title),
+        url: String(exact.url),
+        doc_type: String(exact.doc_type),
+        business_unit: String(exact.business_unit || ''),
+      })
+    }
+
+    // Prefix match on individual words (catches "Litter Life" from "how do I use Litter Life")
+    for (const word of words) {
+      if (word.length < 4) continue // Skip short words
+      const prefix = await env.DB.prepare(
+        'SELECT source_id, title, url, doc_type, business_unit FROM product_aliases WHERE alias_upper LIKE ? LIMIT 2'
+      )
+        .bind(`%${word}%`)
+        .all()
+
+      for (const row of prefix.results || []) {
+        const sid = String(row.source_id)
+        if (seen.has(sid)) continue
+        seen.add(sid)
+        hits.push({
+          source_id: sid,
+          title: String(row.title),
+          url: String(row.url),
+          doc_type: String(row.doc_type),
+          business_unit: String(row.business_unit || ''),
+        })
+      }
+
+      if (hits.length >= 3) break // Cap at 3 alias hits
+    }
+  } catch (err) {
+    console.error('Alias search error (non-blocking):', err)
+  }
+
+  return hits
 }
 
 // ─── Source Filtering ──────────────────────────────────────────────────────
