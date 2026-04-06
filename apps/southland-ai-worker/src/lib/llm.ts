@@ -169,38 +169,45 @@ async function generateOpenAIStream(
   // Transform OpenAI SSE stream into plain text stream
   const reader = res.body.getReader()
   const decoder = new TextDecoder()
-  let buffer = ''
+  const encoder = new TextEncoder()
 
   return new ReadableStream({
-    async pull(controller) {
-      const { done, value } = await reader.read()
-      if (done) {
-        controller.close()
-        return
-      }
-
-      buffer += decoder.decode(value, { stream: true })
-      const lines = buffer.split('\n')
-      buffer = lines.pop() || '' // Keep incomplete line in buffer
-
-      for (const line of lines) {
-        if (!line.startsWith('data: ')) continue
-        const data = line.slice(6)
-        if (data === '[DONE]') {
-          controller.close()
-          return
-        }
-        try {
-          const parsed = JSON.parse(data) as {
-            choices: Array<{ delta: { content?: string } }>
+    async start(controller) {
+      let buffer = ''
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) {
+            controller.close()
+            return
           }
-          const content = parsed.choices?.[0]?.delta?.content
-          if (content) {
-            controller.enqueue(new TextEncoder().encode(content))
+
+          buffer += decoder.decode(value, { stream: true })
+          const lines = buffer.split('\n')
+          buffer = lines.pop() || ''
+
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue
+            const data = line.slice(6)
+            if (data === '[DONE]') {
+              controller.close()
+              return
+            }
+            try {
+              const parsed = JSON.parse(data) as {
+                choices: Array<{ delta: { content?: string } }>
+              }
+              const content = parsed.choices?.[0]?.delta?.content
+              if (content) {
+                controller.enqueue(encoder.encode(content))
+              }
+            } catch {
+              // Skip malformed chunks
+            }
           }
-        } catch {
-          // Skip malformed chunks
         }
+      } catch (err) {
+        controller.error(err)
       }
     },
   })

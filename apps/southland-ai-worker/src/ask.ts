@@ -147,10 +147,18 @@ export async function handleAskStream(
     async start(controller) {
       // Send sources metadata first
       controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'sources', sources: relevantSources })}\n\n`))
-    },
-    async pull(controller) {
-      const { done, value } = await reader.read()
-      if (done) {
+
+      try {
+        // Read all text chunks from the LLM stream
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          const text = new TextDecoder().decode(value)
+          fullAnswer += text
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'text', text })}\n\n`))
+        }
+
         // Generate follow-ups and product cards from the accumulated answer
         const suggestedQuestions = context === 'chat'
           ? generateFollowUps(body.query, fullAnswer, prepared.results)
@@ -169,8 +177,6 @@ export async function handleAskStream(
           product_cards: productCards,
         })}\n\n`))
 
-        controller.close()
-
         // Log async
         ctx.waitUntil(logAskEvent(env, body, {
           answer: fullAnswer,
@@ -180,15 +186,13 @@ export async function handleAskStream(
           latency_ms: Date.now() - start,
           model: 'gpt-4o-mini',
         }))
-        return
+      } catch (err) {
+        console.error('Streaming error:', err)
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'text', text: 'Sorry, something went wrong. Please try again or call us at (800) 608-3755.' })}\n\n`))
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done' })}\n\n`))
       }
 
-      // Decode chunk and accumulate
-      const text = new TextDecoder().decode(value)
-      fullAnswer += text
-
-      // Send text chunk as SSE event
-      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'text', text })}\n\n`))
+      controller.close()
     },
   })
 
