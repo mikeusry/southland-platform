@@ -335,6 +335,162 @@ export const GET: APIRoute = async () => {
     })
   }
 
+  // ─── 6. Key Static Pages (rewards, shipping, about) ────────────────────
+  // These pages have hardcoded content in .astro files, not content collections.
+  // Including them here ensures the chatbot can answer questions about rewards,
+  // shipping, returns, and company info without relying on SOPs (which are
+  // filtered from customer chat context).
+
+  const staticPages: ContentItem[] = [
+    {
+      id: 'page:rewards',
+      slug: 'rewards',
+      title: 'Southland Organics Rewards Program',
+      content: `Loyalty Rewards Program — Earn points on every order. Redeem for discounts, free shipping, and VIP perks.
+
+How to Earn Points:
+- Earn 1 point per $1 spent on every order (after discounts, before shipping)
+- Points multiplied by tier: Bronze 1x, Silver 1.25x, Gold 1.5x
+
+VIP Tiers:
+- Bronze: Free, automatic. Basic rewards.
+- Silver: $500+ lifetime spend. 1.25x multiplier, bonus rewards.
+- Gold: $1,500+ lifetime spend. 1.5x multiplier, exclusive 15% off reward.
+
+Available Rewards:
+- $5 Off: 500 points (min $25 order)
+- Free Shipping: 750 points (any order)
+- $10 Off: 1,000 points (min $50 order)
+- 10% Off: 1,500 points (min $50, Silver+ tier)
+- 15% Off: 2,000 points (min $75, Gold only)
+- $25 Off: 2,500 points (min $100, Silver+ tier)
+
+Referral Program:
+- Share your unique referral code with friends
+- New customer gets $10 off their first order
+- You earn 500 bonus points
+- Referral codes start with REF- prefix
+
+FAQ:
+Q: Do points expire?
+A: Points remain valid as long as you make at least one purchase per year.
+
+Q: Can I use rewards with other discounts?
+A: Only one discount code per order. Rewards cannot be stacked with other promo codes.
+
+Q: How do I check my points balance?
+A: Visit southlandorganics.com/rewards and enter your email address.`,
+      category: 'general',
+      tags: ['loyalty', 'rewards', 'points', 'referrals', 'VIP', 'discounts'],
+      business_unit: 'general',
+      answer_type: 'factual',
+      url: `${SITE_URL}/rewards`,
+      tenant: 'southland',
+      support_relevant: true,
+      word_count: 200,
+      updated_at: now,
+    },
+    {
+      id: 'page:shipping',
+      slug: 'shipping-policy',
+      title: 'Shipping & Returns Policy',
+      content: `Shipping & Returns — Southland Organics
+
+Shipping:
+- Ships from Ringgold, Georgia
+- Most orders ship within 1-2 business days
+- Delivery: 3-5 business days via UPS or FedEx Ground
+- Free shipping on orders over $99
+- Large/heavy orders may ship LTL freight
+
+Returns:
+- 30-day return window for unopened products
+- Opened or damaged items: contact us to discuss options
+- Returns reviewed on case-by-case basis
+
+How to Return:
+1. Contact us at 800-608-3755 or success@southlandorganics.com
+2. We provide return instructions and authorization
+3. Ship product back to our warehouse
+4. Refund processed within 5-7 business days
+
+Damaged Products:
+- Contact us immediately if product arrives damaged
+- We ship a replacement at no cost
+- No need to return the damaged item
+- Take photos for our records
+
+Refunds processed to original payment method within 5-7 business days.`,
+      category: 'general',
+      tags: ['shipping', 'returns', 'refunds', 'delivery', 'policy'],
+      business_unit: 'general',
+      answer_type: 'policy',
+      url: `${SITE_URL}/contact`,
+      tenant: 'southland',
+      support_relevant: true,
+      word_count: 150,
+      updated_at: now,
+    },
+    {
+      id: 'page:subscriptions',
+      slug: 'subscriptions-info',
+      title: 'Pour The Port Subscription — How It Works',
+      content: `Pour The Port — Monthly Septic Tank Treatment Subscription
+
+What It Is:
+Pour The Port is a biological septic tank treatment delivered to your door. Monthly application keeps your septic system healthy by maintaining beneficial bacteria.
+
+What's Included:
+Each shipment includes four bottles: one quart and three 8-ounce bottles. Ships every four months (4-month supply per shipment).
+
+Price: $28.00 per shipment (was $40.00 — subscription saves 30%)
+
+How to Subscribe:
+1. Visit southlandorganics.com/products/pour-the-port-septic-tank-treatment
+2. Select the subscription option (not one-time purchase)
+3. Add to cart and complete checkout
+4. First shipment ships immediately, then every 4 months
+
+How to Use PORT:
+- Pour one 8-ounce bottle down any toilet or drain monthly
+- Flush twice to move into the septic system
+- Use the quart bottle for initial treatment
+- Best applied in the evening when water usage is low
+
+Managing Your Subscription:
+- Skip a delivery: contact us, we push the next billing date
+- Pause: we pause billing, resume anytime
+- Cancel: permanent, cannot be undone — we recommend pausing instead
+- Contact: 800-608-3755 or success@southlandorganics.com
+
+Results:
+- Reduced odors within 1-2 weeks
+- Full microbial balance improvement in 1-3 months
+- Works with all septic types: conventional, aerobic, mound
+
+FAQ:
+Q: Can I cancel anytime?
+A: Yes. Cancellation is immediate and permanent. If you just need a break, pause instead.
+
+Q: Can I get PORT without a subscription?
+A: PORT is subscription-only because consistent monthly use is key to septic health.
+
+Q: Is PORT safe for all septic systems?
+A: Yes — works with all types including conventional, aerobic, and mound systems.`,
+      category: 'agriculture',
+      tags: ['subscriptions', 'pour-the-port', 'septic', 'recurring', 'billing'],
+      business_unit: 'agriculture',
+      answer_type: 'factual',
+      url: `${SITE_URL}/products/pour-the-port-septic-tank-treatment`,
+      tenant: 'southland',
+      support_relevant: true,
+      word_count: 250,
+      updated_at: now,
+    },
+  ]
+
+  items.push(...staticPages)
+
   // Use 'sops' key for compatibility with worker's /index/sops handler
   return new Response(JSON.stringify({ sops: items, count: items.length }), {
     status: 200,
