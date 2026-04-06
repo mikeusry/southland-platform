@@ -342,7 +342,7 @@ export default function ChatWidget() {
       }
 
       // Flush every 60ms or on punctuation
-      const flushInterval = setInterval(flushText, 60)
+      const flushInterval = window.setInterval(flushText, 60)
 
       while (true) {
         const { done, value } = await reader.read()
