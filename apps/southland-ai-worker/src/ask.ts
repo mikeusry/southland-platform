@@ -296,7 +296,7 @@ async function prepareContext(body: AskRequest, env: Env): Promise<PreparedConte
   let sourceNum = 0
   for (const r of reranked) {
     // Skip internal SOPs in customer-facing chat
-    if (context === 'chat' && (r.doc_type === 'sop' || r.id.startsWith('sop:'))) continue
+    if (context === 'chat' && (r.doc_type === 'sop' || r.doc_type === 'sops' || r.id.startsWith('sop:'))) continue
     sourceNum++
     if (r.text && r.text !== r.title) {
       contextParts.push(`[SOURCE ${sourceNum}: ${r.title} (${r.doc_type}) — relevance: ${r.relevance_score.toFixed(2)}]\n${r.text}`)
@@ -676,7 +676,7 @@ function filterSourcesForContext(
 
       if (context === 'chat') {
         // NEVER show SOPs to customers — internal-only docs, 404 on public site
-        if (r.doc_type === 'sop') return false
+        if (r.doc_type === 'sop' || r.doc_type === 'sops') return false
         if (r.url.startsWith('/sops')) return false
         // Only show URLs that exist on the public site
         if (!r.url.startsWith('/blog') && !r.url.startsWith('/products') && !r.url.startsWith('http')) return false

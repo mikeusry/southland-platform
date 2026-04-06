@@ -37,7 +37,8 @@ export async function handleBulkIndex(
   const contentType = url.pathname.split('/').pop() // 'products', 'sops', etc.
 
   if (contentType === 'sops' || contentType === 'blog') {
-    return handleBulkIndexSOPs(request, env, origin, contentType as 'sop' | 'blog')
+    // 'sops' → 'sop' (singular) to match ChunkMetadata.doc_type
+    return handleBulkIndexSOPs(request, env, origin, contentType === 'sops' ? 'sop' : 'blog')
   }
 
   if (contentType !== 'products') {
