@@ -706,7 +706,9 @@ function filterSourcesForContext(
         if (r.doc_type === 'sop' || r.doc_type === 'sops') return false
         if (r.url.startsWith('/sops')) return false
         // Only show URLs that exist on the public site
-        if (!r.url.startsWith('/blog') && !r.url.startsWith('/products') && !r.url.startsWith('http')) return false
+        // Only show URLs that resolve on the public site (not /sops/* which are internal Nexus routes)
+        const publicPrefixes = ['/blog', '/products', '/collections', '/team', '/podcast', '/about', '/contact', '/rewards', '/tools', '/poultry', '/lawn', '/agriculture', '/livestock', 'http']
+        if (!publicPrefixes.some((p) => r.url.startsWith(p))) return false
       }
 
       return true
