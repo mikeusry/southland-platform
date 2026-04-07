@@ -42,6 +42,10 @@ self.addEventListener('fetch', (event) => {
   // Skip API requests
   if (event.request.url.includes('/api/')) return;
 
+  // Don't cache hashed Astro chunks — they're immutable and CDN-cached.
+  // SW caching these causes truncation race conditions on slow mobile networks.
+  if (event.request.url.includes('/_astro/')) return;
+
   event.respondWith(
     fetch(event.request)
       .then((response) => {

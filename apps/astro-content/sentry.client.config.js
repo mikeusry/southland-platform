@@ -46,15 +46,19 @@ Sentry.init({
     // Hydration mismatches (React SSR, usually harmless)
     'Hydration failed',
     'Text content does not match',
+    // Chromium iOS WebView internal recursion (Google app in-app browser)
+    'findTopmostVisibleElement',
+    'Maximum call stack size exceeded',
   ],
 
-  // Ignore extension URLs
+  // Ignore extension URLs and Google Translate proxy
   denyUrls: [
     /extensions\//i,
     /^chrome:\/\//i,
     /^chrome-extension:\/\//i,
     /^moz-extension:\/\//i,
     /^safari-extension:\/\//i,
+    /translate\.goog/i,
   ],
 
   // Tag cart-related errors for easy filtering
