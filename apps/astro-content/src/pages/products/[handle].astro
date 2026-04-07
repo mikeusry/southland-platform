@@ -609,7 +609,7 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
         </section>
       )
     }
-    {muxPlaybackId && <script>import '@mux/mux-player';</script>}
+    {muxPlaybackId && <script>import('@mux/mux-player').catch(function () {})</script>}
 
     {/* S3: PAS / PROBLEM — full mode only */}
     {

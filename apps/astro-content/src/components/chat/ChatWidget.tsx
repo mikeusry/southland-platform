@@ -571,9 +571,19 @@ export default function ChatWidget() {
     }
   }
 
-  // ─── Suggested questions based on page ──────────────────────────────────
+  // ─── Suggested questions based on page (resolved client-side only) ──────
+  const [suggestions, setSuggestions] = useState<string[]>([
+    'How do I use Litter Life?',
+    'What helps with ammonia?',
+    'Where is my order?',
+  ])
+
+  useEffect(() => {
+    setSuggestions(getInitialSuggestions())
+  }, [])
+
   const getInitialSuggestions = () => {
-    const path = typeof window !== 'undefined' ? window.location.pathname.toLowerCase() : ''
+    const path = window.location.pathname.toLowerCase()
 
     // Septic & Waste
     if (path.includes('/septic') || path.includes('/waste') || path.includes('/port'))
@@ -742,7 +752,7 @@ export default function ChatWidget() {
               Ask me anything about our products, orders, or application tips.
             </p>
             <div className="flex flex-wrap justify-center gap-2">
-              {getInitialSuggestions().map((q) => (
+              {suggestions.map((q) => (
                 <button
                   key={q}
                   onClick={() => sendMessage(q)}

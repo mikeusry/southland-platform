@@ -139,15 +139,12 @@ const variantClasses = {
     })
   }
 
-  // Run on page load
-  document.addEventListener('DOMContentLoaded', updatePersonaCTAs)
-  if (document.readyState !== 'loading') {
-    updatePersonaCTAs()
+  // Initialize (guard against duplicate listeners)
+  if (!(window as any).__personaCTAInit) {
+    ;(window as any).__personaCTAInit = true
+    document.addEventListener('DOMContentLoaded', updatePersonaCTAs)
+    window.addEventListener('persona-changed', updatePersonaCTAs)
+    document.addEventListener('astro:page-load', updatePersonaCTAs)
   }
-
-  // Listen for persona changes
-  window.addEventListener('persona-changed', updatePersonaCTAs)
-
-  // Handle Astro View Transitions
-  document.addEventListener('astro:page-load', updatePersonaCTAs)
+  if (document.readyState !== 'loading') updatePersonaCTAs()
 </script>

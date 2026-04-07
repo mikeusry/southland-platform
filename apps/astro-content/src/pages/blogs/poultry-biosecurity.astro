@@ -499,7 +499,9 @@ const schema = {
     </div>
   </section>
 
-  <script>import '@mux/mux-player';</script>
+  <script>
+    import('@mux/mux-player').catch(() => {})
+  </script>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 6: PRODUCT BAND — JTBD-framed + program CTA                  -->

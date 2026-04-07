@@ -185,17 +185,12 @@ if (hideIfUnknown) {
     })
   }
 
-  // Run on page load
-  document.addEventListener('DOMContentLoaded', updatePersonaContent)
-
-  // Also run immediately in case DOM is already loaded
-  if (document.readyState !== 'loading') {
-    updatePersonaContent()
+  // Initialize (guard against duplicate listeners)
+  if (!(window as any).__personaContentInit) {
+    ;(window as any).__personaContentInit = true
+    document.addEventListener('DOMContentLoaded', updatePersonaContent)
+    window.addEventListener('persona-changed', updatePersonaContent)
+    document.addEventListener('astro:page-load', updatePersonaContent)
   }
-
-  // Listen for persona changes
-  window.addEventListener('persona-changed', updatePersonaContent)
-
-  // Re-run on Astro page transitions (View Transitions)
-  document.addEventListener('astro:page-load', updatePersonaContent)
+  if (document.readyState !== 'loading') updatePersonaContent()
 </script>

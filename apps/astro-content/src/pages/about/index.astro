@@ -872,7 +872,7 @@ const aboutSchema = {
 </BaseLayout>
 
 <script>
-  import '@mux/mux-player'
+  import('@mux/mux-player').catch(() => {})
 
   const modal = document.getElementById('video-modal')!
   const playerContainer = document.getElementById('video-modal-player')!

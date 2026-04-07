@@ -368,10 +368,11 @@ const { position = 'bottom', showChangeLink = true, class: className = '' } = As
     if (e.key === 'Escape') closeModal()
   })
 
-  // Initialize
-  document.addEventListener('DOMContentLoaded', updateBanner)
+  // Initialize (guard against duplicate listeners)
+  if (!(window as any).__personaBannerInit) {
+    ;(window as any).__personaBannerInit = true
+    document.addEventListener('DOMContentLoaded', updateBanner)
+    window.addEventListener('persona-changed', updateBanner)
+  }
   if (document.readyState !== 'loading') updateBanner()
-
-  // Listen for persona changes
-  window.addEventListener('persona-changed', updateBanner)
 </script>

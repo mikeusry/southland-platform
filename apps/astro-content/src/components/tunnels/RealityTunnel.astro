@@ -138,17 +138,14 @@ const shouldShowTunnel = tunnelVariant === 'tunnel' && currentPersona && current
     });
   }
 
-  // Run on load
-  document.addEventListener('DOMContentLoaded', initRealityTunnel);
-  if (document.readyState !== 'loading') {
-    initRealityTunnel();
+  // Initialize (guard against duplicate listeners)
+  if (!(window as any).__realityTunnelInit) {
+    (window as any).__realityTunnelInit = true;
+    document.addEventListener('DOMContentLoaded', initRealityTunnel);
+    document.addEventListener('astro:page-load', initRealityTunnel);
+    window.addEventListener('persona-changed', initRealityTunnel);
   }
-
-  // Re-run on Astro View Transitions
-  document.addEventListener('astro:page-load', initRealityTunnel);
-
-  // Re-run on persona change
-  window.addEventListener('persona-changed', initRealityTunnel);
+  if (document.readyState !== 'loading') initRealityTunnel();
 </script>
 
 <style>
