@@ -273,6 +273,28 @@ const productSchema = hasNamedVariants
 const collectionHandle = resolvedProductType
   ? resolvedProductType.toLowerCase().replace(/\s+/g, '-')
   : ''
+
+// Map Shopify collection handles → hub page URLs
+const COLLECTION_TO_HUB: Record<string, string> = {
+  poultry: '/poultry/',
+  'poultry-broilers': '/poultry/commercial/',
+  'backyard-birds': '/poultry/backyard/',
+  'poultry-breeders': '/poultry/breeders/',
+  turkey: '/poultry/turkey/',
+  'game-birds': '/poultry/game-birds/',
+  turf: '/lawn/turf-pros/',
+  homeowners: '/lawn/homeowners/',
+  landscapers: '/lawn/landscapers/',
+  'golf-courses': '/lawn/golf-courses/',
+  crops: '/agriculture/crops/',
+  produce: '/agriculture/produce/',
+  'pig-and-swine-supplements': '/livestock/swine/',
+  hydroseeders: '/hydroseeders/',
+  sanitizers: '/products/sanitizers/',
+  waste: '/products/waste-treatment/',
+}
+const hubUrl = COLLECTION_TO_HUB[collectionHandle] || `/products/`
+
 const breadcrumbSchema = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
@@ -289,7 +311,7 @@ const breadcrumbSchema = {
             '@type': 'ListItem',
             position: 2,
             name: resolvedProductType,
-            item: `${siteUrl}/collections/${collectionHandle}/`,
+            item: `${siteUrl}${hubUrl}`,
           },
         ]
       : []),
@@ -306,8 +328,8 @@ const breadcrumbSchema = {
 const breadcrumbItems = [
   { label: 'Home', href: '/' },
   ...(collectionHandle
-    ? [{ label: resolvedProductType, href: `/collections/${collectionHandle}/` }]
-    : [{ label: 'Collections', href: '/collections/' }]),
+    ? [{ label: resolvedProductType, href: hubUrl }]
+    : [{ label: 'Products', href: '/products/' }]),
   { label: displayTitle, href: `/products/${handle}/` },
 ]
 
@@ -497,7 +519,7 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
           {
             resolvedProductType && (
               <a
-                href={`/collections/${resolvedProductType.toLowerCase().replace(/\s+/g, '-')}/`}
+                href={hubUrl}
                 class="mt-2 inline-block text-sm text-brand-green-light hover:underline"
               >
                 {resolvedProductType}

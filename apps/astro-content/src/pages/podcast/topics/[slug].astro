@@ -26,6 +26,15 @@ const { Content } = await render(topic)
 
 // Get the slug without extension
 const topicSlug = topic.id.replace(/\.mdx?$/, '')
+// Map topic segments to hub page URLs
+const SEGMENT_TO_HUB: Record<string, string> = {
+  poultry: '/poultry/',
+  turf: '/lawn/turf-pros/',
+  crops: '/agriculture/crops/',
+  produce: '/agriculture/produce/',
+  waste: '/products/waste-treatment/',
+}
+
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
 const pageUrl = `${siteUrl}/podcast/topics/${topicSlug}/`
 
@@ -205,9 +214,7 @@ const schema = {
               </div>
               <div class="mt-6 text-center">
                 <a
-                  href={`https://southlandorganics.com/collections/${topic.data.segment || 'all'}`}
-                  target="_blank"
-                  rel="noopener"
+                  href={SEGMENT_TO_HUB[topic.data.segment] || '/products/'}
                   class="inline-flex items-center gap-2 font-medium text-southland-green transition-colors hover:text-southland-green-dark"
                 >
                   Browse all {topic.data.name.toLowerCase()} products

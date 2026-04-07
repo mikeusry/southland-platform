@@ -123,7 +123,7 @@ function getProducts(filter: string) {
 }
 ---
 
-<BaseLayout title={title} description={description} schema={schema}>
+<BaseLayout title={title} description={description} schema={schema} noIndex={true}>
   {/* RealityTunnel disabled for launch — always show default view */}
   {/* RealityTunnel + persona tunnels disabled for launch — enable post-launch */}
   {false && <Fragment>

@@ -8,9 +8,16 @@
  */
 
 export interface PersonaScores {
-  backyard: number
-  commercial: number
-  lawn: number
+  bill: number
+  betty: number
+  bob: number
+  tom: number
+  greg: number
+  taylor: number
+  gary: number
+  hannah: number
+  maggie: number
+  sam: number
   general: number
 }
 
@@ -30,9 +37,20 @@ export interface VisitorData {
   anonymous_id: string
   customer_id?: string
   persona_scores: PersonaScores
-  predicted_persona: 'backyard' | 'commercial' | 'lawn' | 'general'
+  predicted_persona:
+    | 'bill'
+    | 'betty'
+    | 'bob'
+    | 'tom'
+    | 'greg'
+    | 'taylor'
+    | 'gary'
+    | 'hannah'
+    | 'maggie'
+    | 'sam'
+    | 'general'
   persona_confidence: number
-  explicit_persona?: 'backyard' | 'commercial' | 'lawn' | 'general'
+  explicit_persona?: VisitorData['predicted_persona']
   current_stage: JourneyStage
   stage_confidence: number
   session_count: number
@@ -139,7 +157,7 @@ export function getStageCTA(stage: JourneyStage): { text: string; action: string
     unaware: { text: 'Learn More', action: '/learn/' },
     aware: { text: 'Explore Solutions', action: '/shop/' },
     receptive: { text: 'See How It Works', action: '/resources/' },
-    zmot: { text: 'Compare Products', action: '/collections/' },
+    zmot: { text: 'Compare Products', action: '/products/' },
     objections: { text: 'Get Answers', action: '/faq/' },
     test_prep: { text: 'Start Your Trial', action: '/shop/' },
     challenge: { text: 'Get Support', action: '/support/' },

@@ -97,10 +97,22 @@ const NEXUS_LEADS_URL = 'https://nexus.southlandorganics.com/api/leads'
 
 /** Fire-and-forget POST to Nexus. Never blocks user experience. */
 export function postToNexus(payload: NexusLeadPayload): void {
+  const body = JSON.stringify(payload)
+
+  // Use sendBeacon if available — survives page navigation
+  if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+    const sent = navigator.sendBeacon(
+      NEXUS_LEADS_URL,
+      new Blob([body], { type: 'application/json' })
+    )
+    if (sent) return
+  }
+
+  // Fallback to fetch
   fetch(NEXUS_LEADS_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body,
   }).catch(() => {})
 }
 

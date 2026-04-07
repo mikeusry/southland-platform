@@ -51,8 +51,38 @@ for (const [from, to] of Object.entries(REDIRECTS)) {
   }
 }
 
+// Simple in-memory rate limiter for API endpoints (per-IP, 60 req/min)
+const apiHits = new Map<string, { count: number; reset: number }>()
+const API_RATE_LIMIT = 60
+const API_RATE_WINDOW = 60_000
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now()
+  const entry = apiHits.get(ip)
+  if (!entry || now > entry.reset) {
+    apiHits.set(ip, { count: 1, reset: now + API_RATE_WINDOW })
+    return false
+  }
+  entry.count++
+  return entry.count > API_RATE_LIMIT
+}
+
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url
+
+  // Rate-limit /api/ endpoints
+  if (pathname.startsWith('/api/')) {
+    const ip = context.request.headers.get('cf-connecting-ip') || 'unknown'
+    if (isRateLimited(ip)) {
+      return new Response(JSON.stringify({ error: 'Too many requests' }), {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': '60',
+        },
+      })
+    }
+  }
 
   // Permanent redirects (old Shopify URLs → new Astro routes)
   const redirect = REDIRECTS_WITH_SLASHES[pathname]

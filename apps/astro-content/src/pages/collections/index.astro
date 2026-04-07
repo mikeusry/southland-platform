@@ -41,6 +41,26 @@ const collections = shopifyCollections
     }
   })
 
+// Map Shopify collection handles → hub page URLs
+const COLLECTION_TO_HUB: Record<string, string> = {
+  poultry: '/poultry/',
+  'poultry-broilers': '/poultry/commercial/',
+  'backyard-birds': '/poultry/backyard/',
+  'poultry-breeders': '/poultry/breeders/',
+  turkey: '/poultry/turkey/',
+  'game-birds': '/poultry/game-birds/',
+  turf: '/lawn/turf-pros/',
+  homeowners: '/lawn/homeowners/',
+  landscapers: '/lawn/landscapers/',
+  'golf-courses': '/lawn/golf-courses/',
+  crops: '/agriculture/crops/',
+  produce: '/agriculture/produce/',
+  'pig-and-swine-supplements': '/livestock/swine/',
+  hydroseeders: '/hydroseeders/',
+  sanitizers: '/products/sanitizers/',
+  waste: '/products/waste-treatment/',
+}
+
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
 
 const schema = {
@@ -90,7 +110,7 @@ const personaAccent: Record<string, string> = {
       {
         collections.map((collection) => (
           <a
-            href={`/collections/${collection.handle}/`}
+            href={COLLECTION_TO_HUB[collection.handle] || `/products/`}
             class:list={[
               'group block rounded-lg border border-gray-200 bg-white p-5 transition-shadow hover:shadow-md',
               collection.persona ? `border-l-4 ${personaAccent[collection.persona] || ''}` : '',

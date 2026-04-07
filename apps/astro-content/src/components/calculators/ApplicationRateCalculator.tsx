@@ -53,6 +53,7 @@ export default function ApplicationRateCalculator() {
   const [leadSubmitted, setLeadSubmitted] = useState(false)
   const [addingToCart, setAddingToCart] = useState(false)
   const [addedToCart, setAddedToCart] = useState(false)
+  const [cartError, setCartError] = useState<string | null>(null)
   const startTime = useRef(Date.now())
   const thresholdFired = useRef(false)
 
@@ -157,8 +158,11 @@ export default function ApplicationRateCalculator() {
       )
       setAddedToCart(true)
       setTimeout(() => setAddedToCart(false), 3000)
-    } catch {
-      // Silent
+    } catch (err) {
+      setCartError('Failed to add to cart. Please try again.')
+      if (typeof window !== 'undefined' && (window as any).Sentry) {
+        ;(window as any).Sentry.captureException(err)
+      }
     } finally {
       setAddingToCart(false)
     }
@@ -663,6 +667,7 @@ export default function ApplicationRateCalculator() {
                   >
                     Request Volume Pricing
                   </a>
+                  {cartError && <p className="text-sm text-red-600">{cartError}</p>}
                   {result.cartLines.length > 0 ? (
                     <button
                       type="button"

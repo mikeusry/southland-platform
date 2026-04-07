@@ -11,7 +11,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 import { buildSouthlandUrl } from '../../lib/cloudinary'
 
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
-const shopUrl = 'https://southlandorganics.com/collections/all'
+const shopUrl = '/products/'
 const lookupUrl = 'https://nexus.southlandorganics.com/api/loyalty/lookup'
 
 const rewardsSchema = {
@@ -79,6 +79,7 @@ const faqs = [
     quality: 'auto',
     format: 'auto',
   })}
+  canonicalUrl={`${siteUrl}/rewards/`}
   schema={rewardsSchema}
 >
   <!-- ============================================================

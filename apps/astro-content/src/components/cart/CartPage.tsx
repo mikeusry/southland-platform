@@ -169,6 +169,7 @@ export default function CartPage() {
   const [cart, setCart] = useState<Cart | null>(null)
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
+  const [cartError, setCartError] = useState<string | null>(null)
 
   // Shipping estimate state
   const [zip, setZip] = useState('')
@@ -254,6 +255,7 @@ export default function CartPage() {
         const updated = await updateCartLines([{ id: lineId, quantity }])
         if (updated) {
           setCart(updated)
+          setCartError(null)
           // Track quantity change
           if (line && oldQty !== quantity) {
             const direction = quantity > oldQty ? 'increase' : 'decrease'
@@ -280,6 +282,10 @@ export default function CartPage() {
         }
       } catch (err) {
         console.error('Failed to update quantity:', err)
+        setCartError('Failed to update quantity. Please try again.')
+        if (typeof window !== 'undefined' && (window as any).Sentry) {
+          ;(window as any).Sentry.captureException(err)
+        }
       } finally {
         setUpdating(false)
       }
@@ -297,8 +303,13 @@ export default function CartPage() {
       try {
         const updated = await removeFromCart([lineId])
         setCart(updated)
+        setCartError(null)
       } catch (err) {
         console.error('Failed to remove item:', err)
+        setCartError('Failed to remove item. Please try again.')
+        if (typeof window !== 'undefined' && (window as any).Sentry) {
+          ;(window as any).Sentry.captureException(err)
+        }
       } finally {
         setUpdating(false)
       }
@@ -359,6 +370,19 @@ export default function CartPage() {
 
   return (
     <div className="grid gap-8 lg:grid-cols-3">
+      {/* Error toast */}
+      {cartError && (
+        <div className="col-span-full mb-4 flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          <span>{cartError}</span>
+          <button
+            onClick={() => setCartError(null)}
+            className="ml-4 text-red-600 hover:text-red-800"
+            aria-label="Dismiss error"
+          >
+            &times;
+          </button>
+        </div>
+      )}
       {/* Line items */}
       <div className="lg:col-span-2">
         <div className="divide-y-0">
