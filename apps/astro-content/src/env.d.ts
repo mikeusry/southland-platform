@@ -22,4 +22,7 @@ interface Window {
 
   /** Google Tag Manager dataLayer */
   dataLayer?: Array<Record<string, any>>
+
+  /** Meta Pixel */
+  fbq?: (...args: any[]) => void
 }

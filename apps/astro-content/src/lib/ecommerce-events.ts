@@ -1,8 +1,9 @@
 /**
- * GA4 E-commerce Event Tracking
+ * E-commerce Event Tracking
  *
- * Pushes standard GA4 e-commerce events to dataLayer (consumed by GTM).
- * Also mirrors to point.dog pixel for CDP attribution.
+ * Pushes standard GA4 e-commerce events to dataLayer (consumed by GTM),
+ * mirrors to point.dog pixel for CDP attribution, and fires Meta Pixel
+ * standard events (ViewContent, AddToCart, InitiateCheckout) for ROAS.
  *
  * Event reference: https://developers.google.com/analytics/devguides/collection/ga4/ecommerce
  */
@@ -64,6 +65,11 @@ function pushToDataLayer(event: string, data: Record<string, unknown>): void {
   // Clear previous ecommerce data to prevent contamination
   window.dataLayer.push({ ecommerce: null })
   window.dataLayer.push({ event, ecommerce: data })
+}
+
+function pushToMeta(event: string, data: Record<string, unknown>): void {
+  if (typeof window === 'undefined' || typeof window.fbq !== 'function') return
+  window.fbq('track', event, data)
 }
 
 function pushToPixel(event: string, data: Record<string, unknown>): void {
@@ -130,6 +136,13 @@ export function trackViewItem(product: ProductData, variantIndex = 0): void {
 
   pushToDataLayer('view_item', { currency, value, items: [item] })
   pushToPixel('view_item', { currency, value, items: [item] })
+  pushToMeta('ViewContent', {
+    content_ids: [product.handle],
+    content_name: product.title,
+    content_type: 'product',
+    value,
+    currency,
+  })
 }
 
 /**
@@ -165,6 +178,13 @@ export function trackAddToCart(
 
   pushToDataLayer('add_to_cart', { currency, value, items: [item] })
   pushToPixel('add_to_cart', { currency, value, items: [item] })
+  pushToMeta('AddToCart', {
+    content_ids: [product.handle],
+    content_name: product.title,
+    content_type: 'product',
+    value,
+    currency,
+  })
 }
 
 /**
@@ -203,4 +223,10 @@ export function trackBeginCheckout(
 
   pushToDataLayer('begin_checkout', { currency, value, items })
   pushToPixel('begin_checkout', { currency, value, item_count: items.length })
+  pushToMeta('InitiateCheckout', {
+    content_ids: items.map((i) => i.item_id),
+    num_items: items.length,
+    value,
+    currency,
+  })
 }
