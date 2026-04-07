@@ -39,6 +39,7 @@ export default [
         File: 'readonly',
         document: 'readonly',
         window: 'readonly',
+        navigator: 'readonly',
         localStorage: 'readonly',
         sessionStorage: 'readonly',
         CustomEvent: 'readonly',
