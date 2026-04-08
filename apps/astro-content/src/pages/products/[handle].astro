@@ -21,6 +21,9 @@ import CollectionProductCard from '../../components/shop/CollectionProductCard.a
 import AccordionFaq from '../../components/shop/AccordionFaq.astro'
 import { isValidPersonaId, type PersonaId } from '../../lib/persona'
 import TalkToRep from '../../components/product/TalkToRep'
+import { fetchProductReviews } from '../../lib/klaviyo-reviews'
+import StarRating from '../../components/product/StarRating.astro'
+import ReviewsSection from '../../components/product/ReviewsSection.astro'
 
 // SSR — do not prerender
 const { handle } = Astro.params
@@ -57,6 +60,9 @@ const product = await getProductByHandle(client, shopifyHandle)
 if (!product) {
   return new Response(null, { status: 404, statusText: 'Product not found' })
 }
+
+// ── Fetch Klaviyo reviews (graceful — returns null on failure) ──────────────
+const reviewData = await fetchProductReviews(product.id)
 
 // ── Related products (same productType collection) ──────────────────────────
 let relatedProducts: Product[] = []
@@ -202,6 +208,33 @@ const variantOffers = product.variants.map((variant) => ({
 const hasNamedVariants =
   hasMultipleVariants && product.variants.some((v) => v.title !== 'Default Title')
 
+// ── Schema.org AggregateRating + Review[] (from Klaviyo) ───────────────────
+const reviewSchemaProps =
+  reviewData?.aggregate && reviewData.aggregate.reviewCount > 0
+    ? {
+        aggregateRating: {
+          '@type': 'AggregateRating',
+          ratingValue: reviewData.aggregate.averageRating.toFixed(1),
+          reviewCount: reviewData.aggregate.reviewCount,
+          bestRating: 5,
+          worstRating: 1,
+        },
+        review: reviewData.reviews.slice(0, 5).map((r) => ({
+          '@type': 'Review',
+          author: { '@type': 'Person', name: r.author },
+          datePublished: r.createdAt.split('T')[0],
+          reviewBody: r.content,
+          ...(r.title ? { name: r.title } : {}),
+          reviewRating: {
+            '@type': 'Rating',
+            ratingValue: r.rating,
+            bestRating: 5,
+            worstRating: 1,
+          },
+        })),
+      }
+    : {}
+
 // ProductGroup + hasVariant for multi-variant products with named options
 const productSchema = hasNamedVariants
   ? {
@@ -242,6 +275,7 @@ const productSchema = hasNamedVariants
         priceCurrency: product.priceRange.minVariantPrice.currencyCode || 'USD',
         offerCount: product.variants.length,
       },
+      ...reviewSchemaProps,
     }
   : {
       '@context': 'https://schema.org',
@@ -267,6 +301,7 @@ const productSchema = hasNamedVariants
             offers: variantOffers,
           }
         : variantOffers[0],
+      ...reviewSchemaProps,
     }
 
 // ── Schema.org BreadcrumbList ──────────────────────────────────────────────
@@ -534,6 +569,20 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
             )
           }
           {hasMultipleVariants && <p class="mt-4 text-sm text-gray-500">From {priceFormatted}</p>}
+
+          {/* Star rating — links to reviews section */}
+          {
+            reviewData?.aggregate && reviewData.aggregate.reviewCount > 0 && (
+              <div class="mt-2">
+                <StarRating
+                  rating={reviewData.aggregate.averageRating}
+                  count={reviewData.aggregate.reviewCount}
+                  size="md"
+                  anchorTo="#reviews"
+                />
+              </div>
+            )
+          }
 
           {/* Add to cart island */}
           <div class="mt-6" id="pdp-atc">
@@ -806,6 +855,18 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
         }
       </div>
     </section>
+
+    {/* S5.5: REVIEWS — Klaviyo Reviews (both tiers) */}
+    {
+      reviewData?.aggregate && reviewData.aggregate.reviewCount > 0 && (
+        <ReviewsSection
+          reviews={reviewData.reviews}
+          questions={reviewData.questions}
+          aggregate={reviewData.aggregate}
+          productHandle={product.handle}
+        />
+      )
+    }
 
     {/* S6: FAQ — conditional */}
     {
@@ -1091,6 +1152,7 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
 
         if (sectionName === 'pdp-video') trackEvent('pdp_video_impression')
         if (sectionName === 'pdp-hero') trackEvent('pdp_hero_atc_view')
+        if (sectionName === 'pdp-reviews') trackEvent('pdp_reviews_impression')
       })
     },
     { threshold: 0.3 }

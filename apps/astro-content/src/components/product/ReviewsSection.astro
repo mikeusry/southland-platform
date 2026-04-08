@@ -1,0 +1,107 @@
+---
+/**
+ * ReviewsSection — composite reviews section for PDP.
+ * Two-column layout: aggregate summary (left) + review cards (right).
+ * Includes Q&A section if questions with replies exist.
+ */
+import StarRating from './StarRating.astro'
+import RatingHistogram from './RatingHistogram.astro'
+import ReviewCard from './ReviewCard.astro'
+import type { KlaviyoReview, ReviewAggregate } from '../../lib/klaviyo-reviews'
+
+interface Props {
+  reviews: KlaviyoReview[]
+  questions?: KlaviyoReview[]
+  aggregate: ReviewAggregate
+  productHandle: string
+}
+
+const { reviews, questions = [], aggregate, productHandle } = Astro.props
+
+// Show first 10 reviews SSR'd
+const displayedReviews = reviews.slice(0, 10)
+const hasQuestions = questions.length > 0
+---
+
+<section
+  id="reviews"
+  class="border-t border-gray-100 bg-white py-8 md:py-12"
+  data-section="pdp-reviews"
+>
+  <div class="mx-auto max-w-6xl px-4">
+    <h2 class="mb-8 font-heading text-2xl text-gray-900">Customer Reviews</h2>
+
+    <div class="grid gap-8 lg:grid-cols-12">
+      {/* Left column: Aggregate summary */}
+      <div class="lg:col-span-4">
+        <div class="sticky top-24 space-y-4">
+          {/* Big rating number */}
+          <div class="text-center lg:text-left">
+            <p class="font-heading text-5xl text-gray-900">
+              {aggregate.averageRating.toFixed(1)}
+            </p>
+            <div class="mt-1">
+              <StarRating
+                rating={aggregate.averageRating}
+                count={aggregate.reviewCount}
+                size="md"
+                showCount={true}
+              />
+            </div>
+          </div>
+
+          {/* Distribution histogram */}
+          <div class="mt-4">
+            <RatingHistogram
+              distribution={aggregate.distribution}
+              totalCount={aggregate.reviewCount}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Right column: Review cards */}
+      <div class="lg:col-span-8">
+        <div class="space-y-4">
+          {displayedReviews.map((review) => <ReviewCard review={review} />)}
+        </div>
+
+        {
+          reviews.length > 10 && (
+            <p class="mt-6 text-center text-sm text-gray-500">
+              Showing {displayedReviews.length} of {reviews.length} reviews
+            </p>
+          )
+        }
+
+        {/* Q&A Section */}
+        {
+          hasQuestions && (
+            <div class="mt-10 border-t border-gray-200 pt-8">
+              <h3 class="mb-4 font-heading text-xl text-gray-900">Questions & Answers</h3>
+              <div class="space-y-4">
+                {questions.slice(0, 5).map((q) => (
+                  <div class="rounded-lg border border-gray-200 bg-gray-50 p-5">
+                    <p class="text-sm font-medium text-gray-900">
+                      <span class="mr-2 font-bold text-brand-green-dark">Q:</span>
+                      {q.content}
+                    </p>
+                    <p class="mt-1 text-xs text-gray-500">— {q.author}</p>
+                    {q.publicReply && (
+                      <div class="mt-3 border-l-2 border-brand-green-light pl-4">
+                        <p class="text-sm text-gray-700">
+                          <span class="mr-2 font-bold text-brand-green-light">A:</span>
+                          {q.publicReply.content}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        }
+      </div>
+    </div>
+  </div>
+</section>
