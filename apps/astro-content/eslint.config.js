@@ -59,6 +59,7 @@ export default [
         TextDecoder: 'readonly',
         ReadableStream: 'readonly',
         Uint8Array: 'readonly',
+        AbortSignal: 'readonly',
       },
     },
     plugins: {
