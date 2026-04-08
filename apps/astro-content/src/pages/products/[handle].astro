@@ -21,7 +21,7 @@ import CollectionProductCard from '../../components/shop/CollectionProductCard.a
 import AccordionFaq from '../../components/shop/AccordionFaq.astro'
 import { isValidPersonaId, type PersonaId } from '../../lib/persona'
 import TalkToRep from '../../components/product/TalkToRep'
-import { fetchProductReviews } from '../../lib/klaviyo-reviews'
+import { fetchProductReviews, fetchAllAggregates } from '../../lib/klaviyo-reviews'
 import StarRating from '../../components/product/StarRating.astro'
 import ReviewsSection from '../../components/product/ReviewsSection.astro'
 
@@ -73,6 +73,9 @@ if (product.productType) {
     relatedProducts = collection.products.filter((p) => p.handle !== shopifyHandle).slice(0, 4)
   }
 }
+
+// ── Batch review aggregates for related product cards ───────────────────────
+const allAggregates = relatedProducts.length > 0 ? await fetchAllAggregates() : new Map()
 
 const hasTinaContent = !!tinaProduct
 // TinaContent rendered for Phase 3 (full StoryBrand mode)
@@ -891,7 +894,11 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
                 <h2 class="font-heading text-2xl text-gray-900">Related Products</h2>
                 <div class="mt-6 grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-4">
                   {relatedProducts.map((related) => (
-                    <CollectionProductCard product={related} persona={persona} />
+                    <CollectionProductCard
+                      product={related}
+                      persona={persona}
+                      reviewAggregate={allAggregates.get(related.id) ?? null}
+                    />
                   ))}
                 </div>
               </div>

@@ -16,6 +16,7 @@ import AccordionFaq from '../../../components/shop/AccordionFaq.astro'
 import CollectionProductCard from '../../../components/shop/CollectionProductCard.astro'
 import Breadcrumbs from '../../../components/shared/Breadcrumbs.astro'
 import { buildSouthlandUrl } from '../../../lib/cloudinary'
+import { fetchAllAggregates } from '../../../lib/klaviyo-reviews'
 
 // ── Philip McWhirter photo ──────────────────────────────────────────────────
 const philipPhoto = buildSouthlandUrl('team/Philip_McWhirter', {
@@ -179,6 +180,8 @@ const faqSchema = {
     },
   })),
 }
+
+const reviewAggregates = await fetchAllAggregates()
 ---
 
 <BaseLayout
@@ -584,7 +587,7 @@ const faqSchema = {
       {allGolfProducts.length > 0 ? (
         <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
           {allGolfProducts.map((product) => (
-            <CollectionProductCard product={product} persona="gary" />
+            <CollectionProductCard product={product} persona="gary" reviewAggregate={reviewAggregates.get(product.id) ?? null} />
           ))}
         </div>
       ) : (

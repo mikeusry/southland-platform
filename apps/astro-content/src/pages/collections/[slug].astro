@@ -15,6 +15,7 @@ import AccordionFaq from '../../components/shop/AccordionFaq.astro'
 import ProofPoints from '../../components/cdp/ProofPoints.astro'
 import Breadcrumbs from '../../components/shared/Breadcrumbs.astro'
 import type { PersonaId } from '../../lib/persona'
+import { fetchAllAggregates } from '../../lib/klaviyo-reviews'
 
 // SSR — do not prerender
 const { slug } = Astro.params
@@ -193,6 +194,8 @@ const theme =
 
 const displayTitle = heroHeadline || title
 const displaySubheadline = heroSubheadline || seoDescription
+
+const reviewAggregates = await fetchAllAggregates()
 ---
 
 <BaseLayout
@@ -273,7 +276,11 @@ const displaySubheadline = heroSubheadline || seoDescription
   {/* ── 3. Product Grid ─────────────────────────────────────────────────────── */}
   <section class="bg-white px-4 py-12 sm:py-16">
     <div class="mx-auto max-w-6xl">
-      <CollectionGrid products={shopifyCollection.products} persona={activePersona} />
+      <CollectionGrid
+        products={shopifyCollection.products}
+        persona={activePersona}
+        reviewAggregates={reviewAggregates}
+      />
     </div>
   </section>
 

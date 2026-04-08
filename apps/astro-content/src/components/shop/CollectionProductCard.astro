@@ -9,14 +9,17 @@
  */
 import type { Product } from '@southland/shopify-storefront'
 import { optimizeShopifyImage } from '../../lib/cloudinary'
+import type { ReviewAggregate } from '../../lib/klaviyo-reviews'
+import StarRating from '../product/StarRating.astro'
 
 interface Props {
   product: Product
   persona?: import('../../lib/persona').PersonaId
   class?: string
+  reviewAggregate?: ReviewAggregate | null
 }
 
-const { product, persona, class: className } = Astro.props
+const { product, persona, class: className, reviewAggregate } = Astro.props
 
 // Get the first available image
 const image = product.images[0] ?? null
@@ -185,6 +188,18 @@ const displayName = product.title.includes('|') ? product.title.split('|')[0].tr
     <h3 class="text-sm font-semibold text-gray-900 group-hover:text-brand-green-dark">
       {displayName}
     </h3>
+
+    {
+      reviewAggregate && reviewAggregate.reviewCount > 0 && (
+        <div class="mt-1">
+          <StarRating
+            rating={reviewAggregate.averageRating}
+            count={reviewAggregate.reviewCount}
+            size="sm"
+          />
+        </div>
+      )
+    }
 
     {
       product.description && (

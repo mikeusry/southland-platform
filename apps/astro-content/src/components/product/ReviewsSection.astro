@@ -7,6 +7,7 @@
 import StarRating from './StarRating.astro'
 import RatingHistogram from './RatingHistogram.astro'
 import ReviewCard from './ReviewCard.astro'
+import ReviewFilters from './ReviewFilters'
 import type { KlaviyoReview, ReviewAggregate } from '../../lib/klaviyo-reviews'
 
 interface Props {
@@ -18,8 +19,8 @@ interface Props {
 
 const { reviews, questions = [], aggregate, productHandle } = Astro.props
 
-// Show first 10 reviews SSR'd
-const displayedReviews = reviews.slice(0, 10)
+// SSR all reviews — sort/filter handled client-side via ReviewFilters
+const displayedReviews = reviews
 const hasQuestions = questions.length > 0
 ---
 
@@ -62,17 +63,15 @@ const hasQuestions = questions.length > 0
 
       {/* Right column: Review cards */}
       <div class="lg:col-span-8">
-        <div class="space-y-4">
-          {displayedReviews.map((review) => <ReviewCard review={review} />)}
-        </div>
-
         {
-          reviews.length > 10 && (
-            <p class="mt-6 text-center text-sm text-gray-500">
-              Showing {displayedReviews.length} of {reviews.length} reviews
-            </p>
+          reviews.length > 3 && (
+            <ReviewFilters client:visible reviews={reviews} totalCount={reviews.length} />
           )
         }
+
+        <div id="review-cards" class="flex flex-col gap-4">
+          {displayedReviews.map((review) => <ReviewCard review={review} />)}
+        </div>
 
         {/* Q&A Section */}
         {

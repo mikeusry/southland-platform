@@ -236,3 +236,94 @@ export async function fetchReviewPage(
     return null
   }
 }
+
+// ── Batch aggregates (for collection pages) ────────────────────────────────
+
+/** In-memory cache for aggregates — lives for the duration of one SSR request. */
+let _aggregateCache: Map<string, ReviewAggregate> | null = null
+
+/**
+ * Fetch ALL published reviews and compute aggregates per product.
+ * Returns a Map keyed by Shopify GID (e.g. "gid://shopify/Product/123").
+ * Cached in memory so multiple components on the same page share one fetch.
+ */
+export async function fetchAllAggregates(): Promise<Map<string, ReviewAggregate>> {
+  if (_aggregateCache) return _aggregateCache
+
+  const apiKey = import.meta.env.KLAVIYO_API_KEY
+  if (!apiKey) return new Map()
+
+  try {
+    // Collect all reviews across all products
+    const reviewsByProduct = new Map<string, { ratings: number[] }>()
+    let nextUrl: string | null =
+      `${KLAVIYO_API_BASE}/reviews/?filter=equals(status,"published")&sort=-created&page[size]=20`
+
+    while (nextUrl) {
+      const response: Response = await fetch(nextUrl, {
+        headers: {
+          Authorization: `Klaviyo-API-Key ${apiKey}`,
+          revision: REVISION,
+          Accept: 'application/json',
+        },
+        signal: AbortSignal.timeout(5000),
+      })
+
+      if (!response.ok) break
+
+      const json: any = await response.json()
+      const items = json?.data
+      if (!Array.isArray(items)) break
+
+      for (const item of items) {
+        const attrs = item.attributes
+        if (!attrs || attrs.review_type !== 'review' || attrs.rating < 1) continue
+        if (!attrs.content || attrs.content.length <= 1) continue
+
+        // Get the Klaviyo item ID and convert back to Shopify GID
+        const klaviyoItemId = item.relationships?.item?.data?.id ?? ''
+        const numericMatch = klaviyoItemId.match(/:::(\d+)$/)
+        if (!numericMatch) continue
+
+        const shopifyGid = `gid://shopify/Product/${numericMatch[1]}`
+        if (!reviewsByProduct.has(shopifyGid)) {
+          reviewsByProduct.set(shopifyGid, { ratings: [] })
+        }
+        reviewsByProduct.get(shopifyGid)!.ratings.push(attrs.rating)
+      }
+
+      nextUrl = json?.links?.next ?? null
+    }
+
+    // Compute aggregates
+    const aggregates = new Map<string, ReviewAggregate>()
+    for (const [gid, data] of reviewsByProduct) {
+      const distribution: Record<1 | 2 | 3 | 4 | 5, number> = {
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+      }
+      let total = 0
+      for (const r of data.ratings) {
+        if (r >= 1 && r <= 5) {
+          distribution[r as 1 | 2 | 3 | 4 | 5]++
+          total += r
+        }
+      }
+      const count = data.ratings.length
+      aggregates.set(gid, {
+        averageRating: Math.round((total / count) * 10) / 10,
+        reviewCount: count,
+        distribution,
+      })
+    }
+
+    _aggregateCache = aggregates
+    return aggregates
+  } catch (err) {
+    console.error('[klaviyo-reviews] Batch fetch failed:', err)
+    return new Map()
+  }
+}

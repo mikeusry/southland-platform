@@ -16,6 +16,7 @@ import CloudinaryHero from '../../../components/CloudinaryHero.astro'
 import AccordionFaq from '../../../components/shop/AccordionFaq.astro'
 import CollectionProductCard from '../../../components/shop/CollectionProductCard.astro'
 import { buildSouthlandUrl } from '../../../lib/cloudinary'
+import { fetchAllAggregates } from '../../../lib/klaviyo-reviews'
 
 // ── Allen Reynolds photo ────────────────────────────────────────────────────
 const turkeyIcon = buildSouthlandUrl('poultry/turkey/Turkey_icon', {
@@ -177,6 +178,8 @@ const faqSchema = {
     },
   })),
 }
+
+const reviewAggregates = await fetchAllAggregates()
 ---
 
 <BaseLayout title={title} description={description} schema={[pageSchema, faqSchema]} ogImage="https://res.cloudinary.com/southland-organics/image/upload/w_1200,h_630,c_lfill,q_auto,f_auto,g_auto/Southland%20Website/poultry/turkey/Turkey_Header">
@@ -569,7 +572,7 @@ const faqSchema = {
       {allTurkeyProducts.length > 0 ? (
         <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
           {allTurkeyProducts.map((product) => (
-            <CollectionProductCard product={product} persona="tom" />
+            <CollectionProductCard product={product} persona="tom" reviewAggregate={reviewAggregates.get(product.id) ?? null} />
           ))}
         </div>
       ) : (

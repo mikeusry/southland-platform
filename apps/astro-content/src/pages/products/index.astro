@@ -12,6 +12,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 import Breadcrumbs from '../../components/shared/Breadcrumbs.astro'
 import CollectionProductCard from '../../components/shop/CollectionProductCard.astro'
 import { isValidPersonaId, type PersonaId } from '../../lib/persona'
+import { fetchAllAggregates } from '../../lib/klaviyo-reviews'
 
 // SSR — do not prerender
 
@@ -83,6 +84,8 @@ const breadcrumbItems = [
   { label: 'Home', href: '/' },
   { label: 'Products', href: '/products/' },
 ]
+
+const reviewAggregates = await fetchAllAggregates()
 ---
 
 <BaseLayout
@@ -172,7 +175,11 @@ const breadcrumbItems = [
             data-title={product.title.toLowerCase()}
             data-tags={product.tags.join(',').toLowerCase()}
           >
-            <CollectionProductCard product={product} persona={persona} />
+            <CollectionProductCard
+              product={product}
+              persona={persona}
+              reviewAggregate={reviewAggregates.get(product.id) ?? null}
+            />
           </div>
         ))
       }
