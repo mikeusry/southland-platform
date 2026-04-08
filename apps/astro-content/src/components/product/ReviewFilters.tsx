@@ -6,7 +6,7 @@
  * Uses client:visible to load only when scrolled into view.
  */
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import type { KlaviyoReview } from '../../lib/klaviyo-reviews'
 
 type SortOption = 'newest' | 'highest' | 'lowest'
@@ -72,18 +72,16 @@ export default function ReviewFilters({ reviews, totalCount }: Props) {
 
   const handleSort = (value: SortOption) => {
     setSort(value)
-    setTimeout(() => applyFilters(), 0)
   }
 
   const handleFilter = (value: FilterOption) => {
     setFilter(value)
-    setTimeout(() => applyFilters(), 0)
   }
 
-  // Apply on mount
-  useState(() => {
-    setTimeout(() => applyFilters(), 100)
-  })
+  // Apply filters whenever sort or filter changes
+  useEffect(() => {
+    applyFilters()
+  }, [sort, filter, applyFilters])
 
   return (
     <div className="mb-4 flex flex-wrap items-center gap-3">
