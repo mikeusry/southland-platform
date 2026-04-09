@@ -154,13 +154,13 @@ export function getStageDisplayName(stage: JourneyStage): string {
  */
 export function getStageCTA(stage: JourneyStage): { text: string; action: string } {
   const ctas: Record<JourneyStage, { text: string; action: string }> = {
-    unaware: { text: 'Learn More', action: '/learn/' },
-    aware: { text: 'Explore Solutions', action: '/shop/' },
-    receptive: { text: 'See How It Works', action: '/resources/' },
+    unaware: { text: 'Learn More', action: '/blog/' },
+    aware: { text: 'Explore Solutions', action: '/products/' },
+    receptive: { text: 'See How It Works', action: '/blog/' },
     zmot: { text: 'Compare Products', action: '/products/' },
-    objections: { text: 'Get Answers', action: '/faq/' },
-    test_prep: { text: 'Start Your Trial', action: '/shop/' },
-    challenge: { text: 'Get Support', action: '/support/' },
+    objections: { text: 'Get Answers', action: '/contact/' },
+    test_prep: { text: 'Start Your Trial', action: '/products/' },
+    challenge: { text: 'Get Support', action: '/contact/' },
     success: { text: 'Reorder', action: '/account/' },
     commitment: { text: 'Subscribe & Save', action: '/subscriptions/' },
     evangelist: { text: 'Refer a Friend', action: '/referral/' },
