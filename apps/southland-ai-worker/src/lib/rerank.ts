@@ -68,6 +68,7 @@ export async function rerank(
         top_n: topN,
         return_documents: false,
       }),
+      signal: AbortSignal.timeout(2000), // 2s max — fall back to Vectorize ordering
     })
 
     if (!res.ok) {

@@ -114,6 +114,7 @@ export async function executeTool(
       method: 'POST',
       headers,
       body: JSON.stringify(args),
+      signal: AbortSignal.timeout(3000), // 3s max — tool data is nice-to-have, not blocking
     })
 
     if (!res.ok) {

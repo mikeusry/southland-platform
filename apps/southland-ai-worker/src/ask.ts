@@ -272,19 +272,27 @@ async function prepareContext(body: AskRequest, env: Env): Promise<PreparedConte
 
   // Step 2: Fuse results — inject alias hits at top, deduplicate by ID
   const seenIds = new Set<string>()
-  const candidates: RerankCandidate[] = []
+
+  // Build deduplicated list of items needing KV lookup
+  interface PendingCandidate {
+    chunkId: string
+    title: string
+    score: number
+    url: string
+    doc_type: string
+    business_unit: string
+  }
+  const pending: PendingCandidate[] = []
 
   // Alias hits first (lexical match = high signal for exact product/SKU queries)
   for (const alias of aliasHits) {
     const chunkId = `product:${alias.source_id}:0`
     if (seenIds.has(chunkId)) continue
     seenIds.add(chunkId)
-    const cached = await env.CACHE.get(`chunk:${chunkId}`)
-    candidates.push({
-      id: chunkId,
-      text: cached || alias.title,
+    pending.push({
+      chunkId,
       title: alias.title,
-      score: 0.95, // High score for exact match
+      score: 0.95,
       url: alias.url,
       doc_type: alias.doc_type,
       business_unit: alias.business_unit,
@@ -295,10 +303,8 @@ async function prepareContext(body: AskRequest, env: Env): Promise<PreparedConte
   for (const result of rawResults) {
     if (seenIds.has(result.id)) continue
     seenIds.add(result.id)
-    const cached = await env.CACHE.get(`chunk:${result.id}`)
-    candidates.push({
-      id: result.id,
-      text: cached || result.title,
+    pending.push({
+      chunkId: result.id,
       title: result.title,
       score: result.score,
       url: result.url,
@@ -307,8 +313,38 @@ async function prepareContext(body: AskRequest, env: Env): Promise<PreparedConte
     })
   }
 
-  // Step 3: Rerank fused candidates (Cohere Rerank v3.5 → top 6)
-  const reranked = await rerank(env, body.query, candidates, 6)
+  // Parallel KV reads — was sequential for-loop, now Promise.all
+  const cachedTexts = await Promise.all(
+    pending.map((p) => env.CACHE.get(`chunk:${p.chunkId}`))
+  )
+
+  const candidates: RerankCandidate[] = pending.map((p, i) => ({
+    id: p.chunkId,
+    text: cachedTexts[i] || p.title,
+    title: p.title,
+    score: p.score,
+    url: p.url,
+    doc_type: p.doc_type,
+    business_unit: p.business_unit,
+  }))
+
+  // Step 3: Rerank + customer context IN PARALLEL
+  // These are independent: rerank uses candidates, customer context uses email/order.
+  // Running them concurrently saves 200ms-3s vs sequential.
+
+  let orderNumber = body.order_number
+  if (!orderNumber && (context === 'staff' || context === 'support_draft')) {
+    const orderMatch = body.query.match(/(?:SH-|D2-|#)?(\d{4,6})/i)
+    if (orderMatch) orderNumber = orderMatch[0]
+  }
+
+  const customerContextPromise = fetchCustomerContext(env, body.customer_email, orderNumber, body.customer_context)
+  const rerankPromise = rerank(env, body.query, candidates, 6)
+
+  const [reranked, customerData] = await Promise.all([rerankPromise, customerContextPromise])
+
+  let customerContext = customerData.contextString
+  let identityLevel = customerData.identityLevel
 
   // Convert reranked results back to SearchResult format for downstream compatibility
   const results = reranked.map((r) => ({
@@ -335,77 +371,11 @@ async function prepareContext(body: AskRequest, env: Env): Promise<PreparedConte
     }
   }
 
-  // Step 3: Customer identity + account data
-  let customerContext = ''
-  let identityLevel: import('./types').IdentityLevel = 'anonymous'
-
-  let orderNumber = body.order_number
-  if (!orderNumber && (context === 'staff' || context === 'support_draft')) {
-    const orderMatch = body.query.match(/(?:SH-|D2-|#)?(\d{4,6})/i)
-    if (orderMatch) orderNumber = orderMatch[0]
-  }
-
-  if (body.customer_email || orderNumber) {
-    try {
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-      if (env.NEXUS_API_KEY) headers['Authorization'] = `Bearer ${env.NEXUS_API_KEY}`
-
-      const ctxRes = await fetch(`${env.NEXUS_API_URL}/api/ai/customer-context`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          email: body.customer_email,
-          order_number: orderNumber,
-        }),
-      })
-
-      if (ctxRes.ok) {
-        const snapshot = (await ctxRes.json()) as import('./types').CustomerSnapshot
-        identityLevel = snapshot.identity_level || 'anonymous'
-
-        if (snapshot.customer_id && identityLevel !== 'anonymous') {
-          const parts: string[] = []
-          parts.push(`Customer: ${snapshot.display_name || 'Unknown'}`)
-
-          if (snapshot.recent_orders?.length) {
-            parts.push('Recent orders:')
-            for (const o of snapshot.recent_orders.slice(0, 3)) {
-              let line = `  - ${o.number}: ${o.status}`
-              if (o.tracking) line += ` (tracking: ${o.tracking}, ${o.carrier || 'unknown carrier'})`
-              if (o.delivery_status) line += ` — ${o.delivery_status}`
-              parts.push(line)
-            }
-          }
-
-          if (snapshot.active_subscriptions?.length) {
-            parts.push('Active subscriptions:')
-            for (const s of snapshot.active_subscriptions) {
-              parts.push(`  - ${s.product}: ${s.status}, next billing: ${s.next_billing || 'unknown'}`)
-            }
-          }
-
-          if (snapshot.shipping_exceptions?.length) {
-            parts.push('Shipping issues:')
-            for (const e of snapshot.shipping_exceptions) {
-              parts.push(`  - Order ${e.order_number}: ${e.status} (${e.carrier} ${e.tracking})`)
-            }
-          }
-
-          customerContext = '\n\nCUSTOMER ACCOUNT DATA:\n' + parts.join('\n')
-        }
-      }
-    } catch (err) {
-      console.error('Customer context fetch failed (non-blocking):', err)
-    }
-  } else if (body.customer_context?.orders?.length) {
-    customerContext = '\n\nCUSTOMER ORDER DATA:\n' + body.customer_context.orders
-      .map((o) => `- Order ${o.number}: ${o.status} (${o.date})`)
-      .join('\n')
-  }
-
   // Step 4: Tool routing
+  // Gate: staff/support always get tools. Chat users only if identified (anonymous = no account data to look up).
   let toolResult = ''
-  const toolsAllowed = context === 'staff' || context === 'support_draft' || identityLevel !== 'anonymous'
+  const toolsAllowed = context === 'staff' || context === 'support_draft' ||
+    (context === 'chat' && identityLevel !== 'anonymous')
   if (toolsAllowed) {
     const lower = body.query.toLowerCase()
     const needsTool = lower.includes('order') || lower.includes('track') || lower.includes('ship') ||
@@ -657,6 +627,77 @@ async function logToNexus(env: Env, request: AskRequest, response: AskResponse):
   } catch (err) {
     console.error('Nexus log error (non-blocking):', err)
   }
+}
+
+// ─── Customer Context Fetch ───────────────────────────────────────────────
+// Extracted to run in parallel with reranking. 2.5s timeout protects against cold Vercel.
+
+async function fetchCustomerContext(
+  env: Env,
+  customerEmail: string | undefined,
+  orderNumber: string | undefined,
+  inlineContext: { orders?: Array<{ number: string; status: string; date: string }> } | undefined
+): Promise<{ contextString: string; identityLevel: import('./types').IdentityLevel }> {
+  let contextString = ''
+  let identityLevel: import('./types').IdentityLevel = 'anonymous'
+
+  if (customerEmail || orderNumber) {
+    try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (env.NEXUS_API_KEY) headers['Authorization'] = `Bearer ${env.NEXUS_API_KEY}`
+
+      const ctxRes = await fetch(`${env.NEXUS_API_URL}/api/ai/customer-context`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ email: customerEmail, order_number: orderNumber }),
+        signal: AbortSignal.timeout(2500),
+      })
+
+      if (ctxRes.ok) {
+        const snapshot = (await ctxRes.json()) as import('./types').CustomerSnapshot
+        identityLevel = snapshot.identity_level || 'anonymous'
+
+        if (snapshot.customer_id && identityLevel !== 'anonymous') {
+          const parts: string[] = []
+          parts.push(`Customer: ${snapshot.display_name || 'Unknown'}`)
+
+          if (snapshot.recent_orders?.length) {
+            parts.push('Recent orders:')
+            for (const o of snapshot.recent_orders.slice(0, 3)) {
+              let line = `  - ${o.number}: ${o.status}`
+              if (o.tracking) line += ` (tracking: ${o.tracking}, ${o.carrier || 'unknown carrier'})`
+              if (o.delivery_status) line += ` — ${o.delivery_status}`
+              parts.push(line)
+            }
+          }
+
+          if (snapshot.active_subscriptions?.length) {
+            parts.push('Active subscriptions:')
+            for (const s of snapshot.active_subscriptions) {
+              parts.push(`  - ${s.product}: ${s.status}, next billing: ${s.next_billing || 'unknown'}`)
+            }
+          }
+
+          if (snapshot.shipping_exceptions?.length) {
+            parts.push('Shipping issues:')
+            for (const e of snapshot.shipping_exceptions) {
+              parts.push(`  - Order ${e.order_number}: ${e.status} (${e.carrier} ${e.tracking})`)
+            }
+          }
+
+          contextString = '\n\nCUSTOMER ACCOUNT DATA:\n' + parts.join('\n')
+        }
+      }
+    } catch (err) {
+      console.error('Customer context fetch failed (non-blocking):', err)
+    }
+  } else if (inlineContext?.orders?.length) {
+    contextString = '\n\nCUSTOMER ORDER DATA:\n' + inlineContext.orders
+      .map((o) => `- Order ${o.number}: ${o.status} (${o.date})`)
+      .join('\n')
+  }
+
+  return { contextString, identityLevel }
 }
 
 // ─── Lexical / Alias Matching (Hybrid Retrieval) ───────────────────────────
