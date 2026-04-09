@@ -96,6 +96,16 @@ const REMOVE_FROM_CART_MUTATION = `
   ${CART_FRAGMENT}
 `
 
+const APPLY_DISCOUNT_MUTATION = `
+  mutation CartDiscountCodesUpdate($cartId: ID!, $discountCodes: [String!]) {
+    cartDiscountCodesUpdate(cartId: $cartId, discountCodes: $discountCodes) {
+      cart { ...CartFields }
+      userErrors { field message }
+    }
+  }
+  ${CART_FRAGMENT}
+`
+
 const GET_CART_QUERY = `
   query GetCart($cartId: ID!) {
     cart(id: $cartId) { ...CartFields }
@@ -185,8 +195,9 @@ export async function createCart(
   })
 
   if (errors) {
-    console.error('[shopify-storefront] createCart errors:', errors)
-    throw new Error('Failed to create cart')
+    const detail = typeof errors === 'object' ? JSON.stringify(errors) : String(errors)
+    console.error('[shopify-storefront] createCart errors:', detail)
+    throw new Error(`Failed to create cart: ${detail}`)
   }
 
   checkUserErrors('createCart', data.cartCreate.userErrors)
@@ -206,8 +217,9 @@ export async function addToCart(
   })
 
   if (errors) {
-    console.error('[shopify-storefront] addToCart errors:', errors)
-    throw new Error('Failed to add to cart')
+    const detail = typeof errors === 'object' ? JSON.stringify(errors) : String(errors)
+    console.error('[shopify-storefront] addToCart errors:', detail)
+    throw new Error(`Failed to add to cart: ${detail}`)
   }
 
   checkUserErrors('addToCart', data.cartLinesAdd.userErrors)
@@ -254,6 +266,28 @@ export async function removeFromCart(
 
   checkUserErrors('removeFromCart', data.cartLinesRemove.userErrors)
   return parseCart(data.cartLinesRemove.cart)
+}
+
+/**
+ * Apply a discount code to an existing cart.
+ */
+export async function applyDiscountCode(
+  client: StorefrontClient,
+  cartId: string,
+  discountCodes: string[]
+): Promise<Cart> {
+  const { data, errors } = await client.request(APPLY_DISCOUNT_MUTATION, {
+    variables: { cartId, discountCodes },
+  })
+
+  if (errors) {
+    const detail = typeof errors === 'object' ? JSON.stringify(errors) : String(errors)
+    console.error('[shopify-storefront] applyDiscountCode errors:', detail)
+    throw new Error(`Failed to apply discount: ${detail}`)
+  }
+
+  checkUserErrors('applyDiscountCode', data.cartDiscountCodesUpdate.userErrors)
+  return parseCart(data.cartDiscountCodesUpdate.cart)
 }
 
 /**

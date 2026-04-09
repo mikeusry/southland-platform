@@ -18,6 +18,9 @@ const PRODUCT_VARIANT_FIELDS = `
   availableForSale
   image { url altText width height }
   selectedOptions { name value }
+  sellingPlanAllocations(first: 5) {
+    edges { node { sellingPlan { id name } } }
+  }
 `
 
 const PRODUCT_FIELDS = `
@@ -171,6 +174,9 @@ function parseImage(node: Record<string, unknown>): ProductImage {
 
 function parseVariant(node: Record<string, unknown>): ProductVariant {
   const selectedOptions = (node.selectedOptions as { name: string; value: string }[]) ?? []
+  const spAlloc = node.sellingPlanAllocations as
+    | { edges: { node: { sellingPlan: { id: string; name: string } } }[] }
+    | undefined
   return {
     id: node.id as string,
     title: node.title as string,
@@ -179,6 +185,7 @@ function parseVariant(node: Record<string, unknown>): ProductVariant {
     availableForSale: node.availableForSale as boolean,
     image: node.image ? parseImage(node.image as Record<string, unknown>) : null,
     selectedOptions,
+    sellingPlanAllocations: spAlloc?.edges?.map((e) => e.node) ?? [],
   }
 }
 

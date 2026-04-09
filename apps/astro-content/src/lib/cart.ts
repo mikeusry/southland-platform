@@ -15,6 +15,7 @@ import {
   getCart as sfGetCart,
   removeFromCart as sfRemoveFromCart,
   updateCartLines as sfUpdateCartLines,
+  applyDiscountCode as sfApplyDiscount,
 } from '@southland/shopify-storefront'
 import type {
   Cart,
@@ -41,11 +42,22 @@ const NEXUS_CID_KEY = '_nexus_cid'
  * Nexus reads this from carrier service callbacks and order webhooks
  * for deterministic matching (match_method = nexus_cid, confidence = high).
  */
+function generateUUID(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+  // Fallback for older browsers (Safari < 15.4, etc.)
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16)
+  })
+}
+
 function getNexusCid(): string {
-  if (typeof window === 'undefined') return crypto.randomUUID()
+  if (typeof window === 'undefined') return generateUUID()
   let cid = localStorage.getItem(NEXUS_CID_KEY)
   if (!cid) {
-    cid = crypto.randomUUID()
+    cid = generateUUID()
     localStorage.setItem(NEXUS_CID_KEY, cid)
   }
   return cid
@@ -126,7 +138,7 @@ function getFirstTouchAttrs(): Array<{ key: string; value: string }> {
     }
     if (data._landing_page) attrs.push({ key: '_pd_ft_landing_page', value: data._landing_page })
     if (data._referrer) attrs.push({ key: '_pd_ft_referrer', value: data._referrer })
-    if (data._timestamp) attrs.push({ key: '_pd_ft_timestamp', value: data._timestamp })
+    if (data._timestamp) attrs.push({ key: '_pd_ft_timestamp', value: String(data._timestamp) })
     return attrs
   } catch {
     return []
@@ -270,8 +282,10 @@ export async function addToCart(lines: CartLineInput[]): Promise<Cart> {
     // Try adding to existing cart
     try {
       cart = await sfAddToCart(client, cartId, stamped)
-    } catch {
-      // Cart may have expired — create a new one
+    } catch (addErr) {
+      // Cart may have expired — clear stale ID and create a new one
+      console.warn('[cart] addToCart failed, creating new cart:', addErr)
+      clearCartId()
       cart = await sfCreateCart(client, stamped)
     }
   } else {
@@ -305,6 +319,38 @@ export async function removeFromCart(lineIds: string[]): Promise<Cart | null> {
   const cart = await sfRemoveFromCart(getClient(), cartId, lineIds)
   dispatchCartEvent(cart)
   return cart
+}
+
+/**
+ * Apply a discount code to the current cart.
+ */
+export async function applyDiscount(code: string): Promise<Cart | null> {
+  const cartId = getCartId()
+  if (!cartId) return null
+
+  const cart = await sfApplyDiscount(getClient(), cartId, [code])
+  dispatchCartEvent(cart)
+  return cart
+}
+
+/**
+ * Fetch a single-use case discount code from Nexus.
+ * Returns the code string, or null on failure.
+ */
+export async function fetchCaseDiscountCode(bundleId: string): Promise<string | null> {
+  try {
+    const res = await fetch('https://nexus.southlandorganics.com/api/case-discount', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bundleId }),
+    })
+    if (!res.ok) return null
+    const data = await res.json()
+    return data.code || null
+  } catch {
+    console.warn('[cart] Failed to fetch case discount code')
+    return null
+  }
 }
 
 // ─── Bundle helpers ──────────────────────────────────────────────────────────

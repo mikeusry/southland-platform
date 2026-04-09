@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import sentry from '@sentry/astro';
 import tailwind from '@astrojs/tailwind';
 import mdx from '@astrojs/mdx';
 import react from '@astrojs/react';
@@ -25,6 +26,16 @@ export default defineConfig({
   site: 'https://southlandorganics.com',
   // base: '/podcast' - handled by Cloudflare Worker routing in production
   integrations: [
+    sentry({
+      dsn: 'https://2cd735876d8ac86479ca9b7ea11b6960@o4510754307178496.ingest.us.sentry.io/4511174165856256',
+      environment: process.env.NODE_ENV || 'production',
+      sourceMapsUploadOptions: {
+        enabled: false, // Cloudflare Pages — upload via CLI if needed later
+      },
+      tracesSampleRate: 0.3,
+      replaysSessionSampleRate: 0.05,
+      replaysOnErrorSampleRate: 1.0,
+    }),
     react(),
     tailwind(),
     mdx(),

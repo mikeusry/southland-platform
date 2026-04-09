@@ -26,6 +26,13 @@ export interface VariantOption {
   value: string
 }
 
+export interface SellingPlanAllocation {
+  sellingPlan: {
+    id: string
+    name: string
+  }
+}
+
 export interface ProductVariant {
   id: string
   title: string
@@ -34,6 +41,8 @@ export interface ProductVariant {
   availableForSale: boolean
   image: ProductImage | null
   selectedOptions: VariantOption[]
+  /** Present when the variant is sold via a subscription / selling plan */
+  sellingPlanAllocations: SellingPlanAllocation[]
 }
 
 export interface Product {
@@ -128,6 +137,7 @@ export interface Cart {
 export interface CartLineInput {
   merchandiseId: string
   quantity: number
+  sellingPlanId?: string
   attributes?: CartLineAttribute[]
 }
 

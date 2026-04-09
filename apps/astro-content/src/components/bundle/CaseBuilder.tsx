@@ -8,7 +8,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient, getGallonProducts } from '@southland/shopify-storefront'
 import type { Product } from '@southland/shopify-storefront'
-import { addToCart, buildCaseLines, generateBundleId } from '../../lib/cart'
+import {
+  addToCart,
+  buildCaseLines,
+  generateBundleId,
+  fetchCaseDiscountCode,
+  applyDiscount,
+} from '../../lib/cart'
 import { getPersonaId } from '../../lib/persona'
 import CaseProgress from './CaseProgress'
 import ProductSelector from './ProductSelector'
@@ -137,11 +143,20 @@ export default function CaseBuilder() {
       }
       const lines = buildCaseLines(variantQuantities, bundleId)
       const cart = await addToCart(lines)
-      setCheckoutUrl(cart.checkoutUrl)
+
+      // Fetch a single-use discount code from Nexus and apply it
+      const discountCode = await fetchCaseDiscountCode(bundleId)
+      if (discountCode) {
+        const discountedCart = await applyDiscount(discountCode)
+        setCheckoutUrl(discountedCart?.checkoutUrl ?? cart.checkoutUrl)
+      } else {
+        setCheckoutUrl(cart.checkoutUrl)
+      }
       setAdded(true)
     } catch (err) {
-      console.error('Failed to add case to cart:', err)
-      setError('Failed to add to cart. Please try again.')
+      const msg = err instanceof Error ? err.message : String(err)
+      console.error('Failed to add case to cart:', msg, err)
+      setError(`Failed to add to cart: ${msg}. Please try again.`)
     } finally {
       setAddingToCart(false)
     }

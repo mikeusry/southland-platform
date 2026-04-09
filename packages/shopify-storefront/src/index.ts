@@ -12,7 +12,14 @@ export {
 } from './queries/products'
 
 // Cart operations
-export { createCart, addToCart, updateCartLines, removeFromCart, getCart } from './queries/cart'
+export {
+  createCart,
+  addToCart,
+  updateCartLines,
+  removeFromCart,
+  applyDiscountCode,
+  getCart,
+} from './queries/cart'
 
 // Types
 export type {
@@ -21,6 +28,7 @@ export type {
   ProductDetail,
   ProductImage,
   ProductVariant,
+  SellingPlanAllocation,
   VariantOption,
   Collection,
   CollectionSummary,

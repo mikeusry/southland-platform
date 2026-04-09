@@ -71,10 +71,12 @@ export default function AddToCartButton({
     setError(null)
 
     try {
+      const sellingPlanId = selectedVariant.sellingPlanAllocations?.[0]?.sellingPlan?.id
       await addToCart([
         {
           merchandiseId: selectedVariant.id,
           quantity,
+          ...(sellingPlanId ? { sellingPlanId } : {}),
           attributes: [{ key: 'Source', value: 'Product Page' }],
         },
       ])
@@ -93,8 +95,9 @@ export default function AddToCartButton({
       setAdded(true)
       setTimeout(() => setAdded(false), 3000)
     } catch (err) {
-      console.error('Add to cart failed:', err)
-      setError('Failed to add to cart. Please try again.')
+      const msg = err instanceof Error ? err.message : String(err)
+      console.error('Add to cart failed:', msg, err)
+      setError(`Failed to add to cart: ${msg}. Please try again.`)
     } finally {
       setAdding(false)
     }
