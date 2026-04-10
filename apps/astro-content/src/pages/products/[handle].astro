@@ -139,6 +139,11 @@ const SEGMENT_TO_TYPE: Record<string, string> = {
 const resolvedProductType =
   product.productType || (tina?.segment ? SEGMENT_TO_TYPE[tina.segment] : '') || ''
 
+// ── Gallon variant detection (for case builder upsell) ─────────────────────
+const hasGallonVariant = product.variants.some((v) =>
+  v.selectedOptions.some((o) => o.name === 'Size' && o.value === '1 Gallon')
+)
+
 // ── Display title (strip pipe-delimited SEO keywords) ──────────────────────
 const displayTitle =
   tina?.headline ||
@@ -598,6 +603,32 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
               productType={product.productType}
             />
           </div>
+
+          {/* Case builder upsell — gallon products only */}
+          {
+            hasGallonVariant && (
+              <a
+                href="/build-a-case/"
+                class="mt-4 flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-3 transition-colors hover:border-green-300 hover:bg-green-100"
+              >
+                <div
+                  class="flex h-8 w-8 flex-shrink-0 items-center justify-center bg-[#2C5234] text-xs font-bold text-white"
+                  style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
+                >
+                  4
+                </div>
+                <div class="flex-1">
+                  <p class="text-sm font-semibold" style="color: #2C5234;">
+                    Buy 4 gallons, save 10%
+                  </p>
+                  <p class="text-xs text-gray-600">
+                    Mix & match any gallons into one case — save on price and shipping
+                  </p>
+                </div>
+                <span class="text-sm font-medium text-[#44883E]">&rarr;</span>
+              </a>
+            )
+          }
 
           {/* Talk to a Rep — inline form */}
           <div class="mt-4">

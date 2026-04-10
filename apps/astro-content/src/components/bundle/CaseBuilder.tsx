@@ -97,6 +97,7 @@ export default function CaseBuilder() {
     (sum, s) => sum + getVariantPrice(s.product) * s.quantity,
     0
   )
+  const discountAmount = subtotal * (DISCOUNT_PERCENT / 100)
 
   const handleAdd = useCallback(
     (variantId: string, product: Product) => {
@@ -220,8 +221,13 @@ export default function CaseBuilder() {
         </div>
         <h2 className="mt-4 font-heading text-xl text-shopify-title">Case added to cart!</h2>
         <p className="mt-2 text-sm text-brand-gray-dark">
-          Your {CASE_SIZE}-gallon case has been added with the case discount.
+          Your {CASE_SIZE}-gallon case has been added with your {DISCOUNT_PERCENT}% case discount.
         </p>
+        {discountAmount > 0 && (
+          <p className="mt-1 text-lg font-bold text-shopify-link">
+            You're saving ${discountAmount.toFixed(2)}
+          </p>
+        )}
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <a
             href={checkoutUrl}
