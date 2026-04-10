@@ -1,13 +1,547 @@
 ---
 /**
- * /subscriptions/ — Redirect to Pour The Port subscription product.
+ * /subscriptions/ — Subscribe & Save landing page
  *
- * No dedicated subscriptions landing page exists yet. PORT is the flagship
- * subscription product. BettyHero (commitment stage) and visitor.ts NBA
- * link here with "Subscribe & Save" CTAs.
- *
- * Future: build a proper subscriptions landing page showing all subscription
- * products, manage existing subscriptions, etc.
+ * Showcases Pour the PORT as the flagship subscription product.
+ * Explains how subscriptions work, pricing vs one-time, and links
+ * to manage existing subscriptions via the Nexus loyalty portal.
  */
-return Astro.redirect('/products/pour-the-port-septic-tank-treatment/', 302)
+
+export const prerender = true
+
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { buildSouthlandUrl } from '../../lib/cloudinary'
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+const lookupUrl = 'https://nexus.southlandorganics.com/api/loyalty/lookup'
+
+const subscriptionSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: 'Subscribe & Save | Southland Organics',
+  description:
+    'Save money and never run out. Subscribe to monthly delivery of Pour the PORT septic treatment and other Southland Organics products.',
+  url: `${siteUrl}/subscriptions/`,
+  mainEntity: {
+    '@type': 'Product',
+    name: 'Pour the PORT Septic Tank Treatment — Monthly Subscription',
+    description:
+      'Monthly biological septic tank treatment delivered to your door. Prevents costly failures, eliminates odor, extends drain field life.',
+    brand: { '@type': 'Organization', name: 'Southland Organics' },
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
+    },
+  },
+}
+
+const benefits = [
+  {
+    title: 'Set It & Forget It',
+    description: 'Monthly delivery on autopilot. Never forget a treatment again.',
+    icon: 'calendar',
+  },
+  {
+    title: 'Save Every Month',
+    description: 'Subscribers save vs. one-time purchases. The longer you stay, the more you save.',
+    icon: 'savings',
+  },
+  {
+    title: 'Skip or Cancel Anytime',
+    description: 'No contracts, no commitment. Pause, skip a month, or cancel whenever you want.',
+    icon: 'flexible',
+  },
+  {
+    title: 'Earn Rewards Points',
+    description:
+      'Every subscription order earns loyalty points toward discounts and free shipping.',
+    icon: 'points',
+  },
+]
+
+const howItWorks = [
+  {
+    step: 1,
+    title: 'Choose Your Product',
+    description: 'Select Pour the PORT and your preferred delivery frequency.',
+  },
+  {
+    step: 2,
+    title: 'We Ship Monthly',
+    description:
+      'Your treatment ships automatically each month. No reordering, no remembering.',
+  },
+  {
+    step: 3,
+    title: 'Pour & Flush',
+    description:
+      'When it arrives, pour one bottle into any toilet and flush. Takes 30 seconds.',
+  },
+]
+
+const faqs = [
+  {
+    q: 'What products are available for subscription?',
+    a: 'Pour the PORT septic tank treatment is our current subscription product. As we add more Subscribe & Save options, they will appear here.',
+  },
+  {
+    q: 'How much do I save with a subscription?',
+    a: 'Subscribers save on every order compared to one-time purchases. Plus, every subscription order earns loyalty points you can redeem for additional discounts.',
+  },
+  {
+    q: 'Can I skip a month or pause my subscription?',
+    a: 'Absolutely. Log into your account or contact us to skip, pause, or adjust your delivery schedule. No penalties, no questions.',
+  },
+  {
+    q: 'Can I cancel anytime?',
+    a: 'Yes. No contracts, no minimum commitment. Cancel anytime through your Shopify account or by reaching out to our team.',
+  },
+  {
+    q: 'How does shipping work?',
+    a: 'Subscription orders ship via USPS or UPS, depending on your location. Most orders arrive within 3-5 business days.',
+  },
+  {
+    q: 'Do subscriptions earn loyalty points?',
+    a: 'Yes! Every subscription order earns points in the Southland Rewards program. Subscribe and you\'re automatically earning toward discounts and free shipping.',
+  },
+  {
+    q: 'I already have a subscription. How do I manage it?',
+    a: 'Use the "Manage My Subscription" form at the bottom of this page. We\'ll send a link to your subscription portal where you can skip, pause, cancel, or update your shipping address.',
+  },
+]
 ---
+
+<BaseLayout
+  title="Subscribe & Save | Pour the PORT Monthly Delivery | Southland Organics"
+  description="Save money and never run out. Subscribe to monthly Pour the PORT septic treatment — delivered to your door, cancel anytime. Earn loyalty points on every order."
+  ogImage={buildSouthlandUrl('heroes/Farm_Athens_GA_7_jbdjik', {
+    width: 1200,
+    height: 630,
+    crop: 'fill',
+    quality: 'auto',
+    format: 'auto',
+  })}
+  canonicalUrl={`${siteUrl}/subscriptions/`}
+  schema={subscriptionSchema}
+>
+  <!-- ============================================================
+       1. HERO
+       ============================================================ -->
+  <section class="bg-southland-green-dark py-16 md:py-24">
+    <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+      <p class="mb-3 text-sm font-medium uppercase tracking-widest text-southland-green">
+        Subscribe & Save
+      </p>
+      <h1 class="mb-6 font-heading text-4xl text-white md:text-5xl lg:text-6xl">
+        Never Miss a Treatment
+      </h1>
+      <p class="mx-auto max-w-3xl text-lg text-white/80 md:text-xl">
+        Monthly Pour the PORT delivery on autopilot. Your septic system stays healthy, you save money, and you never have to think about it.
+      </p>
+      <div class="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+        <a
+          href="/products/pour-the-port-septic-tank-treatment/"
+          class="btn-primary inline-flex items-center gap-2 px-8 py-3 text-lg"
+        >
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+          </svg>
+          Subscribe Now
+        </a>
+        <a
+          href="#manage"
+          class="btn-secondary inline-flex items-center gap-2 border-white/40 px-8 py-3 text-lg text-white hover:bg-white hover:text-southland-green-dark"
+        >
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+          Manage My Subscription
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       2. HOW IT WORKS (3-step strip)
+       ============================================================ -->
+  <section class="relative -mt-8 pb-8">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid gap-4 sm:grid-cols-3">
+        {
+          howItWorks.map((step) => (
+            <div class="rounded-2xl bg-white p-6 text-center shadow-lg">
+              <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-southland-green/10">
+                <span class="text-2xl font-bold text-southland-green">{step.step}</span>
+              </div>
+              <p class="mb-1 text-xs font-semibold uppercase tracking-wider text-southland-green">
+                Step {step.step}
+              </p>
+              <h3 class="mb-2 text-xl text-shopify-title">{step.title}</h3>
+              <p class="text-sm text-shopify-secondary-text">{step.description}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       3. FEATURED PRODUCT — Pour the PORT
+       ============================================================ -->
+  <section class="py-16 md:py-20">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <p class="mb-2 text-sm font-semibold uppercase tracking-widest text-southland-green">
+          Featured Subscription
+        </p>
+        <h2 class="mb-4 font-heading text-3xl md:text-4xl">Pour the PORT</h2>
+        <p class="mx-auto mb-12 max-w-2xl text-shopify-secondary-text">
+          Monthly biological septic tank treatment. Pour one bottle, flush twice, done. Your septic system stays healthy year-round.
+        </p>
+      </div>
+
+      <div class="mx-auto max-w-3xl">
+        <div class="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
+
+          <div class="mb-6 grid grid-cols-2 gap-3">
+            <div class="rounded-xl border border-gray-100 bg-white p-4 text-center shadow-sm">
+              <div class="text-2xl font-bold text-southland-green-dark">2-3x</div>
+              <p class="mt-1 text-xs text-shopify-secondary-text">Longer Between Pump-Outs</p>
+            </div>
+            <div class="rounded-xl border border-gray-100 bg-white p-4 text-center shadow-sm">
+              <div class="text-2xl font-bold text-southland-green-dark">$300+</div>
+              <p class="mt-1 text-xs text-shopify-secondary-text">Saved per Skipped Pump-Out</p>
+            </div>
+            <div class="rounded-xl border border-gray-100 bg-white p-4 text-center shadow-sm">
+              <div class="text-2xl font-bold text-southland-green-dark">1,500 gal</div>
+              <p class="mt-1 text-xs text-shopify-secondary-text">Tank Capacity per Dose</p>
+            </div>
+            <div class="rounded-xl border border-gray-100 bg-white p-4 text-center shadow-sm">
+              <div class="text-2xl font-bold text-southland-green-dark">A+</div>
+              <p class="mt-1 text-xs text-shopify-secondary-text">BBB Rating</p>
+            </div>
+          </div>
+
+          <ul class="mb-6 space-y-3">
+            <li class="flex items-start gap-3">
+              <svg class="mt-0.5 h-5 w-5 shrink-0 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span class="text-sm text-shopify-title">Monthly biological treatment delivered to your door</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="mt-0.5 h-5 w-5 shrink-0 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span class="text-sm text-shopify-title">Breaks down solids, grease, and paper that clog drain fields</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="mt-0.5 h-5 w-5 shrink-0 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span class="text-sm text-shopify-title">Eliminates yard odor and slow-drain symptoms</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="mt-0.5 h-5 w-5 shrink-0 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span class="text-sm text-shopify-title">Cancel anytime — no contracts, no minimum</span>
+            </li>
+          </ul>
+
+          <a
+            href="/products/pour-the-port-septic-tank-treatment/"
+            class="btn-primary inline-flex items-center justify-center gap-2 px-8 py-3 text-lg"
+          >
+            Subscribe to Pour the PORT
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       4. WHY SUBSCRIBE (Benefits grid)
+       ============================================================ -->
+  <section class="bg-gray-50 py-16 md:py-20">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <p class="mb-2 text-sm font-semibold uppercase tracking-widest text-southland-green">
+          Why Subscribe
+        </p>
+        <h2 class="mb-4 font-heading text-3xl md:text-4xl">The Subscribe & Save Advantage</h2>
+        <p class="mx-auto mb-12 max-w-2xl text-shopify-secondary-text">
+          Subscriptions aren't just convenient — they're the best way to keep your septic system consistently healthy.
+        </p>
+      </div>
+
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {
+          benefits.map((b) => (
+            <div class="rounded-xl border border-gray-100 bg-white p-6 text-center shadow-sm transition-shadow hover:shadow-md">
+              <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-southland-green/10">
+                {b.icon === 'calendar' && (
+                  <svg class="h-7 w-7 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                )}
+                {b.icon === 'savings' && (
+                  <svg class="h-7 w-7 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
+                {b.icon === 'flexible' && (
+                  <svg class="h-7 w-7 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                )}
+                {b.icon === 'points' && (
+                  <svg class="h-7 w-7 text-southland-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                  </svg>
+                )}
+              </div>
+              <h3 class="mb-2 text-base font-semibold text-shopify-title">{b.title}</h3>
+              <p class="text-sm text-shopify-secondary-text">{b.description}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       5. TESTIMONIALS
+       ============================================================ -->
+  <section class="py-16 md:py-20">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <p class="mb-2 text-sm font-semibold uppercase tracking-widest text-southland-green">
+          Real Results
+        </p>
+        <h2 class="mb-12 font-heading text-3xl md:text-4xl">What Subscribers Say</h2>
+      </div>
+
+      <div class="mx-auto grid max-w-4xl gap-6 md:grid-cols-2">
+        <div class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+          <div class="mb-4 flex gap-1">
+            {[1, 2, 3, 4, 5].map(() => (
+              <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            ))}
+          </div>
+          <blockquote class="mb-4 leading-relaxed text-shopify-secondary-text">
+            "We were pumping every 18 months and the yard always had a faint smell. Started Pour the PORT and haven't pumped in over 3 years. No smell, no slow drains, no anxiety about the system. Best $20 a month I spend."
+          </blockquote>
+          <div>
+            <p class="font-semibold text-shopify-title">Carol Whitfield</p>
+            <p class="text-sm text-shopify-secondary-text">Homeowner, North Georgia</p>
+          </div>
+        </div>
+
+        <div class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+          <div class="mb-4 flex gap-1">
+            {[1, 2, 3, 4, 5].map(() => (
+              <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            ))}
+          </div>
+          <blockquote class="mb-4 leading-relaxed text-shopify-secondary-text">
+            "I manage 6 rental properties with septic systems. Tenant abuse is constant — grease, wipes, you name it. Pour the PORT on every property has cut my emergency plumber calls to almost zero. The subscription means I don't have to rely on tenants to remember."
+          </blockquote>
+          <div>
+            <p class="font-semibold text-shopify-title">David Reeves</p>
+            <p class="text-sm text-shopify-secondary-text">Property Manager, South Carolina</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       6. REWARDS CROSS-SELL
+       ============================================================ -->
+  <section class="bg-southland-green-dark py-16 md:py-20">
+    <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-2xl">
+        <div
+          class="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-white/10"
+        >
+          <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+            ></path>
+          </svg>
+        </div>
+        <h2 class="mb-4 font-heading text-3xl text-white md:text-4xl">
+          Earn Rewards on Every Delivery
+        </h2>
+        <p class="text-lg text-white/80">
+          Every subscription order automatically earns Southland Rewards points. Redeem for
+          discounts, free shipping, and VIP perks.
+        </p>
+        <a
+          href="/rewards/"
+          class="mt-8 inline-flex items-center gap-2 rounded-lg bg-white px-8 py-3 font-semibold text-southland-green-dark transition-colors hover:bg-gray-100"
+        >
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"
+            ></path>
+          </svg>
+          Learn About Rewards
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       7. FAQ
+       ============================================================ -->
+  <section class="py-16 md:py-20">
+    <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <p class="mb-2 text-sm font-semibold uppercase tracking-widest text-southland-green">
+          Questions
+        </p>
+        <h2 class="mb-10 font-heading text-3xl md:text-4xl">Frequently Asked Questions</h2>
+      </div>
+
+      <div class="divide-y divide-gray-200">
+        {
+          faqs.map((faq) => (
+            <details class="group py-5">
+              <summary class="flex cursor-pointer items-center justify-between text-left font-semibold text-shopify-title transition-colors hover:text-southland-green">
+                <span>{faq.q}</span>
+                <svg
+                  class="ml-4 h-5 w-5 shrink-0 text-shopify-secondary-text transition-transform group-open:rotate-180"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </summary>
+              <p class="mt-3 leading-relaxed text-shopify-secondary-text">{faq.a}</p>
+            </details>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       8. MANAGE SUBSCRIPTION
+       ============================================================ -->
+  <section id="manage" class="bg-gray-50 py-16 md:py-20">
+    <div class="mx-auto max-w-xl px-4 text-center sm:px-6 lg:px-8">
+      <div
+        class="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-full bg-southland-green/10"
+      >
+        <svg
+          class="h-7 w-7 text-southland-green"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+          ></path>
+        </svg>
+      </div>
+      <h2 class="mb-2 font-heading text-3xl md:text-4xl">Manage My Subscription</h2>
+      <p class="mb-8 text-shopify-secondary-text">
+        Enter your email and we'll send a link to your account portal where you can skip, pause, cancel, or update your subscription.
+      </p>
+      <form id="subscription-lookup-form" class="flex flex-col gap-3 sm:flex-row">
+        <input
+          type="email"
+          id="subscription-email"
+          name="email"
+          required
+          placeholder="you@example.com"
+          class="flex-1 rounded-lg border border-gray-200 bg-white px-4 py-3 text-base focus:border-southland-green focus:outline-none focus:ring-2 focus:ring-southland-green/20"
+        />
+        <button
+          type="submit"
+          id="subscription-submit"
+          class="btn-primary whitespace-nowrap px-6 py-3"
+        >
+          Send My Portal Link
+        </button>
+      </form>
+      <p id="subscription-message" class="mt-4 text-xs text-shopify-secondary-text">
+        We'll only use your email to send your account portal link. No spam.
+      </p>
+
+      <script define:vars={{ lookupUrl }}>
+        document
+          .getElementById('subscription-lookup-form')
+          .addEventListener('submit', async (e) => {
+            e.preventDefault()
+            const email = document.getElementById('subscription-email').value.trim()
+            const btn = document.getElementById('subscription-submit')
+            const msg = document.getElementById('subscription-message')
+            if (!email) return
+
+            btn.disabled = true
+            btn.textContent = 'Sending...'
+            msg.className = 'mt-4 text-xs text-shopify-secondary-text'
+            msg.textContent = ''
+
+            try {
+              const res = await fetch(lookupUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+              })
+              if (res.status === 429) {
+                msg.textContent = 'Too many requests. Please try again in a few minutes.'
+                msg.className = 'mt-4 text-sm font-medium text-amber-600'
+              } else {
+                msg.textContent =
+                  "If you have an account, we've sent your portal link. Check your email!"
+                msg.className = 'mt-4 text-sm font-medium text-southland-green'
+              }
+            } catch {
+              msg.textContent = 'Something went wrong. Please try again.'
+              msg.className = 'mt-4 text-sm font-medium text-red-600'
+            } finally {
+              btn.disabled = false
+              btn.textContent = 'Send My Portal Link'
+            }
+          })
+      </script>
+    </div>
+  </section>
+</BaseLayout>
