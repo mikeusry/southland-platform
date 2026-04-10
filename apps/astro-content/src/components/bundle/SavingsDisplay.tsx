@@ -33,17 +33,14 @@ export default function SavingsDisplay({ subtotal, discountPercent, filled, tota
         <>
           <div className="mt-2 flex items-center justify-between text-sm">
             <span className="font-medium text-shopify-link">
-              Case discount ({discountPercent}% off)
+              Case discount
             </span>
             <span className="font-medium text-shopify-link">-{formatMoney(discountAmount)}</span>
           </div>
           <div className="mt-1 flex items-center justify-between text-sm">
-            <span className="italic text-brand-gray-dark">Estimated shipping savings</span>
-            <span className="italic text-brand-gray-dark">Ships as 1 case</span>
+            <span className="text-brand-gray-dark">Ships as 1 case instead of {total}</span>
+            <span className="font-medium text-shopify-link">Less freight</span>
           </div>
-          <p className="mt-1 text-xs text-brand-gray-dark">
-            Actual shipping calculated at checkout.
-          </p>
           <div className="mt-3 border-t border-gray-200 pt-2">
             <div className="flex items-center justify-between">
               <span className="font-medium text-shopify-title">Case total</span>
@@ -51,12 +48,16 @@ export default function SavingsDisplay({ subtotal, discountPercent, filled, tota
                 {formatMoney(subtotal - discountAmount)}
               </span>
             </div>
+            <p className="mt-1 text-xs text-brand-gray-dark">
+              + shipping savings at checkout (1 case vs {total} individual packages)
+            </p>
           </div>
         </>
       ) : (
         <p className="mt-2 text-sm text-brand-gray-dark">
-          Add {total - filled} more gallon{total - filled !== 1 ? 's' : ''} to unlock your case
-          discount ({discountPercent}% off + shipping savings)
+          Add {total - filled} more gallon{total - filled !== 1 ? 's' : ''} to unlock{' '}
+          <span className="font-semibold text-shopify-link">case pricing</span>
+          {' '}— save on every gallon + lower shipping
         </p>
       )}
     </div>

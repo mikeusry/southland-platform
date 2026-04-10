@@ -630,14 +630,14 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
                   <div class="flex-1">
                     <div class="flex items-center gap-2">
                       <p class="text-base font-bold" style="color: #2C5234;">
-                        Build a Case &amp; Save {caseSavings > 0 ? `$${caseSavings}` : '10%'}
+                        Build a Case{caseSavings > 0 ? ` — Save $${caseSavings}` : ''}
                       </p>
                       <span class="rounded-full bg-[#2C5234] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
                         Best Value
                       </span>
                     </div>
                     <p class="mt-0.5 text-sm text-gray-600">
-                      Mix &amp; match any 4 gallons — ships as one case, saves on price &amp; freight
+                      Pick any 4 gallons — ships as 1 case, not 4 packages
                     </p>
                   </div>
                   <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#2C5234] text-white transition-transform group-hover:translate-x-0.5">

@@ -406,20 +406,20 @@ export default function CartPage() {
         {caseNudge && (
           <a
             href="/build-a-case/"
-            className="mt-4 flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4 transition-colors hover:border-green-300 hover:bg-green-100"
+            className="mt-4 flex items-center gap-3 rounded-lg border-2 border-[#2C5234]/20 bg-gradient-to-r from-green-50 to-emerald-50 p-4 transition-all hover:border-[#2C5234]/40 hover:shadow-md"
           >
             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#2C5234] text-sm font-bold text-white">
-              {caseNudge.needed}
+              +{caseNudge.needed}
             </div>
             <div className="flex-1">
-              <p className="text-sm font-semibold text-[#2C5234]">
-                Add {caseNudge.needed} more gallon{caseNudge.needed !== 1 ? 's' : ''} to save 10%
+              <p className="text-sm font-bold text-[#2C5234]">
+                Add {caseNudge.needed} more gallon{caseNudge.needed !== 1 ? 's' : ''} to unlock case pricing
               </p>
               <p className="text-xs text-gray-600">
-                Complete your case and save on price + shipping
+                Save on every gallon + ship as one case instead of {gallonCount + caseNudge.needed}
               </p>
             </div>
-            <span className="text-sm font-medium text-[#44883E]">Build a Case &rarr;</span>
+            <span className="text-sm font-semibold text-[#44883E]">Build a Case &rarr;</span>
           </a>
         )}
 
@@ -429,12 +429,15 @@ export default function CartPage() {
             <svg className="h-5 w-5 flex-shrink-0 text-[#44883E]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p className="text-sm font-medium text-[#2C5234]">
-              Case bundle discount applied — you&apos;re saving{' '}
-              <span className="font-bold">
+            <div>
+              <p className="text-sm font-bold text-[#2C5234]">
+                Case pricing applied — saving{' '}
                 {formatPrice(cart.discountAllocations[0].discountedAmount.amount, cart.discountAllocations[0].discountedAmount.currencyCode)}
-              </span>
-            </p>
+              </p>
+              <p className="text-xs text-gray-600">
+                Shipping as 1 case instead of {gallonCount} individual packages
+              </p>
+            </div>
           </div>
         )}
       </div>
