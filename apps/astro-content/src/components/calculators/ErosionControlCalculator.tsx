@@ -11,6 +11,10 @@ import {
 } from '../../lib/erosionControlRules'
 import { calculateResult, formatWeight } from '../../lib/erosionControlUtils'
 
+// Recommended products that don't yet have Shopify PDPs — route to contact form
+// instead of a 404. Remove a slug here once the product ships in Shopify.
+const UNAVAILABLE_SLUGS = new Set(['hydromulch', 'tackifier', 'erosion-control-blanket'])
+
 const DEFAULTS: CalculatorInputs = {
   area: 1000,
   slope: 'moderate',
@@ -338,12 +342,21 @@ export default function ErosionControlCalculator() {
                       </div>
                       <p className="mt-0.5 text-xs text-gray-600">{p.reason}</p>
                     </div>
-                    <a
-                      href={`/products/${p.slug}/`}
-                      className="shrink-0 rounded-md border border-[#44883E] px-3 py-1.5 text-xs font-semibold text-[#44883E] transition-colors hover:bg-[#44883E] hover:text-white"
-                    >
-                      View
-                    </a>
+                    {UNAVAILABLE_SLUGS.has(p.slug) ? (
+                      <a
+                        href={`/contact/?product=${encodeURIComponent(p.slug)}`}
+                        className="shrink-0 rounded-md border border-[#2C5234] px-3 py-1.5 text-xs font-semibold text-[#2C5234] transition-colors hover:bg-[#2C5234] hover:text-white"
+                      >
+                        Request Quote
+                      </a>
+                    ) : (
+                      <a
+                        href={`/products/${p.slug}/`}
+                        className="shrink-0 rounded-md border border-[#44883E] px-3 py-1.5 text-xs font-semibold text-[#44883E] transition-colors hover:bg-[#44883E] hover:text-white"
+                      >
+                        View
+                      </a>
+                    )}
                   </div>
                 ))}
               </div>
