@@ -94,11 +94,27 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   // /blogs/[category]/[slug] → /blog/[slug]/ (old Shopify blog article URLs)
+  // Skip archive pages (tagged/, author/) and pagination — send those to /blog/
   const blogArticleMatch = pathname.match(/^\/blogs\/[^/]+\/(.+?)\/?\s*$/)
   if (blogArticleMatch) {
+    const slug = blogArticleMatch[1]
+    if (slug.startsWith('tagged/') || slug.startsWith('author/') || slug.includes('/')) {
+      return new Response(null, {
+        status: 301,
+        headers: { location: `/blog/` },
+      })
+    }
     return new Response(null, {
       status: 301,
-      headers: { location: `/blog/${blogArticleMatch[1]}/` },
+      headers: { location: `/blog/${slug}/` },
+    })
+  }
+
+  // Bare /blogs or /blogs/[category] index → /blog/
+  if (pathname === '/blogs' || pathname === '/blogs/' || /^\/blogs\/[^/]+\/?$/.test(pathname)) {
+    return new Response(null, {
+      status: 301,
+      headers: { location: `/blog/` },
     })
   }
 
