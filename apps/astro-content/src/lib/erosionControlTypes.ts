@@ -107,6 +107,12 @@ export interface MethodOverride {
   productRecommendations: ProductRecommendation[]
 }
 
+export interface RegionOverride {
+  notes: string[]
+  warnings: string[]
+  confidence: Confidence
+}
+
 export interface ProductCatalogEntry {
   name: string
   slug: string

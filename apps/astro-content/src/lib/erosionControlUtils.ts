@@ -16,6 +16,7 @@ import {
   METHOD_OVERRIDES,
   MIX_CONFIGS,
   PRODUCT_CATALOG,
+  REGION_OVERRIDES,
   SEASON_OVERRIDES,
   SLOPE_OVERRIDES,
   SOIL_OVERRIDES,
@@ -96,6 +97,14 @@ export function applyOverrides(mix: MixConfig, inputs: CalculatorInputs): Overri
   const season = SEASON_OVERRIDES[inputs.season]
   warnings.push(...season.warnings)
   notes.push(...season.notes)
+
+  // -- Region ---------------------------------------------------------------
+  const region = REGION_OVERRIDES[inputs.region]
+  notes.push(...region.notes)
+  warnings.push(...region.warnings)
+  if (region.confidence === 'custom-review') {
+    confidence = 'custom-review'
+  }
 
   // -- Method ---------------------------------------------------------------
   const method = METHOD_OVERRIDES[inputs.method]

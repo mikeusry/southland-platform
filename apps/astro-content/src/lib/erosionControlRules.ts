@@ -11,6 +11,8 @@ import type {
   MethodOverride,
   MixConfig,
   ProductCatalogEntry,
+  Region,
+  RegionOverride,
   Season,
   SeasonOverride,
   Slope,
@@ -259,6 +261,57 @@ export const METHOD_OVERRIDES: Record<Method, MethodOverride> = {
       'Drill or slit seeding places seed directly into the soil for excellent seed-to-soil contact — best on terrain that allows equipment access.',
     ],
     productRecommendations: [],
+  },
+}
+
+// ---------------------------------------------------------------------------
+// Region Overrides
+// ---------------------------------------------------------------------------
+//
+// Calculator mixes are tall fescue + ryegrass (cool-season species). These
+// establish well across most of the country except the warm-season transition
+// and deep-south zones, where bermuda/bahia would typically be specified. For
+// those regions we flag custom-review rather than invent a warm-season mix.
+
+export const REGION_OVERRIDES: Record<Region, RegionOverride> = {
+  'georgia-southeast': {
+    notes: [],
+    warnings: [],
+    confidence: 'standard',
+  },
+  'mid-atlantic': {
+    notes: [],
+    warnings: [],
+    confidence: 'standard',
+  },
+  midwest: {
+    notes: [],
+    warnings: [],
+    confidence: 'standard',
+  },
+  northeast: {
+    notes: [],
+    warnings: [],
+    confidence: 'standard',
+  },
+  'pacific-northwest': {
+    notes: [],
+    warnings: [],
+    confidence: 'standard',
+  },
+  'mountain-west': {
+    notes: [
+      'Mountain West establishment windows are shorter at elevation — confirm soil temperatures are above 50°F before seeding.',
+    ],
+    warnings: [],
+    confidence: 'standard',
+  },
+  'south-central': {
+    notes: [],
+    warnings: [
+      'South Central (TX, OK, AR) is primarily a warm-season grass region. Tall fescue and ryegrass can work as a temporary cool-season cover but long-term stabilization typically calls for bermuda or bahia. We recommend requesting a custom recommendation before ordering seed.',
+    ],
+    confidence: 'custom-review',
   },
 }
 
