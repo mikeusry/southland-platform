@@ -144,9 +144,7 @@ const gallonVariant = product.variants.find((v) =>
   v.selectedOptions.some((o) => o.name === 'Size' && o.value === '1 Gallon')
 )
 const hasGallonVariant = !!gallonVariant
-const caseSavings = gallonVariant
-  ? Math.round(parseFloat(gallonVariant.price.amount) * 4 * 0.1)
-  : 0
+const caseSavings = gallonVariant ? Math.round(parseFloat(gallonVariant.price.amount) * 4 * 0.1) : 0
 
 // ── Display title (strip pipe-delimited SEO keywords) ──────────────────────
 const displayTitle =
@@ -642,7 +640,12 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
                   </div>
                   <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#2C5234] text-white transition-transform group-hover:translate-x-0.5">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 5l7 7-7 7"
+                      />
                     </svg>
                   </div>
                 </div>

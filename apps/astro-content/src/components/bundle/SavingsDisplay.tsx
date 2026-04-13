@@ -32,9 +32,7 @@ export default function SavingsDisplay({ subtotal, discountPercent, filled, tota
       {caseComplete ? (
         <>
           <div className="mt-2 flex items-center justify-between text-sm">
-            <span className="font-medium text-shopify-link">
-              Case discount
-            </span>
+            <span className="font-medium text-shopify-link">Case discount</span>
             <span className="font-medium text-shopify-link">-{formatMoney(discountAmount)}</span>
           </div>
           <div className="mt-1 flex items-center justify-between text-sm">
@@ -56,8 +54,8 @@ export default function SavingsDisplay({ subtotal, discountPercent, filled, tota
       ) : (
         <p className="mt-2 text-sm text-brand-gray-dark">
           Add {total - filled} more gallon{total - filled !== 1 ? 's' : ''} to unlock{' '}
-          <span className="font-semibold text-shopify-link">case pricing</span>
-          {' '}— save on every gallon + lower shipping
+          <span className="font-semibold text-shopify-link">case pricing</span> — save on every
+          gallon + lower shipping
         </p>
       )}
     </div>
