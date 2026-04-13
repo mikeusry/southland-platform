@@ -262,6 +262,41 @@ const PERSONA_COOKIE = 'sl_persona'
 const SEGMENT_COOKIE = 'sl_segment'
 const COOKIE_DAYS = 365
 
+// Safe localStorage accessor — returns null in WebViews/privacy modes
+// where window exists but localStorage is null or throws on access.
+const safeStorage = (): Storage | null => {
+  try {
+    if (typeof window === 'undefined') return null
+    return window.localStorage ?? null
+  } catch {
+    return null
+  }
+}
+
+const lsGet = (key: string): string | null => {
+  try {
+    return safeStorage()?.getItem(key) ?? null
+  } catch {
+    return null
+  }
+}
+
+const lsSet = (key: string, value: string): void => {
+  try {
+    safeStorage()?.setItem(key, value)
+  } catch {
+    // quota exceeded, privacy mode, etc — fail silently
+  }
+}
+
+const lsRemove = (key: string): void => {
+  try {
+    safeStorage()?.removeItem(key)
+  } catch {
+    // ignore
+  }
+}
+
 function setCookie(name: string, value: string, days: number): void {
   if (typeof document === 'undefined') return
   const expires = new Date(Date.now() + days * 864e5).toUTCString()
@@ -291,7 +326,7 @@ export function getPersona(): PersonaData | null {
   if (typeof window === 'undefined') return null
 
   // Check localStorage first
-  const stored = localStorage.getItem(STORAGE_KEY)
+  const stored = lsGet(STORAGE_KEY)
   if (stored) {
     try {
       const data = JSON.parse(stored) as PersonaData
@@ -301,7 +336,7 @@ export function getPersona(): PersonaData | null {
         data.id = LEGACY_PERSONA_MAP[data.id as string] as PersonaId
         data.segmentId = getSegmentForPersona(data.id!)
         // Rewrite with new ID
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+        lsSet(STORAGE_KEY, JSON.stringify(data))
         setCookie(PERSONA_COOKIE, data.id!, COOKIE_DAYS)
         setCookie(SEGMENT_COOKIE, data.segmentId, COOKIE_DAYS)
       }
@@ -311,7 +346,7 @@ export function getPersona(): PersonaData | null {
         const correctSegment = getSegmentForPersona(data.id)
         if (data.segmentId && data.segmentId !== correctSegment) {
           data.segmentId = correctSegment
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+          lsSet(STORAGE_KEY, JSON.stringify(data))
           setCookie(SEGMENT_COOKIE, data.segmentId, COOKIE_DAYS)
         }
         if (!data.segmentId) {
@@ -321,7 +356,7 @@ export function getPersona(): PersonaData | null {
 
       return data
     } catch {
-      localStorage.removeItem(STORAGE_KEY)
+      lsRemove(STORAGE_KEY)
     }
   }
 
@@ -344,7 +379,7 @@ export function getPersona(): PersonaData | null {
         source: 'decision_engine',
       }
       // Rewrite to localStorage + updated cookie
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+      lsSet(STORAGE_KEY, JSON.stringify(data))
       setCookie(PERSONA_COOKIE, personaId, COOKIE_DAYS)
       setCookie(SEGMENT_COOKIE, segmentId, COOKIE_DAYS)
       return data
@@ -399,7 +434,7 @@ export function setPersona(
     source,
   }
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+  lsSet(STORAGE_KEY, JSON.stringify(data))
   setCookie(PERSONA_COOKIE, personaId, COOKIE_DAYS)
   setCookie(SEGMENT_COOKIE, segmentId, COOKIE_DAYS)
 
@@ -423,7 +458,7 @@ export function setSegment(
     source,
   }
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+  lsSet(STORAGE_KEY, JSON.stringify(data))
   setCookie(SEGMENT_COOKIE, segmentId, COOKIE_DAYS)
   // Do NOT set persona cookie — only segment is known
 
@@ -450,9 +485,9 @@ export function clearPersona(): void {
       selectedAt: new Date().toISOString(),
       source: 'manual',
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+    lsSet(STORAGE_KEY, JSON.stringify(data))
   } else {
-    localStorage.removeItem(STORAGE_KEY)
+    lsRemove(STORAGE_KEY)
     setCookie(SEGMENT_COOKIE, '', -1)
   }
 
