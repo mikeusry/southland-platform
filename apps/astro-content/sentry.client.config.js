@@ -49,6 +49,9 @@ Sentry.init({
     // Chromium iOS WebView internal recursion (Google app in-app browser)
     'findTopmostVisibleElement',
     'Maximum call stack size exceeded',
+    // DuckDuckGo mobile / content-blocker postMessage origin checks —
+    // thrown from injected code with no stack, not from our code.
+    'invalid origin',
   ],
 
   // Ignore extension URLs and Google Translate proxy
