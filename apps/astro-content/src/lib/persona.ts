@@ -264,7 +264,7 @@ const COOKIE_DAYS = 365
 
 // Safe localStorage accessor — returns null in WebViews/privacy modes
 // where window exists but localStorage is null or throws on access.
-const safeStorage = (): Storage | null => {
+const safeStorage = (): typeof window.localStorage | null => {
   try {
     if (typeof window === 'undefined') return null
     return window.localStorage ?? null
