@@ -198,25 +198,67 @@ const breadcrumbSchema = {
   ],
 }
 
-// FAQPage schema — extract from H2/H3 headings that are questions
-const faqItems = tocHeadings
-  .filter((h) => h.text.includes('?'))
-  .map((h) => ({
-    '@type': 'Question',
-    name: h.text,
-  }))
+// FAQPage schema — parse Q&A pairs from MDX body so the schema contains
+// real answer text (Google requires this; placeholder text is grounds for
+// a manual action). Looks for `## Question?` or `### Question?` headings
+// followed by prose, stopping at the next heading.
+function extractFaqs(body: string): { question: string; answer: string }[] {
+  if (!body) return []
+  const lines = body.split('\n')
+  const results: { question: string; answer: string }[] = []
+  let current: { question: string; lines: string[] } | null = null
+  let inFence = false
 
+  const flush = () => {
+    if (!current) return
+    const answer = current.lines
+      .join('\n')
+      .replace(/```[\s\S]*?```/g, '')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+      .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+      .replace(/^\s*[-*+]\s+/gm, '')
+      .replace(/^\s*>\s?/gm, '')
+      .replace(/\*\*([^*]+)\*\*/g, '$1')
+      .replace(/\*([^*]+)\*/g, '$1')
+      .replace(/<[^>]+>/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+    if (answer) results.push({ question: current.question, answer })
+    current = null
+  }
+
+  for (const line of lines) {
+    if (line.trim().startsWith('```')) inFence = !inFence
+    if (inFence) {
+      if (current) current.lines.push(line)
+      continue
+    }
+    const headingMatch = line.match(/^(#{1,6})\s+(.+?)\s*$/)
+    if (headingMatch) {
+      flush()
+      const text = headingMatch[2].trim()
+      if (text.includes('?')) current = { question: text, lines: [] }
+      continue
+    }
+    if (current) current.lines.push(line)
+  }
+  flush()
+  return results
+}
+
+const faqPairs = extractFaqs(post.body || '')
 const faqSchema =
-  faqItems.length >= 2
+  faqPairs.length >= 2
     ? {
         '@context': 'https://schema.org',
         '@type': 'FAQPage',
-        mainEntity: faqItems.map((q) => ({
-          ...q,
+        mainEntity: faqPairs.map((q) => ({
+          '@type': 'Question',
+          name: q.question,
           acceptedAnswer: {
             '@type': 'Answer',
-            name: 'See full answer in article',
-            text: `Read the full explanation in our article: ${post.data.title}`,
+            text: q.answer,
           },
         })),
       }
