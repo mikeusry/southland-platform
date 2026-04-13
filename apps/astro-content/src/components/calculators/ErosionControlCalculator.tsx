@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { CalculatorInputs } from '../../lib/erosionControlTypes'
 import {
   GOAL_OPTIONS,
@@ -15,6 +15,24 @@ import { calculateResult, formatWeight } from '../../lib/erosionControlUtils'
 // instead of a 404. Remove a slug here once the product ships in Shopify.
 const UNAVAILABLE_SLUGS = new Set(['hydromulch', 'tackifier', 'erosion-control-blanket'])
 
+const CALCULATOR_NAME = 'erosion_control_seed'
+
+function trackCalculatorEvent(event: string, payload: Record<string, unknown> = {}): void {
+  if (typeof window === 'undefined') return
+  const data = { calculator: CALCULATOR_NAME, ...payload }
+  try {
+    window.dataLayer = window.dataLayer || []
+    window.dataLayer.push({ event, ...data })
+  } catch {
+    /* ignore */
+  }
+  try {
+    if (window.pdPixel?.track) window.pdPixel.track(event, data)
+  } catch {
+    /* ignore */
+  }
+}
+
 const DEFAULTS: CalculatorInputs = {
   area: 1000,
   slope: 'moderate',
@@ -30,11 +48,30 @@ const DEFAULTS: CalculatorInputs = {
 export default function ErosionControlCalculator() {
   const [inputs, setInputs] = useState<CalculatorInputs>(DEFAULTS)
   const [leadSubmitted, setLeadSubmitted] = useState(false)
+  const usedFiredRef = useRef(false)
+  const lastResultKeyRef = useRef<string | null>(null)
 
   const result = useMemo(() => calculateResult(inputs), [inputs])
 
+  useEffect(() => {
+    const key = `${inputs.area}|${inputs.region}|${inputs.goal}|${inputs.method}`
+    if (lastResultKeyRef.current === key) return
+    lastResultKeyRef.current = key
+    trackCalculatorEvent('calculator_result_viewed', {
+      area: inputs.area,
+      region: inputs.region,
+      goal: inputs.goal,
+      method: inputs.method,
+      product_count: result.productRecommendations?.length ?? 0,
+    })
+  }, [inputs, result])
+
   function update<K extends keyof CalculatorInputs>(key: K, value: CalculatorInputs[K]) {
     setInputs((prev) => ({ ...prev, [key]: value }))
+    if (!usedFiredRef.current) {
+      usedFiredRef.current = true
+      trackCalculatorEvent('calculator_used', { first_field: String(key) })
+    }
   }
 
   return (
@@ -345,6 +382,12 @@ export default function ErosionControlCalculator() {
                     {UNAVAILABLE_SLUGS.has(p.slug) ? (
                       <a
                         href={`/contact/?product=${encodeURIComponent(p.slug)}`}
+                        onClick={() =>
+                          trackCalculatorEvent('calculator_product_clicked', {
+                            slug: p.slug,
+                            destination: 'contact',
+                          })
+                        }
                         className="shrink-0 rounded-md border border-[#2C5234] px-3 py-1.5 text-xs font-semibold text-[#2C5234] transition-colors hover:bg-[#2C5234] hover:text-white"
                       >
                         Request Quote
@@ -352,6 +395,12 @@ export default function ErosionControlCalculator() {
                     ) : (
                       <a
                         href={`/products/${p.slug}/`}
+                        onClick={() =>
+                          trackCalculatorEvent('calculator_product_clicked', {
+                            slug: p.slug,
+                            destination: 'pdp',
+                          })
+                        }
                         className="shrink-0 rounded-md border border-[#44883E] px-3 py-1.5 text-xs font-semibold text-[#44883E] transition-colors hover:bg-[#44883E] hover:text-white"
                       >
                         View
@@ -367,12 +416,14 @@ export default function ErosionControlCalculator() {
           <div className="flex flex-col gap-3 sm:flex-row">
             <a
               href="/contact/"
+              onClick={() => trackCalculatorEvent('calculator_cta_clicked', { cta: 'contact' })}
               className="inline-flex items-center justify-center rounded-md bg-[#2C5234] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-green-800"
             >
               Request Custom Recommendation
             </a>
             <a
               href="tel:+18006083755"
+              onClick={() => trackCalculatorEvent('calculator_cta_clicked', { cta: 'phone' })}
               className="inline-flex items-center justify-center rounded-md border border-[#2C5234] px-6 py-3 text-sm font-semibold text-[#2C5234] transition-colors hover:bg-[#2C5234] hover:text-white"
             >
               Call 800-608-3755
