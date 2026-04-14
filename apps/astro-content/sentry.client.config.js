@@ -52,6 +52,10 @@ Sentry.init({
     // DuckDuckGo mobile / content-blocker postMessage origin checks —
     // thrown from injected code with no stack, not from our code.
     'invalid origin',
+    // Google Maps module load failures — usually ad blockers or flaky
+    // networks blocking maps.googleapis.com. Store locator has a
+    // fallback UI that handles this gracefully, so these are noise.
+    /^Could not load "(marker|places_impl|geocoder|util|map|drawing|visualization)"/,
   ],
 
   // Ignore extension URLs and Google Translate proxy
