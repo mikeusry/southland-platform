@@ -97,7 +97,7 @@ const REMOVE_FROM_CART_MUTATION = `
 `
 
 const APPLY_DISCOUNT_MUTATION = `
-  mutation CartDiscountCodesUpdate($cartId: ID!, $discountCodes: [String!]) {
+  mutation CartDiscountCodesUpdate($cartId: ID!, $discountCodes: [String!]!) {
     cartDiscountCodesUpdate(cartId: $cartId, discountCodes: $discountCodes) {
       cart { ...CartFields }
       userErrors { field message }

@@ -77,6 +77,10 @@ Sentry.init({
     if (msg.includes('Storefront') || msg.includes('GraphQL')) {
       event.tags = { ...event.tags, feature: 'storefront-api' }
     }
+    // Case builder errors are revenue-critical — tag for dedicated alert rule
+    if (msg.includes('discount') || msg.includes('case') || msg.includes('bundle')) {
+      event.tags = { ...event.tags, feature: 'case-builder' }
+    }
     return event
   },
 

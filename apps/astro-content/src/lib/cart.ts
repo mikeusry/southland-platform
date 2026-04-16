@@ -27,6 +27,21 @@ import type {
 // Re-export for convenience
 export type { Cart, CartLineInput }
 
+// ─── Sentry helper ──────────────────────────────────────────────────────────
+
+function captureCartException(err: Error, context: Record<string, unknown>) {
+  if (typeof window !== 'undefined' && (window as any).Sentry) {
+    const Sentry = (window as any).Sentry
+    Sentry.withScope((scope: any) => {
+      scope.setTag('feature', 'case-builder')
+      scope.setTag('stage', String(context.stage || 'unknown'))
+      scope.setLevel('error')
+      scope.setContext('case_builder', context)
+      Sentry.captureException(err)
+    })
+  }
+}
+
 // ─── Storage ─────────────────────────────────────────────────────────────────
 
 const CART_ID_KEY = 'southland_cart_id'
@@ -326,11 +341,26 @@ export async function removeFromCart(lineIds: string[]): Promise<Cart | null> {
  */
 export async function applyDiscount(code: string): Promise<Cart | null> {
   const cartId = getCartId()
-  if (!cartId) return null
+  if (!cartId) {
+    captureCartException(new Error('applyDiscount called with no cart ID'), {
+      stage: 'apply-discount',
+      discountCode: code,
+    })
+    return null
+  }
 
-  const cart = await sfApplyDiscount(getClient(), cartId, [code])
-  dispatchCartEvent(cart)
-  return cart
+  try {
+    const cart = await sfApplyDiscount(getClient(), cartId, [code])
+    dispatchCartEvent(cart)
+    return cart
+  } catch (err) {
+    captureCartException(err instanceof Error ? err : new Error(String(err)), {
+      stage: 'apply-discount',
+      discountCode: code,
+      cartId,
+    })
+    throw err // re-throw so CaseBuilder still shows the error banner
+  }
 }
 
 /**
@@ -344,11 +374,31 @@ export async function fetchCaseDiscountCode(bundleId: string): Promise<string | 
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ bundleId }),
     })
-    if (!res.ok) return null
+    if (!res.ok) {
+      const body = await res.text().catch(() => '')
+      const err = new Error(`Case discount API returned ${res.status}: ${body}`)
+      captureCartException(err, {
+        stage: 'fetch-discount-code',
+        bundleId,
+        httpStatus: res.status,
+      })
+      return null
+    }
     const data = await res.json()
+    if (!data.code) {
+      captureCartException(new Error('Case discount API returned no code'), {
+        stage: 'fetch-discount-code',
+        bundleId,
+        responseBody: JSON.stringify(data),
+      })
+    }
     return data.code || null
-  } catch {
-    console.warn('[cart] Failed to fetch case discount code')
+  } catch (err) {
+    captureCartException(err instanceof Error ? err : new Error(String(err)), {
+      stage: 'fetch-discount-code',
+      bundleId,
+    })
+    console.warn('[cart] Failed to fetch case discount code:', err)
     return null
   }
 }

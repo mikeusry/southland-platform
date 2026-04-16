@@ -82,6 +82,11 @@ export default function CaseBuilder() {
         setProducts(sortByPersona(gallonProducts, persona))
       } catch (err) {
         console.error('Failed to fetch gallon products:', err)
+        if (typeof window !== 'undefined' && (window as any).Sentry) {
+          ;(window as any).Sentry.captureException(err, {
+            tags: { feature: 'case-builder', stage: 'product-fetch' },
+          })
+        }
         setError('Unable to load products. Please try again.')
       } finally {
         setLoading(false)
@@ -157,6 +162,23 @@ export default function CaseBuilder() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
       console.error('Failed to add case to cart:', msg, err)
+      if (typeof window !== 'undefined' && (window as any).Sentry) {
+        const Sentry = (window as any).Sentry
+        Sentry.withScope((scope: any) => {
+          scope.setTag('feature', 'case-builder')
+          scope.setTag('stage', 'add-to-cart')
+          scope.setContext('case_builder', {
+            totalSelected,
+            selectionCount: selections.size,
+            products: Array.from(selections.entries()).map(([vid, s]) => ({
+              variantId: vid,
+              handle: s.product.handle,
+              quantity: s.quantity,
+            })),
+          })
+          Sentry.captureException(err)
+        })
+      }
       setError(`Failed to add to cart: ${msg}. Please try again.`)
     } finally {
       setAddingToCart(false)
