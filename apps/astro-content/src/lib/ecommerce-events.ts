@@ -61,35 +61,47 @@ interface CartLineData {
 
 function pushToDataLayer(event: string, data: Record<string, unknown>): void {
   if (typeof window === 'undefined') return
-  window.dataLayer = window.dataLayer || []
-  // Clear previous ecommerce data to prevent contamination
-  window.dataLayer.push({ ecommerce: null })
-  window.dataLayer.push({ event, ecommerce: data })
+  try {
+    window.dataLayer = window.dataLayer || []
+    // Clear previous ecommerce data to prevent contamination
+    window.dataLayer.push({ ecommerce: null })
+    window.dataLayer.push({ event, ecommerce: data })
+  } catch (err) {
+    console.error('[analytics] pushToDataLayer failed:', err)
+  }
 }
 
 function pushToMeta(event: string, data: Record<string, unknown>): void {
   if (typeof window === 'undefined' || typeof window.fbq !== 'function') return
-  window.fbq('track', event, data)
+  try {
+    window.fbq('track', event, data)
+  } catch (err) {
+    console.error('[analytics] pushToMeta failed:', err)
+  }
 }
 
 function pushToPixel(event: string, data: Record<string, unknown>): void {
   if (typeof window === 'undefined' || !window.pdPixel) return
-  // Include persona if set (from DecisionEngine → localStorage)
-  let persona: string | undefined
   try {
-    const raw = localStorage.getItem('southland_persona')
-    if (raw) {
-      const p = JSON.parse(raw)
-      if (p?.id) persona = p.id
+    // Include persona if set (from DecisionEngine → localStorage)
+    let persona: string | undefined
+    try {
+      const raw = localStorage.getItem('southland_persona')
+      if (raw) {
+        const p = JSON.parse(raw)
+        if (p?.id) persona = p.id
+      }
+    } catch (_err) {
+      /* localStorage may be unavailable */
     }
-  } catch (_err) {
-    /* localStorage may be unavailable */
+    window.pdPixel.track(event, {
+      content_type: 'ecommerce',
+      ...(persona ? { persona } : {}),
+      ...data,
+    })
+  } catch (err) {
+    console.error('[analytics] pushToPixel failed:', err)
   }
-  window.pdPixel.track(event, {
-    content_type: 'ecommerce',
-    ...(persona ? { persona } : {}),
-    ...data,
-  })
 }
 
 function buildItem(
