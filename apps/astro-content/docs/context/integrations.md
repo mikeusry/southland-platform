@@ -316,7 +316,7 @@ Email capture component at `src/components/shared/EmailCapture.astro`.
 |---------|-------|
 | Company ID | `p8XW7D` |
 | List ID | `QQxdLS` (Southland Newsletter Signup) |
-| API Key | `pk_2ca07d7eb76d4777c34f744957a76100eb` (in southland-sep/.env) |
+| API Key | `KLAVIYO_API_KEY` in `.env` (rotated — never commit key values) |
 
 **Env vars (in .env):**
 ```bash

@@ -12,9 +12,14 @@ import { handleFeedback } from './feedback'
 
 // ─── CORS ───────────────────────────────────────────────────────────────────
 
+function normalizeOrigin(origin: string): string {
+  // Strip www. so both variants match the same allowlist entry
+  return origin.replace('://www.', '://')
+}
+
 function corsHeaders(env: Env, origin: string | null): HeadersInit {
-  const allowed = env.ALLOWED_ORIGINS.split(',')
-  const isAllowed = origin && allowed.includes(origin)
+  const allowed = env.ALLOWED_ORIGINS.split(',').map(normalizeOrigin)
+  const isAllowed = origin && allowed.includes(normalizeOrigin(origin))
   return {
     'Access-Control-Allow-Origin': isAllowed ? origin : '',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
