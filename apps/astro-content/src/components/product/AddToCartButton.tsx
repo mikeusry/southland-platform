@@ -80,20 +80,28 @@ export default function AddToCartButton({
           attributes: [{ key: 'Source', value: 'Product Page' }],
         },
       ])
-      trackAddToCart(
-        {
-          id: productHandle,
-          handle: productHandle,
-          title: productTitle,
-          vendor: productVendor,
-          productType: productType,
-          variants,
-        },
-        selectedVariant,
-        quantity
-      )
+      // Cart mutation succeeded — confirm UX BEFORE tracking so a pixel
+      // throw can never surface as "Failed to add to cart".
       setAdded(true)
       setTimeout(() => setAdded(false), 3000)
+
+      // Best-effort pixel emission. Never let a tracking bug break the cart.
+      try {
+        trackAddToCart(
+          {
+            id: productHandle,
+            handle: productHandle,
+            title: productTitle,
+            vendor: productVendor,
+            productType: productType,
+            variants,
+          },
+          selectedVariant,
+          quantity
+        )
+      } catch (trackErr) {
+        console.error('[pixel] trackAddToCart threw:', trackErr)
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
       console.error('Add to cart failed:', msg, err)
