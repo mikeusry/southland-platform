@@ -60,7 +60,8 @@ const REDIRECTS: Record<string, string> = {
   '/pages/holding-tank-treatment': '/products/holding-tank-treatment',
   '/pages/big-ole-bird-instructions': '/products/big-ole-bird',
   '/pages/desecticide-order-information': '/products/desecticide',
-  '/pages/zeropoint-hocl-poultry-disinfectant-safe-for-live-birds': '/products/zeropoint-industrial',
+  '/pages/zeropoint-hocl-poultry-disinfectant-safe-for-live-birds':
+    '/products/zeropoint-industrial',
   // Humate/humic content — preserve rank via existing blog post
   '/pages/our-humate-deposit': '/blog/why-humate-soil-conditioner/',
   '/pages/humate-soil-conditioner': '/blog/why-humate-soil-conditioner/',
