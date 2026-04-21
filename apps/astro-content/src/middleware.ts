@@ -8,6 +8,7 @@
 import { defineMiddleware } from 'astro:middleware'
 
 // Permanent redirects — old Shopify URLs → new Astro routes
+// Mapped from GSC BigQuery inventory (last 90 days) of /pages/* and /collections/* URLs.
 const REDIRECTS: Record<string, string> = {
   // Old collection URLs → persona landing pages
   '/collections/backyard-birds': '/poultry/backyard/',
@@ -15,6 +16,7 @@ const REDIRECTS: Record<string, string> = {
   '/collections/turkey': '/poultry/turkey/',
   '/collections/game-birds': '/poultry/game-birds/',
   '/collections/poultry-breeders': '/poultry/breeders/',
+  '/collections/poultry': '/poultry/',
   '/collections/hydroseeders': '/hydroseeders/',
   '/collections/golf-courses': '/lawn/golf-courses/',
   '/collections/homeowners': '/lawn/homeowners/',
@@ -25,18 +27,69 @@ const REDIRECTS: Record<string, string> = {
   '/collections/pig-and-swine-supplements': '/livestock/swine/',
   '/collections/sanitizers': '/products/sanitizers/',
   '/collections/waste': '/products/waste-treatment/',
+  '/collections/all': '/',
   '/collections/other': '/',
-  // Old /pages/ URLs
+  '/collections': '/',
+  // Old /pages/ URLs — brand/about/contact
   '/pages/why-southland': '/about/',
   '/pages/about-us': '/about/',
+  '/pages/why-organic': '/about/',
+  '/pages/community': '/about/',
   '/pages/contact-us': '/contact/',
+  '/pages/contact': '/contact/',
   '/pages/distribution': '/distribution/',
   '/pages/store-locator': '/store-locator/',
   '/pages/build-a-case': '/build-a-case/',
   '/pages/faqs': '/contact/',
   '/pages/shipping-policy': '/contact/',
+  '/pages/return-policy': '/contact/',
+  '/pages/credit-application': '/contact/',
+  '/pages/vented-caps': '/contact/',
+  '/pages/order-tracking': '/account/',
   '/pages/southland-organics-rewards': '/',
+  '/pages/sale': '/',
   '/pages/hydroseeding': '/hydroseeders/',
+  // Team bios — redirect to existing /team/* pages or /about/ fallback
+  '/pages/mike-usry': '/team/mike-usry/',
+  '/pages/karin-usry': '/team/karin-usry/',
+  '/pages/brad-broxton': '/team/brad-broxton/',
+  '/pages/allen-reynolds': '/team/allen-reynolds/',
+  '/pages/brad-usry': '/about/',
+  '/pages/thomas-abercrombie': '/about/',
+  // Product landing pages (one-offs) — redirect to product or category
+  '/pages/holding-tank-treatment': '/products/holding-tank-treatment',
+  '/pages/big-ole-bird-instructions': '/products/big-ole-bird',
+  '/pages/desecticide-order-information': '/products/desecticide',
+  '/pages/zeropoint-hocl-poultry-disinfectant-safe-for-live-birds': '/products/zeropoint-industrial',
+  // Humate/humic content — preserve rank via existing blog post
+  '/pages/our-humate-deposit': '/blog/why-humate-soil-conditioner/',
+  '/pages/humate-soil-conditioner': '/blog/why-humate-soil-conditioner/',
+  '/pages/humic-acid-soil-conditioner': '/blog/why-humate-soil-conditioner/',
+  // Lawn/poultry programs → persona hubs
+  '/pages/natural-lawn-bundles': '/lawn/homeowners/',
+  '/pages/organic-lawn-care-program': '/lawn/homeowners/',
+  '/pages/natural-lawn-care-instructions': '/lawn/homeowners/',
+  '/pages/professional-turf-care-with-genesis': '/lawn/turf-pros/',
+  '/pages/backyard-poultry-dosing-chart': '/poultry/backyard/',
+  '/pages/probiotics-for-chickens': '/blog/how-to-run-big-ole-bird-poultry-probiotic/',
+  // Topical content — existing blog equivalents
+  '/pages/the-best-septic-tank-treatment-port': '/blog/septic-tank-system-restoration-with-port/',
+  '/pages/how-to-get-rid-of-drain-flies': '/blog/how-to-get-rid-of-drain-flies/',
+  // Careers — no dedicated careers page yet, send to /about/
+  '/pages/operations-coordinator': '/about/',
+  '/pages/athens-ga-job-operations-technician': '/about/',
+  // Author / archive pages
+  '/pages/author/erin-flowers': '/blog/',
+  '/pages/poultry-biosecurity-archives': '/blog/',
+  // Wrong product slugs that GSC still has indexed
+  '/products/natural-lawn-care-products': '/products/natural-lawn-care-subscription',
+  '/products/darkling-beetle-insecticide': '/products/desecticide',
+  // Bare-path legacy
+  '/why-organic': '/about/',
+  // Blog slugs that were never migrated — intercept before /blogs/*/slug regex
+  // so they don't fall through to a 404 at /blog/[slug]/
+  '/blogs/news/built-to-move-smarter-migration-fencing-for-modern-poultry-houses': '/blog/',
+  '/blogs/news/choosing-the-right-line-cleaner': '/blog/',
   // Legacy paths
   '/lawn/hydroseeders': '/hydroseeders/',
   '/turf': '/lawn/',
@@ -90,6 +143,23 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return new Response(null, {
       status: 301,
       headers: { location: redirect },
+    })
+  }
+
+  // Bulk pattern: /pages/faqs/* → /contact/ (85 legacy FAQ pages, low individual value)
+  if (pathname.startsWith('/pages/faqs/')) {
+    return new Response(null, {
+      status: 301,
+      headers: { location: `/contact/` },
+    })
+  }
+
+  // Bulk pattern: /collections/[col]/products/[handle] → /products/[handle]
+  const legacyCollectionProduct = pathname.match(/^\/collections\/[^/]+\/products\/([^/]+)\/?$/)
+  if (legacyCollectionProduct) {
+    return new Response(null, {
+      status: 301,
+      headers: { location: `/products/${legacyCollectionProduct[1]}` },
     })
   }
 
