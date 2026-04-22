@@ -83,3 +83,40 @@ NEXUS_API_URL = "https://nexus.southlandorganics.com"
 ENVIRONMENT = "production"
 AI_GATEWAY_SLUG = "southland-ai"
 ALLOWED_ORIGINS = "https://southlandorganics.com,https://www.southlandorganics.com,https://nexus.southlandorganics.com"
+
+# Bindings are NOT inherited from top-level — must be redeclared per environment,
+# or the production worker crashes with 1101 on every request (env.AI/DB/etc. undefined).
+
+[env.production.ai]
+binding = "AI"
+
+[[env.production.vectorize]]
+binding = "KNOWLEDGE_INDEX"
+index_name = "southland-knowledge"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "southland-ai"
+database_id = "309d4d9d-2c01-4d6f-b55b-dd2cf2822e5e"
+
+[[env.production.queues.producers]]
+queue = "index-updates"
+binding = "INDEX_QUEUE"
+
+[[env.production.queues.producers]]
+queue = "post-resolution"
+binding = "SUMMARY_QUEUE"
+
+[[env.production.queues.consumers]]
+queue = "index-updates"
+max_batch_size = 10
+max_batch_timeout = 30
+
+[[env.production.queues.consumers]]
+queue = "post-resolution"
+max_batch_size = 5
+max_batch_timeout = 60
+
+[[env.production.kv_namespaces]]
+binding = "CACHE"
+id = "8d6fcfaadd1e4ff8bff84e11f39b6c06"
