@@ -1,0 +1,29 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://southlandorganics.com/.well-known/api-catalog",
+      "item": [
+        {
+          "href": "https://southlandorganics.com/sitemap-index.xml",
+          "type": "application/xml",
+          "title": "Full URL sitemap index"
+        },
+        {
+          "href": "https://southlandorganics.com/llms.txt",
+          "type": "text/plain",
+          "title": "AI agent content map"
+        },
+        {
+          "href": "https://southlandorganics.com/podcast/rss.xml",
+          "type": "application/rss+xml",
+          "title": "Ag and Culture Podcast feed"
+        },
+        {
+          "href": "https://southlandorganics.com/.well-known/agent-skills/index.json",
+          "type": "application/json",
+          "title": "Agent skills discovery index"
+        }
+      ]
+    }
+  ]
+}

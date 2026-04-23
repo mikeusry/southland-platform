@@ -3,6 +3,8 @@
 
 User-agent: *
 Allow: /
+# We publish educational content and want AI agents citing us — see /llms.txt
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
 
 # Sitemaps
 Sitemap: https://southlandorganics.com/sitemap-index.xml

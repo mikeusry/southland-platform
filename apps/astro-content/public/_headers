@@ -1,0 +1,25 @@
+# Cloudflare Pages response headers
+# https://developers.cloudflare.com/pages/configuration/headers/
+
+# RFC 8288 Link headers — agent + crawler discovery
+# Applied site-wide. Agents hitting any page get pointers to the machine-readable map of the site.
+/*
+  Link: </sitemap-index.xml>; rel="sitemap"
+  Link: </llms.txt>; rel="describedby"; type="text/plain"
+  Link: </.well-known/api-catalog>; rel="api-catalog"; type="application/linkset+json"
+  Link: </podcast/rss.xml>; rel="alternate"; type="application/rss+xml"; title="Ag and Culture Podcast"
+  Link: </search/>; rel="search"
+
+# Well-known JSON endpoints — correct content types + cache headers
+/.well-known/api-catalog
+  Content-Type: application/linkset+json; profile="https://www.rfc-editor.org/info/rfc9727"
+  Cache-Control: public, max-age=3600
+
+/.well-known/agent-skills/index.json
+  Content-Type: application/json
+  Cache-Control: public, max-age=3600
+
+# llms.txt — explicit plain-text content type
+/llms.txt
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=3600
