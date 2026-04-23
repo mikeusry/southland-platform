@@ -1,29 +1,49 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
-import sentry from '@sentry/astro';
-import tailwind from '@astrojs/tailwind';
-import mdx from '@astrojs/mdx';
-import react from '@astrojs/react';
-import sitemap from '@astrojs/sitemap';
-import cloudflare from '@astrojs/cloudflare';
-import rehypeExternalLinks from 'rehype-external-links';
-import { visit } from 'unist-util-visit';
+import { defineConfig } from 'astro/config'
+import { readdirSync, readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
+import sentry from '@sentry/astro'
+import tailwind from '@astrojs/tailwind'
+import mdx from '@astrojs/mdx'
+import react from '@astrojs/react'
+import sitemap from '@astrojs/sitemap'
+import cloudflare from '@astrojs/cloudflare'
+import rehypeExternalLinks from 'rehype-external-links'
+import { visit } from 'unist-util-visit'
+
+const SITE_URL = 'https://southlandorganics.com'
+
+// SSR product pages aren't discovered by @astrojs/sitemap (it only sees prerendered routes).
+// Read shopifyHandle values from the MDX content collection and inject them as customPages.
+function getProductSitemapUrls() {
+  const dir = join(dirname(fileURLToPath(import.meta.url)), 'src/content/products')
+  const handles = new Set()
+  for (const file of readdirSync(dir)) {
+    if (!file.endsWith('.mdx')) continue
+    const match = readFileSync(join(dir, file), 'utf8').match(
+      /^shopifyHandle:\s*["']?([^"'\n]+)["']?/m
+    )
+    if (match) handles.add(match[1].trim())
+  }
+  return [...handles].map((h) => `${SITE_URL}/products/${h}/`)
+}
 
 /** Rehype plugin: add loading="lazy" to all images in markdown content */
 function rehypeLazyImages() {
   return (/** @type {any} */ tree) => {
     visit(tree, 'element', (node) => {
       if (node.tagName === 'img' && node.properties) {
-        node.properties.loading = 'lazy';
+        node.properties.loading = 'lazy'
       }
-    });
-  };
+    })
+  }
 }
 
 // https://astro.build/config
 // TinaCMS runs as separate dev server (npx tinacms dev) alongside Astro
 export default defineConfig({
-  site: 'https://southlandorganics.com',
+  site: SITE_URL,
   // base: '/podcast' - handled by Cloudflare Worker routing in production
   integrations: [
     sentry({
@@ -40,6 +60,7 @@ export default defineConfig({
     tailwind(),
     mdx(),
     sitemap({
+      customPages: getProductSitemapUrls(),
       filter: (page) =>
         !page.includes('/admin/') &&
         !page.includes('/account') &&
@@ -54,19 +75,24 @@ export default defineConfig({
   }),
   markdown: {
     rehypePlugins: [
-      [rehypeExternalLinks, {
-        target: '_blank',
-        rel: ['nofollow', 'noopener', 'noreferrer'],
-      }],
+      [
+        rehypeExternalLinks,
+        {
+          target: '_blank',
+          rel: ['nofollow', 'noopener', 'noreferrer'],
+        },
+      ],
       rehypeLazyImages,
     ],
   },
   build: {
-    format: 'directory'
+    format: 'directory',
   },
   vite: {
     define: {
-      'import.meta.env.PUBLIC_SITE_URL': JSON.stringify(process.env.PUBLIC_SITE_URL || 'https://southlandorganics.com')
+      'import.meta.env.PUBLIC_SITE_URL': JSON.stringify(
+        process.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+      ),
     },
-  }
-});
+  },
+})

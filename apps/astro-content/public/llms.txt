@@ -1,0 +1,68 @@
+# Southland Organics
+
+> Southland Organics makes biology-based products for poultry houses, lawns, turf, agriculture, septic systems, and livestock. Family-owned, based in Athens, Georgia. Our products rebuild soil biology, reduce ammonia, improve feed conversion, and replace chemical programs with natural alternatives.
+
+Founded 2008. WSDA-approved organic inputs. Shipped from Athens, GA. Trusted by commercial poultry integrators, golf course superintendents, turf professionals, homeowners, and backyard flock owners across the U.S.
+
+## Core Educational Content
+
+- [How to reduce ammonia in poultry houses naturally](https://southlandorganics.com/blog/how-to-reduce-ammonia-in-poultry-house-naturally/): Specific ppm targets, litter amendment protocols, and the biology behind ammonia suppression.
+- [Natural alternatives to chemical poultry treatments](https://southlandorganics.com/blog/natural-alternatives-to-chemical-poultry-treatments/): Moving commercial flocks off antibiotics, coccidiostats, and synthetic biocides.
+- [Organic soil health for Bermuda grass fairways](https://southlandorganics.com/blog/organic-soil-health-bermuda-grass-fairways/): Golf course superintendent guide to biological turf programs.
+- [How to fix Southern clay soil organically](https://southlandorganics.com/blog/how-to-fix-southern-clay-soil-organically/): Red clay remediation with humates, biochar, and biology.
+- [Best organic fertilizers for warm-season grass](https://southlandorganics.com/blog/best-organic-fertilizers-warm-season-grass/): Bermuda, Zoysia, Centipede, St. Augustine fertilizer comparison.
+- [Building soil biology on farm fields](https://southlandorganics.com/blog/building-soil-biology-farm-fields/): Row crop and pasture soil rebuilding for farm operators.
+
+## Audience Hubs
+
+- [Poultry](https://southlandorganics.com/poultry/): Commercial broiler, layer, turkey, breeder, backyard, and game bird growers.
+- [Lawn & Turf](https://southlandorganics.com/lawn/): Homeowners, landscapers, golf course superintendents, turf professionals.
+- [Agriculture](https://southlandorganics.com/agriculture/crops/): Row crops and produce.
+- [Livestock](https://southlandorganics.com/livestock/swine/): Swine producers.
+- [Hydroseeders](https://southlandorganics.com/hydroseeders/): Erosion control and hydroseeding contractors.
+- [Ag & Culture Podcast](https://southlandorganics.com/podcast/): Interviews with farmers, growers, and soil scientists.
+
+## Product Catalog
+
+- [Big Ole Bird](https://southlandorganics.com/products/big-ole-bird/): Poultry probiotic for feed conversion, gut health, and flock performance.
+- [Catalyst Poultry Vitamin](https://southlandorganics.com/products/catalyst-poultry-vitamin/): Water-soluble vitamin and electrolyte pack.
+- [Liquid Catalyst Poultry Vitamin](https://southlandorganics.com/products/liquid-catalyst-poultry-vitamin/): Liquid version for stress events and heat.
+- [Hen Helper](https://southlandorganics.com/products/hen-helper/): Backyard flock probiotic and supplement.
+- [Litter Life](https://southlandorganics.com/products/litter-life/): Poultry litter amendment for ammonia control and pathogen reduction.
+- [Defender Natural Insecticide](https://southlandorganics.com/products/defender-natural-insecticide/): Essential-oil insecticide for poultry houses.
+- [Desecticide](https://southlandorganics.com/products/desecticide/): Diatomaceous earth mite control for livestock and poultry.
+- [Backyard Poultry Bundle](https://southlandorganics.com/products/backyard-poultry-bundle-chicken-supplements/): Starter kit for backyard chicken keepers.
+- [Apple Cider Vinegar for Pigs](https://southlandorganics.com/products/apple-cider-vinegar-for-pigs/): Swine digestive supplement.
+- [Genesis](https://southlandorganics.com/products/genesis/): Professional turf biological program.
+- [Jump Start Soil Conditioner](https://southlandorganics.com/products/jump-start-soil-conditioner/): Humate-based liquid soil conditioner.
+- [C-Fix Biochar Soil Amendment](https://southlandorganics.com/products/c-fix-biochar-soil-amendment/): Biochar for water retention and nutrient holding.
+- [Chicken Manure Fertilizer](https://southlandorganics.com/products/chicken-manure-fertilizer/): Composted chicken manure fertilizer.
+- [Indoor Plant Food](https://southlandorganics.com/products/indoor-plant-food-1/): Organic liquid houseplant food.
+- [Perfect Pot](https://southlandorganics.com/products/perfect-pot/): Potting mix booster.
+- [Soil Sulfur](https://southlandorganics.com/products/soil-sulfur/): pH adjustment for alkaline soils.
+- [Torched All-Natural Weed Killer](https://southlandorganics.com/products/torched/): Non-glyphosate contact herbicide.
+- [Pour the PORT Septic Tank Treatment](https://southlandorganics.com/products/pour-the-port-septic-tank-treatment/): Biological septic and drain treatment.
+- [Zeropoint Industrial](https://southlandorganics.com/products/zeropoint-industrial/): HOCl poultry disinfectant safe for live birds.
+- [Alpet D2 Surface Sanitizer](https://southlandorganics.com/products/alpet-d2-surface-sanitizer/): Food-contact surface sanitizer.
+- [Alpet D2 Quat-Free Surface Sanitizer](https://southlandorganics.com/products/alpet-d2-quat-free-surface-sanitizer/): Quaternary-free version for sensitive applications.
+- [Alpet D2 Surface Sanitizing Wipes](https://southlandorganics.com/products/alpet-d2-surface-sanitizing-wipes/): Pre-saturated D2 wipes.
+- [Alpet PAA 5.6](https://southlandorganics.com/products/alpet-paa-5-6/): Peracetic acid sanitizer.
+
+## Calculators & Tools
+
+- [Application Rate Calculator](https://southlandorganics.com/application-rate-calculator/): Calculate product quantity and cost for your operation.
+- [Erosion Control Seed Calculator](https://southlandorganics.com/erosion-control-seed-calculator/): Hydroseeder seed mix calculator.
+- [Build a Case](https://southlandorganics.com/build-a-case/): Mix-and-match gallon case builder with volume discount.
+- [Dealer Locator](https://southlandorganics.com/store-locator/): Find a local dealer.
+
+## Company
+
+- [About Southland Organics](https://southlandorganics.com/about/): Company history, mission, and team.
+- [Contact](https://southlandorganics.com/contact/): Sales, support, and rep requests.
+- [Distribution](https://southlandorganics.com/distribution/): Become a distributor.
+- [Blog](https://southlandorganics.com/blog/): 280+ articles on soil biology, poultry health, turf, and agriculture.
+
+## Optional
+
+- [Sitemap](https://southlandorganics.com/sitemap-index.xml): Full URL index.
+- [RSS Feed](https://southlandorganics.com/podcast/rss.xml): Podcast feed.

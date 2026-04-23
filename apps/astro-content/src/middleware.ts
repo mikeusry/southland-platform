@@ -124,6 +124,14 @@ function isRateLimited(ip: string): boolean {
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url
 
+  // Conventional sitemap path → @astrojs/sitemap output
+  if (pathname === '/sitemap.xml') {
+    return new Response(null, {
+      status: 301,
+      headers: { location: '/sitemap-index.xml' },
+    })
+  }
+
   // Rate-limit /api/ endpoints
   if (pathname.startsWith('/api/')) {
     const ip = context.request.headers.get('cf-connecting-ip') || 'unknown'
