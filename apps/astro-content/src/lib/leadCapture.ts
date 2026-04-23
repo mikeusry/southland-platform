@@ -95,25 +95,36 @@ export function isBot(formData: FormData): boolean {
 
 const NEXUS_LEADS_URL = 'https://nexus.southlandorganics.com/api/leads'
 
-/** Fire-and-forget POST to Nexus. Never blocks user experience. */
+/**
+ * Fire-and-forget POST to Nexus. Never blocks user experience.
+ *
+ * Why fetch+keepalive instead of sendBeacon: sendBeacon with a JSON Blob
+ * triggers a CORS preflight that the beacon queue can't issue, so Chrome
+ * silently returns true but drops the request and Safari refuses outright.
+ * This caused ~2 days of form submissions (Apr 21–23 2026) to reach
+ * HubSpot Collected Forms but never land in Nexus. `fetch(…, { keepalive: true })`
+ * is the modern replacement — it survives page navigation just like sendBeacon
+ * but handles preflights correctly. keepalive bodies are capped at 64KB (well
+ * above our payload size).
+ */
 export function postToNexus(payload: NexusLeadPayload): void {
   const body = JSON.stringify(payload)
 
-  // Use sendBeacon if available — survives page navigation
-  if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
-    const sent = navigator.sendBeacon(
-      NEXUS_LEADS_URL,
-      new Blob([body], { type: 'application/json' })
-    )
-    if (sent) return
+  if (typeof fetch !== 'undefined') {
+    fetch(NEXUS_LEADS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+      keepalive: true,
+    }).catch(() => {})
+    return
   }
 
-  // Fallback to fetch
-  fetch(NEXUS_LEADS_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body,
-  }).catch(() => {})
+  // Ancient-browser fallback. text/plain avoids CORS preflight entirely; the
+  // Nexus endpoint accepts either content type.
+  if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+    navigator.sendBeacon(NEXUS_LEADS_URL, new Blob([body], { type: 'text/plain' }))
+  }
 }
 
 /** Build and send a lead to Nexus with attribution auto-filled */
