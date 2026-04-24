@@ -101,6 +101,18 @@ const episodesCollection = defineCollection({
     metaDescription: z.string().optional(),
     ogImage: z.string().optional(),
 
+    // FAQ — sourced from "People Also Ask" in pre-production brief.
+    // Rendered in HTML body + emitted as FAQPage JSON-LD for AI citation.
+    faq: z
+      .array(
+        z.object({
+          question: z.string(),
+          answer: z.string(),
+        })
+      )
+      .optional()
+      .default([]),
+
     // Status
     draft: z.boolean().optional().default(false),
   }),

@@ -15,6 +15,7 @@ import GuestCard from '../../components/podcast/GuestCard.astro'
 import AuthorCard from '../../components/blog/AuthorCard.astro'
 import RelatedEpisodes from '../../components/podcast/RelatedEpisodes.astro'
 import EpisodeNav from '../../components/podcast/EpisodeNav.astro'
+import EpisodeFAQ from '../../components/podcast/EpisodeFAQ.astro'
 import EmailCapture from '../../components/shared/EmailCapture.astro'
 import ProductCard from '../../components/shared/ProductCard.astro'
 import TopicTag from '../../components/shared/TopicTag.astro'
@@ -92,32 +93,90 @@ function durationToISO(durationStr: string): string {
 }
 
 // Schema markup for PodcastEpisode
-const episodeSchema = {
-  '@context': 'https://schema.org',
+// Verified against Schema.org: name, description, url, datePublished, episodeNumber,
+// duration, partOfSeries, associatedMedia, actor are all valid properties on PodcastEpisode
+// (directly or via Episode/CreativeWork/Thing inheritance).
+// Note: `transcript` is NOT a valid JSON-LD property — transcripts live in HTML body.
+const episodeCoverImage =
+  resolveEpisodeCover(episode.data, 1200) || `${siteUrl}/images/podcast/og-default.jpg`
+
+// Collect associated media: both audio and video if available
+const associatedMediaItems: Record<string, unknown>[] = []
+if (episode.data.audioUrl) {
+  associatedMediaItems.push({
+    '@type': 'AudioObject',
+    contentUrl: episode.data.audioUrl,
+    encodingFormat: 'audio/mpeg',
+    duration: durationToISO(episode.data.duration),
+    ...(episode.data.audioFileSize && { contentSize: String(episode.data.audioFileSize) }),
+  })
+}
+if (episode.data.muxPlaybackId) {
+  associatedMediaItems.push({
+    '@type': 'VideoObject',
+    name: episode.data.title,
+    description: episode.data.description,
+    thumbnailUrl: `https://image.mux.com/${episode.data.muxPlaybackId}/thumbnail.jpg`,
+    contentUrl: `https://stream.mux.com/${episode.data.muxPlaybackId}.m3u8`,
+    embedUrl: `https://player.mux.com/${episode.data.muxPlaybackId}`,
+    uploadDate: episode.data.publishDate.toISOString(),
+    duration: durationToISO(episode.data.duration),
+  })
+}
+
+const episodePodcastSchema = {
   '@type': 'PodcastEpisode',
+  '@id': `${siteUrl}/podcast/${episodeSlug}/#episode`,
   name: episode.data.title,
   description: episode.data.description,
   url: `${siteUrl}/podcast/${episodeSlug}/`,
   datePublished: episode.data.publishDate.toISOString(),
   episodeNumber: episode.data.episodeNumber,
   duration: durationToISO(episode.data.duration),
-  image: resolveEpisodeCover(episode.data, 1200) || `${siteUrl}/images/podcast/og-default.jpg`,
+  image: episodeCoverImage,
   partOfSeries: {
     '@type': 'PodcastSeries',
     name: 'Ag & Culture Podcast',
     url: `${siteUrl}/podcast/`,
-  },
-  ...(episode.data.audioUrl && {
-    associatedMedia: {
-      '@type': 'AudioObject',
-      contentUrl: episode.data.audioUrl,
+    publisher: {
+      '@type': 'Organization',
+      name: 'Southland Organics',
+      url: siteUrl,
     },
+  },
+  ...(associatedMediaItems.length > 0 && {
+    associatedMedia:
+      associatedMediaItems.length === 1 ? associatedMediaItems[0] : associatedMediaItems,
   }),
   ...(resolvedGuests.length > 0 && {
     actor: resolvedGuests.map((g) =>
       g.teamMember ? buildPersonSchema(g.teamMember) : { '@type': 'Person', name: g.name }
     ),
   }),
+}
+
+// FAQPage schema — emitted when episode has FAQ entries (sourced from PAA in pre-production brief)
+const faqItems = episode.data.faq || []
+const faqSchema =
+  faqItems.length > 0
+    ? {
+        '@type': 'FAQPage',
+        '@id': `${siteUrl}/podcast/${episodeSlug}/#faq`,
+        mainEntity: faqItems.map((item) => ({
+          '@type': 'Question',
+          name: item.question,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: item.answer,
+          },
+        })),
+      }
+    : null
+
+// Combine both graphs into a single JSON-LD @graph (standard pattern for multi-entity pages)
+const episodeSchema = {
+  '@context': 'https://schema.org',
+  '@graph': faqSchema ? [episodePodcastSchema, faqSchema] : [episodePodcastSchema],
 }
 
 // Determine if we have video or audio
@@ -249,6 +308,13 @@ const hasAudio = episode.data.audioUrl
               <Content />
             </div>
           </div>
+
+          {/* FAQ (sourced from pre-production brief's People Also Ask) */}
+          {
+            episode.data.faq && episode.data.faq.length > 0 && (
+              <EpisodeFAQ items={episode.data.faq} />
+            )
+          }
 
           {/* Interactive Transcript */}
           {
