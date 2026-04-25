@@ -476,6 +476,46 @@ const productsCollection = defineCollection({
 
     // --- Image alt overrides ---
     imageAltOverrides: z.array(z.string()).optional().default([]),
+
+    // --- Compliance / regulatory ---
+    epaRegNumber: z.string().optional(),
+
+    // --- Author / reviewer attribution (E-E-A-T) ---
+    reviewerSlug: z.string().optional(), // team/{slug} entry
+    reviewerLabel: z.string().optional().default('Reviewed by'),
+
+    // --- Documentation downloads ---
+    documents: z
+      .array(
+        z.object({
+          label: z.string(),
+          url: z.string(),
+          type: z.enum(['pdf', 'doc', 'sds', 'label', 'protocol']).optional().default('pdf'),
+        })
+      )
+      .optional()
+      .default([]),
+
+    // --- Bundle / cross-sell ---
+    bundleHandles: z.array(z.string()).optional().default([]),
+    bundleHeadline: z.string().optional(),
+    bundleDescription: z.string().optional(),
+
+    // --- Volume / tier pricing display (informational only — Shopify still owns commerce) ---
+    volumeTiers: z
+      .array(
+        z.object({
+          label: z.string(), // "Case", "Pallet", "Integrator pricing"
+          quantity: z.string().optional(), // "2x2.5G or 4x1G", "40 cases", "—"
+          price: z.string().optional(), // "$199", "Contact for quote"
+          note: z.string().optional(),
+        })
+      )
+      .optional()
+      .default([]),
+
+    // --- Application calculator (lookup table) ---
+    calculatorType: z.enum(['orp-ph', 'dilution', 'coverage']).optional(),
   }),
 })
 
