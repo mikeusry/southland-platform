@@ -400,6 +400,8 @@ const productsCollection = defineCollection({
     // --- Video ---
     muxPlaybackId: z.string().optional(),
     videoTitle: z.string().optional(),
+    youtubeId: z.string().optional(),
+    youtubeTitle: z.string().optional(),
 
     // --- PAS Section ---
     problemHeadline: z.string().optional(),
