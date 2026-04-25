@@ -87,10 +87,6 @@ const REDIRECTS: Record<string, string> = {
   '/products/darkling-beetle-insecticide': '/products/desecticide',
   // Bare-path legacy
   '/why-organic': '/about/',
-  // Blog slugs that were never migrated — intercept before /blogs/*/slug regex
-  // so they don't fall through to a 404 at /blog/[slug]/
-  '/blogs/news/built-to-move-smarter-migration-fencing-for-modern-poultry-houses': '/blog/',
-  '/blogs/news/choosing-the-right-line-cleaner': '/blog/',
   // Legacy paths
   '/lawn/hydroseeders': '/hydroseeders/',
   '/turf': '/lawn/',
