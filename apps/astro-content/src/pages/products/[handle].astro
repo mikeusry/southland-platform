@@ -895,7 +895,12 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
                         rel="noopener"
                         class="inline-flex items-center gap-2 text-sm text-brand-green-dark hover:underline"
                       >
-                        <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg
+                          class="h-4 w-4 flex-shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
                           <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
@@ -1221,7 +1226,8 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
                     {bp.title}
                   </h3>
                   <p class="mt-auto pt-2 text-xs text-gray-500">
-                    Step {idx + 2} — {idx === 0 ? 'Flush 24 hr, then ACV' : 'Repopulate gut biology'}
+                    Step {idx + 2} —{' '}
+                    {idx === 0 ? 'Flush 24 hr, then ACV' : 'Repopulate gut biology'}
                   </p>
                 </a>
               ))}
@@ -1234,7 +1240,10 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
     {/* S5c: ORP/pH calculator — conditional */}
     {
       tina?.calculatorType === 'orp-ph' && (
-        <section class="border-t border-gray-100 bg-brand-green-dark/5 py-10 md:py-14" data-section="pdp-calculator">
+        <section
+          class="border-t border-gray-100 bg-brand-green-dark/5 py-10 md:py-14"
+          data-section="pdp-calculator"
+        >
           <div class="mx-auto max-w-3xl px-4">
             <h2 class="text-center font-heading text-2xl text-gray-900 sm:text-3xl">
               ORP at the bird, not ppm at the bucket
@@ -1274,7 +1283,9 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
                   <div class="text-xs font-semibold uppercase tracking-wider text-gray-500">
                     Current pH
                   </div>
-                  <div id="orp-ph-value" class="font-heading text-3xl text-gray-900">6.0</div>
+                  <div id="orp-ph-value" class="font-heading text-3xl text-gray-900">
+                    6.0
+                  </div>
                 </div>
               </div>
 
@@ -1297,7 +1308,10 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
                 </div>
               </div>
 
-              <div id="orp-status" class="mt-4 rounded-md bg-green-50 p-3 text-sm text-brand-green-dark">
+              <div
+                id="orp-status"
+                class="mt-4 rounded-md bg-green-50 p-3 text-sm text-brand-green-dark"
+              >
                 <strong>Excellent.</strong> HOCl-dominant — your far-end nipple should test in the
                 700+ mV range.
               </div>
@@ -1339,16 +1353,39 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
           for (var i = 0; i < TABLE.length - 1; i++) {
             if (pH >= TABLE[i][0] && pH <= TABLE[i + 1][0]) {
               var t = (pH - TABLE[i][0]) / (TABLE[i + 1][0] - TABLE[i][0])
-              return [pH, Math.round(TABLE[i][1] + t * (TABLE[i + 1][1] - TABLE[i][1])), Math.round(TABLE[i][2] + t * (TABLE[i + 1][2] - TABLE[i][2]))]
+              return [
+                pH,
+                Math.round(TABLE[i][1] + t * (TABLE[i + 1][1] - TABLE[i][1])),
+                Math.round(TABLE[i][2] + t * (TABLE[i + 1][2] - TABLE[i][2])),
+              ]
             }
           }
           return TABLE[0]
         }
         function statusFor(mv) {
-          if (mv >= 700) return ['bg-green-50', 'text-brand-green-dark', '<strong>Excellent.</strong> HOCl-dominant — your far-end nipple should test in the 700+ mV range.']
-          if (mv >= 650) return ['bg-yellow-50', 'text-yellow-800', '<strong>Acceptable.</strong> ≥650 mV is the bacteriological-safety floor. Monitor and consider line cleaning if trending down.']
-          if (mv >= 550) return ['bg-orange-50', 'text-orange-800', '<strong>Marginal.</strong> Increase injection rate or schedule line cleaning. Acidify source water if pH > 7.0.']
-          return ['bg-red-50', 'text-red-800', '<strong>Fail.</strong> HOCl losing to OCl⁻ — drop pH to 5.5–6.5 or use ZeroPoint pH-buffer additive.']
+          if (mv >= 700)
+            return [
+              'bg-green-50',
+              'text-brand-green-dark',
+              '<strong>Excellent.</strong> HOCl-dominant — your far-end nipple should test in the 700+ mV range.',
+            ]
+          if (mv >= 650)
+            return [
+              'bg-yellow-50',
+              'text-yellow-800',
+              '<strong>Acceptable.</strong> ≥650 mV is the bacteriological-safety floor. Monitor and consider line cleaning if trending down.',
+            ]
+          if (mv >= 550)
+            return [
+              'bg-orange-50',
+              'text-orange-800',
+              '<strong>Marginal.</strong> Increase injection rate or schedule line cleaning. Acidify source water if pH > 7.0.',
+            ]
+          return [
+            'bg-red-50',
+            'text-red-800',
+            '<strong>Fail.</strong> HOCl losing to OCl⁻ — drop pH to 5.5–6.5 or use ZeroPoint pH-buffer additive.',
+          ]
         }
         function update() {
           var pH = parseFloat(slider.value)
