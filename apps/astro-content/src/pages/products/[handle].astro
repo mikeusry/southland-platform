@@ -79,13 +79,14 @@ if (product.productType) {
 const allAggregates = relatedProducts.length > 0 ? await fetchAllAggregates() : new Map()
 
 // ── Bundle products (annihilate-and-repopulate kit etc.) ────────────────────
-let bundleProducts: Product[] = []
-const tinaBundleHandles = tinaProduct?.data.bundleHandles ?? []
+type BundleEntry = Awaited<ReturnType<typeof getProductByHandle>>
+let bundleProducts: NonNullable<BundleEntry>[] = []
+const tinaBundleHandles: string[] = tinaProduct?.data.bundleHandles ?? []
 if (tinaBundleHandles.length > 0) {
   const fetched = await Promise.all(
-    tinaBundleHandles.map((h) => getProductByHandle(client, h).catch(() => null))
+    tinaBundleHandles.map((h: string) => getProductByHandle(client, h).catch(() => null))
   )
-  bundleProducts = fetched.filter((p): p is Product => p !== null)
+  bundleProducts = fetched.filter((p): p is NonNullable<BundleEntry> => p !== null)
 }
 
 const hasTinaContent = !!tinaProduct
@@ -102,7 +103,7 @@ const tina = tinaProduct?.data ?? null
 let reviewer: {
   name: string
   slug: string
-  jobTitle?: string
+  role?: string
   photoUrl?: string | null
 } | null = null
 if (tina?.reviewerSlug) {
@@ -112,7 +113,7 @@ if (tina?.reviewerSlug) {
       reviewer = {
         name: teamMember.data.name,
         slug: tina.reviewerSlug,
-        jobTitle: teamMember.data.jobTitle,
+        role: teamMember.data.role,
         photoUrl: teamMember.data.photo
           ? buildSouthlandUrl(teamMember.data.photo, {
               width: 64,
@@ -680,7 +681,7 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
                   >
                     {reviewer.name}
                   </a>
-                  {reviewer.jobTitle && <span class="text-gray-500">, {reviewer.jobTitle}</span>}
+                  {reviewer.role && <span class="text-gray-500">, {reviewer.role}</span>}
                 </span>
               </div>
             )
