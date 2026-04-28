@@ -168,6 +168,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
     })
   }
 
+  // Real /blogs/* hub pages live at src/pages/blogs/*.astro — never redirect
+  // these. The legacy-Shopify cleanup below handles everything else.
+  const BLOGS_HUBS = new Set(['case-studies', 'humate-hub', 'poultry-biosecurity'])
+  const blogsHubMatch = pathname.match(/^\/blogs\/([^/]+)\/?$/)
+  const isRealHub = blogsHubMatch && BLOGS_HUBS.has(blogsHubMatch[1])
+
   // /blogs/[category]/[slug] → /blog/[slug]/ (old Shopify blog article URLs)
   // Skip archive pages (tagged/, author/) and pagination — send those to /blog/
   const blogArticleMatch = pathname.match(/^\/blogs\/[^/]+\/(.+?)\/?\s*$/)
@@ -185,8 +191,15 @@ export const onRequest = defineMiddleware(async (context, next) => {
     })
   }
 
-  // Bare /blogs or /blogs/[category] index → /blog/
-  if (pathname === '/blogs' || pathname === '/blogs/' || /^\/blogs\/[^/]+\/?$/.test(pathname)) {
+  // Bare /blogs or /blogs/[category] index → /blog/, but ONLY when the
+  // category isn't one of our real hub pages.
+  if (pathname === '/blogs' || pathname === '/blogs/') {
+    return new Response(null, {
+      status: 301,
+      headers: { location: `/blog/` },
+    })
+  }
+  if (/^\/blogs\/[^/]+\/?$/.test(pathname) && !isRealHub) {
     return new Response(null, {
       status: 301,
       headers: { location: `/blog/` },
