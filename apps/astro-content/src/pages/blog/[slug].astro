@@ -455,7 +455,11 @@ const cta = segmentCtas[post.data.segment || 'general']
                   accent-color="#44883e"
                   metadata-video-title={post.data.title}
                   default-hidden-captions
-                  poster={`https://image.mux.com/${post.data.muxPlaybackIds[0]}/thumbnail.jpg?time=10`}
+                  poster={
+                    post.data.muxThumbnailUrl ||
+                    post.data.featuredImage ||
+                    `https://image.mux.com/${post.data.muxPlaybackIds[0]}/thumbnail.jpg?time=10`
+                  }
                   style="width:100%;height:100%;--media-object-fit:cover;"
                 />
               </div>
