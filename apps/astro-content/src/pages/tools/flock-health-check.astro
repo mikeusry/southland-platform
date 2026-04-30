@@ -1,0 +1,147 @@
+---
+/**
+ * /tools/flock-health-check/ — Backyard Flock Health Check
+ *
+ * 7 questions → personalized risk score + recommended care plan.
+ * Lead magnet: year-round flock care plan emailed after results.
+ * Nexus lead_type: product_quiz.
+ * Persona target: Backyard Betty (small flock owners, 5-25 birds).
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import FlockHealthCheckIsland from '../../components/calculators/FlockHealthCheck'
+
+const title = 'Backyard Flock Health Check | Southland Organics'
+const description =
+  'Take our 90-second flock health check and get personalized care recommendations. Risk score, recommended products, and a year-round prevention routine for your specific flock — free, no email required to see results.'
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+const canonicalUrl = `${siteUrl}/tools/flock-health-check/`
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'Backyard Flock Health Check',
+  description,
+  url: canonicalUrl,
+  applicationCategory: 'UtilityApplication',
+  operatingSystem: 'Web Browser',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  provider: {
+    '@type': 'Organization',
+    name: 'Southland Organics',
+    url: siteUrl,
+    telephone: '+1-800-608-3755',
+  },
+}
+---
+
+<BaseLayout title={title} description={description} canonicalUrl={canonicalUrl} schema={schema}>
+  <!-- Hero -->
+  <section class="bg-[#2C5234] py-16 text-white">
+    <div class="mx-auto max-w-4xl px-4 text-center">
+      <h1 class="font-heading text-3xl uppercase tracking-wide md:text-4xl">
+        Backyard Flock Health Check
+      </h1>
+      <p class="mx-auto mt-4 max-w-2xl text-lg text-green-100">
+        Answer 7 quick questions and get a personalized care plan — risk score, recommended
+        products, and a year-round prevention routine for your specific flock.
+      </p>
+    </div>
+  </section>
+
+  <!-- Quiz -->
+  <section class="py-12">
+    <div class="mx-auto max-w-3xl px-4">
+      <FlockHealthCheckIsland client:load />
+    </div>
+  </section>
+
+  <!-- Why Gut Health -->
+  <section class="bg-gray-50 py-12">
+    <div class="mx-auto max-w-4xl px-4">
+      <h2 class="mb-8 text-center font-heading text-2xl uppercase text-[#2C5234]">
+        Why We Start With Gut Health
+      </h2>
+      <div class="grid gap-6 md:grid-cols-2">
+        <div class="rounded-lg bg-white p-6 shadow-sm">
+          <h3 class="font-heading text-sm uppercase text-[#2C5234]">The Pattern</h3>
+          <p class="mt-2 text-sm text-gray-600">
+            Most backyard flock health issues — pasty butt, vent gleet, soft eggs, low energy —
+            trace back to gut imbalance. The gut is where nutrient absorption, immune function, and
+            disease resistance all start. When it's off, everything downstream gets harder.
+          </p>
+        </div>
+        <div class="rounded-lg bg-white p-6 shadow-sm">
+          <h3 class="font-heading text-sm uppercase text-[#2C5234]">The Routine</h3>
+          <p class="mt-2 text-sm text-gray-600">
+            A simple weekly probiotic in the waterer, occasional apple cider vinegar, and a clean
+            coop cover most of what backyard flocks need. The hard part isn't the protocol — it's
+            knowing when to add what. That's what this check is for.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Related Reading -->
+  <section class="bg-white py-12">
+    <div class="mx-auto max-w-4xl px-4">
+      <h2 class="mb-8 text-center font-heading text-2xl uppercase text-[#2C5234]">
+        Backyard Flock Care Guides
+      </h2>
+      <div class="grid gap-4 md:grid-cols-2">
+        <a
+          href="/blog/treating-vent-gleet-and-pasty-butt-in-chickens/"
+          class="block rounded-lg border border-gray-200 p-5 transition-shadow hover:shadow-md"
+        >
+          <h3 class="font-heading text-base uppercase text-[#2C5234]">
+            Pasty Butt &amp; Vent Gleet
+          </h3>
+          <p class="mt-2 text-sm text-gray-600">
+            Causes, step-by-step treatment, and prevention for the two most common backyard flock
+            health issues.
+          </p>
+        </a>
+        <a
+          href="/blog/how-to-get-rid-of-chicken-mites/"
+          class="block rounded-lg border border-gray-200 p-5 transition-shadow hover:shadow-md"
+        >
+          <h3 class="font-heading text-base uppercase text-[#2C5234]">How to Get Rid of Chicken Mites</h3>
+          <p class="mt-2 text-sm text-gray-600">
+            Identification, natural treatment, and prevention — including what to do when chicken
+            mites bite humans.
+          </p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bottom CTA -->
+  <section class="bg-[#2C5234] py-12 text-white">
+    <div class="mx-auto max-w-3xl px-4 text-center">
+      <h2 class="font-heading text-2xl uppercase">Need Personal Help?</h2>
+      <p class="mx-auto mt-3 max-w-xl text-green-100">
+        Our team has helped backyard keepers and commercial operations build healthier flocks for
+        over a decade. We'd love to help yours too.
+      </p>
+      <div class="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+        <a
+          href="/contact/"
+          class="rounded-md bg-white px-6 py-3 text-sm font-semibold text-[#2C5234] transition-colors hover:bg-green-50"
+        >
+          Talk to Our Team
+        </a>
+        <a
+          href="/poultry/"
+          class="rounded-md border border-white/30 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+        >
+          See All Poultry Products
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
