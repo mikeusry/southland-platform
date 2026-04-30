@@ -59,7 +59,12 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     subtitle: 'Helps us right-size your care plan',
     type: 'single-select',
     answers: [
-      { id: 'just-starting', label: "I don't have any yet", description: 'Planning a flock', risk: 0 },
+      {
+        id: 'just-starting',
+        label: "I don't have any yet",
+        description: 'Planning a flock',
+        risk: 0,
+      },
       { id: 'tiny', label: '1–4 birds', description: 'Backyard starter', risk: 0 },
       { id: 'small', label: '5–10 birds', description: 'Family flock', risk: 0 },
       { id: 'medium', label: '11–25 birds', description: 'Small homestead', risk: 0 },
@@ -101,10 +106,30 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     type: 'single-select',
     answers: [
       { id: 'none', label: 'Just feed and water', description: 'No supplements yet', risk: 2 },
-      { id: 'acv-only', label: 'Apple cider vinegar in water', description: 'Occasional or regular', risk: 1 },
-      { id: 'probiotic-only', label: 'Probiotic in rotation', description: 'Hen Helper or similar', risk: 0 },
-      { id: 'full-program', label: 'Full natural care program', description: 'Probiotic + ACV + supplements', risk: 0 },
-      { id: 'medicated', label: 'Medicated feed or antibiotics', description: 'From a vet or feed store', risk: 2 },
+      {
+        id: 'acv-only',
+        label: 'Apple cider vinegar in water',
+        description: 'Occasional or regular',
+        risk: 1,
+      },
+      {
+        id: 'probiotic-only',
+        label: 'Probiotic in rotation',
+        description: 'Hen Helper or similar',
+        risk: 0,
+      },
+      {
+        id: 'full-program',
+        label: 'Full natural care program',
+        description: 'Probiotic + ACV + supplements',
+        risk: 0,
+      },
+      {
+        id: 'medicated',
+        label: 'Medicated feed or antibiotics',
+        description: 'From a vet or feed store',
+        risk: 2,
+      },
     ],
   },
   {
@@ -113,11 +138,31 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     subtitle: 'Picking the closest match is fine',
     type: 'single-select',
     answers: [
-      { id: 'spotless', label: 'Spotless — cleaned weekly', description: 'Low-stress environment', risk: 0 },
-      { id: 'tidy', label: 'Tidy — bedding refreshed often', description: 'Standard care', risk: 0 },
-      { id: 'lived-in', label: 'Lived-in — needs cleaning soon', description: "It's been a while", risk: 1 },
+      {
+        id: 'spotless',
+        label: 'Spotless — cleaned weekly',
+        description: 'Low-stress environment',
+        risk: 0,
+      },
+      {
+        id: 'tidy',
+        label: 'Tidy — bedding refreshed often',
+        description: 'Standard care',
+        risk: 0,
+      },
+      {
+        id: 'lived-in',
+        label: 'Lived-in — needs cleaning soon',
+        description: "It's been a while",
+        risk: 1,
+      },
       { id: 'overdue', label: 'Overdue for a deep clean', description: 'Long overdue', risk: 2 },
-      { id: 'crowded', label: 'Crowded for the bird count', description: 'More birds than space', risk: 3 },
+      {
+        id: 'crowded',
+        label: 'Crowded for the bird count',
+        description: 'More birds than space',
+        risk: 3,
+      },
     ],
   },
   {
@@ -142,11 +187,36 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     subtitle: 'This shapes our recommendation',
     type: 'single-select',
     answers: [
-      { id: 'fix-problem', label: 'Fixing an active problem', description: 'Something is going on', risk: 0 },
-      { id: 'prevention', label: 'Year-round prevention', description: 'Stay ahead of issues', risk: 0 },
-      { id: 'egg-quality', label: 'Better eggs', description: 'Stronger shells, better yolks', risk: 0 },
-      { id: 'simplify', label: 'Simplify what I am doing', description: 'Fewer products, easier routine', risk: 0 },
-      { id: 'beginner', label: 'Just starting out', description: 'Build it right from day 1', risk: 0 },
+      {
+        id: 'fix-problem',
+        label: 'Fixing an active problem',
+        description: 'Something is going on',
+        risk: 0,
+      },
+      {
+        id: 'prevention',
+        label: 'Year-round prevention',
+        description: 'Stay ahead of issues',
+        risk: 0,
+      },
+      {
+        id: 'egg-quality',
+        label: 'Better eggs',
+        description: 'Stronger shells, better yolks',
+        risk: 0,
+      },
+      {
+        id: 'simplify',
+        label: 'Simplify what I am doing',
+        description: 'Fewer products, easier routine',
+        risk: 0,
+      },
+      {
+        id: 'beginner',
+        label: 'Just starting out',
+        description: 'Build it right from day 1',
+        risk: 0,
+      },
     ],
   },
 ]
@@ -220,7 +290,12 @@ export function getRecommendations(answers: Record<string, string>): QuizResult 
   }
 
   // Apple cider vinegar — gut acidification
-  if (supplements === 'none' || supplements === 'medicated' || symptoms.includes('pasty-butt') || symptoms.includes('loose-droppings')) {
+  if (
+    supplements === 'none' ||
+    supplements === 'medicated' ||
+    symptoms.includes('pasty-butt') ||
+    symptoms.includes('loose-droppings')
+  ) {
     recs.push({
       handle: 'apple-cider-vinegar-for-chickens',
       name: 'Mother Load Apple Cider Vinegar',
@@ -275,7 +350,11 @@ export function getRecommendations(answers: Record<string, string>): QuizResult 
   }
 
   // Beginner / starter bundle
-  if (concern === 'beginner' || answers['flock-size'] === 'just-starting' || answers['flock-size'] === 'tiny') {
+  if (
+    concern === 'beginner' ||
+    answers['flock-size'] === 'just-starting' ||
+    answers['flock-size'] === 'tiny'
+  ) {
     recs.push({
       handle: 'backyard-poultry-bundle-chicken-supplements',
       name: 'Backyard Poultry Bundle',
@@ -304,7 +383,7 @@ export function getRecommendations(answers: Record<string, string>): QuizResult 
       return 'A few risk signals worth addressing'
     }
     if (concern === 'beginner') return 'Great news — you can build it right from day one'
-    if (concern === 'prevention') return 'Your flock looks healthy — let\'s keep it that way'
+    if (concern === 'prevention') return "Your flock looks healthy — let's keep it that way"
     if (concern === 'simplify') return 'Your routine can be simpler than this'
     if (concern === 'egg-quality') return 'Your flock is stable — focus on egg-quality gains'
     return 'Your flock is in good shape'
@@ -325,15 +404,15 @@ export function getRecommendations(answers: Record<string, string>): QuizResult 
       return "You're not in crisis territory but you do have a few risk signals worth addressing before they compound. Small flocks can shift from healthy to struggling within 7-10 days when stress events stack up. The recommendations below close the gaps and tighten your routine without overcomplicating it."
     }
     if (concern === 'beginner') {
-      return "Building flock health from day one is dramatically easier than trying to fix problems later. Backyard chicken keepers who establish a probiotic + ACV routine in the first 30 days have measurably fewer health issues for the life of the flock. The plan below is the foundation we recommend for new keepers."
+      return 'Building flock health from day one is dramatically easier than trying to fix problems later. Backyard chicken keepers who establish a probiotic + ACV routine in the first 30 days have measurably fewer health issues for the life of the flock. The plan below is the foundation we recommend for new keepers.'
     }
     if (concern === 'simplify') {
-      return "Most backyard flock health programs are over-engineered. You really only need 2-3 supplements rotated correctly to cover 90% of what comes up. The plan below strips the routine down to what actually moves the needle."
+      return 'Most backyard flock health programs are over-engineered. You really only need 2-3 supplements rotated correctly to cover 90% of what comes up. The plan below strips the routine down to what actually moves the needle.'
     }
     if (concern === 'egg-quality') {
       return 'Egg quality is downstream of gut health and mineral absorption. Once your flock is stable, the highest-leverage upgrades are gut-bacteria support and the trace minerals that build shell strength and yolk color.'
     }
-    return "Your flock looks healthy. The single best move from here is locking in a year-round prevention routine — probiotics in the waterer, occasional ACV, and a coop-cleaning schedule. The plan below is what we recommend for keepers who want to stay ahead of issues before they appear."
+    return 'Your flock looks healthy. The single best move from here is locking in a year-round prevention routine — probiotics in the waterer, occasional ACV, and a coop-cleaning schedule. The plan below is what we recommend for keepers who want to stay ahead of issues before they appear.'
   })()
 
   // Seasonal guidance — tied to risk + symptoms + season-agnostic since we don't ask

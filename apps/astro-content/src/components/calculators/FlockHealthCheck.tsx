@@ -109,9 +109,7 @@ export default function FlockHealthCheck() {
   // Common advance logic — branches on whether quiz is complete
   const advanceFromAnswers = useCallback(
     (currentAnswers: Record<string, string>) => {
-      const nextActive = QUIZ_QUESTIONS.filter(
-        (q) => !q.condition || q.condition(currentAnswers)
-      )
+      const nextActive = QUIZ_QUESTIONS.filter((q) => !q.condition || q.condition(currentAnswers))
       const nextStep = currentStep + 1
 
       if (nextStep >= nextActive.length) {
@@ -228,9 +226,7 @@ export default function FlockHealthCheck() {
               <>
                 <div className="flex flex-wrap gap-2">
                   {currentQuestion.answers.map((answer) => {
-                    const selected = (answers[currentQuestion.id] || '')
-                      .split(',')
-                      .filter(Boolean)
+                    const selected = (answers[currentQuestion.id] || '').split(',').filter(Boolean)
                     const isOn = selected.includes(answer.id)
                     return (
                       <button
