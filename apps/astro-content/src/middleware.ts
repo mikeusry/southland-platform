@@ -151,6 +151,36 @@ export const onRequest = defineMiddleware(async (context, next) => {
     })
   }
 
+  // JockShock vanity + attribution routes
+  // /jockshock        → product PDP (short brand URL)
+  // /jockshock/team-quote → team quote page (lives in /Users/mikeusry/CODING/JockShock for now;
+  //                        proxied/redirected here once that page moves into this repo)
+  // /go/<slug>        → attribution-stamped redirect for athlete vanity URLs (NIL endorsers,
+  //                        printed-bottle QR codes, gym tour partners). Slug becomes
+  //                        utm_campaign so Klaviyo + Nexus can attribute orders.
+  if (pathname === '/jockshock' || pathname === '/jockshock/') {
+    return new Response(null, {
+      status: 302,
+      headers: { location: '/products/jockshock/' },
+    })
+  }
+
+  const goMatch = pathname.match(/^\/go\/([a-z0-9-]+)\/?$/i)
+  if (goMatch) {
+    const slug = goMatch[1].toLowerCase()
+    const incoming = new URL(context.request.url)
+    const target = new URL('/products/jockshock/', incoming.origin)
+    // Preserve any incoming query params (e.g. existing UTMs override the default)
+    incoming.searchParams.forEach((v, k) => target.searchParams.set(k, v))
+    if (!target.searchParams.has('utm_source')) target.searchParams.set('utm_source', 'jockshock-vanity')
+    if (!target.searchParams.has('utm_medium')) target.searchParams.set('utm_medium', 'redirect')
+    if (!target.searchParams.has('utm_campaign')) target.searchParams.set('utm_campaign', slug)
+    return new Response(null, {
+      status: 302,
+      headers: { location: target.pathname + target.search },
+    })
+  }
+
   // Bulk pattern: /pages/faqs/* → /contact/ (85 legacy FAQ pages, low individual value)
   if (pathname.startsWith('/pages/faqs/')) {
     return new Response(null, {
