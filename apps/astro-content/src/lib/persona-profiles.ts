@@ -1937,6 +1937,493 @@ export const PERSONAS: PersonaProfile[] = [
       },
     ],
   },
+
+  // ---------------------------------------------------------------------------
+  // ATHLETE AARON  (JockShock — primary)
+  // ---------------------------------------------------------------------------
+  {
+    slug: 'aaron',
+    name: 'Athlete Aaron',
+    tagline: 'Competitive amateur athlete, 16-34, lives in his gear, knows it stinks',
+    color: '#facc15',
+    bgColor: '#0a0a0a',
+    landerUrl: '/products/jockshock/',
+
+    weight: 0.6,
+    customerCount: 0,
+    avgLTV: 75,
+    revenueGoalPct: 60,
+
+    narrative:
+      'Aaron is the JockShock brand voice — the wearer. Hockey, lacrosse, wrestling, MMA, football. Locker-room-public, not bathroom-private. No JockShock orders yet (pre-launch May 2026). Default JockShock persona — wins when no other signal triggers.',
+
+    mission: {
+      text: 'Wire DecisionEngine + Klaviyo behavior reinforcement flow. First 100 orders against Aaron creative.',
+      target: 100,
+      done: 0,
+      deadline: '2026-07-01',
+    },
+
+    lastActivity: [
+      { label: 'Persona drafted in Mothership: aaron-the-athlete.md', date: '2026-05-06' },
+      { label: 'Cloudinary product photos uploaded', date: '2026-05-06' },
+      { label: 'Shopify variants wired with SKUs + images', date: '2026-05-06' },
+    ],
+
+    demographics: {
+      age: '16-34 (peak 18-26)',
+      income: 'Self-spend at 21+: $35-80K. Under 21: parent funded.',
+      location: 'US national; hockey/lax states + football states',
+      operation: 'Active athlete: 3-6 practices + 1-2 games/week',
+    },
+
+    values: [
+      'Performance edge — anything 1% over the next guy',
+      'Personal pride — refuses to be "the kid who stinks"',
+      'Authenticity — sniffs out marketing BS in 3 seconds',
+      'Earned excellence over hype',
+      'Ritual / routine — pre/post-game is sacred',
+    ],
+
+    fears: [
+      'Smell announces him — class, date, gym, bag in the car',
+      'Looking soft / "extra" — caring too obviously is uncool',
+      'Skin shit — staph, ringworm, MRSA from contaminated gear',
+      'Wasting money on another spray that doesn\'t work',
+      'Damaging $400 pads / $300 stick / $200 helmet',
+    ],
+
+    painPoints: [
+      'Hockey/lacrosse pads smell like death between practices',
+      'Cleats, gloves, headgear can\'t go in the wash',
+      'Bag funk migrates to car / room / laundry',
+      'Existing sprays mask for an hour, don\'t kill the source',
+      'Worry about staph/ringworm contact transfer',
+      'Skin breakouts on pad-covered areas',
+    ],
+
+    buyingTriggers: [
+      'Got called out — partner, sibling, teammate roast',
+      'Season starting / first practice of the year',
+      'New gear arrives — protect from day one',
+      'Skin issue scare (staph, ringworm in locker room)',
+      'Tournament/showcase weekend — high-stakes',
+      'Teammate or strength coach recommendation',
+    ],
+
+    objections: [
+      '"$25 for a spray bottle?"',
+      '"Does this actually work or is it more BS?"',
+      '"Will it damage my pads / leather / mesh?"',
+      '"Can\'t I just use bleach / vinegar / Lysol?"',
+      '"Why not Clear Gear / Febreze?"',
+    ],
+
+    preferredChannels: [
+      'TikTok / IG Reels (gear creators, athletes)',
+      'YouTube (sport-specific gear care)',
+      'Reddit (r/hockey, r/lacrosse, r/wrestling, r/MMA)',
+      'Discord (sport-specific, team)',
+      'Locker room word-of-mouth',
+    ],
+
+    contentPreferences: [
+      'Short-form video (gear-care routines, before/after)',
+      'Quick-answer "how to" — under 90 seconds',
+      'Comparison content (us vs. Clear Gear vs. Febreze)',
+      'Athlete testimonials, locker-room context',
+    ],
+
+    languageRules: {
+      use: [
+        'gear', 'kit', 'pads', 'lid', 'bag', 'stick', 'cleats', 'helmet',
+        'mouthguard', 'funk', 'stink', 'pro-grade', 'clinical-strength',
+        'locker room', 'post-practice', 'HOCl', 'routine',
+      ],
+      avoid: [
+        'synergistic', 'holistic', 'wellness', 'natural', 'eco-friendly',
+        'green', 'sanitize your home', 'household cleaner', 'revolutionary',
+        'mom-approved', 'sustainable', 'solution', 'experience',
+      ],
+    },
+
+    skepticismTriggers: [
+      'Stock photo of model spraying pristine helmet',
+      '"100% natural" anything',
+      'Mom in the frame',
+      'Cleaning-product-aisle visual language',
+      'Anything that looks like Febreze',
+      'Vague claims without mechanism',
+    ],
+
+    trustHierarchy: [
+      'Teammates and locker-room word-of-mouth',
+      'Athletic trainer / strength coach',
+      'NIL athletes / gear creators he follows',
+      'Reddit thread consensus',
+      'Pro/college players using it visibly',
+      'Reviews from buyers in same sport',
+      'Brand claims (lowest)',
+    ],
+
+    jtbd: [
+      { statement: 'Get the funk out of gear so I can put it on without flinching', status: 'covered' },
+      { statement: 'Protect $400 pads / $200 helmet from breaking down early', status: 'partial' },
+      { statement: 'Avoid skin breakouts/infections from contaminated gear', status: 'partial' },
+      { statement: 'Build a post-practice routine that takes <60 seconds', status: 'gap' },
+      { statement: 'Look like a guy who has his shit together to teammates', status: 'covered' },
+      { statement: 'Buy something I won\'t apologize for if a teammate sees it', status: 'covered' },
+      { statement: 'Stop needing my mom to handle my gear', status: 'gap' },
+    ],
+
+    topProducts: [
+      { name: 'JockShock 32oz Spray', handle: 'jockshock' },
+      { name: 'JockShock 3-Bottle Athlete Pack', handle: 'jockshock' },
+    ],
+
+    plays: [
+      {
+        title: '"Just Got Called Out" cold paid hook',
+        description:
+          'Short-form vertical video. Cold open: athlete pulling helmet out of bag, recoiling. Cut to JockShock. End on him walking out clean. CTA: "Get yours."',
+        targetEstimate: 'TikTok + IG Reels, 18-28M, hockey/lax/wrestling/MMA interests',
+        expectedLift: 'First-order CPA $20-35; conversion strongest on 3-pack at $59.99',
+      },
+      {
+        title: 'Locker Room Routine Klaviyo behavior flow',
+        description:
+          'Day 3: "set up your post-practice routine." Day 14: "two-week check." Day 30: "gear bag check." Day 60: "running low? auto-ship."',
+        targetEstimate: 'Every Aaron first-time buyer',
+        expectedLift: 'Per launch strategy: ~2x LTV at 40% trained-cadence adoption',
+      },
+      {
+        title: 'Sport-specific gear-guide SEO cluster',
+        description:
+          'Pillar pages: hockey gear smell, lacrosse pad cleaning, wrestling headgear hygiene, MMA gi care. UGC seed: free 32oz for before/after gear photos.',
+        targetEstimate: 'Long-tail organic; 12-month SERP play',
+        expectedLift: 'Own non-Amazon SERP for "[sport] gear smell"',
+      },
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // PARENT PAM  (JockShock — secondary)
+  // ---------------------------------------------------------------------------
+  {
+    slug: 'pam',
+    name: 'Parent Pam',
+    tagline: 'Sports parent of a 10-17 yr old; runs gear logistics, pays the card',
+    color: '#fbbf24',
+    bgColor: '#fffbeb',
+    landerUrl: '/products/jockshock/',
+
+    weight: 0.3,
+    customerCount: 0,
+    avgLTV: 100,
+    revenueGoalPct: 30,
+
+    narrative:
+      'Pam buys for an Aaron. Highest cold-paid conversion persona — adult buyer, emotional trigger, fast cycle. Voice is a softer translation of Aaron, not a parallel brand voice.',
+
+    mission: {
+      text: 'Welcome flow variant + Meta paid creative aimed at sports parents.',
+      target: 0,
+      done: 0,
+      deadline: '2026-07-15',
+    },
+
+    lastActivity: [
+      { label: 'Persona drafted in Mothership: pam-the-parent.md', date: '2026-05-06' },
+    ],
+
+    demographics: {
+      age: '35-55 (peak 40-50)',
+      income: '$75-200K household',
+      location: 'US national; concentrated in hockey/lax states + youth football',
+      operation: '1-3 kids in organized youth/HS sports; travel/club a strong signal',
+    },
+
+    values: [
+      'Kid\'s confidence — wants him to fit in, not stand out for the wrong reason',
+      'Clean home and clean car (her territory)',
+      'Smart spending — pays for what works, not for hype',
+      'Convenience — single-purchase solutions over routines',
+    ],
+
+    fears: [
+      'Her kid being "the smelly kid"',
+      'Car / house permanently smelling like a hockey bag',
+      'Wasting money on another spray that doesn\'t work',
+      'MRSA / staph / ringworm — she reads these articles',
+      'Damaging expensive gear they paid for',
+    ],
+
+    painPoints: [
+      'The car smells, all the time, no matter what',
+      'Laundry doesn\'t fix gear that can\'t be washed',
+      'Carpool / tournament-mom comments',
+      'Kid won\'t handle gear care himself — she\'s the gear manager',
+      'Graveyard of half-used Febreze / Lysol / Clear Gear',
+    ],
+
+    buyingTriggers: [
+      'Just opened the trunk and gagged',
+      'Carpool comment from another mom',
+      'New season / new gear unboxing',
+      'Article she read about staph / skin infections',
+      'Kid moved up a level (more practices, more gear)',
+      'Recommendation from another sports parent',
+    ],
+
+    objections: [
+      '"Is this safe for my kid?"',
+      '"$25 is steep for a spray bottle"',
+      '"Will it stain his uniform?"',
+      '"Will it make him smell weird at school?"',
+    ],
+
+    preferredChannels: [
+      'Meta / Facebook feed (paid)',
+      'Facebook sports-parent groups',
+      'Team chat / GroupMe',
+      'Google search (problem-driven)',
+      'Email (Klaviyo)',
+    ],
+
+    contentPreferences: [
+      'Practical "this is the system" content',
+      'Other-parent testimonials',
+      'Quick FAQs (safety, washing, application)',
+      'Email reminders and timely campaigns',
+    ],
+
+    languageRules: {
+      use: [
+        'smells go away', 'gear stays clean', 'safe for skin contact',
+        'no harsh chemicals', 'kid handles his own routine',
+        'practice', 'tournament', 'season',
+      ],
+      avoid: [
+        'locker room', 'pro-grade', 'performance edge', 'funk',
+        'shred', 'compete', 'beast mode',
+      ],
+    },
+
+    skepticismTriggers: [
+      'Athlete-bro masculine voice',
+      'Aggressive performance / competition framing',
+      'Anything that looks like a household cleaner ad',
+      'Hyped claims without substantiation',
+    ],
+
+    trustHierarchy: [
+      'Other sports parents (highest)',
+      'Pediatric / athletic trainer endorsement',
+      'EPA registration documentation',
+      'Amazon-style reviews (even if she buys DTC)',
+      'School / team adoption stories',
+    ],
+
+    jtbd: [
+      { statement: 'Drop kid at school without a smell complaint', status: 'covered' },
+      { statement: 'Have the car smell like a normal car again', status: 'covered' },
+      { statement: 'Hand kid a system that works without me nagging', status: 'gap' },
+      { statement: 'Eventually hand gear-care over to him entirely', status: 'gap' },
+    ],
+
+    topProducts: [
+      { name: 'JockShock 3-Bottle Athlete Pack', handle: 'jockshock' },
+      { name: 'JockShock 32oz Spray', handle: 'jockshock' },
+    ],
+
+    plays: [
+      {
+        title: '"Trunk-Open" cold paid hook (Meta)',
+        description:
+          'Adult-targeted, problem-aware. Lead with "open the back of the SUV and recoil" universal moment. Conversion-focused.',
+        targetEstimate: 'Sports-parent lookalike on Meta',
+        expectedLift: 'Higher first-order conversion rate than Aaron creative',
+      },
+      {
+        title: '"Hand it back to him" Klaviyo flow',
+        description:
+          'Frames the routine as a transition: she sets up the system, kid maintains it. Solves her real JTBD (stop being the gear manager).',
+        targetEstimate: 'Pam first-time buyers',
+        expectedLift: 'Lighter touch than Aaron flow; reinforces kid usage',
+      },
+      {
+        title: 'Sports-parent Facebook group seeding',
+        description:
+          'Partnerships with team admins, hockey/lax mom groups, club directors. Sample distribution + group-shareable content.',
+        targetEstimate: '~50 high-engagement parent groups',
+        expectedLift: 'Word-of-mouth in highest-trust channel for Pam',
+      },
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // COACH CARMEN  (JockShock — tertiary by message weight, B2B revenue carrier)
+  // ---------------------------------------------------------------------------
+  {
+    slug: 'carmen',
+    name: 'Coach Carmen',
+    tagline: 'Coach / club director / ATC / gym owner managing 12-200 athletes',
+    color: '#854d0e',
+    bgColor: '#fef3c7',
+    landerUrl: '/teams/',
+
+    weight: 0.1,
+    customerCount: 0,
+    avgLTV: 1500,
+    revenueGoalPct: 10,
+
+    narrative:
+      'Carmen is the B2B revenue carrier — load-bearing for the no-Amazon model. Smallest by count, largest by order value. Quote-form intake, not consumer add-to-cart. The 6-pack consumer SKU is wrong-shape for her — she wants gallons / 5-gal pails (v2).',
+
+    mission: {
+      text: 'Build /teams B2B intake form. First 5 program accounts.',
+      target: 5,
+      done: 0,
+      deadline: '2026-09-01',
+    },
+
+    lastActivity: [
+      { label: 'Persona drafted in Mothership: carmen-the-coach.md', date: '2026-05-06' },
+    ],
+
+    demographics: {
+      age: '30-60',
+      income: 'Direct buyer or strong influence on athletic budget',
+      location: 'National; wherever competitive teams + facilities exist',
+      operation: '12-200 athletes under management; some need AD/principal sign-off above $250',
+    },
+
+    values: [
+      'Athlete welfare — outbreak on her watch is career-damaging',
+      'Efficient operations — anything that simplifies wins',
+      'Liability protection — sanitation as insurance',
+      'Reputation of the program',
+    ],
+
+    fears: [
+      'MRSA / staph / ringworm outbreak — lawsuits, headlines',
+      'Parent complaint or bad team review',
+      'Wasted budget on a case of something that doesn\'t work',
+      'Compliance / audit failure (MMA gyms, college programs)',
+    ],
+
+    painPoints: [
+      'Locker-room / equipment-room funk',
+      'Skin-infection outbreak risk on shared gear',
+      'Mat / shared-equipment hygiene (wrestling, MMA, BJJ)',
+      'No staff time to spray everything down between practices',
+      'Vendor proliferation — wants one product for multiple jobs',
+    ],
+
+    buyingTriggers: [
+      'Skin-infection incident in her program (or a peer\'s)',
+      'Pre-season inventory and protocol review',
+      'New athletic-year budget cycle (July-Aug or Jan)',
+      'Parent complaint that escalated',
+      'Compliance audit',
+      'Conference / clinic where vendors exhibit',
+      'Peer coach or ATC recommendation',
+    ],
+
+    objections: [
+      '"How does this scale to my whole roster?"',
+      '"Is it safe for kids on a team?"',
+      '"How do I get my staff to actually use it?"',
+      '"What about budget?"',
+    ],
+
+    preferredChannels: [
+      'NATA / coach association resources',
+      'Conference / clinic exhibits',
+      'Peer coach networks / referrals',
+      'Google search (protocol-driven)',
+      'Direct sales outreach',
+    ],
+
+    contentPreferences: [
+      'Spec sheets / SDS / EPA documentation',
+      'Protocol PDFs (mat sanitation, locker-room hygiene)',
+      'Case studies from peer programs',
+      'Per-athlete cost calculators',
+    ],
+
+    languageRules: {
+      use: [
+        'protocol', 'facility', 'program-wide', 'athlete safety',
+        'season', 'compliance', 'outbreak prevention', 'roster',
+      ],
+      avoid: [
+        'funk', 'stinks', 'locker-room slang',
+        'parent-emotional framing', 'consumer-marketing voice',
+      ],
+    },
+
+    skepticismTriggers: [
+      'Consumer-marketing voice',
+      'Aaron\'s locker-room slang',
+      'Pam\'s emotional family framing',
+      'Vague claims without documentation',
+      'No SDS / EPA reg available on demand',
+    ],
+
+    trustHierarchy: [
+      'Peer coaches / programs',
+      'Certified athletic trainers (NATA)',
+      'EPA-registration documentation',
+      'MSDS / SDS readily available',
+      'Conference / clinic vendor presence',
+      'Industry association resources',
+    ],
+
+    jtbd: [
+      { statement: 'Run a facility known for being well-managed', status: 'covered' },
+      { statement: 'Avoid a skin-infection outbreak on my watch', status: 'partial' },
+      { statement: 'Repeatable protocol my assistants can execute without me', status: 'gap' },
+      { statement: 'Renew purchase order on autopilot', status: 'gap' },
+      { statement: 'Buy from a vendor that knows program operations', status: 'partial' },
+    ],
+
+    topProducts: [
+      { name: 'JockShock 6-Bottle Team Pack (B2B intake)', handle: 'jockshock' },
+      { name: 'B2B gallon / 5-gal (v2)', handle: 'jockshock' },
+    ],
+
+    plays: [
+      {
+        title: 'B2B intake form replaces consumer 6-pack add-to-cart',
+        description:
+          'Coach lands on /teams, sees per-athlete pricing logic, fills intake form (org size, sport, current protocol, budget). Quote within 24 hours. Aligned with launch strategy: 6-pack consumer SKU is wrong shape for facility buyers.',
+        targetEstimate: 'Every coach / ATC / gym owner who lands on /teams',
+        expectedLift: 'Captures B2B buyer without forcing wrong-shape transaction',
+      },
+      {
+        title: 'NATA / coach conference exhibit calendar',
+        description:
+          'Year-1: NATA, regional coach associations, MMA gym owner conferences. Sample distribution + protocol PDF + lead capture. Her decision channel is exhibitor-discovery, not paid traffic.',
+        targetEstimate: '2-3 high-leverage conferences year 1',
+        expectedLift: 'Direct account acquisition + industry credibility',
+      },
+      {
+        title: 'Protocol content library + Carmen-flow lead gen',
+        description:
+          '"Wrestling Mat Sanitation Protocol," "Locker Room Skin-Infection Prevention Checklist," "Pre-Season Gear Deep Clean — A Coach\'s Playbook." Email-gated, gates lead to Carmen flow.',
+        targetEstimate: 'Coach in problem-solving mode',
+        expectedLift: 'Catches Carmen at her actual search intent',
+      },
+      {
+        title: 'Coach referral network',
+        description:
+          'Adopting coach gets a referral code. New coach signup = both get free product or credit. Her trust hierarchy is peer-to-peer; word-of-mouth is the cheapest CAC channel for this persona.',
+        targetEstimate: 'Active Carmen accounts',
+        expectedLift: 'Referral-driven new account acquisition',
+      },
+    ],
+  },
 ]
 
 // =============================================================================
