@@ -191,7 +191,7 @@ export function Footer({
                 </li>
                 <li>
                   <a
-                    href="/about/"
+                    href="/rewards/"
                     className="text-sm text-white/90 transition-colors hover:text-white"
                   >
                     Rewards Program

@@ -37,10 +37,13 @@ export const GET: APIRoute = async () => {
     return data.draft !== true && new Date(data.publishDate) <= now
   })
 
-  // Sort by publish date (newest first)
-  const sortedEpisodes = [...episodes].sort(
-    (a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
-  )
+  // Sort by publish date (newest first), then by episode number descending so
+  // catch-up batches that share a publish date still render in chronological order.
+  const sortedEpisodes = [...episodes].sort((a, b) => {
+    const dateDiff = new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
+    if (dateDiff !== 0) return dateDiff
+    return (b.data.episodeNumber ?? 0) - (a.data.episodeNumber ?? 0)
+  })
 
   const lastBuildDate =
     sortedEpisodes.length > 0

@@ -43,10 +43,13 @@ const allEpisodes = await getCollection('episodes', ({ data }) => {
   return data.draft !== true && data.topics?.includes(topicSlug)
 })
 
-// Sort by publish date (newest first)
-const episodes = allEpisodes.sort(
-  (a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
-)
+// Sort by publish date (newest first), then by episode number descending so
+// catch-up batches that share a publish date still render in chronological order.
+const episodes = allEpisodes.sort((a, b) => {
+  const dateDiff = new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
+  if (dateDiff !== 0) return dateDiff
+  return (b.data.episodeNumber ?? 0) - (a.data.episodeNumber ?? 0)
+})
 
 // Get related topics
 const allTopics = await getCollection('topics')

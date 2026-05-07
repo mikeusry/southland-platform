@@ -5,13 +5,14 @@
  * Used by Reality Tunnels to personalize content based on visitor type.
  *
  * Two-tier identity model:
- * - SegmentId: 'poultry' | 'turf' | 'waste' | 'general' (homepage routing)
- * - PersonaId: 10 personas + 'general' (hub page routing)
+ * - SegmentId: 'poultry' | 'turf' | 'waste' | 'sports' | 'general'
+ * - PersonaId: 13 personas + 'general'
  *
  * Segments fan out into personas on hub pages:
  *   poultry → bill, betty, bob, tom, greg
  *   turf    → taylor, gary, hannah, maggie
  *   waste   → sam
+ *   sports  → aaron, pam, carmen   (JockShock sub-brand, May 2026)
  */
 
 // =============================================================================
@@ -29,10 +30,13 @@ export type PersonaId =
   | 'hannah'
   | 'maggie'
   | 'sam'
+  | 'aaron'
+  | 'pam'
+  | 'carmen'
   | 'general'
   | null
 
-export type SegmentId = 'poultry' | 'turf' | 'waste' | 'general'
+export type SegmentId = 'poultry' | 'turf' | 'waste' | 'sports' | 'general'
 
 export interface PersonaData {
   id: PersonaId
@@ -94,6 +98,9 @@ export const PERSONA_TO_SEGMENT: Record<Exclude<PersonaId, null>, SegmentId> = {
   hannah: 'turf',
   maggie: 'turf',
   sam: 'waste',
+  aaron: 'sports',
+  pam: 'sports',
+  carmen: 'sports',
   general: 'general',
 }
 
@@ -125,6 +132,14 @@ export const SEGMENT_CONFIG: Record<SegmentId, SegmentConfig> = {
     bgColor: '#f5f3ff',
     hubPage: '/waste/',
     personaSlugs: ['sam'],
+  },
+  sports: {
+    id: 'sports',
+    label: 'Sports & Athletic Gear',
+    color: '#facc15', // JockShock yellow
+    bgColor: '#0a0a0a', // matte black
+    hubPage: '/products/jockshock/',
+    personaSlugs: ['aaron', 'pam', 'carmen'],
   },
   general: {
     id: 'general',
@@ -240,6 +255,36 @@ export const PERSONA_CONFIG: Record<Exclude<PersonaId, null>, PersonaConfig> = {
     landingPage: '/waste/',
     ctaText: 'Fix Septic Odor Fast',
     ctaHref: '/waste/',
+  },
+  aaron: {
+    id: 'aaron',
+    label: 'Athlete Aaron',
+    shortLabel: 'Athlete',
+    color: '#facc15',
+    bgColor: '#0a0a0a',
+    landingPage: '/products/jockshock/',
+    ctaText: 'Get the Pro-Grade Spray',
+    ctaHref: '/products/jockshock/',
+  },
+  pam: {
+    id: 'pam',
+    label: 'Parent Pam',
+    shortLabel: 'Sports Parent',
+    color: '#fbbf24',
+    bgColor: '#fffbeb',
+    landingPage: '/products/jockshock/',
+    ctaText: 'Get the Smell Out',
+    ctaHref: '/products/jockshock/',
+  },
+  carmen: {
+    id: 'carmen',
+    label: 'Coach Carmen',
+    shortLabel: 'Coach / Team',
+    color: '#854d0e',
+    bgColor: '#fef3c7',
+    landingPage: '/teams/',
+    ctaText: 'Get a Team Quote',
+    ctaHref: '/teams/',
   },
   general: {
     id: 'general',
@@ -511,7 +556,7 @@ export function isValidPersonaId(value: string): value is Exclude<PersonaId, nul
  * Check if a string is a valid segment ID
  */
 export function isValidSegmentId(value: string): value is SegmentId {
-  return ['poultry', 'turf', 'waste', 'general'].includes(value)
+  return ['poultry', 'turf', 'waste', 'sports', 'general'].includes(value)
 }
 
 // =============================================================================
