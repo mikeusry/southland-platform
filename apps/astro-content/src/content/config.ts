@@ -383,7 +383,7 @@ const productsCollection = defineCollection({
     // --- Core (existing) ---
     name: z.string(),
     shopifyHandle: z.string(),
-    segment: z.enum(['poultry', 'turf', 'agriculture']),
+    segment: z.enum(['poultry', 'turf', 'agriculture', 'athletic']),
     shortDescription: z.string(),
     benefits: z.array(z.string()).optional().default([]),
     useCases: z.array(z.string()).optional().default([]),
