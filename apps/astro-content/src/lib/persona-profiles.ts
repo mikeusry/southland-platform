@@ -1989,15 +1989,15 @@ export const PERSONAS: PersonaProfile[] = [
       'Smell announces him — class, date, gym, bag in the car',
       'Looking soft / "extra" — caring too obviously is uncool',
       'Skin shit — staph, ringworm, MRSA from contaminated gear',
-      'Wasting money on another spray that doesn\'t work',
+      "Wasting money on another spray that doesn't work",
       'Damaging $400 pads / $300 stick / $200 helmet',
     ],
 
     painPoints: [
       'Hockey/lacrosse pads smell like death between practices',
-      'Cleats, gloves, headgear can\'t go in the wash',
+      "Cleats, gloves, headgear can't go in the wash",
       'Bag funk migrates to car / room / laundry',
-      'Existing sprays mask for an hour, don\'t kill the source',
+      "Existing sprays mask for an hour, don't kill the source",
       'Worry about staph/ringworm contact transfer',
       'Skin breakouts on pad-covered areas',
     ],
@@ -2036,14 +2036,38 @@ export const PERSONAS: PersonaProfile[] = [
 
     languageRules: {
       use: [
-        'gear', 'kit', 'pads', 'lid', 'bag', 'stick', 'cleats', 'helmet',
-        'mouthguard', 'funk', 'stink', 'pro-grade', 'clinical-strength',
-        'locker room', 'post-practice', 'HOCl', 'routine',
+        'gear',
+        'kit',
+        'pads',
+        'lid',
+        'bag',
+        'stick',
+        'cleats',
+        'helmet',
+        'mouthguard',
+        'funk',
+        'stink',
+        'pro-grade',
+        'clinical-strength',
+        'locker room',
+        'post-practice',
+        'HOCl',
+        'routine',
       ],
       avoid: [
-        'synergistic', 'holistic', 'wellness', 'natural', 'eco-friendly',
-        'green', 'sanitize your home', 'household cleaner', 'revolutionary',
-        'mom-approved', 'sustainable', 'solution', 'experience',
+        'synergistic',
+        'holistic',
+        'wellness',
+        'natural',
+        'eco-friendly',
+        'green',
+        'sanitize your home',
+        'household cleaner',
+        'revolutionary',
+        'mom-approved',
+        'sustainable',
+        'solution',
+        'experience',
       ],
     },
 
@@ -2067,12 +2091,15 @@ export const PERSONAS: PersonaProfile[] = [
     ],
 
     jtbd: [
-      { statement: 'Get the funk out of gear so I can put it on without flinching', status: 'covered' },
+      {
+        statement: 'Get the funk out of gear so I can put it on without flinching',
+        status: 'covered',
+      },
       { statement: 'Protect $400 pads / $200 helmet from breaking down early', status: 'partial' },
       { statement: 'Avoid skin breakouts/infections from contaminated gear', status: 'partial' },
       { statement: 'Build a post-practice routine that takes <60 seconds', status: 'gap' },
       { statement: 'Look like a guy who has his shit together to teammates', status: 'covered' },
-      { statement: 'Buy something I won\'t apologize for if a teammate sees it', status: 'covered' },
+      { statement: "Buy something I won't apologize for if a teammate sees it", status: 'covered' },
       { statement: 'Stop needing my mom to handle my gear', status: 'gap' },
     ],
 
@@ -2144,7 +2171,7 @@ export const PERSONAS: PersonaProfile[] = [
     },
 
     values: [
-      'Kid\'s confidence — wants him to fit in, not stand out for the wrong reason',
+      "Kid's confidence — wants him to fit in, not stand out for the wrong reason",
       'Clean home and clean car (her territory)',
       'Smart spending — pays for what works, not for hype',
       'Convenience — single-purchase solutions over routines',
@@ -2153,16 +2180,16 @@ export const PERSONAS: PersonaProfile[] = [
     fears: [
       'Her kid being "the smelly kid"',
       'Car / house permanently smelling like a hockey bag',
-      'Wasting money on another spray that doesn\'t work',
+      "Wasting money on another spray that doesn't work",
       'MRSA / staph / ringworm — she reads these articles',
       'Damaging expensive gear they paid for',
     ],
 
     painPoints: [
       'The car smells, all the time, no matter what',
-      'Laundry doesn\'t fix gear that can\'t be washed',
+      "Laundry doesn't fix gear that can't be washed",
       'Carpool / tournament-mom comments',
-      'Kid won\'t handle gear care himself — she\'s the gear manager',
+      "Kid won't handle gear care himself — she's the gear manager",
       'Graveyard of half-used Febreze / Lysol / Clear Gear',
     ],
 
@@ -2199,13 +2226,23 @@ export const PERSONAS: PersonaProfile[] = [
 
     languageRules: {
       use: [
-        'smells go away', 'gear stays clean', 'safe for skin contact',
-        'no harsh chemicals', 'kid handles his own routine',
-        'practice', 'tournament', 'season',
+        'smells go away',
+        'gear stays clean',
+        'safe for skin contact',
+        'no harsh chemicals',
+        'kid handles his own routine',
+        'practice',
+        'tournament',
+        'season',
       ],
       avoid: [
-        'locker room', 'pro-grade', 'performance edge', 'funk',
-        'shred', 'compete', 'beast mode',
+        'locker room',
+        'pro-grade',
+        'performance edge',
+        'funk',
+        'shred',
+        'compete',
+        'beast mode',
       ],
     },
 
@@ -2308,7 +2345,7 @@ export const PERSONAS: PersonaProfile[] = [
     fears: [
       'MRSA / staph / ringworm outbreak — lawsuits, headlines',
       'Parent complaint or bad team review',
-      'Wasted budget on a case of something that doesn\'t work',
+      "Wasted budget on a case of something that doesn't work",
       'Compliance / audit failure (MMA gyms, college programs)',
     ],
 
@@ -2321,7 +2358,7 @@ export const PERSONAS: PersonaProfile[] = [
     ],
 
     buyingTriggers: [
-      'Skin-infection incident in her program (or a peer\'s)',
+      "Skin-infection incident in her program (or a peer's)",
       'Pre-season inventory and protocol review',
       'New athletic-year budget cycle (July-Aug or Jan)',
       'Parent complaint that escalated',
@@ -2354,19 +2391,28 @@ export const PERSONAS: PersonaProfile[] = [
 
     languageRules: {
       use: [
-        'protocol', 'facility', 'program-wide', 'athlete safety',
-        'season', 'compliance', 'outbreak prevention', 'roster',
+        'protocol',
+        'facility',
+        'program-wide',
+        'athlete safety',
+        'season',
+        'compliance',
+        'outbreak prevention',
+        'roster',
       ],
       avoid: [
-        'funk', 'stinks', 'locker-room slang',
-        'parent-emotional framing', 'consumer-marketing voice',
+        'funk',
+        'stinks',
+        'locker-room slang',
+        'parent-emotional framing',
+        'consumer-marketing voice',
       ],
     },
 
     skepticismTriggers: [
       'Consumer-marketing voice',
-      'Aaron\'s locker-room slang',
-      'Pam\'s emotional family framing',
+      "Aaron's locker-room slang",
+      "Pam's emotional family framing",
       'Vague claims without documentation',
       'No SDS / EPA reg available on demand',
     ],

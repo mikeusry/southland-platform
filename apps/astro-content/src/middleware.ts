@@ -172,7 +172,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
     const target = new URL('/products/jockshock/', incoming.origin)
     // Preserve any incoming query params (e.g. existing UTMs override the default)
     incoming.searchParams.forEach((v, k) => target.searchParams.set(k, v))
-    if (!target.searchParams.has('utm_source')) target.searchParams.set('utm_source', 'jockshock-vanity')
+    if (!target.searchParams.has('utm_source'))
+      target.searchParams.set('utm_source', 'jockshock-vanity')
     if (!target.searchParams.has('utm_medium')) target.searchParams.set('utm_medium', 'redirect')
     if (!target.searchParams.has('utm_campaign')) target.searchParams.set('utm_campaign', slug)
     return new Response(null, {

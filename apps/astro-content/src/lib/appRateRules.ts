@@ -662,32 +662,35 @@ export const PRODUCTS: ProductConfig[] = [
     rates: [
       {
         useCase: 'new-litter',
-        rate: 2,
+        rate: 10,
         rateUnit: 'gal',
         perArea: 1,
         perAreaUnit: 'houses',
-        frequency: 'Before bird placement + mid-flock reapply',
-        notes: 'Spray evenly over litter. Reapply at day 21-28 for broilers.',
+        frequency: '7–14 days before bird placement',
+        notes:
+          '1 gal Litter Life + 9 gal water per 2,000 sq ft. Apply 7–10 days before placement (best: 12–14 days). Close house 1–2 days after spraying, then ventilate.',
         rateSource: 'label_default',
       },
       {
         useCase: 'reused-litter',
-        rate: 3,
+        rate: 10,
         rateUnit: 'gal',
         perArea: 1,
         perAreaUnit: 'houses',
-        frequency: 'At decake + bird placement + mid-flock',
-        notes: '1.5 gal/10,000 sq ft at decake + second application at placement.',
+        frequency: 'Before new bedding goes down',
+        notes:
+          'Apply on built-up litter before adding fresh bedding. Same 1 gal product per 2,000 sq ft mix ratio.',
         rateSource: 'label_default',
       },
       {
         useCase: 'heavy-ammonia',
-        rate: 4,
+        rate: 20,
         rateUnit: 'gal',
         perArea: 1,
         perAreaUnit: 'houses',
         frequency: 'Double initial + ongoing based on ammonia readings',
-        notes: 'Test ammonia at 24 and 48 hours. Adjust ongoing rate based on readings.',
+        notes:
+          'Double the standard rate. Test ammonia at 24 and 48 hours. Adjust ongoing rate based on readings.',
         rateSource: 'condition_adjusted',
       },
     ],
