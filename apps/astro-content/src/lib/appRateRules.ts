@@ -645,23 +645,17 @@ export const PRODUCTS: ProductConfig[] = [
     segment: 'poultry',
     applicationMethod: 'Pump sprayer or boom sprayer',
     useCases: [
-      { id: 'new-litter', label: 'New Litter', scope: 'single_application' },
-      {
-        id: 'reused-litter',
-        label: 'Reused Litter',
-        description: 'Higher rate at decake + bird placement',
-        scope: 'single_application',
-      },
+      { id: 'standard', label: 'Standard Application', scope: 'single_application' },
       {
         id: 'heavy-ammonia',
-        label: 'Heavy Ammonia Situation',
-        description: 'Double initial rate — test at 24 and 48 hours',
+        label: 'Heavy Ammonia (Double Rate)',
+        description: 'Double the standard rate when ammonia is high',
         scope: 'single_application',
       },
     ],
     rates: [
       {
-        useCase: 'new-litter',
+        useCase: 'standard',
         rate: 10,
         rateUnit: 'gal',
         perArea: 1,
@@ -672,25 +666,13 @@ export const PRODUCTS: ProductConfig[] = [
         rateSource: 'label_default',
       },
       {
-        useCase: 'reused-litter',
-        rate: 10,
-        rateUnit: 'gal',
-        perArea: 1,
-        perAreaUnit: 'houses',
-        frequency: 'Before new bedding goes down',
-        notes:
-          'Apply on built-up litter before adding fresh bedding. Same 1 gal product per 2,000 sq ft mix ratio.',
-        rateSource: 'label_default',
-      },
-      {
         useCase: 'heavy-ammonia',
         rate: 20,
         rateUnit: 'gal',
         perArea: 1,
         perAreaUnit: 'houses',
-        frequency: 'Double initial + ongoing based on ammonia readings',
-        notes:
-          'Double the standard rate. Test ammonia at 24 and 48 hours. Adjust ongoing rate based on readings.',
+        frequency: '7–14 days before bird placement',
+        notes: 'Double the standard rate when ammonia readings are high.',
         rateSource: 'condition_adjusted',
       },
     ],
@@ -701,19 +683,18 @@ export const PRODUCTS: ProductConfig[] = [
     defaultUnit: 'houses',
     presets: [
       {
-        id: 'll-4new',
-        label: '4 Houses (New Litter)',
-        description: 'Standard 4-house farm',
-        area: 4,
+        id: 'll-2house',
+        label: '2 Houses',
+        description: '2-house farm',
+        area: 2,
         unit: 'houses',
       },
       {
-        id: 'll-4reused',
-        label: '4 Houses (Reused)',
-        description: 'Reused litter',
+        id: 'll-4house',
+        label: '4 Houses',
+        description: 'Standard 4-house farm',
         area: 4,
         unit: 'houses',
-        useCase: 'reused-litter',
       },
       {
         id: 'll-6house',
