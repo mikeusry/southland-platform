@@ -659,6 +659,123 @@ export function initPersonaFromUrl(): boolean {
 }
 
 // =============================================================================
+// JOCKSHOCK PERSONA INFERENCE (T-651)
+// =============================================================================
+//
+// Auto-infer Aaron / Pam / Carmen from URL context (campaign UTMs, referrer,
+// path). Runs after initPersonaFromUrl() so explicit ?persona=… always wins.
+//
+// Rules from T-651:
+//   Aaron  — sport-keyword utm_campaign, sport-subreddit referrer, OR
+//            JockShock product page with no positive Pam/Carmen signal
+//   Pam    — parent/youth utm_campaign, OR facebook.com referrer on JockShock
+//   Carmen — coach/team/b2b utm_campaign OR /teams|/coaches|/b2b lander
+//            (POSITIVE ONLY — Carmen never defaults)
+//
+// Guards:
+//   - Only runs on JockShock-relevant pages
+//   - Does not override existing non-sports persona (e.g. Hannah staying Hannah)
+//   - Does not override existing sports persona set with source='manual' or
+//     'url_param' or 'hero' (user-chosen wins over inference)
+
+const JOCKSHOCK_PATH_RE =
+  /^\/(products\/jockshock|teams|coaches|b2b)(\/|$|\?)/i
+
+const AARON_UTM_RE = /hockey|lacrosse|wrestling|football|mma|jiu-?jitsu/i
+const AARON_REFERRER_RE =
+  /reddit\.com\/r\/(hockey|lacrosse|wrestling|MMA|bjj)/i
+
+const PAM_UTM_RE = /parent|mom|youth|club|travel/i
+const PAM_REFERRER_RE = /(^|\/\/|\.)facebook\.com/i
+
+const CARMEN_UTM_RE = /coach|team|facility|gym|wholesale|b2b/i
+const CARMEN_PATH_RE = /^\/(teams|coaches|b2b)(\/|$|\?)/i
+
+function isJockShockPage(pathname: string): boolean {
+  return JOCKSHOCK_PATH_RE.test(pathname)
+}
+
+/**
+ * Infer a JockShock persona from page context. Returns null if no signal.
+ * Pure function — no side effects, safe to test.
+ *
+ * Order: Carmen (positive only) → Pam (positive only) → Aaron (positive or
+ * JockShock-default).
+ */
+export function inferJockShockPersona(input: {
+  pathname: string
+  search: string
+  referrer: string
+}): Exclude<PersonaId, null> | null {
+  const { pathname, search, referrer } = input
+
+  if (!isJockShockPage(pathname)) return null
+
+  const params = new URLSearchParams(search)
+  const utm = params.get('utm_campaign') || ''
+
+  // Carmen — positive signals only
+  if (CARMEN_UTM_RE.test(utm)) return 'carmen'
+  if (CARMEN_PATH_RE.test(pathname)) return 'carmen'
+
+  // Pam — positive signals only
+  const onJockShockProductOrLander = JOCKSHOCK_PATH_RE.test(pathname)
+  if (PAM_UTM_RE.test(utm)) return 'pam'
+  if (onJockShockProductOrLander && PAM_REFERRER_RE.test(referrer)) return 'pam'
+
+  // Aaron — positive signals
+  if (AARON_UTM_RE.test(utm)) return 'aaron'
+  if (AARON_REFERRER_RE.test(referrer)) return 'aaron'
+
+  // Aaron — default on JockShock product page when no positive Pam/Carmen
+  if (/^\/products\/jockshock(\/|$|\?)/i.test(pathname)) return 'aaron'
+
+  return null
+}
+
+/**
+ * Initialize JockShock persona from page context (UTMs, referrer, path).
+ *
+ * Runs after initPersonaFromUrl() — explicit URL params always win. Does not
+ * override existing non-sports personas, and does not override a sports persona
+ * the visitor chose themselves (url_param / manual / hero).
+ *
+ * Returns true if a persona was stamped.
+ */
+export function initJockShockPersonaFromContext(): boolean {
+  if (typeof window === 'undefined') return false
+
+  const inferred = inferJockShockPersona({
+    pathname: window.location.pathname,
+    search: window.location.search,
+    referrer: document.referrer || '',
+  })
+  if (!inferred) return false
+
+  const existing = getPersona()
+  if (existing?.id) {
+    // Don't override user-chosen personas regardless of segment
+    if (
+      existing.source === 'url_param' ||
+      existing.source === 'manual' ||
+      existing.source === 'hero' ||
+      existing.source === 'segment_hub'
+    ) {
+      return false
+    }
+    // Don't override non-sports personas (cross-segment browsing)
+    if (existing.segmentId !== 'sports' && existing.segmentId !== 'general') {
+      return false
+    }
+    // Don't churn if same persona already stamped
+    if (existing.id === inferred && existing.source === 'inferred') return false
+  }
+
+  setPersona(inferred, 'inferred')
+  return true
+}
+
+// =============================================================================
 // JOURNEY STAGES
 // =============================================================================
 

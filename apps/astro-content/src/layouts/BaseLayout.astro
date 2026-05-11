@@ -205,9 +205,15 @@ const gtmContainerId = import.meta.env.PUBLIC_GTM_CONTAINER_ID;
 
     <!-- Persona Initialization (handle URL params like ?persona=commercial) -->
     <script>
-      import { initPersonaFromUrl } from '../lib/persona';
-      // Initialize persona from URL if present (for tracking links)
-      initPersonaFromUrl();
+      import { initPersonaFromUrl, initJockShockPersonaFromContext } from '../lib/persona';
+      // Initialize persona from URL if present (for tracking links). Explicit
+      // ?persona=… or ?segment=… always wins.
+      const stamped = initPersonaFromUrl();
+      // Fall back to JockShock contextual inference (T-651): UTM campaign,
+      // referrer, and path-based defaults on JockShock pages.
+      if (!stamped) {
+        initJockShockPersonaFromContext();
+      }
     </script>
 
     <!-- AI Chat Widget (React island, loads when browser idle) -->
