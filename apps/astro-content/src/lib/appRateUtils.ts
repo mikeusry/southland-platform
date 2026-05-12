@@ -463,19 +463,19 @@ export function determineBuyingPath(
   if (t.repRecommended.minCost && purchase.estimatedCost >= t.repRecommended.minCost) {
     return {
       path: 'rep_recommended',
-      reason: 'Volume pricing available for orders of this size.',
+      reason: 'A specialist can help fine-tune your protocol for an order this size.',
     }
   }
   if (t.repRecommended.minContainers && totalContainers >= t.repRecommended.minContainers) {
     return {
       path: 'rep_recommended',
-      reason: 'Volume pricing available for orders of this size.',
+      reason: 'A specialist can help fine-tune your protocol for an order this size.',
     }
   }
   if (t.repRecommended.minHouses && inputUnit === 'houses' && area >= t.repRecommended.minHouses) {
     return {
       path: 'rep_recommended',
-      reason: 'Talk to a poultry specialist for multi-house pricing.',
+      reason: 'A specialist can help fine-tune your protocol across multiple houses.',
     }
   }
 

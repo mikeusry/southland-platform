@@ -658,14 +658,14 @@ export default function ApplicationRateCalculator() {
               {result.buyingPath === 'rep_recommended' && (
                 <div className="space-y-3">
                   <div className="rounded-lg border border-amber-300 bg-amber-50 p-4">
-                    <p className="text-sm font-semibold text-amber-800">Volume Pricing Available</p>
+                    <p className="text-sm font-semibold text-amber-800">Talk to a Specialist</p>
                     <p className="mt-1 text-sm text-amber-700">{result.buyingPathReason}</p>
                   </div>
                   <a
                     href={`/contact/?product=${encodeURIComponent(product.name)}&ref=calculator`}
                     className="inline-flex w-full items-center justify-center rounded-md bg-[#2C5234] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-green-800"
                   >
-                    Request Volume Pricing
+                    Talk to a Specialist
                   </a>
                   {cartError && <p className="text-sm text-red-600">{cartError}</p>}
                   {result.cartLines.length > 0 ? (
