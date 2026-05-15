@@ -10,21 +10,28 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 // SUPABASE CLIENT
 // =============================================================================
 
-let _southlandClient: SupabaseClient | null = null
+export interface CompareEnv {
+  MOTHERSHIP_SUPABASE_URL?: string
+  MOTHERSHIP_SUPABASE_SERVICE_KEY?: string
+}
 
-function getSouthlandClient(): SupabaseClient | null {
-  if (_southlandClient) return _southlandClient
+let _cachedClient: SupabaseClient | null = null
+let _cachedKey: string | null = null
 
-  const url = import.meta.env.MOTHERSHIP_SUPABASE_URL
-  const key = import.meta.env.MOTHERSHIP_SUPABASE_SERVICE_KEY
+function getSouthlandClient(env: CompareEnv): SupabaseClient | null {
+  const url = env.MOTHERSHIP_SUPABASE_URL
+  const key = env.MOTHERSHIP_SUPABASE_SERVICE_KEY
 
   if (!url || !key) {
     console.warn('[compare] Supabase env vars not set — getAllLiveUrls disabled')
     return null
   }
 
-  _southlandClient = createClient(url, key)
-  return _southlandClient
+  const cacheKey = `${url}::${key}`
+  if (_cachedClient && _cachedKey === cacheKey) return _cachedClient
+  _cachedClient = createClient(url, key)
+  _cachedKey = cacheKey
+  return _cachedClient
 }
 
 // =============================================================================
@@ -502,7 +509,7 @@ export function computeVerdict(
 // GET ALL LIVE URLS
 // =============================================================================
 
-export async function getAllLiveUrls(): Promise<
+export async function getAllLiveUrls(env: CompareEnv): Promise<
   {
     url: string
     urlPath: string
@@ -512,7 +519,7 @@ export async function getAllLiveUrls(): Promise<
     crawlTimestamp: string
   }[]
 > {
-  const client = getSouthlandClient()
+  const client = getSouthlandClient(env)
   if (!client) return []
 
   const { data, error } = await client

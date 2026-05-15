@@ -17,9 +17,14 @@ import type {
   QualityMetrics,
   SCORE_THRESHOLDS,
 } from '../../lib/content-score.types'
-import { scorePersonas, analyzeContentGap } from '../../lib/services/mothership'
+import {
+  scorePersonas,
+  analyzeContentGap,
+  type MothershipEnv,
+} from '../../lib/services/mothership'
 import { checkOriginality } from '../../lib/services/originality'
 import { analyzeContentSEO, computeLocalSEOMetrics } from '../../lib/services/dataforseo'
+import { getServerEnv } from '../../lib/server-env'
 
 // Extended request type with mode
 interface ContentScoreRequestWithMode extends ContentScoreRequest {
@@ -217,7 +222,13 @@ function calculateOverallScore(
   }
 }
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
+  const mothershipEnv: MothershipEnv = {
+    MOTHERSHIP_SUPABASE_URL: getServerEnv(locals, 'MOTHERSHIP_SUPABASE_URL'),
+    MOTHERSHIP_SUPABASE_SERVICE_KEY: getServerEnv(locals, 'MOTHERSHIP_SUPABASE_SERVICE_KEY'),
+    OPENAI_API_KEY: getServerEnv(locals, 'OPENAI_API_KEY'),
+    ENABLE_MOTHERSHIP: getServerEnv(locals, 'ENABLE_MOTHERSHIP'),
+  }
   const startTime = Date.now()
 
   try {
@@ -259,7 +270,8 @@ export const POST: APIRoute = async ({ request }) => {
     const personaResult = await scorePersonas(
       `${body.title}\n\n${body.body}`,
       body.segment,
-      brandSlug
+      brandSlug,
+      mothershipEnv
     )
     if (personaResult) {
       response.persona = personaResult
@@ -285,7 +297,13 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // 2. Content gap analysis via Mothership
-    const gapResult = await analyzeContentGap(body.title, body.body, body.url, brandSlug)
+    const gapResult = await analyzeContentGap(
+      body.title,
+      body.body,
+      body.url,
+      brandSlug,
+      mothershipEnv
+    )
     if (gapResult) {
       response.gap = gapResult
     } else {

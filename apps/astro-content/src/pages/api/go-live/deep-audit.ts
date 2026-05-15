@@ -14,7 +14,12 @@
 import type { APIRoute } from 'astro'
 import type { AuditCategory, AuditCheck, Grade } from '../../../lib/services/page-audit'
 import { checkOriginality } from '../../../lib/services/originality'
-import { scorePersonas, scoreBrandVoice } from '../../../lib/services/mothership'
+import {
+  scorePersonas,
+  scoreBrandVoice,
+  type MothershipEnv,
+} from '../../../lib/services/mothership'
+import { getServerEnv } from '../../../lib/server-env'
 
 function gradeFromChecks(checks: AuditCheck[]): Grade {
   const fails = checks.filter((c) => c.status === 'fail').length
@@ -26,7 +31,13 @@ function gradeFromChecks(checks: AuditCheck[]): Grade {
   return 'F'
 }
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
+  const mothershipEnv: MothershipEnv = {
+    MOTHERSHIP_SUPABASE_URL: getServerEnv(locals, 'MOTHERSHIP_SUPABASE_URL'),
+    MOTHERSHIP_SUPABASE_SERVICE_KEY: getServerEnv(locals, 'MOTHERSHIP_SUPABASE_SERVICE_KEY'),
+    OPENAI_API_KEY: getServerEnv(locals, 'OPENAI_API_KEY'),
+    ENABLE_MOTHERSHIP: getServerEnv(locals, 'ENABLE_MOTHERSHIP'),
+  }
   const startTime = Date.now()
 
   try {
@@ -70,8 +81,8 @@ export const POST: APIRoute = async ({ request }) => {
     // Run Layer 2 + 3 in parallel
     const [originalityResult, personaResult, voiceResult] = await Promise.all([
       checkOriginality(bodyText),
-      scorePersonas(bodyText, undefined, 'southland-organics'),
-      scoreBrandVoice(bodyText),
+      scorePersonas(bodyText, undefined, 'southland-organics', mothershipEnv),
+      scoreBrandVoice(bodyText, mothershipEnv),
     ])
 
     // Build Layer 2: Originality — only show if actually ran (not skipped)

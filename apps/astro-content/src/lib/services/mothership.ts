@@ -5,14 +5,25 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import type { PersonaScores, GapStatus, BuyerStage, BrandVoiceScore } from '../content-score.types'
 
-// Initialize Supabase client
-let supabaseClient: SupabaseClient | null = null
+/**
+ * Env values needed by mothership service. Callers pass these in so the
+ * service works at request time on Cloudflare Pages (where secrets land on
+ * locals.runtime.env, not import.meta.env).
+ */
+export interface MothershipEnv {
+  MOTHERSHIP_SUPABASE_URL?: string
+  MOTHERSHIP_SUPABASE_SERVICE_KEY?: string
+  OPENAI_API_KEY?: string
+  ENABLE_MOTHERSHIP?: string
+}
 
-function getSupabaseClient(): SupabaseClient | null {
-  if (supabaseClient) return supabaseClient
+// Cached client keyed by (url, key) pair so multiple callers in one request share it
+let cachedClient: SupabaseClient | null = null
+let cachedKey: string | null = null
 
-  const url = import.meta.env.MOTHERSHIP_SUPABASE_URL
-  const key = import.meta.env.MOTHERSHIP_SUPABASE_SERVICE_KEY
+function getSupabaseClient(env: MothershipEnv): SupabaseClient | null {
+  const url = env.MOTHERSHIP_SUPABASE_URL
+  const key = env.MOTHERSHIP_SUPABASE_SERVICE_KEY
 
   if (!url || !key) {
     console.error(
@@ -25,13 +36,15 @@ function getSupabaseClient(): SupabaseClient | null {
     return null
   }
 
-  supabaseClient = createClient(url, key)
-  return supabaseClient
+  const cacheKey = `${url}::${key}`
+  if (cachedClient && cachedKey === cacheKey) return cachedClient
+  cachedClient = createClient(url, key)
+  cachedKey = cacheKey
+  return cachedClient
 }
 
 // OpenAI client for generating embeddings
-async function generateEmbedding(text: string): Promise<number[] | null> {
-  const apiKey = import.meta.env.OPENAI_API_KEY
+async function generateEmbedding(text: string, apiKey: string | undefined): Promise<number[] | null> {
   if (!apiKey) {
     console.error('[mothership] MISSING OPENAI_API_KEY env var')
     return null
@@ -68,8 +81,10 @@ async function generateEmbedding(text: string): Promise<number[] | null> {
  * Generate a 3072-dim embedding using text-embedding-3-large.
  * Matches the dimension of transcript_chunks.embedding in Mothership.
  */
-async function generateLargeEmbedding(text: string): Promise<number[] | null> {
-  const apiKey = import.meta.env.OPENAI_API_KEY
+async function generateLargeEmbedding(
+  text: string,
+  apiKey: string | undefined
+): Promise<number[] | null> {
   if (!apiKey) {
     console.error('[mothership] MISSING OPENAI_API_KEY env var')
     return null
@@ -106,21 +121,24 @@ async function generateLargeEmbedding(text: string): Promise<number[] | null> {
  * Score content against brand voice using transcript chunk similarity.
  * Uses 3072-dim embeddings to match Mothership's transcript_chunks table.
  */
-export async function scoreBrandVoice(content: string): Promise<BrandVoiceScore> {
-  const supabase = getSupabaseClient()
+export async function scoreBrandVoice(
+  content: string,
+  env: MothershipEnv
+): Promise<BrandVoiceScore> {
+  const supabase = getSupabaseClient(env)
 
   if (!supabase) {
     console.warn('[mothership] scoreBrandVoice: Supabase client is null (env vars missing)')
     return { alignment: 0, topMatches: [], available: false }
   }
 
-  if (!import.meta.env.ENABLE_MOTHERSHIP) {
+  if (!env.ENABLE_MOTHERSHIP) {
     console.warn('[mothership] scoreBrandVoice: ENABLE_MOTHERSHIP is falsy')
     return { alignment: 0, topMatches: [], available: false }
   }
 
   try {
-    const embedding = await generateLargeEmbedding(content)
+    const embedding = await generateLargeEmbedding(content, env.OPENAI_API_KEY)
     if (!embedding) {
       console.error(
         '[mothership] scoreBrandVoice: embedding generation failed — OpenAI text-embedding-3-large may not be accessible'
@@ -176,27 +194,25 @@ export async function scoreBrandVoice(content: string): Promise<BrandVoiceScore>
  */
 export async function scorePersonas(
   content: string,
-  segment?: string,
-  brandSlug: string = 'southland-organics'
+  segment: string | undefined,
+  brandSlug: string = 'southland-organics',
+  env: MothershipEnv
 ): Promise<PersonaScores | null> {
-  const supabase = getSupabaseClient()
+  const supabase = getSupabaseClient(env)
 
   if (!supabase) {
     console.error('[mothership] scorePersonas: Supabase client is null (env vars missing)')
     return null
   }
 
-  if (!import.meta.env.ENABLE_MOTHERSHIP) {
-    console.error(
-      '[mothership] scorePersonas: ENABLE_MOTHERSHIP is falsy:',
-      import.meta.env.ENABLE_MOTHERSHIP
-    )
+  if (!env.ENABLE_MOTHERSHIP) {
+    console.error('[mothership] scorePersonas: ENABLE_MOTHERSHIP is falsy:', env.ENABLE_MOTHERSHIP)
     return null
   }
 
   try {
     // Generate embedding for content
-    const embedding = await generateEmbedding(content)
+    const embedding = await generateEmbedding(content, env.OPENAI_API_KEY)
     if (!embedding) {
       console.error('[mothership] scorePersonas: embedding generation failed (see above)')
       return null
@@ -336,24 +352,28 @@ export async function scorePersonas(
 export async function analyzeContentGap(
   title: string,
   content: string,
-  url?: string,
-  brandSlug: string = 'southland-organics'
+  url: string | undefined,
+  brandSlug: string = 'southland-organics',
+  env: MothershipEnv
 ): Promise<GapStatus | null> {
-  const supabase = getSupabaseClient()
+  const supabase = getSupabaseClient(env)
 
   if (!supabase) {
     console.error('[mothership] analyzeContentGap: Supabase client is null')
     return null
   }
 
-  if (!import.meta.env.ENABLE_MOTHERSHIP) {
+  if (!env.ENABLE_MOTHERSHIP) {
     console.error('[mothership] analyzeContentGap: ENABLE_MOTHERSHIP is falsy')
     return null
   }
 
   try {
     // Generate embedding for content
-    const embedding = await generateEmbedding(`${title}\n\n${content.slice(0, 4000)}`)
+    const embedding = await generateEmbedding(
+      `${title}\n\n${content.slice(0, 4000)}`,
+      env.OPENAI_API_KEY
+    )
     if (!embedding) {
       console.error('[mothership] analyzeContentGap: embedding generation failed')
       return null
