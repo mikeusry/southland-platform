@@ -13,6 +13,7 @@ import Breadcrumbs from '../../components/shared/Breadcrumbs.astro'
 import CollectionProductCard from '../../components/shop/CollectionProductCard.astro'
 import { isValidPersonaId, type PersonaId } from '../../lib/persona'
 import { fetchAllAggregates } from '../../lib/klaviyo-reviews'
+import { getServerEnv } from '../../lib/server-env'
 
 // SSR — do not prerender
 
@@ -85,7 +86,7 @@ const breadcrumbItems = [
   { label: 'Products', href: '/products/' },
 ]
 
-const reviewAggregates = await fetchAllAggregates()
+const reviewAggregates = await fetchAllAggregates(getServerEnv(Astro.locals, 'KLAVIYO_API_KEY'))
 ---
 
 <BaseLayout

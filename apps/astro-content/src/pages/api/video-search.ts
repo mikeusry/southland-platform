@@ -6,8 +6,9 @@
  */
 import type { APIRoute } from 'astro'
 import { createClient } from '@supabase/supabase-js'
+import { getServerEnv } from '../../lib/server-env'
 
-export const GET: APIRoute = async ({ url }) => {
+export const GET: APIRoute = async ({ url, locals }) => {
   const query = url.searchParams.get('q')?.trim()
 
   if (!query) {
@@ -16,8 +17,8 @@ export const GET: APIRoute = async ({ url }) => {
     })
   }
 
-  const supabaseUrl = import.meta.env.MOTHERSHIP_SUPABASE_URL
-  const supabaseKey = import.meta.env.MOTHERSHIP_SUPABASE_SERVICE_KEY
+  const supabaseUrl = getServerEnv(locals, 'MOTHERSHIP_SUPABASE_URL')
+  const supabaseKey = getServerEnv(locals, 'MOTHERSHIP_SUPABASE_SERVICE_KEY')
 
   if (!supabaseUrl || !supabaseKey) {
     return new Response(JSON.stringify({ error: 'Supabase not configured' }), {

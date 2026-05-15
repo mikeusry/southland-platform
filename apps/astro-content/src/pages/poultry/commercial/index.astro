@@ -16,6 +16,7 @@ import AccordionFaq from '../../../components/shop/AccordionFaq.astro'
 import CollectionProductCard from '../../../components/shop/CollectionProductCard.astro'
 import { buildSouthlandUrl } from '../../../lib/cloudinary'
 import { fetchAllAggregates } from '../../../lib/klaviyo-reviews'
+import { getServerEnv } from '../../../lib/server-env'
 
 // ── Allen Reynolds photo ────────────────────────────────────────────────────
 const allenPhoto = buildSouthlandUrl('team/ALLEN_Reynolds', {
@@ -170,7 +171,7 @@ const faqSchema = {
   })),
 }
 
-const reviewAggregates = await fetchAllAggregates()
+const reviewAggregates = await fetchAllAggregates(getServerEnv(Astro.locals, 'KLAVIYO_API_KEY'))
 ---
 
 <BaseLayout title={title} description={description} schema={[pageSchema, faqSchema]} ogImage={buildSouthlandUrl('poultry/broilers/broiler_farm_sxnkd0', { width: 1200, height: 630, crop: 'fill', quality: 'auto', format: 'auto' })}>

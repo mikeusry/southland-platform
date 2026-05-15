@@ -117,8 +117,11 @@ const REVISION = '2024-10-15'
  * Fetches ALL pages to compute accurate aggregates (most products have <50 reviews).
  * Returns null on any failure — PDP renders without reviews.
  */
-export async function fetchProductReviews(shopifyGid: string): Promise<ProductReviewData | null> {
-  const apiKey = import.meta.env.KLAVIYO_API_KEY
+export async function fetchProductReviews(
+  shopifyGid: string,
+  apiKeyOverride?: string
+): Promise<ProductReviewData | null> {
+  const apiKey = apiKeyOverride || import.meta.env.KLAVIYO_API_KEY
   if (!apiKey) {
     console.warn('[klaviyo-reviews] KLAVIYO_API_KEY not set, skipping reviews')
     return null
@@ -187,12 +190,13 @@ export async function fetchProductReviews(shopifyGid: string): Promise<ProductRe
 export async function fetchReviewPage(
   shopifyGid: string,
   cursor?: string,
-  pageSize = 10
+  pageSize = 10,
+  apiKeyOverride?: string
 ): Promise<{
   reviews: KlaviyoReview[]
   nextCursor: string | null
 } | null> {
-  const apiKey = import.meta.env.KLAVIYO_API_KEY
+  const apiKey = apiKeyOverride || import.meta.env.KLAVIYO_API_KEY
   if (!apiKey) return null
 
   const itemId = shopifyGidToKlaviyoItemId(shopifyGid)
@@ -247,10 +251,12 @@ let _aggregateCache: Map<string, ReviewAggregate> | null = null
  * Returns a Map keyed by Shopify GID (e.g. "gid://shopify/Product/123").
  * Cached in memory so multiple components on the same page share one fetch.
  */
-export async function fetchAllAggregates(): Promise<Map<string, ReviewAggregate>> {
+export async function fetchAllAggregates(
+  apiKeyOverride?: string
+): Promise<Map<string, ReviewAggregate>> {
   if (_aggregateCache) return _aggregateCache
 
-  const apiKey = import.meta.env.KLAVIYO_API_KEY
+  const apiKey = apiKeyOverride || import.meta.env.KLAVIYO_API_KEY
   if (!apiKey) return new Map()
 
   try {

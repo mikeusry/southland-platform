@@ -17,6 +17,7 @@ import AccordionFaq from '../../../components/shop/AccordionFaq.astro'
 import CollectionProductCard from '../../../components/shop/CollectionProductCard.astro'
 import { buildSouthlandUrl } from '../../../lib/cloudinary'
 import { fetchAllAggregates } from '../../../lib/klaviyo-reviews'
+import { getServerEnv } from '../../../lib/server-env'
 
 // ── Allen Reynolds photo ────────────────────────────────────────────────────
 const turkeyIcon = buildSouthlandUrl('poultry/turkey/Turkey_icon', {
@@ -179,7 +180,7 @@ const faqSchema = {
   })),
 }
 
-const reviewAggregates = await fetchAllAggregates()
+const reviewAggregates = await fetchAllAggregates(getServerEnv(Astro.locals, 'KLAVIYO_API_KEY'))
 ---
 
 <BaseLayout title={title} description={description} schema={[pageSchema, faqSchema]} ogImage="https://res.cloudinary.com/southland-organics/image/upload/w_1200,h_630,c_lfill,q_auto,f_auto,g_auto/Southland%20Website/poultry/turkey/Turkey_Header">

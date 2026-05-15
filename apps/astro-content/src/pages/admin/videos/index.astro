@@ -6,9 +6,10 @@
 import AdminLayout from '../../../layouts/AdminLayout.astro'
 import VideoLibrary from '../../../components/admin/VideoLibrary'
 import { createClient } from '@supabase/supabase-js'
+import { getServerEnv } from '../../../lib/server-env'
 
-const supabaseUrl = import.meta.env.MOTHERSHIP_SUPABASE_URL
-const supabaseKey = import.meta.env.MOTHERSHIP_SUPABASE_SERVICE_KEY
+const supabaseUrl = getServerEnv(Astro.locals, 'MOTHERSHIP_SUPABASE_URL')
+const supabaseKey = getServerEnv(Astro.locals, 'MOTHERSHIP_SUPABASE_SERVICE_KEY')
 
 let videos: any[] = []
 let error: string | null = null

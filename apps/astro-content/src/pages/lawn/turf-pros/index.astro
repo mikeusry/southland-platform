@@ -18,6 +18,7 @@ import CollectionProductCard from '../../../components/shop/CollectionProductCar
 import Breadcrumbs from '../../../components/shared/Breadcrumbs.astro'
 import { buildSouthlandUrl, buildCloudinaryUrl } from '../../../lib/cloudinary'
 import { fetchAllAggregates } from '../../../lib/klaviyo-reviews'
+import { getServerEnv } from '../../../lib/server-env'
 
 // ── Brad Broxton photo ──────────────────────────────────────────────────────
 const bradPhoto = buildSouthlandUrl('team/BRAD_Broxton', {
@@ -160,7 +161,7 @@ const ogImage = heroImage
   ? buildCloudinaryUrl(heroImage, { width: 1200, height: 630, crop: 'fill' })
   : undefined
 
-const reviewAggregates = await fetchAllAggregates()
+const reviewAggregates = await fetchAllAggregates(getServerEnv(Astro.locals, 'KLAVIYO_API_KEY'))
 ---
 
 <BaseLayout

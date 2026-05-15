@@ -16,6 +16,7 @@ import ProofPoints from '../../components/cdp/ProofPoints.astro'
 import Breadcrumbs from '../../components/shared/Breadcrumbs.astro'
 import type { PersonaId } from '../../lib/persona'
 import { fetchAllAggregates } from '../../lib/klaviyo-reviews'
+import { getServerEnv } from '../../lib/server-env'
 
 // SSR — do not prerender
 const { slug } = Astro.params
@@ -195,7 +196,7 @@ const theme =
 const displayTitle = heroHeadline || title
 const displaySubheadline = heroSubheadline || seoDescription
 
-const reviewAggregates = await fetchAllAggregates()
+const reviewAggregates = await fetchAllAggregates(getServerEnv(Astro.locals, 'KLAVIYO_API_KEY'))
 ---
 
 <BaseLayout

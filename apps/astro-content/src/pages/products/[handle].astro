@@ -23,6 +23,7 @@ import AccordionFaq from '../../components/shop/AccordionFaq.astro'
 import { isValidPersonaId, type PersonaId } from '../../lib/persona'
 import TalkToRep from '../../components/product/TalkToRep'
 import { fetchProductReviews, fetchAllAggregates } from '../../lib/klaviyo-reviews'
+import { getServerEnv } from '../../lib/server-env'
 import StarRating from '../../components/product/StarRating.astro'
 import ReviewsSection from '../../components/product/ReviewsSection.astro'
 
@@ -63,7 +64,8 @@ if (!product) {
 }
 
 // ── Fetch Klaviyo reviews (graceful — returns null on failure) ──────────────
-const reviewData = await fetchProductReviews(product.id)
+const klaviyoKey = getServerEnv(Astro.locals, 'KLAVIYO_API_KEY')
+const reviewData = await fetchProductReviews(product.id, klaviyoKey)
 
 // ── Related products (same productType collection) ──────────────────────────
 let relatedProducts: Product[] = []
@@ -76,7 +78,7 @@ if (product.productType) {
 }
 
 // ── Batch review aggregates for related product cards ───────────────────────
-const allAggregates = relatedProducts.length > 0 ? await fetchAllAggregates() : new Map()
+const allAggregates = relatedProducts.length > 0 ? await fetchAllAggregates(klaviyoKey) : new Map()
 
 // ── Bundle products (annihilate-and-repopulate kit etc.) ────────────────────
 type BundleEntry = Awaited<ReturnType<typeof getProductByHandle>>

@@ -23,6 +23,7 @@ import CollectionProductCard from '../../../components/shop/CollectionProductCar
 import Breadcrumbs from '../../../components/shared/Breadcrumbs.astro'
 import { buildSouthlandUrl } from '../../../lib/cloudinary'
 import { fetchAllAggregates } from '../../../lib/klaviyo-reviews'
+import { getServerEnv } from '../../../lib/server-env'
 
 // ── Mike Usry photo ─────────────────────────────────────────────────────────
 const mikePhoto = buildSouthlandUrl('team/MIKE_Usry', {
@@ -184,7 +185,7 @@ const faqSchema = {
   })),
 }
 
-const reviewAggregates = await fetchAllAggregates()
+const reviewAggregates = await fetchAllAggregates(getServerEnv(Astro.locals, 'KLAVIYO_API_KEY'))
 ---
 
 <BaseLayout
