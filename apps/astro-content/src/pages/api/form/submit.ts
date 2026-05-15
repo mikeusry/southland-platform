@@ -174,8 +174,10 @@ function formatProductInterest(interest?: string): string {
   return interest ? map[interest] || interest : 'N/A'
 }
 
-export const POST: APIRoute = async ({ request }) => {
-  const sendgridKey = import.meta.env.SENDGRID_API_KEY
+export const POST: APIRoute = async ({ request, locals }) => {
+  // CF Pages secrets land on locals.runtime.env; local dev uses import.meta.env.
+  const runtimeEnv = (locals as { runtime?: { env?: Record<string, string> } })?.runtime?.env
+  const sendgridKey = runtimeEnv?.SENDGRID_API_KEY || import.meta.env.SENDGRID_API_KEY
 
   if (!sendgridKey) {
     console.error('SENDGRID_API_KEY not configured')
