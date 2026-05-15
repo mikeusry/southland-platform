@@ -17,11 +17,7 @@ import type {
   QualityMetrics,
   SCORE_THRESHOLDS,
 } from '../../lib/content-score.types'
-import {
-  scorePersonas,
-  analyzeContentGap,
-  type MothershipEnv,
-} from '../../lib/services/mothership'
+import { scorePersonas, analyzeContentGap, type MothershipEnv } from '../../lib/services/mothership'
 import { checkOriginality } from '../../lib/services/originality'
 import { analyzeContentSEO, computeLocalSEOMetrics } from '../../lib/services/dataforseo'
 import { getServerEnv } from '../../lib/server-env'

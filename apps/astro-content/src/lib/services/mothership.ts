@@ -44,7 +44,10 @@ function getSupabaseClient(env: MothershipEnv): SupabaseClient | null {
 }
 
 // OpenAI client for generating embeddings
-async function generateEmbedding(text: string, apiKey: string | undefined): Promise<number[] | null> {
+async function generateEmbedding(
+  text: string,
+  apiKey: string | undefined
+): Promise<number[] | null> {
   if (!apiKey) {
     console.error('[mothership] MISSING OPENAI_API_KEY env var')
     return null
