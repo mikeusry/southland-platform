@@ -56,6 +56,18 @@ Sentry.init({
     // networks blocking maps.googleapis.com. Store locator has a
     // fallback UI that handles this gracefully, so these are noise.
     /^Could not load "(marker|places_impl|geocoder|util|map|drawing|visualization)"/,
+    // Safari content extractor (Spotlight / Reader / Look Up) runs its own
+    // JSON-LD parser against our pages and throws on @context handling.
+    // Zero affected users, zero usable stack — it's not our code.
+    /r\["@context"\]\.toLowerCase/,
+    // Browser extension noise (Chrome message bus, Android WebView GC,
+    // cross-origin iframes from chat widgets/Shopify Buy Button)
+    'runtime.sendMessage',
+    'Java object is gone',
+    /Blocked a frame with origin .* from accessing a cross-origin frame/,
+    // Single-fire syntax errors that only come from injected/eval'd code
+    'missing ) after argument list',
+    'Unexpected end of input',
   ],
 
   // Ignore extension URLs and Google Translate proxy
@@ -71,6 +83,15 @@ Sentry.init({
   // Tag cart-related errors for easy filtering
   beforeSend(event) {
     const msg = event.exception?.values?.[0]?.value || ''
+    const url = event.request?.url || ''
+
+    // Drop errors fired from Google Translate proxy frames — the page URL
+    // ends in translate.goog but the stack frames point at our bundle, so
+    // denyUrls (which matches stack URLs) doesn't catch them.
+    if (url.includes('translate.goog')) {
+      return null
+    }
+
     if (msg.includes('cart') || msg.includes('Cart') || msg.includes('add to cart')) {
       event.tags = { ...event.tags, feature: 'cart' }
     }
