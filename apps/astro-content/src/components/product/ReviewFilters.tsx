@@ -22,6 +22,7 @@ export default function ReviewFilters({ reviews, totalCount }: Props) {
   const [filter, setFilter] = useState<FilterOption>('all')
 
   const applyFilters = useCallback(() => {
+    if (typeof document === 'undefined') return
     const container = document.getElementById('review-cards')
     if (!container) return
 
