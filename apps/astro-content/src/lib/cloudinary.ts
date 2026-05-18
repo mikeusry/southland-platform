@@ -156,6 +156,13 @@ export function buildCloudinaryUrl(
   publicId: string,
   options: CloudinaryTransformOptions = {}
 ): string {
+  // Pass-through for full URLs — Nexus publishes some MDX with already-built
+  // Cloudinary/Mux URLs in coverImage/thumbnail fields. Wrapping them as if
+  // they were public IDs produced malformed nested URLs (T-722).
+  if (publicId.startsWith('http://') || publicId.startsWith('https://')) {
+    return publicId
+  }
+
   const cloudName = getCloudName()
   const baseUrl = `https://res.cloudinary.com/${cloudName}/image/upload`
 
@@ -360,6 +367,9 @@ export const BRANDING_FOLDER = `${SOUTHLAND_FOLDER}/Southland Branding`
  * Helper function to build public ID with Southland base folder
  */
 export function getSouthlandImageId(imagePath: string): string {
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath
+  }
   const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath
   return `${SOUTHLAND_FOLDER}/${cleanPath}`
 }
@@ -368,6 +378,9 @@ export function getSouthlandImageId(imagePath: string): string {
  * Helper function to build public ID for branding assets
  */
 export function getBrandingImageId(imagePath: string): string {
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath
+  }
   const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath
   return `${BRANDING_FOLDER}/${cleanPath}`
 }
