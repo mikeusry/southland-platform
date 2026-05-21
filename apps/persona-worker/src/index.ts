@@ -180,7 +180,8 @@ async function processEvent(event: PixelEvent, env: Env): Promise<ScoringRespons
   // Forward to BigQuery (non-blocking)
   forwardToBigQuery(event, visitor, env).catch(console.error)
 
-  return {
+  // Build the prod-side response.
+  const response: ScoringResponse = {
     success: true,
     visitor_id: visitorId,
     persona: getEffectivePersona(visitor),
@@ -192,6 +193,18 @@ async function processEvent(event: PixelEvent, env: Env): Promise<ScoringRespons
     explicit_choice: visitor.explicit_persona,
     explicit_segment: visitor.explicit_segment,
   }
+
+  // Phase 0.6.b — shadow-forward the event PLUS this prod scoring result to
+  // the staging worker. Staging runs its own scoring pass independently,
+  // then writes one parity row containing both prod's and staging's
+  // predictions. The mothership parity-diff job reads from that one table
+  // — no BQ-side join required.
+  //
+  // Feature-flagged via env.SHADOW_FORWARD_URL — when the var is unset
+  // (today's state, and post-cutover), the function no-ops.
+  shadowForward(event, response, env).catch(console.error)
+
+  return response
 }
 
 /**
@@ -344,5 +357,51 @@ async function forwardToBigQuery(event: PixelEvent, visitor: VisitorData, env: E
     })
   } catch (error) {
     console.error('BigQuery forward failed:', error)
+  }
+}
+
+/**
+ * Shadow-forward the event + prod's scoring result to a staging worker
+ * (Phase 0.6.b).
+ *
+ * Fire-and-forget. Failures are logged but don't affect the primary
+ * scoring response. Feature-flagged: if SHADOW_FORWARD_URL is unset,
+ * this no-ops.
+ *
+ * Payload shape:
+ *   {
+ *     event: <original PixelEvent>,
+ *     prod_response: <ScoringResponse from this worker>
+ *   }
+ *
+ * The staging worker (mounted on the refactor/measurement-engine branch
+ * via @pointdog/measurement-worker) hits a dedicated /shadow endpoint,
+ * runs the SAME event through its own scoring pass, then writes one BQ
+ * row containing BOTH prod's prediction (from prod_response) and its own
+ * prediction. A nightly mothership job reads cdp.pixel_scoring_parity and
+ * reports persona/segment/stage mismatch rates.
+ *
+ * After 24-48h green, PR #8 merges, refactored worker takes over prod,
+ * and this shadow forwarder is reverted (it's on a separate branch:
+ * feat/measurement-shadow-forwarder).
+ */
+async function shadowForward(
+  event: PixelEvent,
+  prodResponse: ScoringResponse,
+  env: Env
+): Promise<void> {
+  if (!env.SHADOW_FORWARD_URL) return
+
+  try {
+    await fetch(env.SHADOW_FORWARD_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shadow-Source': 'southland-persona-worker-prod',
+      },
+      body: JSON.stringify({ event, prod_response: prodResponse }),
+    })
+  } catch (error) {
+    console.error('Shadow forward failed:', error)
   }
 }

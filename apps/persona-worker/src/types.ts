@@ -164,6 +164,10 @@ export interface Env {
   VISITOR_KV: KVNamespace
   BRAND_ID: string
   BIGQUERY_WEBHOOK_URL?: string
+  // Phase 0.6.b — when set, every event is also shadow-forwarded to this
+  // URL (typically https://pixel-staging.southlandorganics.com/event) so
+  // we can diff prod scoring against the refactored engine. Unset = no-op.
+  SHADOW_FORWARD_URL?: string
 }
 
 // Response from the worker
