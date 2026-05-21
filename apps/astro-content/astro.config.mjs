@@ -49,8 +49,13 @@ export default defineConfig({
     sentry({
       dsn: 'https://2cd735876d8ac86479ca9b7ea11b6960@o4510754307178496.ingest.us.sentry.io/4511174165856256',
       environment: process.env.NODE_ENV || 'production',
-      sourceMapsUploadOptions: {
-        enabled: false, // Cloudflare Pages — upload via CLI if needed later
+      // Source maps upload — requires SENTRY_AUTH_TOKEN at build time (GitHub
+      // Actions secret). Without it, the plugin no-ops gracefully. With it,
+      // minified errors like `Yd` deminify to real class names in Sentry.
+      org: 'inventorysouthland',
+      project: 'southland-website',
+      sourcemaps: {
+        disable: !process.env.SENTRY_AUTH_TOKEN,
       },
       tracesSampleRate: 0.3,
       replaysSessionSampleRate: 0.05,

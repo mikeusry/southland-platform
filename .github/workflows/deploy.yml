@@ -52,6 +52,10 @@ jobs:
           PUBLIC_CLOUDINARY_CLOUD_NAME: southland-organics
           PUBLIC_SITE_URL: https://southlandorganics.com
           PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.PUBLIC_GOOGLE_MAPS_API_KEY }}
+          # Source map upload to Sentry. If the secret isn't set, the Sentry
+          # plugin disables uploads (see astro.config.mjs) and the build still
+          # succeeds — minified errors will just stay minified in Sentry.
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: Deploy to Cloudflare Pages
         env:
