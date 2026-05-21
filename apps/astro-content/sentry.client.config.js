@@ -65,6 +65,14 @@ Sentry.init({
     'runtime.sendMessage',
     'Java object is gone',
     /Blocked a frame with origin .* from accessing a cross-origin frame/,
+    // Safari/Firefox throw this when a <script src> from another origin
+    // loads without CORS headers — almost always third-party pixels, chat
+    // widgets, or ad tags we don't control. No stack into our code.
+    /Cross-origin script load denied by Cross-Origin Resource Sharing policy/,
+    // iOS in-app WebViews (Instagram, Facebook, TikTok, etc.) inject code
+    // that probes window.webkit.messageHandlers. When it's not present,
+    // the host app's injected script throws. Not from our bundle.
+    /window\.webkit\.messageHandlers/,
     // Single-fire syntax errors that only come from injected/eval'd code
     'missing ) after argument list',
     'Unexpected end of input',
