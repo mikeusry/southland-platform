@@ -60,6 +60,7 @@ export default [
         ReadableStream: 'readonly',
         Uint8Array: 'readonly',
         AbortSignal: 'readonly',
+        AbortController: 'readonly',
       },
     },
     plugins: {
