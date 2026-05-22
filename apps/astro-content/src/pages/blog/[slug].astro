@@ -344,8 +344,10 @@ const firstTouchSegment = segmentForBlog(post.data.segment)
   articleAuthor={author?.name}
   articleSection={segmentLabels[post.data.segment || 'general']}
 >
-  {/* First-touch: stamp sl_segment from the article's segment (no visual band —
-      the post already renders a segment-aware CTA below). */}
+  {
+    /* First-touch: stamp sl_segment from the article's segment (no visual band —
+      the post already renders a segment-aware CTA below). */
+  }
   {firstTouchSegment && <FirstTouchSegment segment={firstTouchSegment} stampOnly />}
 
   <!-- Article Header — split layout: text left, media right -->
