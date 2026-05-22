@@ -115,6 +115,16 @@ const gtmContainerId = import.meta.env.PUBLIC_GTM_CONTAINER_ID;
           if(found.srsltid&&!found.utm_source){found.utm_source='google';found.utm_medium=found.utm_medium||'cpc';found.utm_campaign=found.utm_campaign||'pmax'}
           if(found.gclid&&!found.utm_source){found.utm_source='google';found.utm_medium=found.utm_medium||'cpc'}
           if(found.fbclid&&!found.utm_source){found.utm_source='facebook';found.utm_medium=found.utm_medium||'paid_social'}
+          // Read the real _fbp cookie set by the Meta Pixel (fbq init below). This
+          // is Meta's own browser ID — the highest-signal CAPI match parameter after
+          // email. Cookie may be absent on the very first pageview (pixel loads
+          // async) but persists, so it's reliably present by add-to-cart, which is
+          // when cart.ts reads _pd_attribution. (_fbc is left to Nexus, which
+          // reconstructs it from fbclid; capturing the real _fbc cookie would need
+          // its own orders column + plumbing — a separate increment.)
+          var ck=function(n){var m=document.cookie.match(new RegExp('(?:^|; )'+n+'=([^;]*)'));return m?decodeURIComponent(m[1]):''};
+          var fbp=ck('_fbp');
+          if(fbp){found.fbp=fbp;hasNew=true}
           var stored={};try{stored=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
           if(hasNew){var merged={};for(var k in stored){if(stored.hasOwnProperty(k))merged[k]=stored[k]}for(var j in found){if(found.hasOwnProperty(j))merged[j]=found[j]}merged._timestamp=Date.now();merged._landing_page=url.pathname+url.search;merged._referrer=document.referrer||'';try{localStorage.setItem(KEY,JSON.stringify(merged))}catch(e){}}
         }catch(e){}

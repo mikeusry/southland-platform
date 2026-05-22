@@ -106,6 +106,7 @@ function getAttributionAttrs(): Array<{ key: string; value: string }> {
       'utm_term',
       'gclid',
       'fbclid',
+      'fbp', // Meta first-party browser ID — forwarded to CAPI by Nexus for match quality
       'msclid',
       'ttclid',
       'srsltid',
@@ -143,6 +144,7 @@ function getFirstTouchAttrs(): Array<{ key: string; value: string }> {
       'utm_campaign',
       'gclid',
       'fbclid',
+      'fbp',
       'msclid',
       'ttclid',
     ]
