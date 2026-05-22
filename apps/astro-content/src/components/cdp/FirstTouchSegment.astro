@@ -1,0 +1,170 @@
+---
+/**
+ * FirstTouchSegment
+ *
+ * Renders a segment-relevant engagement band on entry pages (product / blog),
+ * and stamps the `sl_segment` cookie on first touch so the rest of the site
+ * (homepage hero, other modules) reacts to the visitor's segment.
+ *
+ * Why: 86% of traffic is single-page and never reaches the persona engine's
+ * 3-page threshold. But the entry page reveals clear SEGMENT intent (a torched
+ * view = turf, a chicken-mites article = poultry). This nudges that one-and-done
+ * visitor toward the segment hub before they bounce — and remembers the segment
+ * if they do come back.
+ *
+ * Segment-only by design: it never claims a persona (that needs more signal).
+ * It does NOT override an explicit persona/segment the visitor already chose.
+ *
+ * Server-rendered from the page's own `segment` prop — no flash, no fetch.
+ */
+import { getSegmentConfig, type SegmentId } from '../../lib/persona'
+
+interface Props {
+  segment: SegmentId
+  /**
+   * Stamp the sl_segment cookie but render no visual band. Use on pages that
+   * already have a segment-aware CTA (e.g. blog posts) so we capture the
+   * segment without duplicating UI.
+   */
+  stampOnly?: boolean
+  class?: string
+}
+
+const { segment, stampOnly = false, class: className = '' } = Astro.props
+
+// 'general' carries no intent — render nothing. stampOnly suppresses the band.
+const cfg = !stampOnly && segment && segment !== 'general' ? getSegmentConfig(segment) : null
+
+// Headline copy per segment. Speaks to the intent the entry page revealed.
+const COPY: Record<Exclude<SegmentId, 'general'>, { eyebrow: string; headline: string }> = {
+  poultry: {
+    eyebrow: 'Poultry & Flock Health',
+    headline: 'See the full poultry program — probiotics, litter, and bird health.',
+  },
+  turf: {
+    eyebrow: 'Lawn, Turf & Soil',
+    headline: 'Build a complete lawn & soil program with biological inputs.',
+  },
+  waste: {
+    eyebrow: 'Septic & Waste',
+    headline: 'Keep your septic and waste systems flowing clean.',
+  },
+  sports: {
+    eyebrow: 'Athletic Gear Care',
+    headline: 'Pro-grade odor control for gear that takes a beating.',
+  },
+}
+
+const copy = cfg && segment !== 'general' ? COPY[segment as Exclude<SegmentId, 'general'>] : null
+---
+
+{
+  cfg && copy && (
+    <section
+      class={`first-touch-segment ${className}`}
+      data-segment={segment}
+      style={`background:${cfg.bgColor}; border-color:${cfg.color}20;`}
+    >
+      <div class="ft-inner">
+        <div class="ft-text">
+          <span class="ft-eyebrow" style={`color:${cfg.color};`}>
+            {copy.eyebrow}
+          </span>
+          <p class="ft-headline">{copy.headline}</p>
+        </div>
+        <a class="ft-cta" href={cfg.hubPage} style={`background:${cfg.color};`}>
+          Explore {cfg.label}
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+    </section>
+  )
+}
+
+{/* Stamp sl_segment on first touch (only if no persona/segment chosen yet). */}
+<script is:inline define:vars={{ segment }}>
+  ;(function () {
+    if (!segment || segment === 'general') return
+    try {
+      var c = '; ' + document.cookie
+      function has(name) {
+        var p = c.split('; ' + name + '=')
+        return p.length === 2 && p[1].split(';')[0].length > 0
+      }
+      // Respect an explicit choice — never override a known persona/segment.
+      if (has('sl_persona') || has('sl_segment')) return
+      var domain = location.hostname.replace(/^www\./, '')
+      var expires = new Date(Date.now() + 365 * 864e5).toUTCString()
+      document.cookie =
+        'sl_segment=' +
+        encodeURIComponent(segment) +
+        '; expires=' +
+        expires +
+        '; path=/; domain=.' +
+        domain +
+        '; SameSite=Lax'
+    } catch (e) {}
+  })()
+</script>
+
+<style>
+  .first-touch-segment {
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+    padding: 1.25rem 1.25rem;
+  }
+  .ft-inner {
+    margin: 0 auto;
+    max-width: 72rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .ft-eyebrow {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .ft-headline {
+    margin: 0.25rem 0 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #1f2937;
+    line-height: 1.35;
+  }
+  .ft-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+    border-radius: 0.5rem;
+    padding: 0.7rem 1.25rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #fff;
+    text-decoration: none;
+    transition:
+      transform 0.15s ease,
+      opacity 0.15s ease;
+  }
+  .ft-cta:hover {
+    transform: translateY(-1px);
+    opacity: 0.94;
+  }
+  .ft-cta svg {
+    height: 1rem;
+    width: 1rem;
+  }
+</style>

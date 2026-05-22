@@ -21,6 +21,8 @@ import AddToCartButton from '../../components/product/AddToCartButton'
 import CollectionProductCard from '../../components/shop/CollectionProductCard.astro'
 import AccordionFaq from '../../components/shop/AccordionFaq.astro'
 import { isValidPersonaId, type PersonaId } from '../../lib/persona'
+import FirstTouchSegment from '../../components/cdp/FirstTouchSegment.astro'
+import { segmentForProduct } from '../../lib/segment-map'
 import TalkToRep from '../../components/product/TalkToRep'
 import { fetchProductReviews, fetchAllAggregates } from '../../lib/klaviyo-reviews'
 import { getServerEnv } from '../../lib/server-env'
@@ -184,6 +186,11 @@ const SEGMENT_TO_TYPE: Record<string, string> = {
 }
 const resolvedProductType =
   product.productType || (tina?.segment ? SEGMENT_TO_TYPE[tina.segment] : '') || ''
+
+// First-touch segment for the engagement band + sl_segment stamp. Handle-first
+// (accurate for high-traffic SKUs), productType fallback. Catches waste/sports
+// the inferredSegment heuristic above doesn't.
+const firstTouchSegment = segmentForProduct(shopifyHandle, product.productType)
 
 // ── Gallon variant detection (for case builder upsell) ─────────────────────
 const gallonVariant = product.variants.find((v) =>
@@ -932,6 +939,10 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
         </div>
       </div>
     </section>
+
+    {/* First-touch segment band — nudges single-page visitors toward the
+        segment hub + stamps sl_segment. Renders nothing for unknown segment. */}
+    {firstTouchSegment && <FirstTouchSegment segment={firstTouchSegment} />}
 
     {/* S2: VIDEO — conditional. Side-by-side when both Mux + YouTube exist. */}
     {

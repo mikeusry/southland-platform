@@ -10,6 +10,8 @@ import AuthorCard from '../../components/blog/AuthorCard.astro'
 import { getCollection, getEntry, render } from 'astro:content'
 import { buildPersonSchema, buildOrganizationSchema } from '../../lib/schema'
 import { resolveEpisodeCover, buildSouthlandUrl } from '../../lib/cloudinary'
+import FirstTouchSegment from '../../components/cdp/FirstTouchSegment.astro'
+import { segmentForBlog } from '../../lib/segment-map'
 
 export const prerender = true
 
@@ -321,6 +323,10 @@ const segmentCtas: Record<string, SegmentCta> = {
   },
 }
 const cta = segmentCtas[post.data.segment || 'general']
+
+// First-touch segment for the sl_segment stamp. Blog already renders a
+// segment-aware CTA, so stamp-only (no extra band).
+const firstTouchSegment = segmentForBlog(post.data.segment)
 ---
 
 <BaseLayout
@@ -338,6 +344,10 @@ const cta = segmentCtas[post.data.segment || 'general']
   articleAuthor={author?.name}
   articleSection={segmentLabels[post.data.segment || 'general']}
 >
+  {/* First-touch: stamp sl_segment from the article's segment (no visual band —
+      the post already renders a segment-aware CTA below). */}
+  {firstTouchSegment && <FirstTouchSegment segment={firstTouchSegment} stampOnly />}
+
   <!-- Article Header — split layout: text left, media right -->
   <header
     class="bg-gradient-to-br from-southland-green-dark via-southland-green-dark to-[#1f3d24] py-10 md:py-14"
