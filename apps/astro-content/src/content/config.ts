@@ -300,6 +300,11 @@ const shopCollectionsCollection = defineCollection({
         attribution: z.string().optional(), // name/role/location for the quote
       })
       .optional(),
+    // Optional Mux video for the case story (e.g. a Grower Spotlight). Pairs
+    // with caseStory above — a published grower video is first-hand proof a
+    // model can't fabricate.
+    caseStoryVideoId: z.string().optional(),
+    caseStoryVideoTitle: z.string().optional(),
   }),
 })
 

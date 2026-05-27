@@ -93,6 +93,14 @@ const collectionPersona: PersonaId = rawCollectionPersona
   : null
 const faq = tinaDoc?.data.faq ?? []
 
+// Non-commodity proof: real grower outcomes + an optional case-story video.
+// These are the #7b enrichment fields — a named operation + published video is
+// first-hand proof a model can't fabricate.
+const proofStats = tinaDoc?.data.proofStats ?? []
+const caseStory = tinaDoc?.data.caseStory ?? null
+const caseStoryVideoId = tinaDoc?.data.caseStoryVideoId ?? null
+const caseStoryVideoTitle = tinaDoc?.data.caseStoryVideoTitle ?? undefined
+
 // Render MDX body content if present
 const Content = tinaDoc ? (await tinaDoc.render()).Content : null
 
@@ -359,6 +367,75 @@ const reviewAggregates = await fetchAllAggregates(getServerEnv(Astro.locals, 'KL
             <Content />
           </div>
         </div>
+      </section>
+    )
+  }
+
+  {/* ── 5b. Grower case story + proof (non-commodity enrichment) ────────────── */}
+  {
+    caseStory && (
+      <section class="bg-white px-4 py-12 sm:py-16">
+        <div class="mx-auto max-w-4xl">
+          <div class="rounded-2xl border border-brand-green-light/20 bg-brand-green-dark/5 p-6 sm:p-10">
+            <p class="text-sm font-semibold uppercase tracking-wide text-brand-green-light">
+              A real grower we worked alongside
+            </p>
+            <h2 class="mt-2 font-heading text-2xl text-brand-green-dark md:text-3xl">
+              {caseStory.operation}
+            </h2>
+
+            {proofStats.length > 0 && (
+              <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {proofStats.map((s: { value: string; label: string }) => (
+                  <div class="rounded-xl bg-white p-4 text-center shadow-sm">
+                    <div class="font-heading text-3xl text-brand-green-dark">{s.value}</div>
+                    <div class="mt-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      {s.label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div class="mt-6 space-y-3 text-gray-700">
+              <p>
+                <span class="font-semibold text-brand-green-dark">The challenge:</span>{' '}
+                {caseStory.challenge}
+              </p>
+              <p>
+                <span class="font-semibold text-brand-green-dark">What happened:</span>{' '}
+                {caseStory.outcome}
+              </p>
+            </div>
+
+            {caseStory.quote && (
+              <blockquote class="mt-6 border-l-4 border-brand-green-light pl-4 text-lg italic text-gray-800">
+                “{caseStory.quote}”
+                {caseStory.attribution && (
+                  <footer class="mt-2 text-sm not-italic text-gray-500">
+                    — {caseStory.attribution}
+                  </footer>
+                )}
+              </blockquote>
+            )}
+
+            {caseStoryVideoId && (
+              <div class="mt-8">
+                <div class="aspect-video overflow-hidden rounded-xl shadow-lg">
+                  <mux-player
+                    playback-id={caseStoryVideoId}
+                    accent-color="#44883e"
+                    metadata-video-title={caseStoryVideoTitle}
+                    default-hidden-captions
+                    poster={`https://image.mux.com/${caseStoryVideoId}/thumbnail.jpg?time=10`}
+                    style="width:100%;height:100%;--media-object-fit:cover;"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        {caseStoryVideoId && <script>import('@mux/mux-player').catch(function () {})</script>}
       </section>
     )
   }
