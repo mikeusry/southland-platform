@@ -12,7 +12,7 @@
  * for a specific flock. Rates sourced verbatim from product MDX.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import FlockDosingCalculator from '../../components/calculators/FlockDosingCalculator'
+import FlockDosingCalculatorIsland from '../../components/calculators/FlockDosingCalculator'
 
 const title = 'Small Flock Dosing Calculator | Southland Organics'
 const description =
@@ -60,7 +60,7 @@ const schema = {
   <!-- Calculator -->
   <section class="py-12">
     <div class="mx-auto max-w-3xl px-4">
-      <FlockDosingCalculator client:load />
+      <FlockDosingCalculatorIsland client:load />
     </div>
   </section>
 
