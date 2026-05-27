@@ -274,6 +274,32 @@ const shopCollectionsCollection = defineCollection({
       )
       .optional()
       .default([]),
+    // --- Non-commodity proof (Thursday Pulse #7b, 2026-05-27) ---
+    // The commodity audit found all 17 collections are 🔴 (a model regenerates
+    // generic category prose). These OPTIONAL fields let a collection carry the
+    // proprietary proof Southland uniquely owns — outcome stats and a named
+    // operation story a model cannot fabricate. Both are optional so the 17
+    // existing files keep validating; a collection is "enriched" once filled
+    // with REAL data sourced from Southland ops/sales (never invented — see the
+    // scaffold doc docs/seo/collection-enrichment/ for what each needs).
+    proofStats: z
+      .array(
+        z.object({
+          value: z.string(), // e.g. "1,000+" — the proprietary number
+          label: z.string(), // e.g. "commercial houses on program"
+        })
+      )
+      .optional()
+      .default([]),
+    caseStory: z
+      .object({
+        operation: z.string(), // who: "a 5,000-bird layer operation in Georgia"
+        challenge: z.string(), // the real problem they faced
+        outcome: z.string(), // the measured result (settlement score, FCR, mortality...)
+        quote: z.string().optional(), // optional verbatim customer quote
+        attribution: z.string().optional(), // name/role/location for the quote
+      })
+      .optional(),
   }),
 })
 

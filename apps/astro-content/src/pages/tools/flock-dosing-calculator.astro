@@ -1,0 +1,112 @@
+---
+/**
+ * /tools/flock-dosing-calculator/ — Small Flock Dosing Calculator
+ *
+ * Select product + flock size → exact dose per refill + bottle duration.
+ * Lead magnet: printable dosing plan + year-round calendar emailed after result.
+ * Nexus lead_type: roi_calculator.
+ * Persona target: Backyard Betty (small flock owners, 5-25 birds).
+ *
+ * SEO/AI-search intent (Thursday Pulse #6): a calculator returns a result FROM
+ * Southland's own dosing data — non-commodity content a model can't regenerate
+ * for a specific flock. Rates sourced verbatim from product MDX.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import FlockDosingCalculator from '../../components/calculators/FlockDosingCalculator'
+
+const title = 'Small Flock Dosing Calculator | Southland Organics'
+const description =
+  'How much Hen Helper or Catalyst does your flock need? Enter your bird count and age, get the exact dose per refill and how long a bottle lasts — free, no email required to see results.'
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+const canonicalUrl = `${siteUrl}/tools/flock-dosing-calculator/`
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'Small Flock Dosing Calculator',
+  description,
+  url: canonicalUrl,
+  applicationCategory: 'UtilityApplication',
+  operatingSystem: 'Web Browser',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  provider: {
+    '@type': 'Organization',
+    name: 'Southland Organics',
+    url: siteUrl,
+    telephone: '+1-800-608-3755',
+  },
+}
+---
+
+<BaseLayout title={title} description={description} canonicalUrl={canonicalUrl} schema={schema}>
+  <!-- Hero -->
+  <section class="bg-[#2C5234] py-16 text-white">
+    <div class="mx-auto max-w-4xl px-4 text-center">
+      <h1 class="font-heading text-3xl uppercase tracking-wide md:text-4xl">
+        Small Flock Dosing Calculator
+      </h1>
+      <p class="mx-auto mt-4 max-w-2xl text-lg text-green-100">
+        Stop guessing. Enter how many birds you have and what you're using — get the exact dose per
+        refill and how long a bottle will last your flock.
+      </p>
+    </div>
+  </section>
+
+  <!-- Calculator -->
+  <section class="py-12">
+    <div class="mx-auto max-w-3xl px-4">
+      <FlockDosingCalculator client:load />
+    </div>
+  </section>
+
+  <!-- How dosing works -->
+  <section class="bg-gray-50 py-12">
+    <div class="mx-auto max-w-4xl px-4">
+      <h2 class="mb-8 text-center font-heading text-2xl uppercase text-[#2C5234]">
+        How Backyard Dosing Works
+      </h2>
+      <div class="grid gap-6 md:grid-cols-2">
+        <div class="rounded-lg bg-white p-6 shadow-sm">
+          <h3 class="font-heading text-lg text-[#2C5234]">One tablespoon per gallon</h3>
+          <p class="mt-2 text-sm text-gray-700">
+            Both Hen Helper and Catalyst Liquid use the same simple backyard dose: one tablespoon
+            per gallon of drinking water. No scooping or measuring cups — pour it into the waterer
+            and every bird that drinks gets a dose.
+          </p>
+        </div>
+        <div class="rounded-lg bg-white p-6 shadow-sm">
+          <h3 class="font-heading text-lg text-[#2C5234]">Replace every 2-3 days</h3>
+          <p class="mt-2 text-sm text-gray-700">
+            Refresh treated water every two to three days, or whenever you top off the waterer. The
+            calculator sizes your per-refill amount around that schedule so you're not over- or
+            under-dosing.
+          </p>
+        </div>
+        <div class="rounded-lg bg-white p-6 shadow-sm">
+          <h3 class="font-heading text-lg text-[#2C5234]">Double up during stress</h3>
+          <p class="mt-2 text-sm text-gray-700">
+            Heat waves, cold snaps, molting, predator scares, or introducing new birds all stress a
+            flock. Double the dose for a few days through the event, then return to standard.
+          </p>
+        </div>
+        <div class="rounded-lg bg-white p-6 shadow-sm">
+          <h3 class="font-heading text-lg text-[#2C5234]">Safe from day one</h3>
+          <p class="mt-2 text-sm text-gray-700">
+            Start chicks at the standard dose from their first day. Early probiotic and vitamin
+            support builds a stronger foundation — there's no withdrawal period.
+          </p>
+        </div>
+      </div>
+      <p class="mx-auto mt-8 max-w-2xl text-center text-xs text-gray-500">
+        Dosing rates are pulled from our product labels. Water-intake estimates are typical backyard
+        figures for planning and rise in hot weather — they are not a veterinary prescription.
+        Always provide fresh water and consult a poultry vet for sick birds.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
