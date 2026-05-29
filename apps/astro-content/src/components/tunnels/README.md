@@ -23,8 +23,13 @@ Reality Tunnels serve different content to different personas. A visitor identif
 │  betty/       │     │  bill/        │     │  taylor/      │
 │  - BettyHero  │     │  - BillHero   │     │  - TaylorHero │
 │  - BettyProds │     │  - BillProds  │     │  - TaylorProds│
-│  - BettyTest  │     │  - BillTest   │     │  - TaylorTest │
 └───────────────┘     └───────────────┘     └───────────────┘
+
+Note: Per-persona testimonial components were removed 2026-05-29 because
+they contained Claude-fabricated names with no sourcing trail. Real
+testimonials live in product MDX `testimonials:` arrays (Allen-reviewed)
+and will be re-added as a tunnel slot only when sourced from Klaviyo
+reviews and/or Allen's OneDrive testimonial archive.
 ```
 
 ## Personas
@@ -84,11 +89,14 @@ Curated product selections for each persona:
 
 ### Testimonial Components
 
-Social proof matching each persona's context:
-
-- **Betty**: Backyard flock success stories
-- **Bill**: ROI metrics, mortality reduction, FCR improvements
-- **Taylor**: Before/after results, professional endorsements
+**Removed 2026-05-29.** Per-persona testimonial components previously lived here
+(`BettyTestimonials.astro`, `BillTestimonials.astro`, `TaylorTestimonials.astro`)
+but they carried Claude-fabricated names with no sourcing trail (Feb 2026
+commit, never imported by any page, never human-reviewed). Real testimonials
+live on PDPs via the product MDX `testimonials:` arrays (which Allen reviews
+— see commit 7767313 "Allen review" 2026-04-02). A persona-tunnel testimonial
+slot will be re-added once we wire it to a real source: Klaviyo reviews,
+Allen's OneDrive testimonial archive, or the Nexus customer-voice store.
 
 ## Usage
 
@@ -120,7 +128,6 @@ Or let RealityTunnel auto-detect from cookies:
 2. Create components:
    - `NewPersonaHero.astro` (with 10 stage variations)
    - `NewPersonaProducts.astro`
-   - `NewPersonaTestimonials.astro`
 3. Update `RealityTunnel.astro` to include new persona
 4. Add persona to scoring in `apps/persona-worker/`
 
