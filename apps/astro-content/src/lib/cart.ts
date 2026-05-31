@@ -163,6 +163,74 @@ function getFirstTouchAttrs(): Array<{ key: string; value: string }> {
 }
 
 /**
+ * Build CART-LEVEL attribute list (not per-line) for the Shopify Web Pixel
+ * cross-origin recovery (v2.3+).
+ *
+ * Why this is needed in addition to stampLines():
+ *   Per-line attributes (set by stampLines) end up on order.line_items[].properties
+ *   — which the Nexus order-created webhook reads via extractAttribution(). That
+ *   path works fine for our internal attribution table.
+ *
+ *   But the Shopify Web Pixel sandbox runs on the CHECKOUT origin
+ *   (southland-organics.myshopify.com), not the storefront origin
+ *   (southlandorganics.com). browser.sessionStorage and per-line properties
+ *   are NOT accessible cross-origin. checkout.attributes (Shopify
+ *   note_attributes set at CART level) IS the only cross-origin-safe channel.
+ *
+ *   Without cart-level attributes, 100% of pixel_events purchase rows arrive
+ *   with fbclid/gclid/utm_source = NULL — costing us Meta CAPI signal and
+ *   Customer Match audience hygiene. (See:
+ *   docs/pixel/southland-attribution-carryover-2026-05-31.md)
+ *
+ * Returns the same _pd_* keys that stampLines() emits, so the pixel can
+ * read either with no schema split.
+ */
+function getCartLevelAttributionAttrs(): Array<{ key: string; value: string }> {
+  const attrs: Array<{ key: string; value: string }> = []
+  if (typeof window === 'undefined') return attrs
+
+  // Mirror the line-level attribution payload
+  attrs.push(...getAttributionAttrs())
+  attrs.push(...getFirstTouchAttrs())
+
+  // Add session_id + user_id so the pixel can correlate cart → purchase
+  try {
+    const cid = getNexusCid()
+    if (cid) attrs.push({ key: NEXUS_CID_KEY, value: cid })
+  } catch (_err) {
+    /* localStorage may be unavailable */
+  }
+  try {
+    const uid = localStorage.getItem('_pd_uid')
+    if (uid) attrs.push({ key: '_pd_user_id', value: uid })
+  } catch (_err) {
+    /* noop */
+  }
+  try {
+    const sessionData = localStorage.getItem('pd_session') || sessionStorage.getItem('pd_session')
+    if (sessionData) {
+      const parsed = JSON.parse(sessionData)
+      if (parsed?.id) attrs.push({ key: '_pd_session_id', value: parsed.id })
+    }
+  } catch (_err) {
+    /* noop */
+  }
+
+  // Persona — useful for downstream pixel reporting splits
+  try {
+    const raw = localStorage.getItem('southland_persona')
+    if (raw) {
+      const data = JSON.parse(raw)
+      if (data?.id) attrs.push({ key: '_pd_persona', value: data.id })
+    }
+  } catch (_err) {
+    /* noop */
+  }
+
+  return attrs
+}
+
+/**
  * Inject _nexus_cid + attribution into cart line inputs.
  * Preserves any existing attributes (e.g., bundle attributes).
  *
@@ -287,11 +355,16 @@ export async function getCart(): Promise<Cart | null> {
 
 /**
  * Add lines to cart. Creates a new cart if none exists.
+ *
+ * On NEW cart creation we ALSO pass cart-level attributes — required for
+ * the Shopify Web Pixel v2.3 cross-origin attribution recovery. See
+ * getCartLevelAttributionAttrs() docstring for the full rationale.
  */
 export async function addToCart(lines: CartLineInput[]): Promise<Cart> {
   const client = getClient()
   const cartId = getCartId()
   const stamped = stampLines(lines)
+  const cartAttrs = getCartLevelAttributionAttrs()
 
   let cart: Cart
 
@@ -303,10 +376,10 @@ export async function addToCart(lines: CartLineInput[]): Promise<Cart> {
       // Cart may have expired — clear stale ID and create a new one
       console.warn('[cart] addToCart failed, creating new cart:', addErr)
       clearCartId()
-      cart = await sfCreateCart(client, stamped)
+      cart = await sfCreateCart(client, stamped, cartAttrs)
     }
   } else {
-    cart = await sfCreateCart(client, stamped)
+    cart = await sfCreateCart(client, stamped, cartAttrs)
   }
 
   setCartId(cart.id)
