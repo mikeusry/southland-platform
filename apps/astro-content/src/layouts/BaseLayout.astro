@@ -45,6 +45,12 @@ const pixelEndpoint = import.meta.env.PUBLIC_PIXEL_ENDPOINT || 'https://pixel.so
 
 // GTM config
 const gtmContainerId = import.meta.env.PUBLIC_GTM_CONTAINER_ID;
+
+// OpenAI Ads (ChatGPT Ads) pixel — provisioned 2026-06-03 from ads.openai.com Conversions tab.
+// Hardcoded fallback because the pixel ID is public (browser-side) and the env var
+// is only useful if we want to per-environment override.
+const openaiAdsPixelId =
+  import.meta.env.PUBLIC_OPENAI_ADS_PIXEL_ID || 'CffkPaU7dDnCJjtj4Fd47G';
 ---
 
 <!doctype html>
@@ -177,6 +183,13 @@ const gtmContainerId = import.meta.env.PUBLIC_GTM_CONTAINER_ID;
         src="https://www.facebook.com/tr?id=2459921147627824&ev=PageView&noscript=1"
       />
     </noscript>
+
+    <!-- OpenAI Ads Pixel (ChatGPT Ads). Server-side CAPI dedups on event_id + type. -->
+    <script is:inline define:vars={{ openaiAdsPixelId }}>
+      !function(w,d,s,u){if(w.oaiq)return;var q=function(){q.q.push(arguments)};q.q=[];w.oaiq=q;var j=d.createElement(s);j.async=1;j.src=u;var f=d.getElementsByTagName(s)[0];f.parentNode.insertBefore(j,f)}(window,document,"script","https://bzrcdn.openai.com/sdk/oaiq.min.js");
+      oaiq("init",{pixelId:openaiAdsPixelId});
+      oaiq("measure","page_viewed",{type:"contents"});
+    </script>
 
     <!-- Google Tag Manager -->
     {gtmContainerId && (
