@@ -69,6 +69,6 @@ The PDP template already supports a `canonicalUrl` override end-to-end: `BaseLay
 
 ## Sequencing across the three workstreams
 
-1. **Workstream 1 (GSC)** can proceed immediately and independently — verify the domain, flip `gsc_ready:true`, start collecting brand-domain search data. (Done/ready — see T-904 comment.)
-2. **Workstream 2 (this memo)** → Mike picks A/B/C. Recommended: C.
-3. **Workstream 3 (PMax)** landing-page target = output of #2. If C, PMax can still land on the Southland PDP buy-path (it converts) while organic equity accrues to the brand domain — or land on jockshockspray.com once that buy-path is confirmed solid. Draft spec in `JOCKSHOCK-PMAX-SPEC.md`.
+1. **Workstream 1 (GSC)** ✅ DONE (2026-06-08) — verified as URL-prefix property `https://jockshockspray.com/`, service account added, `gsc_ready:true` shipped (mothership PR #20), sync tested clean.
+2. **Workstream 2 (this memo)** ✅ Mike approved **Option C** (2026-06-08). Remaining: the exact jockshockspray.com product URL to point the PDP `rel=canonical` at → then the 2-line PDP change ships.
+3. **Workstream 3 (PMax)** landing-page target = output of #2. Under C, PMax can land on the Southland PDP buy-path (it converts) while organic equity accrues to the brand domain — or on jockshockspray.com once that buy-path is confirmed solid. Draft spec lives in **mothership**: `docs/advertising/campaigns/southland/jockshock-pmax.md` (ad strategy belongs in mothership, not platform).
