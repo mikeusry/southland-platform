@@ -108,6 +108,27 @@ const openaiAdsPixelId =
     <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
     <noscript><link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" /></noscript>
 
+    <!-- PMax srsltid → real campaign inference (shared by both capture blocks) -->
+    <script is:inline>
+      // Google Shopping/PMax clicks often land with only ?srsltid= and no utm_*.
+      // The fallback below used to stamp the generic 'pmax', collapsing Torched /
+      // Lawn&Garden / Poultry PMax into one bucket (which Nexus then defaults to
+      // Torched). Infer the real campaign from the landing path so per-campaign
+      // Pulse attribution is correct. Returns a slug pulse-pattern-matrix.py's
+      // UTM_TO_CAMPAIGN_NAME already knows: torched-pmax | lawn-garden-pmax |
+      // poultry-pmax. Falls back to 'pmax' (still resolves to Torched downstream —
+      // no regression) when the path is ambiguous. Slugs mirror segment-map.ts.
+      window.__pdPmaxCampaign=function(path){
+        var p=(path||'').toLowerCase();
+        // Torched is its own PMax campaign (weed killer), distinct from L&G.
+        if(/torched/.test(p))return 'torched-pmax';
+        // Poultry handles + section. Mirrors segment-map.ts poultry handles.
+        if(/\/poultry\b|desecticide|hen-helper|big-ole-bird|poultry-probiotic|catalyst|litter-life|backyard-poultry|natural-mite-control|apple-cider-vinegar-for-chickens|chicken-manure|roost-natural|defender-natural-insecticide|broiler|layer/.test(p))return 'poultry-pmax';
+        // Lawn / turf / soil / garden → Lawn & Garden PMax. Mirrors segment-map.ts turf handles.
+        if(/\/lawn\b|genesis|natural-lawn-care|dog-spot-for-lawns|jump-start-soil|humate|humates|turf-revival|c-fix-biochar|fertalive|omega-soil|veridian|soil-sulfur|compost-tea|perfect-pot|indoor-plant-food|fertiliz|\bturf\b|\bsoil\b/.test(p))return 'lawn-garden-pmax';
+        return 'pmax'; // ambiguous → generic fallback (downstream defaults to Torched)
+      };
+    </script>
     <!-- Attribution Capture: Last-touch (overwrites on each visit with params) -->
     <script is:inline>
       (function(){
@@ -118,7 +139,7 @@ const openaiAdsPixelId =
           var url=new URL(window.location.href);
           var found={},hasNew=false;
           PARAMS.forEach(function(p){var v=url.searchParams.get(p);if(v){found[p]=v;hasNew=true}});
-          if(found.srsltid&&!found.utm_source){found.utm_source='google';found.utm_medium=found.utm_medium||'cpc';found.utm_campaign=found.utm_campaign||'pmax'}
+          if(found.srsltid&&!found.utm_source){found.utm_source='google';found.utm_medium=found.utm_medium||'cpc';found.utm_campaign=found.utm_campaign||window.__pdPmaxCampaign(url.pathname)}
           if(found.gclid&&!found.utm_source){found.utm_source='google';found.utm_medium=found.utm_medium||'cpc'}
           if(found.fbclid&&!found.utm_source){found.utm_source='facebook';found.utm_medium=found.utm_medium||'paid_social'}
           // Read the real _fbp cookie set by the Meta Pixel (fbq init below). This
@@ -147,7 +168,7 @@ const openaiAdsPixelId =
           var PARAMS=['utm_source','utm_medium','utm_campaign','gclid','fbclid','msclid','ttclid','srsltid'];
           var data={};
           PARAMS.forEach(function(p){var v=url.searchParams.get(p);if(v)data[p]=v});
-          if(data.srsltid&&!data.utm_source){data.utm_source='google';data.utm_medium=data.utm_medium||'cpc';data.utm_campaign=data.utm_campaign||'pmax'}
+          if(data.srsltid&&!data.utm_source){data.utm_source='google';data.utm_medium=data.utm_medium||'cpc';data.utm_campaign=data.utm_campaign||(window.__pdPmaxCampaign?window.__pdPmaxCampaign(url.pathname):'pmax')}
           if(data.gclid&&!data.utm_source){data.utm_source='google';data.utm_medium=data.utm_medium||'cpc'}
           if(data.fbclid&&!data.utm_source){data.utm_source='facebook';data.utm_medium=data.utm_medium||'paid_social'}
           data._timestamp=Date.now();data._landing_page=url.pathname+url.search;data._referrer=document.referrer||'';
