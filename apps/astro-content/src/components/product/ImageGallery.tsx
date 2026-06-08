@@ -20,6 +20,19 @@ function optimizeUrl(url: string, handle: string, w: number, h?: number): string
   return `https://res.cloudinary.com/${cloudName}/image/upload/w_${w},h_${h || w},c_pad,f_auto,q_auto/${publicId}`
 }
 
+/**
+ * Shopify's own CDN resizing — fallback when a product's images were never
+ * mirrored to Cloudinary (the Cloudinary rewrite would 404 and blank the
+ * gallery). Used via onError so the gallery never breaks for un-mirrored products.
+ */
+function shopifyResize(url: string, w: number, h?: number): string {
+  if (!url.includes('cdn.shopify.com')) return url
+  const u = new URL(url)
+  u.searchParams.set('width', String(w))
+  u.searchParams.set('height', String(h || w))
+  return u.toString()
+}
+
 interface Props {
   images: ProductImage[]
   productTitle: string
@@ -69,6 +82,11 @@ export default function ImageGallery({ images, productTitle, productHandle }: Pr
       <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
         <img
           src={optimizeUrl(activeImage.url, productHandle, 600)}
+          onError={(e) => {
+            const img = e.currentTarget
+            const fb = shopifyResize(activeImage.url, 600)
+            if (img.src !== fb) img.src = fb
+          }}
           alt={activeImage.altText || productTitle}
           width={600}
           height={600}
@@ -94,6 +112,11 @@ export default function ImageGallery({ images, productTitle, productHandle }: Pr
             >
               <img
                 src={optimizeUrl(image.url, productHandle, 80)}
+                onError={(e) => {
+                  const img = e.currentTarget
+                  const fb = shopifyResize(image.url, 80)
+                  if (img.src !== fb) img.src = fb
+                }}
                 alt={image.altText || `${productTitle} image ${index + 1}`}
                 width={80}
                 height={80}
