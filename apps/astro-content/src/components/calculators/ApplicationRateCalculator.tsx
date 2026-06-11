@@ -137,6 +137,12 @@ export default function ApplicationRateCalculator() {
   function handleUnitSwitch(newUnit: Unit) {
     trackCalculatorUnitSwitched(unit, newUnit)
     setUnit(newUnit)
+    // Houses ↔ sq ft differ by 20,000×, so carrying the raw number over would be
+    // misleading (e.g. "4 houses" must not become "4 sq ft"). Reset on that switch.
+    if (newUnit === 'houses' || unit === 'houses') {
+      setArea(0)
+      setActivePreset(null)
+    }
     handleInputChange()
   }
 
@@ -305,7 +311,9 @@ export default function ApplicationRateCalculator() {
                   className="mb-1.5 block text-sm font-semibold text-gray-700"
                 >
                   {product.defaultUnit === 'houses'
-                    ? 'Number of Houses'
+                    ? unit === 'sqft'
+                      ? 'Area (sq ft)'
+                      : 'Number of Houses'
                     : product.handle === 'pour-the-port-septic-tank-treatment'
                       ? 'Number of Months'
                       : product.handle === 'torched-all-natural-weed-killer'
@@ -353,6 +361,27 @@ export default function ApplicationRateCalculator() {
                         ))}
                       </div>
                     )}
+                  {/* Poultry products are house-based by default but the engine
+                      converts sq ft → houses (20,000 sq ft/house), so let growers
+                      who think in floor area switch units. */}
+                  {product.defaultUnit === 'houses' && (
+                    <div className="flex rounded-md border border-gray-300">
+                      {(['houses', 'sqft'] as const).map((u) => (
+                        <button
+                          key={u}
+                          type="button"
+                          onClick={() => handleUnitSwitch(u)}
+                          className={`px-3 py-2 text-xs font-medium transition-colors first:rounded-l-md last:rounded-r-md ${
+                            unit === u
+                              ? 'bg-[#2C5234] text-white'
+                              : 'bg-white text-gray-600 hover:bg-gray-50'
+                          }`}
+                        >
+                          {UNIT_LABELS[u]}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 {product.defaultUnit === 'sqft' &&
                   unit === 'sqft' &&
@@ -362,6 +391,11 @@ export default function ApplicationRateCalculator() {
                       A 1/4 acre lawn is about 10,890 sq ft
                     </p>
                   )}
+                {product.defaultUnit === 'houses' && unit === 'sqft' && (
+                  <p className="mt-1 text-xs text-gray-400">
+                    Based on a standard 20,000 sq ft house (40×500). A typical house ≈ 20,000 sq ft.
+                  </p>
+                )}
               </div>
             )}
 
