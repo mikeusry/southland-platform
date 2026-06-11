@@ -7,7 +7,6 @@
  * Persona-aware sorting via CollectionGrid pattern.
  */
 import { createClient, getAllProducts, getAllCollections } from '@southland/shopify-storefront'
-import type { Product } from '@southland/shopify-storefront'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Breadcrumbs from '../../components/shared/Breadcrumbs.astro'
 import CollectionProductCard from '../../components/shop/CollectionProductCard.astro'
@@ -38,26 +37,6 @@ const [products, collections] = await Promise.all([
 // ── Collection filter pills ──────────────────────────────────────────────────
 const skipCollections = new Set(['frontpage', 'all', 'flowers', 'lavender-and-eucalyptus-bundles'])
 const filterCollections = collections.filter((c) => !skipCollections.has(c.handle))
-
-// Map Shopify collection handles → hub page URLs
-const COLLECTION_TO_HUB: Record<string, string> = {
-  poultry: '/poultry/',
-  'poultry-broilers': '/poultry/commercial/',
-  'backyard-birds': '/poultry/backyard/',
-  'poultry-breeders': '/poultry/breeders/',
-  turkey: '/poultry/turkey/',
-  'game-birds': '/poultry/game-birds/',
-  turf: '/lawn/turf-pros/',
-  homeowners: '/lawn/homeowners/',
-  landscapers: '/lawn/landscapers/',
-  'golf-courses': '/lawn/golf-courses/',
-  crops: '/agriculture/crops/',
-  produce: '/agriculture/produce/',
-  'pig-and-swine-supplements': '/livestock/swine/',
-  hydroseeders: '/hydroseeders/',
-  sanitizers: '/products/sanitizers/',
-  waste: '/products/waste-treatment/',
-}
 
 // ── SEO ─────────────────────────────────────────────────────────────────────
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
@@ -119,7 +98,7 @@ const reviewAggregates = await fetchAllAggregates(getServerEnv(Astro.locals, 'KL
     <div class="mb-6">
       <div class="relative">
         <svg
-          class="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
+          class="pointer-events-none absolute left-3 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-gray-400"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -134,7 +113,7 @@ const reviewAggregates = await fetchAllAggregates(getServerEnv(Astro.locals, 'KL
           type="search"
           id="product-search"
           placeholder="Search products..."
-          class="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-brand-green-light focus:outline-none focus:ring-1 focus:ring-brand-green-light"
+          class="w-full rounded-lg border border-gray-300 py-3 pl-11 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-brand-green-light focus:outline-none focus:ring-1 focus:ring-brand-green-light"
         />
       </div>
     </div>
@@ -151,12 +130,13 @@ const reviewAggregates = await fetchAllAggregates(getServerEnv(Astro.locals, 'KL
             All
           </button>
           {filterCollections.map((collection) => (
-            <a
-              href={COLLECTION_TO_HUB[collection.handle] || `/products/`}
-              class="rounded-full border border-gray-300 bg-white px-4 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:border-brand-green-light hover:text-brand-green-dark"
+            <button
+              type="button"
+              data-filter={collection.handle}
+              class="filter-pill rounded-full border border-gray-300 bg-white px-4 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:border-brand-green-light hover:text-brand-green-dark"
             >
               {collection.title}
-            </a>
+            </button>
           ))}
         </div>
       )
@@ -175,6 +155,7 @@ const reviewAggregates = await fetchAllAggregates(getServerEnv(Astro.locals, 'KL
             class="product-item"
             data-title={product.title.toLowerCase()}
             data-tags={product.tags.join(',').toLowerCase()}
+            data-collections={product.collectionHandles.join(',')}
           >
             <CollectionProductCard
               product={product}
@@ -200,15 +181,35 @@ const reviewAggregates = await fetchAllAggregates(getServerEnv(Astro.locals, 'KL
   </section>
 </BaseLayout>
 
-{/* Client-side search filtering */}
+{/* Client-side search + category filtering */}
 <script>
   const searchInput = document.getElementById('product-search') as HTMLInputElement
   const grid = document.getElementById('product-grid')!
   const countEl = document.getElementById('product-count')!
   const noResults = document.getElementById('no-results')!
   const clearBtn = document.getElementById('clear-search')
+  const pills = Array.from(document.querySelectorAll<HTMLButtonElement>('.filter-pill'))
   const items = grid.querySelectorAll<HTMLElement>('.product-item')
   const total = items.length
+
+  // Active collection handle, or 'all' for no category filter
+  let activeFilter = 'all'
+
+  const activeClasses = ['border-brand-green-dark', 'bg-brand-green-dark', 'text-white']
+  const inactiveClasses = ['border-gray-300', 'bg-white', 'text-gray-700']
+
+  function setActivePill(target: HTMLButtonElement) {
+    pills.forEach((pill) => {
+      const isActive = pill === target
+      pill.classList.toggle('active', isActive)
+      pill.classList.toggle(activeClasses[0], isActive)
+      pill.classList.toggle(activeClasses[1], isActive)
+      pill.classList.toggle(activeClasses[2], isActive)
+      pill.classList.toggle(inactiveClasses[0], !isActive)
+      pill.classList.toggle(inactiveClasses[1], !isActive)
+      pill.classList.toggle(inactiveClasses[2], !isActive)
+    })
+  }
 
   function filterProducts() {
     const query = searchInput.value.toLowerCase().trim()
@@ -217,13 +218,19 @@ const reviewAggregates = await fetchAllAggregates(getServerEnv(Astro.locals, 'KL
     items.forEach((item) => {
       const title = item.dataset.title || ''
       const tags = item.dataset.tags || ''
-      const matches = !query || title.includes(query) || tags.includes(query)
+      const collections = item.dataset.collections || ''
+
+      const matchesSearch = !query || title.includes(query) || tags.includes(query)
+      const matchesCategory =
+        activeFilter === 'all' || collections.split(',').includes(activeFilter)
+      const matches = matchesSearch && matchesCategory
 
       item.style.display = matches ? '' : 'none'
       if (matches) visible++
     })
 
-    countEl.textContent = query
+    const filtered = query !== '' || activeFilter !== 'all'
+    countEl.textContent = filtered
       ? `Showing ${visible} of ${total} products`
       : `Showing ${total} products`
 
@@ -232,6 +239,14 @@ const reviewAggregates = await fetchAllAggregates(getServerEnv(Astro.locals, 'KL
   }
 
   searchInput.addEventListener('input', filterProducts)
+
+  pills.forEach((pill) => {
+    pill.addEventListener('click', () => {
+      activeFilter = pill.dataset.filter || 'all'
+      setActivePill(pill)
+      filterProducts()
+    })
+  })
 
   clearBtn?.addEventListener('click', () => {
     searchInput.value = ''

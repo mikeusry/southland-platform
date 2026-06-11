@@ -140,10 +140,12 @@ const displayName = product.title.includes('|') ? product.title.split('|')[0].tr
       image ? (
         <img
           src={optimizeShopifyImage(image.url, product.handle, 400, 400)}
+          data-fallback={image.url}
           alt={image.altText || product.title}
           width="400"
           height="400"
           loading="lazy"
+          onerror="if(this.dataset.fallback&&this.src!==this.dataset.fallback){this.src=this.dataset.fallback;this.removeAttribute('data-fallback')}"
           class="h-full w-full object-contain transition-transform group-hover:scale-105"
         />
       ) : (

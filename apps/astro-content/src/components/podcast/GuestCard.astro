@@ -39,7 +39,9 @@ const {
   class: className = '',
 } = Astro.props
 
-const guestUrl = href || `/team/${slug}/`
+// Strip any .md/.mdx extension — some content collections include it in the id
+const cleanSlug = slug.replace(/\.mdx?$/, '')
+const guestUrl = href || `/team/${cleanSlug}/`
 const defaultPhoto = '/images/podcast/guests/default-avatar.jpg'
 
 const isCompact = variant === 'compact'
