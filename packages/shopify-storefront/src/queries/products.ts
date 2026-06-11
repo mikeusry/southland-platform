@@ -29,6 +29,11 @@ const PRODUCT_FIELDS = `
   handle
   description
   tags
+  collections(first: 20) {
+    edges {
+      node { handle }
+    }
+  }
   priceRange {
     minVariantPrice { amount currencyCode }
   }
@@ -194,6 +199,7 @@ function parseProduct(node: Record<string, unknown>): Product {
   const variants = node.variants as {
     edges: { node: Record<string, unknown> }[]
   }
+  const collections = node.collections as { edges: { node: { handle: string } }[] } | undefined
 
   return {
     id: node.id as string,
@@ -201,6 +207,7 @@ function parseProduct(node: Record<string, unknown>): Product {
     handle: node.handle as string,
     description: node.description as string,
     tags: node.tags as string[],
+    collectionHandles: collections?.edges.map((e) => e.node.handle) ?? [],
     priceRange: node.priceRange as Product['priceRange'],
     images: images.edges.map((e) => parseImage(e.node)),
     variants: variants.edges.map((e) => parseVariant(e.node)),
@@ -366,6 +373,7 @@ export async function getProductByHandle(
     vendor: (node.vendor as string) ?? '',
     productType: (node.productType as string) ?? '',
     tags: node.tags as string[],
+    collectionHandles: [],
     seo: (node.seo as ProductDetail['seo']) ?? { title: null, description: null },
     priceRange: node.priceRange as Product['priceRange'],
     images: images.edges.map((e) => parseImage(e.node)),

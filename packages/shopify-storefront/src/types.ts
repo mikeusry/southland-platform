@@ -51,6 +51,8 @@ export interface Product {
   handle: string
   description: string
   tags: string[]
+  /** Handles of collections this product belongs to (for in-page filtering) */
+  collectionHandles: string[]
   priceRange: {
     minVariantPrice: Money
   }
