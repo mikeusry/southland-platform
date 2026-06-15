@@ -1,0 +1,196 @@
+---
+/**
+ * Support — Shipping & Leakage / "My order arrived leaking"
+ * /support/shipping-leakage/
+ *
+ * Reassurance page for customers whose liquid products show leakage on arrival.
+ * Replaces the bare Mux video link in support email replies with a real page:
+ * plain-language explanation, the explainer video, an FAQ (with FAQPage JSON-LD),
+ * and a clear "still short on volume? contact us" path.
+ */
+
+export const prerender = true
+
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import Breadcrumbs from '../../../components/shared/Breadcrumbs.astro'
+import VideoEmbed from '../../../components/podcast/VideoEmbed.astro'
+import AccordionFaq from '../../../components/shop/AccordionFaq.astro'
+import { buildSouthlandUrl } from '../../../lib/cloudinary'
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+const canonicalUrl = `${siteUrl}/support/shipping-leakage/`
+
+const MUX_PLAYBACK_ID = 'LXPYGvvlC9vECKIhHwwdvnHNrJ01rk302gf5IcAe8EG02Y'
+
+const faqs = [
+  {
+    question: 'My bottle leaked during shipping. Did I lose product?',
+    answer:
+      'Almost certainly not. We fill every bottle with extra volume specifically to account for the small amount of leakage that can happen in transit. Even when a bottle shows some seepage on arrival, you should still have the full amount of product you paid for.',
+  },
+  {
+    question: 'Why do the bottles leak in the first place?',
+    answer:
+      'Our products are living, biological liquids, and they ship across changing temperatures, altitudes, and pressures. Those changes cause bottles to expand and contract, which can push a little product past the cap seal. It is normal for liquid biologicals and is not a sign of a defective product.',
+  },
+  {
+    question: 'Is the product still good if it leaked?',
+    answer:
+      'Yes. A little external leakage does not affect the quality, potency, or safety of the product inside the bottle. Give it a gentle shake, wipe down the outside, and use it as directed.',
+  },
+  {
+    question: 'How do I know I received the correct volume?',
+    answer:
+      'Because we overfill to compensate for transit loss, a leaked bottle will typically still hold at or above the labeled volume. If you measure it out and genuinely believe you are short, contact us — we will make it right.',
+  },
+  {
+    question: 'What should I do if I think I am actually short on product?',
+    answer:
+      'Reach out to our team at 800-608-3755 or success@southlandorganics.com. Let us know your order number and what you are seeing, and we will take care of you.',
+  },
+  {
+    question: 'How should I store and handle a bottle that arrived with leakage?',
+    answer:
+      'Wipe the bottle and cap clean, store it upright in a cool place out of direct sunlight, and keep the cap closed tightly between uses. Then apply as directed on the label.',
+  },
+]
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((item) => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: { '@type': 'Answer', text: item.answer },
+  })),
+}
+
+const ogImage = buildSouthlandUrl('heroes/Farm_Athens_GA_7_jbdjik', {
+  width: 1200,
+  height: 630,
+  crop: 'fill',
+  quality: 'auto',
+  format: 'auto',
+})
+---
+
+<BaseLayout
+  title="My Order Arrived Leaking — What to Know | Southland Organics"
+  description="Liquid biologicals can leak a little during shipping. We overfill every bottle to compensate, so you still get the full volume you paid for. Here's what to do."
+  canonicalUrl={canonicalUrl}
+  ogImage={ogImage}
+  schema={faqSchema}
+>
+  {/* Hero */}
+  <section class="bg-southland-green-dark py-14 md:py-20">
+    <div class="mx-auto max-w-3xl px-4">
+      <Breadcrumbs
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'Support', href: '/support/' },
+          { label: 'Shipping & Leakage' },
+        ]}
+        class="mb-5 [&_*]:text-sm [&_a]:text-white/80 [&_span]:text-white/60"
+      />
+      <p class="mb-3 text-sm uppercase tracking-widest text-southland-green">Order Support</p>
+      <h1 class="mb-4 font-heading text-3xl text-white md:text-4xl">
+        Did your order arrive leaking?
+      </h1>
+      <p class="max-w-2xl text-lg leading-relaxed text-white/80">
+        Good news: a little leakage is normal for our living, liquid products — and you almost
+        certainly still have the full amount you paid for. Here's why it happens and what to do.
+      </p>
+    </div>
+  </section>
+
+  {/* The short answer */}
+  <section class="py-12 md:py-16">
+    <div class="mx-auto max-w-3xl px-4">
+      <div class="rounded-xl border border-southland-green/20 bg-southland-green/5 p-6 md:p-8">
+        <h2 class="mb-3 font-heading text-xl text-shopify-title md:text-2xl">The short answer</h2>
+        <p class="text-base leading-relaxed text-shopify-text">
+          We fill every bottle with <strong>extra volume</strong> in anticipation of the small amount
+          of leakage that can occur in shipping. So even if your bottle shows some seepage on arrival,
+          you should have the correct volume of product. Wipe it down, give it a shake, and use it as
+          directed. If you measure it out and still feel you're short, we'll make it right.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {/* Explainer video */}
+  <section class="pb-12 md:pb-16">
+    <div class="mx-auto max-w-3xl px-4">
+      <h2 class="mb-4 font-heading text-xl text-shopify-title md:text-2xl">
+        Watch: why bottles leak in transit
+      </h2>
+      <VideoEmbed
+        muxPlaybackId={MUX_PLAYBACK_ID}
+        title="Why Southland Organics bottles can leak during shipping"
+        episodeNumber={0}
+        episodeSlug="shipping-leakage"
+        class="shadow-sm"
+      />
+      <p class="mt-3 text-sm text-shopify-secondary-text">
+        A quick explanation from our team on why leakage happens and why your volume is still
+        correct.
+      </p>
+    </div>
+  </section>
+
+  {/* Why it happens */}
+  <section class="pb-4">
+    <div class="mx-auto max-w-3xl px-4">
+      <h2 class="mb-4 font-heading text-xl text-shopify-title md:text-2xl">
+        Why does this happen?
+      </h2>
+      <p class="mb-4 text-base leading-relaxed text-shopify-text">
+        Our products are biological — living, active liquids. As your order travels, it passes
+        through changes in temperature, altitude, and pressure. Those changes make the bottle expand
+        and contract, which can push a small amount of product past the cap seal.
+      </p>
+      <p class="text-base leading-relaxed text-shopify-text">
+        It's a normal characteristic of shipping liquid biologicals and is not a sign of a defective
+        product. The product inside is unaffected — its quality, potency, and safety are exactly
+        what they should be.
+      </p>
+    </div>
+  </section>
+
+  {/* FAQ */}
+  <section class="py-12 md:py-16">
+    <div class="mx-auto max-w-3xl px-4">
+      <h2 class="mb-6 font-heading text-2xl text-shopify-title md:text-3xl">
+        Frequently asked questions
+      </h2>
+      <AccordionFaq items={faqs} />
+    </div>
+  </section>
+
+  {/* Contact CTA */}
+  <section class="bg-brand-gray py-12 md:py-16">
+    <div class="mx-auto max-w-3xl px-4 text-center">
+      <h2 class="mb-3 font-heading text-2xl text-shopify-title md:text-3xl">
+        Still have a concern?
+      </h2>
+      <p class="mx-auto mb-6 max-w-xl text-base text-shopify-text">
+        If you've checked your volume and believe you're genuinely short — or anything else doesn't
+        look right — our team is here to help and will make it right.
+      </p>
+      <div class="flex flex-wrap items-center justify-center gap-4">
+        <a
+          href="tel:1-800-608-3755"
+          class="inline-flex items-center gap-2 rounded-lg bg-southland-green px-6 py-3 font-semibold text-white transition-colors hover:bg-southland-green-dark"
+        >
+          Call 800-608-3755
+        </a>
+        <a
+          href="mailto:success@southlandorganics.com"
+          class="inline-flex items-center gap-2 rounded-lg border-2 border-southland-green-dark/30 px-6 py-3 font-semibold text-shopify-title transition-colors hover:border-southland-green-dark/60 hover:bg-southland-green-dark/5"
+        >
+          Email Support
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
