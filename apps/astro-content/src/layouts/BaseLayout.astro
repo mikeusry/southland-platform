@@ -153,6 +153,17 @@ const openaiAdsPixelId =
           var fbp=ck('_fbp');
           if(fbp){found.fbp=fbp;hasNew=true}
           var stored={};try{stored=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+          // Expire stale last-touch attribution across a session gap. The merge below
+          // exists to backfill the async _fbp cookie WITHIN a session, but without
+          // expiry it lets a click's utm_campaign/gclid survive in localStorage for
+          // days and ride along onto an unrelated later purchase (verified: a Broiler
+          // Bill ad click on Jun-10 tainted a D2-sanitizer purchase on Jun-12). A
+          // 30-min inactivity window (standard session boundary) clears the slate so a
+          // returning visitor's new click starts clean and a stale one can't bleed.
+          // Same-session cross-sell (click A, buy B within the window) is preserved.
+          var SESSION_MS=30*60*1000;
+          var lastTs=Number(stored&&stored._timestamp)||0;
+          if(lastTs&&(Date.now()-lastTs)>SESSION_MS){stored={}}
           if(hasNew){var merged={};for(var k in stored){if(stored.hasOwnProperty(k))merged[k]=stored[k]}for(var j in found){if(found.hasOwnProperty(j))merged[j]=found[j]}merged._timestamp=Date.now();merged._landing_page=url.pathname+url.search;merged._referrer=document.referrer||'';try{localStorage.setItem(KEY,JSON.stringify(merged))}catch(e){}}
         }catch(e){}
       })();
