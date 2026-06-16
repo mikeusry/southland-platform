@@ -97,6 +97,15 @@ function getAttributionAttrs(): Array<{ key: string; value: string }> {
     const raw = localStorage.getItem(PD_ATTRIBUTION_KEY)
     if (!raw) return []
     const data = JSON.parse(raw) as Record<string, string>
+    // Expire stale last-touch attribution. BaseLayout clears it across a 30-min
+    // session gap on write, but a returning visitor who lands with NO params never
+    // hits that write path — so a campaign click can survive in localStorage for
+    // days and get stamped onto an unrelated later purchase (verified: a Broiler
+    // Bill click tainted a D2 purchase 2 days later). Enforce the same session
+    // window here at read time so stale attribution is never stamped on a cart line.
+    const SESSION_MS = 30 * 60 * 1000
+    const ts = Number(data._timestamp) || 0
+    if (ts && Date.now() - ts > SESSION_MS) return []
     const attrs: Array<{ key: string; value: string }> = []
     const PARAMS = [
       'utm_source',
