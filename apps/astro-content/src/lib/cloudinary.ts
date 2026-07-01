@@ -468,7 +468,7 @@ export function resolveEpisodeCover(
   data: { coverImage?: string; thumbnail?: string },
   width: number = 640
 ): string | undefined {
-  if (data.coverImage) {
+  if (data.coverImage && looksLikeCloudinaryPublicId(data.coverImage)) {
     return buildSouthlandUrl(data.coverImage, {
       width,
       height: Math.round((width * 9) / 16),
@@ -479,6 +479,25 @@ export function resolveEpisodeCover(
     })
   }
   return data.thumbnail
+}
+
+/**
+ * Guards against non-public-ID strings landing in `coverImage`.
+ *
+ * The Nexus content pipeline sometimes populates `episode_metadata.coverImage`
+ * with a descriptive keyword string (e.g. "Farmers, Farm Life, Agriculture")
+ * instead of a Cloudinary public ID. Feeding that into buildSouthlandUrl()
+ * produces a broken URL and a blank thumbnail. A real public ID is either a
+ * full URL or a slash/underscore-delimited path with no comma-separated prose.
+ */
+function looksLikeCloudinaryPublicId(value: string): boolean {
+  const v = value.trim()
+  if (!v) return false
+  if (v.startsWith('http://') || v.startsWith('https://')) return true
+  // Prose gives itself away: commas, or several space-separated words.
+  if (v.includes(',')) return false
+  if (v.split(/\s+/).length > 2) return false
+  return true
 }
 
 /**
