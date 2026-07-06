@@ -38,3 +38,6 @@ apps/shopify-app/prisma/*.db-journal
 packages/*/dist/
 *.tsbuildinfo
 briefs/
+
+# Claude Code session worktrees (per global workflow)
+.claude/worktrees/
