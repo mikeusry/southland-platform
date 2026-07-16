@@ -471,7 +471,7 @@ Tracked in Nexus `/hr/todos` (13 tasks, Mar 23-Apr 3).
 
 ## Klaviyo Flow Integration
 
-**Master Roadmap:** `mothership/docs/KLAVIYO-FLOW-ROADMAP.md`
+**Master Roadmap:** `mothership/docs/esp-klaviyo/reference/flow-roadmap.md`
 
 Platform's role in the Klaviyo flow ecosystem:
 - **CDP Personas** (Broiler Bill, Backyard Betty, Turf Pro Taylor) drive post-purchase email segmentation — product education and cross-sell flows branch by persona
@@ -495,11 +495,19 @@ Platform's role in the Klaviyo flow ecosystem:
 
 ## Related Resources
 
+> **Every path below was `test -f`-verified 2026-07-16.** All five previously listed here
+> were wrong — three pointed at real files one directory too shallow (Nexus reorganised its
+> flat `docs/` into `strategy/`/`sops/` and these never followed), and the Klaviyo roadmap
+> had moved. **A cross-repo path is the most rot-prone reference there is: nothing in this
+> repo's CI can see that a path in that repo moved.** `/janitor`'s link check now `test -f`s
+> every backticked repo path in memory. Full doc map:
+> `Southland Ledger/Southland Platform Memory/southland-platform-docs-map.md`.
+
 - **Mothership:** `~/CODING/mothership/` - Orchestration platform
-  - `docs/KLAVIYO-FLOW-ROADMAP.md` — Klaviyo flow master checklist (post-purchase, NBA, loyalty, leads)
+  - `docs/esp-klaviyo/reference/flow-roadmap.md` — Klaviyo flow master checklist (post-purchase, NBA, loyalty, leads)
 - **Nexus (Inventory):** `~/CODING/southland-inventory/` - Order management, shipping, EOS todos
-  - `docs/LEAD-MAGNETS.md` — Canonical lead magnet spec (mirrored in this repo)
-  - `docs/LEAD-SCORING-SOP.md` — How lead scoring and MQL/SQL qualification works
-  - `docs/UARZO-FLOW.md` — Customer journey framework + Revenue Operating Scorecard
+  - `docs/strategy/LEAD-MAGNETS.md` — Canonical lead magnet spec (mirrored in this repo at `docs/LEAD-MAGNETS.md`)
+  - `docs/sops/LEAD-SCORING-SOP.md` — How lead scoring and MQL/SQL qualification works
+  - `docs/strategy/UARZO-FLOW.md` — Customer journey framework + Revenue Operating Scorecard
 - **point.dog:** CDP/analytics integration
 - **Shopify Store:** southland-organics.myshopify.com
