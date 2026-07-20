@@ -290,7 +290,7 @@ export const GET: APIRoute = async () => {
       tags: [...tags, 'podcast', 'episode'],
       business_unit: inferBU('general', tags, content),
       answer_type: 'factual',
-      url: `${SITE_URL}/podcast/${ep.id}`,
+      url: `${SITE_URL}/podcast/${ep.id.replace(/\.mdx?$/, '')}/`,
       tenant: 'southland',
       support_relevant: false,
       word_count: content.split(/\s+/).length,
