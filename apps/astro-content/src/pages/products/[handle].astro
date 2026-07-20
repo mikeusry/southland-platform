@@ -206,7 +206,16 @@ const displayTitle =
 
 // ── SEO metadata ────────────────────────────────────────────────────────────
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
-const canonicalUrl = `${siteUrl}/products/${handle}/`
+
+// This page's own address. Used for schema.org url/@id and breadcrumbs, which must
+// always describe THIS page even when search equity is consolidated elsewhere.
+const pageUrl = `${siteUrl}/products/${handle}/`
+
+// What we tell Google to index. Normally this page; for products with a dedicated
+// brand storefront, the frontmatter points it at that domain instead (see
+// canonicalUrl in the products collection schema). The PDP still renders and sells
+// either way — a canonical is an indexing instruction, not a redirect.
+const canonicalUrl = tina?.canonicalUrl || pageUrl
 
 const pageTitle = tina?.seoTitle || product.seo.title || `${product.title} | Southland Organics`
 const pageDescription =
@@ -261,7 +270,7 @@ const variantOffers = product.variants.map((variant) => ({
   availability: variant.availableForSale
     ? 'https://schema.org/InStock'
     : 'https://schema.org/OutOfStock',
-  url: canonicalUrl,
+  url: pageUrl,
   seller,
   shippingDetails,
   hasMerchantReturnPolicy: returnPolicy,
@@ -305,7 +314,7 @@ const productSchema = hasNamedVariants
       '@type': 'ProductGroup',
       name: product.title,
       description: product.description,
-      url: canonicalUrl,
+      url: pageUrl,
       image: product.images.map((img) => img.url),
       brand: {
         '@type': 'Brand',
@@ -325,7 +334,7 @@ const productSchema = hasNamedVariants
           availability: variant.availableForSale
             ? 'https://schema.org/InStock'
             : 'https://schema.org/OutOfStock',
-          url: canonicalUrl,
+          url: pageUrl,
           seller,
           shippingDetails,
           hasMerchantReturnPolicy: returnPolicy,
@@ -345,7 +354,7 @@ const productSchema = hasNamedVariants
       '@type': 'Product',
       name: product.title,
       description: product.description,
-      url: canonicalUrl,
+      url: pageUrl,
       image: product.images.map((img) => img.url),
       brand: {
         '@type': 'Brand',
@@ -417,7 +426,7 @@ const breadcrumbSchema = {
       '@type': 'ListItem',
       position: collectionHandle ? 3 : 2,
       name: displayTitle,
-      item: canonicalUrl,
+      item: pageUrl,
     },
   ],
 }
