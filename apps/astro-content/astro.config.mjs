@@ -74,6 +74,14 @@ export default defineConfig({
     }),
   ],
   output: 'server',
+  // Legacy Shopify handles that still resolve via [handle].astro's shopifyHandle
+  // matcher, leaving one page indexed at two URLs. Redirect the legacy path so the
+  // canonical slug owns the ranking. See T-1138 GSC data (2026-07-20): the legacy
+  // handle held MORE impressions at pos 10.2 than /products/desecticide/ at pos 2.0.
+  redirects: {
+    '/products/natural-mite-control-livestock-poultry':
+      '/products/desecticide',
+  },
   adapter: cloudflare({
     // routes: adapter auto-generates include: ["/*"] which covers all SSR routes.
     // Do NOT add routes.extend.include — overlapping splat rules cause wrangler deploy to fail.
