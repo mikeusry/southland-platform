@@ -428,6 +428,12 @@ const productsCollection = defineCollection({
     // --- SEO (editorial override) ---
     seoTitle: z.string().optional(), // <title> override
     seoDescription: z.string().optional(), // <meta description> override
+    // Cross-domain canonical. Set ONLY when this product's search equity should
+    // consolidate on another domain we own (e.g. a dedicated brand storefront).
+    // The PDP stays live and keeps selling — this affects indexing, not serving.
+    // Must be an absolute URL to a genuine equivalent of this page, or Google
+    // ignores it. Leave unset for normal products.
+    canonicalUrl: z.string().url().optional(),
 
     // --- Video ---
     muxPlaybackId: z.string().optional(),
