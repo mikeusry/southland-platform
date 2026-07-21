@@ -307,13 +307,19 @@ const reviewSchemaProps =
       }
     : {}
 
+// Schema description: prefer editorial copy over the raw Shopify description.
+// The visible PDP renders TinaCMS content when it exists, so shipping Shopify's
+// description in JSON-LD tells Google something different than the page tells the
+// customer. Shopify remains the fallback for products with no Tina file.
+const schemaDescription = tina?.seoDescription || tina?.shortDescription || product.description
+
 // ProductGroup + hasVariant for multi-variant products with named options
 const productSchema = hasNamedVariants
   ? {
       '@context': 'https://schema.org',
       '@type': 'ProductGroup',
       name: product.title,
-      description: product.description,
+      description: schemaDescription,
       url: pageUrl,
       image: product.images.map((img) => img.url),
       brand: {
@@ -353,7 +359,7 @@ const productSchema = hasNamedVariants
       '@context': 'https://schema.org',
       '@type': 'Product',
       name: product.title,
-      description: product.description,
+      description: schemaDescription,
       url: pageUrl,
       image: product.images.map((img) => img.url),
       brand: {
