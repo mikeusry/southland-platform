@@ -14,19 +14,37 @@ import { visit } from 'unist-util-visit'
 
 const SITE_URL = 'https://southlandorganics.com'
 
-// SSR product pages aren't discovered by @astrojs/sitemap (it only sees prerendered routes).
-// Read shopifyHandle values from the MDX content collection and inject them as customPages.
+// SSR product pages aren't discovered by @astrojs/sitemap (it only sees prerendered routes),
+// so product URLs are injected as customPages.
+//
+// 🛑 Emit the FILENAME slug, not `shopifyHandle`. [handle].astro resolves a URL by matching
+// EITHER the file id OR shopifyHandle, then asks Shopify for that handle — so the filename
+// URL always renders, while the shopifyHandle URL only renders if Shopify still publishes
+// that handle to the storefront. Submitting the shopifyHandle form put three dead URLs in
+// the sitemap (2026-07-21): chicken-manure-fertilizer, c-fix-biochar-soil-amendment, and
+// natural-mite-control-livestock-poultry — the last of which is really /products/desecticide/.
+// Google reported all three as "Product page unavailable" in Merchant Center.
+//
+// Products whose Shopify handle is no longer published to the storefront sales channel
+// render a 404 even though the MDX file exists — the route asks Shopify for the handle and
+// gets null. Keep them out of the sitemap until they are re-published in Shopify; a dead URL
+// in the sitemap is a crawl-quality signal and Google flags it in Merchant Center too.
+// Verified 404 on 2026-07-21. Delete an entry here once its Shopify page is live again.
+const UNPUBLISHED_PRODUCT_SLUGS = new Set([
+  'chicken-manure-fertilizer',
+  'c-fix-biochar-soil-amendment',
+])
+
 function getProductSitemapUrls() {
   const dir = join(dirname(fileURLToPath(import.meta.url)), 'src/content/products')
-  const handles = new Set()
+  const slugs = new Set()
   for (const file of readdirSync(dir)) {
     if (!file.endsWith('.mdx')) continue
-    const match = readFileSync(join(dir, file), 'utf8').match(
-      /^shopifyHandle:\s*["']?([^"'\n]+)["']?/m
-    )
-    if (match) handles.add(match[1].trim())
+    const slug = file.replace(/\.mdx?$/, '')
+    if (UNPUBLISHED_PRODUCT_SLUGS.has(slug)) continue
+    slugs.add(slug)
   }
-  return [...handles].map((h) => `${SITE_URL}/products/${h}/`)
+  return [...slugs].map((s) => `${SITE_URL}/products/${s}/`)
 }
 
 /** Rehype plugin: add loading="lazy" to all images in markdown content */
@@ -78,9 +96,14 @@ export default defineConfig({
   // matcher, leaving one page indexed at two URLs. Redirect the legacy path so the
   // canonical slug owns the ranking. See T-1138 GSC data (2026-07-20): the legacy
   // handle held MORE impressions at pos 10.2 than /products/desecticide/ at pos 2.0.
+  // 🛑 Declare BOTH the bare and trailing-slash form. Astro matches these literally, and
+  // the site canonicalises to a trailing slash — so the slashed variant is the one Google
+  // actually holds. Before 2026-07-21 only the bare path was listed, and
+  // /products/natural-mite-control-livestock-poultry/ (with slash) 404'd while the bare
+  // path redirected correctly.
   redirects: {
-    '/products/natural-mite-control-livestock-poultry':
-      '/products/desecticide',
+    '/products/natural-mite-control-livestock-poultry': '/products/desecticide',
+    '/products/natural-mite-control-livestock-poultry/': '/products/desecticide/',
   },
   adapter: cloudflare({
     // routes: adapter auto-generates include: ["/*"] which covers all SSR routes.
