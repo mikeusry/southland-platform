@@ -2,15 +2,30 @@
 /**
  * Why Our Bottles Have Vented Caps — /vented-caps/
  *
- * Support page linked from the Order Delivered email. Explains why liquid
- * products ship with vented caps and why a little product can weep out in
- * transit — the single most common "is my order damaged?" question.
+ * Support page linked from the Order Delivered email. It answers one question:
+ * "there's liquid around the cap, did I get ripped off?" Reassurance first,
+ * explanation second, escalation path last.
  *
  * Migrated from the Shopify page at shop.southlandorganics.com/pages/vented-caps,
- * which was never ported. middleware.ts sent /pages/vented-caps -> /contact/ as a
- * placeholder, so every customer clicking the link in a delivery email landed on
- * the contact form instead of the answer. Copy is the Shopify original, lightly
- * tightened; the facts (methane, overfilling, storage) are unchanged.
+ * which was never ported. middleware.ts sent /pages/vented-caps -> /contact/, so
+ * every customer clicking the link in a delivery email landed on a contact form
+ * instead of the answer.
+ *
+ * 🛑 TWO CLAIMS FROM THE SHOPIFY ORIGINAL WERE CORRECTED, NOT COPIED:
+ *
+ * 1. "they release small amounts of METHANE" — dropped. Our own product content
+ *    names *Bacillus* strains, which are facultative aerobes: they produce CO2,
+ *    not methane. Methanogens are strict anaerobic archaea and are not what is in
+ *    a probiotic bottle. Every other methane reference in our content is about
+ *    septic/anaerobic digestion, a different process. Now reads "a small amount
+ *    of gas" — true without naming a compound we cannot support.
+ *
+ * 2. "OUR liquid products are packed with beneficial microbes" — too broad.
+ *    Peracetic acid is an antimicrobial oxidizer; D2 sanitizers are not probiotic.
+ *    Now reads "many of our liquid products."
+ *
+ * If someone can source the methane claim from a lab result, put it back. Until
+ * then this is the version that cannot be shown to be wrong in public.
  */
 
 export const prerender = true
@@ -29,7 +44,7 @@ const hero = getCloudinaryResponsiveSet(
 
 const title = 'Why Our Bottles Have Vented Caps | Southland Organics'
 const description =
-  'Our liquid products are alive. Vented caps let the microbes breathe so bottles do not over-inflate — and why a little product may weep out in transit.'
+  "Notice a little liquid around the cap? Nothing's wrong, and you didn't lose any of what you paid for. Here's why our bottles vent."
 
 const schema = {
   '@context': 'https://schema.org',
@@ -40,23 +55,31 @@ const schema = {
       name: 'Why do Southland Organics bottles have vented caps?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Our liquid products are packed with living microbes. As they multiply they release small amounts of methane. A vented cap lets that gas escape so the bottle does not over-inflate or risk breaking.',
+        text: 'Many of our liquid products are alive. The beneficial microbes in them keep working after the bottle is filled, and as they do they release a small amount of gas. A sealed cap would trap it and the bottle would swell, then split. The vent lets it out.',
       },
     },
     {
       '@type': 'Question',
-      name: 'Why did some product leak out of my bottle during shipping?',
+      name: 'Why did some liquid leak out of my bottle during shipping?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Because the vent lets pressure escape, it can also let out a small amount of liquid in transit. The amount is minimal, and we intentionally overfill every bottle so you still receive the full amount you paid for.',
+        text: "When pressure escapes, a bit of liquid can come with it, especially after a bottle has been jostled in a truck. We overfill every bottle to account for it, so the full labeled amount is there.",
       },
     },
     {
       '@type': 'Question',
-      name: 'How should I store Southland Organics liquid products?',
+      name: 'Is the product still good if it vented?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Wipe off the bottle, make sure the cap is tight, and store it upright in a cool, dry place out of reach of children and pets.',
+        text: 'Yes. A little venting means the biology is active, which is exactly what you are paying for.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Can I replace the vented cap with a solid one?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'No. Sealing the bottle is what makes it burst. Check the cap is seated snugly instead — it will still vent, and that is fine.',
       },
     },
   ],
@@ -95,7 +118,8 @@ const schema = {
         Why Our Bottles Have Vented Caps
       </h1>
       <p class="mt-5 text-lg leading-relaxed text-green-100">
-        Our liquid products are alive. The cap is what keeps them that way.
+        Notice a little liquid around the cap? Nothing&rsquo;s wrong, and you didn&rsquo;t lose
+        any of what you paid for. Here&rsquo;s why.
       </p>
     </div>
   </section>
@@ -110,29 +134,30 @@ const schema = {
   <!-- Body -->
   <section class="bg-white py-16 md:py-20">
     <div class="mx-auto max-w-3xl px-6">
-      <p class="text-lg leading-relaxed text-[#191D21]">
-        At Southland Organics we love sharing how nature powers everything we do. Our liquid
-        products are packed with beneficial microbes, which means they need a little breathing
-        room to stay healthy and active.
-      </p>
-
-      <h2 class="font-heading mt-12 text-2xl uppercase text-[#2C5234] md:text-3xl">
+      <h2 class="font-heading text-2xl uppercase text-[#2C5234] md:text-3xl">
         The cap is doing a job
       </h2>
       <p class="mt-4 text-lg leading-relaxed text-[#191D21]">
-        As the microbes multiply they release small amounts of methane. The vented cap lets that
-        gas escape so the bottle does not over-inflate or risk breaking. It is a simple design
-        that protects the product and keeps those live ingredients thriving.
+        Many of our liquid products are alive. The beneficial microbes in them keep working
+        after the bottle is filled, and as they do, they release a small amount of gas. A sealed
+        cap would trap it &mdash; the bottle would swell, then split. The vent lets it out.
       </p>
 
       <h2 class="font-heading mt-12 text-2xl uppercase text-[#2C5234] md:text-3xl">
         If a little leaked out, nothing is wrong
       </h2>
       <p class="mt-4 text-lg leading-relaxed text-[#191D21]">
-        Because the vent allows pressure to escape, it can also occasionally let out a small
-        amount of liquid. Any product that escapes is typically minimal &mdash; and we
-        intentionally fill our bottles knowing a little may be lost in transit, so you still
-        receive the full amount you paid for.
+        When pressure escapes, a bit of liquid can come with it, especially after a bottle has
+        been jostled in a truck. <strong>We overfill every bottle to account for it.</strong> The
+        full labeled amount is there.
+      </p>
+
+      <h2 class="font-heading mt-12 text-2xl uppercase text-[#2C5234] md:text-3xl">
+        Is the product still good?
+      </h2>
+      <p class="mt-4 text-lg leading-relaxed text-[#191D21]">
+        Yes. A little venting means the biology is active &mdash; which is exactly what
+        you&rsquo;re paying for.
       </p>
     </div>
   </section>
@@ -143,35 +168,38 @@ const schema = {
       <h2 class="font-heading text-2xl uppercase text-[#2C5234] md:text-3xl">
         When your order arrives
       </h2>
-      <ul class="mt-6 space-y-3">
+      <ul class="mt-6 list-none space-y-3 pl-0">
         <li class="flex gap-3 text-lg leading-relaxed text-[#191D21]">
           <span class="mt-1 font-bold text-[#44883E]" aria-hidden="true">&check;</span>
-          <span>Wipe off the bottle.</span>
+          <span>Wipe off the bottle</span>
         </li>
         <li class="flex gap-3 text-lg leading-relaxed text-[#191D21]">
           <span class="mt-1 font-bold text-[#44883E]" aria-hidden="true">&check;</span>
-          <span>Make sure the cap is tight.</span>
+          <span>
+            Check the cap is seated snugly &mdash; it&rsquo;ll still vent, and that&rsquo;s fine
+          </span>
         </li>
         <li class="flex gap-3 text-lg leading-relaxed text-[#191D21]">
           <span class="mt-1 font-bold text-[#44883E]" aria-hidden="true">&check;</span>
-          <span>Store it upright in a cool, dry place, out of reach of children and pets.</span>
+          <span>Store it upright, cool and dry, out of reach of children and pets</span>
+        </li>
+        <li class="flex gap-3 text-lg leading-relaxed text-[#191D21]">
+          <span class="mt-1 font-bold text-[#44883E]" aria-hidden="true">&check;</span>
+          <span>
+            Don&rsquo;t swap in a solid cap &mdash; sealing the bottle is what makes it burst
+          </span>
         </li>
       </ul>
-      <p class="mt-8 text-lg leading-relaxed text-[#191D21]">
-        These vented caps are part of what keeps our naturally active formulas balanced, fresh
-        and ready to work hard for you.
-      </p>
     </div>
   </section>
 
   <!-- Help -->
   <section class="bg-[#2C5234] py-14 md:py-16">
     <div class="mx-auto max-w-3xl px-6 text-center">
-      <h2 class="font-heading text-2xl uppercase text-white md:text-3xl">
-        Something not right?
-      </h2>
+      <h2 class="font-heading text-2xl uppercase text-white md:text-3xl">More than a little?</h2>
       <p class="mt-4 text-lg leading-relaxed text-green-100">
-        If your order arrived damaged, take a photo and send it to us. We will take care of it.
+        If a bottle showed up visibly low, cracked, or soaked through the box, that&rsquo;s not
+        normal venting. Send us a photo and we&rsquo;ll make it right.
       </p>
       <p class="mt-7">
         <a
