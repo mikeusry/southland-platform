@@ -44,7 +44,7 @@ const REDIRECTS: Record<string, string> = {
   '/pages/shipping-policy': '/contact/',
   '/pages/return-policy': '/contact/',
   '/pages/credit-application': '/contact/',
-  '/pages/vented-caps': '/contact/',
+  '/pages/vented-caps': '/vented-caps/',
   '/pages/order-tracking': '/account/',
   '/pages/southland-organics-rewards': '/',
   '/pages/sale': '/',

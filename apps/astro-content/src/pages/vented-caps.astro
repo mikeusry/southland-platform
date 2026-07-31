@@ -1,0 +1,190 @@
+---
+/**
+ * Why Our Bottles Have Vented Caps — /vented-caps/
+ *
+ * Support page linked from the Order Delivered email. Explains why liquid
+ * products ship with vented caps and why a little product can weep out in
+ * transit — the single most common "is my order damaged?" question.
+ *
+ * Migrated from the Shopify page at shop.southlandorganics.com/pages/vented-caps,
+ * which was never ported. middleware.ts sent /pages/vented-caps -> /contact/ as a
+ * placeholder, so every customer clicking the link in a delivery email landed on
+ * the contact form instead of the answer. Copy is the Shopify original, lightly
+ * tightened; the facts (methane, overfilling, storage) are unchanged.
+ */
+
+export const prerender = true
+
+import BaseLayout from '../layouts/BaseLayout.astro'
+import Breadcrumbs from '../components/shared/Breadcrumbs.astro'
+import { getCloudinaryResponsiveSet, getSouthlandImageId } from '../lib/cloudinary'
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+
+const hero = getCloudinaryResponsiveSet(
+  getSouthlandImageId('heroes/Farm_Athens_GA_7_jbdjik'),
+  [800, 1200, 1600, 1920],
+  { crop: 'fill', quality: 'auto', format: 'auto', effect: ['saturation:60', 'brightness:80'] }
+)
+
+const title = 'Why Our Bottles Have Vented Caps | Southland Organics'
+const description =
+  'Our liquid products are alive. Vented caps let the microbes breathe so bottles do not over-inflate — and why a little product may weep out in transit.'
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Why do Southland Organics bottles have vented caps?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Our liquid products are packed with living microbes. As they multiply they release small amounts of methane. A vented cap lets that gas escape so the bottle does not over-inflate or risk breaking.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Why did some product leak out of my bottle during shipping?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Because the vent lets pressure escape, it can also let out a small amount of liquid in transit. The amount is minimal, and we intentionally overfill every bottle so you still receive the full amount you paid for.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'How should I store Southland Organics liquid products?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Wipe off the bottle, make sure the cap is tight, and store it upright in a cool, dry place out of reach of children and pets.',
+      },
+    },
+  ],
+}
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalUrl={`${siteUrl}/vented-caps/`}
+  schema={schema}
+>
+  <!-- Hero -->
+  <section class="relative overflow-hidden">
+    <img
+      src={hero.src}
+      srcset={hero.srcset}
+      sizes="100vw"
+      alt="Southland Organics farm in Athens, Georgia"
+      class="absolute inset-0 h-full w-full object-cover"
+      width="1600"
+      height="1067"
+      loading="eager"
+      decoding="async"
+      fetchpriority="high"
+    />
+    <div class="absolute inset-0 bg-[#2C5234]/85"></div>
+    <div class="relative mx-auto max-w-4xl px-6 py-20 md:py-24">
+      <p
+        class="font-semibold uppercase tracking-wider text-green-300"
+        style="font-size:0.8125rem;"
+      >
+        Product care
+      </p>
+      <h1 class="font-heading mt-3 text-4xl uppercase text-white md:text-5xl">
+        Why Our Bottles Have Vented Caps
+      </h1>
+      <p class="mt-5 text-lg leading-relaxed text-green-100">
+        Our liquid products are alive. The cap is what keeps them that way.
+      </p>
+    </div>
+  </section>
+
+  <Breadcrumbs
+    items={[
+      { label: 'Home', href: '/' },
+      { label: 'Why Our Bottles Have Vented Caps', href: '/vented-caps/' },
+    ]}
+  />
+
+  <!-- Body -->
+  <section class="bg-white py-16 md:py-20">
+    <div class="mx-auto max-w-3xl px-6">
+      <p class="text-lg leading-relaxed text-[#191D21]">
+        At Southland Organics we love sharing how nature powers everything we do. Our liquid
+        products are packed with beneficial microbes, which means they need a little breathing
+        room to stay healthy and active.
+      </p>
+
+      <h2 class="font-heading mt-12 text-2xl uppercase text-[#2C5234] md:text-3xl">
+        The cap is doing a job
+      </h2>
+      <p class="mt-4 text-lg leading-relaxed text-[#191D21]">
+        As the microbes multiply they release small amounts of methane. The vented cap lets that
+        gas escape so the bottle does not over-inflate or risk breaking. It is a simple design
+        that protects the product and keeps those live ingredients thriving.
+      </p>
+
+      <h2 class="font-heading mt-12 text-2xl uppercase text-[#2C5234] md:text-3xl">
+        If a little leaked out, nothing is wrong
+      </h2>
+      <p class="mt-4 text-lg leading-relaxed text-[#191D21]">
+        Because the vent allows pressure to escape, it can also occasionally let out a small
+        amount of liquid. Any product that escapes is typically minimal &mdash; and we
+        intentionally fill our bottles knowing a little may be lost in transit, so you still
+        receive the full amount you paid for.
+      </p>
+    </div>
+  </section>
+
+  <!-- Storage -->
+  <section class="bg-[#F8FAF8] py-16 md:py-20">
+    <div class="mx-auto max-w-3xl px-6">
+      <h2 class="font-heading text-2xl uppercase text-[#2C5234] md:text-3xl">
+        When your order arrives
+      </h2>
+      <ul class="mt-6 space-y-3">
+        <li class="flex gap-3 text-lg leading-relaxed text-[#191D21]">
+          <span class="mt-1 font-bold text-[#44883E]" aria-hidden="true">&check;</span>
+          <span>Wipe off the bottle.</span>
+        </li>
+        <li class="flex gap-3 text-lg leading-relaxed text-[#191D21]">
+          <span class="mt-1 font-bold text-[#44883E]" aria-hidden="true">&check;</span>
+          <span>Make sure the cap is tight.</span>
+        </li>
+        <li class="flex gap-3 text-lg leading-relaxed text-[#191D21]">
+          <span class="mt-1 font-bold text-[#44883E]" aria-hidden="true">&check;</span>
+          <span>Store it upright in a cool, dry place, out of reach of children and pets.</span>
+        </li>
+      </ul>
+      <p class="mt-8 text-lg leading-relaxed text-[#191D21]">
+        These vented caps are part of what keeps our naturally active formulas balanced, fresh
+        and ready to work hard for you.
+      </p>
+    </div>
+  </section>
+
+  <!-- Help -->
+  <section class="bg-[#2C5234] py-14 md:py-16">
+    <div class="mx-auto max-w-3xl px-6 text-center">
+      <h2 class="font-heading text-2xl uppercase text-white md:text-3xl">
+        Something not right?
+      </h2>
+      <p class="mt-4 text-lg leading-relaxed text-green-100">
+        If your order arrived damaged, take a photo and send it to us. We will take care of it.
+      </p>
+      <p class="mt-7">
+        <a
+          href="mailto:success@southlandorganics.com"
+          class="inline-block rounded-lg bg-[#44883E] px-6 py-3.5 font-semibold text-white no-underline"
+        >
+          Email success@southlandorganics.com
+        </a>
+      </p>
+      <p class="mt-5 text-green-200">
+        Or call <a href="tel:18006083755" class="text-white underline">800-608-3755</a> &mdash; a
+        real person answers.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
