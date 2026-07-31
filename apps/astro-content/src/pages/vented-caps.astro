@@ -1,0 +1,248 @@
+---
+/**
+ * Why Our Bottles Have Vented Caps — /vented-caps/
+ *
+ * Support page linked from the Order Delivered email. It answers one question:
+ * "there's liquid around the cap, did I get ripped off?" Reassurance first,
+ * explanation second, escalation path last.
+ *
+ * Migrated from the Shopify page at shop.southlandorganics.com/pages/vented-caps,
+ * which was never ported. middleware.ts sent /pages/vented-caps -> /contact/, so
+ * every customer clicking the link in a delivery email landed on a contact form
+ * instead of the answer.
+ *
+ * 🛑 TWO CLAIMS FROM THE SHOPIFY ORIGINAL WERE CORRECTED, NOT COPIED:
+ *
+ * 1. "they release small amounts of METHANE" — dropped. Our own product content
+ *    names *Bacillus* strains, which are facultative aerobes: they produce CO2,
+ *    not methane. Methanogens are strict anaerobic archaea and are not what is in
+ *    a probiotic bottle. Every other methane reference in our content is about
+ *    septic/anaerobic digestion, a different process. Now reads "a small amount
+ *    of gas" — true without naming a compound we cannot support.
+ *
+ * 2. "OUR liquid products are packed with beneficial microbes" — too broad.
+ *    Peracetic acid is an antimicrobial oxidizer; D2 sanitizers are not probiotic.
+ *    Now reads "many of our liquid products."
+ *
+ * If someone can source the methane claim from a lab result, put it back. Until
+ * then this is the version that cannot be shown to be wrong in public.
+ */
+
+export const prerender = true
+
+import BaseLayout from '../layouts/BaseLayout.astro'
+import Breadcrumbs from '../components/shared/Breadcrumbs.astro'
+import { getCloudinaryResponsiveSet, getSouthlandImageId } from '../lib/cloudinary'
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+
+const hero = getCloudinaryResponsiveSet(
+  getSouthlandImageId('heroes/Farm_Athens_GA_7_jbdjik'),
+  [800, 1200, 1600, 1920],
+  { crop: 'fill', quality: 'auto', format: 'auto', effect: ['saturation:60', 'brightness:80'] }
+)
+
+/**
+ * "Vented Caps" — 2:00, Mux. Found in point.dog `voice_videos`
+ * (id 4ee56dd7-fd91-4f78-8f94-0742bddbbdb0). Playback policy is `public`, so the
+ * poster is fetchable without a signed token — which is what lets the Customer.io
+ * email use the same still.
+ */
+const MUX_PLAYBACK_ID = 'LXPYGvvlC9vECKIhHwwdvnHNrJ01rk302gf5IcAe8EG02Y'
+const muxPoster = `https://image.mux.com/${MUX_PLAYBACK_ID}/thumbnail.jpg?width=1200&fit_mode=preserve`
+
+const title = 'Why Our Bottles Have Vented Caps | Southland Organics'
+const description =
+  "Notice a little liquid around the cap? Nothing's wrong, and you didn't lose any of what you paid for. Here's why our bottles vent."
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Why do Southland Organics bottles have vented caps?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Many of our liquid products are alive. The beneficial microbes in them keep working after the bottle is filled, and as they do they release a small amount of gas. A sealed cap would trap it and the bottle would swell, then split. The vent lets it out.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Why did some liquid leak out of my bottle during shipping?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'When pressure escapes, a bit of liquid can come with it, especially after a bottle has been jostled in a truck. We overfill every bottle to account for it, so the full labeled amount is there.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Is the product still good if it vented?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes. A little venting means the biology is active, which is exactly what you are paying for.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Can I replace the vented cap with a solid one?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'No. Sealing the bottle is what makes it burst. Check the cap is seated snugly instead — it will still vent, and that is fine.',
+      },
+    },
+  ],
+}
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalUrl={`${siteUrl}/vented-caps/`}
+  schema={schema}
+>
+  <!-- Hero -->
+  <section class="relative overflow-hidden">
+    <img
+      src={hero.src}
+      srcset={hero.srcset}
+      sizes="100vw"
+      alt="Southland Organics farm in Athens, Georgia"
+      class="absolute inset-0 h-full w-full object-cover"
+      width="1600"
+      height="1067"
+      loading="eager"
+      decoding="async"
+      fetchpriority="high"
+    />
+    <div class="absolute inset-0 bg-[#2C5234]/85"></div>
+    <div class="relative mx-auto max-w-4xl px-6 py-20 md:py-24">
+      <p class="font-semibold uppercase tracking-wider text-green-300" style="font-size:0.8125rem;">
+        Product care
+      </p>
+      <h1 class="mt-3 font-heading text-4xl uppercase text-white md:text-5xl">
+        Why Our Bottles Have Vented Caps
+      </h1>
+      <p class="mt-5 text-lg leading-relaxed text-green-100">
+        Notice a little liquid around the cap? Nothing&rsquo;s wrong, and you didn&rsquo;t lose any
+        of what you paid for. Here&rsquo;s why.
+      </p>
+    </div>
+  </section>
+
+  <Breadcrumbs
+    items={[
+      { label: 'Home', href: '/' },
+      { label: 'Why Our Bottles Have Vented Caps', href: '/vented-caps/' },
+    ]}
+  />
+
+  <!-- Body -->
+  <section class="bg-white py-16 md:py-20">
+    <div class="mx-auto max-w-3xl px-6">
+      <h2 class="font-heading text-2xl uppercase text-[#2C5234] md:text-3xl">
+        The cap is doing a job
+      </h2>
+      <p class="mt-4 text-lg leading-relaxed text-[#191D21]">
+        Many of our liquid products are alive. The beneficial microbes in them keep working after
+        the bottle is filled, and as they do, they release a small amount of gas. A sealed cap would
+        trap it &mdash; the bottle would swell, then split. The vent lets it out.
+      </p>
+
+      <h2 class="mt-12 font-heading text-2xl uppercase text-[#2C5234] md:text-3xl">
+        If a little leaked out, nothing is wrong
+      </h2>
+      <p class="mt-4 text-lg leading-relaxed text-[#191D21]">
+        When pressure escapes, a bit of liquid can come with it, especially after a bottle has been
+        jostled in a truck. <strong>We overfill every bottle to account for it.</strong> The full labeled
+        amount is there.
+      </p>
+
+      <h2 class="mt-12 font-heading text-2xl uppercase text-[#2C5234] md:text-3xl">
+        Is the product still good?
+      </h2>
+      <p class="mt-4 text-lg leading-relaxed text-[#191D21]">
+        Yes. A little venting means the biology is active &mdash; which is exactly what you&rsquo;re
+        paying for.
+      </p>
+
+      <!-- Mux player. VideoEmbed.astro is podcast-specific (requires episodeNumber
+           and episodeSlug), so the element is used directly here. -->
+      <div class="relative mt-10 aspect-video overflow-hidden rounded-xl bg-black">
+        <mux-player
+          playback-id={MUX_PLAYBACK_ID}
+          accent-color="#44883e"
+          metadata-video-title="Why Our Bottles Have Vented Caps"
+          default-hidden-captions
+          poster={muxPoster}
+          style="width:100%;height:100%;--media-object-fit:cover;"></mux-player>
+      </div>
+      <p class="mt-3 text-center text-sm text-[#686363]">
+        Two minutes on why the cap vents &mdash; and why that&rsquo;s a good thing.
+      </p>
+    </div>
+  </section>
+
+  <!-- Storage -->
+  <section class="bg-[#F8FAF8] py-16 md:py-20">
+    <div class="mx-auto max-w-3xl px-6">
+      <h2 class="font-heading text-2xl uppercase text-[#2C5234] md:text-3xl">
+        When your order arrives
+      </h2>
+      <ul class="mt-6 list-none space-y-3 pl-0">
+        <li class="flex gap-3 text-lg leading-relaxed text-[#191D21]">
+          <span class="mt-1 font-bold text-[#44883E]" aria-hidden="true">&check;</span>
+          <span>Wipe off the bottle</span>
+        </li>
+        <li class="flex gap-3 text-lg leading-relaxed text-[#191D21]">
+          <span class="mt-1 font-bold text-[#44883E]" aria-hidden="true">&check;</span>
+          <span>
+            Check the cap is seated snugly &mdash; it&rsquo;ll still vent, and that&rsquo;s fine
+          </span>
+        </li>
+        <li class="flex gap-3 text-lg leading-relaxed text-[#191D21]">
+          <span class="mt-1 font-bold text-[#44883E]" aria-hidden="true">&check;</span>
+          <span>Store it upright, cool and dry, out of reach of children and pets</span>
+        </li>
+        <li class="flex gap-3 text-lg leading-relaxed text-[#191D21]">
+          <span class="mt-1 font-bold text-[#44883E]" aria-hidden="true">&check;</span>
+          <span>
+            Don&rsquo;t swap in a solid cap &mdash; sealing the bottle is what makes it burst
+          </span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Help -->
+  <section class="bg-[#2C5234] py-14 md:py-16">
+    <div class="mx-auto max-w-3xl px-6 text-center">
+      <h2 class="font-heading text-2xl uppercase text-white md:text-3xl">More than a little?</h2>
+      <p class="mt-4 text-lg leading-relaxed text-green-100">
+        If a bottle showed up visibly low, cracked, or soaked through the box, that&rsquo;s not
+        normal venting. Send us a photo and we&rsquo;ll make it right.
+      </p>
+      <p class="mt-7">
+        <a
+          href="mailto:success@southlandorganics.com"
+          class="inline-block rounded-lg bg-[#44883E] px-6 py-3.5 font-semibold text-white no-underline"
+        >
+          Email success@southlandorganics.com
+        </a>
+      </p>
+      <p class="mt-5 text-green-200">
+        Or call <a href="tel:18006083755" class="text-white underline">800-608-3755</a> &mdash; a real
+        person answers.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<!-- Registers the <mux-player> custom element.
+     🛑 MUST sit OUTSIDE <BaseLayout>. Astro only hoists and bundles <script>
+     tags from the component root — nested inside the layout it is dropped
+     silently, the element never upgrades, and the player renders as a dead
+     poster image. Same placement as about/index.astro and blog/[slug].astro. -->
+<script>
+  import('@mux/mux-player').catch(function () {})
+</script>
