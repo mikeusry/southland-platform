@@ -202,6 +202,22 @@ function getCartLevelAttributionAttrs(): Array<{ key: string; value: string }> {
   attrs.push(...getAttributionAttrs())
   attrs.push(...getFirstTouchAttrs())
 
+  // 🛑 WHICH STOREFRONT. southlandorganics.com and jockshockspray.com share ONE
+  // Shopify backend, so nothing in the checkout payload reliably says which site
+  // the shopper was on. Without this the Customer.io abandoned-cart flow cannot
+  // tell them apart and would send Southland copy to a JockShock shopper.
+  //
+  // Unconditional, unlike the attribution keys above — those appear only when a
+  // click id was captured; brand must be on EVERY cart or the flow can't gate.
+  //
+  // Measured 2026-08-01 over 300 checkouts — why nothing in the payload works:
+  //   referring_site     absent on 79/300 (direct visits, search, shop.app)
+  //   full_landing_site  the headless /cart/c/ path on 210/300, both brands
+  //   line item SKU      JockShock SKUs also sell HERE, and that is a Southland
+  //                      sale that should get Southland email — attribute on the
+  //                      SITE, not the product.
+  attrs.push({ key: '_pd_brand', value: 'southland' })
+
   // Add session_id + user_id so the pixel can correlate cart → purchase
   try {
     const cid = getNexusCid()
