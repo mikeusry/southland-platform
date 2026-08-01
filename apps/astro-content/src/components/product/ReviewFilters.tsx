@@ -7,7 +7,7 @@
  */
 
 import { useState, useCallback, useEffect } from 'react'
-import type { KlaviyoReview } from '../../lib/klaviyo-reviews'
+import type { KlaviyoReview } from '../../lib/reviews'
 
 type SortOption = 'newest' | 'highest' | 'lowest'
 type FilterOption = 'all' | 'verified' | '5' | '4' | '3' | '2' | '1'
