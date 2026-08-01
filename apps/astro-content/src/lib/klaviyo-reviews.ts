@@ -188,8 +188,19 @@ export async function fetchProductReviews(
 
   try {
     const allParsed: KlaviyoReview[] = []
+    // 🔴 The status filter is load-bearing — do not remove it.
+    //
+    // Without it this query returns EVERY review for the product regardless of
+    // moderation state. On Torched that was 101 rows including 11 `pending`,
+    // 2 `rejected` and 1 `unpublished` — all of which were rendering publicly.
+    // Moderating in Klaviyo had no effect on what the PDP displayed, and a
+    // review someone had explicitly rejected was live on the site.
+    //
+    // `equals(status,"published")` also returns `featured` rows (verified:
+    // 87 = 86 published + 1 featured), so one filter covers both. Note the API
+    // rejects `any(status,[...])` — status only supports `equals`.
     let nextUrl: string | null =
-      `${KLAVIYO_API_BASE}/reviews/?filter=equals(item.id,"${itemId}")&sort=-created&page[size]=20`
+      `${KLAVIYO_API_BASE}/reviews/?filter=and(equals(item.id,"${itemId}"),equals(status,"published"))&sort=-created&page[size]=20`
 
     // Fetch all pages (most products have <50 reviews, so 1-3 pages max)
     while (nextUrl) {
@@ -266,7 +277,7 @@ export async function fetchReviewPage(
   const itemId = shopifyGidToKlaviyoItemId(shopifyGid)
 
   try {
-    let url = `${KLAVIYO_API_BASE}/reviews/?filter=equals(item.id,"${itemId}")&sort=-created&page[size]=${pageSize}`
+    let url = `${KLAVIYO_API_BASE}/reviews/?filter=and(equals(item.id,"${itemId}"),equals(status,"published"))&sort=-created&page[size]=${pageSize}`
     if (cursor) url += `&page[cursor]=${cursor}`
 
     const response = await fetch(url, {
