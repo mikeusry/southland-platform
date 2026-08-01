@@ -7,7 +7,7 @@
  */
 
 import { useState, useCallback, useEffect } from 'react'
-import type { KlaviyoReview } from '../../lib/klaviyo-reviews'
+import type { KlaviyoReview } from '../../lib/reviews'
 
 type SortOption = 'newest' | 'highest' | 'lowest'
 type FilterOption = 'all' | 'verified' | '5' | '4' | '3' | '2' | '1'
@@ -68,6 +68,27 @@ export default function ReviewFilters({ reviews, totalCount }: Props) {
         filtered.length === totalCount
           ? `${totalCount} reviews`
           : `${filtered.length} of ${totalCount} reviews`
+    }
+
+    // The show-more cap hides slots by their ORIGINAL position, which is wrong
+    // once a filter is applied: filtering to 1-star found 4 reviews but only 2
+    // sat inside the first 8 slots, so the list showed 2 while the label said
+    // 4. Whenever a narrowing filter or a re-sort is active, drop the cap —
+    // the result set is already small, which is the whole point of filtering.
+    const cardsContainer = document.getElementById('review-cards')
+    const showMoreBtn = document.getElementById('review-show-more')
+    if (cardsContainer && showMoreBtn) {
+      const isNarrowed = filter !== 'all' || sort !== 'newest'
+      if (isNarrowed) {
+        cardsContainer.classList.remove('is-collapsed')
+        showMoreBtn.setAttribute('hidden', '')
+      } else {
+        showMoreBtn.removeAttribute('hidden')
+        // Restore the collapsed state the button itself is advertising.
+        if (showMoreBtn.getAttribute('aria-expanded') === 'false') {
+          cardsContainer.classList.add('is-collapsed')
+        }
+      }
     }
   }, [reviews, sort, filter, totalCount])
 

@@ -10,9 +10,22 @@ interface Props {
   size?: 'sm' | 'md' | 'lg'
   anchorTo?: string
   showCount?: boolean
+  /**
+   * What `count` counts. Defaults to 'rating' because callers pass the rating
+   * count (all star submissions) to sit beside an average computed over that
+   * same set. Pass 'review' only where the number really is written reviews.
+   */
+  countLabel?: 'rating' | 'review'
 }
 
-const { rating, count, size = 'md', anchorTo, showCount = true } = Astro.props
+const {
+  rating,
+  count,
+  size = 'md',
+  anchorTo,
+  showCount = true,
+  countLabel = 'rating',
+} = Astro.props
 
 const sizes = {
   sm: { star: 'w-4 h-4', text: 'text-xs', gap: 'gap-0.5' },
@@ -29,7 +42,12 @@ const stars = Array.from({ length: 5 }, (_, i) => {
   return 0
 })
 
-const countText = count === 1 ? '1 review' : `${count} reviews`
+// `count` is the RATING count (every star submission, including star-only
+// ratings with no text), because it sits beside an average computed over that
+// same set. Labelling it "reviews" put "25 reviews" next to a list header
+// reading "24 reviews" — both true, but it reads as a bug. Say "ratings".
+const noun = countLabel === 'rating' ? 'rating' : 'review'
+const countText = count === 1 ? `1 ${noun}` : `${count} ${noun}s`
 ---
 
 <div class={`inline-flex items-center ${s.gap}`}>

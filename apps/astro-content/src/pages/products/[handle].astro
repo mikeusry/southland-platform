@@ -24,7 +24,8 @@ import { isValidPersonaId, type PersonaId } from '../../lib/persona'
 import FirstTouchSegment from '../../components/cdp/FirstTouchSegment.astro'
 import { segmentForProduct } from '../../lib/segment-map'
 import TalkToRep from '../../components/product/TalkToRep'
-import { fetchProductReviews, fetchAllAggregates } from '../../lib/klaviyo-reviews'
+import { fetchProductReviews, fetchAllAggregates } from '../../lib/reviews'
+import type { KlaviyoReview } from '../../lib/reviews'
 import { getServerEnv } from '../../lib/server-env'
 import StarRating from '../../components/product/StarRating.astro'
 import ReviewsSection from '../../components/product/ReviewsSection.astro'
@@ -281,17 +282,57 @@ const hasNamedVariants =
   hasMultipleVariants && product.variants.some((v) => v.title !== 'Default Title')
 
 // ── Schema.org AggregateRating + Review[] (from Klaviyo) ───────────────────
+//
+// Which reviews get marked up: NOT simply the newest N. Google reads a sample,
+// so the sample should be representative and substantive rather than whatever
+// arrived last. Prefer longer text, prefer reviews carrying a public reply, and
+// keep a spread of ratings — marking up five 5-star reviews on a product with
+// 1-star reviews on the page misrepresents the page to Google.
+const MARKED_UP_REVIEW_LIMIT = 15
+
+const selectReviewsForSchema = (reviews: KlaviyoReview[]): KlaviyoReview[] => {
+  if (reviews.length <= MARKED_UP_REVIEW_LIMIT) return reviews
+
+  const score = (r: KlaviyoReview) =>
+    Math.min(r.content.trim().length, 600) + (r.publicReply ? 400 : 0)
+
+  // Take the best-scoring reviews within each star bucket proportionally, so
+  // the marked-up sample keeps the shape of the real distribution.
+  const byRating = new Map<number, KlaviyoReview[]>()
+  for (const r of reviews) {
+    const bucket = byRating.get(r.rating) ?? []
+    bucket.push(r)
+    byRating.set(r.rating, bucket)
+  }
+
+  const picked: KlaviyoReview[] = []
+  for (const [, bucket] of byRating) {
+    const share = Math.max(1, Math.round((bucket.length / reviews.length) * MARKED_UP_REVIEW_LIMIT))
+    picked.push(...[...bucket].sort((a, b) => score(b) - score(a)).slice(0, share))
+  }
+
+  return picked
+    .sort((a, b) => score(b) - score(a))
+    .slice(0, MARKED_UP_REVIEW_LIMIT)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+}
+
 const reviewSchemaProps =
-  reviewData?.aggregate && reviewData.aggregate.reviewCount > 0
+  reviewData?.aggregate && reviewData.aggregate.ratingCount > 0
     ? {
         aggregateRating: {
           '@type': 'AggregateRating',
           ratingValue: reviewData.aggregate.averageRating.toFixed(1),
+          // reviewCount = written reviews; ratingCount = all star submissions
+          // including star-only. Emitting both is the honest denominator —
+          // star-only ratings are real customer ratings and count toward the
+          // average, but they are not written reviews.
           reviewCount: reviewData.aggregate.reviewCount,
+          ratingCount: reviewData.aggregate.ratingCount,
           bestRating: 5,
           worstRating: 1,
         },
-        review: reviewData.reviews.slice(0, 5).map((r) => ({
+        review: selectReviewsForSchema(reviewData.reviews).map((r) => ({
           '@type': 'Review',
           author: { '@type': 'Person', name: r.author },
           datePublished: r.createdAt.split('T')[0],
@@ -303,6 +344,18 @@ const reviewSchemaProps =
             bestRating: 5,
             worstRating: 1,
           },
+          // Our public reply, rendered on the page but previously absent from
+          // the markup. These are Southland's authored answers — real content
+          // that answers the objection the review raises.
+          ...(r.publicReply?.content
+            ? {
+                comment: {
+                  '@type': 'Comment',
+                  author: { '@type': 'Organization', name: 'Southland Organics' },
+                  text: r.publicReply.content,
+                },
+              }
+            : {}),
         })),
       }
     : {}
@@ -653,11 +706,11 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
 
           {/* Star rating — links to reviews section */}
           {
-            reviewData?.aggregate && reviewData.aggregate.reviewCount > 0 && (
+            reviewData?.aggregate && reviewData.aggregate.ratingCount > 0 && (
               <div class="mt-2">
                 <StarRating
                   rating={reviewData.aggregate.averageRating}
-                  count={reviewData.aggregate.reviewCount}
+                  count={reviewData.aggregate.ratingCount}
                   size="md"
                   anchorTo="#reviews"
                 />
@@ -1191,7 +1244,7 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
 
     {/* S5.5: REVIEWS — Klaviyo Reviews (both tiers) */}
     {
-      reviewData?.aggregate && reviewData.aggregate.reviewCount > 0 && (
+      reviewData?.aggregate && reviewData.aggregate.ratingCount > 0 && (
         <ReviewsSection
           reviews={reviewData.reviews}
           questions={reviewData.questions}

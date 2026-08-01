@@ -23,7 +23,17 @@ export interface KlaviyoReview {
 
 export interface ReviewAggregate {
   averageRating: number
+  /** Reviews with written text. Drives the "N reviews" label and JSON-LD reviewCount. */
   reviewCount: number
+  /**
+   * ALL 1-5 star submissions, including star-only ratings with no text.
+   * schema.org draws this distinction on purpose: reviewCount counts written
+   * reviews, ratingCount counts ratings. Star-only submissions are real
+   * customer ratings and belong in the average and the histogram — they were
+   * previously discarded by a `content.length > 1` filter meant to drop junk
+   * entries like ".". Always >= reviewCount.
+   */
+  ratingCount: number
   distribution: Record<1 | 2 | 3 | 4 | 5, number>
 }
 
@@ -46,6 +56,39 @@ function shopifyGidToKlaviyoItemId(gid: string): string {
   return `$shopify:::$default:::${numericId}`
 }
 
+/**
+ * Resolve a Klaviyo review image to our own self-hosted copy.
+ *
+ * Klaviyo returns a RELATIVE path — `p8XW7D/<uuid>.jpeg?updated_at=...` — with no
+ * host. That string was previously passed straight through as `src`, so every
+ * review photo resolved against southlandorganics.com and 404'd. They have been
+ * broken on the live site for as long as the widget has been rendering them.
+ *
+ * All 27 originals were pulled from Klaviyo's S3 bucket
+ * (`klaviyo.s3.amazonaws.com/reviews/images/<path>`), resized to 1200px and
+ * converted to WebP under `public/review-images/`. We self-host on purpose:
+ * that bucket disappears when the Klaviyo account is cancelled.
+ *
+ * Returns null for anything we do not have locally, so the caller can drop it
+ * rather than render another broken image.
+ */
+function resolveReviewImage(raw: unknown): string | null {
+  const path = typeof raw === 'string' ? raw : ((raw as any)?.url ?? '')
+  if (!path) return null
+
+  // Already absolute (future first-party URLs) — trust it.
+  if (path.startsWith('http://') || path.startsWith('https://')) return path
+
+  // `p8XW7D/<uuid>.jpeg?updated_at=...` → `/review-images/<uuid>.webp`
+  const file = path.split('?')[0].split('/').pop()
+  if (!file) return null
+
+  const stem = file.replace(/\.(jpe?g|png|webp)$/i, '')
+  if (!stem) return null
+
+  return `/review-images/${stem}.webp`
+}
+
 /** Parse a single Klaviyo review API object into our clean type. */
 function parseReview(item: any): KlaviyoReview | null {
   try {
@@ -61,9 +104,10 @@ function parseReview(item: any): KlaviyoReview | null {
       verified: attrs.verified ?? false,
       createdAt: attrs.created ?? '',
       images: Array.isArray(attrs.images)
-        ? attrs.images.map((img: any) => ({
-            url: typeof img === 'string' ? img : (img?.url ?? ''),
-          }))
+        ? attrs.images
+            .map((img: any) => resolveReviewImage(img))
+            .filter((url: string | null): url is string => url !== null)
+            .map((url: string) => ({ url }))
         : [],
       smartQuote: attrs.smart_quote ?? '',
       publicReply: attrs.public_reply
@@ -79,8 +123,19 @@ function parseReview(item: any): KlaviyoReview | null {
   }
 }
 
-/** Compute aggregate stats from an array of reviews (review type only, not questions). */
-function computeAggregate(reviews: KlaviyoReview[]): ReviewAggregate {
+/**
+ * Compute aggregate stats.
+ *
+ * Takes TWO sets on purpose:
+ *   - `rated`   — every 1-5 star submission, text or not. Drives the average,
+ *                 the histogram, and `ratingCount`.
+ *   - `written` — the subset with review text. Drives `reviewCount`.
+ *
+ * Previously both came from one already-filtered array, so star-only ratings
+ * were excluded from the average and the count. Questions (rating 0) are never
+ * in either set.
+ */
+function computeAggregate(rated: KlaviyoReview[], written: KlaviyoReview[]): ReviewAggregate {
   const distribution: Record<1 | 2 | 3 | 4 | 5, number> = {
     1: 0,
     2: 0,
@@ -90,19 +145,21 @@ function computeAggregate(reviews: KlaviyoReview[]): ReviewAggregate {
   }
 
   let totalRating = 0
-  for (const r of reviews) {
+  let ratingCount = 0
+  for (const r of rated) {
     if (r.rating >= 1 && r.rating <= 5) {
       distribution[r.rating as 1 | 2 | 3 | 4 | 5]++
       totalRating += r.rating
+      ratingCount++
     }
   }
 
-  const reviewCount = reviews.length
-  const averageRating = reviewCount > 0 ? totalRating / reviewCount : 0
+  const averageRating = ratingCount > 0 ? totalRating / ratingCount : 0
 
   return {
     averageRating: Math.round(averageRating * 10) / 10,
-    reviewCount,
+    reviewCount: written.length,
+    ratingCount,
     distribution,
   }
 }
@@ -131,8 +188,19 @@ export async function fetchProductReviews(
 
   try {
     const allParsed: KlaviyoReview[] = []
+    // 🔴 The status filter is load-bearing — do not remove it.
+    //
+    // Without it this query returns EVERY review for the product regardless of
+    // moderation state. On Torched that was 101 rows including 11 `pending`,
+    // 2 `rejected` and 1 `unpublished` — all of which were rendering publicly.
+    // Moderating in Klaviyo had no effect on what the PDP displayed, and a
+    // review someone had explicitly rejected was live on the site.
+    //
+    // `equals(status,"published")` also returns `featured` rows (verified:
+    // 87 = 86 published + 1 featured), so one filter covers both. Note the API
+    // rejects `any(status,[...])` — status only supports `equals`.
     let nextUrl: string | null =
-      `${KLAVIYO_API_BASE}/reviews/?filter=equals(item.id,"${itemId}")&sort=-created&page[size]=20`
+      `${KLAVIYO_API_BASE}/reviews/?filter=and(equals(item.id,"${itemId}"),equals(status,"published"))&sort=-created&page[size]=20`
 
     // Fetch all pages (most products have <50 reviews, so 1-3 pages max)
     while (nextUrl) {
@@ -162,13 +230,20 @@ export async function fetchProductReviews(
       nextUrl = json?.links?.next ?? null
     }
 
-    // Split: published reviews vs questions
-    const reviews = allParsed.filter(
-      (r) => r.reviewType === 'review' && r.rating >= 1 && r.content.length > 1 // Filter junk like "."
+    // Every real 1-5 star submission — 'review' AND 'rating' (star-only, no text).
+    // This is the set the average and histogram are computed over.
+    const rated = allParsed.filter(
+      (r) => r.reviewType !== 'question' && r.rating >= 1 && r.rating <= 5
     )
+
+    // The subset with actual words — what gets RENDERED as cards. A star-only
+    // rating counts toward the score but is not a card worth showing, and the
+    // `length > 1` check still drops junk entries like ".".
+    const reviews = rated.filter((r) => r.content.trim().length > 1)
+
     const questions = allParsed.filter((r) => r.reviewType === 'question' && r.publicReply)
 
-    const aggregate = computeAggregate(reviews)
+    const aggregate = computeAggregate(rated, reviews)
 
     return {
       aggregate,
@@ -202,7 +277,7 @@ export async function fetchReviewPage(
   const itemId = shopifyGidToKlaviyoItemId(shopifyGid)
 
   try {
-    let url = `${KLAVIYO_API_BASE}/reviews/?filter=equals(item.id,"${itemId}")&sort=-created&page[size]=${pageSize}`
+    let url = `${KLAVIYO_API_BASE}/reviews/?filter=and(equals(item.id,"${itemId}"),equals(status,"published"))&sort=-created&page[size]=${pageSize}`
     if (cursor) url += `&page[cursor]=${cursor}`
 
     const response = await fetch(url, {
@@ -261,7 +336,7 @@ export async function fetchAllAggregates(
 
   try {
     // Collect all reviews across all products
-    const reviewsByProduct = new Map<string, { ratings: number[] }>()
+    const reviewsByProduct = new Map<string, { ratings: number[]; written: number }>()
     let nextUrl: string | null =
       `${KLAVIYO_API_BASE}/reviews/?filter=equals(status,"published")&sort=-created&page[size]=20`
 
@@ -283,8 +358,10 @@ export async function fetchAllAggregates(
 
       for (const item of items) {
         const attrs = item.attributes
-        if (!attrs || attrs.review_type !== 'review' || attrs.rating < 1) continue
-        if (!attrs.content || attrs.content.length <= 1) continue
+        // Count every 1-5 star submission, text or not — 'review' AND 'rating'
+        // (star-only). Questions carry rating 0 and are excluded by the range check.
+        if (!attrs || attrs.review_type === 'question') continue
+        if (!(attrs.rating >= 1 && attrs.rating <= 5)) continue
 
         // Get the Klaviyo item ID and convert back to Shopify GID
         const klaviyoItemId = item.relationships?.item?.data?.id ?? ''
@@ -293,9 +370,14 @@ export async function fetchAllAggregates(
 
         const shopifyGid = `gid://shopify/Product/${numericMatch[1]}`
         if (!reviewsByProduct.has(shopifyGid)) {
-          reviewsByProduct.set(shopifyGid, { ratings: [] })
+          reviewsByProduct.set(shopifyGid, { ratings: [], written: 0 })
         }
-        reviewsByProduct.get(shopifyGid)!.ratings.push(attrs.rating)
+        const bucket = reviewsByProduct.get(shopifyGid)!
+        bucket.ratings.push(attrs.rating)
+        // Track how many carry actual words, for reviewCount.
+        if (typeof attrs.content === 'string' && attrs.content.trim().length > 1) {
+          bucket.written++
+        }
       }
 
       nextUrl = json?.links?.next ?? null
@@ -318,10 +400,11 @@ export async function fetchAllAggregates(
           total += r
         }
       }
-      const count = data.ratings.length
+      const ratingCount = data.ratings.length
       aggregates.set(gid, {
-        averageRating: Math.round((total / count) * 10) / 10,
-        reviewCount: count,
+        averageRating: ratingCount > 0 ? Math.round((total / ratingCount) * 10) / 10 : 0,
+        reviewCount: data.written,
+        ratingCount,
         distribution,
       })
     }

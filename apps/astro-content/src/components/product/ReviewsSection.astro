@@ -8,7 +8,7 @@ import StarRating from './StarRating.astro'
 import RatingHistogram from './RatingHistogram.astro'
 import ReviewCard from './ReviewCard.astro'
 import ReviewFilters from './ReviewFilters'
-import type { KlaviyoReview, ReviewAggregate } from '../../lib/klaviyo-reviews'
+import type { KlaviyoReview, ReviewAggregate } from '../../lib/reviews'
 
 interface Props {
   reviews: KlaviyoReview[]
@@ -19,8 +19,28 @@ interface Props {
 
 const { reviews, questions = [], aggregate, productHandle } = Astro.props
 
-// SSR all reviews — sort/filter handled client-side via ReviewFilters
-const displayedReviews = reviews
+/**
+ * Every review is SSR'd — sorting, filtering and the show-more cap are all
+ * client-side over the rendered DOM. Nothing is fetched on demand and nothing
+ * is hidden from crawlers behind an interaction: the full text ships in the
+ * HTML, which is what keeps us eligible for review rich results.
+ *
+ * The cap exists purely for page length. Torched has 101 reviews; showing all
+ * of them by default makes the PDP enormous. Collapsing past the cap is done
+ * with a CLASS, never `style.display`, because ReviewFilters writes
+ * `style.display` directly when filtering — using the same channel would make
+ * the two features overwrite each other.
+ */
+const INITIAL_REVIEW_COUNT = 8
+
+// Photo reviews first — a customer's own photo is the most persuasive thing on
+// the page — then the rest in API order (newest first). Stable within groups.
+const displayedReviews = [
+  ...reviews.filter((r) => r.images.length > 0),
+  ...reviews.filter((r) => r.images.length === 0),
+]
+
+const isCollapsible = displayedReviews.length > INITIAL_REVIEW_COUNT
 const hasQuestions = questions.length > 0
 ---
 
@@ -42,9 +62,14 @@ const hasQuestions = questions.length > 0
               {aggregate.averageRating.toFixed(1)}
             </p>
             <div class="mt-1">
+              {
+                /* ratingCount, not reviewCount — the star average is computed over
+                  every rating including star-only submissions, so the count shown
+                  beside it must be the same denominator. */
+              }
               <StarRating
                 rating={aggregate.averageRating}
-                count={aggregate.reviewCount}
+                count={aggregate.ratingCount}
                 size="md"
                 showCount={true}
               />
@@ -53,9 +78,13 @@ const hasQuestions = questions.length > 0
 
           {/* Distribution histogram */}
           <div class="mt-4">
+            {
+              /* The bars are built from all ratings; totalCount must match or the
+                percentages do not sum correctly. */
+            }
             <RatingHistogram
               distribution={aggregate.distribution}
-              totalCount={aggregate.reviewCount}
+              totalCount={aggregate.ratingCount}
             />
           </div>
         </div>
@@ -69,9 +98,48 @@ const hasQuestions = questions.length > 0
           )
         }
 
-        <div id="review-cards" class="flex flex-col gap-4">
-          {displayedReviews.map((review) => <ReviewCard review={review} />)}
+        <div
+          id="review-cards"
+          class="flex flex-col gap-4"
+          data-initial-count={INITIAL_REVIEW_COUNT}
+        >
+          {
+            displayedReviews.map((review, i) => (
+              <div
+                class:list={['review-slot', { 'review-slot--beyond': i >= INITIAL_REVIEW_COUNT }]}
+              >
+                <ReviewCard review={review} />
+              </div>
+            ))
+          }
         </div>
+
+        {
+          isCollapsible && (
+            <div class="mt-6 text-center">
+              <button
+                type="button"
+                id="review-show-more"
+                class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 transition hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2"
+                aria-expanded="false"
+                aria-controls="review-cards"
+              >
+                <span data-show-more-label>Show all {displayedReviews.length} reviews</span>
+                <svg
+                  class="h-4 w-4 transition-transform"
+                  data-show-more-icon
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+            </div>
+          )
+        }
 
         {/* Q&A Section */}
         {
@@ -104,3 +172,56 @@ const hasQuestions = questions.length > 0
     </div>
   </div>
 </section>
+
+<style>
+  /* Collapsed state lives on the CONTAINER, not on each card, so ReviewFilters
+     can keep writing `style.display` on individual cards without the two
+     features overwriting each other. */
+  #review-cards.is-collapsed .review-slot--beyond {
+    display: none;
+  }
+
+  /* The filter island reorders with flex `order` on the CARD, one level down.
+     Hoist that onto the wrapper so ordering still works through the slot. */
+  .review-slot {
+    display: contents;
+  }
+</style>
+
+<script>
+  // Show-more for the review list. Progressive enhancement: with JS off, every
+  // review is visible (the collapsed class is added here, not server-rendered),
+  // so crawlers and no-JS users always get the full list.
+  function initReviewShowMore() {
+    const container = document.getElementById('review-cards')
+    const button = document.getElementById('review-show-more')
+    if (!container || !button) return
+    if (container.dataset.showMoreReady === '1') return
+    container.dataset.showMoreReady = '1'
+
+    const label = button.querySelector('[data-show-more-label]')
+    const icon = button.querySelector('[data-show-more-icon]')
+    const total = container.querySelectorAll('.review-slot').length
+
+    container.classList.add('is-collapsed')
+
+    button.addEventListener('click', () => {
+      const collapsed = container.classList.toggle('is-collapsed')
+      button.setAttribute('aria-expanded', String(!collapsed))
+      if (label) {
+        label.textContent = collapsed ? `Show all ${total} reviews` : 'Show fewer reviews'
+      }
+      if (icon) {
+        icon.classList.toggle('rotate-180', !collapsed)
+      }
+      // Collapsing from far down the list would leave the viewport stranded
+      // below the section — pull it back to the reviews heading.
+      if (collapsed) {
+        document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    })
+  }
+
+  initReviewShowMore()
+  document.addEventListener('astro:page-load', initReviewShowMore)
+</script>
