@@ -57,19 +57,27 @@ const isLong = review.content.length > 300
     )
   }
 
-  {/* Customer photos */}
+  {/* Customer photos — self-hosted in /review-images (see resolveReviewImage). */}
   {
     review.images.length > 0 && (
-      <div class="mt-3 flex gap-2">
+      <div class="mt-3 flex flex-wrap gap-2">
         {review.images.slice(0, 4).map((img) => (
-          <img
-            src={img.url}
-            alt="Customer photo"
-            class="h-16 w-16 rounded-md border border-gray-200 object-cover"
-            loading="lazy"
-            width="64"
-            height="64"
-          />
+          <a
+            href={img.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-900 rounded-md"
+          >
+            <img
+              src={img.url}
+              alt={`Customer photo from ${review.author}'s review`}
+              class="h-24 w-24 rounded-md border border-gray-200 object-cover transition group-hover:brightness-95"
+              loading="lazy"
+              decoding="async"
+              width="96"
+              height="96"
+            />
+          </a>
         ))}
       </div>
     )

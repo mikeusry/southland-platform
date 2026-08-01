@@ -56,6 +56,39 @@ function shopifyGidToKlaviyoItemId(gid: string): string {
   return `$shopify:::$default:::${numericId}`
 }
 
+/**
+ * Resolve a Klaviyo review image to our own self-hosted copy.
+ *
+ * Klaviyo returns a RELATIVE path — `p8XW7D/<uuid>.jpeg?updated_at=...` — with no
+ * host. That string was previously passed straight through as `src`, so every
+ * review photo resolved against southlandorganics.com and 404'd. They have been
+ * broken on the live site for as long as the widget has been rendering them.
+ *
+ * All 27 originals were pulled from Klaviyo's S3 bucket
+ * (`klaviyo.s3.amazonaws.com/reviews/images/<path>`), resized to 1200px and
+ * converted to WebP under `public/review-images/`. We self-host on purpose:
+ * that bucket disappears when the Klaviyo account is cancelled.
+ *
+ * Returns null for anything we do not have locally, so the caller can drop it
+ * rather than render another broken image.
+ */
+function resolveReviewImage(raw: unknown): string | null {
+  const path = typeof raw === 'string' ? raw : ((raw as any)?.url ?? '')
+  if (!path) return null
+
+  // Already absolute (future first-party URLs) — trust it.
+  if (path.startsWith('http://') || path.startsWith('https://')) return path
+
+  // `p8XW7D/<uuid>.jpeg?updated_at=...` → `/review-images/<uuid>.webp`
+  const file = path.split('?')[0].split('/').pop()
+  if (!file) return null
+
+  const stem = file.replace(/\.(jpe?g|png|webp)$/i, '')
+  if (!stem) return null
+
+  return `/review-images/${stem}.webp`
+}
+
 /** Parse a single Klaviyo review API object into our clean type. */
 function parseReview(item: any): KlaviyoReview | null {
   try {
@@ -71,9 +104,10 @@ function parseReview(item: any): KlaviyoReview | null {
       verified: attrs.verified ?? false,
       createdAt: attrs.created ?? '',
       images: Array.isArray(attrs.images)
-        ? attrs.images.map((img: any) => ({
-            url: typeof img === 'string' ? img : (img?.url ?? ''),
-          }))
+        ? attrs.images
+            .map((img: any) => resolveReviewImage(img))
+            .filter((url: string | null): url is string => url !== null)
+            .map((url: string) => ({ url }))
         : [],
       smartQuote: attrs.smart_quote ?? '',
       publicReply: attrs.public_reply
