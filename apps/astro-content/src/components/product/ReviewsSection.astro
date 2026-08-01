@@ -42,9 +42,14 @@ const hasQuestions = questions.length > 0
               {aggregate.averageRating.toFixed(1)}
             </p>
             <div class="mt-1">
+              {
+                /* ratingCount, not reviewCount — the star average is computed over
+                  every rating including star-only submissions, so the count shown
+                  beside it must be the same denominator. */
+              }
               <StarRating
                 rating={aggregate.averageRating}
-                count={aggregate.reviewCount}
+                count={aggregate.ratingCount}
                 size="md"
                 showCount={true}
               />
@@ -53,9 +58,13 @@ const hasQuestions = questions.length > 0
 
           {/* Distribution histogram */}
           <div class="mt-4">
+            {
+              /* The bars are built from all ratings; totalCount must match or the
+                percentages do not sum correctly. */
+            }
             <RatingHistogram
               distribution={aggregate.distribution}
-              totalCount={aggregate.reviewCount}
+              totalCount={aggregate.ratingCount}
             />
           </div>
         </div>

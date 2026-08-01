@@ -192,11 +192,11 @@ const displayName = product.title.includes('|') ? product.title.split('|')[0].tr
     </h3>
 
     {
-      reviewAggregate && reviewAggregate.reviewCount > 0 && (
+      reviewAggregate && reviewAggregate.ratingCount > 0 && (
         <div class="mt-1">
           <StarRating
             rating={reviewAggregate.averageRating}
-            count={reviewAggregate.reviewCount}
+            count={reviewAggregate.ratingCount}
             size="sm"
           />
         </div>
