@@ -78,7 +78,8 @@ const grouped = SEGMENTS.map((s) => ({
  * badge is a small loss, a wrong badge is a wasted trip.
  */
 const TEACHES = /how to|what is|why |overview|guide|instructions|application/i
-const teaches = (p: (typeof usable)[number]) => Boolean(p.data.muxPlaybackId && TEACHES.test(p.data.videoTitle ?? ''))
+const teaches = (p: (typeof usable)[number]) =>
+  Boolean(p.data.muxPlaybackId && TEACHES.test(p.data.videoTitle ?? ''))
 
 const withVideo = usable.filter(teaches).length
 
@@ -120,9 +121,9 @@ const schema = {
     <div class="mx-auto max-w-4xl px-4 text-center">
       <h1 class="font-heading text-4xl uppercase text-white md:text-5xl">You got your order</h1>
       <p class="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-green-100">
-        Here is how much to use, when to put it down, and what to expect &mdash; for every
-        product we make. If you would rather just ask somebody, the phone number is real and a
-        person answers it.
+        Here is how much to use, when to put it down, and what to expect &mdash; for every product
+        we make. If you would rather just ask somebody, the phone number is real and a person
+        answers it.
       </p>
       <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
         <a
@@ -140,7 +141,9 @@ const schema = {
       </div>
       <p class="mt-5 text-sm text-green-200/70">
         Mon-Fri, 8am-5pm EST &middot; or email
-        <a href="mailto:success@southlandorganics.com" class="underline">success@southlandorganics.com</a>
+        <a href="mailto:success@southlandorganics.com" class="underline"
+          >success@southlandorganics.com</a
+        >
       </p>
     </div>
   </section>
@@ -151,37 +154,47 @@ const schema = {
       <h2 class="font-heading text-3xl uppercase text-[#2C5234] md:text-4xl">Start here</h2>
       <div class="mt-8 grid items-start gap-6 md:grid-cols-3">
         <div class="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-          <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[#44883E]/10 font-heading text-lg text-[#2C5234]">
+          <div
+            class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[#44883E]/10 font-heading text-lg text-[#2C5234]"
+          >
             1
           </div>
           <h3 class="font-bold text-gray-900">How much do I use?</h3>
           <p class="mt-2 text-gray-600">
-            Every product below lists its mix ratio and rate. For an exact number based on
-            your square footage or flock size, use the
-            <a href="/application-rate-calculator/" class="text-[#44883E] underline">rate calculator</a>.
+            Every product below lists its mix ratio and rate. For an exact number based on your
+            square footage or flock size, use the
+            <a href="/application-rate-calculator/" class="text-[#44883E] underline"
+              >rate calculator</a
+            >.
           </p>
         </div>
         <div class="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-          <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[#44883E]/10 font-heading text-lg text-[#2C5234]">
+          <div
+            class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[#44883E]/10 font-heading text-lg text-[#2C5234]"
+          >
             2
           </div>
-          {/*
+          {
+            /*
             ⚠️ Do NOT say "these are biological products, not chemicals" here.
             The catalog includes the Alpet D2 sanitizer line and PAA 5.6%, which
             are chemical sanitizers. A blanket claim across the whole catalog is
             false on those SKUs, and it is the kind of false that matters on a
             product people spray in a food-production house.
-          */}
+          */
+          }
           <h3 class="font-bold text-gray-900">When will I see something?</h3>
           <p class="mt-2 text-gray-600">
-            Depends on the product. Sanitizers work on contact. The biological products
-            &mdash; soil conditioners, flock supplements, litter treatment &mdash; work with
-            the soil or the bird rather than on it, so most of their results show up over
-            weeks, not overnight. Each product page says what to watch for.
+            Depends on the product. Sanitizers work on contact. The biological products &mdash; soil
+            conditioners, flock supplements, litter treatment &mdash; work with the soil or the bird
+            rather than on it, so most of their results show up over weeks, not overnight. Each
+            product page says what to watch for.
           </p>
         </div>
         <div class="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-          <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[#44883E]/10 font-heading text-lg text-[#2C5234]">
+          <div
+            class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[#44883E]/10 font-heading text-lg text-[#2C5234]"
+          >
             3
           </div>
           <h3 class="font-bold text-gray-900">Something is not right</h3>
@@ -200,9 +213,7 @@ const schema = {
     grouped.map((group, gi) => (
       <section class={gi % 2 === 0 ? 'bg-[#F8FAF8] py-16 md:py-20' : 'bg-white py-16 md:py-20'}>
         <div class="mx-auto max-w-6xl px-4">
-          <h2 class="font-heading text-3xl uppercase text-[#2C5234] md:text-4xl">
-            {group.label}
-          </h2>
+          <h2 class="font-heading text-3xl uppercase text-[#2C5234] md:text-4xl">{group.label}</h2>
           <p class="mt-2 text-gray-600">{group.blurb}</p>
 
           <div class="mt-8 grid items-start gap-6 md:grid-cols-2">
@@ -264,8 +275,8 @@ const schema = {
     <div class="mx-auto max-w-3xl px-4 text-center">
       <h2 class="font-heading text-3xl uppercase text-white md:text-4xl">Still not sure?</h2>
       <p class="mt-4 text-lg leading-relaxed text-green-100">
-        We have been doing this since 2009 and we would rather spend ten minutes on the phone
-        than have you waste a gallon of product. Nobody is going to sell you anything.
+        We have been doing this since 2009 and we would rather spend ten minutes on the phone than
+        have you waste a gallon of product. Nobody is going to sell you anything.
       </p>
       <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
         <a
