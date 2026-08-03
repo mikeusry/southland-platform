@@ -8,6 +8,7 @@ import StarRating from './StarRating.astro'
 import RatingHistogram from './RatingHistogram.astro'
 import ReviewCard from './ReviewCard.astro'
 import ReviewFilters from './ReviewFilters'
+import ReviewForm from './ReviewForm.astro'
 import type { KlaviyoReview, ReviewAggregate } from '../../lib/reviews'
 
 interface Props {
@@ -15,9 +16,18 @@ interface Props {
   questions?: KlaviyoReview[]
   aggregate: ReviewAggregate
   productHandle: string
+  shopifyProductId?: string
+  productName?: string
 }
 
-const { reviews, questions = [], aggregate, productHandle } = Astro.props
+const {
+  reviews,
+  questions = [],
+  aggregate,
+  productHandle,
+  shopifyProductId = '',
+  productName = '',
+} = Astro.props
 
 /**
  * Every review is SSR'd — sorting, filtering and the show-more cap are all
@@ -42,6 +52,10 @@ const displayedReviews = [
 
 const isCollapsible = displayedReviews.length > INITIAL_REVIEW_COUNT
 const hasQuestions = questions.length > 0
+
+// ratingCount, not reviews.length — a product with only star-only ratings has
+// real proof to show even with no written cards.
+const hasReviews = aggregate.ratingCount > 0
 ---
 
 <section
@@ -50,11 +64,24 @@ const hasQuestions = questions.length > 0
   data-section="pdp-reviews"
 >
   <div class="mx-auto max-w-6xl px-4">
-    <h2 class="mb-8 font-heading text-2xl text-gray-900">Customer Reviews</h2>
+    <h2 class="mb-8 font-heading text-2xl text-gray-900">
+      {hasReviews ? 'Customer Reviews' : 'Reviews'}
+    </h2>
+
+    {
+      /* No reviews yet: say so plainly and ask. Rendering the aggregate column
+         here would print a 5xl "0.0" under five empty stars, which reads worse
+         than an honest empty state. */
+      !hasReviews && (
+        <p class="mb-2 max-w-xl text-sm leading-relaxed text-gray-600">
+          No reviews yet. If you've used this, your review is the one the next person reads.
+        </p>
+      )
+    }
 
     <div class="grid gap-8 lg:grid-cols-12">
       {/* Left column: Aggregate summary */}
-      <div class="lg:col-span-4">
+      <div class:list={['lg:col-span-4', !hasReviews && 'hidden']}>
         <div class="sticky top-24 space-y-4">
           {/* Big rating number */}
           <div class="text-center lg:text-left">
@@ -168,6 +195,18 @@ const hasQuestions = questions.length > 0
             </div>
           )
         }
+
+        {
+          /* Write-a-review. Sits at the bottom of the list so it does not
+            compete with the proof above it, but is always present — including
+            on products with no reviews yet, which are exactly the ones that
+            need the first one. */
+        }
+        <ReviewForm
+          shopifyProductId={shopifyProductId}
+          productHandle={productHandle}
+          productName={productName}
+        />
       </div>
     </div>
   </div>

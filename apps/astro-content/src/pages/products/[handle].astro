@@ -1242,17 +1242,29 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
       </div>
     </section>
 
-    {/* S5.5: REVIEWS — Klaviyo Reviews (both tiers) */}
     {
-      reviewData?.aggregate && reviewData.aggregate.ratingCount > 0 && (
-        <ReviewsSection
-          reviews={reviewData.reviews}
-          questions={reviewData.questions}
-          aggregate={reviewData.aggregate}
-          productHandle={product.handle}
-        />
-      )
+      /* S5.5: REVIEWS — first-party, served from Nexus.
+
+        Rendered even at ZERO reviews, because the section now carries the
+        write-a-review form and a product with no reviews is exactly the one
+        that needs the first. ZeroPoint has none at all. The aggregate block
+        inside stays gated on ratingCount, so an empty product shows the form
+        without inventing stars, and the JSON-LD still emits {} — no rating is
+        ever fabricated. */
     }
+    <ReviewsSection
+      reviews={reviewData?.reviews ?? []}
+      questions={reviewData?.questions ?? []}
+      aggregate={reviewData?.aggregate ?? {
+        averageRating: 0,
+        reviewCount: 0,
+        ratingCount: 0,
+        distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+      }}
+      productHandle={product.handle}
+      shopifyProductId={product.id.split('/').pop() ?? ''}
+      productName={product.title}
+    />
 
     {/* S5b: BUNDLE — annihilate-and-repopulate kit */}
     {

@@ -1,0 +1,271 @@
+---
+/**
+ * ReviewForm — write a review, on our own site.
+ *
+ * There was no submission path anywhere before this. Collection was 100%
+ * Klaviyo's post-purchase flow, and the "Leave a Review" CTA on the site linked
+ * to /contact/.
+ *
+ * Two entry points, and the difference is what the review is worth:
+ *
+ *   ?review=<token>  — arrived from our post-purchase email. The token proves
+ *                      this person bought this product on this order, so the
+ *                      review lands verified. This replaces Klaviyo's gate.
+ *   open form        — anyone. Lands unverified. Needed because only ~34% of
+ *                      reviewer emails match a customer record, and because
+ *                      reviews arrive by email with no order attached.
+ *
+ * Both land as `pending`. Nothing self-publishes.
+ *
+ * Kept to ONE required field (the rating). Every additional required field
+ * costs completion, and a one-tap rating is the highest-completion path we
+ * have — which is exactly why star-only ratings must count toward the total.
+ */
+interface Props {
+  shopifyProductId: string
+  productHandle: string
+  productName: string
+}
+
+const { shopifyProductId, productHandle, productName } = Astro.props
+---
+
+<div id="review-form-root" class="mt-8 border-t border-gray-200 pt-8">
+  <button
+    type="button"
+    id="review-form-toggle"
+    class="rounded-md border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 transition hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2"
+    aria-expanded="false"
+    aria-controls="review-form"
+  >
+    Write a review
+  </button>
+
+  <form
+    id="review-form"
+    class="mt-4 hidden max-w-xl space-y-4"
+    data-product-id={shopifyProductId}
+    data-product-handle={productHandle}
+    data-product-name={productName}
+  >
+    <div>
+      <!-- Rating: the only required field. -->
+      <span class="block text-sm font-medium text-gray-900">Your rating</span>
+      <div id="review-stars" class="mt-1 flex gap-1" role="radiogroup" aria-label="Rating out of 5">
+        {
+          [1, 2, 3, 4, 5].map((n) => (
+            <button
+              type="button"
+              class="review-star text-3xl leading-none text-gray-300 transition hover:text-amber-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900"
+              data-value={n}
+              role="radio"
+              aria-checked="false"
+              aria-label={`${n} star${n > 1 ? 's' : ''}`}
+            >
+              &#9733;
+            </button>
+          ))
+        }
+      </div>
+    </div>
+
+    <div>
+      <label for="review-title" class="block text-sm font-medium text-gray-900">
+        Headline <span class="font-normal text-gray-500">(optional)</span>
+      </label>
+      <input
+        type="text"
+        id="review-title"
+        maxlength="120"
+        class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
+      />
+    </div>
+
+    <div>
+      <label for="review-body" class="block text-sm font-medium text-gray-900">
+        Your review <span class="font-normal text-gray-500">(optional)</span>
+      </label>
+      <textarea
+        id="review-body"
+        rows="4"
+        maxlength="4000"
+        placeholder="What worked, what didn't, what you'd tell someone considering it."
+        class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
+      ></textarea>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div>
+        <label for="review-name" class="block text-sm font-medium text-gray-900">Your name</label>
+        <input
+          type="text"
+          id="review-name"
+          maxlength="80"
+          autocomplete="name"
+          class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
+        />
+      </div>
+      <div>
+        <label for="review-email" class="block text-sm font-medium text-gray-900">Email</label>
+        <input
+          type="email"
+          id="review-email"
+          required
+          autocomplete="email"
+          class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
+        />
+        <p class="mt-1 text-xs text-gray-500">Not published. We only use it to verify.</p>
+      </div>
+    </div>
+
+    {
+      /* Honeypot — hidden from people, filled by bots. Not display:none, which
+        some bots skip; off-screen with aria-hidden and no tab stop. */
+    }
+    <div class="absolute left-[-9999px]" aria-hidden="true">
+      <label for="company_website">Company website</label>
+      <input
+        type="text"
+        id="company_website"
+        name="company_website"
+        tabindex="-1"
+        autocomplete="off"
+      />
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button
+        type="submit"
+        id="review-submit"
+        class="rounded-md bg-brand-green-dark px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        Submit review
+      </button>
+      <span id="review-form-status" class="text-sm" role="status" aria-live="polite"></span>
+    </div>
+
+    <p class="text-xs leading-relaxed text-gray-500">
+      Reviews are read by a person before they appear. We publish honest reviews whether they are
+      positive or negative.
+    </p>
+  </form>
+
+  <div
+    id="review-form-done"
+    class="mt-4 hidden rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-900"
+  >
+  </div>
+</div>
+
+<script>
+  function initReviewForm() {
+    const root = document.getElementById('review-form-root')
+    const form = document.getElementById('review-form') as HTMLFormElement | null
+    const toggle = document.getElementById('review-form-toggle')
+    if (!root || !form || !toggle) return
+    if (root.dataset.ready === '1') return
+    root.dataset.ready = '1'
+
+    const params = new URLSearchParams(window.location.search)
+    const token = params.get('review')
+    const prefill = Number(params.get('rating'))
+
+    let rating = 0
+    const stars = Array.from(document.querySelectorAll<HTMLElement>('.review-star'))
+
+    function paint(n: number) {
+      rating = n
+      for (const s of stars) {
+        const v = Number(s.dataset.value)
+        s.classList.toggle('text-amber-400', v <= n)
+        s.classList.toggle('text-gray-300', v > n)
+        s.setAttribute('aria-checked', String(v === n))
+      }
+    }
+
+    for (const s of stars) {
+      s.addEventListener('click', () => paint(Number(s.dataset.value)))
+    }
+
+    function open() {
+      form!.classList.remove('hidden')
+      toggle!.setAttribute('aria-expanded', 'true')
+      toggle!.classList.add('hidden')
+    }
+
+    toggle.addEventListener('click', open)
+
+    // Arriving from the post-purchase email: open the form, pre-fill the star
+    // they tapped, and put them straight at it. They have already committed —
+    // making them hunt for the form is how that intent gets lost.
+    if (token) {
+      open()
+      if (prefill >= 1 && prefill <= 5) paint(prefill)
+      root.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const status = document.getElementById('review-form-status')!
+      const submit = document.getElementById('review-submit') as HTMLButtonElement
+
+      const email = (document.getElementById('review-email') as HTMLInputElement).value.trim()
+      if (!rating) {
+        status.textContent = 'Pick a star rating first.'
+        status.className = 'text-sm text-red-700'
+        return
+      }
+      if (!email) {
+        status.textContent = 'Email is required.'
+        status.className = 'text-sm text-red-700'
+        return
+      }
+
+      submit.disabled = true
+      status.textContent = 'Sending…'
+      status.className = 'text-sm text-gray-500'
+
+      try {
+        const res = await fetch('/api/reviews/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            token,
+            rating,
+            title: (document.getElementById('review-title') as HTMLInputElement).value,
+            content: (document.getElementById('review-body') as HTMLTextAreaElement).value,
+            author_name: (document.getElementById('review-name') as HTMLInputElement).value,
+            email,
+            company_website: (document.getElementById('company_website') as HTMLInputElement).value,
+            shopify_product_id: form.dataset.productId,
+            product_handle: form.dataset.productHandle,
+            product_name: form.dataset.productName,
+          }),
+        })
+
+        const json = await res.json().catch(() => ({}))
+
+        if (!res.ok) {
+          status.textContent = json.error || 'Something went wrong. Please try again.'
+          status.className = 'text-sm text-red-700'
+          submit.disabled = false
+          return
+        }
+
+        const done = document.getElementById('review-form-done')!
+        done.textContent =
+          json.message ||
+          'Thanks — your review has been received and will be published after review.'
+        done.classList.remove('hidden')
+        form.classList.add('hidden')
+      } catch {
+        status.textContent = 'Could not reach us just now. Please try again shortly.'
+        status.className = 'text-sm text-red-700'
+        submit.disabled = false
+      }
+    })
+  }
+
+  initReviewForm()
+  document.addEventListener('astro:page-load', initReviewForm)
+</script>
