@@ -1,0 +1,293 @@
+---
+/**
+ * /how-to-use/ — "I got my order. Now what?"
+ *
+ * ── Why this page exists ────────────────────────────────────────────────────
+ *
+ * The welcome email had a "Read Our Blog" button. It was clicked 4 times in a
+ * year (158 recipients, trailing 365d, Klaviyo flow-series-report). The plain
+ * founder email with NO button got 23 clicks and the only revenue in the flow.
+ *
+ * The blog is the wrong ask for someone who just bought and is waiting on a
+ * box. What they want is "how do I use the thing I ordered," and there was
+ * nowhere to send them: /how-to-use/, /faq/, /support/ and /pages/product-guides
+ * all 404'd. Only /contact/ and /blog/ existed.
+ *
+ * ── What this page does NOT do ──────────────────────────────────────────────
+ *
+ * 🛑 IT INVENTS NO INSTRUCTIONS. Every mix ratio, timing note and application
+ * method on this page is read from `dosingInstructions` / `applicationMethod`
+ * in the product content collection — the same fields the PDP renders. 28 of
+ * 29 products already carry them. If a product's directions are wrong, fix the
+ * .mdx file; do not write copy here.
+ *
+ * That is also why there is no hand-written FAQ. Answers that live in one
+ * person's head and get retyped into a marketing page go stale silently. This
+ * page can only ever be as current as the product data behind it.
+ *
+ * ── The one product without dosing ──────────────────────────────────────────
+ *
+ * Dog Spot has no `dosingInstructions`. It is filtered out rather than shown
+ * with an empty card — a card promising directions and delivering none is
+ * worse than not listing it. When someone adds dosing to dog-spot-for-lawns.mdx
+ * it appears here automatically, no edit to this file required.
+ */
+import { getCollection } from 'astro:content'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import Breadcrumbs from '../../components/shared/Breadcrumbs.astro'
+
+// Static — the content collection is build-time data, there is nothing per-visitor here.
+export const prerender = true
+
+const all = await getCollection('products')
+
+// Only products that can actually answer "how do I use this."
+const usable = all
+  .filter((p) => p.data.dosingInstructions)
+  .sort((a, b) => a.data.name.localeCompare(b.data.name))
+
+const SEGMENTS = [
+  {
+    id: 'poultry',
+    label: 'Poultry',
+    blurb: 'Flock supplements, litter treatment, and house products.',
+  },
+  { id: 'turf', label: 'Lawn & Garden', blurb: 'Soil conditioners, fertilizers, and turf care.' },
+  {
+    id: 'agriculture',
+    label: 'Sanitizers & Waste Treatment',
+    blurb: 'Surface sanitizers, septic and vault toilet treatment.',
+  },
+  { id: 'athletic', label: 'Skin & Body', blurb: 'Personal care.' },
+] as const
+
+const grouped = SEGMENTS.map((s) => ({
+  ...s,
+  items: usable.filter((p) => p.data.segment === s.id),
+})).filter((g) => g.items.length > 0)
+
+/**
+ * 🛑 A VIDEO IS NOT A WALKTHROUGH. 13 products carry a muxPlaybackId, but only
+ * some are instructional — the rest are "Big Ole Bird | Performance Study
+ * Results", "Pour the PORT Clip", "Mother Load ACV". Badging those as help on a
+ * page about how to use things sends someone hunting for directions into a
+ * product film.
+ *
+ * Match on the TITLE, which is what tells you the video's job. New videos need
+ * an instructional title to earn the badge — that is the intended default: no
+ * badge is a small loss, a wrong badge is a wasted trip.
+ */
+const TEACHES = /how to|what is|why |overview|guide|instructions|application/i
+const teaches = (p: (typeof usable)[number]) => Boolean(p.data.muxPlaybackId && TEACHES.test(p.data.videoTitle ?? ''))
+
+const withVideo = usable.filter(teaches).length
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+const canonicalUrl = `${siteUrl}/how-to-use/`
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'How to Use Southland Organics Products',
+  description:
+    'Application rates, mix ratios and timing for every Southland Organics product, plus who to call if you get stuck.',
+  url: canonicalUrl,
+  mainEntity: {
+    '@type': 'ItemList',
+    numberOfItems: usable.length,
+    itemListElement: usable.map((p, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: p.data.name,
+      url: `${siteUrl}/products/${p.data.shopifyHandle}/`,
+    })),
+  },
+}
+---
+
+<BaseLayout
+  title="How to Use Our Products | Southland Organics"
+  description="Application rates, mix ratios and timing for every Southland Organics product. Plus a real phone number if you would rather just ask."
+  canonicalUrl={canonicalUrl}
+  schema={schema}
+>
+  <div class="mx-auto max-w-6xl px-4 py-6">
+    <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'How to Use' }]} />
+  </div>
+
+  <!-- Hero -->
+  <section class="bg-[#2C5234] py-16 md:py-20">
+    <div class="mx-auto max-w-4xl px-4 text-center">
+      <h1 class="font-heading text-4xl uppercase text-white md:text-5xl">You got your order</h1>
+      <p class="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-green-100">
+        Here is how much to use, when to put it down, and what to expect &mdash; for every
+        product we make. If you would rather just ask somebody, the phone number is real and a
+        person answers it.
+      </p>
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <a
+          href="tel:800-608-3755"
+          class="rounded-lg bg-[#44883E] px-6 py-3.5 font-semibold text-white transition-colors hover:bg-green-700"
+        >
+          Call 800-608-3755
+        </a>
+        <a
+          href="/application-rate-calculator/"
+          class="rounded-lg border-2 border-white/30 px-6 py-3.5 font-semibold text-white transition-colors hover:bg-white/10"
+        >
+          Calculate my exact amount
+        </a>
+      </div>
+      <p class="mt-5 text-sm text-green-200/70">
+        Mon-Fri, 8am-5pm EST &middot; or email
+        <a href="mailto:success@southlandorganics.com" class="underline">success@southlandorganics.com</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- The three things people actually ask -->
+  <section class="bg-white py-16 md:py-20">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="font-heading text-3xl uppercase text-[#2C5234] md:text-4xl">Start here</h2>
+      <div class="mt-8 grid items-start gap-6 md:grid-cols-3">
+        <div class="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+          <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[#44883E]/10 font-heading text-lg text-[#2C5234]">
+            1
+          </div>
+          <h3 class="font-bold text-gray-900">How much do I use?</h3>
+          <p class="mt-2 text-gray-600">
+            Every product below lists its mix ratio and rate. For an exact number based on
+            your square footage or flock size, use the
+            <a href="/application-rate-calculator/" class="text-[#44883E] underline">rate calculator</a>.
+          </p>
+        </div>
+        <div class="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+          <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[#44883E]/10 font-heading text-lg text-[#2C5234]">
+            2
+          </div>
+          {/*
+            ⚠️ Do NOT say "these are biological products, not chemicals" here.
+            The catalog includes the Alpet D2 sanitizer line and PAA 5.6%, which
+            are chemical sanitizers. A blanket claim across the whole catalog is
+            false on those SKUs, and it is the kind of false that matters on a
+            product people spray in a food-production house.
+          */}
+          <h3 class="font-bold text-gray-900">When will I see something?</h3>
+          <p class="mt-2 text-gray-600">
+            Depends on the product. Sanitizers work on contact. The biological products
+            &mdash; soil conditioners, flock supplements, litter treatment &mdash; work with
+            the soil or the bird rather than on it, so most of their results show up over
+            weeks, not overnight. Each product page says what to watch for.
+          </p>
+        </div>
+        <div class="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+          <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[#44883E]/10 font-heading text-lg text-[#2C5234]">
+            3
+          </div>
+          <h3 class="font-bold text-gray-900">Something is not right</h3>
+          <p class="mt-2 text-gray-600">
+            Call us. We would rather talk you through it than have you guess &mdash;
+            <a href="tel:800-608-3755" class="text-[#44883E] underline">800-608-3755</a>, or
+            <a href="/contact/" class="text-[#44883E] underline">send a message</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Directions, straight from product data -->
+  {
+    grouped.map((group, gi) => (
+      <section class={gi % 2 === 0 ? 'bg-[#F8FAF8] py-16 md:py-20' : 'bg-white py-16 md:py-20'}>
+        <div class="mx-auto max-w-6xl px-4">
+          <h2 class="font-heading text-3xl uppercase text-[#2C5234] md:text-4xl">
+            {group.label}
+          </h2>
+          <p class="mt-2 text-gray-600">{group.blurb}</p>
+
+          <div class="mt-8 grid items-start gap-6 md:grid-cols-2">
+            {group.items.map((p) => (
+              <div class="flex flex-col rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+                <div class="flex items-start justify-between gap-3">
+                  <h3 class="font-bold text-gray-900">{p.data.name}</h3>
+                  {/*
+                    ⚠️ Says "Watch", NOT "How-to". Only 5 of the 13 product
+                    videos are instructional — the rest are things like
+                    "Performance Study Results" and "Pour the PORT Clip". A
+                    how-to badge on a marketing clip sends someone looking for
+                    directions to a product film, which is worse than no badge.
+                  */}
+                  {teaches(p) && (
+                    <span class="shrink-0 rounded-md bg-[#44883E]/10 px-2.5 py-1 text-xs font-semibold uppercase tracking-wider text-[#2C5234]">
+                      Video
+                    </span>
+                  )}
+                </div>
+
+                {p.data.applicationMethod && (
+                  <p class="mt-2 text-sm text-gray-500">{p.data.applicationMethod}</p>
+                )}
+
+                {/*
+                  whitespace-pre-line preserves the bullet/line structure the
+                  .mdx author wrote. These are mix ratios — reflowing them into
+                  a paragraph would make them harder to follow, not easier.
+                */}
+                <p class="mt-4 whitespace-pre-line text-sm leading-relaxed text-gray-700">
+                  {p.data.dosingInstructions}
+                </p>
+
+                <div class="mt-6 flex flex-wrap gap-4 pt-2">
+                  <a
+                    href={`/products/${p.data.shopifyHandle}/`}
+                    class="text-sm font-semibold text-[#44883E] hover:underline"
+                  >
+                    Full directions &amp; proof &rarr;
+                  </a>
+                  <a
+                    href={`/application-rate-calculator/?product=${p.data.shopifyHandle}`}
+                    class="text-sm font-semibold text-[#44883E] hover:underline"
+                  >
+                    Calculate my amount &rarr;
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    ))
+  }
+
+  <!-- Close -->
+  <section class="bg-[#2C5234] py-16 md:py-20">
+    <div class="mx-auto max-w-3xl px-4 text-center">
+      <h2 class="font-heading text-3xl uppercase text-white md:text-4xl">Still not sure?</h2>
+      <p class="mt-4 text-lg leading-relaxed text-green-100">
+        We have been doing this since 2009 and we would rather spend ten minutes on the phone
+        than have you waste a gallon of product. Nobody is going to sell you anything.
+      </p>
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <a
+          href="tel:800-608-3755"
+          class="rounded-lg bg-[#44883E] px-6 py-3.5 font-semibold text-white transition-colors hover:bg-green-700"
+        >
+          Call 800-608-3755
+        </a>
+        <a
+          href="/contact/"
+          class="rounded-lg border-2 border-white/30 px-6 py-3.5 font-semibold text-white transition-colors hover:bg-white/10"
+        >
+          Send a message
+        </a>
+      </div>
+      {
+        withVideo > 0 && (
+          <p class="mt-6 text-sm text-green-200/70">
+            {withVideo} of our products have a walkthrough video on their product page.
+          </p>
+        )
+      }
+    </div>
+  </section>
+</BaseLayout>
