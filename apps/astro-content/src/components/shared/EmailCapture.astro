@@ -186,6 +186,22 @@ const buttonClasses =
         }
       }
 
+      // Identify to the point.dog pixel BEFORE the Klaviyo round-trip.
+      //
+      // Two reasons for the ordering: identify must land before any track() or
+      // the event attaches to a profile with no email, and doing it up front
+      // means the identity survives even if Klaviyo is slow or the visitor
+      // navigates away mid-request. identify() hashes locally — no plaintext
+      // email is ever sent to the pixel endpoint.
+      if (window.pdPixel?.identify) {
+        try {
+          await window.pdPixel.identify({ email })
+        } catch (e) {
+          // Never let identity capture break the signup itself.
+          console.error('pdPixel.identify failed:', e)
+        }
+      }
+
       try {
         // Klaviyo Client Subscribe API (2024 format)
         const response = await fetch(

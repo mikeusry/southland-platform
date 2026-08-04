@@ -127,6 +127,28 @@ export function postToNexus(payload: NexusLeadPayload): void {
   }
 }
 
+/**
+ * Hand the calculator/quiz email to the point.dog pixel.
+ *
+ * These tools were the site's only wholly-uninstrumented capture path — they
+ * posted to Nexus and pushed a dataLayer event, but the pixel never learned the
+ * visitor's identity, so their browse history stayed anonymous. Calling
+ * identify() stamps the `_pd_eh` cookie so every subsequent event on this
+ * device carries the identity.
+ *
+ * Deliberately not awaited: submitLead() is fire-and-forget by contract, and
+ * identify() hashes locally (no network) before persisting. Failures are
+ * swallowed — a tracking miss must never break a lead submission.
+ */
+function identifyToPixel(email: string, phone?: string | null): void {
+  if (typeof window === 'undefined') return
+  try {
+    void window.pdPixel?.identify?.({ email, phone: phone ?? undefined })
+  } catch {
+    /* non-fatal */
+  }
+}
+
 /** Build and send a lead to Nexus with attribution auto-filled */
 export function submitLead(opts: {
   leadType: LeadType
@@ -139,6 +161,7 @@ export function submitLead(opts: {
   message: string
 }): void {
   const attribution = getAttribution()
+  identifyToPixel(opts.email, opts.phone)
   postToNexus({
     source: 'website_form',
     form_type: opts.formType ?? 'contact',
