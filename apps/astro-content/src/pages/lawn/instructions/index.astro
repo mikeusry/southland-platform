@@ -1,0 +1,290 @@
+---
+/**
+ * /lawn/instructions/ — Natural Lawn Care Instructions
+ *
+ * Replaces the Shopify page /pages/natural-lawn-care-instructions, which four
+ * blog posts still link to and which middleware was redirecting to
+ * /lawn/homeowners/ — a page carrying none of this content.
+ *
+ * 🛑 The schedules, dilution steps and coverage figures are DOSING INSTRUCTIONS
+ * transcribed verbatim from the original page. Do not paraphrase them for tone.
+ */
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import Breadcrumbs from '../../../components/shared/Breadcrumbs.astro'
+import CloudinaryHero from '../../../components/CloudinaryHero.astro'
+import { DILUTION, LAWN_BUNDLES, LAWN_SIZES, TURF_ZONES } from '../../../lib/lawnBundleData'
+import { buildSouthlandUrl } from '../../../lib/cloudinary'
+
+const title = 'Natural Lawn Care Instructions | Southland Organics'
+const description =
+  'Month-by-month application schedules and dilution instructions for all nine Southland Organics Natural Lawn Care Bundles.'
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+const canonicalUrl = `${siteUrl}/lawn/instructions/`
+
+const ogImage = buildSouthlandUrl('Southland Website/heroes/grass_kvxy54', {
+  width: 1200,
+  height: 630,
+  crop: 'fill',
+  gravity: 'auto',
+  quality: 'auto',
+  format: 'auto',
+})
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name: 'How to apply a Southland Organics Natural Lawn Care Bundle',
+  description,
+  url: canonicalUrl,
+  step: LAWN_BUNDLES[0].schedule.map((s, i) => ({
+    '@type': 'HowToStep',
+    position: i + 1,
+    name: s.month,
+    text: s.action,
+  })),
+}
+
+const sizeLabel = (b: (typeof LAWN_BUNDLES)[number]) =>
+  LAWN_SIZES.find((s) => s.id === b.size)?.label ?? b.size
+
+/** Grouped by turf zone so the page reads as three rows of three. */
+const byZone = TURF_ZONES.map((z) => ({
+  zone: z,
+  bundles: LAWN_BUNDLES.filter((b) => b.zone === z.id),
+}))
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalUrl={canonicalUrl}
+  ogImage={ogImage}
+  schema={schema}
+>
+  <!-- HERO -->
+  <CloudinaryHero
+    publicId="Southland Website/heroes/grass_kvxy54"
+    alt="Close-up of healthy green grass"
+    height={440}
+    minHeight="380px"
+    overlay="gradient"
+    overlayOpacity={88}
+    contentAlign="center"
+    contentJustify="start"
+    priority={true}
+  >
+    <div class="mx-auto w-full max-w-6xl pb-10 pt-12 md:pt-16">
+      <Breadcrumbs
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'Lawn & Turf', href: '/lawn/' },
+          { label: 'Bundle Instructions' },
+        ]}
+        class="mb-4 [&_*]:text-sm [&_a]:text-white/80 [&_span]:text-white/60"
+      />
+      <div class="max-w-3xl">
+        <span
+          class="mb-3 inline-block rounded-full bg-white/15 px-4 py-1 text-sm font-medium text-green-300"
+        >
+          How to apply
+        </span>
+        <h1
+          class="mb-4 font-heading text-4xl uppercase leading-tight text-white md:text-5xl lg:text-6xl"
+        >
+          Natural Lawn Care Instructions
+        </h1>
+        <p class="text-lg text-white/70 md:text-xl">
+          One product, once per month, using the entire bottle in each application. Find your bundle
+          below for the exact schedule.
+        </p>
+      </div>
+    </div>
+  </CloudinaryHero>
+
+  <!-- QUICK JUMP -->
+  <section class="border-b border-gray-200 bg-white py-6">
+    <div class="mx-auto max-w-6xl px-4">
+      <p class="mb-3 text-center text-sm font-medium uppercase tracking-wider text-gray-500">
+        Jump to your bundle
+      </p>
+      <div class="flex flex-wrap justify-center gap-2">
+        {
+          LAWN_BUNDLES.map((b) => (
+            <a
+              href={`#bundle-${b.number}`}
+              class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-shopify-title transition-colors hover:border-[#44883E] hover:bg-green-50 hover:text-[#44883E]"
+            >
+              #{b.number}
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- DILUTION -->
+  <section class="bg-white py-16 md:py-20">
+    <div class="mx-auto max-w-5xl px-4">
+      <div class="mb-10 text-center">
+        <h2 class="mb-3 font-heading text-3xl uppercase text-shopify-title md:text-4xl">
+          Dilution instructions.
+        </h2>
+        <p class="mx-auto max-w-2xl text-gray-600">
+          All four products in the Natural Lawn Care Bundles are applied with a hose end sprayer.
+          Which set of steps you follow depends on the container your bundle shipped in.
+        </p>
+      </div>
+      <div class="grid gap-6 md:grid-cols-2">
+        {
+          (['sprayer-quart', 'own-sprayer'] as const).map((fmt) => (
+            <div class="rounded-xl border border-gray-200 bg-white p-6 transition-shadow hover:shadow-lg md:p-8">
+              <div class="mb-4 flex items-start gap-3">
+                <span class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green-100">
+                  <svg
+                    class="h-5 w-5 text-green-700"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+                    />
+                  </svg>
+                </span>
+                <h3 class="font-heading text-base uppercase leading-snug text-shopify-title">
+                  {DILUTION[fmt].heading}
+                </h3>
+              </div>
+              <ol class="space-y-3">
+                {DILUTION[fmt].steps.map((s, i) => (
+                  <li class="flex gap-3 text-sm leading-relaxed text-gray-700">
+                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-bold text-gray-600">
+                      {i + 1}
+                    </span>
+                    <span>{s}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- NOT SURE -->
+  <section class="bg-[#2C5234] py-12">
+    <div class="mx-auto max-w-3xl px-4 text-center">
+      <h2 class="font-heading text-2xl uppercase text-white md:text-3xl">
+        Not sure which bundle is right for you?
+      </h2>
+      <p class="mx-auto mt-3 max-w-xl text-green-100">
+        Answer two questions — your turf zone and your lawn size — and we'll match you.
+      </p>
+      <a
+        href="/lawn/bundles/"
+        class="mt-6 inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3.5 font-semibold text-[#2C5234] transition-colors hover:bg-green-50"
+      >
+        Find My Bundle
+        <span aria-hidden="true">→</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- SCHEDULES, GROUPED BY ZONE -->
+  <section class="bg-gray-50 py-16 md:py-20">
+    <div class="mx-auto max-w-6xl px-4">
+      <div class="mb-12 text-center">
+        <h2 class="mb-3 font-heading text-3xl uppercase text-shopify-title md:text-4xl">
+          Bundle schedules.
+        </h2>
+        <p class="mx-auto max-w-2xl text-gray-600">
+          Your zone sets which months you apply. Your lawn size sets the container.
+        </p>
+      </div>
+
+      {
+        byZone.map(({ zone, bundles }) => (
+          <div class="mb-12 last:mb-0">
+            <div class="mb-5 flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-gray-200 pb-3">
+              <h3 class="font-heading text-xl uppercase text-shopify-title">
+                {zone.label} turf zone
+              </h3>
+              <span class="text-sm text-gray-500">{zone.detail}</span>
+              <span class="ml-auto text-sm font-semibold text-[#44883E]">
+                Applies {zone.season}
+              </span>
+            </div>
+            <div class="grid gap-6 md:grid-cols-3">
+              {bundles.map((b) => (
+                <div
+                  id={`bundle-${b.number}`}
+                  class="scroll-mt-24 rounded-xl border border-gray-200 bg-white p-6 transition-shadow hover:shadow-lg"
+                >
+                  <div class="mb-1 flex items-baseline justify-between gap-2">
+                    <h4 class="font-heading text-lg uppercase text-shopify-title">
+                      Bundle #{b.number}
+                    </h4>
+                    <span class="text-sm font-bold text-[#44883E]">${b.price}</span>
+                  </div>
+                  <p class="mb-4 text-xs uppercase tracking-wide text-gray-500">
+                    {sizeLabel(b)} lawn ·{' '}
+                    {b.format === 'sprayer-quart' ? 'Sprayer quarts' : 'Your own sprayer'}
+                  </p>
+                  <ol class="space-y-2 border-t border-gray-100 pt-4">
+                    {b.schedule.map((s) => (
+                      <li class="flex gap-3 text-sm">
+                        <span class="w-20 shrink-0 font-heading text-xs uppercase text-[#44883E]">
+                          {s.month}
+                        </span>
+                        <span class="text-gray-700">{s.action}</span>
+                      </li>
+                    ))}
+                  </ol>
+                  <a
+                    href={`https://shop.southlandorganics.com/products/natural-lawn-care-subscription?variant=${b.variantId}`}
+                    class="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-[#44883E] hover:underline"
+                  >
+                    Buy Bundle #{b.number}
+                    <span aria-hidden="true">→</span>
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- HELP -->
+  <section class="bg-white py-16">
+    <div class="mx-auto max-w-3xl px-4 text-center">
+      <h2 class="font-heading text-2xl uppercase text-shopify-title md:text-3xl">
+        Still have a question?
+      </h2>
+      <p class="mx-auto mt-3 max-w-xl text-gray-600">
+        Damages or shortages must be reported to us right away so Customer Service can put it right.
+        For damaged items, keep all packing material for inspection.
+      </p>
+      <div class="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+        <a
+          href="tel:1-800-608-3755"
+          class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3.5 font-semibold text-white transition-colors hover:bg-[#44883E]/85"
+        >
+          Call 800-608-3755
+        </a>
+        <a
+          href="mailto:success@southlandorganics.com"
+          class="inline-flex items-center gap-2 rounded-lg border-2 border-gray-300 px-6 py-3.5 font-semibold text-shopify-title transition-colors hover:border-[#44883E] hover:text-[#44883E]"
+        >
+          Email Support
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
