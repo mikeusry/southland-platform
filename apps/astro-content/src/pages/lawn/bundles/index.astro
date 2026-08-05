@@ -8,12 +8,18 @@
  * arriving from the four blog posts that still say "take our quick and easy
  * quiz" hit a dead end.
  *
+ * Follows the StoryBrand structure the persona hubs use:
+ * Hero → Problem → Finder → What's inside → Proof band → Plan → FAQ → CTA.
+ *
  * The finder is a client island: two questions, a 3×3 lookup, no third party.
  */
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import Breadcrumbs from '../../../components/shared/Breadcrumbs.astro'
+import CloudinaryHero from '../../../components/CloudinaryHero.astro'
+import AccordionFaq from '../../../components/shop/AccordionFaq.astro'
 import BundleFinder from '../../../components/calculators/BundleFinder'
 import { BUNDLE_PRODUCTS, LAWN_BUNDLES } from '../../../lib/lawnBundleData'
+import { buildSouthlandUrl } from '../../../lib/cloudinary'
 
 const title = 'Natural Lawn Bundles | Southland Organics'
 const description =
@@ -25,7 +31,44 @@ const canonicalUrl = `${siteUrl}/lawn/bundles/`
 const lowest = Math.min(...LAWN_BUNDLES.map((b) => b.price))
 const highest = Math.max(...LAWN_BUNDLES.map((b) => b.price))
 
-const schema = {
+const ogImage = buildSouthlandUrl('Southland Website/heroes/lawn_result_ait3ra', {
+  width: 1200,
+  height: 630,
+  crop: 'fill',
+  gravity: 'auto',
+  quality: 'auto',
+  format: 'auto',
+})
+
+const faq = [
+  {
+    question: 'How do I know which turf zone I am in?',
+    answer:
+      'Your zone follows your climate, not your state line. Cool-season grasses (fescue, bluegrass, ryegrass) run through the northern states. Warm-season grasses (bermuda, zoysia, centipede, St. Augustine) run through the deep south. The transition zone in between is where both types struggle. The finder above lists the states in each band — pick the one your state appears in, and if you sit on a border, go by the grass type you actually have.',
+  },
+  {
+    question: 'What if my lawn size is between two options?',
+    answer:
+      'Round up. The bundle sizing sets how much product you receive, and running short mid-season is worse than having a little left over. Small covers up to about 5,000 square feet, medium 5,000–10,000, and large anything above that.',
+  },
+  {
+    question: 'Do I have to apply all four products?',
+    answer:
+      'Yes — that is the point of the bundle. Genesis conditions the soil in spring, FertALive and Omega feed and activate through summer, and Revival dethatches in fall. Each one does a different job at a different point in the season. Applying only one gets you a fraction of the result.',
+  },
+  {
+    question: 'Is this safe around kids and pets?',
+    answer:
+      'Yes. Every product in the bundle is made from naturally derived ingredients with no synthetic chemicals and no warning label telling you to keep anyone off the grass. Your family and your dog can be back on the lawn as soon as you are done spraying.',
+  },
+  {
+    question: 'What if I already have a sprayer?',
+    answer:
+      'Bundles 3, 6 and 9 ship in gallon containers for use with your own hose-end sprayer. The rest come with sprayer quarts that dilute automatically. Full dilution instructions for both are on the instructions page.',
+  },
+]
+
+const pageSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
   name: 'Lawn Bundle Finder',
@@ -47,59 +90,211 @@ const schema = {
     telephone: '+1-800-608-3755',
   },
 }
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((item) => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: { '@type': 'Answer', text: item.answer },
+  })),
+}
 ---
 
-<BaseLayout title={title} description={description} canonicalUrl={canonicalUrl} schema={schema}>
-  <Breadcrumbs
-    items={[
-      { label: 'Lawn', href: '/lawn/' },
-      { label: 'Natural Lawn Bundles', href: '/lawn/bundles/' },
-    ]}
-  />
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalUrl={canonicalUrl}
+  ogImage={ogImage}
+  schema={[pageSchema, faqSchema]}
+>
+  <!-- HERO -->
+  <CloudinaryHero
+    publicId="Southland Website/heroes/lawn_result_ait3ra"
+    alt="A lush green lawn grown with Southland Organics natural lawn bundles"
+    height={560}
+    minHeight="460px"
+    overlay="gradient"
+    overlayOpacity={88}
+    contentAlign="center"
+    contentJustify="start"
+    priority={true}
+  >
+    <div class="mx-auto w-full max-w-6xl pb-12 pt-12 md:pt-20">
+      <Breadcrumbs
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'Lawn & Turf', href: '/lawn/' },
+          { label: 'Natural Lawn Bundles' },
+        ]}
+        class="mb-4 [&_*]:text-sm [&_a]:text-white/80 [&_span]:text-white/60"
+      />
+      <div class="max-w-3xl">
+        <div class="mb-3 flex flex-wrap items-center gap-2">
+          <span
+            class="inline-block rounded-full bg-white/15 px-4 py-1 text-sm font-medium text-green-300"
+          >
+            For Homeowners
+          </span>
+          <span
+            class="inline-block rounded-full bg-green-400/20 px-3 py-1 text-sm font-semibold text-green-300"
+          >
+            Safe for Kids &amp; Pets
+          </span>
+        </div>
+        <h1
+          class="mb-4 font-heading text-4xl uppercase leading-tight text-white md:text-5xl lg:text-6xl"
+        >
+          Stop guessing which products your lawn needs.
+        </h1>
+        <p class="mb-5 text-lg text-white/70 md:text-xl">
+          Two questions — your turf zone and your lawn size — and we'll match you to the bundle that
+          carries your lawn through the entire growing season.
+        </p>
+        <div class="mb-6 flex flex-wrap gap-x-6 gap-y-2">
+          <span class="flex items-center gap-2 text-lg font-semibold text-white">
+            <span class="inline-block h-2 w-2 rounded-full bg-green-400"></span>
+            4 Products
+          </span>
+          <span class="flex items-center gap-2 text-lg font-semibold text-white">
+            <span class="inline-block h-2 w-2 rounded-full bg-green-400"></span>
+            One Full Season
+          </span>
+          <span class="flex items-center gap-2 text-lg font-semibold text-white">
+            <span class="inline-block h-2 w-2 rounded-full bg-green-400"></span>
+            Zero Synthetics
+          </span>
+        </div>
+        <div class="flex flex-wrap items-center gap-4">
+          <a
+            href="#finder"
+            class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3.5 font-semibold text-white transition-colors hover:bg-[#44883E]/85"
+          >
+            Find My Bundle
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
+          </a>
+          <a
+            href="/lawn/program/"
+            class="inline-flex items-center gap-2 rounded-lg border-2 border-white/30 px-6 py-3.5 font-semibold text-white transition-colors hover:border-white/60 hover:bg-white/5"
+          >
+            See the Program
+          </a>
+        </div>
+        <div
+          class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-white/10 pt-4 text-sm text-white/80"
+        >
+          <span class="flex items-center gap-1.5">
+            <svg
+              class="h-3.5 w-3.5 text-green-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4"></path>
+            </svg>
+            ${lowest}–${highest} per season
+          </span>
+          <span class="flex items-center gap-1.5">
+            <svg
+              class="h-3.5 w-3.5 text-green-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4"></path>
+            </svg>
+            9 bundles, matched to your climate
+          </span>
+        </div>
+      </div>
+    </div>
+  </CloudinaryHero>
 
-  <!-- Hero -->
-  <section class="bg-[#2C5234] py-16 text-white">
+  <!-- PROBLEM -->
+  <section class="bg-white py-16 md:py-20">
     <div class="mx-auto max-w-4xl px-4 text-center">
-      <h1 class="font-heading text-3xl uppercase tracking-wide md:text-4xl">
-        Grow a Lush, Healthy Lawn with a Natural Lawn Bundle
-      </h1>
-      <p class="mx-auto mt-4 max-w-2xl text-lg text-green-100">
-        Our Natural Lawn Bundles are built with naturally derived ingredients that give your lawn
-        what it needs to thrive all season. Answer two questions to find the bundle matched to your
-        turf zone and lawn size.
+      <h2 class="mb-4 font-heading text-3xl uppercase text-shopify-title md:text-4xl">
+        The hardest part isn't the work. It's knowing what to buy.
+      </h2>
+      <p class="mx-auto max-w-2xl text-lg text-gray-600">
+        Stand in front of a shelf of lawn products and every bottle claims to fix everything. So
+        most people buy the cheapest bag, apply it whenever they remember, and wonder why the lawn
+        looks the same in August as it did in April.
+      </p>
+      <p class="mx-auto mt-4 max-w-2xl text-lg text-gray-600">
+        A lawn in Athens doesn't need what a lawn in Minneapolis needs, and a quarter acre doesn't
+        need what a half acre needs. <span class="font-semibold text-shopify-title"
+          >Your climate and your square footage decide the answer</span
+        > — which means it can be worked out in about ten seconds.
       </p>
     </div>
   </section>
 
-  <!-- The finder -->
-  <section class="py-12">
+  <!-- FINDER -->
+  <section id="finder" class="scroll-mt-20 bg-gray-50 py-16 md:py-20">
     <div class="mx-auto max-w-3xl px-4">
+      <div class="mb-8 text-center">
+        <span
+          class="inline-block rounded-full bg-green-100 px-4 py-1 text-sm font-semibold uppercase tracking-wide text-green-800"
+        >
+          Two questions
+        </span>
+        <h2 class="mt-3 font-heading text-3xl uppercase text-shopify-title md:text-4xl">
+          Find your bundle.
+        </h2>
+        <p class="mx-auto mt-3 max-w-xl text-gray-600">No email required to see your answer.</p>
+      </div>
       <BundleFinder client:load />
     </div>
   </section>
 
-  <!-- What's in every bundle -->
-  <section class="bg-gray-50 py-12">
-    <div class="mx-auto max-w-5xl px-4">
-      <h2 class="text-center font-heading text-2xl uppercase text-[#2C5234]">
-        Everything Your Lawn Needs for the Whole Season
-      </h2>
-      <p class="mx-auto mt-3 max-w-2xl text-center text-gray-600">
-        Every bundle includes the same four products. Quantities and container sizes change with
-        your lawn size; the roles do not.
-      </p>
-      <div class="mt-8 grid gap-6 md:grid-cols-2">
+  <!-- WHAT'S INSIDE -->
+  <section class="bg-white py-16 md:py-20">
+    <div class="mx-auto max-w-6xl px-4">
+      <div class="mb-12 text-center">
+        <h2 class="mb-3 font-heading text-3xl uppercase text-shopify-title md:text-4xl">
+          Four products. One full season.
+        </h2>
+        <p class="mx-auto max-w-2xl text-gray-600">
+          Every bundle contains the same four products. Your zone and lawn size change the
+          quantities and container sizes — never the roles.
+        </p>
+      </div>
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {
-          BUNDLE_PRODUCTS.map((p) => (
-            <div class="rounded-lg bg-white p-6 shadow-sm">
-              <h3 class="font-heading text-lg uppercase text-[#2C5234]">{p.name}</h3>
-              <p class="mt-1 text-xs uppercase tracking-wide text-gray-500">{p.role}</p>
-              <p class="mt-3 text-sm text-gray-600">{p.blurb}</p>
+          BUNDLE_PRODUCTS.map((p, i) => (
+            <div class="group rounded-xl border border-gray-200 bg-white p-6 transition-shadow hover:shadow-lg">
+              <div class="mb-4 flex items-center gap-3">
+                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green-100 text-sm font-bold text-green-700">
+                  {i + 1}
+                </span>
+                <div>
+                  <h3 class="font-heading text-lg uppercase text-shopify-title">{p.name}</h3>
+                  <p class="text-xs uppercase tracking-wide text-[#44883E]">{p.role}</p>
+                </div>
+              </div>
+              <p class="text-sm leading-relaxed text-gray-600">{p.blurb}</p>
               <a
                 href={`/products/${p.handle}/`}
-                class="mt-4 inline-block text-sm font-semibold text-[#2C5234] underline"
+                class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#44883E] transition-colors hover:underline group-hover:gap-2"
               >
                 About {p.name}
+                <span aria-hidden="true">→</span>
               </a>
             </div>
           ))
@@ -108,62 +303,143 @@ const schema = {
     </div>
   </section>
 
-  <!-- Why a bundle -->
-  <section class="py-12">
-    <div class="mx-auto max-w-4xl px-4">
-      <h2 class="text-center font-heading text-2xl uppercase text-[#2C5234]">
-        Why a Bundle Instead of Single Products
+  <!-- PROOF BAND -->
+  <section class="bg-[#2C5234] py-12 md:py-16">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="mb-3 text-center font-heading text-3xl uppercase text-white md:text-4xl">
+        Why a bundle beats a shelf.
       </h2>
-      <ul class="mx-auto mt-6 max-w-2xl space-y-3">
-        <li class="flex gap-3 text-gray-700">
-          <span class="text-[#2C5234]">✓</span>
-          <span>A custom mix of four natural products specific to your turf zone and lawn size</span
-          >
-        </li>
-        <li class="flex gap-3 text-gray-700">
-          <span class="text-[#2C5234]">✓</span>
-          <span>
-            No harsh chemicals — only natural ingredients, so your lawn stays safe for people, pets
-            and the planet
-          </span>
-        </li>
-        <li class="flex gap-3 text-gray-700">
-          <span class="text-[#2C5234]">✓</span>
-          <span>Science-based solutions that address soil health to grow a greener lawn</span>
-        </li>
-        <li class="flex gap-3 text-gray-700">
-          <span class="text-[#2C5234]">✓</span>
-          <span> Enough product to take you through the whole season, timed to your climate </span>
-        </li>
-        <li class="flex gap-3 text-gray-700">
-          <span class="text-[#2C5234]">✓</span>
-          <span>Addresses lawn health from the grass roots up</span>
-        </li>
-      </ul>
+      <p class="mx-auto mb-10 max-w-lg text-center text-sm text-green-200/80">
+        Matched to your climate, timed to your season, sized to your yard.
+      </p>
+      <div class="grid grid-cols-2 gap-8 md:grid-cols-4">
+        <div class="text-center">
+          <div class="text-3xl font-bold text-green-300 md:text-4xl">78%</div>
+          <div class="mt-1 text-sm font-medium text-white">Increase in green-up</div>
+          <div class="mt-0.5 text-xs text-green-200/70">Turf treated with Genesis</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-green-300 md:text-4xl">9</div>
+          <div class="mt-1 text-sm font-medium text-white">Bundles, not one</div>
+          <div class="mt-0.5 text-xs text-green-200/70">3 turf zones × 3 lawn sizes</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-green-300 md:text-4xl">Zero</div>
+          <div class="mt-1 text-sm font-medium text-white">Synthetic chemicals</div>
+          <div class="mt-0.5 text-xs text-green-200/70">Safe for kids and pets</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-green-300 md:text-4xl">1×/mo</div>
+          <div class="mt-1 text-sm font-medium text-white">All you have to do</div>
+          <div class="mt-0.5 text-xs text-green-200/70">One product, one application</div>
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- Bottom CTA -->
-  <section class="bg-[#2C5234] py-12 text-white">
-    <div class="mx-auto max-w-3xl px-4 text-center">
-      <h2 class="font-heading text-2xl uppercase">Already Have Your Bundle?</h2>
-      <p class="mx-auto mt-3 max-w-xl text-green-100">
-        Full dilution instructions and a month-by-month schedule for all nine bundles.
+  <!-- PLAN -->
+  <section class="bg-white py-16 md:py-20">
+    <div class="mx-auto max-w-4xl px-4">
+      <h2 class="mb-4 text-center font-heading text-3xl uppercase text-shopify-title md:text-4xl">
+        Three steps to a better lawn.
+      </h2>
+      <p class="mx-auto mb-12 max-w-xl text-center text-gray-600">
+        The whole season, decided in one sitting.
       </p>
-      <div class="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+      <div class="space-y-8">
+        <div class="flex items-start gap-6">
+          <div
+            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700"
+          >
+            1
+          </div>
+          <div>
+            <h3 class="mb-1 text-lg font-bold text-shopify-title">
+              <span class="text-[#44883E]">Answer</span> two questions.
+            </h3>
+            <p class="text-gray-600">
+              Your turf zone and your lawn size. That is the whole quiz — no email, no waiting on a
+              reply.
+            </p>
+          </div>
+        </div>
+        <div class="flex items-start gap-6">
+          <div
+            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700"
+          >
+            2
+          </div>
+          <div>
+            <h3 class="mb-1 text-lg font-bold text-shopify-title">
+              <span class="text-[#44883E]">Get</span> your bundle and your schedule.
+            </h3>
+            <p class="text-gray-600">
+              We show the exact bundle plus the month-by-month plan for it. Add it to your cart in
+              one click, or have the schedule emailed to you.
+            </p>
+          </div>
+        </div>
+        <div class="flex items-start gap-6">
+          <div
+            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700"
+          >
+            3
+          </div>
+          <div>
+            <h3 class="mb-1 text-lg font-bold text-shopify-title">
+              <span class="text-[#44883E]">Spray</span> once a month and let it work.
+            </h3>
+            <p class="text-gray-600">
+              One product per month, the whole bottle, through a hose-end sprayer. About fifteen
+              minutes a month for the entire season.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="bg-gray-50 py-16 md:py-20">
+    <div class="mx-auto max-w-3xl px-4">
+      <h2 class="mb-4 text-center font-heading text-3xl uppercase text-shopify-title md:text-4xl">
+        Questions we hear every week.
+      </h2>
+      <p class="mx-auto mb-10 max-w-xl text-center text-gray-600">
+        Straight answers before you spend a dollar.
+      </p>
+      <AccordionFaq items={faq} persona="lawn" />
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="bg-[#2C5234] py-16 text-white">
+    <div class="mx-auto max-w-3xl px-4 text-center">
+      <h2 class="font-heading text-3xl uppercase md:text-4xl">Already have your bundle?</h2>
+      <p class="mx-auto mt-3 max-w-xl text-green-100">
+        Dilution instructions and a month-by-month schedule for all nine bundles.
+      </p>
+      <div class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
         <a
           href="/lawn/instructions/"
-          class="rounded-md bg-white px-6 py-3 text-sm font-semibold text-[#2C5234] transition-colors hover:bg-green-50"
+          class="inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3.5 font-semibold text-[#2C5234] transition-colors hover:bg-green-50"
         >
           Bundle Instructions
         </a>
         <a
           href="/lawn/program/"
-          class="rounded-md border border-white/30 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+          class="inline-flex items-center gap-2 rounded-lg border-2 border-white/30 px-6 py-3.5 font-semibold text-white transition-colors hover:border-white/60 hover:bg-white/5"
         >
           The Full Program
         </a>
       </div>
+      <p class="mt-6 text-sm text-green-200/80">
+        Questions? Call <a href="tel:1-800-608-3755" class="font-semibold underline">800-608-3755</a
+        > or email
+        <a href="mailto:success@southlandorganics.com" class="font-semibold underline"
+          >success@southlandorganics.com</a
+        >.
+      </p>
     </div>
   </section>
 </BaseLayout>
