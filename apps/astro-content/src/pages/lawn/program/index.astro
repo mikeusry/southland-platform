@@ -1,0 +1,148 @@
+---
+/**
+ * /lawn/program/ — Organic Lawn Care Program
+ *
+ * Replaces the Shopify page /pages/organic-lawn-care-program, which middleware
+ * was redirecting to /lawn/homeowners/. This is the season-by-season "why and
+ * when" behind the bundles, with per-product application rates.
+ *
+ * 🛑 Application rates are transcribed verbatim from the original page. They are
+ * dosing figures — do not round or reword them.
+ */
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import Breadcrumbs from '../../../components/shared/Breadcrumbs.astro'
+
+const title = 'Organic Lawn Care Program | Southland Organics'
+const description =
+  'A season-by-season organic lawn care program — Genesis in spring, FertALive and Omega through summer, Revival in fall, with application rates for each.'
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+const canonicalUrl = `${siteUrl}/lawn/program/`
+
+const seasons = [
+  {
+    n: 1,
+    season: 'Spring',
+    product: 'Genesis',
+    handle: 'genesis',
+    body: 'Genesis is the ultimate soil conditioner for bringing out early-season colour and vibrancy in your lawn and turf grass. Trials show turf treated with Genesis has a 78% increase in green-up. More importantly, it prepares the lawn for the hot summer season by delivering activated carbon and rich biology for increased soil activity, energy and overall vitality. It has been shown to increase germination rate, plant height and mass area.',
+    rate: 'Apply 10–12 oz. of Genesis per thousand square feet, diluted at a 1:20 product to water ratio. Apply in the spring, starting in March. Apply once a month for a total of 3–4 applications.',
+  },
+  {
+    n: 2,
+    season: 'Summer',
+    product: 'FertALive and Omega',
+    handle: 'fertalive',
+    body: 'FertALive is a nutrient enhancer that delivers nutrient-releasing microbiology and vital nitrogen in small amounts, giving weeks of steady nutrition rather than one heavy feed. Omega is our amplified formula of biologically active carbon and organic acids — its proprietary blend of beneficial bacteria promotes nutrient uptake and builds grass resilient to disease and environmental stress.',
+    rate: 'Apply FertALive and Omega in the summer, starting in late May and continuing through August or September. Apply 8 oz. of FertALive per thousand square feet, diluted at a 1:30 ratio. Apply 6–8 oz. of Omega per thousand square feet, diluted at a 1:20 ratio. Apply once per month for a total of 4 applications.',
+  },
+  {
+    n: 3,
+    season: 'Fall',
+    product: 'Revival',
+    handle: 'turf-revival',
+    body: 'Revival is the ultimate microbial dethatcher, liquid aerator and compost accelerant. It breaks down your lawn’s thatch organically and converts it to usable nutrients to keep your grass healthy — letting you avoid the cost and time of physical thatch removal and mechanical aeration.',
+    rate: 'Apply 5–7 oz. of Revival per thousand square feet, diluted at a 1:20 ratio. Apply in the fall, starting in September. Apply once per month for a total of 2 applications.',
+  },
+]
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name: 'Organic Lawn Care Program',
+  description,
+  url: canonicalUrl,
+  step: seasons.map((s) => ({
+    '@type': 'HowToStep',
+    position: s.n,
+    name: `${s.season} — ${s.product}`,
+    text: s.rate,
+  })),
+}
+---
+
+<BaseLayout title={title} description={description} canonicalUrl={canonicalUrl} schema={schema}>
+  <Breadcrumbs
+    items={[
+      { label: 'Lawn', href: '/lawn/' },
+      { label: 'Organic Lawn Care Program', href: '/lawn/program/' },
+    ]}
+  />
+
+  <section class="bg-[#2C5234] py-16 text-white">
+    <div class="mx-auto max-w-4xl px-4 text-center">
+      <h1 class="font-heading text-3xl uppercase tracking-wide md:text-4xl">
+        Organic Lawn Care Program
+      </h1>
+      <p class="mx-auto mt-4 max-w-2xl text-lg text-green-100">
+        An easy-to-follow program for a healthy, green lawn without harmful chemicals — safe for
+        your family, your pets and the environment.
+      </p>
+    </div>
+  </section>
+
+  <!-- Seasons -->
+  <section class="py-12">
+    <div class="mx-auto max-w-4xl space-y-8 px-4">
+      {
+        seasons.map((s) => (
+          <article class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm md:p-8">
+            <p class="text-xs uppercase tracking-wide text-gray-500">Step {s.n}</p>
+            <h2 class="mt-1 font-heading text-2xl uppercase text-[#2C5234]">
+              {s.season} | {s.product}
+            </h2>
+            <p class="mt-3 text-gray-700">{s.body}</p>
+            <div class="mt-4 rounded-md bg-gray-50 p-4">
+              <h3 class="font-heading text-sm uppercase text-[#2C5234]">Application Rate</h3>
+              <p class="mt-1 text-sm text-gray-700">{s.rate}</p>
+            </div>
+            <a
+              href={`/products/${s.handle}/`}
+              class="mt-4 inline-block text-sm font-semibold text-[#2C5234] underline"
+            >
+              About {s.product.split(' and ')[0]}
+            </a>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Why shift -->
+  <section class="bg-gray-50 py-12">
+    <div class="mx-auto max-w-3xl px-4">
+      <h2 class="font-heading text-2xl uppercase text-[#2C5234]">
+        Shifting from Conventional to Natural Lawn Care
+      </h2>
+      <p class="mt-4 text-gray-700">
+        Americans spend over $45 billion a year on lawn care services, fertilizers and pesticides.
+        According to the ATTRA Sustainable Turf Care guide, the average homeowner uses ten times
+        more chemical fertilizer per acre than farmers use on farmland.
+      </p>
+      <p class="mt-4 text-gray-700">
+        Over-application does not just cost money. High fertilization increases susceptibility to
+        chinch bugs, sod webworms, parasitic nematodes and brown patch — much like overusing
+        antibacterial soap leaves you more prone to infection, not less.
+      </p>
+      <p class="mt-4 text-gray-700">
+        You can have a healthier, lower-maintenance lawn without losing the well-kept look. Natural
+        management practices benefit the environment and save time and money in the long run.
+      </p>
+    </div>
+  </section>
+
+  <section class="bg-[#2C5234] py-12 text-white">
+    <div class="mx-auto max-w-3xl px-4 text-center">
+      <h2 class="font-heading text-2xl uppercase">Get the Whole Program in One Bundle</h2>
+      <p class="mx-auto mt-3 max-w-xl text-green-100">
+        We package all four products in the right quantities for your turf zone and lawn size.
+      </p>
+      <a
+        href="/lawn/bundles/"
+        class="mt-6 inline-block rounded-md bg-white px-6 py-3 text-sm font-semibold text-[#2C5234] transition-colors hover:bg-green-50"
+      >
+        Find My Bundle
+      </a>
+    </div>
+  </section>
+</BaseLayout>

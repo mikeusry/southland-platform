@@ -66,10 +66,14 @@ const REDIRECTS: Record<string, string> = {
   '/pages/our-humate-deposit': '/blog/why-humate-soil-conditioner/',
   '/pages/humate-soil-conditioner': '/blog/why-humate-soil-conditioner/',
   '/pages/humic-acid-soil-conditioner': '/blog/why-humate-soil-conditioner/',
-  // Lawn/poultry programs → persona hubs
-  '/pages/natural-lawn-bundles': '/lawn/homeowners/',
-  '/pages/organic-lawn-care-program': '/lawn/homeowners/',
-  '/pages/natural-lawn-care-instructions': '/lawn/homeowners/',
+  // Lawn programs → their ported equivalents.
+  // 🛑 These three carried the VideoAsk bundle quiz on Shopify and were pointed
+  // at /lawn/homeowners/, which has no quiz and none of this content. Four blog
+  // posts still say "take our quick and easy quiz" and link here, so every one
+  // of those visitors hit a dead end. Ported 2026-08-05 — keep them 1:1.
+  '/pages/natural-lawn-bundles': '/lawn/bundles/',
+  '/pages/organic-lawn-care-program': '/lawn/program/',
+  '/pages/natural-lawn-care-instructions': '/lawn/instructions/',
   '/pages/professional-turf-care-with-genesis': '/lawn/turf-pros/',
   '/pages/backyard-poultry-dosing-chart': '/poultry/backyard/',
   '/pages/probiotics-for-chickens': '/blog/how-to-run-big-ole-bird-poultry-probiotic/',

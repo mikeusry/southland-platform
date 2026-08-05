@@ -1,0 +1,169 @@
+---
+/**
+ * /lawn/bundles/ — Natural Lawn Bundles + the bundle finder
+ *
+ * Replaces the Shopify page /pages/natural-lawn-bundles, which carried a
+ * VideoAsk quiz (videoask.com/fyahikle6). Middleware had been redirecting that
+ * URL to /lawn/homeowners/ — a page with no quiz on it — so every visitor
+ * arriving from the four blog posts that still say "take our quick and easy
+ * quiz" hit a dead end.
+ *
+ * The finder is a client island: two questions, a 3×3 lookup, no third party.
+ */
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import Breadcrumbs from '../../../components/shared/Breadcrumbs.astro'
+import BundleFinder from '../../../components/calculators/BundleFinder'
+import { BUNDLE_PRODUCTS, LAWN_BUNDLES } from '../../../lib/lawnBundleData'
+
+const title = 'Natural Lawn Bundles | Southland Organics'
+const description =
+  'Find the natural lawn care bundle matched to your turf zone and lawn size. Four products, a full season of applications, no harsh chemicals.'
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+const canonicalUrl = `${siteUrl}/lawn/bundles/`
+
+const lowest = Math.min(...LAWN_BUNDLES.map((b) => b.price))
+const highest = Math.max(...LAWN_BUNDLES.map((b) => b.price))
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'Lawn Bundle Finder',
+  description,
+  url: canonicalUrl,
+  applicationCategory: 'UtilityApplication',
+  operatingSystem: 'Web Browser',
+  offers: {
+    '@type': 'AggregateOffer',
+    lowPrice: String(lowest),
+    highPrice: String(highest),
+    priceCurrency: 'USD',
+    offerCount: String(LAWN_BUNDLES.length),
+  },
+  provider: {
+    '@type': 'Organization',
+    name: 'Southland Organics',
+    url: siteUrl,
+    telephone: '+1-800-608-3755',
+  },
+}
+---
+
+<BaseLayout title={title} description={description} canonicalUrl={canonicalUrl} schema={schema}>
+  <Breadcrumbs
+    items={[
+      { label: 'Lawn', href: '/lawn/' },
+      { label: 'Natural Lawn Bundles', href: '/lawn/bundles/' },
+    ]}
+  />
+
+  <!-- Hero -->
+  <section class="bg-[#2C5234] py-16 text-white">
+    <div class="mx-auto max-w-4xl px-4 text-center">
+      <h1 class="font-heading text-3xl uppercase tracking-wide md:text-4xl">
+        Grow a Lush, Healthy Lawn with a Natural Lawn Bundle
+      </h1>
+      <p class="mx-auto mt-4 max-w-2xl text-lg text-green-100">
+        Our Natural Lawn Bundles are built with naturally derived ingredients that give your lawn
+        what it needs to thrive all season. Answer two questions to find the bundle matched to your
+        turf zone and lawn size.
+      </p>
+    </div>
+  </section>
+
+  <!-- The finder -->
+  <section class="py-12">
+    <div class="mx-auto max-w-3xl px-4">
+      <BundleFinder client:load />
+    </div>
+  </section>
+
+  <!-- What's in every bundle -->
+  <section class="bg-gray-50 py-12">
+    <div class="mx-auto max-w-5xl px-4">
+      <h2 class="text-center font-heading text-2xl uppercase text-[#2C5234]">
+        Everything Your Lawn Needs for the Whole Season
+      </h2>
+      <p class="mx-auto mt-3 max-w-2xl text-center text-gray-600">
+        Every bundle includes the same four products. Quantities and container sizes change with
+        your lawn size; the roles do not.
+      </p>
+      <div class="mt-8 grid gap-6 md:grid-cols-2">
+        {
+          BUNDLE_PRODUCTS.map((p) => (
+            <div class="rounded-lg bg-white p-6 shadow-sm">
+              <h3 class="font-heading text-lg uppercase text-[#2C5234]">{p.name}</h3>
+              <p class="mt-1 text-xs uppercase tracking-wide text-gray-500">{p.role}</p>
+              <p class="mt-3 text-sm text-gray-600">{p.blurb}</p>
+              <a
+                href={`/products/${p.handle}/`}
+                class="mt-4 inline-block text-sm font-semibold text-[#2C5234] underline"
+              >
+                About {p.name}
+              </a>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Why a bundle -->
+  <section class="py-12">
+    <div class="mx-auto max-w-4xl px-4">
+      <h2 class="text-center font-heading text-2xl uppercase text-[#2C5234]">
+        Why a Bundle Instead of Single Products
+      </h2>
+      <ul class="mx-auto mt-6 max-w-2xl space-y-3">
+        <li class="flex gap-3 text-gray-700">
+          <span class="text-[#2C5234]">✓</span>
+          <span>A custom mix of four natural products specific to your turf zone and lawn size</span
+          >
+        </li>
+        <li class="flex gap-3 text-gray-700">
+          <span class="text-[#2C5234]">✓</span>
+          <span>
+            No harsh chemicals — only natural ingredients, so your lawn stays safe for people, pets
+            and the planet
+          </span>
+        </li>
+        <li class="flex gap-3 text-gray-700">
+          <span class="text-[#2C5234]">✓</span>
+          <span>Science-based solutions that address soil health to grow a greener lawn</span>
+        </li>
+        <li class="flex gap-3 text-gray-700">
+          <span class="text-[#2C5234]">✓</span>
+          <span> Enough product to take you through the whole season, timed to your climate </span>
+        </li>
+        <li class="flex gap-3 text-gray-700">
+          <span class="text-[#2C5234]">✓</span>
+          <span>Addresses lawn health from the grass roots up</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Bottom CTA -->
+  <section class="bg-[#2C5234] py-12 text-white">
+    <div class="mx-auto max-w-3xl px-4 text-center">
+      <h2 class="font-heading text-2xl uppercase">Already Have Your Bundle?</h2>
+      <p class="mx-auto mt-3 max-w-xl text-green-100">
+        Full dilution instructions and a month-by-month schedule for all nine bundles.
+      </p>
+      <div class="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+        <a
+          href="/lawn/instructions/"
+          class="rounded-md bg-white px-6 py-3 text-sm font-semibold text-[#2C5234] transition-colors hover:bg-green-50"
+        >
+          Bundle Instructions
+        </a>
+        <a
+          href="/lawn/program/"
+          class="rounded-md border border-white/30 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+        >
+          The Full Program
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
