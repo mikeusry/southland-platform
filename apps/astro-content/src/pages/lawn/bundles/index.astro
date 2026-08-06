@@ -21,9 +21,22 @@ import BundleFinder from '../../../components/calculators/BundleFinder'
 import { BUNDLE_PRODUCTS, LAWN_BUNDLES } from '../../../lib/lawnBundleData'
 import { buildSouthlandUrl } from '../../../lib/cloudinary'
 
-const title = 'Natural Lawn Bundles | Southland Organics'
+/**
+ * 🛑 TITLE AND DESCRIPTION CARRY THE BUNDLE-INTENT VOCABULARY ON PURPOSE.
+ *
+ * GSC (90d, pulled 2026-08-05): the bundle PDP ranks for 200 queries and 7,106
+ * impressions and earns 3 clicks, because it sits at position 30-75 on the
+ * queries that matter — "best diy lawn care program" (38), "3 in 1 lawn care"
+ * (31), "all in one lawn care" (75), "annual lawn programs" (78). Google knows
+ * we sell a lawn program; it could not find a page that IS one, because the
+ * page that should have answered was redirected to /lawn/homeowners/.
+ *
+ * "DIY", "all-in-one", "3-step", "annual program", "subscription" and "complete
+ * lawn care program" are the entity gap. Do not strip them for brevity.
+ */
+const title = 'DIY Lawn Care Program: All-in-One Natural Lawn Bundles | Southland Organics'
 const description =
-  'Find the natural lawn care bundle matched to your turf zone and lawn size. Four products, a full season of applications, no harsh chemicals.'
+  'A complete DIY lawn care program in one box — four natural products matched to your turf zone and lawn size, with a month-by-month schedule for the whole season. No harsh chemicals, no guesswork.'
 
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
 const canonicalUrl = `${siteUrl}/lawn/bundles/`
@@ -40,7 +53,38 @@ const ogImage = buildSouthlandUrl('Southland Website/heroes/lawn_result_ait3ra',
   format: 'auto',
 })
 
+/**
+ * 🛑 The first four answers are ANSWER-ENGINE entries, not marketing copy.
+ *
+ * They target the question-form queries GSC shows us ranking for at position
+ * 30-75 with zero clicks ("best diy lawn care program", "3 in 1 lawn care",
+ * "all in one lawn care", "annual lawn programs", "lawn fertilizer
+ * subscription"). Each is written to stand alone if an AI engine lifts it out
+ * of the page, which is the whole point — keep them self-contained.
+ *
+ * These render into FAQPage JSON-LD below. Do not shorten them into teasers.
+ */
 const faq = [
+  {
+    question: 'What is a DIY lawn care program?',
+    answer:
+      'A DIY lawn care program is a season-long plan you apply yourself instead of hiring a service — the right products, in the right order, at the right time of year. Southland Organics Natural Lawn Bundles are an all-in-one version: four natural products packaged together with a month-by-month schedule, sized to your turf zone and lawn size. You apply one product per month with a hose end sprayer, about fifteen minutes each time.',
+  },
+  {
+    question: 'Is an all-in-one lawn care kit better than buying products separately?',
+    answer:
+      'For most homeowners, yes — because the hard part is not the application, it is knowing which product to use and when. An all-in-one bundle removes both decisions: it contains a full season of product in the correct quantities and tells you which month to apply each one. Buying separately works if you already know your program; if you are guessing, a bundle is cheaper than buying the wrong thing twice.',
+  },
+  {
+    question: 'How many steps are in the Southland lawn program?',
+    answer:
+      'Four products across three seasons. Genesis conditions the soil in spring, FertALive and Omega feed and activate through summer, and Revival dethatches in fall. Depending on your turf zone that lands as five or six monthly applications between March and September — one product per month, using the whole bottle each time.',
+  },
+  {
+    question: 'Do you offer a lawn care subscription?',
+    answer:
+      'The Natural Lawn Bundle is a one-time purchase covering a full growing season, not a recurring subscription. You buy the bundle once, apply it monthly through the season, and reorder the following spring. There is no auto-ship to cancel and no contract.',
+  },
   {
     question: 'How do I know which turf zone I am in?',
     answer:
@@ -233,7 +277,11 @@ const faqSchema = {
     </div>
   </CloudinaryHero>
 
-  <!-- PROBLEM -->
+  <!-- PROBLEM
+       🛑 The vocabulary here is deliberate, not filler. See the note above the
+       page title: "DIY lawn care program", "all-in-one", "annual program" and
+       "subscription" are the terms Google already ranks us for at position
+       30-75 with no page that answers them. -->
   <section class="bg-white py-16 md:py-20">
     <div class="mx-auto max-w-4xl px-4 text-center">
       <h2 class="mb-4 font-heading text-3xl uppercase text-shopify-title md:text-4xl">
@@ -243,6 +291,11 @@ const faqSchema = {
         Stand in front of a shelf of lawn products and every bottle claims to fix everything. So
         most people buy the cheapest bag, apply it whenever they remember, and wonder why the lawn
         looks the same in August as it did in April.
+      </p>
+      <p class="mx-auto mt-4 max-w-2xl text-lg text-gray-600">
+        A Natural Lawn Bundle is a <strong class="text-shopify-title">DIY lawn care program</strong>
+        — an all-in-one kit holding a full season of product, so you are not buying a bag at a time and
+        hoping the timing works out.
       </p>
       <p class="mx-auto mt-4 max-w-2xl text-lg text-gray-600">
         A lawn in Athens doesn't need what a lawn in Minneapolis needs, and a quarter acre doesn't
