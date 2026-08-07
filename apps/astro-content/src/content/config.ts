@@ -421,6 +421,13 @@ const productsCollection = defineCollection({
     topics: z.array(z.string()).optional().default([]),
     featured: z.boolean().optional().default(false),
 
+    // Case study slugs (blog post filenames, no extension) that prove this
+    // product's claims. The register lives in mothership `docs/evidence/`;
+    // this is the machine-readable half, kept beside the claim it supports.
+    // A study result asserted in `heroBullets` without a slug here is an
+    // unsupported claim — see mothership `docs/KNOWLEDGE-ARCHITECTURE.md`.
+    caseStudies: z.array(z.string()).optional().default([]),
+
     // --- PDP Hero ---
     headline: z.string().optional(), // Benefit headline, not SKU name
     heroBullets: z.array(z.string()).optional().default([]),
