@@ -84,6 +84,83 @@ const PD_ATTRIBUTION_KEY = '_pd_attribution'
 const PD_FIRST_TOUCH_KEY = '_pd_first_touch'
 
 /**
+ * A utm_campaign value that downstream attribution can actually join on.
+ *
+ * The Pulse joins orders to ad spend by slugifying the Google Ads campaign name
+ * and matching it against orders.utm_campaign. That only works if the value we
+ * stamp IS a slug. Measured on live orders 2026-07-28 (90d, gclid orders), five
+ * distinct shapes were arriving in this one field:
+ *
+ *   bb-backyard-betty-pmax                          ✅ correct slug
+ *   Catalyst - PMax (Feed-Only)                     ❌ raw campaign name
+ *   Metapneumovirus (01KXNTEYRTKP4Q3BGVKSMT3E6C)    ❌ Klaviyo campaign ID
+ *   actual_campaign_name_hardcoded                  ❌ tracking-template placeholder
+ *   [D2-P0] Intent Search — Alpet + Food-Contact    ❌ another brand's campaign
+ *
+ * A raw name can't join because slugify(name) != name. A Klaviyo ID is email
+ * traffic that happened to carry a click id. A placeholder is a template that
+ * was never wired. None of these are recoverable downstream — by the time the
+ * Pulse sees them the campaign is unknowable — so reject them at write time.
+ *
+ * Deliberately permissive: this is a shape check, not an allowlist. An allowlist
+ * of campaign names is exactly what rotted three times (2026-04-30, 06-15,
+ * 06-21) — every new campaign broke it until someone hand-edited a CASE
+ * statement. Any lowercase slug passes; new campaigns need no change here.
+ */
+const UTM_CAMPAIGN_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+
+/** Known-bad values that are the right SHAPE but still can't be attribution. */
+const UTM_CAMPAIGN_PLACEHOLDERS = new Set([
+  'actual_campaign_name_hardcoded',
+  'actual-campaign-name-hardcoded',
+  'campaign_name_here',
+  'campaign-name-here',
+  'your_campaign',
+  'your-campaign',
+  'placeholder',
+  'todo',
+  'test',
+  'undefined',
+  'null',
+  'none',
+])
+
+/**
+ * Returns true when `value` is safe to stamp as utm_campaign.
+ *
+ * NOTE ON SCOPE: a passing value is well-formed, NOT verified to exist. Only the
+ * Google Ads API can confirm a gclid's real campaign, and that resolution has to
+ * happen server-side at order import. This guard stops garbage from entering the
+ * field; it cannot fill the field in when the click arrived without one.
+ */
+export function isValidUtmCampaign(value: unknown): value is string {
+  if (typeof value !== 'string') return false
+  const v = value.trim()
+  if (!v || v.length > 100) return false
+  if (UTM_CAMPAIGN_PLACEHOLDERS.has(v.toLowerCase())) return false
+  return UTM_CAMPAIGN_SLUG.test(v)
+}
+
+/**
+ * Drop utm_campaign from an attribution bag when it isn't joinable.
+ *
+ * Dropping beats stamping garbage: a missing utm_campaign reads downstream as
+ * "unknown campaign" (already handled — the Pulse prints a — and warns), whereas
+ * a bogus value reads as a CONFIDENT WRONG ANSWER and silently misattributes
+ * revenue to whichever campaign it collides with. The 2026-04 L&G incident
+ * misattributed $3,616 exactly this way.
+ *
+ * Other _pd_ params are left untouched: gclid is ground truth and is what the
+ * server-side resolver will use to recover the campaign properly.
+ */
+function withValidatedCampaign(
+  attrs: Array<{ key: string; value: string }>,
+  campaignKey: string
+): Array<{ key: string; value: string }> {
+  return attrs.filter((a) => a.key !== campaignKey || isValidUtmCampaign(a.value))
+}
+
+/**
  * Read attribution data from localStorage (captured on landing page).
  * Returns key/value pairs prefixed with _pd_ for Nexus extraction.
  *
@@ -127,7 +204,7 @@ function getAttributionAttrs(): Array<{ key: string; value: string }> {
     }
     if (data._landing_page) attrs.push({ key: '_pd_landing_page', value: data._landing_page })
     if (data._referrer) attrs.push({ key: '_pd_referrer', value: data._referrer })
-    return attrs
+    return withValidatedCampaign(attrs, '_pd_utm_campaign')
   } catch {
     return []
   }
@@ -165,7 +242,7 @@ function getFirstTouchAttrs(): Array<{ key: string; value: string }> {
     if (data._landing_page) attrs.push({ key: '_pd_ft_landing_page', value: data._landing_page })
     if (data._referrer) attrs.push({ key: '_pd_ft_referrer', value: data._referrer })
     if (data._timestamp) attrs.push({ key: '_pd_ft_timestamp', value: String(data._timestamp) })
-    return attrs
+    return withValidatedCampaign(attrs, '_pd_ft_utm_campaign')
   } catch {
     return []
   }
