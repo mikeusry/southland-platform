@@ -17,6 +17,7 @@ const CART_FRAGMENT = `
     id
     checkoutUrl
     totalQuantity
+    attributes { key value }
     cost {
       totalAmount { amount currencyCode }
       subtotalAmount { amount currencyCode }
@@ -106,6 +107,16 @@ const APPLY_DISCOUNT_MUTATION = `
   ${CART_FRAGMENT}
 `
 
+const UPDATE_CART_ATTRIBUTES_MUTATION = `
+  mutation CartAttributesUpdate($cartId: ID!, $attributes: [AttributeInput!]!) {
+    cartAttributesUpdate(cartId: $cartId, attributes: $attributes) {
+      cart { ...CartFields }
+      userErrors { field message }
+    }
+  }
+  ${CART_FRAGMENT}
+`
+
 const GET_CART_QUERY = `
   query GetCart($cartId: ID!) {
     cart(id: $cartId) { ...CartFields }
@@ -156,6 +167,7 @@ function parseCart(raw: Record<string, unknown>): Cart {
     totalQuantity: raw.totalQuantity as number,
     cost: raw.cost as Cart['cost'],
     lines: lines.edges.map((e) => parseCartLine(e.node)),
+    attributes: (raw.attributes as CartLineAttribute[]) ?? [],
     discountCodes: raw.discountCodes as Cart['discountCodes'],
     discountAllocations: raw.discountAllocations as Cart['discountAllocations'],
   }
@@ -202,6 +214,38 @@ export async function createCart(
 
   checkUserErrors('createCart', data.cartCreate.userErrors)
   return parseCart(data.cartCreate.cart)
+}
+
+/**
+ * Set CART-level attributes (Shopify note_attributes) on an existing cart.
+ *
+ * 🛑 REPLACE, NOT MERGE. Shopify's `cartAttributesUpdate` takes the complete
+ * attribute list and discards anything absent from it — verified against the
+ * live 2026-01 Storefront API on 2026-08-09: a cart created with
+ * {_pd_user_id, _pd_brand} then updated with {_pd_user_id, _pd_gclid} came back
+ * holding ONLY the latter two. `_pd_brand` was silently dropped, no userError,
+ * no warning.
+ *
+ * Callers must therefore pass the full desired set. `mergeCartAttributes()` in
+ * the app's cart.ts does this; do not call this function with a partial list.
+ */
+export async function updateCartAttributes(
+  client: StorefrontClient,
+  cartId: string,
+  attributes: CartLineAttribute[]
+): Promise<Cart> {
+  const { data, errors } = await client.request(UPDATE_CART_ATTRIBUTES_MUTATION, {
+    variables: { cartId, attributes },
+  })
+
+  if (errors) {
+    const detail = typeof errors === 'object' ? JSON.stringify(errors) : String(errors)
+    console.error('[shopify-storefront] updateCartAttributes errors:', detail)
+    throw new Error(`Failed to update cart attributes: ${detail}`)
+  }
+
+  checkUserErrors('updateCartAttributes', data.cartAttributesUpdate.userErrors)
+  return parseCart(data.cartAttributesUpdate.cart)
 }
 
 /**

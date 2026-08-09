@@ -15,6 +15,7 @@ import {
   getCart as sfGetCart,
   removeFromCart as sfRemoveFromCart,
   updateCartLines as sfUpdateCartLines,
+  updateCartAttributes as sfUpdateCartAttributes,
   applyDiscountCode as sfApplyDiscount,
 } from '@southland/shopify-storefront'
 import type {
@@ -379,11 +380,52 @@ export async function getCart(): Promise<Cart | null> {
 }
 
 /**
+ * Merge freshly-read attribution over a cart's existing cart-level attributes.
+ *
+ * 🛑 EXISTING VALUES WIN. This is deliberate and is the whole point of the
+ * merge. getCartLevelAttributionAttrs() reads localStorage through a 30-minute
+ * session window (see getAttributionAttrs), so a shopper who clicked an ad,
+ * added an item, then returned 45 minutes later to add a second item reads back
+ * an EMPTY attribution set on that second call. Letting the fresh read win would
+ * erase the gclid that the first add-to-cart correctly captured — turning a
+ * working attribution into a lost one.
+ *
+ * So: keep what the cart already has, and only fill in keys that are missing.
+ * The one exception is identity (_pd_user_id / _pd_session_id), which is stable
+ * per-browser and safe to refresh; a cart that never got them can gain them here.
+ */
+function mergeCartAttributes(
+  existing: Array<{ key: string; value: string }>,
+  fresh: Array<{ key: string; value: string }>
+): Array<{ key: string; value: string }> {
+  // Identity keys are refreshable — a stale/absent value should yield to a live one.
+  const REFRESHABLE = new Set(['_pd_user_id', '_pd_session_id'])
+
+  const merged = new Map<string, string>()
+  for (const a of existing) {
+    if (a.key && a.value) merged.set(a.key, a.value)
+  }
+  for (const a of fresh) {
+    if (!a.key || !a.value) continue
+    if (!merged.has(a.key) || REFRESHABLE.has(a.key)) merged.set(a.key, a.value)
+  }
+  return Array.from(merged, ([key, value]) => ({ key, value }))
+}
+
+/**
  * Add lines to cart. Creates a new cart if none exists.
  *
- * On NEW cart creation we ALSO pass cart-level attributes — required for
- * the Shopify Web Pixel v2.3 cross-origin attribution recovery. See
- * getCartLevelAttributionAttrs() docstring for the full rationale.
+ * Cart-level attributes are required for the Shopify Web Pixel v2.3
+ * cross-origin attribution recovery — they are the ONLY channel the pixel
+ * sandbox can read from the checkout origin. See
+ * getCartLevelAttributionAttrs() for the full rationale.
+ *
+ * NEW carts get them via cartCreate. EXISTING carts get them via a follow-up
+ * cartAttributesUpdate: verified 2026-08-09 against the live 2026-01 API,
+ * cartLinesAdd PRESERVES cart attributes but cannot SET them, so a cart first
+ * created without attribution (direct visit, or a click outside the 30-min
+ * window) could previously never acquire identity for the rest of its life.
+ * That is the 222/224 no-uid gap in the attribution handoff.
  */
 export async function addToCart(lines: CartLineInput[]): Promise<Cart> {
   const client = getClient()
@@ -397,6 +439,26 @@ export async function addToCart(lines: CartLineInput[]): Promise<Cart> {
     // Try adding to existing cart
     try {
       cart = await sfAddToCart(client, cartId, stamped)
+
+      // cartLinesAdd preserves existing cart attributes but never sets them.
+      // Reconcile so identity/attribution reaches checkout on repeat adds too.
+      const merged = mergeCartAttributes(cart.attributes ?? [], cartAttrs)
+      const changed =
+        merged.length !== (cart.attributes?.length ?? 0) ||
+        merged.some((m) => !cart.attributes?.some((e) => e.key === m.key && e.value === m.value))
+
+      if (changed && merged.length > 0) {
+        try {
+          cart = await sfUpdateCartAttributes(client, cart.id, merged)
+        } catch (attrErr) {
+          // Attribution is best-effort — never fail an add-to-cart over it.
+          console.warn('[cart] cart attribute sync failed (non-fatal):', attrErr)
+          captureCartException(attrErr instanceof Error ? attrErr : new Error(String(attrErr)), {
+            stage: 'cart-attributes-sync',
+            cartId: cart.id,
+          })
+        }
+      }
     } catch (addErr) {
       // Cart may have expired — clear stale ID and create a new one
       console.warn('[cart] addToCart failed, creating new cart:', addErr)

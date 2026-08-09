@@ -130,6 +130,13 @@ export interface Cart {
     subtotalAmount: Money
   }
   lines: CartLine[]
+  /**
+   * CART-level attributes (Shopify note_attributes). Distinct from the per-line
+   * `attributes` on CartLine: these persist onto the order and are the only
+   * channel the Shopify Web Pixel can read cross-origin (the pixel sandbox runs
+   * on the checkout origin, where storefront sessionStorage is unreachable).
+   */
+  attributes: CartLineAttribute[]
   discountCodes: { code: string; applicable: boolean }[]
   discountAllocations: CartDiscountAllocation[]
 }
