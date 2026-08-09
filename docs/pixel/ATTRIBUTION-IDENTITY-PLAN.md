@@ -95,15 +95,38 @@ properties **first**, then `note_attributes`. Cart-level attributes land in
 storefront orders** — so fixing Nexus first would rewire it to a field that is often
 empty. Order matters.
 
-### 1.3 The view — INHERITED, NOT re-checked
+### 1.3 The view — VERIFIED 2026-08-09 (Phase 0 executed)
 
-**[INHERITED]** `v_channel_attribution.sql:92` filters `WHERE email_hash IS NOT NULL`,
-which requires identity *at touch time*; an ad click is anonymous, so paid is deleted and
-email survives. **[INHERITED]** 0 paid touchpoints since 2016; 91,114 gclid-bearing rows
-discarded in 90d; `v_customer_touchpoints_v2` built alongside v1 at 67.3% coverage.
+**[VERIFIED]** `19a96f8` exists (`feat(bq): v_customer_touchpoints_v2 — recover paid
+touchpoints via pd_user_id stitch`), the SQL file exists, and all three views are live in
+BQ (`INFORMATION_SCHEMA.TABLES`: `v_channel_attribution`, `v_customer_touchpoints`,
+`v_customer_touchpoints_v2`).
 
-🛑 **I have run no BigQuery query. Every number in this section is unverified.** They are
-reproduced only so the plan has something to test against. **Do not quote them.**
+**[VERIFIED] The gate holds — `v_customer_touchpoints` is effectively email-only:**
+
+| channel | touchpoints | first_seen | last_seen |
+|---|---|---|---|
+| Email | 4,029,046 | 2016-10-09 | 2026-08-09 |
+| Referral | 70 | 2026-08-06 | 2026-08-08 |
+| Direct | 6 | 2026-08-07 | 2026-08-08 |
+| **Paid Search** | **1** | 2026-08-08 | 2026-08-08 |
+
+The handoff said 0 paid; it is now **1** (a single row landed 2026-08-08). Immaterial —
+1 in 4.03M over a decade. The finding stands.
+
+**[VERIFIED] The regression baseline reproduces the handoff's table EXACTLY** (90d, run
+2026-08-09):
+
+| source | grp | n | no_uid | no_sess |
+|---|---|---|---|---|
+| shopify_web_pixel | COVERED | 695 | 9 | 10 |
+| shopify_web_pixel | **GAP** | **224** | **222** | 213 |
+| storefront_pixel | COVERED | 15 | 15 | 15 |
+| storefront_pixel | GAP | 121 | 16 | 121 |
+
+**[INHERITED, still unverified]** the 91,114 discarded-touchpoint figure, the 67.3%
+coverage figure, and the 348 paid-touched orders. Not needed for Phases 1-3; verify before
+any channel-share claim.
 
 ---
 
@@ -121,18 +144,41 @@ because that 224 is itself inherited. The fix stands on its own merits either wa
 
 ## 3. Open decisions — Mike's call
 
-### 3.1 Do phone/manual orders belong in the attribution denominator?
+### 3.1 Phone/manual orders — ✅ ANSWERED 2026-08-09, and the hypothesis was WRONG
 
-**[INHERITED]** 136 gap orders carry `order_id = orderNumber` (Nexus numbering) and look
-like phone/manual orders. **[VERIFIED]** `order_source` exists on the `orders` table, and
-the advertising pages already filter `.eq('order_source', 'shopify')` to exclude manual
-orders — a precedent. **[VERIFIED]** `order_source` is **not** currently plumbed into
-`purchase-event.ts` (`command grep -rn "order_source" src/lib/purchase-event.ts` → no
-hits).
+The handoff proposed that the 136 `storefront_pixel` orders are phone/manual, and that
+excluding them would shrink the problem. **It is answerable by query, and the answer is no.**
 
-If manual orders are excluded by definition, **Bug 2 is mostly a labeling fix and true
-coverage is materially better than 67.3%.** This is a definitional question about what
-belongs in click attribution. It is not answerable by query.
+**[VERIFIED]** Prefix breakdown of all 136 `storefront_pixel` purchase rows (90d):
+
+| prefix | n | meaning |
+|---|---|---|
+| `SH-` | 132 | Southland **Shopify** orders |
+| `D2-` | 4 | **D2 Sanitizers** — a different brand |
+| **`SO-` (manual)** | **0** | — |
+
+**[VERIFIED]** Nexus `orders` uses `SO-` for manual orders (sampled
+`order_source=eq.manual` → `SO-010370`…`SO-010377`) and `SH-shopify NNNNN` / `D2-NNNN`
+for Shopify orders (`order_source='shopify'`).
+
+**So zero manual orders reach the pixel at all.** Every one of the 136 is a real Shopify
+ecommerce order that *should* be in the denominator. Nothing shrinks. Bug 2 is a genuine
+attribution bug, not a labeling artifact.
+
+**Two consequences:**
+
+1. Do **not** plumb `order_source` as an exclusion filter — there is nothing to exclude.
+2. **4 D2 orders are flowing into the Southland pixel path.** Not investigated. Worth a
+   look: is `brand_id` correct on those rows?
+
+**[VERIFIED]** `order_source` is not currently in `purchase-event.ts`
+(`command grep -rn "order_source" src/lib/purchase-event.ts` → no hits). It should stay
+that way.
+
+**Method note:** the first query I ran here returned 0 rows and *looked* like a clean
+answer. It was malformed — `order_number` is a **string** (`SH-shopify 23446`), not an int,
+so a numeric range matched nothing. A 0-row result is not evidence until the query shape is
+verified against a real row.
 
 ### 3.2 The 45-day attribution window
 
@@ -146,16 +192,24 @@ before anyone treats v2 output as real.
 
 Ordered by dependency. **Each phase ends with a check that can fail.**
 
-### Phase 0 — Baseline before anything ships
+### Phase 0 — Baseline — ✅ DONE 2026-08-09
 
-Run the handoff's regression query and **save the output with today's date**. Without a
-saved baseline, no later claim of improvement is provable.
+Executed. Results in §1.3 (channel mix + regression baseline) and §3.1 (the phone-order
+question, answered). **Gate passed:** paid touchpoints = 1 of 4.03M, so the premise holds.
 
-Also re-run the two diagnostic queries in the handoff (channel mix; gclid-without-email).
-**Inherit the SQL, not the numbers.**
+The baseline table in §1.3 is the thing Phase 2 compares against. Do not re-run as a
+prerequisite — re-run it *after* deploy, as the comparison.
 
-**Gate:** if paid touchpoints in `v_customer_touchpoints` is **not** 0, the entire premise
-has changed — stop and re-diagnose.
+**How to re-run** (from `~/CODING/mothership`):
+
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS=$PWD/southland-warehouse-service-account.json
+bq --project_id=southland-warehouse query --use_legacy_sql=false '<the query>'
+```
+
+The `bq` CLI is installed and the service-account key is present and working. There is no
+MCP connector and none is needed. (`google-cloud-bigquery` Python lib is **not** installed
+— use the CLI.)
 
 ### Phase 1 — Storefront (PR #78) — READY, awaiting review
 
@@ -229,10 +283,20 @@ next session ends up re-deriving all of this from scratch.
 
 Stated plainly so it is not mistaken for covered ground:
 
-1. **Every BigQuery figure** — 91,114 / 67.3% / 348 / 224 / 136 / the 45-day window. All inherited.
-2. **Whether `19a96f8` exists** and whether `v_customer_touchpoints_v2` is live in BQ.
-3. **Whether the deployed CF Pages Worker matches `origin/main`.** I verified source and the
+**Closed 2026-08-09** (was 1, 2, 4 in the original list):
+
+- ~~Whether `19a96f8` exists / v2 is live~~ → **both confirmed**, §1.3
+- ~~The 224 / 136 baseline figures~~ → **reproduced exactly**, §1.3
+- ~~Whether the 136 are phone orders~~ → **no; zero manual orders reach the pixel**, §3.1
+
+**Still open:**
+
+1. **Three BigQuery figures remain inherited:** 91,114 discarded touchpoints, 67.3%
+   coverage, 348 paid-touched orders. Not needed for Phases 1-3. **Verify before any
+   channel-share claim.**
+2. **The 45-day window** (§3.2) — never measured, materially changes every split.
+3. **Whether the deployed CF Pages Worker matches `origin/main`.** Verified source and the
    live CDN pixel — not the deployment.
-4. **Whether the 136 orders are in fact phone orders.** Requires cross-referencing Nexus
-   `order_source`. Not done.
-5. **Any real browser session through real checkout.** The one hop that closes Phase 1.
+4. **Any real browser session through real checkout.** The one hop that closes Phase 1 and
+   the only thing a terminal cannot prove.
+5. **Why 4 D2 orders are in the Southland pixel path** (§3.1). New, unexamined.
