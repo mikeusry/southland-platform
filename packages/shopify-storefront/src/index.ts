@@ -16,6 +16,7 @@ export {
   createCart,
   addToCart,
   updateCartLines,
+  updateCartAttributes,
   removeFromCart,
   applyDiscountCode,
   getCart,
