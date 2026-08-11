@@ -197,6 +197,30 @@ const openaiAdsPixelId =
     </script>
     <script src="https://cdn.point.dog/pixel/pd-pixel.min.js" async></script>
 
+    <!-- Simpli.fi organization tag — "Southland Organics SITE RT"
+         (org 554212, tag id 281561).
+
+         🛑 This tag was ISSUED but never installed. Verified 2026-08-11: the
+         `SO - SITE RT- Poultry` retargeting segment reads user_count 1,
+         active false, days_inactive 126 — it has been collecting nobody
+         because the tag it depends on was never on the site. Meanwhile D2's
+         equivalent tag, which IS installed, holds 2,677 users.
+
+         Site-retargeting audiences are "this tag + URL rules", so nothing
+         Simpli.fi can retarget on southlandorganics.com works without it.
+
+         🛑 Do not swap in JockShock's tag (5e5a79bc…) or D2's (18f08d36…).
+         Wrong tag pools unrelated audiences together and ruins both.
+
+         Conversion tracking additionally needs this tag with tx_val/tx_id on
+         the Shopify order-status page — that store is shared with JockShock,
+         so both tags belong there. Not done here. -->
+    <script
+      is:inline
+      async
+      src="https://tag.simpli.fi/sifitag/679871f8-7c57-41b4-a4c9-7fd24de2efb4"
+    ></script>
+
     <!-- Meta Pixel -->
     <script is:inline>
       !function(f,b,e,v,n,t,s)
