@@ -54,7 +54,11 @@ const baseColumns =
         },
       ]
 
-const columns = [...baseColumns.slice(0, 3), podcastColumn]
+// All configured columns plus the podcast one. This used to slice(0, 3), which
+// was harmless while layout.json held nothing but empty columns and the
+// fallback below supplied exactly three — but it would silently drop the
+// fourth ("Company") now that the real structure is in the data.
+const columns = [...baseColumns, podcastColumn]
 ---
 
 <FooterReact

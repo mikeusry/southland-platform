@@ -13,7 +13,14 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 import { buildSouthlandUrl } from '../../lib/cloudinary'
 
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
-const lookupUrl = 'https://nexus.southlandorganics.com/api/loyalty/lookup'
+
+// Subscription lookup, NOT the loyalty one. This form used to post to
+// /api/loyalty/lookup, which gates on an active Rewards account and emails a
+// points balance linking to /portal/{token}/rewards. So a subscriber who had
+// never joined Rewards got no email at all while this page said "check your
+// email", and one who had joined was sent to a rewards page when they asked to
+// manage a subscription. A customer reported both.
+const lookupUrl = 'https://nexus.southlandorganics.com/api/subscriptions/lookup'
 
 const subscriptionSchema = {
   '@context': 'https://schema.org',
@@ -89,11 +96,11 @@ const faqs = [
   },
   {
     q: 'Can I skip a month or pause my subscription?',
-    a: 'Absolutely. Log into your account or contact us to skip, pause, or adjust your delivery schedule. No penalties, no questions.',
+    a: 'Absolutely. Use the "Manage My Subscription" form at the bottom of this page to get a link to your portal, where you can skip, pause, or adjust your delivery schedule. No penalties, no questions.',
   },
   {
     q: 'Can I cancel anytime?',
-    a: 'Yes. No contracts, no minimum commitment. Cancel anytime through your Shopify account or by reaching out to our team.',
+    a: 'Yes. No contracts, no minimum commitment. Cancel anytime from your subscription portal — use the form at the bottom of this page to get your link — or by reaching out to our team.',
   },
   {
     q: 'How does shipping work?',
@@ -623,8 +630,16 @@ const faqs = [
                 msg.textContent = 'Too many requests. Please try again in a few minutes.'
                 msg.className = 'mt-4 text-sm font-medium text-amber-600'
               } else {
-                msg.textContent =
-                  "If you have an account, we've sent your portal link. Check your email!"
+                // Deliberately conditional. The endpoint cannot say whether an
+                // address is known without leaking who our customers are, so
+                // this must not promise an email that may never arrive — the
+                // old copy ("we've sent your portal link. Check your email!")
+                // left subscribers with no subscription on file waiting
+                // forever on a green checkmark. Give them the exit instead.
+                msg.innerHTML =
+                  'If we found a subscription for that address, your portal link is on its way. ' +
+                  "Nothing after a few minutes? Call <a class='underline' href='tel:8006083755'>800-608-3755</a> " +
+                  "or email <a class='underline' href='mailto:success@southlandorganics.com'>success@southlandorganics.com</a>."
                 msg.className = 'mt-4 text-sm font-medium text-southland-green'
               }
             } catch {

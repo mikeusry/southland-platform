@@ -86,51 +86,47 @@
       }
     ]
   },
+    "_comment": "Eleven Shopify menu ITEMS were synced in as column TITLES with empty links, so every column was a heading with nothing under it. Footer.astro detects that (columns[0].links.length === 0) and silently substitutes its own defaults, so the live footer was never broken — but the dead data reads like a broken nav and cost real time during a customer-report investigation. Replaced with the real structure. 'Subscriber Portal' is deliberately gone: it pointed nowhere and duplicated /subscriptions/, which is the actual entry point.",
   "footer": {
     "columns": [
       {
-        "title": "Why Choose Southland",
-        "links": []
+        "title": "Products",
+        "links": [
+          { "label": "Poultry", "href": "/poultry/" },
+          { "label": "Livestock", "href": "/livestock/swine/" },
+          { "label": "Lawn & Garden", "href": "/lawn/" },
+          { "label": "Septic & Waste", "href": "/products/waste-treatment/" },
+          { "label": "Crops", "href": "/agriculture/crops/" }
+        ]
       },
       {
-        "title": "Store Locator",
-        "links": []
+        "title": "Resources",
+        "links": [
+          { "label": "Blog", "href": "/blog/" },
+          { "label": "Case Studies", "href": "/blogs/case-studies" },
+          { "label": "Humate Hub", "href": "/blogs/humate-hub" },
+          { "label": "Poultry Biosecurity", "href": "/blogs/poultry-biosecurity" },
+          { "label": "Search", "href": "/search" }
+        ]
       },
       {
-        "title": "Become a Distributor",
-        "links": []
+        "title": "Your Account",
+        "links": [
+          { "label": "Subscribe & Save", "href": "/subscriptions/" },
+          { "label": "Manage My Subscription", "href": "/subscriptions/#manage" },
+          { "label": "Rewards Program", "href": "/rewards/" },
+          { "label": "Contact", "href": "/contact/" },
+          { "label": "FAQs", "href": "/contact/" }
+        ]
       },
       {
-        "title": "Shopify Collective",
-        "links": []
-      },
-      {
-        "title": "Poultry Biosecurity Resources",
-        "links": []
-      },
-      {
-        "title": "Blog Posts",
-        "links": []
-      },
-      {
-        "title": "Case Studies",
-        "links": []
-      },
-      {
-        "title": "Search",
-        "links": []
-      },
-      {
-        "title": "Contact",
-        "links": []
-      },
-      {
-        "title": "Rewards Program",
-        "links": []
-      },
-      {
-        "title": "Subscriber Portal",
-        "links": []
+        "title": "Company",
+        "links": [
+          { "label": "Why Choose Southland", "href": "/about/" },
+          { "label": "Find a Dealer", "href": "/store-locator/" },
+          { "label": "Become a Distributor", "href": "/distribution/" },
+          { "label": "Podcast", "href": "/podcast/" }
+        ]
       }
     ],
     "copyright": "© 2026 Southland Organics. All rights reserved.",
