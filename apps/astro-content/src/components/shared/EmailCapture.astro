@@ -1,18 +1,30 @@
 ---
 /**
- * Email capture component - integrates with Klaviyo
- * Used across podcast and content pages
+ * Email capture component — posts to Customer.io via /api/subscribe.
+ * Used across podcast and content pages.
  *
- * Podcast subscribers get these custom properties:
- * - podcast_subscriber: true
- * - podcast_subscribed_at: ISO timestamp
- * - podcast_signup_episode: episode slug (if on episode page)
- * - podcast_signup_source: "episode_page" | "hub" | "footer"
+ * Was wired straight to Klaviyo's browser API until 2026-08-12. Klaviyo was
+ * retired as ESP in Jul 2026, but that endpoint still returns 202, so every
+ * signup kept showing "You're in!" while landing in a dead ESP. The Customer.io
+ * Track API needs a secret key, so the call now goes through a server route
+ * rather than the browser.
+ *
+ * `listId` is retained as a no-op prop: four Klaviyo list ids are still passed
+ * by callers (QQxdLS, Rv67aH, TckeZK). Audience is now carried by `source`,
+ * which the API maps to Customer.io attributes. Remove the prop once callers
+ * are cleaned up.
+ *
+ * Subscribers get these attributes:
+ * - newsletter_subscriber: true
+ * - newsletter_subscribed_at: ISO timestamp
+ * - newsletter_signup_source: the `source` prop
+ * Podcast sources additionally get podcast_subscriber / podcast_signup_episode.
  */
 
 interface Props {
   headline?: string
   description?: string
+  /** @deprecated Klaviyo list id — accepted but ignored. Audience comes from `source`. */
   listId?: string
   source?:
     | 'episode_page'
@@ -32,15 +44,12 @@ interface Props {
 const {
   headline = 'Subscribe to Ag & Culture',
   description = 'Get notified when new episodes drop, plus exclusive content and tips.',
-  listId = import.meta.env.PUBLIC_KLAVIYO_LIST_ID || 'QQxdLS',
   source = 'website',
   episodeSlug = '',
   buttonText = 'Subscribe',
   variant = 'card',
   class: className = '',
 } = Astro.props
-
-const klaviyoCompanyId = import.meta.env.PUBLIC_KLAVIYO_COMPANY_ID || 'p8XW7D'
 
 const variantClasses = {
   inline: '',
@@ -81,11 +90,7 @@ const buttonClasses =
     )
   }
 
-  <form
-    class="klaviyo-form flex flex-col gap-3 sm:flex-row"
-    data-list-id={listId}
-    data-klaviyo-company-id={klaviyoCompanyId}
-  >
+  <form class="subscribe-form flex flex-col gap-3 sm:flex-row">
     <div class="flex-1">
       <label for="email-capture-input" class="sr-only">Email address</label>
       <input
@@ -139,58 +144,38 @@ const buttonClasses =
 </div>
 
 <script>
-  // Klaviyo form submission handler with podcast-specific properties
-  document.querySelectorAll('.klaviyo-form').forEach((form) => {
+  // Posts to /api/subscribe, which talks to Customer.io server-side.
+  document.querySelectorAll('.subscribe-form').forEach((form) => {
     form.addEventListener('submit', async (e) => {
       e.preventDefault()
 
       const formEl = e.target as HTMLFormElement
       const emailInput = formEl.querySelector('input[type="email"]') as HTMLInputElement
-      const listId = formEl.dataset.listId
-      const companyId = formEl.dataset.klaviyoCompanyId
       const container = formEl.closest('.email-capture')
       const source = container?.getAttribute('data-source') || 'website'
       const episodeSlug = container?.getAttribute('data-episode-slug') || ''
 
       const email = emailInput?.value
-
-      if (!email || !listId || !companyId) {
-        console.error('Missing required fields for Klaviyo submission')
-        return
-      }
+      if (!email) return
 
       const submitButton = formEl.querySelector('button[type="submit"]') as HTMLButtonElement
+      const originalLabel = submitButton.textContent || 'Subscribe'
       const successMessage = formEl.parentElement?.querySelector('.success-message')
       const errorMessage = formEl.parentElement?.querySelector('.error-message')
 
-      // Show loading state
+      errorMessage?.classList.add('hidden')
       submitButton.disabled = true
       submitButton.textContent = 'Subscribing...'
 
-      // Build podcast-specific properties
       const isPodcastSource =
         ['episode_page', 'hub', 'footer'].includes(source) ||
         window.location.pathname.includes('/podcast')
-      const properties: Record<string, any> = {
-        source: source,
-        signup_page: window.location.pathname,
-      }
 
-      // Add podcast subscriber properties
-      if (isPodcastSource) {
-        properties.podcast_subscriber = true
-        properties.podcast_subscribed_at = new Date().toISOString()
-        properties.podcast_signup_source = source
-        if (episodeSlug) {
-          properties.podcast_signup_episode = episodeSlug
-        }
-      }
-
-      // Identify to the point.dog pixel BEFORE the Klaviyo round-trip.
+      // Identify to the point.dog pixel BEFORE the round-trip.
       //
       // Two reasons for the ordering: identify must land before any track() or
       // the event attaches to a profile with no email, and doing it up front
-      // means the identity survives even if Klaviyo is slow or the visitor
+      // means the identity survives even if the API is slow or the visitor
       // navigates away mid-request. identify() hashes locally — no plaintext
       // email is ever sent to the pixel endpoint.
       if (window.pdPixel?.identify) {
@@ -203,82 +188,44 @@ const buttonClasses =
       }
 
       try {
-        // Klaviyo Client Subscribe API (2024 format)
-        const response = await fetch(
-          `https://a.klaviyo.com/client/subscriptions/?company_id=${companyId}`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              revision: '2024-02-15',
-            },
-            body: JSON.stringify({
-              data: {
-                type: 'subscription',
-                attributes: {
-                  custom_source: isPodcastSource
-                    ? 'Podcast Signup'
-                    : source === 'biosecurity'
-                      ? 'Biosecurity Signup'
-                      : source === 'lawn'
-                        ? 'Lawn Care Signup'
-                        : source === 'case-study'
-                          ? 'Case Study Signup'
-                          : 'Website Signup',
-                  profile: {
-                    data: {
-                      type: 'profile',
-                      attributes: {
-                        email: email,
-                        properties: properties,
-                      },
-                    },
-                  },
-                },
-                relationships: {
-                  list: {
-                    data: {
-                      type: 'list',
-                      id: listId,
-                    },
-                  },
-                },
-              },
-            }),
-          }
-        )
+        const response = await fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            source,
+            signupPage: window.location.pathname,
+            episodeSlug: episodeSlug || undefined,
+          }),
+        })
 
-        // Klaviyo returns 202 with empty body on success
-        if (response.status === 200 || response.status === 202) {
-          // Hide form, show success
-          formEl.classList.add('hidden')
-          if (successMessage) {
-            successMessage.classList.remove('hidden')
-          }
-
-          // Also hide the headline/description
-          const header = container?.querySelector('.mb-4')
-          if (header) {
-            header.classList.add('hidden')
-          }
-
-          // Track conversion via point.dog pixel
-          if (window.pdPixel) {
-            window.pdPixel.track('email_signup', {
-              source: source,
-              list_id: listId,
-              podcast_subscriber: isPodcastSource,
-              episode_slug: episodeSlug || null,
-            })
-          }
-        } else {
+        // Only a real 2xx counts. The whole point of this rewrite is that a
+        // subscriber must never see "You're in!" unless they actually are.
+        if (!response.ok) {
           throw new Error(`Subscription failed: ${response.status}`)
+        }
+
+        formEl.classList.add('hidden')
+        successMessage?.classList.remove('hidden')
+
+        // Also hide the headline/description
+        const header = container?.querySelector('.mb-4')
+        if (header) {
+          header.classList.add('hidden')
+        }
+
+        if (window.pdPixel) {
+          window.pdPixel.track('email_signup', {
+            source: source,
+            podcast_subscriber: isPodcastSource,
+            episode_slug: episodeSlug || null,
+          })
         }
       } catch (error) {
         console.error('Email signup error:', error)
         errorMessage?.classList.remove('hidden')
         submitButton.disabled = false
-        submitButton.textContent = 'Subscribe'
+        submitButton.textContent = originalLabel
       }
     })
   })
