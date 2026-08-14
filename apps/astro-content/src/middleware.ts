@@ -229,7 +229,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // FlashSpeed on the shop theme rewrites /blogs/{cat}/{slug} in HTML to
   // /blog/{cat}/{slug} (drops the "s"). That path 404s. Known Shopify blog
   // handles → /blog/{slug}/.
-  const SHOPIFY_BLOG_HANDLES = new Set(['news', 'case-studies', 'humate-hub', 'poultry-biosecurity'])
+  const SHOPIFY_BLOG_HANDLES = new Set([
+    'news',
+    'case-studies',
+    'humate-hub',
+    'poultry-biosecurity',
+  ])
   const flashspeedBlog = pathname.match(/^\/blog\/([^/]+)\/([^/]+)\/?$/)
   if (flashspeedBlog && SHOPIFY_BLOG_HANDLES.has(flashspeedBlog[1])) {
     return new Response(null, {
