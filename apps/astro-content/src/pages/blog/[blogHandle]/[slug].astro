@@ -1,0 +1,22 @@
+---
+/**
+ * Catch-all redirect for FlashSpeed-rewritten shop article URLs.
+ *
+ * Shopify articles live at /blogs/{handle}/{slug}. The shop theme's
+ * FlashSpeed rewrite drops the "s" and emits /blog/{handle}/{slug},
+ * which 404s. Prerendered /blog/[slug] pages cause the Cloudflare
+ * adapter to exclude /blog/* from the Worker, so middleware never
+ * fires here. Same pattern as src/pages/blogs/[...slug].astro.
+ *
+ * Static /blog/category/[segment] wins over this for "category".
+ */
+const SHOPIFY_BLOG_HANDLES = new Set(['news', 'case-studies', 'humate-hub', 'poultry-biosecurity'])
+
+const { blogHandle, slug } = Astro.params
+
+if (blogHandle && slug && SHOPIFY_BLOG_HANDLES.has(blogHandle)) {
+  return Astro.redirect(`/blog/${slug}/`, 301)
+}
+
+return new Response(null, { status: 404, statusText: 'Not Found' })
+---
