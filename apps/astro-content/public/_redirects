@@ -4,3 +4,7 @@
 /blog/case-studies/* /blog/:splat 301
 /blog/humate-hub/* /blog/:splat 301
 /blog/poultry-biosecurity/* /blog/:splat 301
+
+# Football-pad how-to lives on the JockShock brand site, not Southland.
+/blog/how-to-clean-football-pads https://www.jockshockspray.com/learn/clean-football-pads/ 301
+/blog/how-to-clean-football-pads/ https://www.jockshockspray.com/learn/clean-football-pads/ 301
