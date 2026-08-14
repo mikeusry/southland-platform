@@ -1,0 +1,6 @@
+# FlashSpeed on the shop theme rewrites /blogs/{handle}/{slug} → /blog/{handle}/{slug}.
+# These run at the Pages edge, before prerendered /blog/* is excluded from the Worker.
+/blog/news/* /blog/:splat 301
+/blog/case-studies/* /blog/:splat 301
+/blog/humate-hub/* /blog/:splat 301
+/blog/poultry-biosecurity/* /blog/:splat 301
