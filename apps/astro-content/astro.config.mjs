@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config'
 import { readdirSync, readFileSync } from 'node:fs'
+import { readFile, writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import sentry from '@sentry/astro'
@@ -40,6 +41,38 @@ function rehypeLazyImages() {
   }
 }
 
+// FlashSpeed on the shop theme rewrites /blogs/{handle}/{slug} → /blog/{handle}/{slug}.
+// Prerendered /blog/[slug] pages exclude /blog/* from the Worker, so Astro
+// middleware and SSR pages never see those URLs. Append splat rules to the
+// Pages _redirects file (edge, before _routes.json) after the adapter writes it.
+const FLASHSPEED_BLOG_REDIRECTS = [
+  '/blog/news/* /blog/:splat 301',
+  '/blog/case-studies/* /blog/:splat 301',
+  '/blog/humate-hub/* /blog/:splat 301',
+  '/blog/poultry-biosecurity/* /blog/:splat 301',
+]
+
+function appendFlashspeedBlogRedirects() {
+  return {
+    name: 'append-flashspeed-blog-redirects',
+    hooks: {
+      'astro:build:done': async (/** @type {{ dir: URL }} */ { dir }) => {
+        const file = join(fileURLToPath(dir), '_redirects')
+        let existing = ''
+        try {
+          existing = await readFile(file, 'utf8')
+        } catch {
+          /* adapter may not have written one */
+        }
+        if (existing.includes('/blog/news/*')) return
+        const next =
+          existing.trimEnd() + (existing ? '\n' : '') + FLASHSPEED_BLOG_REDIRECTS.join('\n') + '\n'
+        await writeFile(file, next)
+      },
+    },
+  }
+}
+
 // https://astro.build/config
 // TinaCMS runs as separate dev server (npx tinacms dev) alongside Astro
 export default defineConfig({
@@ -72,6 +105,7 @@ export default defineConfig({
         !page.includes('/survey/') &&
         !page.includes('/homepage-b'),
     }),
+    appendFlashspeedBlogRedirects(),
   ],
   output: 'server',
   // Legacy Shopify handles that still resolve via [handle].astro's shopifyHandle
@@ -79,8 +113,7 @@ export default defineConfig({
   // canonical slug owns the ranking. See T-1138 GSC data (2026-07-20): the legacy
   // handle held MORE impressions at pos 10.2 than /products/desecticide/ at pos 2.0.
   redirects: {
-    '/products/natural-mite-control-livestock-poultry':
-      '/products/desecticide',
+    '/products/natural-mite-control-livestock-poultry': '/products/desecticide',
   },
   adapter: cloudflare({
     // routes: adapter auto-generates include: ["/*"] which covers all SSR routes.
