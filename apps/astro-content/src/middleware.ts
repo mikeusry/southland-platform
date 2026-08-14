@@ -46,7 +46,7 @@ const REDIRECTS: Record<string, string> = {
   '/pages/credit-application': '/contact/',
   '/pages/vented-caps': '/vented-caps/',
   '/pages/order-tracking': '/account/',
-  '/pages/southland-organics-rewards': '/',
+  '/pages/southland-organics-rewards': '/rewards/',
   '/pages/sale': '/',
   '/pages/hydroseeding': '/hydroseeders/',
   // Team bios — redirect to existing /team/* pages or /about/ fallback

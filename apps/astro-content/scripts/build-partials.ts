@@ -140,7 +140,7 @@ const baseColumns =
             { label: 'Contact', href: '/contact/' },
             { label: 'Find a Dealer', href: '/store-locator/' },
             { label: 'Distribution', href: '/distribution/' },
-            { label: 'Rewards Program', href: '/pages/southland-organics-rewards' },
+            { label: 'Rewards Program', href: '/rewards/' },
           ],
         },
       ]

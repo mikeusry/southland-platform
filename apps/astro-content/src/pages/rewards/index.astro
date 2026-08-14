@@ -19,7 +19,7 @@ const rewardsSchema = {
   '@type': 'WebPage',
   name: 'Southland Rewards | Loyalty Program',
   description:
-    'Earn points on every order. Redeem for discounts, free shipping, and VIP perks. Join Southland Rewards today.',
+    'Earn points on every order. Redeem for dollar-off discounts and VIP perks. Join Southland Rewards today.',
   url: `${siteUrl}/rewards/`,
   mainEntity: {
     '@type': 'Organization',
@@ -58,13 +58,12 @@ const FALLBACK = {
     { key: 'silver', label: 'Silver', qualifying_spend: 500, earn_multiplier: 1.25 },
     { key: 'gold', label: 'Gold', qualifying_spend: 1500, earn_multiplier: 1.5 },
   ],
+  // Last-known-good 2026-08-14 — Smile 5% rungs. Do not resurrect the 1% catalog.
   rewards: [
-    { name: '$5 Off', points_required: 500, minimum_purchase: 25, min_tier: 'bronze' },
-    { name: 'Free Shipping', points_required: 750, minimum_purchase: null, min_tier: 'bronze' },
-    { name: '$10 Off', points_required: 1000, minimum_purchase: 50, min_tier: 'bronze' },
-    { name: '10% Off', points_required: 1500, minimum_purchase: 50, min_tier: 'silver' },
-    { name: '15% Off', points_required: 2000, minimum_purchase: 75, min_tier: 'gold' },
-    { name: '$25 Off', points_required: 2500, minimum_purchase: 100, min_tier: 'silver' },
+    { name: '$10 Off', points_required: 200, minimum_purchase: 25, min_tier: 'bronze' },
+    { name: '$15 Off', points_required: 300, minimum_purchase: 30, min_tier: 'bronze' },
+    { name: '$20 Off', points_required: 400, minimum_purchase: 40, min_tier: 'bronze' },
+    { name: '$25 Off', points_required: 500, minimum_purchase: 50, min_tier: 'bronze' },
   ],
   referral: { referrer_points: 500, referee_discount: 10 },
 }
@@ -116,7 +115,7 @@ const faqs = [
   },
   {
     q: 'Do points expire?',
-    a: 'Points are valid as long as your account is active with at least one purchase per year.',
+    a: 'No. Points do not expire.',
   },
   {
     q: 'What are the tiers?',
@@ -128,7 +127,7 @@ const faqs = [
   },
   {
     q: 'Can I use rewards with other discounts?',
-    a: 'One discount code per order. Rewards codes cannot be combined with other promotions.',
+    a: 'Yes. Reward discounts can be used on sale prices. One reward code per order.',
   },
   {
     q: 'How do I check my points balance?',
@@ -139,7 +138,7 @@ const faqs = [
 
 <BaseLayout
   title="Southland Rewards | Earn Points on Every Order"
-  description="Earn points on every order. Redeem for discounts, free shipping, and VIP perks. Join the Southland Rewards loyalty program today."
+  description="Earn points on every order. Redeem for dollar-off discounts and VIP perks. Join the Southland Rewards loyalty program today."
   ogImage={buildSouthlandUrl('heroes/Farm_Athens_GA_7_jbdjik', {
     width: 1200,
     height: 630,
@@ -162,7 +161,7 @@ const faqs = [
         Southland Rewards
       </h1>
       <p class="mx-auto max-w-3xl text-lg text-white/80 md:text-xl">
-        Earn points on every order. Redeem for discounts, free shipping, and VIP perks.
+        Earn points on every order. Redeem for dollar-off discounts and VIP perks.
       </p>
       <div class="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
         <a href={shopUrl} class="btn-primary inline-flex items-center gap-2 px-8 py-3 text-lg">
@@ -277,7 +276,7 @@ const faqs = [
           </p>
           <h3 class="mb-2 text-xl text-shopify-title">Redeem</h3>
           <p class="text-sm text-shopify-secondary-text">
-            Cash in points for discounts, free shipping, and exclusive perks.
+            Cash in points for dollar-off discounts.
           </p>
         </div>
       </div>
@@ -366,8 +365,7 @@ const faqs = [
         </p>
         <h2 class="mb-4 font-heading text-3xl md:text-4xl">Redeem Your Points</h2>
         <p class="mx-auto mb-12 max-w-2xl text-shopify-secondary-text">
-          Choose from discounts, free shipping, and tier-exclusive perks. Unlock more rewards as you
-          level up.
+          Four dollar-off rewards, starting at 200 points. Every member can redeem at Bronze.
         </p>
       </div>
 
@@ -560,8 +558,8 @@ const faqs = [
             <tr>
               <td class="py-3 pr-4 font-medium text-shopify-title">Exclusive Rewards</td>
               <td class="px-4 py-3 text-center text-shopify-secondary-text">&mdash;</td>
-              <td class="px-4 py-3 text-center">10% Off, $25 Off</td>
-              <td class="px-4 py-3 text-center">15% Off</td>
+              <td class="px-4 py-3 text-center text-shopify-secondary-text">&mdash;</td>
+              <td class="px-4 py-3 text-center text-shopify-secondary-text">&mdash;</td>
             </tr>
           </tbody>
         </table>
