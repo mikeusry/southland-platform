@@ -56,7 +56,7 @@ function appendFlashspeedBlogRedirects() {
   return {
     name: 'append-flashspeed-blog-redirects',
     hooks: {
-      'astro:build:done': async ({ dir }) => {
+      'astro:build:done': async (/** @type {{ dir: URL }} */ { dir }) => {
         const file = join(fileURLToPath(dir), '_redirects')
         let existing = ''
         try {
