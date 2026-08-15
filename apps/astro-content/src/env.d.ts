@@ -45,4 +45,7 @@ interface Window {
 
   /** Meta Pixel */
   fbq?: (...args: any[]) => void
+
+  /** Shared PageView eventID for fbq ↔ CAPI pairing */
+  __pdPageViewEventId?: string
 }

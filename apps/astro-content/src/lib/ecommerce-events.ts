@@ -71,16 +71,25 @@ function pushToDataLayer(event: string, data: Record<string, unknown>): void {
   }
 }
 
-function pushToMeta(event: string, data: Record<string, unknown>): void {
+function nextEventId(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
+  return `xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx`.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0
+    const v = c === 'x' ? r : (r & 0x3) | 0x8
+    return v.toString(16)
+  })
+}
+
+function pushToMeta(event: string, data: Record<string, unknown>, eventID: string): void {
   if (typeof window === 'undefined' || typeof window.fbq !== 'function') return
   try {
-    window.fbq('track', event, data)
+    window.fbq('track', event, data, { eventID })
   } catch (err) {
     console.error('[analytics] pushToMeta failed:', err)
   }
 }
 
-function pushToPixel(event: string, data: Record<string, unknown>): void {
+function pushToPixel(event: string, data: Record<string, unknown>, eventID?: string): void {
   if (typeof window === 'undefined' || !window.pdPixel) return
   try {
     // Include persona if set (from DecisionEngine → localStorage)
@@ -98,6 +107,7 @@ function pushToPixel(event: string, data: Record<string, unknown>): void {
       content_type: 'ecommerce',
       ...(persona ? { persona } : {}),
       ...data,
+      ...(eventID ? { event_id: eventID } : {}),
     })
   } catch (err) {
     console.error('[analytics] pushToPixel failed:', err)
@@ -146,15 +156,24 @@ export function trackViewItem(product: ProductData, variantIndex = 0): void {
   const value = parseFloat(variant?.price.amount || '0')
   const currency = variant?.price.currencyCode || 'USD'
 
+  const eventID = nextEventId()
   pushToDataLayer('view_item', { currency, value, items: [item] })
-  pushToPixel('view_item', { currency, value, items: [item] })
-  pushToMeta('ViewContent', {
-    content_ids: [product.handle],
-    content_name: product.title,
-    content_type: 'product',
-    value,
-    currency,
-  })
+  pushToPixel(
+    'view_item',
+    { currency, value, items: [item], content_ids: [product.handle], content_name: product.title },
+    eventID
+  )
+  pushToMeta(
+    'ViewContent',
+    {
+      content_ids: [product.handle],
+      content_name: product.title,
+      content_type: 'product',
+      value,
+      currency,
+    },
+    eventID
+  )
 }
 
 /**
@@ -188,15 +207,24 @@ export function trackAddToCart(
   const value = parseFloat(variant.price.amount) * quantity
   const currency = variant.price.currencyCode || 'USD'
 
+  const eventID = nextEventId()
   pushToDataLayer('add_to_cart', { currency, value, items: [item] })
-  pushToPixel('add_to_cart', { currency, value, items: [item] })
-  pushToMeta('AddToCart', {
-    content_ids: [product.handle],
-    content_name: product.title,
-    content_type: 'product',
-    value,
-    currency,
-  })
+  pushToPixel(
+    'add_to_cart',
+    { currency, value, items: [item], content_ids: [product.handle], content_name: product.title },
+    eventID
+  )
+  pushToMeta(
+    'AddToCart',
+    {
+      content_ids: [product.handle],
+      content_name: product.title,
+      content_type: 'product',
+      value,
+      currency,
+    },
+    eventID
+  )
 }
 
 /**
@@ -233,12 +261,21 @@ export function trackBeginCheckout(
   const items = lines.map(cartLineToItem)
   const value = parseFloat(totalAmount)
 
+  const eventID = nextEventId()
   pushToDataLayer('begin_checkout', { currency, value, items })
-  pushToPixel('begin_checkout', { currency, value, item_count: items.length })
-  pushToMeta('InitiateCheckout', {
-    content_ids: items.map((i) => i.item_id),
-    num_items: items.length,
-    value,
-    currency,
-  })
+  pushToPixel(
+    'begin_checkout',
+    { currency, value, item_count: items.length, content_ids: items.map((i) => i.item_id) },
+    eventID
+  )
+  pushToMeta(
+    'InitiateCheckout',
+    {
+      content_ids: items.map((i) => i.item_id),
+      num_items: items.length,
+      value,
+      currency,
+    },
+    eventID
+  )
 }
