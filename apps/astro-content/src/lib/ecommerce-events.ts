@@ -158,14 +158,22 @@ export function trackViewItem(product: ProductData, variantIndex = 0): void {
 
   const eventID = nextEventId()
   pushToDataLayer('view_item', { currency, value, items: [item] })
-  pushToPixel('view_item', { currency, value, items: [item], content_ids: [product.handle], content_name: product.title }, eventID)
-  pushToMeta('ViewContent', {
-    content_ids: [product.handle],
-    content_name: product.title,
-    content_type: 'product',
-    value,
-    currency,
-  }, eventID)
+  pushToPixel(
+    'view_item',
+    { currency, value, items: [item], content_ids: [product.handle], content_name: product.title },
+    eventID
+  )
+  pushToMeta(
+    'ViewContent',
+    {
+      content_ids: [product.handle],
+      content_name: product.title,
+      content_type: 'product',
+      value,
+      currency,
+    },
+    eventID
+  )
 }
 
 /**
@@ -201,14 +209,22 @@ export function trackAddToCart(
 
   const eventID = nextEventId()
   pushToDataLayer('add_to_cart', { currency, value, items: [item] })
-  pushToPixel('add_to_cart', { currency, value, items: [item], content_ids: [product.handle], content_name: product.title }, eventID)
-  pushToMeta('AddToCart', {
-    content_ids: [product.handle],
-    content_name: product.title,
-    content_type: 'product',
-    value,
-    currency,
-  }, eventID)
+  pushToPixel(
+    'add_to_cart',
+    { currency, value, items: [item], content_ids: [product.handle], content_name: product.title },
+    eventID
+  )
+  pushToMeta(
+    'AddToCart',
+    {
+      content_ids: [product.handle],
+      content_name: product.title,
+      content_type: 'product',
+      value,
+      currency,
+    },
+    eventID
+  )
 }
 
 /**
@@ -247,11 +263,19 @@ export function trackBeginCheckout(
 
   const eventID = nextEventId()
   pushToDataLayer('begin_checkout', { currency, value, items })
-  pushToPixel('begin_checkout', { currency, value, item_count: items.length, content_ids: items.map((i) => i.item_id) }, eventID)
-  pushToMeta('InitiateCheckout', {
-    content_ids: items.map((i) => i.item_id),
-    num_items: items.length,
-    value,
-    currency,
-  }, eventID)
+  pushToPixel(
+    'begin_checkout',
+    { currency, value, item_count: items.length, content_ids: items.map((i) => i.item_id) },
+    eventID
+  )
+  pushToMeta(
+    'InitiateCheckout',
+    {
+      content_ids: items.map((i) => i.item_id),
+      num_items: items.length,
+      value,
+      currency,
+    },
+    eventID
+  )
 }
