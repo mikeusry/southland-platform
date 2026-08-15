@@ -208,7 +208,13 @@ const openaiAdsPixelId =
       s.parentNode.insertBefore(t,s)}(window, document,'script',
       'https://connect.facebook.net/en_US/fbevents.js');
       fbq('init', '2459921147627824');
-      fbq('track', 'PageView');
+      var pageViewEventId = (crypto.randomUUID && crypto.randomUUID()) ||
+        'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
+      window.__pdPageViewEventId = pageViewEventId;
+      fbq('track', 'PageView', {}, { eventID: pageViewEventId });
     </script>
     <noscript>
       <img height="1" width="1" style="display:none"
