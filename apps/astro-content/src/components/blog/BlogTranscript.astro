@@ -1,0 +1,22 @@
+---
+/**
+ * Collapsible full-video transcript. Content stays in the HTML so crawlers
+ * and the VideoObject schema see it even while the fold is closed.
+ */
+interface Props {
+  transcript: string
+}
+
+const { transcript } = Astro.props
+---
+
+<details class="mt-12 rounded-xl border border-gray-200 bg-gray-50 p-5">
+  <summary class="cursor-pointer text-base font-semibold text-shopify-title">
+    Full video transcript
+  </summary>
+  <div
+    class="transcript-body mt-4 max-h-[32rem] overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed text-shopify-secondary-text"
+  >
+    {transcript}
+  </div>
+</details>

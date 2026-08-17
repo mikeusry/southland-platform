@@ -4,11 +4,15 @@
  * Shows full article content with E-E-A-T author/reviewer attribution and SEO schema
  */
 
+import { existsSync, readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import BlogCard from '../../components/blog/BlogCard.astro'
 import AuthorCard from '../../components/blog/AuthorCard.astro'
+import BlogTranscript from '../../components/blog/BlogTranscript.astro'
 import { getCollection, getEntry, render } from 'astro:content'
-import { buildPersonSchema, buildOrganizationSchema } from '../../lib/schema'
+import { buildPersonSchema, buildOrganizationSchema, buildVideoObject } from '../../lib/schema'
 import { resolveEpisodeCover, buildSouthlandUrl } from '../../lib/cloudinary'
 import FirstTouchSegment from '../../components/cdp/FirstTouchSegment.astro'
 import { segmentForBlog } from '../../lib/segment-map'
@@ -172,7 +176,50 @@ const articleSchema = {
   },
   keywords: post.data.tags?.join(', '),
   wordCount,
+} as Record<string, unknown>
+
+const pageUrl = `${siteUrl}/blog/${postSlug}/`
+const transcriptFile = join(
+  dirname(fileURLToPath(import.meta.url)),
+  '../../content/blog/transcripts',
+  `${postSlug}.txt`
+)
+const videoTranscript = existsSync(transcriptFile)
+  ? readFileSync(transcriptFile, 'utf8').trim()
+  : ''
+
+const playbackIds = post.data.muxPlaybackIds || []
+const durations = post.data.videoDurationSeconds || []
+const uploadDate = new Date(post.data.publishDate).toISOString()
+const publisher = buildOrganizationSchema()
+const videoObjects = playbackIds.map((playbackId: string, i: number) =>
+  buildVideoObject({
+    name: playbackIds.length > 1 ? `${post.data.title} (Part ${i + 1})` : post.data.title,
+    description: post.data.description,
+    playbackId,
+    pageUrl,
+    id: playbackIds.length > 1 ? `${pageUrl}#video-${i + 1}` : `${pageUrl}#video`,
+    uploadDate,
+    durationSeconds: durations[i],
+    transcript: videoTranscript || undefined,
+    publisher,
+  })
+)
+if (videoObjects.length === 1) {
+  articleSchema.video = videoObjects[0]
+} else if (videoObjects.length > 1) {
+  articleSchema.video = videoObjects
 }
+
+const videoSchema =
+  videoObjects.length === 1
+    ? { '@context': 'https://schema.org', ...videoObjects[0] }
+    : videoObjects.length > 1
+      ? {
+          '@context': 'https://schema.org',
+          '@graph': videoObjects,
+        }
+      : null
 
 // BreadcrumbList schema
 const breadcrumbSchema = {
@@ -514,6 +561,11 @@ const firstTouchSegment = segmentForBlog(post.data.segment)
       <script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
     )
   }
+  {
+    videoSchema && (
+      <script is:inline type="application/ld+json" set:html={JSON.stringify(videoSchema)} />
+    )
+  }
 
   <!-- Additional video embeds (if multiple) -->
   {
@@ -550,6 +602,7 @@ const firstTouchSegment = segmentForBlog(post.data.segment)
           >
             <Content />
           </div>
+          {videoTranscript && <BlogTranscript transcript={videoTranscript} />}
         </div>
 
         <!-- Table of Contents (desktop sidebar) -->
