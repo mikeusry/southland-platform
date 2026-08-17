@@ -179,6 +179,8 @@ const blogCollection = defineCollection({
     // Video embeds (Mux playback IDs — migrated from Wistia/Gumlet)
     muxPlaybackIds: z.array(z.string()).optional().default([]),
     muxThumbnailUrl: z.string().optional(), // Custom poster for the Mux player; falls back to featuredImage then Mux auto-thumb
+    // Parallel to muxPlaybackIds — ISO duration for VideoObject schema
+    videoDurationSeconds: z.array(z.number()).optional(),
     draft: z.boolean().optional().default(false),
     // Shopify migration fields
     shopifyId: z.union([z.number(), z.string()]).optional(),
