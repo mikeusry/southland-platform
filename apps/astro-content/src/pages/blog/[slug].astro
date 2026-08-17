@@ -4,9 +4,6 @@
  * Shows full article content with E-E-A-T author/reviewer attribution and SEO schema
  */
 
-import { existsSync, readFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import BlogCard from '../../components/blog/BlogCard.astro'
 import AuthorCard from '../../components/blog/AuthorCard.astro'
@@ -179,14 +176,13 @@ const articleSchema = {
 } as Record<string, unknown>
 
 const pageUrl = `${siteUrl}/blog/${postSlug}/`
-const transcriptFile = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../content/blog/transcripts',
-  `${postSlug}.txt`
-)
-const videoTranscript = existsSync(transcriptFile)
-  ? readFileSync(transcriptFile, 'utf8').trim()
-  : ''
+const transcriptModules = import.meta.glob('../../content/blog/transcripts/*.txt', {
+  query: '?raw',
+  eager: true,
+  import: 'default',
+}) as Record<string, string>
+const transcriptKey = Object.keys(transcriptModules).find((k) => k.endsWith(`/${postSlug}.txt`))
+const videoTranscript = (transcriptKey ? transcriptModules[transcriptKey] : '').trim()
 
 const playbackIds = post.data.muxPlaybackIds || []
 const durations = post.data.videoDurationSeconds || []
