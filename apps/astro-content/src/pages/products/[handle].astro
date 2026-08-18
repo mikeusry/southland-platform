@@ -557,10 +557,7 @@ const faqSchema = shouldEmitFaqSchema
         name: item.question,
         acceptedAnswer: {
           '@type': 'Answer',
-          text: item.answer.replace(
-            /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
-            '$1 ($2)',
-          ),
+          text: item.answer.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '$1 ($2)'),
         },
       })),
     }
