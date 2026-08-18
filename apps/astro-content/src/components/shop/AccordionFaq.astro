@@ -16,13 +16,10 @@ const { items, persona, class: className = '' } = Astro.props
 
 /** Escape HTML, then turn `[label](https://…)` into a real link. Other markup stays text. */
 function faqAnswerHtml(text: string): string {
-  const escaped = text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
+  const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   return escaped.replace(
     /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
-    '<a href="$2" class="underline underline-offset-2 hover:text-gray-900">$1</a>',
+    '<a href="$2" class="underline underline-offset-2 hover:text-gray-900">$1</a>'
   )
 }
 
@@ -62,7 +59,10 @@ const chevronAccent =
           </svg>
         </summary>
         <div class="accordion-content overflow-hidden">
-          <p class="pb-5 pr-12 text-sm leading-relaxed text-gray-600" set:html={faqAnswerHtml(item.answer)} />
+          <p
+            class="pb-5 pr-12 text-sm leading-relaxed text-gray-600"
+            set:html={faqAnswerHtml(item.answer)}
+          />
         </div>
       </details>
     ))
