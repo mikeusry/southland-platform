@@ -43,8 +43,12 @@ const fullOgImage = ogImage.startsWith('http') ? ogImage : new URL(ogImage, site
 const pixelBrandId = import.meta.env.PUBLIC_PIXEL_BRAND_ID || 'southland';
 const pixelEndpoint = import.meta.env.PUBLIC_PIXEL_ENDPOINT || 'https://pixel.southlandorganics.com/collect';
 
-// GTM config
-const gtmContainerId = import.meta.env.PUBLIC_GTM_CONTAINER_ID;
+// GTM — same container Shopify checkout already runs (GTM-KT63MW).
+// Hardcoded fallback: CI never passed PUBLIC_GTM_CONTAINER_ID, so production
+// Astro baked an empty string and the storefront shipped with no Google tag.
+// The ID is public (it is in page source on shop.southlandorganics.com).
+const gtmContainerId =
+  import.meta.env.PUBLIC_GTM_CONTAINER_ID || 'GTM-KT63MW';
 
 // OpenAI Ads (ChatGPT Ads) pixel — provisioned 2026-06-03 from ads.openai.com Conversions tab.
 // Hardcoded fallback because the pixel ID is public (browser-side) and the env var

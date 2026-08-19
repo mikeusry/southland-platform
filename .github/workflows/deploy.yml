@@ -51,6 +51,7 @@ jobs:
           PUBLIC_SHOPIFY_STOREFRONT_TOKEN: ${{ secrets.PUBLIC_SHOPIFY_STOREFRONT_TOKEN }}
           PUBLIC_CLOUDINARY_CLOUD_NAME: southland-organics
           PUBLIC_SITE_URL: https://southlandorganics.com
+          PUBLIC_GTM_CONTAINER_ID: GTM-KT63MW
           PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.PUBLIC_GOOGLE_MAPS_API_KEY }}
           # Source map upload to Sentry. If the secret isn't set, the Sentry
           # plugin disables uploads (see astro.config.mjs) and the build still
