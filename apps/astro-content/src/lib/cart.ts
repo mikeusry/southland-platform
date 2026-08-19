@@ -120,6 +120,7 @@ function getAttributionAttrs(): Array<{ key: string; value: string }> {
       'msclid',
       'ttclid',
       'srsltid',
+      'oppref', // OpenAI / ChatGPT Ads click ID
     ]
     for (const param of PARAMS) {
       if (data[param]) {
@@ -157,6 +158,7 @@ function getFirstTouchAttrs(): Array<{ key: string; value: string }> {
       'fbp',
       'msclid',
       'ttclid',
+      'oppref',
     ]
     for (const param of PARAMS) {
       if (data[param]) {

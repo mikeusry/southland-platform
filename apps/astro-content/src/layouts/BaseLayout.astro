@@ -138,7 +138,7 @@ const openaiAdsPixelId =
       (function(){
         'use strict';
         var KEY='_pd_attribution';
-        var PARAMS=['utm_source','utm_medium','utm_campaign','utm_content','utm_term','gclid','fbclid','msclid','ttclid','srsltid'];
+        var PARAMS=['utm_source','utm_medium','utm_campaign','utm_content','utm_term','gclid','fbclid','msclid','ttclid','srsltid','oppref'];
         try{
           var url=new URL(window.location.href);
           var found={},hasNew=false;
@@ -156,6 +156,21 @@ const openaiAdsPixelId =
           var ck=function(n){var m=document.cookie.match(new RegExp('(?:^|; )'+n+'=([^;]*)'));return m?decodeURIComponent(m[1]):''};
           var fbp=ck('_fbp');
           if(fbp){found.fbp=fbp;hasNew=true}
+          // OpenAI / ChatGPT Ads click id. Prefer the URL param; oaiq also sets
+          // __oppref. Cookie may be missing on first paint — retry once.
+          if(!found.oppref){var fromOai=ck('__oppref');if(fromOai){found.oppref=fromOai;hasNew=true}}
+          if(found.oppref&&!found.utm_source){found.utm_source='chatgpt';found.utm_medium=found.utm_medium||'ppc';hasNew=true}
+          window.setTimeout(function(){
+            var later=ck('__oppref');
+            if(!later)return;
+            var cur={};
+            try{cur=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+            if(cur.oppref)return;
+            cur.oppref=later;
+            if(!cur.utm_source){cur.utm_source='chatgpt';cur.utm_medium=cur.utm_medium||'ppc'}
+            cur._timestamp=Date.now();
+            try{localStorage.setItem(KEY,JSON.stringify(cur))}catch(e){}
+          },1500);
           var stored={};try{stored=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
           // Expire stale last-touch attribution across a session gap. The merge below
           // exists to backfill the async _fbp cookie WITHIN a session, but without
@@ -180,12 +195,15 @@ const openaiAdsPixelId =
         try{
           if(localStorage.getItem(FT_KEY))return;
           var url=new URL(window.location.href);
-          var PARAMS=['utm_source','utm_medium','utm_campaign','gclid','fbclid','msclid','ttclid','srsltid'];
+          var PARAMS=['utm_source','utm_medium','utm_campaign','gclid','fbclid','msclid','ttclid','srsltid','oppref'];
           var data={};
           PARAMS.forEach(function(p){var v=url.searchParams.get(p);if(v)data[p]=v});
           if(data.srsltid&&!data.utm_source){data.utm_source='google';data.utm_medium=data.utm_medium||'cpc';data.utm_campaign=data.utm_campaign||(window.__pdPmaxCampaign?window.__pdPmaxCampaign(url.pathname):'pmax')}
           if(data.gclid&&!data.utm_source){data.utm_source='google';data.utm_medium=data.utm_medium||'cpc'}
           if(data.fbclid&&!data.utm_source){data.utm_source='facebook';data.utm_medium=data.utm_medium||'paid_social'}
+          var ck=function(n){var m=document.cookie.match(new RegExp('(?:^|; )'+n+'=([^;]*)'));return m?decodeURIComponent(m[1]):''};
+          if(!data.oppref){var fromOai=ck('__oppref');if(fromOai)data.oppref=fromOai}
+          if(data.oppref&&!data.utm_source){data.utm_source='chatgpt';data.utm_medium=data.utm_medium||'ppc'}
           data._timestamp=Date.now();data._landing_page=url.pathname+url.search;data._referrer=document.referrer||'';
           try{localStorage.setItem(FT_KEY,JSON.stringify(data))}catch(e){}
         }catch(e){}
@@ -199,7 +217,7 @@ const openaiAdsPixelId =
         endpoint: pixelEndpoint
       };
     </script>
-    <script src="https://cdn.point.dog/pixel/pd-pixel.min.js?v=2.4.1" async></script>
+    <script src="https://cdn.point.dog/pixel/pd-pixel.min.js?v=2.4.2" async></script>
 
     <!-- Meta Pixel -->
     <script is:inline>
