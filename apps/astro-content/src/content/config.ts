@@ -469,6 +469,11 @@ const productsCollection = defineCollection({
     // --- Dosing (only for complex application products) ---
     dosingInstructions: z.string().optional(),
     applicationMethod: z.string().optional(),
+    // Buy-box facts — shown next to Add to cart so mix rate / safety / coverage
+    // are visible without scrolling. Max 4 short lines.
+    buyBoxSpecs: z.array(z.string()).optional().default([]),
+    // Shown under the size/variant picker (e.g. "All sizes are concentrate").
+    buyBoxSizeNote: z.string().optional(),
 
     // --- Proof ---
     proofStats: z
