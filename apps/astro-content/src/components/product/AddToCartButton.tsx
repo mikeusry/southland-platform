@@ -17,6 +17,8 @@ interface Props {
   productTitle: string
   productVendor?: string
   productType?: string
+  /** Clarifies what the size chips mean (concentrate vs RTU, dose, etc.) */
+  sizeNote?: string
 }
 
 function formatPrice(money: Money): string {
@@ -32,6 +34,7 @@ export default function AddToCartButton({
   productTitle,
   productVendor,
   productType,
+  sizeNote,
 }: Props) {
   const [selectedVariantId, setSelectedVariantId] = useState(
     variants.find((v) => v.availableForSale)?.id ?? variants[0]?.id ?? ''
@@ -115,6 +118,7 @@ export default function AddToCartButton({
 
   return (
     <div className="space-y-4">
+      {sizeNote && !hasMultipleVariants && <p className="text-xs text-gray-600">{sizeNote}</p>}
       {/* Variant selector */}
       {hasMultipleVariants && (
         <div className="space-y-3">
@@ -122,6 +126,7 @@ export default function AddToCartButton({
             // Single option dimension — render as buttons
             <div>
               <label className="block text-sm font-medium text-gray-700">{optionNames[0]}</label>
+              {sizeNote && <p className="mt-1 text-xs text-gray-600">{sizeNote}</p>}
               <div className="mt-2 flex flex-wrap gap-2">
                 {variants.map((variant) => {
                   const optionValue = variant.selectedOptions.find(
@@ -156,6 +161,7 @@ export default function AddToCartButton({
               <label htmlFor="variant-select" className="block text-sm font-medium text-gray-700">
                 Option
               </label>
+              {sizeNote && <p className="mt-1 text-xs text-gray-600">{sizeNote}</p>}
               <select
                 id="variant-select"
                 value={selectedVariantId}

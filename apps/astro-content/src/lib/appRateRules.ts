@@ -315,24 +315,24 @@ export const PRODUCTS: ProductConfig[] = [
     handle: 'torched-all-natural-weed-killer',
     name: 'Torched',
     segment: 'lawn',
-    applicationMethod: 'Spray bottle (RTU) or pump sprayer (concentrate)',
+    applicationMethod: 'Mix concentrate in a pump sprayer (8-10 oz per gallon)',
     useCases: [
       {
         id: 'concentrate',
         label: 'Concentrate (pump sprayer)',
-        description: 'Mix 4-6 oz per gallon of water',
+        description: 'Mix 8-10 oz per gallon of water',
         scope: 'single_application',
       },
     ],
     rates: [
       {
         useCase: 'concentrate',
-        rate: 5,
+        rate: 9,
         rateUnit: 'oz',
         perArea: 1,
         perAreaUnit: 'sqft', // per gallon of spray mix — area input = gallons
-        rateMin: 4,
-        rateMax: 6,
+        rateMin: 8,
+        rateMax: 10,
         frequency: 'Reapply after 7-10 days for stubborn weeds',
         notes:
           'Apply on dry, sunny day. Avoid drift onto desirable plants. Needs 2-4 hours dry time.',

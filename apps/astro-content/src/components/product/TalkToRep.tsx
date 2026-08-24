@@ -14,12 +14,15 @@ interface TalkToRepProps {
   productHandle: string
   /** Whether this is a commercial/B2B product page */
   isCommercial?: boolean
+  /** Button label. Default is honest — this opens a human, not the mix-rate box. */
+  buttonLabel?: string
 }
 
 export default function TalkToRep({
   productName,
   productHandle,
   isCommercial = false,
+  buttonLabel = 'Still stuck? Ask us',
 }: TalkToRepProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -103,7 +106,7 @@ export default function TalkToRep({
             d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
           />
         </svg>
-        Get Application Help
+        {buttonLabel}
       </button>
     )
   }

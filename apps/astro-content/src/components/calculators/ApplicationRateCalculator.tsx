@@ -41,12 +41,19 @@ const UNIT_LABELS: Record<Unit, string> = {
 // COMPONENT
 // =============================================================================
 
-export default function ApplicationRateCalculator() {
-  const [segment, setSegment] = useState<Segment>('lawn')
-  const [productHandle, setProductHandle] = useState('')
-  const [useCaseId, setUseCaseId] = useState('')
+export default function ApplicationRateCalculator({
+  initialProductHandle,
+}: {
+  initialProductHandle?: string
+} = {}) {
+  const seeded = initialProductHandle
+    ? PRODUCTS.find((p) => p.handle === initialProductHandle)
+    : undefined
+  const [segment, setSegment] = useState<Segment>(seeded?.segment ?? 'lawn')
+  const [productHandle, setProductHandle] = useState(seeded?.handle ?? '')
+  const [useCaseId, setUseCaseId] = useState(seeded?.useCases[0]?.id ?? '')
   const [area, setArea] = useState<number>(0)
-  const [unit, setUnit] = useState<Unit>('sqft')
+  const [unit, setUnit] = useState<Unit>(seeded?.defaultUnit ?? 'sqft')
   const [onHand, setOnHand] = useState<number>(0)
   const [showOnHand, setShowOnHand] = useState(false)
   const [activePreset, setActivePreset] = useState<string | null>(null)
@@ -181,28 +188,29 @@ export default function ApplicationRateCalculator() {
       {/* ─── INPUT PANEL ─── */}
       <div className="lg:col-span-2">
         <div className="space-y-6">
-          {/* Segment Cards */}
-          <div className="grid grid-cols-3 gap-3">
-            {SEGMENTS.map((seg) => (
-              <button
-                key={seg.id}
-                type="button"
-                onClick={() => handleSegmentChange(seg.id)}
-                className={`rounded-lg border p-3 text-center transition-colors ${
-                  segment === seg.id
-                    ? 'border-[#2C5234] bg-[#2C5234] text-white'
-                    : 'border-gray-200 bg-white text-gray-700 hover:border-[#44883E]'
-                }`}
-              >
-                <p className="text-sm font-semibold">{seg.label}</p>
-                <p
-                  className={`mt-0.5 text-xs ${segment === seg.id ? 'text-green-100' : 'text-gray-400'}`}
+          {!initialProductHandle && (
+            <div className="grid grid-cols-3 gap-3">
+              {SEGMENTS.map((seg) => (
+                <button
+                  key={seg.id}
+                  type="button"
+                  onClick={() => handleSegmentChange(seg.id)}
+                  className={`rounded-lg border p-3 text-center transition-colors ${
+                    segment === seg.id
+                      ? 'border-[#2C5234] bg-[#2C5234] text-white'
+                      : 'border-gray-200 bg-white text-gray-700 hover:border-[#44883E]'
+                  }`}
                 >
-                  {getProductsBySegment(seg.id).length} products
-                </p>
-              </button>
-            ))}
-          </div>
+                  <p className="text-sm font-semibold">{seg.label}</p>
+                  <p
+                    className={`mt-0.5 text-xs ${segment === seg.id ? 'text-green-100' : 'text-gray-400'}`}
+                  >
+                    {getProductsBySegment(seg.id).length} products
+                  </p>
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Form Card */}
           <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">

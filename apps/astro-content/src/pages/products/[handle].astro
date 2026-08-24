@@ -24,6 +24,8 @@ import { isValidPersonaId, type PersonaId } from '../../lib/persona'
 import FirstTouchSegment from '../../components/cdp/FirstTouchSegment.astro'
 import { segmentForProduct } from '../../lib/segment-map'
 import TalkToRep from '../../components/product/TalkToRep'
+import ApplicationRateCalculator from '../../components/calculators/ApplicationRateCalculator'
+import { PRODUCTS } from '../../lib/appRateRules'
 import { fetchProductReviews, fetchAllAggregates } from '../../lib/reviews'
 import type { KlaviyoReview } from '../../lib/reviews'
 import { getServerEnv } from '../../lib/server-env'
@@ -103,6 +105,23 @@ if (tinaProduct) {
   TinaContent = rendered.Content
 }
 const tina = tinaProduct?.data ?? null
+
+const buyBoxSpecs: string[] = (
+  tina?.buyBoxSpecs && tina.buyBoxSpecs.length > 0
+    ? tina.buyBoxSpecs
+    : [
+        tina?.applicationMethod,
+        ...(tina?.dosingInstructions
+          ? tina.dosingInstructions
+              .split('\n')
+              .map((line) => line.replace(/^[•\-\s]+/, '').trim())
+              .filter((line) => line.length > 12 && line.length < 140)
+              .slice(0, 3)
+          : []),
+      ].filter((line): line is string => !!line)
+).slice(0, 4)
+
+const hasAppRateCalc = PRODUCTS.some((p) => p.handle === product.handle)
 
 // ── Reviewer (E-E-A-T attribution) ─────────────────────────────────────────
 let reviewer: {
@@ -773,6 +792,7 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
               productTitle={product.title}
               productVendor={product.vendor}
               productType={product.productType}
+              sizeNote={tina?.buyBoxSizeNote}
             />
           </div>
 
@@ -830,6 +850,49 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
             </span>
           </div>
 
+          {
+            buyBoxSpecs.length > 0 && (
+              <ul class="mt-5 space-y-2 rounded-lg border border-[#2C5234]/15 bg-[#F8FAF8] p-4">
+                {buyBoxSpecs.map((spec) => (
+                  <li class="flex items-start gap-2 text-sm text-[#191D21]">
+                    <svg
+                      class="mt-0.5 h-4 w-4 flex-shrink-0 text-[#44883E]"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                    <span>{spec}</span>
+                  </li>
+                ))}
+              </ul>
+            )
+          }
+
+          <div class="mt-4 flex flex-col gap-2">
+            {
+              (tina?.dosingInstructions || hasAppRateCalc) && (
+                <a
+                  href={hasAppRateCalc ? '#calculator' : '#application'}
+                  class="flex w-full items-center justify-center gap-2 rounded-md bg-[#44883E] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#2C5234]"
+                >
+                  How to use / how much I need
+                </a>
+              )
+            }
+            <TalkToRep
+              client:load
+              productName={tina?.name ?? product.title}
+              productHandle={product.handle}
+              isCommercial={tina?.segment === 'poultry'}
+              buttonLabel="Still stuck? Ask us"
+            />
+          </div>
+
           {/* Case builder upsell — gallon products only */}
           {
             hasGallonVariant && (
@@ -873,36 +936,6 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
                     </svg>
                   </div>
                 </div>
-              </a>
-            )
-          }
-
-          {/* Talk to a Rep — inline form */}
-          <div class="mt-4">
-            <TalkToRep
-              client:load
-              productName={tina?.name ?? product.title}
-              productHandle={product.handle}
-              isCommercial={tina?.segment === 'poultry'}
-            />
-          </div>
-
-          {/* Calculate How Much I Need */}
-          {
-            tina?.dosingInstructions && (
-              <a
-                href={`/application-rate-calculator/?product=${product.handle}`}
-                class="mt-3 flex w-full items-center justify-center gap-2 rounded-md bg-gray-100 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 hover:text-[#2C5234]"
-              >
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                  />
-                </svg>
-                Calculate How Much I Need
               </a>
             )
           }
@@ -1143,7 +1176,10 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
 
             {/* Dosing / Application */}
             {tina?.dosingInstructions && (
-              <div class="mt-8 rounded-xl border border-green-200 bg-green-50 p-6">
+              <div
+                id="application"
+                class="mt-8 scroll-mt-24 rounded-xl border border-green-200 bg-green-50 p-6"
+              >
                 <h3 class="font-heading text-lg text-brand-green-dark">
                   {tina.applicationMethod
                     ? `Application: ${tina.applicationMethod}`
@@ -1153,7 +1189,11 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
                   {tina.dosingInstructions}
                 </p>
                 <a
-                  href={`/application-rate-calculator/?product=${product.handle}`}
+                  href={
+                    hasAppRateCalc
+                      ? '#calculator'
+                      : `/application-rate-calculator/?product=${product.handle}`
+                  }
                   class="mt-4 inline-flex items-center gap-2 rounded-md bg-brand-green-dark px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-800"
                 >
                   <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1190,6 +1230,37 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
             </div>
           </section>
         )
+      )
+    }
+
+    {
+      hasAppRateCalc && (
+        <section
+          id="calculator"
+          class="scroll-mt-24 border-t border-gray-100 bg-[#F8FAF8] py-8 md:py-12"
+          data-section="pdp-apprate"
+        >
+          <div class="mx-auto max-w-3xl px-4">
+            <h2 class="font-heading text-2xl text-gray-900">How much do I need?</h2>
+            <p class="mt-2 text-sm text-gray-600">
+              Stays on this page. Enter your area and get a mix rate for {displayTitle}.
+            </p>
+            <div class="mt-6">
+              <ApplicationRateCalculator client:load initialProductHandle={product.handle} />
+            </div>
+          </div>
+        </section>
+      )
+    }
+
+    {
+      faqItems.length > 0 && (
+        <section class="border-t border-gray-100 bg-gray-50 py-8 md:py-12" data-section="pdp-faq">
+          <div class="mx-auto max-w-3xl px-4">
+            <h2 class="mb-6 font-heading text-2xl text-gray-900">Frequently Asked Questions</h2>
+            <AccordionFaq items={faqItems} persona={segment ?? inferredSegment} />
+          </div>
+        </section>
       )
     }
 
@@ -1498,18 +1569,6 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
         update()
       })()
     </script>
-
-    {/* S6: FAQ — conditional */}
-    {
-      faqItems.length > 0 && (
-        <section class="border-t border-gray-100 bg-gray-50 py-8 md:py-12" data-section="pdp-faq">
-          <div class="mx-auto max-w-3xl px-4">
-            <h2 class="mb-6 font-heading text-2xl text-gray-900">Frequently Asked Questions</h2>
-            <AccordionFaq items={faqItems} persona={segment ?? inferredSegment} />
-          </div>
-        </section>
-      )
-    }
 
     {/* S7: RELATED PRODUCTS + CROSS-LINKS — always */}
     {
