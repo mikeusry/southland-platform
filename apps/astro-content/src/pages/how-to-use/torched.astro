@@ -1,0 +1,548 @@
+---
+/**
+ * /how-to-use/torched/ — Torched handbook
+ *
+ * The person who has the bottle. Not a spec. The $90 fear, the brown, the
+ * green, and why the five-star and the one-star wrote the same sentence.
+ *
+ * 🛑 Mix rates are read from torched.mdx `dosingInstructions`. Do not retype
+ * ounces in the prose as the source of truth. Anchor ids are live in emails —
+ * do not rename them.
+ */
+import { getCollection } from 'astro:content'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import Breadcrumbs from '../../components/shared/Breadcrumbs.astro'
+import CloudinaryHero from '../../components/CloudinaryHero.astro'
+import StarRating from '../../components/product/StarRating.astro'
+import { buildCloudinaryUrl, buildSouthlandUrl } from '../../lib/cloudinary'
+
+export const prerender = true
+
+const products = await getCollection('products')
+const torched = products.find((p) => p.data.shopifyHandle === 'torched-all-natural-weed-killer')
+
+if (!torched?.data.dosingInstructions) {
+  throw new Error('Torched handbook: dosingInstructions missing from content/products/torched.mdx')
+}
+
+const dosing = torched.data.dosingInstructions
+const muxPlaybackId = torched.data.muxPlaybackId ?? 'qrxyFtXf6q4fAzJw3wdww00LDdYeXVPaP3YCU15qLKxg'
+const videoTitle = torched.data.videoTitle ?? 'Torched Weed Killer'
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+const canonicalUrl = `${siteUrl}/how-to-use/torched/`
+
+const mikePhoto = buildSouthlandUrl('Southland Website/team/MIKE_Usry', {
+  width: 320,
+  height: 320,
+  crop: 'fill',
+  gravity: 'face',
+  quality: 'auto',
+  format: 'auto',
+})
+
+const kidAndDog = buildCloudinaryUrl('Spray Squad/Site Images/flea_tick_Boy_hyhgg8', {
+  width: 800,
+  quality: 'auto',
+  format: 'auto',
+})
+
+const beforeAfter =
+  'https://res.cloudinary.com/southland-organics/image/upload/f_auto,fl_lossy,q_auto/v1679179689/Blog%20Images/Before_and_after_Torched_natural_weed_killer_jtri7m.png'
+const broadleaf =
+  'https://res.cloudinary.com/southland-organics/image/upload/f_auto,fl_lossy,q_auto/v1679179684/Blog%20Images/Broadleaf_weeds_pqilr5.png'
+const jug =
+  'https://res.cloudinary.com/southland-organics/image/upload/f_auto,fl_lossy,q_auto/v1679179682/Blog%20Images/Torched_natural_weed_killers_lsgsmb.png'
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name: 'How to use Torched weed killer',
+  description: 'What happens after you spray Torched — the brown, the green, and the second pass.',
+  url: canonicalUrl,
+}
+
+const nav = [
+  { href: '#what-youll-see', label: 'What you will see' },
+  { href: '#mix', label: 'Mix' },
+  { href: '#came-back-green', label: 'It came back green' },
+  { href: '#season', label: 'The year' },
+  { href: '#what-good-looks-like', label: 'When it works' },
+] as const
+---
+
+<BaseLayout
+  title="You sprayed. The weeds browned. Then they came back green."
+  description="That is how Torched works. The five-star people and the one-star people saw the same thing. Here is what to do with the bottle in your hand."
+  canonicalUrl={canonicalUrl}
+  schema={schema}
+>
+  <CloudinaryHero
+    publicId="Spray Squad/Site Images/family_frknoe"
+    alt="Kids running in the yard while the family eats outside"
+    height={620}
+    minHeight="520px"
+    overlay="dark"
+    overlayOpacity={72}
+    gravity="west"
+    contentAlign="center"
+    contentJustify="start"
+    priority={true}
+  >
+    <div class="mx-auto w-full max-w-6xl px-4 pb-12 pt-8 md:pt-16">
+      <Breadcrumbs
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'How to Use', href: '/how-to-use/' },
+          { label: 'Torched' },
+        ]}
+        class="mb-6 [&_*]:text-sm [&_a]:text-white/80 [&_span]:text-white/60"
+      />
+      <p class="text-sm font-semibold uppercase tracking-wider text-green-300">
+        For the person holding the jug
+      </p>
+      <h1
+        class="mt-3 max-w-4xl font-heading text-4xl uppercase leading-tight text-white md:text-5xl lg:text-6xl"
+      >
+        You bought this so the kids could play in the yard.
+      </h1>
+      <p class="mt-6 max-w-2xl text-xl leading-relaxed text-green-100">
+        Then the weeds browned in an afternoon and turned green again in a week. That is not the
+        bottle dying on you. That is a plant spending what it stored. Come back.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a
+          href="#what-youll-see"
+          class="rounded-lg bg-[#44883E] px-6 py-3.5 font-semibold text-white transition-colors hover:bg-green-700"
+        >
+          Show me the week
+        </a>
+        <a
+          href="tel:800-608-3755"
+          class="rounded-lg border-2 border-white/30 px-6 py-3.5 font-semibold text-white transition-colors hover:bg-white/10"
+        >
+          I would rather call
+        </a>
+      </div>
+    </div>
+  </CloudinaryHero>
+
+  <nav
+    class="sticky top-0 z-20 border-b border-gray-200 bg-white/95 backdrop-blur"
+    aria-label="On this page"
+  >
+    <div class="mx-auto flex max-w-6xl flex-wrap gap-x-6 gap-y-2 px-4 py-3 text-sm">
+      {
+        nav.map((item) => (
+          <a href={item.href} class="font-semibold text-[#2C5234] hover:text-[#44883E]">
+            {item.label}
+          </a>
+        ))
+      }
+    </div>
+  </nav>
+
+  <section class="bg-white py-16 md:py-20">
+    <div class="mx-auto max-w-6xl px-4">
+      <div class="grid items-start gap-10 lg:grid-cols-2">
+        <div>
+          <h2 class="font-heading text-3xl uppercase text-[#2C5234] md:text-4xl">
+            Same weeds. Opposite review.
+          </h2>
+          <p class="mt-5 text-lg leading-relaxed text-gray-800">
+            We read a hundred of them. The person who called it total crap for ninety dollars and
+            the person who will not let anything else on the property described the same week.
+          </p>
+          <p class="mt-4 leading-relaxed text-gray-700">
+            Leaves gone in hours. Green in twelve days. One of them had planned on coming back. One
+            of them thought they were finished, and felt cheated.
+          </p>
+          <p class="mt-4 leading-relaxed text-gray-700">
+            Torched burns what it touches. It does not ride the sap down to the root. A young weed
+            often dies in one pass. A dandelion, a thistle, the stuff in a gravel drive — that root
+            has lunch money. You take the lunch money on pass two.
+          </p>
+        </div>
+        <div class="grid gap-4">
+          <div class="rounded-xl border border-gray-200 bg-[#F8FAF8] p-6">
+            <div class="flex items-center gap-2">
+              <StarRating rating={1} size="md" showCount={false} />
+              <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">One star</p>
+            </div>
+            <p class="mt-3 text-lg text-gray-900">
+              “Kills leaves within a few hours but does not kill the plant.”
+            </p>
+          </div>
+          <div class="rounded-xl border border-[#44883E]/30 bg-white p-6 shadow-sm">
+            <div class="flex items-center gap-2">
+              <StarRating rating={5} size="md" showCount={false} />
+              <p class="text-xs font-semibold uppercase tracking-wider text-[#44883E]">
+                Five stars
+              </p>
+            </div>
+            <p class="mt-3 text-lg text-gray-900">
+              “It works on the surface leaves but not the roots of the bermuda grass invasion… and I
+              feel good about using it.”
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-[#F8FAF8] py-16 md:py-20">
+    <div class="mx-auto max-w-4xl px-4">
+      <h2 class="text-center font-heading text-3xl uppercase text-[#2C5234] md:text-4xl">
+        Watch it work
+      </h2>
+      <p class="mx-auto mt-4 max-w-2xl text-center leading-relaxed text-gray-700">
+        Thirty seconds of a leaf giving up is worth more than a paragraph. This is the product film.
+        Then keep reading — the part the film cannot show you is day eight.
+      </p>
+      <div class="mt-8 aspect-video overflow-hidden rounded-xl shadow-lg">
+        <mux-player
+          playback-id={muxPlaybackId}
+          accent-color="#44883e"
+          metadata-video-title={videoTitle}
+          default-hidden-captions
+          poster={`https://image.mux.com/${muxPlaybackId}/thumbnail.jpg?time=10`}
+          style="width:100%;height:100%;--media-object-fit:cover;"></mux-player>
+      </div>
+    </div>
+  </section>
+  <script>
+    import('@mux/mux-player').catch(function () {})
+  </script>
+
+  <section id="what-youll-see" class="scroll-mt-24 bg-white py-16 md:py-20">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="font-heading text-3xl uppercase text-[#2C5234] md:text-4xl">
+        The week, hour by hour
+      </h2>
+      <p class="mt-4 max-w-2xl text-lg leading-relaxed text-gray-700">
+        If nobody tells you this before you spray, you will stand over a brown patch on Thursday and
+        feel like a sucker on the following Thursday.
+      </p>
+
+      <div class="mt-10 grid gap-6 md:grid-cols-3">
+        <div class="rounded-xl border border-gray-200 bg-[#F8FAF8] p-8">
+          <p class="font-heading text-4xl text-[#44883E]">01</p>
+          <h3 class="mt-3 font-bold text-gray-900">The same afternoon</h3>
+          <p class="mt-3 leading-relaxed text-gray-700">
+            The top wilts. It looks dead. You will want to put the sprayer away and be done. Do not
+            be done.
+          </p>
+        </div>
+        <div class="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+          <p class="font-heading text-4xl text-[#44883E]">02</p>
+          <h3 class="mt-3 font-bold text-gray-900">A few days later</h3>
+          <p class="mt-3 leading-relaxed text-gray-700">
+            On a tough plant, a little green pushes back. That is the root spending reserves. It is
+            weaker than it was. This is the only window that matters.
+          </p>
+        </div>
+        <div class="rounded-xl border border-[#2C5234] bg-[#2C5234] p-8">
+          <p class="font-heading text-4xl text-green-300">03</p>
+          <h3 class="mt-3 font-bold text-white">Day five to seven</h3>
+          <p class="mt-3 leading-relaxed text-green-100">
+            Spray the new green. That is the kill. People who write “will buy again” did this.
+            People who write “total crap” went inside after step one.
+          </p>
+        </div>
+      </div>
+
+      <figure class="mt-12">
+        <img
+          src={beforeAfter}
+          alt="Weeds browned after Torched — the first pass, not the last"
+          class="w-full rounded-xl shadow-md"
+          loading="lazy"
+        />
+        <figcaption class="mt-3 text-sm text-gray-500">
+          This is pass one. If you stop here on a taproot, it will look like this never happened.
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="second-pass" class="scroll-mt-24 bg-[#2C5234] py-16 md:py-20">
+    <div class="mx-auto max-w-3xl px-4 text-center">
+      <h2 class="font-heading text-3xl uppercase text-white md:text-4xl">Come back in a week</h2>
+      <p class="mt-5 text-lg leading-relaxed text-green-100">
+        5–7 days. Two or three passes on a taproot is normal. We will not give you a percentage. We
+        will give you a calendar. Put it on the fridge. The plant is not smarter than a reminder.
+      </p>
+    </div>
+  </section>
+
+  <section id="mix" class="scroll-mt-24 bg-white py-16 md:py-20">
+    <div class="mx-auto grid max-w-6xl items-center gap-10 px-4 lg:grid-cols-2">
+      <div>
+        <h2 class="font-heading text-3xl uppercase text-[#2C5234] md:text-4xl">The mix</h2>
+        <p class="mt-5 text-lg leading-relaxed text-gray-800">
+          A cup of concentrate in a gallon of water. That is 8 ounces. Go to 10 if they are mean.
+          10–12 if they have been living in that crack since your last president.
+        </p>
+        <p class="mt-4 leading-relaxed text-gray-700" id="shake">
+          Shake the jug. Shake the sprayer while you walk. The oils want to sit on top of the water
+          like a bad salad dressing. If you spray that, you are watering weeds with a little
+          perfume.
+        </p>
+        <p class="mt-4 leading-relaxed text-gray-700">
+          Coat the leaf. Do not drown the ground. Flowers, beans, the rose you like — they brown if
+          you paint them. Cardboard over what you want to keep. If you miss, rinse.
+        </p>
+      </div>
+      <div>
+        <img
+          src={jug}
+          alt="Torched concentrate — shake it, then mix it"
+          class="mb-6 w-full rounded-xl shadow-md"
+          loading="lazy"
+        />
+        <div class="rounded-xl border border-gray-200 bg-[#F8FAF8] p-6">
+          <p class="text-xs font-semibold uppercase tracking-wider text-[#2C5234]">
+            From the label
+          </p>
+          <p class="mt-3 whitespace-pre-line text-sm leading-relaxed text-gray-800">{dosing}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="when" class="scroll-mt-24 bg-[#F8FAF8] py-16 md:py-20">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="font-heading text-3xl uppercase text-[#2C5234] md:text-4xl">
+        Sun. Heat. Not the shade of the barn.
+      </h2>
+      <div class="mt-10 grid gap-8 md:grid-cols-3">
+        <div>
+          <h3 class="font-bold text-gray-900">When</h3>
+          <p class="mt-3 leading-relaxed text-gray-700">
+            A bright morning, warm enough that you took your jacket off. We print “above 60°F”
+            because that is when people stop wasting a tank — an instruction, not a lab number. A
+            customer said it plainly: use it after the weather is hot and dry for at least a week.
+            Shade is a different product. Wait, or walk it into the sun.
+          </p>
+        </div>
+        <div id="rain" class="scroll-mt-24">
+          <h3 class="font-bold text-gray-900">Rain</h3>
+          <p class="mt-3 leading-relaxed text-gray-700">
+            If the sky opens before it dries, you just gave the weeds a bath. Do it again. Same if
+            it rains inside a day. We are not going to pretend we timed a storm in a lab. You have
+            eyes.
+          </p>
+        </div>
+        <div id="shade" class="scroll-mt-24">
+          <h3 class="font-bold text-gray-900">Shade</h3>
+          <p class="mt-3 leading-relaxed text-gray-700">
+            “Weeds in the shade? not so much.” That is a customer, not us. The burn wants light.
+            Move the work or give it more passes. Do not stand in the lee of the coop and decide the
+            jug is empty of magic.
+          </p>
+        </div>
+      </div>
+      <img
+        src={broadleaf}
+        alt="Broadleaf weeds in a bed — the kind of job Torched was mixed for"
+        class="mt-10 w-full rounded-xl shadow-md"
+        loading="lazy"
+      />
+    </div>
+  </section>
+
+  <section id="came-back-green" class="scroll-mt-24 bg-white py-16 md:py-20">
+    <div class="mx-auto max-w-3xl px-4">
+      <h2 class="font-heading text-3xl uppercase text-[#2C5234] md:text-4xl">It came back green</h2>
+      <p class="mt-5 text-xl leading-relaxed text-gray-800">
+        Good. You are in the middle of the job, not the end of the story.
+      </p>
+      <p class="mt-4 leading-relaxed text-gray-700">
+        If you have already sprayed three times and the drive looks greener than when you started,
+        do not throw the jug. Walk the list: did you shake it? Was it a gray day? Did it rain on the
+        first pass? Are you looking at brand-new seedlings — because Torched will not poison the
+        dirt for you, and that is the point. A living yard grows things. Spot-spray the new ones.
+      </p>
+
+      <div id="grass-vs-broadleaf" class="mt-12 scroll-mt-24 rounded-xl border border-gray-200 p-8">
+        <h3 class="font-bold text-gray-900">The grass looks like you never came</h3>
+        <p class="mt-3 leading-relaxed text-gray-700">
+          Grass wears a wax coat. A dandelion does not. Use the hardy mix from the card above and
+          plan on more than one walk. It is slower. It is not a different bottle.
+        </p>
+      </div>
+
+      <div id="water" class="mt-6 scroll-mt-24 rounded-xl bg-[#F8FAF8] p-8">
+        <h3 class="font-bold text-gray-900">You mixed it right and nothing browned</h3>
+        <p class="mt-3 leading-relaxed text-gray-700">
+          Uncommon. We see it on well water in parts of Texas and country like it — hard, high pH,
+          minerals that pick a fight with the acid in the jug. Lower the water pH. Sometimes a
+          sticker so it holds the leaf. Call us before you invent a recipe. We have not printed
+          ounces of citric or a brand of sticker, and we will not guess them onto this page.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="season" class="scroll-mt-24 bg-[#F8FAF8] py-16 md:py-20">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="font-heading text-3xl uppercase text-[#2C5234] md:text-4xl">
+        This is not a one-Saturday product
+      </h2>
+      <p class="mt-4 max-w-2xl text-lg leading-relaxed text-gray-700">
+        Nobody writes in to ask how to live with a weed killer for a year. They write in July, angry
+        about April.
+      </p>
+      <div class="mt-10 grid gap-6 md:grid-cols-3">
+        <div class="rounded-xl bg-white p-8 shadow-sm">
+          <h3 class="font-bold text-gray-900">Spring</h3>
+          <p class="mt-3 leading-relaxed text-gray-700">
+            They are young and they are moving. First pass. Put the second on the calendar before
+            you hang the sprayer up.
+          </p>
+        </div>
+        <div class="rounded-xl bg-white p-8 shadow-sm">
+          <h3 class="font-bold text-gray-900">The heat</h3>
+          <p class="mt-3 leading-relaxed text-gray-700">
+            This is when Torched looks like the pictures — and when the person who sprayed once in
+            April decides we robbed them. It is the same plant, or a new seed. Spray what is
+            standing.
+          </p>
+        </div>
+        <div class="rounded-xl bg-white p-8 shadow-sm">
+          <h3 class="font-bold text-gray-900">Fall</h3>
+          <p class="mt-3 leading-relaxed text-gray-700">
+            Last pass on what is still green. Do not wait for a bare winter. We refused to leave
+            poison in the dirt. The ground will try again. So will you.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="what-good-looks-like" class="scroll-mt-24 bg-white py-16 md:py-20">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="font-heading text-3xl uppercase text-[#2C5234] md:text-4xl">
+        What good looks like
+      </h2>
+      <p class="mt-3 text-sm text-gray-500">Customers. Not a lab. Not us writing as them.</p>
+      <div class="mt-10 grid items-center gap-8 lg:grid-cols-2">
+        <figure>
+          <img
+            src={kidAndDog}
+            alt="A boy kissing his dog in the grass — the reason the bottle exists"
+            class="w-full rounded-xl shadow-md"
+            width="640"
+            height="960"
+            loading="lazy"
+          />
+          <figcaption class="mt-3 text-sm text-gray-500">
+            This is the job. Not a brown leaf. This.
+          </figcaption>
+        </figure>
+        <div class="grid gap-6">
+          <blockquote class="rounded-xl border border-gray-200 p-8">
+            <p class="text-lg text-gray-900">
+              “I have two toddlers and a dog, so Roundup was never an option. Torched works just as
+              fast on the weeds in my driveway cracks… I don't worry about my kids playing outside
+              an hour later.”
+            </p>
+            <footer class="mt-4 text-sm font-semibold text-[#2C5234]">
+              Lisa Nguyen · Nashville
+            </footer>
+          </blockquote>
+          <blockquote class="rounded-xl border border-gray-200 p-8">
+            <p class="text-lg text-gray-900">
+              “I am a bee keeper as well as trying to practice regenerative ag. I have cattle, sheep
+              and free range chickens. Fence line maintenance with electric fencing is a nightmare
+              without some help.”
+            </p>
+            <footer class="mt-4 text-sm font-semibold text-[#2C5234]">
+              Chris R. · bees, cattle, chickens
+            </footer>
+          </blockquote>
+        </div>
+      </div>
+      <div class="mt-6 grid gap-6 md:grid-cols-2">
+        <blockquote class="rounded-xl border border-gray-200 p-8">
+          <p class="text-lg text-gray-900">
+            “It does take 1 week for a full kill and does not immediately brown the weed.”
+          </p>
+          <footer class="mt-4 text-sm text-gray-500">Customer review</footer>
+        </blockquote>
+        <blockquote class="rounded-xl border border-gray-200 p-8">
+          <p class="text-lg text-gray-900">
+            “The only weedkiller I allow to be used on our property.”
+          </p>
+          <footer class="mt-4 text-sm text-gray-500">Customer review</footer>
+        </blockquote>
+      </div>
+      <p class="mt-10 max-w-2xl leading-relaxed text-gray-700">
+        Still weighing this against a jug of 30% vinegar?
+        <a
+          href="/blog/get-rid-of-weeds-with-torched-all-natural-weed-killer/"
+          class="font-semibold text-[#44883E] hover:underline">That comparison is over here.</a
+        >
+      </p>
+    </div>
+  </section>
+
+  <section class="bg-[#F8FAF8] py-16 md:py-20">
+    <div
+      class="mx-auto flex max-w-6xl flex-col items-start gap-10 px-4 md:flex-row md:items-center"
+    >
+      <img
+        src={mikePhoto}
+        alt="Mike Usry"
+        class="h-40 w-40 shrink-0 rounded-xl object-cover shadow-md"
+        width="160"
+        height="160"
+      />
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wider text-[#44883E]">
+          The person who makes it
+        </p>
+        <h2 class="mt-2 font-heading text-3xl uppercase text-[#2C5234]">Mike Usry</h2>
+        <p class="mt-4 max-w-2xl text-lg leading-relaxed text-gray-800">
+          I have watched people spray once, see brown, and leave. I have watched the ones who came
+          back a week later keep the bottle. If you are standing in the drive unsure which one you
+          are, call. I would rather talk you through a tank than read another review that describes
+          a job half finished.
+        </p>
+        <p class="mt-3 text-sm text-gray-500">Made in the USA since 2017. We answer the phone.</p>
+      </div>
+    </div>
+  </section>
+
+  <CloudinaryHero
+    publicId="Spray Squad/Site Images/home-hero_p1bbep"
+    alt=""
+    height={420}
+    minHeight="360px"
+    overlay="dark"
+    overlayOpacity={75}
+    gravity="center"
+    contentAlign="center"
+    contentJustify="center"
+  >
+    <div class="mx-auto max-w-3xl px-4 py-16 text-center">
+      <h2 class="font-heading text-3xl uppercase text-white md:text-4xl">
+        Put the second Saturday on the calendar.
+      </h2>
+      <p class="mt-4 text-lg text-green-100">Then let the kids back on the grass when it is dry.</p>
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <a
+          href="tel:800-608-3755"
+          class="rounded-lg bg-[#44883E] px-6 py-3.5 font-semibold text-white transition-colors hover:bg-green-700"
+        >
+          Call 800-608-3755
+        </a>
+        <a
+          href="/products/torched-all-natural-weed-killer/"
+          class="rounded-lg border-2 border-white/30 px-6 py-3.5 font-semibold text-white transition-colors hover:bg-white/10"
+        >
+          The product page
+        </a>
+      </div>
+    </div>
+  </CloudinaryHero>
+</BaseLayout>

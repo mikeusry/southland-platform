@@ -18,7 +18,7 @@ const { items, persona, class: className = '' } = Astro.props
 function faqAnswerHtml(text: string): string {
   const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   return escaped.replace(
-    /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+    /\[([^\]]+)\]\((https?:\/\/[^\s)]+|\/[^\s)]+)\)/g,
     '<a href="$2" class="underline underline-offset-2 hover:text-gray-900">$1</a>'
   )
 }

@@ -81,6 +81,11 @@ const TEACHES = /how to|what is|why |overview|guide|instructions|application/i
 const teaches = (p: (typeof usable)[number]) =>
   Boolean(p.data.muxPlaybackId && TEACHES.test(p.data.videoTitle ?? ''))
 
+/** Product-specific handbooks. Index still reprints dosing; the handbook is the walk-through. */
+const HANDBOOKS: Record<string, string> = {
+  'torched-all-natural-weed-killer': '/how-to-use/torched/',
+}
+
 const withVideo = usable.filter(teaches).length
 
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
@@ -100,7 +105,9 @@ const schema = {
       '@type': 'ListItem',
       position: i + 1,
       name: p.data.name,
-      url: `${siteUrl}/products/${p.data.shopifyHandle}/`,
+      url: HANDBOOKS[p.data.shopifyHandle]
+        ? `${siteUrl}${HANDBOOKS[p.data.shopifyHandle]}`
+        : `${siteUrl}/products/${p.data.shopifyHandle}/`,
     })),
   },
 }
@@ -249,11 +256,21 @@ const schema = {
                 </p>
 
                 <div class="mt-6 flex flex-wrap gap-4 pt-2">
+                  {HANDBOOKS[p.data.shopifyHandle] ? (
+                    <a
+                      href={HANDBOOKS[p.data.shopifyHandle]}
+                      class="text-sm font-semibold text-[#44883E] hover:underline"
+                    >
+                      Handbook &rarr;
+                    </a>
+                  ) : null}
                   <a
                     href={`/products/${p.data.shopifyHandle}/`}
                     class="text-sm font-semibold text-[#44883E] hover:underline"
                   >
-                    Full directions &amp; proof &rarr;
+                    {HANDBOOKS[p.data.shopifyHandle]
+                      ? 'Product page →'
+                      : 'Full directions & proof →'}
                   </a>
                   <a
                     href={`/application-rate-calculator/?product=${p.data.shopifyHandle}`}
