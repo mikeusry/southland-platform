@@ -1,0 +1,74 @@
+---
+import LinksLayout from '../layouts/LinksLayout.astro'
+import { getLogoUrl } from '../lib/cloudinary'
+import links from '../data/links.json'
+
+const UTM = 'utm_source=instagram&utm_medium=organic_social&utm_campaign=link_in_bio'
+const logoUrl = getLogoUrl('square', { width: 200 })
+
+function withBioUtm(href: string): string {
+  const [pathAndQuery, hash] = href.split('#')
+  const sep = pathAndQuery.includes('?') ? '&' : '?'
+  return `${pathAndQuery}${sep}${UTM}${hash ? `#${hash}` : ''}`
+}
+---
+
+<LinksLayout
+  title="Links | Southland Organics"
+  description="Shop, backyard poultry, lawn care, and the Southland blog."
+>
+  <main class="min-h-screen bg-[#2C5234] px-5 py-12">
+    <div class="mx-auto w-full max-w-md text-center">
+      <img
+        src={logoUrl}
+        alt={links.logoAlt}
+        class="mx-auto mb-5 h-24 w-24 rounded-full border-2 border-[#44883E] bg-white object-contain p-2"
+      />
+      <p class="font-sans text-sm font-semibold tracking-wide text-[#44883E]">{links.handle}</p>
+      <h1 class="mt-1 font-heading text-2xl uppercase text-white">{links.name}</h1>
+      <p class="mt-2 font-sans text-sm text-white/70">{links.tagline}</p>
+
+      <nav class="mt-8 flex flex-col gap-3" aria-label="Profile links">
+        {
+          links.links.map((link) => (
+            <a
+              href={withBioUtm(link.href)}
+              class:list={[
+                'block w-full rounded-xl px-5 py-3.5 font-sans text-base font-semibold transition-colors',
+                link.primary
+                  ? 'bg-[#44883E] text-white hover:bg-[#3a7535]'
+                  : 'border-2 border-white/25 bg-white/5 text-white hover:border-[#44883E] hover:bg-white/10',
+              ]}
+            >
+              {link.label}
+            </a>
+          ))
+        }
+      </nav>
+
+      <div class="mt-8 flex items-center justify-center gap-5">
+        {
+          links.social.map((item) => (
+            <a href={item.href} class="text-white/70 hover:text-[#44883E]" aria-label={item.label}>
+              {item.platform === 'instagram' && (
+                <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3Z" />
+                </svg>
+              )}
+              {item.platform === 'facebook' && (
+                <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M22 12.07C22 6.48 17.52 2 11.93 2S1.86 6.48 1.86 12.07c0 5.02 3.66 9.18 8.44 9.93v-7.02H7.9v-2.91h2.4V9.84c0-2.38 1.42-3.69 3.6-3.69 1.04 0 2.13.19 2.13.19v2.34h-1.2c-1.18 0-1.55.73-1.55 1.48v1.78h2.64l-.42 2.91h-2.22V22c4.78-.75 8.44-4.91 8.44-9.93Z" />
+                </svg>
+              )}
+              {item.platform === 'youtube' && (
+                <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M23.5 6.2a3.02 3.02 0 0 0-2.13-2.14C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.37.46A3.02 3.02 0 0 0 .5 6.2 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.8 3.02 3.02 0 0 0 2.13 2.14C4.5 20.4 12 20.4 12 20.4s7.5 0 9.37-.46a3.02 3.02 0 0 0 2.13-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.8ZM9.75 15.57V8.43L15.84 12l-6.09 3.57Z" />
+                </svg>
+              )}
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </main>
+</LinksLayout>

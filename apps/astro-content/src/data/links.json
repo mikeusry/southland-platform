@@ -1,0 +1,50 @@
+{
+  "name": "Southland Organics",
+  "handle": "@southlandorganics",
+  "tagline": "Organic solutions for poultry, lawn, and the people who grow things.",
+  "logoAlt": "Southland Organics",
+  "links": [
+    {
+      "label": "Shop Southland",
+      "href": "/",
+      "primary": true
+    },
+    {
+      "label": "Backyard Poultry",
+      "href": "/poultry/backyard/"
+    },
+    {
+      "label": "Lawn & Garden",
+      "href": "/lawn/"
+    },
+    {
+      "label": "Southland Blog",
+      "href": "/blog/"
+    },
+    {
+      "label": "Poultry Biosecurity",
+      "href": "/blogs/poultry-biosecurity/"
+    },
+    {
+      "label": "Join the Newsletter",
+      "href": "/blog/#newsletter"
+    }
+  ],
+  "social": [
+    {
+      "platform": "instagram",
+      "label": "Instagram",
+      "href": "https://instagram.com/southlandorganics"
+    },
+    {
+      "platform": "facebook",
+      "label": "Facebook",
+      "href": "https://www.facebook.com/southlandorganics"
+    },
+    {
+      "platform": "youtube",
+      "label": "YouTube",
+      "href": "https://www.youtube.com/@Southlandorganics"
+    }
+  ]
+}
