@@ -9,6 +9,49 @@
 
 import * as Sentry from '@sentry/astro'
 
+/**
+ * GTM-KT63MW (and tags it injects) throw constantly on /blog/*:
+ * AviviD, jQuery/$, OneTrust CMP, Adoric, OpenAI oaiq + TCF.
+ * Sentry marks `/gtm.js` as in_app, so ignoreErrors/denyUrls miss most of them.
+ * We only keep events that touch our bundled code (`/_astro/` or pd-pixel).
+ */
+function isVendorNoise(event) {
+  const values = event.exception?.values || []
+  const msg = [
+    event.message,
+    ...values.map((v) => `${v.type || ''} ${v.value || ''}`),
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  const blob = `${msg} ${JSON.stringify(event.contexts || {})}`
+  if (
+    /AviviD is not defined|jQuery is not defined|\$ is not defined|gtag is not defined|serviceName is not defined|__tcfapi|getUserConsentStatusForVendor|Event `CustomEvent` \(type=unhandledrejection\)|Hydration failed/i.test(
+      blob
+    )
+  ) {
+    return true
+  }
+
+  const files = values.flatMap((v) =>
+    (v.stacktrace?.frames || []).map((f) => f.filename || f.abs_path || '')
+  )
+  if (!files.length) return false
+
+  const isOurs = (file) => /\/_astro\//.test(file) || /cdn\.point\.dog\/pixel/.test(file)
+  if (files.some(isOurs)) return false
+
+  const isVendor = (file) =>
+    !file ||
+    file === '<anonymous>' ||
+    /(?:^|\/)(?:gtm\.js|adoric\.js|otSDKStub\.js|cmp2\.js|oaiq\.min\.js)(?:\?|$)/i.test(file) ||
+    /@sentry[+/]|\/sentry\/browser/i.test(file) ||
+    /googletagmanager|onetrust|adoric|bzrcdn\.openai/i.test(file) ||
+    (/\/(blog|products|collections)\//.test(file) && !/\.(m?js|tsx?)(\?|$)/.test(file))
+
+  return files.every(isVendor)
+}
+
 Sentry.init({
   dsn: 'https://2cd735876d8ac86479ca9b7ea11b6960@o4510754307178496.ingest.us.sentry.io/4511174165856256',
 
@@ -76,6 +119,18 @@ Sentry.init({
     // Single-fire syntax errors that only come from injected/eval'd code
     'missing ) after argument list',
     'Unexpected end of input',
+    // GTM-KT63MW vendor tags (AviviD, leftover jQuery, consent). We don't
+    // ship jQuery. Stack filter in isVendorNoise is the real gate; these
+    // catch the ones Sentry attributes to <anonymous>.
+    'AviviD is not defined',
+    'jQuery is not defined',
+    '$ is not defined',
+    'gtag is not defined',
+    'serviceName is not defined',
+    'window.__tcfapi is not a function',
+    'getUserConsentStatusForVendor',
+    'Event `CustomEvent` (type=unhandledrejection)',
+    "Hydration failed - the server rendered HTML didn't match the client.",
   ],
 
   // Ignore extension URLs and Google Translate proxy
@@ -86,10 +141,17 @@ Sentry.init({
     /^moz-extension:\/\//i,
     /^safari-extension:\/\//i,
     /translate\.goog/i,
+    /\/gtm\.js/i,
+    /adoric\.js/i,
+    /otSDKStub\.js/i,
+    /\/cmp2\.js/i,
+    /oaiq\.min\.js/i,
   ],
 
   // Tag cart-related errors for easy filtering
   beforeSend(event) {
+    if (isVendorNoise(event)) return null
+
     const msg = event.exception?.values?.[0]?.value || ''
     const url = event.request?.url || ''
 
