@@ -8,8 +8,8 @@
  * Products fetched dynamically from Shopify Storefront API.
  * Copy hardcoded — will extract to TinaCMS after Betty/Taylor pages establish shared pattern.
  */
-import { createClient, getProductByHandle, getCollectionProducts } from '@southland/shopify-storefront'
-import type { Product } from '@southland/shopify-storefront'
+import { createClient, getProductByHandle } from '@southland/shopify-storefront'
+import type { Product, ProductVariant } from '@southland/shopify-storefront'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import CloudinaryHero from '../../../components/CloudinaryHero.astro'
 import AccordionFaq from '../../../components/shop/AccordionFaq.astro'
@@ -38,37 +38,32 @@ const client = createClient({
   publicAccessToken: import.meta.env.PUBLIC_SHOPIFY_STOREFRONT_TOKEN,
 })
 
-// Fetch JTBD-featured products individually (need full detail)
-const jtbdHandles = [
-  'poultry-probiotic',           // Big Ole Bird
-  'hen-helper',
-  'poultry-litter-amendment',    // Litter Life
-  'natural-mite-control-livestock-poultry', // Desecticide
+// Commercial shelf only — same SKU class as Bill PMax listing groups
+// (2.5g / cases / Catalyst 800g). No Hen Helper, no quarts, no Alpet.
+const commercialHandles = [
+  'poultry-probiotic', // Big Ole Bird
+  'poultry-litter-amendment', // Litter Life
   'catalyst-poultry-vitamin',
+  'apple-cider-vinegar-for-chickens', // Mother Load
+  'zeropoint-industrial',
 ] as const
 
-const jtbdProducts = await Promise.all(
-  jtbdHandles.map((h) => getProductByHandle(client, h))
+const commercialFetched = await Promise.all(
+  commercialHandles.map((h) => getProductByHandle(client, h))
 )
 const productMap = new Map(
-  jtbdProducts.filter(Boolean).map((p) => [p!.handle, p!])
-)
-
-// Fetch ALL products in the broiler collection for the shop grid
-const broilerCollection = await getCollectionProducts(client, 'poultry-broilers')
-
-// Filter out non-poultry products that ops mis-assigned to this collection
-const EXCLUDED_HANDLES = new Set([
-  'apple-cider-vinegar-for-pigs',
-  'torched-all-natural-weed-killer',
-])
-const allBroilerProducts: Product[] = (broilerCollection?.products ?? []).filter(
-  (p) => !EXCLUDED_HANDLES.has(p.handle)
+  commercialFetched.filter(Boolean).map((p) => [p!.handle, p!])
 )
 
 /** Helper: get product or null */
 function getProduct(handle: string) {
   return productMap.get(handle) ?? null
+}
+
+function commercialProduct(handle: string): Product | null {
+  const product = getProduct(handle)
+  if (!product || !commercialFromAmount(product)) return null
+  return product
 }
 
 /** Helper: format price from Shopify Money */
@@ -77,6 +72,38 @@ function formatPrice(amount: string) {
   return num % 1 === 0 ? `$${num}` : `$${num.toFixed(2)}`
 }
 
+/** True for house-scale packs (2.5g, cases, 800g bag). False for quart / 1-gallon / sprayer. */
+function isCommercialSize(variant: ProductVariant): boolean {
+  const blob = `${variant.title} ${variant.selectedOptions.map((o) => o.value).join(' ')}`.toLowerCase()
+  if (/quart|\b8\s*oz\b|32\s*oz|sprayer/.test(blob)) return false
+  if (/4\s*x\s*1|4x1/.test(blob)) return true
+  if (/\b1\s*-?\s*gallon\b/.test(blob) && !/[24]\s*x/.test(blob)) return false
+  return /2\.5|2\s*x\s*2\.5|2x2\.5|case|800\s*g/.test(blob)
+}
+
+function commercialFromAmount(product: Product): string | null {
+  const pack = product.variants
+    .filter((v) => isCommercialSize(v))
+    .sort((a, b) => Number(a.price.amount) - Number(b.price.amount))[0]
+  return pack?.price.amount ?? null
+}
+
+const commercialShelfSpec = [
+  { handle: 'poultry-probiotic', bestFor: 'Gut health, FCR, livability' },
+  { handle: 'poultry-litter-amendment', bestFor: 'House ammonia and reused litter' },
+  { handle: 'catalyst-poultry-vitamin', bestFor: 'Placement, heat, and stress weeks' },
+  { handle: 'apple-cider-vinegar-for-chickens', bestFor: 'Water acidifier at house scale' },
+  { handle: 'zeropoint-industrial', bestFor: 'Water lines and between-flock reset' },
+] as const
+
+const commercialShelf = commercialShelfSpec.flatMap(({ handle, bestFor }) => {
+  const product = productMap.get(handle)
+  if (!product) return []
+  const fromAmount = commercialFromAmount(product)
+  if (!fromAmount) return []
+  return [{ product, fromAmount, bestFor }]
+})
+
 // ── JTBD data ───────────────────────────────────────────────────────────────
 const jobs = [
   {
@@ -84,7 +111,9 @@ const jobs = [
     struggle:
       'Mortality creeping up, FCR slipping, and every 0.1% costs real money.',
     bestFor: 'Growers fighting mortality or inconsistent flock performance',
-    products: [getProduct('poultry-probiotic'), getProduct('hen-helper')].filter(Boolean),
+    products: [commercialProduct('poultry-probiotic'), commercialProduct('catalyst-poultry-vitamin')].filter(
+      (p): p is Product => p !== null
+    ),
     proof: '6.2% mortality reduction',
     proofSource: 'UGA Study, C. Stephen Roney DVM',
     recommended: true,
@@ -93,9 +122,11 @@ const jobs = [
   {
     title: 'Cut ammonia and litter stress.',
     struggle:
-      'Ammonia burns paws, darkling beetles spread disease, litter costs keep climbing.',
-    bestFor: 'Houses with paw scores, beetle pressure, or reused litter',
-    products: [getProduct('poultry-litter-amendment'), getProduct('natural-mite-control-livestock-poultry')].filter(Boolean),
+      'Ammonia burns paws, reused litter gets worse each flock, and every point on the paw score shows up at settlement.',
+    bestFor: 'Houses with paw scores or reused litter',
+    products: [commercialProduct('poultry-litter-amendment'), commercialProduct('zeropoint-industrial')].filter(
+      (p): p is Product => p !== null
+    ),
     proof: 'Ammonia reduction within 48 hours',
     proofSource: 'Grower field reports',
     recommended: false,
@@ -106,7 +137,9 @@ const jobs = [
     struggle:
       "Placement week. Summer heat. The 14 days between 'looks fine' and 'we've got a problem.'",
     bestFor: 'High-stress periods — placement, heat, or transition flocks',
-    products: [getProduct('catalyst-poultry-vitamin'), getProduct('poultry-probiotic')].filter(Boolean),
+    products: [commercialProduct('catalyst-poultry-vitamin'), commercialProduct('poultry-probiotic')].filter(
+      (p): p is Product => p !== null
+    ),
     proof: '7-point FCR improvement, +0.4 lb in 38 days',
     proofSource: 'UGA Study, 2018',
     recommended: false,
@@ -240,7 +273,7 @@ const reviewAggregates = await fetchAllAggregates(getServerEnv(Astro.locals, 'KL
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
-            Shop Broiler Products
+            Shop house packs
           </a>
           <a
             href="#proof"
@@ -437,7 +470,7 @@ const reviewAggregates = await fetchAllAggregates(getServerEnv(Astro.locals, 'KL
       </p>
       <p class="mb-12 text-center">
         <a href="#broiler-products" class="inline-flex items-center gap-1 text-sm font-medium text-green-700 hover:text-green-600 hover:underline">
-          Skip to all broiler products
+          Skip to commercial sizes
           <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
@@ -495,7 +528,7 @@ const reviewAggregates = await fetchAllAggregates(getServerEnv(Astro.locals, 'KL
                       {product!.title.includes('|') ? product!.title.split('|')[0].trim() : product!.title}
                     </div>
                     <div class="text-sm text-green-700">
-                      From {formatPrice(product!.priceRange.minVariantPrice.amount)}
+                      From {formatPrice(commercialFromAmount(product)!)}
                     </div>
                   </div>
                   <svg class="h-4 w-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -529,10 +562,10 @@ const reviewAggregates = await fetchAllAggregates(getServerEnv(Astro.locals, 'KL
   <section id="broiler-products" class="bg-white py-16 md:py-20">
     <div class="mx-auto max-w-6xl px-4">
       <h2 class="mb-4 text-center font-heading text-3xl uppercase md:text-4xl" style="color: var(--color-title);">
-        Shop the Broiler System
+        Shop the house program
       </h2>
       <p class="mx-auto mb-6 max-w-2xl text-center text-gray-600">
-        Everything on this shelf exists to do one of the three jobs above. Start with one product or run the full system.
+        2.5-gallon and cases — the sizes that belong in a house, not a coop. Start with one product or run the full system.
       </p>
 
       <!-- System vs Individual callout -->
@@ -563,19 +596,26 @@ const reviewAggregates = await fetchAllAggregates(getServerEnv(Astro.locals, 'KL
         </div>
       </div>
 
-      {allBroilerProducts.length > 0 ? (
-        <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
-          {allBroilerProducts.map((product) => (
-            <CollectionProductCard product={product} persona="bill" reviewAggregate={reviewAggregates.get(product.id) ?? null} />
+      {commercialShelf.length > 0 ? (
+        <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-5">
+          {commercialShelf.map(({ product, fromAmount, bestFor }) => (
+            <CollectionProductCard
+              product={product}
+              persona="bill"
+              priceOverride={`From ${formatPrice(fromAmount)}`}
+              bestForOverride={bestFor}
+              hideDescription
+              reviewAggregate={reviewAggregates.get(product.id) ?? null}
+            />
           ))}
         </div>
       ) : (
         <div class="text-center">
           <a
-            href="/poultry/commercial/#products"
+            href="tel:800-608-3755"
             class="inline-flex items-center gap-2 rounded-lg bg-[#44883E] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#44883E]/85"
           >
-            Browse All Broiler Products
+            Call Allen for house-pack pricing
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>
@@ -620,9 +660,9 @@ const reviewAggregates = await fetchAllAggregates(getServerEnv(Astro.locals, 'KL
           <div class="mt-0.5 text-xs text-green-200/70">UGA Study, 2018</div>
         </div>
         <div class="text-center">
-          <div class="text-3xl font-bold text-green-300 md:text-4xl">10.97x</div>
-          <div class="mt-1 text-sm font-medium text-white">ROAS on Big Ole Bird</div>
-          <div class="mt-0.5 text-xs text-green-200/70">Customer data</div>
+          <div class="text-3xl font-bold text-green-300 md:text-4xl">Zero</div>
+          <div class="mt-1 text-sm font-medium text-white">Withdrawal period</div>
+          <div class="mt-0.5 text-xs text-green-200/70">Integrator-friendly</div>
         </div>
         <div class="text-center">
           <div class="text-3xl font-bold text-green-300 md:text-4xl">2009</div>
