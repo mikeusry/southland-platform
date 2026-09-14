@@ -112,16 +112,12 @@ const openaiAdsPixelId =
     <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
     <noscript><link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" /></noscript>
 
-    <!-- PMax srsltid → real campaign inference (shared by both capture blocks) -->
+    <!-- Paid Shopping path → campaign fill when srsltid AND gclid, campaign empty -->
     <script is:inline>
-      // Google Shopping/PMax clicks often land with only ?srsltid= and no utm_*.
-      // The fallback below used to stamp the generic 'pmax', collapsing Torched /
-      // Lawn&Garden / Poultry PMax into one bucket (which Nexus then defaults to
-      // Torched). Infer the real campaign from the landing path so per-campaign
-      // Pulse attribution is correct. Returns a slug pulse-pattern-matrix.py's
-      // UTM_TO_CAMPAIGN_NAME already knows: torched-pmax | lawn-garden-pmax |
-      // poultry-pmax. Falls back to 'pmax' (still resolves to Torched downstream —
-      // no regression) when the path is ambiguous. Slugs mirror segment-map.ts.
+      // Used only for paid Shopping (srsltid + gclid) when the URL has no
+      // utm_campaign. Listing clicks (srsltid, no gclid) must NOT call this —
+      // they are not a PMax campaign. Returns a slug Pulse already knows:
+      // torched-pmax | lawn-garden-pmax | poultry-pmax. Ambiguous path → 'pmax'.
       window.__pdPmaxCampaign=function(path){
         var p=(path||'').toLowerCase();
         // Torched is its own PMax campaign (weed killer), distinct from L&G.
@@ -143,7 +139,13 @@ const openaiAdsPixelId =
           var url=new URL(window.location.href);
           var found={},hasNew=false;
           PARAMS.forEach(function(p){var v=url.searchParams.get(p);if(v){found[p]=v;hasNew=true}});
-          if(found.srsltid&&!found.utm_source){found.utm_source='google';found.utm_medium=found.utm_medium||'cpc';found.utm_campaign=found.utm_campaign||window.__pdPmaxCampaign(url.pathname)}
+          // Listing vs paid Shopping. srsltid with no gclid is a Merchant Center
+          // listing — force the honest floor even if the feed already put
+          // utm_source=google or a PMax name on the URL. Do not path-guess.
+          // Other-network click ids on this same URL win (same guard as Nexus).
+          var otherPaid=found.fbclid||found.msclid||found.ttclid||found.oppref;
+          if(found.srsltid&&!found.gclid&&!otherPaid){found.utm_source='google';found.utm_medium='shopping_unattributed';found.utm_campaign='shopping-unattributed'}
+          else if(found.srsltid&&found.gclid&&!found.utm_campaign){found.utm_source=found.utm_source||'google';found.utm_medium=found.utm_medium||'cpc';found.utm_campaign=window.__pdPmaxCampaign(url.pathname)}
           if(found.gclid&&!found.utm_source){found.utm_source='google';found.utm_medium=found.utm_medium||'cpc'}
           if(found.fbclid&&!found.utm_source){found.utm_source='facebook';found.utm_medium=found.utm_medium||'paid_social'}
           // Read the real _fbp cookie set by the Meta Pixel (fbq init below). This
@@ -198,7 +200,12 @@ const openaiAdsPixelId =
           var PARAMS=['utm_source','utm_medium','utm_campaign','gclid','fbclid','msclid','ttclid','srsltid','oppref'];
           var data={};
           PARAMS.forEach(function(p){var v=url.searchParams.get(p);if(v)data[p]=v});
-          if(data.srsltid&&!data.utm_source){data.utm_source='google';data.utm_medium=data.utm_medium||'cpc';data.utm_campaign=data.utm_campaign||(window.__pdPmaxCampaign?window.__pdPmaxCampaign(url.pathname):'pmax')}
+          // Same listing-vs-paid rule as last-touch. First-touch is write-once;
+          // Nexus does not rewrite ft_utm_*. Missing this block leaves a fake
+          // PMax on _pd_first_touch forever for new visitors.
+          var ftOtherPaid=data.fbclid||data.msclid||data.ttclid||data.oppref;
+          if(data.srsltid&&!data.gclid&&!ftOtherPaid){data.utm_source='google';data.utm_medium='shopping_unattributed';data.utm_campaign='shopping-unattributed'}
+          else if(data.srsltid&&data.gclid&&!data.utm_campaign){data.utm_source=data.utm_source||'google';data.utm_medium=data.utm_medium||'cpc';data.utm_campaign=window.__pdPmaxCampaign?window.__pdPmaxCampaign(url.pathname):'pmax'}
           if(data.gclid&&!data.utm_source){data.utm_source='google';data.utm_medium=data.utm_medium||'cpc'}
           if(data.fbclid&&!data.utm_source){data.utm_source='facebook';data.utm_medium=data.utm_medium||'paid_social'}
           var ck=function(n){var m=document.cookie.match(new RegExp('(?:^|; )'+n+'=([^;]*)'));return m?decodeURIComponent(m[1]):''};
