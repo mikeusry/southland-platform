@@ -653,28 +653,7 @@ const distributionSchema = {
 </style>
 
 <script>
-  // --- Attribution capture (runs on page load) ---
-  ;(function captureAttribution() {
-    const params = new URLSearchParams(window.location.search)
-    const keys = ['gclid', 'utm_source', 'utm_medium', 'utm_campaign'] as const
-    keys.forEach((k) => {
-      const v = params.get(k)
-      if (v) sessionStorage.setItem('sl_' + k, v)
-    })
-    if (!sessionStorage.getItem('sl_landing_page')) {
-      sessionStorage.setItem('sl_landing_page', window.location.pathname)
-    }
-  })()
-
-  function getAttribution() {
-    return {
-      gclid: sessionStorage.getItem('sl_gclid') || null,
-      utm_source: sessionStorage.getItem('sl_utm_source') || null,
-      utm_medium: sessionStorage.getItem('sl_utm_medium') || null,
-      utm_campaign: sessionStorage.getItem('sl_utm_campaign') || null,
-      landing_page: sessionStorage.getItem('sl_landing_page') || null,
-    }
-  }
+  import { getAttribution } from '../../lib/leadCapture'
 
   const NEXUS_API = 'https://nexus.southlandorganics.com/api/leads'
 

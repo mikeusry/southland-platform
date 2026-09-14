@@ -47,7 +47,46 @@ export interface Attribution {
 // ATTRIBUTION
 // =============================================================================
 
-/** Collect attribution from sessionStorage + localStorage fallback */
+/** Same floor as Nexus purchase upload — do not stamp junk. */
+function isValidGclid(gclid: unknown): gclid is string {
+  if (typeof gclid !== 'string' || !gclid) return false
+  if (gclid.length < 30 || gclid.length > 200) return false
+  return /^[A-Za-z0-9_-]+$/.test(gclid)
+}
+
+type PdAttr = Record<string, unknown>
+
+function readPdAttribution(): PdAttr {
+  try {
+    const raw = localStorage.getItem('_pd_attribution')
+    return raw ? (JSON.parse(raw) as PdAttr) : {}
+  } catch {
+    return {}
+  }
+}
+
+/** Persist this-page URL params. Does not invent a gclid from srsltid. */
+function captureUrlIntoSession(): void {
+  const params = new URLSearchParams(window.location.search)
+  for (const k of ['gclid', 'utm_source', 'utm_medium', 'utm_campaign'] as const) {
+    const v = params.get(k)
+    if (v) sessionStorage.setItem(`sl_${k}`, v)
+  }
+  if (!sessionStorage.getItem('sl_landing_page')) {
+    const fromPd = str(readPdAttribution()._landing_page)
+    sessionStorage.setItem('sl_landing_page', fromPd || window.location.pathname)
+  }
+}
+
+function str(v: unknown): string | null {
+  return typeof v === 'string' && v ? v : null
+}
+
+/**
+ * Click + UTMs for a Nexus lead.
+ * URL on this page, then sl_* session, then BaseLayout `_pd_attribution`.
+ * Listing clicks (srsltid, no gclid) do not get a fake gclid.
+ */
 export function getAttribution(): Attribution {
   if (typeof window === 'undefined') {
     return {
@@ -59,24 +98,25 @@ export function getAttribution(): Attribution {
     }
   }
 
-  const gclid =
-    sessionStorage.getItem('sl_gclid') ||
-    (() => {
-      try {
-        const raw = localStorage.getItem('_pd_attribution')
-        return raw ? JSON.parse(raw).gclid : null
-      } catch {
-        return null
-      }
-    })() ||
-    null
+  captureUrlIntoSession()
+  const pd = readPdAttribution()
+  const gclid = [sessionStorage.getItem('sl_gclid'), pd.gclid].find(isValidGclid) ?? null
+  const listingOnly =
+    !gclid &&
+    (pd.utm_campaign === 'shopping-unattributed' || pd.utm_medium === 'shopping_unattributed')
+
+  const utm = (key: 'utm_source' | 'utm_medium' | 'utm_campaign') =>
+    sessionStorage.getItem(`sl_${key}`) || (listingOnly ? null : str(pd[key]))
 
   return {
     gclid,
-    utm_source: sessionStorage.getItem('sl_utm_source') || null,
-    utm_medium: sessionStorage.getItem('sl_utm_medium') || null,
-    utm_campaign: sessionStorage.getItem('sl_utm_campaign') || null,
-    landing_page: sessionStorage.getItem('sl_landing_page') || window.location.pathname,
+    utm_source: utm('utm_source'),
+    utm_medium: utm('utm_medium'),
+    utm_campaign: utm('utm_campaign'),
+    landing_page:
+      sessionStorage.getItem('sl_landing_page') ||
+      str(pd._landing_page) ||
+      window.location.pathname,
   }
 }
 

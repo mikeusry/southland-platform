@@ -10,6 +10,7 @@ import {
   SUN_OPTIONS,
 } from '../../lib/erosionControlRules'
 import { calculateResult, formatWeight } from '../../lib/erosionControlUtils'
+import { getAttribution } from '../../lib/leadCapture'
 
 // Recommended products that don't yet have Shopify PDPs — route to contact form
 // instead of a 404. Remove a slug here once the product ships in Shopify.
@@ -471,24 +472,7 @@ export default function ErosionControlCalculator() {
                   const goalLabel =
                     GOAL_OPTIONS.find((o) => o.value === inputs.goal)?.label ?? inputs.goal
 
-                  const attribution = {
-                    gclid:
-                      sessionStorage.getItem('sl_gclid') ||
-                      (() => {
-                        try {
-                          const raw = localStorage.getItem('_pd_attribution')
-                          return raw ? JSON.parse(raw).gclid : null
-                        } catch {
-                          return null
-                        }
-                      })() ||
-                      null,
-                    utm_source: sessionStorage.getItem('sl_utm_source') || null,
-                    utm_medium: sessionStorage.getItem('sl_utm_medium') || null,
-                    utm_campaign: sessionStorage.getItem('sl_utm_campaign') || null,
-                    landing_page:
-                      sessionStorage.getItem('sl_landing_page') || window.location.pathname,
-                  }
+                  const attribution = getAttribution()
 
                   // Fire-and-forget POST to Nexus
                   fetch('https://nexus.southlandorganics.com/api/leads', {
