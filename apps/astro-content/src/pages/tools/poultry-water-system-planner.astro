@@ -1,0 +1,118 @@
+---
+/**
+ * /tools/poultry-water-system-planner/
+ * Decision router for poultry water lines / cool cells — no disease diagnosis.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import PoultryWaterPlannerIsland from '../../components/calculators/PoultryWaterPlanner'
+
+const title = 'Poultry Water-System Planner | Southland Organics'
+const description =
+  'Answer four questions about your poultry water system and get the next guides and product docs to open. No disease diagnosis. Label rules stay on the product page.'
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+const canonicalUrl = `${siteUrl}/tools/poultry-water-system-planner/`
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'Poultry Water-System Planner',
+  description,
+  url: canonicalUrl,
+  applicationCategory: 'UtilityApplication',
+  operatingSystem: 'Web Browser',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  provider: {
+    '@type': 'Organization',
+    name: 'Southland Organics',
+    url: siteUrl,
+    telephone: '+1-800-608-3755',
+  },
+}
+---
+
+<BaseLayout title={title} description={description} canonicalUrl={canonicalUrl} schema={schema}>
+  <section class="bg-[#2C5234] py-16 text-white">
+    <div class="mx-auto max-w-4xl px-4 text-center">
+      <h1 class="font-heading text-3xl uppercase tracking-wide md:text-4xl">
+        Poultry Water-System Planner
+      </h1>
+      <p class="mx-auto mt-4 max-w-2xl text-lg text-green-100">
+        Map drinker lines, cool cells, timing, and your main concern — then open the right guide and
+        documentation. We do not diagnose disease here.
+      </p>
+    </div>
+  </section>
+
+  <section class="py-12">
+    <div class="mx-auto max-w-3xl px-4">
+      <PoultryWaterPlannerIsland client:load />
+    </div>
+  </section>
+
+  <section class="bg-gray-50 py-12">
+    <div class="mx-auto max-w-4xl px-4">
+      <h2 class="mb-8 text-center font-heading text-2xl uppercase text-[#2C5234]">
+        Keep These Jobs Separate
+      </h2>
+      <div class="grid gap-6 md:grid-cols-3">
+        <div class="rounded-lg bg-white p-6 shadow-sm">
+          <h3 class="font-heading text-sm uppercase text-[#2C5234]">Cleaning / maintenance</h3>
+          <p class="mt-2 text-sm text-gray-600">
+            Organic load and routine line care. Start with the process guide, then the product
+            label.
+          </p>
+        </div>
+        <div class="rounded-lg bg-white p-6 shadow-sm">
+          <h3 class="font-heading text-sm uppercase text-[#2C5234]">Disinfection claims</h3>
+          <p class="mt-2 text-sm text-gray-600">
+            Only where the EPA label supports them. Do not stretch a cleaner into animal-health
+            language.
+          </p>
+        </div>
+        <div class="rounded-lg bg-white p-6 shadow-sm">
+          <h3 class="font-heading text-sm uppercase text-[#2C5234]">Equipment limits</h3>
+          <p class="mt-2 text-sm text-gray-600">
+            Contact time and concentration that damage seals or regulators are a fail — follow the
+            label.
+          </p>
+        </div>
+      </div>
+      <p class="mt-8 text-center text-sm">
+        <a href="/blog/poultry-water-line-biofilm-and-cleaning-hub/" class="font-semibold text-[#44883E]"
+          >Evidence hub →</a
+        >
+        ·
+        <a href="/products/zeropoint-industrial/" class="font-semibold text-[#44883E]"
+          >ZeroPoint PDP →</a
+        >
+        ·
+        <a href="/contact/" class="font-semibold text-[#44883E]">Dealer / support →</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="bg-[#2C5234] py-12 text-white">
+    <div class="mx-auto max-w-3xl px-4 text-center">
+      <h2 class="font-heading text-2xl uppercase">Need a human?</h2>
+      <p class="mx-auto mt-3 max-w-xl text-green-100">
+        If your water system is outside the planner paths — or you need label clarification — call
+        before you invent a protocol.
+      </p>
+      <div class="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+        <a
+          href="/products/zeropoint-industrial/"
+          class="rounded-md bg-white px-6 py-3 text-sm font-semibold text-[#2C5234] hover:bg-green-50"
+        >
+          ZeroPoint product page
+        </a>
+        <a
+          href="tel:800-608-3755"
+          class="rounded-md border border-white/30 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10"
+        >
+          800-608-3755
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

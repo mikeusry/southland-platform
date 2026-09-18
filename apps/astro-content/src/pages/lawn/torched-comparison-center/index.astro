@@ -1,0 +1,231 @@
+---
+/**
+ * /lawn/torched-comparison-center/
+ * Claim-safe Torched decision + demo hub. No glyphosate efficacy win. Not USDA Organic.
+ * Mix rates stay on the label / handbook — not retyped here.
+ */
+import { getCollection } from 'astro:content'
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import Breadcrumbs from '../../../components/shared/Breadcrumbs.astro'
+
+export const prerender = true
+
+const products = await getCollection('products')
+const torched = products.find((p) => p.data.shopifyHandle === 'torched-all-natural-weed-killer')
+const muxPlaybackId = torched?.data.muxPlaybackId ?? 'qrxyFtXf6q4fAzJw3wdww00LDdYeXVPaP3YCU15qLKxg'
+const videoTitle = torched?.data.videoTitle ?? 'Torched Weed Killer'
+
+const title = 'Torched Comparison & Demo Center | Southland Organics'
+const description =
+  'Contact weed control realism for Torched: how it compares to vinegar, what it is not, demo video, handbook, and product docs. No glyphosate kill-rate claims. Not USDA Organic.'
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+const canonicalUrl = `${siteUrl}/lawn/torched-comparison-center/`
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: 'Torched Comparison & Demo Center',
+  description,
+  url: canonicalUrl,
+  about: {
+    '@type': 'Product',
+    name: 'Torched All-Natural Weed Killer',
+    url: `${siteUrl}/products/torched-all-natural-weed-killer/`,
+  },
+  provider: {
+    '@type': 'Organization',
+    name: 'Southland Organics',
+    url: siteUrl,
+    telephone: '+1-800-608-3755',
+  },
+}
+
+const comparisons = [
+  {
+    topic: 'Vs grocery / horticultural vinegar',
+    allowed:
+      'Same job class: contact burn-down, not systemic. Grocery vinegar is usually too weak. Horticultural vinegar is harsh to handle. Torched is clove and mint oil plus soap.',
+    offLimits: 'We do not claim a kill-rate win over vinegar.',
+    href: '/blog/get-rid-of-weeds-with-torched-all-natural-weed-killer/',
+    linkLabel: 'Full Torched vs vinegar guide →',
+  },
+  {
+    topic: 'Vs systemic herbicides',
+    allowed:
+      'Torched is a contact desiccant. It burns foliage it coats. Deep-rooted perennials often need repeat passes — that is contact control realism, not a product failure.',
+    offLimits: 'Do not position Torched as systemic. Do not invent root-kill guarantees.',
+    href: '/products/torched-all-natural-weed-killer/',
+    linkLabel: 'Product page — what “came back green” means is on the label and FAQ →',
+  },
+  {
+    topic: 'Vs glyphosate (Roundup-class)',
+    allowed:
+      'Different tools. Glyphosate is systemic and can keep ground bare longer because residue remains. Torched leaves no soil-sterilizing residue by design — living soil still grows new seeds.',
+    offLimits: 'No efficacy head-to-head win. No “as good as Roundup” language.',
+    href: '/products/torched-all-natural-weed-killer/',
+    linkLabel: 'Product FAQ on the PDP →',
+  },
+  {
+    topic: '“Organic” / certification',
+    allowed:
+      'EPA minimum-risk (FIFRA 25b exempt). “All natural” on the label is not a certification.',
+    offLimits: 'Torched is not USDA Organic. Do not imply certified-organic status.',
+    href: '/blog/get-rid-of-weeds-with-torched-all-natural-weed-killer/',
+    linkLabel: 'Certification answer in the vinegar guide →',
+  },
+] as const
+
+const nav = [
+  { href: '#demo', label: 'Demo' },
+  { href: '#compare', label: 'Compare' },
+  { href: '#limits', label: 'Limits' },
+  { href: '#next', label: 'Next step' },
+] as const
+---
+
+<BaseLayout title={title} description={description} canonicalUrl={canonicalUrl} schema={schema}>
+  <section class="bg-[#2C5234] py-16 text-white">
+    <div class="mx-auto max-w-4xl px-4">
+      <Breadcrumbs
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'Lawn', href: '/lawn/' },
+          { label: 'Torched Comparison' },
+        ]}
+        class="mb-6 [&_*]:text-sm [&_a]:text-white/80 [&_span]:text-white/60"
+      />
+      <p class="text-sm font-semibold uppercase tracking-wider text-green-300">
+        Claim-safe decision hub
+      </p>
+      <h1 class="mt-3 font-heading text-3xl uppercase tracking-wide md:text-5xl">
+        Torched Comparison & Demo Center
+      </h1>
+      <p class="mt-4 max-w-2xl text-lg text-green-100">
+        Contact control realism — what Torched is, what it is not, the demo film, and the pages to
+        open next. Mix rates stay on the label and handbook.
+      </p>
+    </div>
+  </section>
+
+  <nav
+    class="sticky top-0 z-20 border-b border-gray-200 bg-white/95 backdrop-blur"
+    aria-label="On this page"
+  >
+    <div class="mx-auto flex max-w-4xl flex-wrap gap-x-6 gap-y-2 px-4 py-3 text-sm">
+      {
+        nav.map((item) => (
+          <a href={item.href} class="font-semibold text-[#2C5234] hover:text-[#44883E]">
+            {item.label}
+          </a>
+        ))
+      }
+    </div>
+  </nav>
+
+  <section id="demo" class="scroll-mt-24 bg-[#F8FAF8] py-16">
+    <div class="mx-auto max-w-4xl px-4">
+      <h2 class="text-center font-heading text-2xl uppercase text-[#2C5234] md:text-3xl">
+        Watch Torched work
+      </h2>
+      <p class="mx-auto mt-4 max-w-2xl text-center text-gray-700">
+        Product film for <strong>Torched All-Natural Weed Killer</strong>. The film shows foliage
+        responding on contact. Mix, weather, and a second pass stay on the product page.
+      </p>
+      <div class="mt-8 aspect-video overflow-hidden rounded-xl shadow-lg">
+        <mux-player
+          playback-id={muxPlaybackId}
+          accent-color="#44883e"
+          metadata-video-title={videoTitle}
+          default-hidden-captions
+          poster={`https://image.mux.com/${muxPlaybackId}/thumbnail.jpg?time=10`}
+          style="width:100%;height:100%;--media-object-fit:cover;"></mux-player>
+      </div>
+      <p class="mt-4 text-center text-sm text-gray-500">
+        <a href="/products/torched-all-natural-weed-killer/" class="font-semibold text-[#44883E]"
+          >Torched product page →</a
+        >
+      </p>
+    </div>
+  </section>
+  <script>
+    import('@mux/mux-player').catch(function () {})
+  </script>
+
+  <section id="compare" class="scroll-mt-24 bg-white py-16">
+    <div class="mx-auto max-w-4xl px-4">
+      <h2 class="mb-8 text-center font-heading text-2xl uppercase text-[#2C5234] md:text-3xl">
+        Honest comparisons
+      </h2>
+      <div class="space-y-6">
+        {
+          comparisons.map((row) => (
+            <article class="rounded-lg border border-gray-200 p-6">
+              <h3 class="font-heading text-lg uppercase text-[#2C5234]">{row.topic}</h3>
+              <p class="mt-3 text-sm leading-relaxed text-gray-700">{row.allowed}</p>
+              <p class="mt-2 text-sm font-medium text-red-800/80">Off-limits: {row.offLimits}</p>
+              <p class="mt-4">
+                <a href={row.href} class="text-sm font-semibold text-[#44883E]">
+                  {row.linkLabel}
+                </a>
+              </p>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section id="limits" class="scroll-mt-24 bg-gray-50 py-16">
+    <div class="mx-auto max-w-4xl px-4">
+      <h2 class="mb-6 text-center font-heading text-2xl uppercase text-[#2C5234]">
+        Hard limits (read before you buy)
+      </h2>
+      <ul class="mx-auto max-w-2xl list-disc space-y-3 pl-5 text-sm text-gray-700">
+        <li>
+          Non-selective: any green leaf it coats can burn — including grass, ornamentals, and food
+          plants. Shield what you keep.
+        </li>
+        <li>
+          Near chickens or pets: keep animals off treated surfaces until dry / as the current label
+          requires. “Natural” is not a free pass.
+        </li>
+        <li>
+          We name weeds we have data for. We will not invent Japanese knotweed, foxtail, or other
+          names without evidence.
+        </li>
+        <li>Rates, weather windows, and re-entry live on the label — copy them from there.</li>
+      </ul>
+      <p class="mt-8 text-center text-sm">
+        <a href="/tools/lawn-weed-selector/" class="font-semibold text-[#44883E]"
+          >Not sure which path? Use the lawn weed selector →</a
+        >
+      </p>
+    </div>
+  </section>
+
+  <section id="next" class="scroll-mt-24 bg-[#2C5234] py-16 text-white">
+    <div class="mx-auto max-w-3xl px-4 text-center">
+      <h2 class="font-heading text-2xl uppercase md:text-3xl">Commercial next step</h2>
+      <p class="mx-auto mt-4 max-w-xl text-green-100">
+        Open the product page for sizes, SDS path, and checkout — or call if your site is
+        chicken-heavy, HOA-constrained, or outside the named weed list.
+      </p>
+      <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <a
+          href="/products/torched-all-natural-weed-killer/"
+          class="rounded-md bg-white px-6 py-3 text-sm font-semibold text-[#2C5234] transition-colors hover:bg-green-50"
+        >
+          Torched product page
+        </a>
+        <a
+          href="/contact/"
+          class="rounded-md border border-white/30 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+        >
+          Dealer / support
+        </a>
+      </div>
+      <p class="mt-6 text-sm text-green-200">800-608-3755</p>
+    </div>
+  </section>
+</BaseLayout>

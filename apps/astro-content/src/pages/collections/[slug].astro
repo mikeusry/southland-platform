@@ -320,6 +320,22 @@ const reviewAggregates = await fetchAllAggregates(getServerEnv(Astro.locals, 'KL
                   Not sure which product? Take the 60-second quiz
                 </a>
               )}
+              {isTurf && (
+                <a
+                  href="/tools/lawn-weed-selector/"
+                  class="inline-flex items-center gap-2 rounded-md border border-[#2C5234] bg-white px-5 py-2.5 text-sm font-semibold text-[#2C5234] transition-colors hover:bg-[#2C5234] hover:text-white"
+                >
+                  Weed product selector
+                </a>
+              )}
+              {isPoultry && (
+                <a
+                  href="/tools/poultry-water-system-planner/"
+                  class="inline-flex items-center gap-2 rounded-md bg-[#2C5234] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-green-800"
+                >
+                  Poultry water-system planner
+                </a>
+              )}
               <a
                 href="/application-rate-calculator/"
                 class="inline-flex items-center gap-2 rounded-md border border-[#2C5234] bg-white px-5 py-2.5 text-sm font-semibold text-[#2C5234] transition-colors hover:bg-[#2C5234] hover:text-white"

@@ -1,0 +1,129 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import LawnWeedSelectorIsland from '../../components/calculators/LawnWeedSelector'
+
+const title = 'Lawn & Hardscape Weed Product Selector | Southland Organics'
+const description =
+  'Choose contact vs systemic framing, surface type, and animal proximity — then open Torched guides, handbook, and product docs. Label rules stay on the label.'
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
+const canonicalUrl = `${siteUrl}/tools/lawn-weed-selector/`
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'Lawn & Hardscape Weed Product Selector',
+  description,
+  url: canonicalUrl,
+  applicationCategory: 'UtilityApplication',
+  operatingSystem: 'Web Browser',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  provider: {
+    '@type': 'Organization',
+    name: 'Southland Organics',
+    url: siteUrl,
+    telephone: '+1-800-608-3755',
+  },
+}
+---
+
+<BaseLayout title={title} description={description} canonicalUrl={canonicalUrl} schema={schema}>
+  <section class="bg-[#2C5234] py-16 text-white">
+    <div class="mx-auto max-w-4xl px-4 text-center">
+      <h1 class="font-heading text-3xl uppercase tracking-wide md:text-4xl">
+        Lawn & Hardscape Weed Selector
+      </h1>
+      <p class="mx-auto mt-4 max-w-2xl text-lg text-green-100">
+        Contact vs systemic, where the weeds are, and whether chickens or pets share the space —
+        then the right Torched pages to open.
+      </p>
+    </div>
+  </section>
+
+  <section class="bg-gray-50 py-10">
+    <div class="mx-auto max-w-4xl px-4">
+      <div class="grid gap-4 md:grid-cols-3">
+        <div class="flex items-start gap-3">
+          <span
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#2C5234] text-sm font-bold text-white"
+            >1</span
+          >
+          <div>
+            <p class="text-sm font-semibold text-gray-900">Answer four questions</p>
+            <p class="text-xs text-gray-500">Surface, approach, animals, goal</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <span
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#2C5234] text-sm font-bold text-white"
+            >2</span
+          >
+          <div>
+            <p class="text-sm font-semibold text-gray-900">Get a claim-safe path</p>
+            <p class="text-xs text-gray-500">Including honest “not Torched” outcomes</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <span
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#2C5234] text-sm font-bold text-white"
+            >3</span
+          >
+          <div>
+            <p class="text-sm font-semibold text-gray-900">Open PDP / handbook</p>
+            <p class="text-xs text-gray-500">Rates stay on the label</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-12">
+    <div class="mx-auto max-w-3xl px-4">
+      <LawnWeedSelectorIsland client:load />
+    </div>
+  </section>
+
+  <section class="bg-gray-50 py-12">
+    <div class="mx-auto max-w-4xl px-4">
+      <h2 class="mb-8 text-center font-heading text-2xl uppercase text-[#2C5234]">Related reading</h2>
+      <div class="grid gap-6 md:grid-cols-3">
+        <a href="/lawn/torched-comparison-center/" class="rounded-lg bg-white p-6 shadow-sm">
+          <h3 class="font-heading text-sm uppercase text-[#2C5234]">Torched comparison center</h3>
+          <p class="mt-2 text-sm text-gray-600">Demo film + vinegar / systemic honesty.</p>
+        </a>
+        <a href="/how-to-use/torched/" class="rounded-lg bg-white p-6 shadow-sm">
+          <h3 class="font-heading text-sm uppercase text-[#2C5234]">Torched handbook</h3>
+          <p class="mt-2 text-sm text-gray-600">What you see after you spray — mix from the label.</p>
+        </a>
+        <a href="/tools/lawn-quiz/" class="rounded-lg bg-white p-6 shadow-sm">
+          <h3 class="font-heading text-sm uppercase text-[#2C5234]">Full lawn health quiz</h3>
+          <p class="mt-2 text-sm text-gray-600">Broader turf program routing beyond weeds.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-[#2C5234] py-12 text-white">
+    <div class="mx-auto max-w-3xl px-4 text-center">
+      <h2 class="font-heading text-2xl uppercase">Ready to check the bottle?</h2>
+      <p class="mx-auto mt-3 max-w-xl text-green-100">
+        Product page for sizes and SDS path — or call if your site is chicken-heavy or outside the
+        named weed list.
+      </p>
+      <div class="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+        <a
+          href="/products/torched-all-natural-weed-killer/"
+          class="rounded-md bg-white px-6 py-3 text-sm font-semibold text-[#2C5234] hover:bg-green-50"
+        >
+          Torched product page
+        </a>
+        <a
+          href="/contact/"
+          class="rounded-md border border-white/30 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10"
+        >
+          Talk to support
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

@@ -12,16 +12,11 @@ import {
   getPersona,
   getJTBDCoverage,
   getNextBestMove,
-  PERSONAS,
 } from '../../../lib/persona-profiles'
 import { PAGE_GROUPS } from '../../../lib/site-audit-pages'
 import { getCollection } from 'astro:content'
 
-export const prerender = true
-
-export function getStaticPaths() {
-  return PERSONAS.map((p) => ({ params: { slug: p.slug } }))
-}
+export const prerender = false
 
 const { slug } = Astro.params
 const persona = getPersona(slug!)
@@ -722,7 +717,7 @@ function pipelineClass(pipeline?: string): string {
       hiddenBlogCount > 0 && (
         <div class="lineup-more">
           + {hiddenBlogCount} more blog posts not shown.{' '}
-          <a href="/admin/site-audit">View all in Site Audit</a>
+          <a href="/admin/sitemap">View all in Sitemap</a>
         </div>
       )
     }

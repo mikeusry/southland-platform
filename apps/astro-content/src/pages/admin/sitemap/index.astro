@@ -1,0 +1,41 @@
+---
+/**
+ * Southland sitemap. Rows live in the point.dog project.
+ * Mounts the shared PD Dashboard 1.0 screen.
+ */
+import AdminLayout from '../../../layouts/AdminLayout.astro'
+import SitemapScreen from '@pointdog/admin-core/components/SitemapScreen.astro'
+import { buildView, formatSiteScan, isSitemapView } from '@pointdog/admin-core'
+import { listSitemapRows, readSiteScan } from '@pointdog/admin-core/api'
+import { getServerEnv } from '../../../lib/server-env'
+
+export const prerender = false
+
+const brandId = 'southland'
+const supabaseUrl = getServerEnv(Astro.locals, 'MOTHERSHIP_SUPABASE_URL')
+const serviceKey = getServerEnv(Astro.locals, 'MOTHERSHIP_SUPABASE_SERVICE_KEY')
+
+let error: string | null = null
+const viewParam = Astro.url.searchParams.get('view')
+const view = isSitemapView(viewParam) ? viewParam : 'all'
+
+let rows: Awaited<ReturnType<typeof listSitemapRows>> = []
+if (!supabaseUrl || !serviceKey) {
+  error = 'Sitemap storage is not configured.'
+} else {
+  try {
+    rows = await listSitemapRows(supabaseUrl, serviceKey, brandId)
+  } catch (caught) {
+    error = caught instanceof Error ? caught.message : 'Could not load the sitemap'
+  }
+}
+
+const board = buildView(rows, view)
+const scan = supabaseUrl && serviceKey ? await readSiteScan(supabaseUrl, serviceKey, brandId) : { scannedAt: null, pageCount: null }
+const scanLabel = formatSiteScan(scan.scannedAt, scan.pageCount)
+---
+
+<AdminLayout title="Sitemap" activeNav="/admin/sitemap" wide>
+  {error && <p style="color: #991b1b; margin-bottom: 12px;">{error}</p>}
+  <SitemapScreen board={board} scanLabel={scanLabel} />
+</AdminLayout>

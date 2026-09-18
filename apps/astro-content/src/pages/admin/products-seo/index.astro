@@ -6,6 +6,9 @@
  * Shows SEO coverage, schema status, video, and content tier for every product.
  */
 import AdminLayout from '../../../layouts/AdminLayout.astro'
+import { getServerEnv } from '../../../lib/server-env'
+import { formatSiteScan } from '@pointdog/admin-core'
+import { readSiteScan } from '@pointdog/admin-core/api'
 import {
   createClient,
   getProductByHandle,
@@ -242,6 +245,10 @@ const sortedRows = [...rows].sort((a, b) => {
 })
 const enrichedRows = rows.filter(r => r.tier === 'enriched').sort((a, b) => a.title.localeCompare(b.title))
 const alphaRows = [...rows].sort((a, b) => a.title.localeCompare(b.title))
+const scanUrl = getServerEnv(Astro.locals, 'MOTHERSHIP_SUPABASE_URL')
+const scanKey = getServerEnv(Astro.locals, 'MOTHERSHIP_SUPABASE_SERVICE_KEY')
+const scan = scanUrl && scanKey ? await readSiteScan(scanUrl, scanKey, 'southland') : { scannedAt: null, pageCount: null }
+const scanLabel = formatSiteScan(scan.scannedAt, scan.pageCount)
 ---
 
 <AdminLayout title="Products SEO" activeNav="/admin/products-seo">
@@ -250,6 +257,7 @@ const alphaRows = [...rows].sort((a, b) => a.title.localeCompare(b.title))
   <header style="margin-bottom: 2rem;">
     <h1 style="font-family: var(--font-heading, 'Eveleth Dot', sans-serif); font-size: 1.75rem; color: var(--text, #191d21); margin: 0;">Products SEO Dashboard</h1>
     <p style="color: var(--text-muted, #686363); margin-top: 0.25rem;">{total} products from Shopify Storefront API &bull; Cross-referenced with {allTinaProducts.length} TinaCMS entries</p>
+    <p style="color: var(--text-muted, #686363); margin-top: 0.25rem;">{scanLabel}</p>
   </header>
 
   {fetchError ? (
