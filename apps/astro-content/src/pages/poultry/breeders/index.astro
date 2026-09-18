@@ -100,6 +100,7 @@ const jobs = [
     products: [getProduct('poultry-probiotic'), getProduct('apple-cider-vinegar-for-chickens'), getProduct('hen-helper')].filter(Boolean),
     proof: '6.2% mortality reduction in poultry',
     proofSource: 'UGA Study, C. Stephen Roney DVM',
+    proofUrl: '/blog/big-ole-bird-performance-study-results/',
     recommended: true,
     icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>`,
   },
@@ -122,6 +123,7 @@ const jobs = [
     products: [getProduct('catalyst-poultry-vitamin'), getProduct('poultry-probiotic')].filter(Boolean),
     proof: '7-point FCR improvement, +0.4 lb in 38 days',
     proofSource: 'UGA Study, 2018',
+    proofUrl: '/blog/big-ole-bird-poultry-probiotics-performance-study-results/',
     recommended: false,
     icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>`,
   },
@@ -524,7 +526,16 @@ const reviewAggregates = await fetchAllAggregates(getServerEnv(Astro.locals, 'KL
                 </svg>
                 <div>
                   <span class="text-sm font-semibold text-green-700">{job.proof}</span>
-                  <span class="block text-xs text-gray-500">{job.proofSource}</span>
+                  {job.proofUrl ? (
+                    <a
+                      href={job.proofUrl}
+                      class="block text-xs text-green-700 underline decoration-green-700/30 underline-offset-2 transition-colors hover:decoration-green-700"
+                    >
+                      {job.proofSource} &rarr;
+                    </a>
+                  ) : (
+                    <span class="block text-xs text-gray-500">{job.proofSource}</span>
+                  )}
                 </div>
               </div>
             </div>
