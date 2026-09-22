@@ -23,10 +23,7 @@ interface Props {
   initialVariantId?: string | null
 }
 
-export function matchVariantId(
-  variants: ProductVariant[],
-  requested?: string | null
-): string {
+export function matchVariantId(variants: ProductVariant[], requested?: string | null): string {
   const fallback = variants.find((v) => v.availableForSale)?.id ?? variants[0]?.id ?? ''
   if (!requested) return fallback
   const needle = String(requested).replace(/^gid:\/\/shopify\/ProductVariant\//, '')
