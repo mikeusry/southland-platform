@@ -68,6 +68,15 @@ if (!product) {
   return new Response(null, { status: 404, statusText: 'Product not found' })
 }
 
+const requestedVariant = Astro.url.searchParams.get('variant')
+const matchedVariant = requestedVariant
+  ? product.variants.find((v) => {
+      const id = v.id.replace(/^gid:\/\/shopify\/ProductVariant\//, '')
+      return v.id === requestedVariant || id === requestedVariant
+    })
+  : null
+const initialImageUrl = matchedVariant?.image?.url ?? null
+
 // ── Fetch Klaviyo reviews (graceful — returns null on failure) ──────────────
 const klaviyoKey = getServerEnv(Astro.locals, 'KLAVIYO_API_KEY')
 const reviewData = await fetchProductReviews(product.id, klaviyoKey)
@@ -654,6 +663,7 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
             images={product.images}
             productTitle={product.title}
             productHandle={product.handle}
+            initialImageUrl={initialImageUrl}
           />
         </div>
 
@@ -793,6 +803,7 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
               productVendor={product.vendor}
               productType={product.productType}
               sizeNote={tina?.buyBoxSizeNote}
+              initialVariantId={requestedVariant}
             />
           </div>
 

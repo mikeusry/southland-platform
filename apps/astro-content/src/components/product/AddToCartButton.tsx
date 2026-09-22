@@ -5,7 +5,7 @@
  * and add-to-cart button. Manages its own loading/success states.
  */
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import type { ProductVariant, Money } from '@southland/shopify-storefront'
 import { addToCart } from '../../lib/cart'
 import { trackAddToCart } from '../../lib/ecommerce-events'
@@ -19,6 +19,22 @@ interface Props {
   productType?: string
   /** Clarifies what the size chips mean (concentrate vs RTU, dose, etc.) */
   sizeNote?: string
+  /** Numeric Shopify variant id from ?variant= so Shopping case clicks land on the case. */
+  initialVariantId?: string | null
+}
+
+export function matchVariantId(
+  variants: ProductVariant[],
+  requested?: string | null
+): string {
+  const fallback = variants.find((v) => v.availableForSale)?.id ?? variants[0]?.id ?? ''
+  if (!requested) return fallback
+  const needle = String(requested).replace(/^gid:\/\/shopify\/ProductVariant\//, '')
+  const match = variants.find((v) => {
+    const id = v.id.replace(/^gid:\/\/shopify\/ProductVariant\//, '')
+    return v.id === requested || id === needle
+  })
+  return match?.id ?? fallback
 }
 
 function formatPrice(money: Money): string {
@@ -35,9 +51,10 @@ export default function AddToCartButton({
   productVendor,
   productType,
   sizeNote,
+  initialVariantId,
 }: Props) {
-  const [selectedVariantId, setSelectedVariantId] = useState(
-    variants.find((v) => v.availableForSale)?.id ?? variants[0]?.id ?? ''
+  const [selectedVariantId, setSelectedVariantId] = useState(() =>
+    matchVariantId(variants, initialVariantId)
   )
   const [quantity, setQuantity] = useState(1)
   const [adding, setAdding] = useState(false)
@@ -46,6 +63,13 @@ export default function AddToCartButton({
 
   const selectedVariant = variants.find((v) => v.id === selectedVariantId)
   const isAvailable = selectedVariant?.availableForSale ?? false
+
+  useEffect(() => {
+    if (!selectedVariant?.image?.url) return
+    window.dispatchEvent(
+      new CustomEvent('pdp-variant-image', { detail: { url: selectedVariant.image.url } })
+    )
+  }, [selectedVariant?.image?.url])
 
   // Group variant options by name for selector UI
   const optionNames = Array.from(
