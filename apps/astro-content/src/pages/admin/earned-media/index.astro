@@ -1,0 +1,87 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro'
+import OpportunitiesScreen from '@pointdog/admin-core/components/OpportunitiesScreen.astro'
+import {
+  applyOpportunityAction,
+  applyOpportunityForm,
+  blankOpportunity,
+} from '@pointdog/admin-core'
+import { loadEarnedMedia, saveOpportunity } from '@pointdog/admin-core/api'
+import { getServerEnv } from '../../../lib/server-env'
+
+export const prerender = false
+
+const brandId = 'southland'
+const supabaseUrl = getServerEnv(Astro.locals, 'MOTHERSHIP_SUPABASE_URL')
+const serviceKey = getServerEnv(Astro.locals, 'MOTHERSHIP_SUPABASE_SERVICE_KEY')
+
+let error: string | null = null
+let notice: string | null = Astro.url.searchParams.get('notice')
+const selectedId = Astro.url.searchParams.get('id')
+
+if (!supabaseUrl || !serviceKey) {
+  error = 'Earned-media storage is not configured.'
+}
+
+let opportunities: Awaited<ReturnType<typeof loadEarnedMedia>>['opportunities'] = []
+let scorecard: Awaited<ReturnType<typeof loadEarnedMedia>>['scorecard'] = {
+  opportunitiesInbox: 0,
+  opportunitiesQualified: 0,
+  pitchesApproved: 0,
+  pitchesSent: 0,
+  placementsPublished: 0,
+  verifiedLinks: 0,
+  verifiedUnlinkedMentions: 0,
+  highValueCommercial: 0,
+  rejected: 0,
+  claimsBlocked: 0,
+  activeWip: 0,
+}
+
+let selected =
+  selectedId ? opportunities.find((row) => row.id === selectedId) ?? blankOpportunity(brandId, selectedId) : blankOpportunity(brandId)
+
+if (supabaseUrl && serviceKey) {
+  try {
+    if (Astro.request.method === 'POST') {
+      const data = await Astro.request.formData()
+      const loaded = await loadEarnedMedia(supabaseUrl, serviceKey, brandId)
+      const id = typeof data.get('id') === 'string' ? String(data.get('id')) : ''
+      const existing = loaded.opportunities.find((row) => row.id === id) ?? blankOpportunity(brandId, id || undefined)
+      const drafted = applyOpportunityForm(existing, data)
+      const action = typeof data.get('action') === 'string' ? String(data.get('action')) : 'save'
+      const result = applyOpportunityAction(drafted, loaded.opportunities, action)
+      opportunities = loaded.opportunities
+      scorecard = loaded.scorecard
+      selected = result.row
+      if (result.error) {
+        error = result.error
+      } else if (!result.row.title.trim() || !result.row.outletName.trim()) {
+        error = 'Title and outlet are required'
+      } else {
+        await saveOpportunity(supabaseUrl, serviceKey, result.row)
+        return Astro.redirect(`/admin/earned-media?id=${result.row.id}&notice=Saved`)
+      }
+    } else {
+      const loaded = await loadEarnedMedia(supabaseUrl, serviceKey, brandId)
+      opportunities = loaded.opportunities
+      scorecard = loaded.scorecard
+      selected = selectedId
+        ? loaded.opportunities.find((row) => row.id === selectedId) ?? blankOpportunity(brandId, selectedId)
+        : blankOpportunity(brandId)
+    }
+  } catch (caught) {
+    error = caught instanceof Error ? caught.message : 'Could not load earned media'
+  }
+}
+---
+
+<AdminLayout title="Digital PR" activeNav="/admin/earned-media" wide>
+  <OpportunitiesScreen
+    opportunities={opportunities}
+    selected={selected}
+    scorecard={scorecard}
+    error={error}
+    notice={notice}
+  />
+</AdminLayout>

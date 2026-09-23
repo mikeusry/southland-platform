@@ -1,0 +1,79 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro'
+import PlacementsScreen from '@pointdog/admin-core/components/PlacementsScreen.astro'
+import { applyPlacementAction, applyPlacementForm, blankPlacement } from '@pointdog/admin-core'
+import { loadEarnedMedia, savePlacement } from '@pointdog/admin-core/api'
+import { getServerEnv } from '../../../lib/server-env'
+
+export const prerender = false
+
+const brandId = 'southland'
+const supabaseUrl = getServerEnv(Astro.locals, 'MOTHERSHIP_SUPABASE_URL')
+const serviceKey = getServerEnv(Astro.locals, 'MOTHERSHIP_SUPABASE_SERVICE_KEY')
+
+let error: string | null = null
+let notice: string | null = Astro.url.searchParams.get('notice')
+const selectedId = Astro.url.searchParams.get('id')
+
+let opportunities: Awaited<ReturnType<typeof loadEarnedMedia>>['opportunities'] = []
+let placements: Awaited<ReturnType<typeof loadEarnedMedia>>['placements'] = []
+let scorecard: Awaited<ReturnType<typeof loadEarnedMedia>>['scorecard'] = {
+  opportunitiesInbox: 0,
+  opportunitiesQualified: 0,
+  pitchesApproved: 0,
+  pitchesSent: 0,
+  placementsPublished: 0,
+  verifiedLinks: 0,
+  verifiedUnlinkedMentions: 0,
+  highValueCommercial: 0,
+  rejected: 0,
+  claimsBlocked: 0,
+  activeWip: 0,
+}
+
+if (!supabaseUrl || !serviceKey) {
+  error = 'Earned-media storage is not configured.'
+} else {
+  try {
+    if (Astro.request.method === 'POST') {
+      const data = await Astro.request.formData()
+      const loaded = await loadEarnedMedia(supabaseUrl, serviceKey, brandId)
+      const id = typeof data.get('id') === 'string' ? String(data.get('id')) : ''
+      const existing = loaded.placements.find((row) => row.id === id) ?? blankPlacement(brandId, id || undefined)
+      const drafted = applyPlacementForm(existing, data)
+      const action = typeof data.get('action') === 'string' ? String(data.get('action')) : 'save'
+      const result = applyPlacementAction(drafted, action)
+      if (result.error) {
+        error = result.error
+        opportunities = loaded.opportunities
+        placements = loaded.placements
+        scorecard = loaded.scorecard
+      } else {
+        await savePlacement(supabaseUrl, serviceKey, result.row)
+        return Astro.redirect(`/admin/earned-media/placements?id=${result.row.id}&notice=Saved`)
+      }
+    } else {
+      const loaded = await loadEarnedMedia(supabaseUrl, serviceKey, brandId)
+      opportunities = loaded.opportunities
+      placements = loaded.placements
+      scorecard = loaded.scorecard
+    }
+  } catch (caught) {
+    error = caught instanceof Error ? caught.message : 'Could not load placements'
+  }
+}
+
+const selected =
+  selectedId ? placements.find((row) => row.id === selectedId) ?? blankPlacement(brandId, selectedId) : blankPlacement(brandId)
+---
+
+<AdminLayout title="Placements" activeNav="/admin/earned-media" wide>
+  <PlacementsScreen
+    placements={placements}
+    selected={selected}
+    opportunities={opportunities}
+    scorecard={scorecard}
+    error={error}
+    notice={notice}
+  />
+</AdminLayout>
