@@ -4,11 +4,7 @@
  */
 
 import { getServerEnv } from './server-env'
-import {
-  filterGapCandidates,
-  normalizeDomain,
-  type GapCandidate,
-} from '@pointdog/admin-core'
+import { filterGapCandidates, normalizeDomain, type GapCandidate } from '@pointdog/admin-core'
 
 const API_BASE = 'https://api.dataforseo.com/v3'
 
@@ -34,12 +30,15 @@ export async function fetchCompetitorGaps(
     ourDomain: string
     competitors: string[]
     limit?: number
-  },
+  }
 ): Promise<{ candidates: GapCandidate[]; error?: string }> {
   const login = getServerEnv(locals, 'DATAFORSEO_LOGIN')
   const password = getServerEnv(locals, 'DATAFORSEO_PASSWORD')
   if (!login || !password) {
-    return { candidates: [], error: 'DataForSEO credentials are not configured on this environment.' }
+    return {
+      candidates: [],
+      error: 'DataForSEO credentials are not configured on this environment.',
+    }
   }
 
   const ourDomain = normalizeDomain(input.ourDomain)

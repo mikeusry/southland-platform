@@ -31,7 +31,10 @@ if (!supabaseUrl || !serviceKey) {
 }
 
 const board = buildView(rows, view)
-const scan = supabaseUrl && serviceKey ? await readSiteScan(supabaseUrl, serviceKey, brandId) : { scannedAt: null, pageCount: null }
+const scan =
+  supabaseUrl && serviceKey
+    ? await readSiteScan(supabaseUrl, serviceKey, brandId)
+    : { scannedAt: null, pageCount: null }
 const scanLabel = formatSiteScan(scan.scannedAt, scan.pageCount)
 ---
 

@@ -51,13 +51,17 @@ if (!supabaseUrl || !serviceKey) {
 
     if (Astro.request.method === 'POST') {
       const data = await Astro.request.formData()
-      opportunityId = typeof data.get('opportunityId') === 'string' ? String(data.get('opportunityId')) : opportunityId
+      opportunityId =
+        typeof data.get('opportunityId') === 'string'
+          ? String(data.get('opportunityId'))
+          : opportunityId
       const found = loaded.opportunities.find((row) => row.id === opportunityId)
       if (!found) {
         error = 'Qualify an opportunity before drafting a pitch'
       } else {
         const id = typeof data.get('id') === 'string' ? String(data.get('id')) : ''
-        const existing = loaded.pitches.find((row) => row.id === id) ?? blankPitch(found, id || undefined)
+        const existing =
+          loaded.pitches.find((row) => row.id === id) ?? blankPitch(found, id || undefined)
         const drafted = applyPitchForm(existing, data)
         const action = typeof data.get('action') === 'string' ? String(data.get('action')) : 'save'
         const result = applyPitchAction(drafted, found, action)
@@ -77,8 +81,8 @@ if (!supabaseUrl || !serviceKey) {
 
     if (!opportunity) {
       opportunity = opportunityId
-        ? opportunities.find((row) => row.id === opportunityId) ?? null
-        : opportunities[0] ?? null
+        ? (opportunities.find((row) => row.id === opportunityId) ?? null)
+        : (opportunities[0] ?? null)
     }
     if (!pitch && opportunity) {
       pitch = activePitchFor(opportunity.id, pitches) ?? blankPitch(opportunity)

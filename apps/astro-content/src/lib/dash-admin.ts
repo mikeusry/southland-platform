@@ -25,7 +25,7 @@ type CookieJar = {
       sameSite?: 'lax' | 'strict' | 'none'
       secure?: boolean
       maxAge?: number
-    },
+    }
   ): void
 }
 
@@ -54,7 +54,7 @@ async function hmac(secret: string, body: string): Promise<string> {
     TEXT.encode(secret),
     { name: 'HMAC', hash: 'SHA-256' },
     false,
-    ['sign'],
+    ['sign']
   )
   const sig = new Uint8Array(await crypto.subtle.sign('HMAC', key, TEXT.encode(body)))
   return bytesToB64url(sig)
@@ -64,7 +64,7 @@ async function signSiteTicket(
   secret: string,
   brand: string,
   email: string,
-  ttlSeconds: number,
+  ttlSeconds: number
 ): Promise<string> {
   const payload: TicketPayload = {
     v: 1,
@@ -79,7 +79,7 @@ async function signSiteTicket(
 async function verifySiteTicket(
   secret: string,
   token: string,
-  brand: string,
+  brand: string
 ): Promise<{ email: string } | null> {
   const dot = token.indexOf('.')
   if (dot <= 0) return null
@@ -100,11 +100,15 @@ async function verifySiteTicket(
   return { email: payload.e }
 }
 
-export function readServerEnv(locals: unknown, key: 'SITE_SSO_SECRET' | 'DASH_ORIGIN'): string | undefined {
+export function readServerEnv(
+  locals: unknown,
+  key: 'SITE_SSO_SECRET' | 'DASH_ORIGIN'
+): string | undefined {
   const runtime = (locals as { runtime?: { env?: Record<string, string | undefined> } } | null)
     ?.runtime?.env?.[key]
   if (typeof runtime === 'string' && runtime) return runtime
-  const meta = key === 'SITE_SSO_SECRET' ? import.meta.env.SITE_SSO_SECRET : import.meta.env.DASH_ORIGIN
+  const meta =
+    key === 'SITE_SSO_SECRET' ? import.meta.env.SITE_SSO_SECRET : import.meta.env.DASH_ORIGIN
   if (typeof meta === 'string' && meta) return meta
   if (typeof process !== 'undefined' && typeof process.env[key] === 'string' && process.env[key]) {
     return process.env[key]

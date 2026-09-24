@@ -53,7 +53,11 @@ export default function LawnWeedSelector() {
         const r = getSelectorResult(newAnswers)
         setResult(r)
         setPhase('results')
-        trackToolCompleted('lawn_weed_selector', r.headline, Math.round((Date.now() - startTime.current) / 1000))
+        trackToolCompleted(
+          'lawn_weed_selector',
+          r.headline,
+          Math.round((Date.now() - startTime.current) / 1000)
+        )
         trackResultViewed(
           'lawn_weed_selector',
           'products',
@@ -102,9 +106,12 @@ export default function LawnWeedSelector() {
 
       {phase === 'intro' && (
         <div className="rounded-xl border border-gray-200 bg-white p-8 text-center shadow-sm">
-          <h3 className="font-heading text-2xl uppercase text-[#2C5234]">Lawn & Hardscape Weed Selector</h3>
+          <h3 className="font-heading text-2xl uppercase text-[#2C5234]">
+            Lawn & Hardscape Weed Selector
+          </h3>
           <p className="mx-auto mt-3 max-w-md text-gray-600">
-            Contact vs systemic, surface type, and animals nearby — then open the right Torched pages.
+            Contact vs systemic, surface type, and animals nearby — then open the right Torched
+            pages.
           </p>
           <button
             type="button"
@@ -153,9 +160,14 @@ export default function LawnWeedSelector() {
 
           {result.products.length > 0 && (
             <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-              <h4 className="mb-4 text-sm font-semibold uppercase text-gray-500">Products to review</h4>
+              <h4 className="mb-4 text-sm font-semibold uppercase text-gray-500">
+                Products to review
+              </h4>
               {result.products.map((p, i) => (
-                <div key={p.handle} className="mb-3 flex justify-between gap-4 rounded-lg bg-gray-50 p-4">
+                <div
+                  key={p.handle}
+                  className="mb-3 flex justify-between gap-4 rounded-lg bg-gray-50 p-4"
+                >
                   <div>
                     <p className="font-semibold">{p.name}</p>
                     <p className="text-sm text-gray-600">{p.reason}</p>

@@ -173,7 +173,10 @@ export default function PoultryWaterPlanner() {
             </h4>
             <div className="space-y-4">
               {result.actions.map((action) => (
-                <div key={action.title} className="rounded-lg border border-gray-100 bg-gray-50 p-4">
+                <div
+                  key={action.title}
+                  className="rounded-lg border border-gray-100 bg-gray-50 p-4"
+                >
                   <p className="font-semibold text-gray-900">{action.title}</p>
                   <p className="mt-1 text-sm text-gray-600">{action.body}</p>
                   {action.href && (

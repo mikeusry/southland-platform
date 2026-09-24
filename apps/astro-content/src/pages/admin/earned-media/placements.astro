@@ -39,7 +39,8 @@ if (!supabaseUrl || !serviceKey) {
       const data = await Astro.request.formData()
       const loaded = await loadEarnedMedia(supabaseUrl, serviceKey, brandId)
       const id = typeof data.get('id') === 'string' ? String(data.get('id')) : ''
-      const existing = loaded.placements.find((row) => row.id === id) ?? blankPlacement(brandId, id || undefined)
+      const existing =
+        loaded.placements.find((row) => row.id === id) ?? blankPlacement(brandId, id || undefined)
       const drafted = applyPlacementForm(existing, data)
       const action = typeof data.get('action') === 'string' ? String(data.get('action')) : 'save'
       const result = applyPlacementAction(drafted, action)
@@ -63,8 +64,9 @@ if (!supabaseUrl || !serviceKey) {
   }
 }
 
-const selected =
-  selectedId ? placements.find((row) => row.id === selectedId) ?? blankPlacement(brandId, selectedId) : blankPlacement(brandId)
+const selected = selectedId
+  ? (placements.find((row) => row.id === selectedId) ?? blankPlacement(brandId, selectedId))
+  : blankPlacement(brandId)
 ---
 
 <AdminLayout title="Placements" activeNav="/admin/earned-media" wide>

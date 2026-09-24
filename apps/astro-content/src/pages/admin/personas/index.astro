@@ -102,7 +102,10 @@ const totalJobs = rows.reduce((sum, r) => sum + r.coverage.total, 0)
 const coveredJobs = rows.reduce((sum, r) => sum + r.coverage.covered, 0)
 const scanUrl = getServerEnv(Astro.locals, 'MOTHERSHIP_SUPABASE_URL')
 const scanKey = getServerEnv(Astro.locals, 'MOTHERSHIP_SUPABASE_SERVICE_KEY')
-const scan = scanUrl && scanKey ? await readSiteScan(scanUrl, scanKey, 'southland') : { scannedAt: null, pageCount: null }
+const scan =
+  scanUrl && scanKey
+    ? await readSiteScan(scanUrl, scanKey, 'southland')
+    : { scannedAt: null, pageCount: null }
 const scanLabel = formatSiteScan(scan.scannedAt, scan.pageCount)
 ---
 

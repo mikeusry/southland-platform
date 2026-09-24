@@ -46,8 +46,9 @@ let scorecard: Awaited<ReturnType<typeof loadEarnedMedia>>['scorecard'] = {
 let candidates: GapCandidate[] = []
 let scanMeta: { ourDomain: string; competitors: string[] } | null = null
 
-let selected =
-  selectedId ? opportunities.find((row) => row.id === selectedId) ?? blankOpportunity(brandId, selectedId) : blankOpportunity(brandId)
+let selected = selectedId
+  ? (opportunities.find((row) => row.id === selectedId) ?? blankOpportunity(brandId, selectedId))
+  : blankOpportunity(brandId)
 
 const dfsReady = dataForSeoConfigured(Astro.locals)
 
@@ -57,7 +58,8 @@ if (supabaseUrl && serviceKey) {
     opportunities = loaded.opportunities
     scorecard = loaded.scorecard
     selected = selectedId
-      ? loaded.opportunities.find((row) => row.id === selectedId) ?? blankOpportunity(brandId, selectedId)
+      ? (loaded.opportunities.find((row) => row.id === selectedId) ??
+        blankOpportunity(brandId, selectedId))
       : blankOpportunity(brandId)
 
     if (Astro.request.method === 'POST') {
@@ -84,14 +86,15 @@ if (supabaseUrl && serviceKey) {
         if (result.error) error = result.error
         candidates = result.candidates
         if (!result.error && candidates.length === 0) {
-          notice = 'Scan returned no usable domains. Try different competitors or lower the bar next week.'
+          notice =
+            'Scan returned no usable domains. Try different competitors or lower the bar next week.'
         } else if (!result.error) {
           notice = `Found ${candidates.length} domains linking to competitors but not us. Check a few to import.`
         }
       } else if (action === 'import_gaps') {
         const selectedPayloads = data.getAll('candidate').map(String)
         const existingDomains = new Set(
-          loaded.opportunities.map((row) => normalizeDomain(row.outletDomain ?? '')).filter(Boolean),
+          loaded.opportunities.map((row) => normalizeDomain(row.outletDomain ?? '')).filter(Boolean)
         )
         let imported = 0
         let skipped = 0
@@ -111,13 +114,14 @@ if (supabaseUrl && serviceKey) {
           error = 'Pick at least one domain to import'
         } else {
           return Astro.redirect(
-            `/admin/earned-media?notice=${encodeURIComponent(`Imported ${imported}${skipped ? ` (skipped ${skipped} already in queue)` : ''}`)}`,
+            `/admin/earned-media?notice=${encodeURIComponent(`Imported ${imported}${skipped ? ` (skipped ${skipped} already in queue)` : ''}`)}`
           )
         }
       } else {
         const id = typeof data.get('id') === 'string' ? String(data.get('id')) : ''
         const existing =
-          loaded.opportunities.find((row) => row.id === id) ?? blankOpportunity(brandId, id || undefined)
+          loaded.opportunities.find((row) => row.id === id) ??
+          blankOpportunity(brandId, id || undefined)
         const drafted = applyOpportunityForm(existing, data)
         const result = applyOpportunityAction(drafted, loaded.opportunities, action)
         selected = result.row

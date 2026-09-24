@@ -569,13 +569,22 @@ const icons: Record<string, string> = {
                     </svg>
                     {section.name}
                   </span>
-                  <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg
+                    class="chevron"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
                     <path d="M19 9l-7 7-7-7" />
                   </svg>
                 </summary>
                 <div class="nav-children">
                   {section.items.map((item) => (
-                    <a href={item.href} class:list={['nav-child', { active: isCurrent(item.href) }]}>
+                    <a
+                      href={item.href}
+                      class:list={['nav-child', { active: isCurrent(item.href) }]}
+                    >
                       {item.name}
                     </a>
                   ))}

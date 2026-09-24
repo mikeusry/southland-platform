@@ -45,17 +45,33 @@ export const PLANNER_QUESTIONS: PlannerQuestion[] = [
     id: 'system',
     title: 'What are you focused on right now?',
     answers: [
-      { id: 'drinkers', label: 'Drinker / nipple lines', description: 'Biofilm, flow, nipple trigger' },
+      {
+        id: 'drinkers',
+        label: 'Drinker / nipple lines',
+        description: 'Biofilm, flow, nipple trigger',
+      },
       { id: 'coolcell', label: 'Cool cells / pads', description: 'Evaporative cooling system' },
-      { id: 'both', label: 'Both water lines and cool cells', description: 'Whole-house water path' },
-      { id: 'unsure', label: 'Not sure — odor or performance dip', description: 'Need a starting point' },
+      {
+        id: 'both',
+        label: 'Both water lines and cool cells',
+        description: 'Whole-house water path',
+      },
+      {
+        id: 'unsure',
+        label: 'Not sure — odor or performance dip',
+        description: 'Need a starting point',
+      },
     ],
   },
   {
     id: 'timing',
     title: 'When can you treat?',
     answers: [
-      { id: 'between', label: 'Between flocks (empty house)', description: 'Strongest cleaning window' },
+      {
+        id: 'between',
+        label: 'Between flocks (empty house)',
+        description: 'Strongest cleaning window',
+      },
       { id: 'birds-in', label: 'Birds are in the house', description: 'Must stay label-safe' },
       { id: 'either', label: 'Either is possible', description: 'Flexible schedule' },
     ],
@@ -65,7 +81,11 @@ export const PLANNER_QUESTIONS: PlannerQuestion[] = [
     title: 'What concerns you most?',
     answers: [
       { id: 'biofilm', label: 'Biofilm / slime in lines', description: 'Organic load in the pipe' },
-      { id: 'equipment', label: 'Equipment compatibility', description: 'Seals, regulators, nipples' },
+      {
+        id: 'equipment',
+        label: 'Equipment compatibility',
+        description: 'Seals, regulators, nipples',
+      },
       { id: 'odor', label: 'Odor / organic load', description: 'House smell or litter issues' },
       { id: 'docs', label: 'Need docs before I buy', description: 'Label, SDS, dealer help' },
     ],
@@ -137,7 +157,10 @@ export function getPlannerResult(answers: Record<string, string>): PlannerResult
   return { headline, summary, actions, notFor }
 }
 
-export function buildPlannerSummary(answers: Record<string, string>, result: PlannerResult): string {
+export function buildPlannerSummary(
+  answers: Record<string, string>,
+  result: PlannerResult
+): string {
   return [
     `Operation: ${answers.operation || 'n/a'}`,
     `Focus: ${answers.system || 'n/a'}`,

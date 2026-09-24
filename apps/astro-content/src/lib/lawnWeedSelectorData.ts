@@ -34,7 +34,11 @@ export const SELECTOR_QUESTIONS: SelQuestion[] = [
     id: 'where',
     title: 'Where are the weeds?',
     answers: [
-      { id: 'hardscape', label: 'Driveway, gravel, fence line, cracks', description: 'Hardscape / edge' },
+      {
+        id: 'hardscape',
+        label: 'Driveway, gravel, fence line, cracks',
+        description: 'Hardscape / edge',
+      },
       { id: 'lawn', label: 'In the lawn turf', description: 'Living grass' },
       { id: 'beds', label: 'Beds / garden edges', description: 'Near ornamentals or food plants' },
       { id: 'mixed', label: 'Mixed areas', description: 'More than one surface' },
@@ -61,7 +65,11 @@ export const SELECTOR_QUESTIONS: SelQuestion[] = [
     id: 'animals',
     title: 'Are backyard chickens or pets nearby?',
     answers: [
-      { id: 'chickens', label: 'Yes — chickens on the property', description: 'Need careful boundaries' },
+      {
+        id: 'chickens',
+        label: 'Yes — chickens on the property',
+        description: 'Need careful boundaries',
+      },
       { id: 'pets', label: 'Dogs / cats use the area', description: 'Pet traffic' },
       { id: 'neither', label: 'No animals in the spray zone', description: 'Standard site' },
     ],
@@ -108,7 +116,8 @@ export function getSelectorResult(answers: Record<string, string>): SelResult {
     products.push({
       handle: 'torched-all-natural-weed-killer',
       name: 'Torched',
-      reason: 'Contact weed control for many hardscape and fence-line jobs — confirm site fit on the PDP and label.',
+      reason:
+        'Contact weed control for many hardscape and fence-line jobs — confirm site fit on the PDP and label.',
     })
   }
 
@@ -116,7 +125,8 @@ export function getSelectorResult(answers: Record<string, string>): SelResult {
     products.push({
       handle: 'genesis',
       name: 'Genesis',
-      reason: 'Soil-biology / conditioner lane for lawn programs — not a substitute for a weed-contact product.',
+      reason:
+        'Soil-biology / conditioner lane for lawn programs — not a substitute for a weed-contact product.',
     })
     reads.push({ href: '/tools/lawn-quiz/', label: 'Full lawn health quiz' })
   }
@@ -142,7 +152,10 @@ export function getSelectorResult(answers: Record<string, string>): SelResult {
 
   if (answers.goal === 'docs' || products.length) {
     reads.push({ href: '/how-to-use/torched/', label: 'Torched how-to handbook' })
-    reads.push({ href: '/products/torched-all-natural-weed-killer/', label: 'Torched product page + SDS path' })
+    reads.push({
+      href: '/products/torched-all-natural-weed-killer/',
+      label: 'Torched product page + SDS path',
+    })
   }
 
   if (!products.length && answers.where === 'beds') {
@@ -154,7 +167,8 @@ export function getSelectorResult(answers: Record<string, string>): SelResult {
         {
           handle: 'torched-all-natural-weed-killer',
           name: 'Torched (verify site fit)',
-          reason: 'Only if the label supports your exact site. When unsure, ask support before you spray.',
+          reason:
+            'Only if the label supports your exact site. When unsure, ask support before you spray.',
         },
       ],
       reads: [
