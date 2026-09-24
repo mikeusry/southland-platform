@@ -142,11 +142,6 @@ export default defineConfig({
     format: 'directory',
   },
   vite: {
-    server: {
-      watch: {
-        ignored: ['!**/node_modules/@pointdog/admin-core/**'],
-      },
-    },
     define: {
       'import.meta.env.PUBLIC_SITE_URL': JSON.stringify(
         process.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
