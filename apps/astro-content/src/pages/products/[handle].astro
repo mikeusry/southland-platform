@@ -31,6 +31,7 @@ import type { KlaviyoReview } from '../../lib/reviews'
 import { getServerEnv } from '../../lib/server-env'
 import StarRating from '../../components/product/StarRating.astro'
 import ReviewsSection from '../../components/product/ReviewsSection.astro'
+import { isCommercialHouseHandle } from '../../lib/commercialHouse'
 
 // SSR — do not prerender
 const { handle } = Astro.params
@@ -67,6 +68,15 @@ const product = await getProductByHandle(client, shopifyHandle)
 if (!product) {
   return new Response(null, { status: 404, statusText: 'Product not found' })
 }
+
+const requestedVariant = Astro.url.searchParams.get('variant')
+const matchedVariant = requestedVariant
+  ? product.variants.find((v) => {
+      const id = v.id.replace(/^gid:\/\/shopify\/ProductVariant\//, '')
+      return v.id === requestedVariant || id === requestedVariant
+    })
+  : null
+const initialImageUrl = matchedVariant?.image?.url ?? null
 
 // ── Fetch Klaviyo reviews (graceful — returns null on failure) ──────────────
 const klaviyoKey = getServerEnv(Astro.locals, 'KLAVIYO_API_KEY')
@@ -247,6 +257,7 @@ const ogImage = product.images[0]?.url ?? '/images/podcast/og-default.jpg'
 
 // ── Schema.org Product ──────────────────────────────────────────────────────
 const hasMultipleVariants = product.variants.length > 1
+const isCommercialHouse = isCommercialHouseHandle(shopifyHandle)
 
 // Shared shipping details for all offers
 const shippingDetails = {
@@ -524,6 +535,12 @@ const priceFormatted = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: minPrice.currencyCode || 'USD',
 }).format(Number(minPrice.amount))
+const selectedPriceFormatted = matchedVariant
+  ? new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: matchedVariant.price.currencyCode || 'USD',
+    }).format(Number(matchedVariant.price.amount))
+  : priceFormatted
 
 // ── Product video (TinaCMS override → hardcoded map) ───────────────────────
 const PRODUCT_VIDEOS: Record<string, string> = {
@@ -654,6 +671,7 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
             images={product.images}
             productTitle={product.title}
             productHandle={product.handle}
+            initialImageUrl={initialImageUrl}
           />
         </div>
 
@@ -715,13 +733,16 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
             )
           }
 
-          {/* Price */}
           {
             !hasMultipleVariants && (
               <p class="mt-4 text-2xl font-bold text-gray-900">{priceFormatted}</p>
             )
           }
-          {hasMultipleVariants && <p class="mt-4 text-sm text-gray-500">From {priceFormatted}</p>}
+          {
+            hasMultipleVariants && !matchedVariant && !isCommercialHouse && (
+              <p class="mt-4 text-sm text-gray-500">From {priceFormatted}</p>
+            )
+          }
 
           {/* Star rating — links to reviews section */}
           {
@@ -793,8 +814,24 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
               productVendor={product.vendor}
               productType={product.productType}
               sizeNote={tina?.buyBoxSizeNote}
+              initialVariantId={requestedVariant}
+              showPerGallon={isCommercialHouse}
             />
           </div>
+
+          {
+            isCommercialHouse && (
+              <p class="mt-3 text-center text-sm text-[#191D21]">
+                Need a house quote? Call{' '}
+                <a
+                  href="tel:800-608-3755"
+                  class="font-semibold text-[#2C5234] underline-offset-2 hover:underline"
+                >
+                  800-608-3755
+                </a>
+              </p>
+            )
+          }
 
           {/* Trust microcopy row — directly under Add to Cart */}
           <div
@@ -888,8 +925,10 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
               client:load
               productName={tina?.name ?? product.title}
               productHandle={product.handle}
-              isCommercial={tina?.segment === 'poultry'}
-              buttonLabel="Still stuck? Ask us"
+              isCommercial={isCommercialHouse}
+              buttonLabel={isCommercialHouse
+                ? 'Need a house quote? Message us'
+                : 'Still stuck? Ask us'}
             />
           </div>
 
@@ -1719,7 +1758,9 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
       <div class="flex items-center justify-between gap-3">
         <div class="min-w-0 flex-1">
           <p class="truncate text-sm font-semibold text-gray-900">{displayTitle}</p>
-          <p class="text-sm font-bold text-brand-green-dark">{priceFormatted}</p>
+          <p id="sticky-atc-price" class="text-sm font-bold text-brand-green-dark">
+            {selectedPriceFormatted}
+          </p>
         </div>
         <button
           id="sticky-atc-btn"
@@ -1786,6 +1827,13 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
       atcSection.scrollIntoView({ behavior: 'smooth', block: 'center' })
     })
   }
+
+  window.addEventListener('pdp-variant-price', (event) => {
+    const stickyPrice = document.getElementById('sticky-atc-price')
+    if (!(event instanceof CustomEvent)) return
+    const formatted = event.detail?.formatted
+    if (stickyPrice && typeof formatted === 'string') stickyPrice.textContent = formatted
+  })
 
   // ── Persona CTA client-side swap ─────────────────────────────────────────
   // Swaps CTA text in S8 based on persona cookie. HTML source stays default.

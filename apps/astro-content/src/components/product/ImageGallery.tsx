@@ -37,10 +37,20 @@ interface Props {
   images: ProductImage[]
   productTitle: string
   productHandle: string
+  initialImageUrl?: string | null
 }
 
-export default function ImageGallery({ images, productTitle, productHandle }: Props) {
-  const [activeIndex, setActiveIndex] = useState(0)
+export default function ImageGallery({
+  images,
+  productTitle,
+  productHandle,
+  initialImageUrl,
+}: Props) {
+  const [activeIndex, setActiveIndex] = useState(() => {
+    if (!initialImageUrl) return 0
+    const idx = images.findIndex((img) => img.url === initialImageUrl)
+    return idx === -1 ? 0 : idx
+  })
 
   // Listen for variant changes from AddToCartButton
   useEffect(() => {

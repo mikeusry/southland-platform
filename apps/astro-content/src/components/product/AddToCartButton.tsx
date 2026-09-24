@@ -5,10 +5,11 @@
  * and add-to-cart button. Manages its own loading/success states.
  */
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import type { ProductVariant, Money } from '@southland/shopify-storefront'
 import { addToCart } from '../../lib/cart'
 import { trackAddToCart } from '../../lib/ecommerce-events'
+import { gallonsFromVariant, pricePerGallon } from '../../lib/gallonsFromPackTitle'
 
 interface Props {
   variants: ProductVariant[]
@@ -19,6 +20,21 @@ interface Props {
   productType?: string
   /** Clarifies what the size chips mean (concentrate vs RTU, dose, etc.) */
   sizeNote?: string
+  /** Numeric Shopify variant id from ?variant= so Shopping case clicks land on the case. */
+  initialVariantId?: string | null
+  /** Show pack gallons and $/gal on gallon and case sizes. Skip quarts. */
+  showPerGallon?: boolean
+}
+
+export function matchVariantId(variants: ProductVariant[], requested?: string | null): string {
+  const fallback = variants.find((v) => v.availableForSale)?.id ?? variants[0]?.id ?? ''
+  if (!requested) return fallback
+  const needle = String(requested).replace(/^gid:\/\/shopify\/ProductVariant\//, '')
+  const match = variants.find((v) => {
+    const id = v.id.replace(/^gid:\/\/shopify\/ProductVariant\//, '')
+    return v.id === requested || id === needle
+  })
+  return match?.id ?? fallback
 }
 
 function formatPrice(money: Money): string {
@@ -28,6 +44,17 @@ function formatPrice(money: Money): string {
   }).format(Number(money.amount))
 }
 
+function packMath(variant: ProductVariant): { gallons: number; perGallon: string } | null {
+  const gallons = gallonsFromVariant(variant)
+  if (!gallons) return null
+  const per = pricePerGallon(variant.price.amount, gallons)
+  if (per == null) return null
+  return {
+    gallons,
+    perGallon: formatPrice({ amount: String(per), currencyCode: variant.price.currencyCode }),
+  }
+}
+
 export default function AddToCartButton({
   variants,
   productHandle,
@@ -35,9 +62,11 @@ export default function AddToCartButton({
   productVendor,
   productType,
   sizeNote,
+  initialVariantId,
+  showPerGallon = false,
 }: Props) {
-  const [selectedVariantId, setSelectedVariantId] = useState(
-    variants.find((v) => v.availableForSale)?.id ?? variants[0]?.id ?? ''
+  const [selectedVariantId, setSelectedVariantId] = useState(() =>
+    matchVariantId(variants, initialVariantId)
   )
   const [quantity, setQuantity] = useState(1)
   const [adding, setAdding] = useState(false)
@@ -46,6 +75,23 @@ export default function AddToCartButton({
 
   const selectedVariant = variants.find((v) => v.id === selectedVariantId)
   const isAvailable = selectedVariant?.availableForSale ?? false
+  const selectedPack = selectedVariant && showPerGallon ? packMath(selectedVariant) : null
+
+  useEffect(() => {
+    if (!selectedVariant?.image?.url) return
+    window.dispatchEvent(
+      new CustomEvent('pdp-variant-image', { detail: { url: selectedVariant.image.url } })
+    )
+  }, [selectedVariant?.image?.url])
+
+  useEffect(() => {
+    if (!selectedVariant) return
+    window.dispatchEvent(
+      new CustomEvent('pdp-variant-price', {
+        detail: { formatted: formatPrice(selectedVariant.price) },
+      })
+    )
+  }, [selectedVariant])
 
   // Group variant options by name for selector UI
   const optionNames = Array.from(
@@ -134,6 +180,7 @@ export default function AddToCartButton({
                   )?.value
                   const isSelected = variant.id === selectedVariantId
                   const isDisabled = !variant.availableForSale
+                  const chipPack = showPerGallon && !isDisabled ? packMath(variant) : null
 
                   return (
                     <button
@@ -149,7 +196,16 @@ export default function AddToCartButton({
                             : 'border-gray-300 bg-white text-gray-700 hover:border-brand-green-light'
                       }`}
                     >
-                      {optionValue ?? variant.title}
+                      <span className="block">{optionValue ?? variant.title}</span>
+                      {chipPack && (
+                        <span
+                          className={`mt-0.5 block text-xs font-normal ${
+                            isSelected ? 'text-white/80' : 'text-gray-500'
+                          }`}
+                        >
+                          {chipPack.perGallon}/gal
+                        </span>
+                      )}
                     </button>
                   )
                 })}
@@ -183,7 +239,7 @@ export default function AddToCartButton({
       )}
 
       {/* Price display */}
-      <div className="flex items-baseline gap-2">
+      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
         <span className="text-2xl font-bold text-gray-900">
           {formatPrice(selectedVariant.price)}
         </span>
@@ -193,6 +249,13 @@ export default function AddToCartButton({
               {formatPrice(selectedVariant.compareAtPrice)}
             </span>
           )}
+        {selectedPack && (
+          <span className="text-sm font-medium text-gray-600">
+            {selectedPack.gallons === 1
+              ? `${selectedPack.perGallon}/gal`
+              : `${selectedPack.gallons} gal · ${selectedPack.perGallon}/gal`}
+          </span>
+        )}
       </div>
 
       {/* Quantity + Add to cart row */}
