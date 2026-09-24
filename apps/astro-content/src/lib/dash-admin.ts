@@ -160,7 +160,7 @@ export async function gateAdmin(input: {
       })
       const clean = new URL(input.url)
       clean.searchParams.delete('pd_ticket')
-      return Response.redirect(clean.toString(), 302)
+      return redirect(clean.toString())
     }
   }
 
@@ -183,5 +183,10 @@ export async function gateAdmin(input: {
   const login = new URL('/auth/site', dashOrigin(input.locals))
   login.searchParams.set('brand', input.brand)
   login.searchParams.set('return', back.toString())
-  return Response.redirect(login.toString(), 302)
+  return redirect(login.toString())
+}
+
+/** Response.redirect() headers are immutable, so Astro cannot append Set-Cookie to it. */
+function redirect(location: string): Response {
+  return new Response(null, { status: 302, headers: { Location: location } })
 }
