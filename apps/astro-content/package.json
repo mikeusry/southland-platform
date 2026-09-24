@@ -22,7 +22,6 @@
     "@astrojs/react": "^4.2.1",
     "@astrojs/sitemap": "^3.7.0",
     "@astrojs/tailwind": "^6.0.2",
-    "@pointdog/admin-core": "file:../../../mothership/packages/admin-core",
     "@cloudinary/url-gen": "^1.22.0",
     "@mux/mux-player": "^3.11.4",
     "@sentry/astro": "^10.47.0",
