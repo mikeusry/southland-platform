@@ -1,13 +1,24 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro'
 import PlacementsScreen from '@pointdog/admin-core/components/PlacementsScreen.astro'
-import { applyPlacementAction, applyPlacementForm, blankPlacement } from '@pointdog/admin-core'
-import { loadEarnedMedia, savePlacement } from '@pointdog/admin-core/api'
+import {
+  applyPlacementAction,
+  applyPlacementCheck,
+  applyPlacementForm,
+  blankPlacement,
+  summarizeCheck,
+} from '@pointdog/admin-core'
+import { checkPlacementLive, loadEarnedMedia, savePlacement } from '@pointdog/admin-core/api'
 import { getServerEnv } from '../../../lib/server-env'
 
 export const prerender = false
 
 const brandId = 'southland'
+const checkOptions = {
+  brandDomain: 'southlandorganics.com',
+  brandTerms: ['Southland Organics'],
+  expertTerms: ['Usry'],
+}
 const supabaseUrl = getServerEnv(Astro.locals, 'MOTHERSHIP_SUPABASE_URL')
 const serviceKey = getServerEnv(Astro.locals, 'MOTHERSHIP_SUPABASE_SERVICE_KEY')
 
@@ -43,7 +54,18 @@ if (!supabaseUrl || !serviceKey) {
         loaded.placements.find((row) => row.id === id) ?? blankPlacement(brandId, id || undefined)
       const drafted = applyPlacementForm(existing, data)
       const action = typeof data.get('action') === 'string' ? String(data.get('action')) : 'save'
-      const result = applyPlacementAction(drafted, action)
+      if (action === 'check' && drafted.placementUrl.trim()) {
+        const intended =
+          loaded.opportunities.find((row) => row.id === drafted.opportunityId)?.job1TargetUrl ??
+          null
+        const check = await checkPlacementLive(drafted.placementUrl.trim(), checkOptions)
+        const checked = applyPlacementCheck(drafted, check, intended)
+        await savePlacement(supabaseUrl, serviceKey, checked)
+        return Astro.redirect(
+          `/admin/earned-media/placements?id=${checked.id}&notice=${encodeURIComponent(summarizeCheck(check))}`
+        )
+      }
+      const result = applyPlacementAction(drafted, action === 'check' ? 'save' : action)
       if (result.error) {
         error = result.error
         opportunities = loaded.opportunities

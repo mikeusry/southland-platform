@@ -1,14 +1,28 @@
 /**
- * DataForSEO backlink domain intersection for earned-media intake.
+ * DataForSEO competitor article links for earned-media intake.
  * Credentials from Cloudflare runtime env (getServerEnv), not Vite build.
  */
 
 import { getServerEnv } from './server-env'
-import { filterGapCandidates, normalizeDomain, type GapCandidate } from '@pointdog/admin-core'
+import {
+  candidatesFromArticleLinks,
+  filterGapCandidates,
+  normalizeDomain,
+  type CompetitorArticleLink,
+  type GapCandidate,
+} from '@pointdog/admin-core'
 
 const API_BASE = 'https://api.dataforseo.com/v3'
 
 type Locals = unknown
+
+type BacklinkItem = {
+  domain_from?: string
+  domain_from_rank?: number
+  url_from?: string
+  page_from_title?: string | null
+  dofollow?: boolean
+}
 
 function authHeader(login: string, password: string): string {
   return `Basic ${btoa(`${login}:${password}`)}`
@@ -20,15 +34,46 @@ export function dataForSeoConfigured(locals: Locals): boolean {
   return Boolean(login && password)
 }
 
+async function backlinks(auth: string, task: Record<string, unknown>): Promise<BacklinkItem[]> {
+  const response = await fetch(`${API_BASE}/backlinks/backlinks/live`, {
+    method: 'POST',
+    headers: { Authorization: auth, 'Content-Type': 'application/json' },
+    body: JSON.stringify([
+      {
+        mode: 'one_per_domain',
+        backlinks_status_type: 'live',
+        exclude_internal_backlinks: true,
+        ...task,
+      },
+    ]),
+  })
+  if (!response.ok) {
+    throw new Error(`DataForSEO HTTP ${response.status}: ${(await response.text()).slice(0, 200)}`)
+  }
+  const data = (await response.json()) as {
+    tasks?: Array<{
+      status_code?: number
+      status_message?: string
+      result?: Array<{ items?: BacklinkItem[] | null }>
+    }>
+  }
+  const result = data.tasks?.[0]
+  if (result?.status_code && result.status_code >= 40000) {
+    throw new Error(result.status_message || `DataForSEO task ${result.status_code}`)
+  }
+  return result?.result?.[0]?.items ?? []
+}
+
 /**
- * Domains that link to one or more competitors but not us.
- * Cap is intentional — intake, not a backlink warehouse.
+ * Articles that cite a competitor in the body, on domains that never link to us.
+ * One call per competitor plus one exclusion call (~$0.025 each).
  */
 export async function fetchCompetitorGaps(
   locals: Locals,
   input: {
     ourDomain: string
     competitors: string[]
+    minRank: number
     limit?: number
   }
 ): Promise<{ candidates: GapCandidate[]; error?: string }> {
@@ -42,89 +87,56 @@ export async function fetchCompetitorGaps(
   }
 
   const ourDomain = normalizeDomain(input.ourDomain)
-  const competitors = input.competitors.map(normalizeDomain).filter(Boolean).slice(0, 10)
+  const competitors = input.competitors.map(normalizeDomain).filter(Boolean).slice(0, 6)
   if (!ourDomain || competitors.length === 0) {
     return { candidates: [], error: 'Need our domain and at least one competitor.' }
   }
 
-  const targets: Record<string, string> = {}
-  competitors.forEach((comp, i) => {
-    targets[String(i + 1)] = comp
-  })
-
-  const limit = Math.min(Math.max(input.limit ?? 20, 5), 40)
+  const auth = authHeader(login, password)
+  const limit = Math.min(Math.max(input.limit ?? 25, 5), 50)
 
   try {
-    const response = await fetch(`${API_BASE}/backlinks/domain_intersection/live`, {
-      method: 'POST',
-      headers: {
-        Authorization: authHeader(login, password),
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify([
-        {
-          targets,
-          exclude_targets: [ourDomain],
-          limit: Math.min(limit * 5, 100),
-          order_by: ['1.rank,desc'],
-          exclude_internal_backlinks: true,
-          backlinks_status_type: 'live',
-        },
-      ]),
-    })
+    const perCompetitor = await Promise.all(
+      competitors.map(async (competitor) => {
+        const items = await backlinks(auth, {
+          target: competitor,
+          filters: [
+            ['semantic_location', '=', 'article'],
+            'and',
+            ['domain_from_rank', '>=', input.minRank],
+          ],
+          order_by: ['domain_from_rank,desc'],
+          limit: 60,
+        })
+        return items.map(
+          (item): CompetitorArticleLink => ({
+            competitor,
+            domainFrom: item.domain_from ?? '',
+            domainFromRank: item.domain_from_rank ?? 0,
+            urlFrom: item.url_from ?? '',
+            pageTitle: item.page_from_title ?? null,
+            dofollow: Boolean(item.dofollow),
+          })
+        )
+      })
+    )
+    const links = perCompetitor.flat().filter((link) => link.domainFrom && link.urlFrom)
+    const domains = [...new Set(links.map((link) => link.domainFrom))]
 
-    if (!response.ok) {
-      const body = await response.text()
-      return { candidates: [], error: `DataForSEO HTTP ${response.status}: ${body.slice(0, 200)}` }
-    }
+    const linkingToUs =
+      domains.length === 0
+        ? []
+        : await backlinks(auth, {
+            target: ourDomain,
+            filters: ['domain_from', 'in', domains],
+            limit: 1000,
+          })
 
-    const data = (await response.json()) as {
-      tasks?: Array<{
-        status_code?: number
-        status_message?: string
-        result?: Array<{ items?: Array<Record<string, unknown>> }>
-      }>
-    }
-    const task = data.tasks?.[0]
-    if (task?.status_code && task.status_code >= 40000) {
-      return { candidates: [], error: task.status_message || `DataForSEO task ${task.status_code}` }
-    }
-
-    const items = task?.result?.[0]?.items ?? []
-    const mapped: GapCandidate[] = items.map((item) => {
-      const intersection = (item.domain_intersection || {}) as Record<
-        string,
-        { target?: string; rank?: number; backlinks?: number } | undefined
-      >
-      let domain = ''
-      let rank = 0
-      let totalBacklinks = 0
-      const linksTo: string[] = []
-
-      for (const [idx, entry] of Object.entries(intersection)) {
-        if (!entry) continue
-        if (!domain) {
-          domain = entry.target || ''
-          rank = entry.rank || 0
-        }
-        totalBacklinks += entry.backlinks || 0
-        const compIdx = Number(idx) - 1
-        if (competitors[compIdx]) linksTo.push(competitors[compIdx])
-      }
-
-      // Some payloads put the referring domain on the item root
-      if (!domain && typeof item.target === 'string') domain = item.target
-
-      return {
-        domain,
-        rank,
-        backlinks: totalBacklinks,
-        linksTo: [...new Set(linksTo)],
-        sampleUrl: null,
-      }
-    })
-
-    return { candidates: filterGapCandidates(mapped, { minRank: 15, limit }) }
+    const candidates = candidatesFromArticleLinks(
+      links,
+      linkingToUs.map((item) => item.domain_from ?? '')
+    )
+    return { candidates: filterGapCandidates(candidates, { minRank: input.minRank, limit }) }
   } catch (caught) {
     return {
       candidates: [],

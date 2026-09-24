@@ -81,15 +81,15 @@ if (supabaseUrl && serviceKey) {
         const result = await fetchCompetitorGaps(Astro.locals, {
           ourDomain,
           competitors: list,
-          limit: 20,
+          minRank: SOUTHLAND_GAP_DEFAULTS.minRank,
+          limit: 25,
         })
         if (result.error) error = result.error
         candidates = result.candidates
         if (!result.error && candidates.length === 0) {
-          notice =
-            'Scan returned no usable domains. Try different competitors or lower the bar next week.'
+          notice = 'Scan found no usable articles. Try different competitors.'
         } else if (!result.error) {
-          notice = `Found ${candidates.length} domains linking to competitors but not us. Check a few to import.`
+          notice = `Found ${candidates.length} articles citing competitors on sites that never link to us. Open a few before importing.`
         }
       } else if (action === 'import_gaps') {
         const selectedPayloads = data.getAll('candidate').map(String)
