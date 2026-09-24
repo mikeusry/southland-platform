@@ -8,26 +8,46 @@
 interface Props {
   title: string
   activeNav?: string
+  wide?: boolean
 }
 
-const { title, activeNav } = Astro.props
+const { title, activeNav, wide = false } = Astro.props
 
-const navItems = [
-  { name: 'Dashboard', href: '/admin', icon: 'home' },
-  { name: 'Videos', href: '/admin/videos', icon: 'video' },
-  { name: 'Personas', href: '/admin/personas', icon: 'users' },
-  { name: 'Go Live', href: '/admin/go-live', icon: 'shield' },
-  { name: 'TinaCMS', href: '/cms/index.html', icon: 'edit' },
-  { name: 'Branding', href: '/admin/branding', icon: 'palette' },
-  { name: 'Images', href: '/admin/images', icon: 'image' },
-  { name: 'Products SEO', href: '/admin/products-seo', icon: 'clipboard' },
-  { name: 'Quality', href: '/admin/content-quality', icon: 'shield' },
-  { name: 'Sales Log', href: '/admin/sales-log', icon: 'phone' },
-  { name: 'Analytics', href: '/admin/analytics', icon: 'chart' },
+const here = (activeNav ?? Astro.url.pathname).replace(/\/$/, '') || '/'
+
+function isCurrent(href: string): boolean {
+  if (href === '/admin') return here === '/admin'
+  return here === href || here.startsWith(`${href}/`)
+}
+
+const navSections = [
+  {
+    name: 'Pages',
+    icon: 'map',
+    items: [
+      { name: 'Sitemap', href: '/admin/sitemap' },
+      { name: 'Digital PR', href: '/admin/earned-media' },
+      { name: 'Personas', href: '/admin/personas' },
+      { name: 'Products SEO', href: '/admin/products-seo' },
+      { name: 'Quality', href: '/admin/content-quality' },
+      { name: 'Go Live', href: '/admin/go-live' },
+    ],
+  },
+  {
+    name: 'Content',
+    icon: 'edit',
+    items: [
+      { name: 'TinaCMS', href: '/cms/index.html' },
+      { name: 'Videos', href: '/admin/videos' },
+      { name: 'Images', href: '/admin/images' },
+      { name: 'Branding', href: '/admin/branding' },
+    ],
+  },
 ]
 
 const icons: Record<string, string> = {
   home: '<path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>',
+  map: '<path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>',
   clipboard:
     '<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>',
   chart:
@@ -171,10 +191,79 @@ const icons: Record<string, string> = {
         font-weight: 500;
       }
 
-      .nav-item svg {
+      .nav-item svg,
+      .nav-section summary svg {
         width: 18px;
         height: 18px;
         flex-shrink: 0;
+      }
+
+      .nav-section {
+        margin-top: 2px;
+      }
+
+      .nav-section summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 10px 12px;
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        color: var(--text-secondary);
+        cursor: pointer;
+        list-style: none;
+      }
+
+      .nav-section summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .nav-section summary:hover {
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      .nav-section summary .label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .nav-section[open] summary .chevron {
+        transform: rotate(180deg);
+      }
+
+      .chevron {
+        width: 16px;
+        height: 16px;
+        transition: transform 0.15s ease;
+      }
+
+      .nav-children {
+        margin: 2px 0 8px 22px;
+        padding-left: 12px;
+        border-left: 1px solid var(--border-subtle);
+      }
+
+      .nav-child {
+        display: block;
+        padding: 6px 10px;
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        color: var(--text-secondary);
+        text-decoration: none;
+      }
+
+      .nav-child:hover {
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      .nav-child.active {
+        background: var(--accent-light);
+        color: var(--accent-dark);
+        font-weight: 500;
       }
 
       .sidebar-footer {
@@ -205,6 +294,47 @@ const icons: Record<string, string> = {
       .admin-main {
         padding: 32px 40px;
         max-width: 1200px;
+      }
+
+      .admin-main.wide {
+        max-width: none;
+      }
+
+      .site-switch {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px 24px;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .site-switch p {
+        margin: 0;
+        font-size: 14px;
+        color: #4b5563;
+      }
+
+      .site-switch-links {
+        display: flex;
+        flex-shrink: 0;
+        gap: 16px;
+        font-size: 14px;
+      }
+
+      .site-switch-links a {
+        font-weight: 500;
+        text-decoration: none;
+      }
+
+      .site-switch-links a.here {
+        color: #111827;
+      }
+
+      .site-switch-links a.there {
+        color: #6d28d9;
       }
 
       .page-header {
@@ -400,22 +530,6 @@ const icons: Record<string, string> = {
     </style>
   </head>
   <body>
-    <!-- Password Gate (client-side simple protection) -->
-    <div id="password-gate" class="password-gate" style="display: none;">
-      <form class="password-form" id="auth-form">
-        <h1>Admin Access</h1>
-        <p>Enter the admin password to continue.</p>
-        <div id="password-error" class="password-error">Incorrect password</div>
-        <input
-          type="password"
-          id="admin-password"
-          placeholder="Password"
-          autocomplete="current-password"
-        />
-        <button type="submit">Enter</button>
-      </form>
-    </div>
-
     <!-- Admin Layout -->
     <div id="admin-content" class="admin-layout">
       <aside class="admin-sidebar">
@@ -425,21 +539,57 @@ const icons: Record<string, string> = {
         </div>
 
         <nav class="sidebar-nav">
+          <a href="/admin" class:list={['nav-item', { active: isCurrent('/admin') }]}>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <Fragment set:html={icons.home} />
+            </svg>
+            Dashboard
+          </a>
           {
-            navItems.map((item) => (
-              <a href={item.href} class={`nav-item ${activeNav === item.href ? 'active' : ''}`}>
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <Fragment set:html={icons[item.icon]} />
-                </svg>
-                {item.name}
-              </a>
+            navSections.map((section) => (
+              <details class="nav-section" open>
+                <summary>
+                  <span class="label">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <Fragment set:html={icons[section.icon]} />
+                    </svg>
+                    {section.name}
+                  </span>
+                  <svg
+                    class="chevron"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M19 9l-7 7-7-7" />
+                  </svg>
+                </summary>
+                <div class="nav-children">
+                  {section.items.map((item) => (
+                    <a
+                      href={item.href}
+                      class:list={['nav-child', { active: isCurrent(item.href) }]}
+                    >
+                      {item.name}
+                    </a>
+                  ))}
+                </div>
+              </details>
             ))
           }
         </nav>
@@ -454,50 +604,16 @@ const icons: Record<string, string> = {
         </div>
       </aside>
 
-      <main class="admin-main">
+      <main class:list={['admin-main', { wide }]}>
+        <div class="site-switch">
+          <p>How the business did stays on the dashboard. Changing the site stays in the admin.</p>
+          <div class="site-switch-links">
+            <a class="there" href="https://dash.point.dog/southland">Dashboard</a>
+            <a class="here" href="/admin">Admin</a>
+          </div>
+        </div>
         <slot />
       </main>
     </div>
-
-    <script is:inline>
-      // Simple client-side password protection
-      // For production, use proper server-side auth
-      const ADMIN_PASSWORD_HASH = 'southland2024' // Change this!
-      const AUTH_KEY = 'southland_admin_auth'
-
-      function checkAuth() {
-        const auth = sessionStorage.getItem(AUTH_KEY)
-        return auth === 'authenticated'
-      }
-
-      function showGate() {
-        document.getElementById('password-gate').style.display = 'flex'
-        document.getElementById('admin-content').style.display = 'none'
-      }
-
-      function showContent() {
-        document.getElementById('password-gate').style.display = 'none'
-        document.getElementById('admin-content').style.display = 'grid'
-      }
-
-      // Check on load
-      if (!checkAuth()) {
-        showGate()
-      }
-
-      // Handle form submit
-      document.getElementById('auth-form').addEventListener('submit', function (e) {
-        e.preventDefault()
-        const password = document.getElementById('admin-password').value
-
-        if (password === ADMIN_PASSWORD_HASH) {
-          sessionStorage.setItem(AUTH_KEY, 'authenticated')
-          showContent()
-        } else {
-          document.getElementById('password-error').style.display = 'block'
-          document.getElementById('admin-password').value = ''
-        }
-      })
-    </script>
   </body>
 </html>

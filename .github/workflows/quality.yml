@@ -15,6 +15,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # apps/astro-content depends on file:../../../mothership/packages/admin-core
+      - name: Checkout admin-core
+        uses: actions/checkout@v4
+        with:
+          repository: mikeusry/mothership
+          ssh-key: ${{ secrets.MOTHERSHIP_DEPLOY_KEY }}
+          path: .mothership
+          sparse-checkout: packages/admin-core
+
+      - name: Place admin-core beside the repo
+        run: mv .mothership ../mothership
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 

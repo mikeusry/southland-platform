@@ -6,8 +6,10 @@
  * green, and why the five-star and the one-star wrote the same sentence.
  *
  * 🛑 Mix rates are read from torched.mdx `dosingInstructions`. Do not retype
- * ounces in the prose as the source of truth. Anchor ids are live in emails —
- * do not rename them.
+ * ounces in the prose as the source of truth.
+ *
+ * Local only. Production returns 404 — this page does more harm than good live.
+ * Emails that still point at these anchors will 404 until those sends are updated.
  */
 import { getCollection } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
@@ -16,7 +18,11 @@ import CloudinaryHero from '../../components/CloudinaryHero.astro'
 import StarRating from '../../components/product/StarRating.astro'
 import { buildCloudinaryUrl, buildSouthlandUrl } from '../../lib/cloudinary'
 
-export const prerender = true
+export const prerender = false
+
+if (import.meta.env.PROD) {
+  return new Response(null, { status: 404, statusText: 'Not Found' })
+}
 
 const products = await getCollection('products')
 const torched = products.find((p) => p.data.shopifyHandle === 'torched-all-natural-weed-killer')

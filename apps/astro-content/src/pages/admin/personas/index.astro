@@ -9,9 +9,12 @@
 import AdminLayout from '../../../layouts/AdminLayout.astro'
 import { PERSONAS, getJTBDCoverage, getNextBestMove } from '../../../lib/persona-profiles'
 import { PAGE_GROUPS } from '../../../lib/site-audit-pages'
+import { getServerEnv } from '../../../lib/server-env'
+import { formatSiteScan } from '@pointdog/admin-core'
+import { readSiteScan } from '@pointdog/admin-core/api'
 import type { PersonaProfile } from '../../../lib/persona-profiles'
 
-export const prerender = true
+export const prerender = false
 
 // ── Segment definitions ─────────────────────────────────────────────────────
 const SEGMENTS = [
@@ -97,6 +100,13 @@ const greenfieldCount = rows.filter((r) => r.status === 'greenfield').length
 const totalCustomers = rows.reduce((sum, r) => sum + r.customerCount, 0)
 const totalJobs = rows.reduce((sum, r) => sum + r.coverage.total, 0)
 const coveredJobs = rows.reduce((sum, r) => sum + r.coverage.covered, 0)
+const scanUrl = getServerEnv(Astro.locals, 'MOTHERSHIP_SUPABASE_URL')
+const scanKey = getServerEnv(Astro.locals, 'MOTHERSHIP_SUPABASE_SERVICE_KEY')
+const scan =
+  scanUrl && scanKey
+    ? await readSiteScan(scanUrl, scanKey, 'southland')
+    : { scannedAt: null, pageCount: null }
+const scanLabel = formatSiteScan(scan.scannedAt, scan.pageCount)
 ---
 
 <AdminLayout title="Personas">
@@ -111,6 +121,7 @@ const coveredJobs = rows.reduce((sum, r) => sum + r.coverage.covered, 0)
           totalJobs
         } jobs covered
       </p>
+      <p class="subtitle">{scanLabel}</p>
     </header>
 
     <!-- ── Underline tabs ──────────────────────────────────────────────── -->

@@ -6,6 +6,7 @@
  * No HTML proxying — Shopify is API-only backend.
  */
 import { defineMiddleware } from 'astro:middleware'
+import { gateAdmin } from './lib/dash-admin'
 
 // Permanent redirects — old Shopify URLs → new Astro routes
 // Mapped from GSC BigQuery inventory (last 90 days) of /pages/* and /collections/* URLs.
@@ -123,6 +124,15 @@ function isRateLimited(ip: string): boolean {
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url
+
+  const adminGate = await gateAdmin({
+    request: context.request,
+    url: context.url,
+    locals: context.locals,
+    cookies: context.cookies,
+    brand: 'southland',
+  })
+  if (adminGate) return adminGate
 
   // Conventional sitemap path → @astrojs/sitemap output
   if (pathname === '/sitemap.xml') {

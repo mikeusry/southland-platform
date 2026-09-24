@@ -82,9 +82,9 @@ const teaches = (p: (typeof usable)[number]) =>
   Boolean(p.data.muxPlaybackId && TEACHES.test(p.data.videoTitle ?? ''))
 
 /** Product-specific handbooks. Index still reprints dosing; the handbook is the walk-through. */
-const HANDBOOKS: Record<string, string> = {
-  'torched-all-natural-weed-killer': '/how-to-use/torched/',
-}
+const HANDBOOKS: Record<string, string> = import.meta.env.DEV
+  ? { 'torched-all-natural-weed-killer': '/how-to-use/torched/' }
+  : {}
 
 const withVideo = usable.filter(teaches).length
 

@@ -105,7 +105,8 @@ export default defineConfig({
         !page.includes('/admin/') &&
         !page.includes('/account') &&
         !page.includes('/survey/') &&
-        !page.includes('/homepage-b'),
+        !page.includes('/homepage-b') &&
+        !page.includes('/how-to-use/torched'),
     }),
     appendFlashspeedBlogRedirects(),
   ],
@@ -141,6 +142,11 @@ export default defineConfig({
     format: 'directory',
   },
   vite: {
+    server: {
+      watch: {
+        ignored: ['!**/node_modules/@pointdog/admin-core/**'],
+      },
+    },
     define: {
       'import.meta.env.PUBLIC_SITE_URL': JSON.stringify(
         process.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'

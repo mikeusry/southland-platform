@@ -34,6 +34,8 @@
           { "label": "Game Birds", "href": "/poultry/game-birds/", "group": "By Bird" },
           { "label": "Turkey", "href": "/poultry/turkey/", "group": "By Bird" },
           { "label": "Application Calculator", "href": "/application-rate-calculator/", "group": "Resources" },
+          { "label": "Water-System Planner", "href": "/tools/poultry-water-system-planner/", "group": "Resources" },
+          { "label": "Water-Line Cleaning Hub", "href": "/blog/poultry-water-line-biofilm-and-cleaning-hub/", "group": "Resources" },
           { "label": "Poultry Biosecurity", "href": "/blogs/poultry-biosecurity", "group": "Resources" },
           { "label": "Case Studies", "href": "/blogs/case-studies", "group": "Resources" },
           { "label": "Shop All Poultry", "href": "/poultry/", "group": "Resources" }
@@ -51,6 +53,9 @@
           { "label": "Hydroseeders", "href": "/hydroseeders/", "group": "Specialty" },
           { "label": "Shop All Lawn & Garden", "href": "/lawn/", "group": "Specialty" },
           { "label": "Application Calculator", "href": "/application-rate-calculator/", "group": "Resources" },
+          { "label": "Lawn Weed Selector", "href": "/tools/lawn-weed-selector/", "group": "Resources" },
+          { "label": "Torched Comparison Center", "href": "/lawn/torched-comparison-center/", "group": "Resources" },
+          { "label": "Lawn Health Quiz", "href": "/tools/lawn-quiz/", "group": "Resources" },
           { "label": "Erosion Seed Calculator", "href": "/erosion-control-seed-calculator/", "group": "Resources" },
           { "label": "Humate Hub", "href": "/blogs/humate-hub", "group": "Resources" },
           { "label": "Case Studies", "href": "/blogs/case-studies", "group": "Resources" }
@@ -103,6 +108,7 @@
         "title": "Resources",
         "links": [
           { "label": "Blog", "href": "/blog/" },
+          { "label": "Tools", "href": "/tools/" },
           { "label": "Case Studies", "href": "/blogs/case-studies" },
           { "label": "Humate Hub", "href": "/blogs/humate-hub" },
           { "label": "Poultry Biosecurity", "href": "/blogs/poultry-biosecurity" },

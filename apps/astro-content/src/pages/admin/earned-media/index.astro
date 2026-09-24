@@ -1,0 +1,159 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro'
+import OpportunitiesScreen from '@pointdog/admin-core/components/OpportunitiesScreen.astro'
+import {
+  SOUTHLAND_GAP_DEFAULTS,
+  applyOpportunityAction,
+  applyOpportunityForm,
+  blankOpportunity,
+  normalizeDomain,
+  opportunityFromGap,
+  parseGapCandidatePayload,
+  type GapCandidate,
+} from '@pointdog/admin-core'
+import { loadEarnedMedia, saveOpportunity } from '@pointdog/admin-core/api'
+import { dataForSeoConfigured, fetchCompetitorGaps } from '../../../lib/earned-media-dfs'
+import { getServerEnv } from '../../../lib/server-env'
+
+export const prerender = false
+
+const brandId = 'southland'
+const supabaseUrl = getServerEnv(Astro.locals, 'MOTHERSHIP_SUPABASE_URL')
+const serviceKey = getServerEnv(Astro.locals, 'MOTHERSHIP_SUPABASE_SERVICE_KEY')
+
+let error: string | null = null
+let notice: string | null = Astro.url.searchParams.get('notice')
+const selectedId = Astro.url.searchParams.get('id')
+
+if (!supabaseUrl || !serviceKey) {
+  error = 'Earned-media storage is not configured.'
+}
+
+let opportunities: Awaited<ReturnType<typeof loadEarnedMedia>>['opportunities'] = []
+let scorecard: Awaited<ReturnType<typeof loadEarnedMedia>>['scorecard'] = {
+  opportunitiesInbox: 0,
+  opportunitiesQualified: 0,
+  pitchesApproved: 0,
+  pitchesSent: 0,
+  placementsPublished: 0,
+  verifiedLinks: 0,
+  verifiedUnlinkedMentions: 0,
+  highValueCommercial: 0,
+  rejected: 0,
+  claimsBlocked: 0,
+  activeWip: 0,
+}
+let candidates: GapCandidate[] = []
+let scanMeta: { ourDomain: string; competitors: string[] } | null = null
+
+let selected = selectedId
+  ? (opportunities.find((row) => row.id === selectedId) ?? blankOpportunity(brandId, selectedId))
+  : blankOpportunity(brandId)
+
+const dfsReady = dataForSeoConfigured(Astro.locals)
+
+if (supabaseUrl && serviceKey) {
+  try {
+    const loaded = await loadEarnedMedia(supabaseUrl, serviceKey, brandId)
+    opportunities = loaded.opportunities
+    scorecard = loaded.scorecard
+    selected = selectedId
+      ? (loaded.opportunities.find((row) => row.id === selectedId) ??
+        blankOpportunity(brandId, selectedId))
+      : blankOpportunity(brandId)
+
+    if (Astro.request.method === 'POST') {
+      const data = await Astro.request.formData()
+      const action = typeof data.get('action') === 'string' ? String(data.get('action')) : 'save'
+
+      if (action === 'scan') {
+        const ourDomain =
+          (typeof data.get('ourDomain') === 'string' && String(data.get('ourDomain')).trim()) ||
+          SOUTHLAND_GAP_DEFAULTS.ourDomain
+        const competitorsRaw =
+          typeof data.get('competitors') === 'string' ? String(data.get('competitors')) : ''
+        const competitors = competitorsRaw
+          .split(/[,\s]+/)
+          .map((part) => part.trim())
+          .filter(Boolean)
+        const list = competitors.length > 0 ? competitors : [...SOUTHLAND_GAP_DEFAULTS.competitors]
+        scanMeta = { ourDomain, competitors: list }
+        const result = await fetchCompetitorGaps(Astro.locals, {
+          ourDomain,
+          competitors: list,
+          minRank: SOUTHLAND_GAP_DEFAULTS.minRank,
+          limit: 25,
+        })
+        if (result.error) error = result.error
+        candidates = result.candidates
+        if (!result.error && candidates.length === 0) {
+          notice = 'Scan found no usable articles. Try different competitors.'
+        } else if (!result.error) {
+          notice = `Found ${candidates.length} articles citing competitors on sites that never link to us. Open a few before importing.`
+        }
+      } else if (action === 'import_gaps') {
+        const selectedPayloads = data.getAll('candidate').map(String)
+        const existingDomains = new Set(
+          loaded.opportunities.map((row) => normalizeDomain(row.outletDomain ?? '')).filter(Boolean)
+        )
+        let imported = 0
+        let skipped = 0
+        for (const payload of selectedPayloads) {
+          const candidate = parseGapCandidatePayload(payload)
+          if (!candidate) continue
+          if (existingDomains.has(candidate.domain)) {
+            skipped += 1
+            continue
+          }
+          const row = opportunityFromGap(brandId, candidate, SOUTHLAND_GAP_DEFAULTS.ourDomain)
+          await saveOpportunity(supabaseUrl, serviceKey, row)
+          existingDomains.add(candidate.domain)
+          imported += 1
+        }
+        if (imported === 0 && selectedPayloads.length === 0) {
+          error = 'Pick at least one domain to import'
+        } else {
+          return Astro.redirect(
+            `/admin/earned-media?notice=${encodeURIComponent(`Imported ${imported}${skipped ? ` (skipped ${skipped} already in queue)` : ''}`)}`
+          )
+        }
+      } else {
+        const id = typeof data.get('id') === 'string' ? String(data.get('id')) : ''
+        const existing =
+          loaded.opportunities.find((row) => row.id === id) ??
+          blankOpportunity(brandId, id || undefined)
+        const drafted = applyOpportunityForm(existing, data)
+        const result = applyOpportunityAction(drafted, loaded.opportunities, action)
+        selected = result.row
+        if (result.error) {
+          error = result.error
+        } else if (!result.row.title.trim() || !result.row.outletName.trim()) {
+          error = 'Title and outlet are required'
+        } else {
+          await saveOpportunity(supabaseUrl, serviceKey, result.row)
+          return Astro.redirect(`/admin/earned-media?id=${result.row.id}&notice=Saved`)
+        }
+      }
+
+      const refreshed = await loadEarnedMedia(supabaseUrl, serviceKey, brandId)
+      opportunities = refreshed.opportunities
+      scorecard = refreshed.scorecard
+    }
+  } catch (caught) {
+    error = caught instanceof Error ? caught.message : 'Could not load earned media'
+  }
+}
+---
+
+<AdminLayout title="Digital PR" activeNav="/admin/earned-media" wide>
+  <OpportunitiesScreen
+    opportunities={opportunities}
+    selected={selected}
+    scorecard={scorecard}
+    candidates={candidates}
+    scanMeta={scanMeta}
+    dfsReady={dfsReady}
+    error={error}
+    notice={notice}
+  />
+</AdminLayout>
