@@ -23,3 +23,8 @@
 /llms.txt
   Content-Type: text/plain; charset=utf-8
   Cache-Control: public, max-age=3600
+
+# Written by the deploy workflow; read back to confirm the live site is this build.
+/version.txt
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: no-store
