@@ -151,13 +151,22 @@ export function isValidUtmCampaign(value: unknown): value is string {
  * revenue to whichever campaign it collides with. The 2026-04 L&G incident
  * misattributed $3,616 exactly this way.
  *
+ * Only applies to Google Ads clicks (a gclid is present) — the only traffic the
+ * Pulse joins to spend by slug. Email (Klaviyo, Customer.io), Meta, and social
+ * stamps use names like "Welcome Series, Email #1 (YfNzYt)", "Torched Sales",
+ * "link_in_bio" that fail the slug shape but ARE the attribution for those
+ * channels. Checked against every order 2026-01-17 → 2026-10-02: 169 stamps fail
+ * the shape, 45 with a gclid (the garbage above), 124 without (all legitimate).
+ *
  * Other _pd_ params are left untouched: gclid is ground truth and is what the
  * server-side resolver will use to recover the campaign properly.
  */
 function withValidatedCampaign(
   attrs: Array<{ key: string; value: string }>,
-  campaignKey: string
+  campaignKey: string,
+  gclidKey: string
 ): Array<{ key: string; value: string }> {
+  if (!attrs.some((a) => a.key === gclidKey)) return attrs
   return attrs.filter((a) => a.key !== campaignKey || isValidUtmCampaign(a.value))
 }
 
@@ -206,7 +215,7 @@ function getAttributionAttrs(): Array<{ key: string; value: string }> {
     }
     if (data._landing_page) attrs.push({ key: '_pd_landing_page', value: data._landing_page })
     if (data._referrer) attrs.push({ key: '_pd_referrer', value: data._referrer })
-    return withValidatedCampaign(attrs, '_pd_utm_campaign')
+    return withValidatedCampaign(attrs, '_pd_utm_campaign', '_pd_gclid')
   } catch {
     return []
   }
@@ -245,7 +254,7 @@ function getFirstTouchAttrs(): Array<{ key: string; value: string }> {
     if (data._landing_page) attrs.push({ key: '_pd_ft_landing_page', value: data._landing_page })
     if (data._referrer) attrs.push({ key: '_pd_ft_referrer', value: data._referrer })
     if (data._timestamp) attrs.push({ key: '_pd_ft_timestamp', value: String(data._timestamp) })
-    return withValidatedCampaign(attrs, '_pd_ft_utm_campaign')
+    return withValidatedCampaign(attrs, '_pd_ft_utm_campaign', '_pd_ft_gclid')
   } catch {
     return []
   }
