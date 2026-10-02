@@ -39,6 +39,9 @@ export interface ProductVariant {
   price: Money
   compareAtPrice: Money | null
   availableForSale: boolean
+  sku: string | null
+  /** UPC/EAN as entered in Shopify admin */
+  barcode: string | null
   image: ProductImage | null
   selectedOptions: VariantOption[]
   /** Present when the variant is sold via a subscription / selling plan */

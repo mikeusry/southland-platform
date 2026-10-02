@@ -16,6 +16,8 @@ const PRODUCT_VARIANT_FIELDS = `
   price { amount currencyCode }
   compareAtPrice { amount currencyCode }
   availableForSale
+  sku
+  barcode
   image { url altText width height }
   selectedOptions { name value }
   sellingPlanAllocations(first: 5) {
@@ -188,6 +190,8 @@ function parseVariant(node: Record<string, unknown>): ProductVariant {
     price: node.price as ProductVariant['price'],
     compareAtPrice: (node.compareAtPrice as ProductVariant['compareAtPrice']) ?? null,
     availableForSale: node.availableForSale as boolean,
+    sku: (node.sku as string) || null,
+    barcode: (node.barcode as string) || null,
     image: node.image ? parseImage(node.image as Record<string, unknown>) : null,
     selectedOptions,
     sellingPlanAllocations: spAlloc?.edges?.map((e) => e.node) ?? [],

@@ -514,6 +514,7 @@ const productsCollection = defineCollection({
     primaryPersona: z.string().optional(),
     guideName: z.string().optional(),
     guidePhoto: z.string().optional(), // Cloudinary public ID
+    finalCtaBody: z.string().optional(), // Replaces the farm-oriented default in the PDP final CTA
 
     // --- Related ---
     relatedProductHandles: z.array(z.string()).optional().default([]),
