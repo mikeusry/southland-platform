@@ -82,9 +82,17 @@ const initialImageUrl = matchedVariant?.image?.url ?? null
 const klaviyoKey = getServerEnv(Astro.locals, 'KLAVIYO_API_KEY')
 const reviewData = await fetchProductReviews(product.id, klaviyoKey)
 
-// ── Related products (same productType collection) ──────────────────────────
+// ── Related products (curated handles → same productType collection) ─────────
 let relatedProducts: Product[] = []
-if (product.productType) {
+const curatedRelatedHandles = [...new Set(tinaProduct?.data.relatedProductHandles ?? [])].filter(
+  (h) => h !== shopifyHandle
+)
+if (curatedRelatedHandles.length > 0) {
+  const fetched = await Promise.all(
+    curatedRelatedHandles.map((h) => getProductByHandle(client, h).catch(() => null))
+  )
+  relatedProducts = fetched.filter((p): p is NonNullable<typeof p> => p !== null).slice(0, 4)
+} else if (product.productType) {
   const typeHandle = product.productType.toLowerCase().replace(/\s+/g, '-')
   const collection = await getCollectionProducts(client, typeHandle, 8)
   if (collection) {
@@ -230,9 +238,12 @@ const hasGallonVariant = !!gallonVariant
 const caseSavings = gallonVariant ? Math.round(parseFloat(gallonVariant.price.amount) * 4 * 0.1) : 0
 
 // ── Display title (strip pipe-delimited SEO keywords) ──────────────────────
-const displayTitle =
-  tina?.headline ||
-  (product.title.includes('|') ? product.title.split('|')[0].trim() : product.title)
+const shopifyBaseTitle = product.title.includes('|')
+  ? product.title.split('|')[0].trim()
+  : product.title
+const displayTitle = tina?.headline || shopifyBaseTitle
+// A headline can be a full sentence; breadcrumbs, schema and CTA copy need the name.
+const productName = tina?.name || shopifyBaseTitle
 
 // ── SEO metadata ────────────────────────────────────────────────────────────
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
@@ -293,9 +304,14 @@ const returnPolicy = {
 }
 
 // Build per-variant offers
+const gtinProps = (barcode: string | null) =>
+  barcode && /^\d{8}$|^\d{12,14}$/.test(barcode) ? { gtin: barcode } : {}
+
 const variantOffers = product.variants.map((variant) => ({
   '@type': 'Offer' as const,
-  name: variant.title !== 'Default Title' ? variant.title : product.title,
+  name: variant.title !== 'Default Title' ? variant.title : productName,
+  ...(variant.sku ? { sku: variant.sku } : {}),
+  ...gtinProps(variant.barcode),
   price: variant.price.amount,
   priceCurrency: variant.price.currencyCode || 'USD',
   availability: variant.availableForSale
@@ -395,13 +411,15 @@ const reviewSchemaProps =
 // description in JSON-LD tells Google something different than the page tells the
 // customer. Shopify remains the fallback for products with no Tina file.
 const schemaDescription = tina?.seoDescription || tina?.shortDescription || product.description
+// Same rule for the visible hero blurb: editorial copy wins over Shopify's.
+const heroDescription = tina?.shortDescription || product.description
 
 // ProductGroup + hasVariant for multi-variant products with named options
 const productSchema = hasNamedVariants
   ? {
       '@context': 'https://schema.org',
       '@type': 'ProductGroup',
-      name: product.title,
+      name: productName,
       description: schemaDescription,
       url: pageUrl,
       image: product.images.map((img) => img.url),
@@ -413,8 +431,9 @@ const productSchema = hasNamedVariants
       productGroupID: product.id,
       hasVariant: product.variants.map((variant) => ({
         '@type': 'Product',
-        name:
-          variant.title !== 'Default Title' ? `${product.title} — ${variant.title}` : product.title,
+        name: variant.title !== 'Default Title' ? `${productName} — ${variant.title}` : productName,
+        ...(variant.sku ? { sku: variant.sku } : {}),
+        ...gtinProps(variant.barcode),
         image: variant.image?.url || product.images[0]?.url,
         offers: {
           '@type': 'Offer',
@@ -441,7 +460,9 @@ const productSchema = hasNamedVariants
   : {
       '@context': 'https://schema.org',
       '@type': 'Product',
-      name: product.title,
+      name: productName,
+      ...(!hasMultipleVariants && product.variants[0]?.sku ? { sku: product.variants[0].sku } : {}),
+      ...(!hasMultipleVariants ? gtinProps(product.variants[0]?.barcode ?? null) : {}),
       description: schemaDescription,
       url: pageUrl,
       image: product.images.map((img) => img.url),
@@ -491,42 +512,13 @@ const COLLECTION_TO_HUB: Record<string, string> = {
 }
 const hubUrl = COLLECTION_TO_HUB[collectionHandle] || `/products/`
 
-const breadcrumbSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'BreadcrumbList',
-  itemListElement: [
-    {
-      '@type': 'ListItem',
-      position: 1,
-      name: 'Home',
-      item: siteUrl,
-    },
-    ...(collectionHandle
-      ? [
-          {
-            '@type': 'ListItem',
-            position: 2,
-            name: resolvedProductType,
-            item: `${siteUrl}${hubUrl}`,
-          },
-        ]
-      : []),
-    {
-      '@type': 'ListItem',
-      position: collectionHandle ? 3 : 2,
-      name: displayTitle,
-      item: pageUrl,
-    },
-  ],
-}
-
-// ── Breadcrumb items ────────────────────────────────────────────────────────
+// ── Breadcrumb items (<Breadcrumbs> emits the BreadcrumbList JSON-LD) ──────
 const breadcrumbItems = [
   { label: 'Home', href: '/' },
   ...(collectionHandle
     ? [{ label: resolvedProductType, href: hubUrl }]
     : [{ label: 'Products', href: '/products/' }]),
-  { label: displayTitle, href: `/products/${handle}/` },
+  { label: productName, href: `/products/${handle}/` },
 ]
 
 // ── Price display for static rendering ──────────────────────────────────────
@@ -600,7 +592,7 @@ const faqSchema = shouldEmitFaqSchema
   : null
 
 // ── Aggregate all schemas ──────────────────────────────────────────────────
-const schemas = [productSchema, breadcrumbSchema, ...(faqSchema ? [faqSchema] : [])]
+const schemas = [productSchema, ...(faqSchema ? [faqSchema] : [])]
 
 // ── Proof stats (TinaCMS → generic defaults) ───────────────────────────────
 const proofStats = tina?.proofStats?.length
@@ -637,7 +629,10 @@ const SEGMENT_HUBS: Record<string, { label: string; href: string }> = {
   turf: { label: 'Lawn & Turf Hub', href: '/lawn/' },
   agriculture: { label: 'Agriculture Hub', href: '/agriculture/crops/' },
 }
-const hubLink = SEGMENT_HUBS[segment ?? inferredSegment ?? ''] ?? null
+const hubLink =
+  firstTouchSegment === 'waste'
+    ? { label: 'Septic & Waste', href: '/products/waste-treatment/' }
+    : (SEGMENT_HUBS[segment ?? inferredSegment ?? ''] ?? null)
 
 // ── PDP tier (for analytics) ───────────────────────────────────────────────
 const pdpTier = hasTinaContent ? 'enriched' : 'baseline'
@@ -1068,11 +1063,11 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
 
           {/* Short description */}
           {
-            product.description && (
+            heroDescription && (
               <p class="mt-5 text-sm leading-relaxed text-gray-600">
-                {product.description.length > 300
-                  ? product.description.slice(0, 300).trim() + '...'
-                  : product.description}
+                {heroDescription.length > 300
+                  ? heroDescription.slice(0, 300).trim() + '...'
+                  : heroDescription}
               </p>
             )
           }
@@ -1693,6 +1688,7 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
       id="pdp-final-cta"
       class="border-t border-gray-100 bg-brand-green-dark py-12 md:py-16"
       data-section="pdp-cta"
+      data-persona-swap={firstTouchSegment === 'waste' ? 'off' : undefined}
     >
       <div class="mx-auto max-w-3xl px-4 text-center">
         {
@@ -1711,8 +1707,10 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
           {tina?.guideName ? `Talk to ${tina.guideName}` : 'Ready to Get Started?'}
         </h2>
         <p class="mx-auto mt-3 max-w-xl text-green-200">
-          Have questions about {displayTitle}? Our team has helped over 1,000 farms find the right
-          solution. Call us or shop now.
+          {
+            tina?.finalCtaBody ??
+              `Have questions about ${productName}? Our team has helped over 1,000 farms find the right solution. Call us or shop now.`
+          }
         </p>
         <div class="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <a
@@ -1857,7 +1855,7 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
     if (!config) return
 
     const ctaSection = document.getElementById('pdp-final-cta')
-    if (!ctaSection) return
+    if (!ctaSection || ctaSection.dataset.personaSwap === 'off') return
 
     const h2 = ctaSection.querySelector('h2')
     if (h2) h2.textContent = config.headline
