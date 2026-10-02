@@ -5,6 +5,13 @@ on:
     branches: [main, dev-audit]
   workflow_dispatch:
 
+# Back-to-back merges otherwise race, and the last upload to finish wins even
+# when it is an older commit. One deploy at a time per branch; a newer push
+# replaces any queued one.
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   quality:
     name: Quality Gate
