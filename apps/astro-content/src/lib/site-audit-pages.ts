@@ -806,18 +806,6 @@ export const PAGE_GROUPS: PageGroup[] = [
         pipeline: 'shipped',
       },
       {
-        route: '/admin/content-quality',
-        name: 'Content Quality',
-        pageType: 'utility',
-        persona: null,
-        funnelStage: 'awareness',
-        searchIntent: 'navigational',
-        primaryGoal: 'Internal',
-        priority: 'medium',
-        contentType: 'non-content',
-        pipeline: 'shipped',
-      },
-      {
         route: '/admin/site-audit',
         name: 'Site Audit',
         pageType: 'utility',
