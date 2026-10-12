@@ -124,7 +124,11 @@ export default defineConfig({
         !page.includes('/account') &&
         !page.includes('/survey/') &&
         !page.includes('/homepage-b') &&
-        !page.includes('/how-to-use/torched'),
+        !page.includes('/how-to-use/torched') &&
+        !page.includes('/cart/') &&
+        !page.includes('/search/') &&
+        !page.includes('/referral/') &&
+        !page.includes('/rewards/'),
     }),
     appendFlashspeedBlogRedirects(),
   ],
