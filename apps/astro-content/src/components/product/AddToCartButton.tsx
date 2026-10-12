@@ -37,6 +37,20 @@ export function matchVariantId(variants: ProductVariant[], requested?: string | 
   return match?.id ?? fallback
 }
 
+/**
+ * Selling plans owned by the southland-nexus Shopify app, the only app that bills renewals.
+ * A plan owned by any other app sells a subscription that is charged once and never renews
+ * (15 PORT buyers, Apr–Oct 2026, on the Headless app's "Monthly" plan 9984377077).
+ */
+const NEXUS_SELLING_PLAN_IDS = new Set(['gid://shopify/SellingPlan/10006266101'])
+
+export function nexusSellingPlanId(variant: ProductVariant): string | null {
+  const plan = variant.sellingPlanAllocations?.find((a) =>
+    NEXUS_SELLING_PLAN_IDS.has(a.sellingPlan.id)
+  )
+  return plan?.sellingPlan.id ?? null
+}
+
 function formatPrice(money: Money): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -120,7 +134,15 @@ export default function AddToCartButton({
     setError(null)
 
     try {
-      const sellingPlanId = selectedVariant.sellingPlanAllocations?.[0]?.sellingPlan?.id
+      const sellingPlanId = nexusSellingPlanId(selectedVariant)
+      if (selectedVariant.sellingPlanAllocations?.length && !sellingPlanId) {
+        console.error(
+          '[subscription] no Nexus selling plan offered',
+          selectedVariant.id,
+          selectedVariant.sellingPlanAllocations.map((a) => a.sellingPlan.id)
+        )
+        throw new Error('this subscription is temporarily unavailable')
+      }
       await addToCart([
         {
           merchandiseId: selectedVariant.id,
