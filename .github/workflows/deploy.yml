@@ -65,8 +65,28 @@ jobs:
           # succeeds — minified errors will just stay minified in Sentry.
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
+      - name: Stamp build commit
+        run: echo "${{ github.sha }}" > apps/astro-content/dist/version.txt
+
       - name: Deploy to Cloudflare Pages
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: npx wrangler pages deploy apps/astro-content/dist --project-name=southland-website --branch=${{ github.ref_name }} --commit-hash=${{ github.sha }} --commit-dirty=true
+
+      # The deploy can report success while production serves another build
+      # (2026-10-02: an older commit's upload finished last and went live).
+      - name: Verify production serves this commit
+        if: github.ref_name == 'main'
+        run: |
+          for i in $(seq 1 18); do
+            live=$(curl -fsS "https://southlandorganics.com/version.txt?t=$(date +%s)" | tr -d '[:space:]' || true)
+            if [ "$live" = "${{ github.sha }}" ]; then
+              echo "Live site is ${{ github.sha }}"
+              exit 0
+            fi
+            echo "Attempt $i: live is '${live:-unreachable}', waiting"
+            sleep 10
+          done
+          echo "::error::Production is serving '${live:-unreachable}', not ${{ github.sha }}. Re-run this deploy."
+          exit 1
