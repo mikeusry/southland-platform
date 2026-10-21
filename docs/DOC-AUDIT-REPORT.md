@@ -136,7 +136,7 @@ The color `#1a5f3c` appears **nowhere** in the actual codebase. README predates 
 | Port 4400 for astro-content | CORRECT | Configured in dev script |
 | "pnpm 9.15+" | CORRECT | Matches package.json |
 | CDP Personas (betty, commercial, lawn) | CORRECT | Match persona.ts and worker |
-| Admin password "southland2024" | CORRECT | In AdminLayout.astro |
+| Admin password "(removed; admin login is via Dash SSO)" | CORRECT | In AdminLayout.astro |
 | Cloudinary cloud "southland-organics" | CORRECT | In .env.example |
 | persona-worker app exists | CORRECT | Fixed — added to structure |
 | docs/schemas/bigquery-outcomes.sql exists | CORRECT | File verified on disk |

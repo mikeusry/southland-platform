@@ -28,6 +28,8 @@ When Mike mentions a task number, **read it and start solving it**. The task des
 
 **Goal:** Migrate from Shopify Liquid theme to Astro-powered headless architecture with full SEO control, unified header/footer, and marketing-friendly content editing.
 
+**Status:** Live. Astro on Cloudflare Pages serves `southlandorganics.com`; Shopify is the API-only commerce backend (checkout via `shop.southlandorganics.com`). Phase history, the original architecture diagram, and the migration-phase table: [docs/STATUS-HISTORY.md](docs/STATUS-HISTORY.md).
+
 ### Stack
 
 | Layer | Technology |
@@ -38,59 +40,6 @@ When Mike mentions a task number, **read it and start solving it**. The task des
 | Images | Cloudinary CDN |
 | Hosting | Cloudflare Pages |
 | Fonts | Self-hosted (Eveleth Dot WOFF2, Open Sans via Google Fonts) |
-
-### Architecture Diagram
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         ASTRO FRONTEND                              │
-│                    (southlandorganics.com)                          │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐   │
-│  │     /       │ │  /podcast/  │ │   /blog/    │ │   /about/   │   │
-│  │  Homepage   │ │   Hub +     │ │  Articles   │ │  Contact    │   │
-│  │             │ │  Episodes   │ │             │ │  Team, etc  │   │
-│  └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘   │
-│                                                                     │
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │                    /collections/[slug]/                      │   │
-│  │         SEO Content (TinaCMS) + Products (Shopify)           │   │
-│  └─────────────────────────────────────────────────────────────┘   │
-│                                                                     │
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │                    /products/[handle]/                       │   │
-│  │              Product Pages (Shopify Storefront API)          │   │
-│  └─────────────────────────────────────────────────────────────┘   │
-│                                                                     │
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │              Header / Footer (Astro Components)              │   │
-│  │                    ONE source of truth                       │   │
-│  └─────────────────────────────────────────────────────────────┘   │
-│                                                                     │
-└───────────────────────────┬─────────────────────────────────────────┘
-                            │
-        ┌───────────────────┼───────────────────┐
-        │                   │                   │
-        ▼                   ▼                   ▼
-┌───────────────┐   ┌───────────────┐   ┌───────────────┐
-│   TINACMS     │   │   SHOPIFY     │   │  CLOUDINARY   │
-│   /admin      │   │  Storefront   │   │     CDN       │
-│               │   │     API       │   │               │
-│  • Blog       │   │  • Products   │   │  • Images     │
-│  • Episodes   │   │  • Cart       │   │  • Podcast    │
-│  • Pages      │   │  • Checkout   │   │    covers     │
-│  • Collections│   │  • Menus      │   │  • Team       │
-│    SEO        │   │  • Inventory  │   │    photos     │
-└───────────────┘   └───────────────┘   └───────────────┘
-        │                   │
-        ▼                   ▼
-┌───────────────┐   ┌───────────────┐
-│    GitHub     │   │ Shopify Admin │
-│  (content     │   │ (commerce     │
-│   storage)    │   │  management)  │
-└───────────────┘   └───────────────┘
-```
 
 ### Content Ownership Matrix
 
@@ -115,7 +64,7 @@ When Mike mentions a task number, **read it and start solving it**. The task des
 | `/` | Shopify (proxied) | Homepage |
 | `/podcast/` | Astro + TinaCMS | Podcast hub |
 | `/podcast/[slug]/` | Astro + TinaCMS | Episode pages |
-| `/blog/` | Astro + TinaCMS | Blog index (287 posts migrated) |
+| `/blog/` | Astro + TinaCMS | Blog index |
 | `/blog/[slug]/` | Astro + TinaCMS | Blog posts |
 | `/collections/[slug]/` | Shopify (proxied) | Collection pages (Astro built, not routed yet) |
 | `/products/[handle]/` | Shopify (proxied) | Product pages |
@@ -132,39 +81,18 @@ When Mike mentions a task number, **read it and start solving it**. The task des
 | `/admin/videos/` | Astro + Mothership Supabase | Mux video library + transcript search |
 | `/api/video-search` | Astro API | Transcript text search for video library |
 
-### Current Phase: Phase 1 — Testing (Feb 19, 2026)
+## Middleware & Hosting
 
-**Status:** Deployed to `southland-website.pages.dev`. DNS still at Shopify. NOT live on production domain.
-
-**Astro routes (all verified 200 OK on pages.dev):**
-- `/podcast/*` — Hub, episodes, topics, search, RSS feed
-- `/about/` — About page
-- `/contact/` — Contact page
-- `/distribution/` — Distribution info
-- `/store-locator/` — Dealer locator
-- `/team/*` — Team member pages
-- `/blog/*` — Blog index + posts
-- `/admin/*` — Admin dashboard, video library
-
-**Middleware Architecture:**
+**Middleware:**
 - `src/middleware.ts` (Astro middleware) — runs inside the Cloudflare Worker
 - All routes are Astro-owned. Commerce uses Shopify Storefront API (headless). No HTML proxying.
 - Middleware responsibilities: path-level REDIRECTS (legacy Shopify URLs → new Astro routes), per-IP rate limiting on `/api/*`
 - `_routes.json` auto-generated by adapter; configured via `routes.extend` in `astro.config.mjs`
-- `functions/` directory NOT used (Advanced Mode ignores it)
+- `functions/` directory NOT used (Advanced Mode ignores it) — dead code
 
 **Canonical host:**
 - Apex `southlandorganics.com` is canonical (HTML canonical tag, OG URL, schema `@id`)
 - `www.southlandorganics.com` 301s to apex via Cloudflare Redirect Rule (zone-level)
-
-### Migration Phases
-
-| Phase | Routes | Status |
-|-------|--------|--------|
-| 1 | `/podcast/*`, `/about/`, `/contact/`, `/distribution/`, `/store-locator/`, `/team/*`, `/blog/*` | **Deployed to pages.dev, DNS pending** |
-| 2 | `/collections/*` | Built (SSR), proxied to Shopify |
-| 3 | `/products/*` | Planned |
-| 4 | `/` (homepage) | Planned |
 
 ---
 
@@ -178,38 +106,15 @@ Comprehensive Customer Data Platform strategy combining:
 - **Vector-powered personalization:** Supabase embeddings + semantic search
 - **Outcome tracking:** FCR, mortality, problem-solved metrics
 
-### Current CDP Phase
+CDP phase tracker and build order (historical): [docs/STATUS-HISTORY.md](docs/STATUS-HISTORY.md).
 
-**Status:** Week 4 Complete - Persona Scoring Worker
-
-| Track | Focus | Owner |
-|-------|-------|-------|
-| **Track A: Ads** | Consolidate 99 → 15 campaigns | Marketing |
-| **Track B: CDP** | Reality Tunnels Content (Betty) | Dev/Data |
-
-### CDP Build Order
-
-| Week | Deliverable | Status |
-|------|-------------|--------|
-| 1 | Decision Engine + Outcome Surveys | ✅ COMPLETE |
-| 2 | Reality Tunnels Infrastructure | ✅ COMPLETE |
-| 3 | Semantic Search + First Proofs | ✅ COMPLETE |
-| 4 | Persona Scoring Worker | ✅ COMPLETE |
-| 5-6 | Reality Tunnels Content (Betty) | ← NEXT |
-| 7-8 | Reality Tunnels Content (Bill) — GATED | Planned |
-
-### Reality Tunnels (Week 2)
+### Reality Tunnels
 
 **Concept:** Same site shows different content based on visitor persona. Components conditionally render CTAs, messaging, and content sections.
 
 #### Personas
 
-| ID | Name | Storage Key | Color |
-|----|------|-------------|-------|
-| `backyard` | Backyard Betty | `southland_persona` | Amber |
-| `commercial` | Broiler Bill | `southland_persona` | Green |
-| `lawn` | Turf Pro Taylor | `southland_persona` | Emerald |
-| `general` | Skipped selection | `southland_persona` | Gray |
+The canonical roster is `PersonaId` in `apps/astro-content/src/lib/persona.ts` — 13 personas (`bill`, `betty`, `bob`, …) plus `general`, with `PERSONA_CONFIG` and `PERSONA_TO_SEGMENT`. Read it there; never define personas anywhere else.
 
 #### CDP Components
 
@@ -220,32 +125,6 @@ Comprehensive Customer Data Platform strategy combining:
 | `PersonaCTA` | CTA changes by persona | `components/cdp/PersonaCTA.astro` |
 | `PersonaBanner` | Bottom bar + change modal | `components/cdp/PersonaBanner.astro` |
 | `OutcomeSurvey` | Post-purchase surveys | `components/cdp/OutcomeSurvey.astro` |
-
-#### Persona Utilities
-
-```typescript
-import { getPersonaId, setPersona, getPersonaConfig } from '../lib/persona';
-
-// Get current persona
-const persona = getPersonaId(); // 'backyard' | 'commercial' | 'lawn' | 'general' | null
-
-// Set persona (fires 'persona-changed' event)
-setPersona('commercial', 'decision_engine');
-```
-
-#### Usage Examples
-
-```astro
-<!-- Show content only for commercial users -->
-<PersonaContent show="commercial">
-  <p>Call our commercial team: 1-800-XXX-XXXX</p>
-</PersonaContent>
-
-<!-- CTA that auto-changes by persona -->
-<PersonaCTA variant="primary" />
-<!-- Backyard sees "Shop Backyard Products" → /shop/poultry/backyard/ -->
-<!-- Commercial sees "Talk to a Specialist" → /contact/commercial/ -->
-```
 
 ### Key CDP Decisions
 
@@ -339,13 +218,13 @@ Listed in `apps/astro-content/.prettierignore`
 
 ### astro-content (Port 4400)
 
-Astro 5 content site — Phase 1 LIVE routes:
+Astro 5 content site — key routes:
 
 - `/podcast/*` — Ag & Culture Podcast hub, episodes, topics, search, RSS
-- `/blog/*` — Blog index + 287 posts
+- `/blog/*` — Blog index + posts
 - `/about/`, `/contact/`, `/distribution/`, `/store-locator/` — Static pages
 - `/team/*` — Team member pages
-- `/admin/` — Admin dashboard (password protected)
+- `/admin/` — Admin dashboard (Dash SSO)
 - `/admin/videos/` — Mux video library with transcript search
 - `/build-a-case/` — Mix & Match gallon case builder
 - `/application-rate-calculator/` — Application rate calculator (12 products, 3 segments)
@@ -362,9 +241,7 @@ Lead Magnets / Calculators:
 
 Infrastructure:
 
-- `build-partials` script renders `StaticHeader`/`Footer` to HTML for HTMLRewriter injection
-- Cloudflare Pages middleware proxies non-Astro routes to Shopify
-- HTMLRewriter dormant until Shopify section IDs identified
+- `build-partials` script renders `StaticHeader`/`Footer` to static HTML partials
 
 See [apps/astro-content/.claude-context.md](apps/astro-content/.claude-context.md) for details.
 
@@ -430,28 +307,11 @@ PUBLIC_CLOUDINARY_CLOUD_NAME=southland-organics
 
 ## Admin Access
 
-Admin pages at `/admin/` are password protected.
+Admin login at `/admin/` is via Dash SSO — see `apps/astro-content/src/lib/dash-admin.ts`.
 
-**Default Password:** `southland2024`
+## Pillar Page Content Rules
 
-Change in `apps/astro-content/src/layouts/AdminLayout.astro` line 227.
-
-## AI Search Content Initiative (March 2026)
-
-**Full doc:** [docs/AI-CONTENT-INITIATIVE.md](docs/AI-CONTENT-INITIATIVE.md)
-
-AI visibility audit found we rank on 4/10 situation queries but are cited in 0/10 AI Overviews. Built 6 pillar pages + upgraded 4 collection pages to fix this.
-
-### New Pillar Pages (blog posts)
-
-| File | Target Situation |
-|------|-----------------|
-| `how-to-reduce-ammonia-in-poultry-house-naturally.mdx` | Poultry ammonia control |
-| `natural-alternatives-to-chemical-poultry-treatments.mdx` | Chemical → natural transition |
-| `organic-soil-health-bermuda-grass-fairways.mdx` | Golf course soil health |
-| `how-to-fix-southern-clay-soil-organically.mdx` | Southern clay soil remediation |
-| `best-organic-fertilizers-warm-season-grass.mdx` | Warm season grass fertilizer guide |
-| `building-soil-biology-farm-fields.mdx` | Farm soil biology rebuilding |
+Initiative background (March 2026 AI-visibility audit, pillar list, PMax rewrite): [docs/STATUS-HISTORY.md](docs/STATUS-HISTORY.md) and [docs/AI-CONTENT-INITIATIVE.md](docs/AI-CONTENT-INITIATIVE.md).
 
 ### Content Rules (for all future pillar pages)
 1. Problem-first, product-second — always
@@ -461,23 +321,11 @@ AI visibility audit found we rank on 4/10 situation queries but are cited in 0/1
 5. Products appear as ONE option among several
 6. Author: `mike-usry` for E-E-A-T
 
-### PMax Rewrite
-Situation-first ad headlines in `mothership/docs/advertising/campaigns/southland-pmax-situation-rewrite-2026-03.md`. A/B test: keep 5 existing, swap 10 situation-framed.
-
-### Launch Tasks
-Tracked in Nexus `/hr/todos` (13 tasks, Mar 23-Apr 3).
-
 ---
 
-## Klaviyo Flow Integration
+## Email (ESP)
 
-**Master Roadmap:** `mothership/docs/esp-klaviyo/reference/flow-roadmap.md`
-
-Platform's role in the Klaviyo flow ecosystem:
-- **CDP Personas** (Broiler Bill, Backyard Betty, Turf Pro Taylor) drive post-purchase email segmentation — product education and cross-sell flows branch by persona
-- **Reality Tunnels** content strategy aligns with post-purchase education emails (same content, different channel)
-- **Replenishment timing** data from BigQuery CDP informs reorder email scheduling
-- Nexus owns event infrastructure (delivery events, fulfillment sync); Mothership owns flow definitions; Platform owns persona/content strategy
+The ESP is **Customer.io** — Klaviyo was retired (emitters removed 2026-08-11). Nexus fires events and identifies profiles; Mothership documents automations. The old Klaviyo flow section is archived in [docs/STATUS-HISTORY.md](docs/STATUS-HISTORY.md).
 
 ## Lead Magnets & Nexus Integration
 
@@ -504,7 +352,7 @@ Platform's role in the Klaviyo flow ecosystem:
 > `Southland Ledger/Southland Platform Memory/southland-platform-docs-map.md`.
 
 - **Mothership:** `~/CODING/mothership/` - Orchestration platform
-  - `docs/esp-klaviyo/reference/flow-roadmap.md` — Klaviyo flow master checklist (post-purchase, NBA, loyalty, leads)
+  - `docs/esp-klaviyo/reference/flow-roadmap.md` — Klaviyo flow checklist (SUPERSEDED by Customer.io; historical)
 - **Nexus (Inventory):** `~/CODING/southland-inventory/` - Order management, shipping, EOS todos
   - `docs/strategy/LEAD-MAGNETS.md` — Canonical lead magnet spec (mirrored in this repo at `docs/LEAD-MAGNETS.md`)
   - `docs/sops/LEAD-SCORING-SOP.md` — How lead scoring and MQL/SQL qualification works
