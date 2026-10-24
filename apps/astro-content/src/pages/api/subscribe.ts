@@ -21,7 +21,7 @@
 
 import type { APIRoute } from 'astro'
 import { getServerEnv } from '../../lib/server-env'
-import { mintNewsletterViaNexus } from './subscribe-nexus'
+import { mintNewsletterViaNexus } from '../../lib/subscribe-nexus'
 
 const CIO_TRACK_API = 'https://track.customer.io/api/v1'
 

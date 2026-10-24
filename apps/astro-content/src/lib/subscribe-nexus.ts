@@ -1,8 +1,19 @@
-import { getServerEnv } from '../../lib/server-env'
+import { getServerEnv } from './server-env'
 
 export const NEXUS_NEWSLETTER_URL = 'https://nexus.southlandorganics.com/api/public/newsletter'
 const NEXUS_ORIGIN = 'https://southlandorganics.com'
-const NEXUS_TIMEOUT_MS = 5000
+const DEFAULT_NEXUS_TIMEOUT_MS = 5000
+
+let nexusMintTimeoutMs = DEFAULT_NEXUS_TIMEOUT_MS
+
+/** Lower in tests to exercise AbortController without slowing CI. */
+export function setNexusMintTimeoutMs(ms: number): void {
+  nexusMintTimeoutMs = ms
+}
+
+export function resetNexusMintTimeoutMs(): void {
+  nexusMintTimeoutMs = DEFAULT_NEXUS_TIMEOUT_MS
+}
 
 export interface NexusNewsletterPayload {
   email: string
@@ -34,7 +45,7 @@ export async function mintNewsletterViaNexus(
   }
 
   const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), NEXUS_TIMEOUT_MS)
+  const timeout = setTimeout(() => controller.abort(), nexusMintTimeoutMs)
 
   try {
     const res = await fetch(NEXUS_NEWSLETTER_URL, {
@@ -44,11 +55,11 @@ export async function mintNewsletterViaNexus(
       signal: controller.signal,
     })
     if (!res.ok) {
-      const detail = await res.text().catch(() => '')
-      console.warn(`[subscribe] Nexus newsletter failed: ${res.status} ${detail}`)
+      console.warn(`[subscribe] Nexus newsletter failed: ${res.status}`)
     }
   } catch (err) {
-    console.warn('[subscribe] Nexus newsletter error (non-fatal):', err)
+    const e = err instanceof Error ? err : new Error(String(err))
+    console.warn(`[subscribe] Nexus newsletter error (non-fatal): ${e.name}: ${e.message}`)
   } finally {
     clearTimeout(timeout)
   }

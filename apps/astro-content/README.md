@@ -187,11 +187,6 @@ SUPABASE_SERVICE_KEY=your_service_key
 KLAVIYO_PUBLIC_API_KEY=your_public_key
 KLAVIYO_LIST_ID=your_list_id
 
-# Newsletter subscribe API (`/api/subscribe`) — set as Cloudflare Pages secrets
-CUSTOMERIO_SITE_ID=your_customerio_site_id
-CUSTOMERIO_TRACK_API_KEY=your_customerio_track_api_key
-NEWSLETTER_MINT_SECRET=your_nexus_mint_secret
-
 # Site URL
 PUBLIC_SITE_URL=https://southlandorganics.com
 ```
