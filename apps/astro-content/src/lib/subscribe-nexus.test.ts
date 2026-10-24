@@ -53,12 +53,11 @@ function abortError(): Error {
 
 describe('POST /api/subscribe', () => {
   let fetchCalls: FetchCall[]
-  let warnSpy: ReturnType<typeof mock.method>
 
   beforeEach(() => {
     fetchCalls = []
     resetNexusMintTimeoutMs()
-    warnSpy = mock.method(console, 'warn', () => {})
+    mock.method(console, 'warn', () => {})
     mock.method(globalThis, 'fetch', async (input: RequestInfo | URL, init?: FetchInit) => {
       const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
       fetchCalls.push({ url, init })
@@ -162,7 +161,7 @@ describe('POST /api/subscribe', () => {
     for (const status of [429, 500] as const) {
       fetchCalls = []
       mock.restoreAll()
-      warnSpy = mock.method(console, 'warn', () => {})
+      mock.method(console, 'warn', () => {})
       mock.method(globalThis, 'fetch', async (input: RequestInfo | URL, init?: FetchInit) => {
         const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
         fetchCalls.push({ url, init })
@@ -191,10 +190,10 @@ describe('POST /api/subscribe', () => {
 
     mock.restoreAll()
     const logged: unknown[][] = []
-    warnSpy = mock.method(console, 'warn', (...args: unknown[]) => {
+    mock.method(console, 'warn', (...args: unknown[]) => {
       logged.push(args)
     })
-    mock.method(globalThis, 'fetch', async (input: RequestInfo | URL, init?: FetchInit) => {
+    mock.method(globalThis, 'fetch', async (input: RequestInfo | URL) => {
       const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
       if (url === NEXUS_NEWSLETTER_URL) {
         return new Response('leaked super-secret-mint-token in body', { status: 500 })
@@ -219,7 +218,7 @@ describe('POST /api/subscribe', () => {
     })
 
     mock.restoreAll()
-    warnSpy = mock.method(console, 'warn', () => {})
+    mock.method(console, 'warn', () => {})
     fetchCalls = []
     mock.method(globalThis, 'fetch', async (input: RequestInfo | URL, init?: FetchInit) => {
       const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
