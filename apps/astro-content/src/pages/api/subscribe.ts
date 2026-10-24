@@ -21,6 +21,7 @@
 
 import type { APIRoute } from 'astro'
 import { getServerEnv } from '../../lib/server-env'
+import { mintNewsletterViaNexus } from './subscribe-nexus'
 
 const CIO_TRACK_API = 'https://track.customer.io/api/v1'
 
@@ -38,6 +39,7 @@ const VALID_SOURCES = new Set([
 
 interface SubscribePayload {
   email?: string
+  first_name?: string
   source?: string
   signupPage?: string
   episodeSlug?: string
@@ -110,6 +112,17 @@ export const POST: APIRoute = async ({ request, locals }) => {
       console.error(`[subscribe] Customer.io identify failed: ${res.status} ${detail}`)
       return json({ error: 'Could not complete signup. Please try again.' }, 502)
     }
+
+    const firstName =
+      typeof payload.first_name === 'string' ? payload.first_name.trim() : undefined
+
+    // Nexus mints a one-time welcome code and emits newsletter_subscribed in Customer.io.
+    // Non-fatal: CIO profile is already saved; order is PUT → Nexus → signup event.
+    await mintNewsletterViaNexus(locals, {
+      email,
+      source,
+      ...(firstName ? { first_name: firstName } : {}),
+    })
 
     // A separate event so Customer.io campaigns can trigger on the signup
     // itself, not just on the attribute flipping true.
