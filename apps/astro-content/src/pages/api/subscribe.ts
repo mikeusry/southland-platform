@@ -113,8 +113,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       return json({ error: 'Could not complete signup. Please try again.' }, 502)
     }
 
-    const firstName =
-      typeof payload.first_name === 'string' ? payload.first_name.trim() : undefined
+    const firstName = typeof payload.first_name === 'string' ? payload.first_name.trim() : undefined
 
     // Nexus mints a one-time welcome code and emits newsletter_subscribed in Customer.io.
     // Non-fatal: CIO profile is already saved; order is PUT → Nexus → signup event.

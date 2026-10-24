@@ -163,7 +163,8 @@ describe('POST /api/subscribe', () => {
       mock.restoreAll()
       mock.method(console, 'warn', () => {})
       mock.method(globalThis, 'fetch', async (input: RequestInfo | URL, init?: FetchInit) => {
-        const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
+        const url =
+          typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
         fetchCalls.push({ url, init })
         if (url === NEXUS_NEWSLETTER_URL) {
           return new Response('error', { status })
