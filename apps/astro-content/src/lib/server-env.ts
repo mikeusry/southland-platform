@@ -26,5 +26,6 @@ type RuntimeLocals = {
 
 export function getServerEnv(locals: unknown, name: string): string | undefined {
   const runtimeEnv = (locals as RuntimeLocals)?.runtime?.env
-  return runtimeEnv?.[name] || (import.meta.env as Record<string, string | undefined>)[name]
+  const viteEnv = import.meta.env as Record<string, string | undefined> | undefined
+  return runtimeEnv?.[name] || viteEnv?.[name]
 }
