@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict'
-import { afterEach, describe, it, mock } from 'node:test'
+import { describe, it } from 'node:test'
 import type { StorefrontClient } from '../client'
-import type { ProductDetail } from '../types'
 import { getProductByHandle, lookupProductByHandle } from './products'
 
 const minimalProductNode = {
@@ -45,10 +44,6 @@ function mockClient(
 }
 
 describe('lookupProductByHandle', () => {
-  afterEach(() => {
-    mock.restoreAll()
-  })
-
   it('returns found when Shopify returns a product', async () => {
     const client = mockClient(async () => ({
       data: { product: minimalProductNode },
@@ -91,10 +86,6 @@ describe('lookupProductByHandle', () => {
 })
 
 describe('getProductByHandle (legacy callers)', () => {
-  afterEach(() => {
-    mock.restoreAll()
-  })
-
   it('returns null on API error — indistinguishable from not found (PDP previously 404)', async () => {
     const client = mockClient(async () => ({
       errors: [{ message: 'Service unavailable' }],

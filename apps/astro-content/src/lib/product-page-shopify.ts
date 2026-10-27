@@ -50,7 +50,6 @@ export function productShopifyUnavailableResponse(): Response {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="robots" content="noindex" />
   <title>Product temporarily unavailable | Southland Organics</title>
   <style>
     body { font-family: system-ui, sans-serif; margin: 0; padding: 2rem; color: #191D21; background: #f8faf8; }
@@ -78,19 +77,4 @@ export function productShopifyUnavailableResponse(): Response {
       'Cache-Control': 'no-store',
     },
   })
-}
-
-export function httpStatusForProductPageLoad(load: ProductPageLoadResult): 200 | 404 | 503 {
-  switch (load.outcome) {
-    case 'product':
-      return 200
-    case 'not_found':
-      return 404
-    case 'unavailable':
-      return 503
-    default: {
-      const unreachable: never = load
-      return unreachable
-    }
-  }
 }
