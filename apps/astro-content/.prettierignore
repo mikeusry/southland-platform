@@ -33,5 +33,4 @@ src/pages/poultry/breeders/index.astro
 src/pages/poultry/commercial/index.astro
 src/pages/poultry/turkey/index.astro
 src/pages/products/waste-treatment/index.astro
-src/pages/products/\[handle\].astro
 src/pages/team/\[slug\].astro

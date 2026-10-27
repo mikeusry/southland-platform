@@ -1,5 +1,4 @@
 ---
-// @ts-nocheck
 /**
  * /products/[handle] — Product Detail Page (SSR)
  *
@@ -33,8 +32,10 @@ import { getServerEnv } from '../../lib/server-env'
 import StarRating from '../../components/product/StarRating.astro'
 import ReviewsSection from '../../components/product/ReviewsSection.astro'
 import { isCommercialHouseHandle } from '../../lib/commercialHouse'
-import { loadProductForProductPage, PRODUCT_PAGE_RETRY_AFTER_SECONDS } from '../../lib/product-page-shopify'
-import ProductShopifyUnavailable from '../../components/product/ProductShopifyUnavailable.astro'
+import {
+  loadProductForProductPage,
+  productShopifyUnavailableResponse,
+} from '../../lib/product-page-shopify'
 
 // SSR — do not prerender
 const { handle } = Astro.params
@@ -72,13 +73,10 @@ if (productLoad.outcome === 'not_found') {
   return new Response(null, { status: 404, statusText: 'Product not found' })
 }
 
-const shopifyUnavailable = productLoad.outcome === 'unavailable'
-if (shopifyUnavailable) {
-  Astro.response.status = 503
-  Astro.response.headers.set('Retry-After', String(PRODUCT_PAGE_RETRY_AFTER_SECONDS))
+if (productLoad.outcome === 'unavailable') {
+  return productShopifyUnavailableResponse()
 }
 
-if (!shopifyUnavailable) {
 const product = productLoad.product
 
 const requestedVariant = Astro.url.searchParams.get('variant')
@@ -651,12 +649,8 @@ const pdpTier = hasTinaContent ? 'enriched' : 'baseline'
 
 // ── Cache: anonymous PDP HTML cacheable at edge (persona swap is client-side) ─
 Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400')
-}
 ---
 
-{shopifyUnavailable && <ProductShopifyUnavailable />}
-
-{!shopifyUnavailable && (
 <BaseLayout
   title={pageTitle}
   description={pageDescription}
@@ -1786,9 +1780,7 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
     </div>
   </main>
 </BaseLayout>
-)}
 
-{!shopifyUnavailable && (
 <script
   is:inline
   define:vars={{
@@ -1977,4 +1969,3 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
     })
   })
 </script>
-)}
