@@ -14,7 +14,7 @@ import {
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Breadcrumbs from '../../components/shared/Breadcrumbs.astro'
 import { getServerEnv } from '../../lib/server-env'
-import { metaDescriptionFromPolicyHtml } from '../../lib/shop-policy-meta'
+import { demotePolicyBodyH1, metaDescriptionFromPolicyHtml } from '../../lib/shop-policy-meta'
 
 const { slug } = Astro.params
 
@@ -37,7 +37,11 @@ const publicAccessToken =
 
 let policy = null
 if (publicAccessToken) {
-  policy = await getShopPolicy(createClient({ storeDomain, publicAccessToken }), policyField)
+  try {
+    policy = await getShopPolicy(createClient({ storeDomain, publicAccessToken }), policyField)
+  } catch (error) {
+    console.error('[pages/policy] authenticated Shopify client failed:', error)
+  }
 }
 if (!policy?.body?.trim()) {
   policy = await getShopPolicyUnauthenticated(storeDomain, policyField)
@@ -51,6 +55,9 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.co
 const canonicalUrl = `${siteUrl}/pages/${slug}/`
 const pageTitle = `${policy.title} | Southland Organics`
 const description = metaDescriptionFromPolicyHtml(policy.body)
+const policyBodyHtml = demotePolicyBodyH1(policy.body)
+
+Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400')
 ---
 
 <BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
@@ -72,7 +79,7 @@ const description = metaDescriptionFromPolicyHtml(policy.body)
     <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
       <div
         class="prose prose-lg max-w-none prose-headings:font-heading prose-headings:text-shopify-title prose-a:text-brand-green-light"
-        set:html={policy.body}
+        set:html={policyBodyHtml}
       />
     </div>
   </section>

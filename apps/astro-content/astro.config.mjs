@@ -48,6 +48,13 @@ function getProductSitemapUrls() {
   return [...slugs].map((s) => `${SITE_URL}/products/${s}/`)
 }
 
+const POLICY_SITEMAP_URLS = [
+  `${SITE_URL}/pages/privacy-policy/`,
+  `${SITE_URL}/pages/terms-of-service/`,
+  `${SITE_URL}/pages/shipping-policy/`,
+  `${SITE_URL}/pages/return-policy/`,
+]
+
 /** Rehype plugin: add loading="lazy" to all images in markdown content */
 function rehypeLazyImages() {
   return (/** @type {any} */ tree) => {
@@ -118,7 +125,7 @@ export default defineConfig({
     tailwind(),
     mdx(),
     sitemap({
-      customPages: getProductSitemapUrls(),
+      customPages: [...getProductSitemapUrls(), ...POLICY_SITEMAP_URLS],
       filter: (page) =>
         !page.includes('/admin/') &&
         !page.includes('/account') &&

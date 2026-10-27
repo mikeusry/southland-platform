@@ -50,22 +50,28 @@ export async function getShopPolicy(
     }
   `
 
-  const { data, errors } = await client.request(query)
+  try {
+    const { data, errors } = await client.request(query)
 
-  if (errors) {
-    console.error(`[shopify-storefront] getShopPolicy(${field}) errors:`, errors)
+    if (errors) {
+      console.error(`[shopify-storefront] getShopPolicy(${field}) errors:`, errors)
+      return null
+    }
+
+    const shop = data?.shop as Record<string, unknown> | undefined
+    if (!shop) return null
+
+    return parseShopPolicy(shop[field] as Record<string, unknown>)
+  } catch (error) {
+    console.error(`[shopify-storefront] getShopPolicy(${field}) request failed:`, error)
     return null
   }
-
-  const shop = data?.shop as Record<string, unknown> | undefined
-  if (!shop) return null
-
-  return parseShopPolicy(shop[field] as Record<string, unknown>)
 }
 
 /**
- * Shopify allows unauthenticated Storefront API reads for shop policies only.
- * Used when PUBLIC_SHOPIFY_STOREFRONT_TOKEN is unavailable (local preview).
+ * Tokenless Storefront API access is a documented Shopify mode (no access token
+ * header). Used when PUBLIC_SHOPIFY_STOREFRONT_TOKEN is unavailable or the
+ * authenticated request fails.
  */
 export async function getShopPolicyUnauthenticated(
   storeDomain: string,
@@ -91,36 +97,44 @@ export async function getShopPolicyUnauthenticated(
     }
   `
 
-  const response = await fetch(`https://${domain}/api/${apiVersion}/graphql.json`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query }),
-  })
+  try {
+    const response = await fetch(`https://${domain}/api/${apiVersion}/graphql.json`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query }),
+    })
 
-  if (!response.ok) {
+    if (!response.ok) {
+      console.error(
+        `[shopify-storefront] getShopPolicyUnauthenticated(${field}) HTTP ${response.status}`
+      )
+      return null
+    }
+
+    const json = (await response.json()) as {
+      data?: { shop?: Record<string, unknown> }
+      errors?: unknown
+    }
+
+    if (json.errors) {
+      console.error(
+        `[shopify-storefront] getShopPolicyUnauthenticated(${field}) errors:`,
+        json.errors
+      )
+      return null
+    }
+
+    const shop = json.data?.shop
+    if (!shop) return null
+
+    return parseShopPolicy(shop[field] as Record<string, unknown>)
+  } catch (error) {
     console.error(
-      `[shopify-storefront] getShopPolicyUnauthenticated(${field}) HTTP ${response.status}`
+      `[shopify-storefront] getShopPolicyUnauthenticated(${field}) request failed:`,
+      error
     )
     return null
   }
-
-  const json = (await response.json()) as {
-    data?: { shop?: Record<string, unknown> }
-    errors?: unknown
-  }
-
-  if (json.errors) {
-    console.error(
-      `[shopify-storefront] getShopPolicyUnauthenticated(${field}) errors:`,
-      json.errors
-    )
-    return null
-  }
-
-  const shop = json.data?.shop
-  if (!shop) return null
-
-  return parseShopPolicy(shop[field] as Record<string, unknown>)
 }
 
 /** URL slug on southlandorganics.com → Storefront API shop policy field */
@@ -129,6 +143,7 @@ export const POLICY_SLUG_TO_FIELD: Record<string, ShopPolicyField> = {
   'terms-of-service': 'termsOfService',
   'shipping-policy': 'shippingPolicy',
   'return-policy': 'refundPolicy',
+  'refund-policy': 'refundPolicy',
 }
 
 export function policySlugToField(slug: string): ShopPolicyField | null {

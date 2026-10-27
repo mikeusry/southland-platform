@@ -1,3 +1,11 @@
+/**
+ * Demote h1 tags in policy HTML to h2 for display only (page shell already has h1).
+ * Tag names only — policy wording is unchanged.
+ */
+export function demotePolicyBodyH1(html: string): string {
+  return html.replace(/<h1(\s|>)/gi, '<h2$1').replace(/<\/h1>/gi, '</h2>')
+}
+
 /** Plain-text excerpt for meta description from Shopify policy HTML */
 export function metaDescriptionFromPolicyHtml(html: string, maxLength = 160): string {
   const text = html
