@@ -32,6 +32,10 @@ import { getServerEnv } from '../../lib/server-env'
 import StarRating from '../../components/product/StarRating.astro'
 import ReviewsSection from '../../components/product/ReviewsSection.astro'
 import { isCommercialHouseHandle } from '../../lib/commercialHouse'
+import {
+  loadProductForProductPage,
+  productShopifyUnavailableResponse,
+} from '../../lib/product-page-shopify'
 
 // SSR — do not prerender
 const { handle } = Astro.params
@@ -63,11 +67,17 @@ const client = createClient({
   publicAccessToken: import.meta.env.PUBLIC_SHOPIFY_STOREFRONT_TOKEN,
 })
 
-const product = await getProductByHandle(client, shopifyHandle)
+const productLoad = await loadProductForProductPage(client, shopifyHandle)
 
-if (!product) {
+if (productLoad.outcome === 'not_found') {
   return new Response(null, { status: 404, statusText: 'Product not found' })
 }
+
+if (productLoad.outcome === 'unavailable') {
+  return productShopifyUnavailableResponse()
+}
+
+const product = productLoad.product
 
 const requestedVariant = Astro.url.searchParams.get('variant')
 const matchedVariant = requestedVariant
