@@ -5,6 +5,19 @@
  * They are intentionally minimal — only the fields we actually query.
  */
 
+// ─── Shop policies ───────────────────────────────────────────────────────────
+
+export type ShopPolicyField = 'privacyPolicy' | 'termsOfService' | 'shippingPolicy' | 'refundPolicy'
+
+export interface ShopPolicy {
+  id: string
+  title: string
+  /** HTML body from Shopify Admin — do not modify or invent */
+  body: string
+  handle: string
+  url: string
+}
+
 // ─── Money ───────────────────────────────────────────────────────────────────
 
 export interface Money {

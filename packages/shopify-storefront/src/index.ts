@@ -11,6 +11,14 @@ export {
   searchProducts,
 } from './queries/products'
 
+// Shop policies (privacy, terms, shipping, refund)
+export {
+  getShopPolicy,
+  getShopPolicyUnauthenticated,
+  policySlugToField,
+  POLICY_SLUG_TO_FIELD,
+} from './queries/policies'
+
 // Cart operations
 export {
   createCart,
@@ -40,4 +48,6 @@ export type {
   CartLineInput,
   CartLineUpdateInput,
   CartDiscountAllocation,
+  ShopPolicy,
+  ShopPolicyField,
 } from './types'
