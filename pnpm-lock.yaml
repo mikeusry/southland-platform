@@ -170,10 +170,10 @@ importers:
         version: 6.19.2(prisma@6.19.2(typescript@5.9.3))(typescript@5.9.3)
       '@remix-run/dev':
         specifier: ^2.16.1
-        version: 2.17.4(@remix-run/react@2.17.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@remix-run/serve@2.17.4(typescript@5.9.3))(@types/node@22.19.7)(jiti@2.6.1)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(yaml@2.8.2))(wrangler@3.114.17(@cloudflare/workers-types@4.20260227.0))(yaml@2.8.2)
+        version: 2.17.4(@remix-run/react@2.17.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@remix-run/serve@2.17.4(typescript@5.9.3))(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(yaml@2.8.2))(wrangler@3.114.17(@cloudflare/workers-types@4.20260227.0))(yaml@2.8.2)
       '@remix-run/fs-routes':
         specifier: ^2.16.1
-        version: 2.17.4(@remix-run/dev@2.17.4(@remix-run/react@2.17.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@remix-run/serve@2.17.4(typescript@5.9.3))(@types/node@22.19.7)(jiti@2.6.1)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(yaml@2.8.2))(wrangler@3.114.17(@cloudflare/workers-types@4.20260227.0))(yaml@2.8.2))(@remix-run/route-config@2.17.4(@remix-run/dev@2.17.4(@remix-run/react@2.17.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@remix-run/serve@2.17.4(typescript@5.9.3))(@types/node@22.19.7)(jiti@2.6.1)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(yaml@2.8.2))(wrangler@3.114.17(@cloudflare/workers-types@4.20260227.0))(yaml@2.8.2))(typescript@5.9.3))(typescript@5.9.3)
+        version: 2.17.4(@remix-run/dev@2.17.4(@remix-run/react@2.17.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@remix-run/serve@2.17.4(typescript@5.9.3))(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(yaml@2.8.2))(wrangler@3.114.17(@cloudflare/workers-types@4.20260227.0))(yaml@2.8.2))(@remix-run/route-config@2.17.4(@remix-run/dev@2.17.4(@remix-run/react@2.17.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@remix-run/serve@2.17.4(typescript@5.9.3))(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(yaml@2.8.2))(wrangler@3.114.17(@cloudflare/workers-types@4.20260227.0))(yaml@2.8.2))(typescript@5.9.3))(typescript@5.9.3)
       '@remix-run/node':
         specifier: ^2.16.1
         version: 2.17.4(typescript@5.9.3)
@@ -212,14 +212,14 @@ importers:
         version: 18.3.1(react@18.3.1)
       vite-tsconfig-paths:
         specifier: ^5.0.1
-        version: 5.1.4(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(yaml@2.8.2))
+        version: 5.1.4(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(yaml@2.8.2))
     devDependencies:
       '@remix-run/eslint-config':
         specifier: ^2.16.1
         version: 2.17.4(eslint@8.57.1)(react@18.3.1)(typescript@5.9.3)
       '@remix-run/route-config':
         specifier: ^2.16.1
-        version: 2.17.4(@remix-run/dev@2.17.4(@remix-run/react@2.17.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@remix-run/serve@2.17.4(typescript@5.9.3))(@types/node@22.19.7)(jiti@2.6.1)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(yaml@2.8.2))(wrangler@3.114.17(@cloudflare/workers-types@4.20260227.0))(yaml@2.8.2))(typescript@5.9.3)
+        version: 2.17.4(@remix-run/dev@2.17.4(@remix-run/react@2.17.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@remix-run/serve@2.17.4(typescript@5.9.3))(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(yaml@2.8.2))(wrangler@3.114.17(@cloudflare/workers-types@4.20260227.0))(yaml@2.8.2))(typescript@5.9.3)
       '@shopify/api-codegen-preset':
         specifier: ^1.1.1
         version: 1.2.2(@types/node@22.19.7)(crossws@0.3.5)(typescript@5.9.3)
@@ -249,7 +249,7 @@ importers:
         version: 5.9.3
       vite:
         specifier: ^6.2.2
-        version: 6.4.1(@types/node@22.19.7)(jiti@2.6.1)(yaml@2.8.2)
+        version: 6.4.1(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(yaml@2.8.2)
 
   apps/southland-ai-worker:
     devDependencies:
@@ -290,6 +290,9 @@ importers:
       prettier:
         specifier: ^3.4.2
         version: 3.8.1
+      tsx:
+        specifier: ^4.19.0
+        version: 4.23.15
       typescript:
         specifier: ^5.7.0
         version: 5.9.3
@@ -15296,7 +15299,7 @@ snapshots:
     dependencies:
       react: 19.2.4
 
-  '@remix-run/dev@2.17.4(@remix-run/react@2.17.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@remix-run/serve@2.17.4(typescript@5.9.3))(@types/node@22.19.7)(jiti@2.6.1)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(yaml@2.8.2))(wrangler@3.114.17(@cloudflare/workers-types@4.20260227.0))(yaml@2.8.2)':
+  '@remix-run/dev@2.17.4(@remix-run/react@2.17.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@remix-run/serve@2.17.4(typescript@5.9.3))(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(yaml@2.8.2))(wrangler@3.114.17(@cloudflare/workers-types@4.20260227.0))(yaml@2.8.2)':
     dependencies:
       '@babel/core': 7.28.6
       '@babel/generator': 7.28.6
@@ -15353,12 +15356,12 @@ snapshots:
       tar-fs: 2.1.4
       tsconfig-paths: 4.2.0
       valibot: 1.2.0(typescript@5.9.3)
-      vite-node: 3.2.4(@types/node@22.19.7)(jiti@2.6.1)(yaml@2.8.2)
+      vite-node: 3.2.4(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(yaml@2.8.2)
       ws: 7.5.10
     optionalDependencies:
       '@remix-run/serve': 2.17.4(typescript@5.9.3)
       typescript: 5.9.3
-      vite: 6.4.1(@types/node@22.19.7)(jiti@2.6.1)(yaml@2.8.2)
+      vite: 6.4.1(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(yaml@2.8.2)
       wrangler: 3.114.17(@cloudflare/workers-types@4.20260227.0)
     transitivePeerDependencies:
       - '@types/node'
@@ -15414,10 +15417,10 @@ snapshots:
     optionalDependencies:
       typescript: 5.9.3
 
-  '@remix-run/fs-routes@2.17.4(@remix-run/dev@2.17.4(@remix-run/react@2.17.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@remix-run/serve@2.17.4(typescript@5.9.3))(@types/node@22.19.7)(jiti@2.6.1)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(yaml@2.8.2))(wrangler@3.114.17(@cloudflare/workers-types@4.20260227.0))(yaml@2.8.2))(@remix-run/route-config@2.17.4(@remix-run/dev@2.17.4(@remix-run/react@2.17.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@remix-run/serve@2.17.4(typescript@5.9.3))(@types/node@22.19.7)(jiti@2.6.1)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(yaml@2.8.2))(wrangler@3.114.17(@cloudflare/workers-types@4.20260227.0))(yaml@2.8.2))(typescript@5.9.3))(typescript@5.9.3)':
+  '@remix-run/fs-routes@2.17.4(@remix-run/dev@2.17.4(@remix-run/react@2.17.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@remix-run/serve@2.17.4(typescript@5.9.3))(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(yaml@2.8.2))(wrangler@3.114.17(@cloudflare/workers-types@4.20260227.0))(yaml@2.8.2))(@remix-run/route-config@2.17.4(@remix-run/dev@2.17.4(@remix-run/react@2.17.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@remix-run/serve@2.17.4(typescript@5.9.3))(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(yaml@2.8.2))(wrangler@3.114.17(@cloudflare/workers-types@4.20260227.0))(yaml@2.8.2))(typescript@5.9.3))(typescript@5.9.3)':
     dependencies:
-      '@remix-run/dev': 2.17.4(@remix-run/react@2.17.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@remix-run/serve@2.17.4(typescript@5.9.3))(@types/node@22.19.7)(jiti@2.6.1)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(yaml@2.8.2))(wrangler@3.114.17(@cloudflare/workers-types@4.20260227.0))(yaml@2.8.2)
-      '@remix-run/route-config': 2.17.4(@remix-run/dev@2.17.4(@remix-run/react@2.17.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@remix-run/serve@2.17.4(typescript@5.9.3))(@types/node@22.19.7)(jiti@2.6.1)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(yaml@2.8.2))(wrangler@3.114.17(@cloudflare/workers-types@4.20260227.0))(yaml@2.8.2))(typescript@5.9.3)
+      '@remix-run/dev': 2.17.4(@remix-run/react@2.17.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@remix-run/serve@2.17.4(typescript@5.9.3))(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(yaml@2.8.2))(wrangler@3.114.17(@cloudflare/workers-types@4.20260227.0))(yaml@2.8.2)
+      '@remix-run/route-config': 2.17.4(@remix-run/dev@2.17.4(@remix-run/react@2.17.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@remix-run/serve@2.17.4(typescript@5.9.3))(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(yaml@2.8.2))(wrangler@3.114.17(@cloudflare/workers-types@4.20260227.0))(yaml@2.8.2))(typescript@5.9.3)
     optionalDependencies:
       typescript: 5.9.3
 
@@ -15445,9 +15448,9 @@ snapshots:
     optionalDependencies:
       typescript: 5.9.3
 
-  '@remix-run/route-config@2.17.4(@remix-run/dev@2.17.4(@remix-run/react@2.17.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@remix-run/serve@2.17.4(typescript@5.9.3))(@types/node@22.19.7)(jiti@2.6.1)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(yaml@2.8.2))(wrangler@3.114.17(@cloudflare/workers-types@4.20260227.0))(yaml@2.8.2))(typescript@5.9.3)':
+  '@remix-run/route-config@2.17.4(@remix-run/dev@2.17.4(@remix-run/react@2.17.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@remix-run/serve@2.17.4(typescript@5.9.3))(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(yaml@2.8.2))(wrangler@3.114.17(@cloudflare/workers-types@4.20260227.0))(yaml@2.8.2))(typescript@5.9.3)':
     dependencies:
-      '@remix-run/dev': 2.17.4(@remix-run/react@2.17.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@remix-run/serve@2.17.4(typescript@5.9.3))(@types/node@22.19.7)(jiti@2.6.1)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(yaml@2.8.2))(wrangler@3.114.17(@cloudflare/workers-types@4.20260227.0))(yaml@2.8.2)
+      '@remix-run/dev': 2.17.4(@remix-run/react@2.17.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@remix-run/serve@2.17.4(typescript@5.9.3))(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(yaml@2.8.2))(wrangler@3.114.17(@cloudflare/workers-types@4.20260227.0))(yaml@2.8.2)
       lodash: 4.17.23
     optionalDependencies:
       typescript: 5.9.3
@@ -24871,13 +24874,13 @@ snapshots:
       - supports-color
       - terser
 
-  vite-node@3.2.4(@types/node@22.19.7)(jiti@2.6.1)(yaml@2.8.2):
+  vite-node@3.2.4(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(yaml@2.8.2):
     dependencies:
       cac: 6.7.14
       debug: 4.4.3
       es-module-lexer: 1.7.0
       pathe: 2.0.3
-      vite: 6.4.1(@types/node@22.19.7)(jiti@2.6.1)(yaml@2.8.2)
+      vite: 6.4.1(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(yaml@2.8.2)
     transitivePeerDependencies:
       - '@types/node'
       - jiti
@@ -24892,13 +24895,13 @@ snapshots:
       - tsx
       - yaml
 
-  vite-tsconfig-paths@5.1.4(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(yaml@2.8.2)):
+  vite-tsconfig-paths@5.1.4(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(yaml@2.8.2)):
     dependencies:
       debug: 4.4.3
       globrex: 0.1.2
       tsconfck: 3.1.6(typescript@5.9.3)
     optionalDependencies:
-      vite: 6.4.1(@types/node@22.19.7)(jiti@2.6.1)(yaml@2.8.2)
+      vite: 6.4.1(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(yaml@2.8.2)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -24930,7 +24933,7 @@ snapshots:
       '@types/node': 25.1.0
       fsevents: 2.3.3
 
-  vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(yaml@2.8.2):
+  vite@6.4.1(@types/node@22.19.7)(jiti@2.6.1)(tsx@4.23.15)(yaml@2.8.2):
     dependencies:
       esbuild: 0.25.12
       fdir: 6.5.0(picomatch@4.0.3)
@@ -24942,6 +24945,7 @@ snapshots:
       '@types/node': 22.19.7
       fsevents: 2.3.3
       jiti: 2.6.1
+      tsx: 4.23.15
       yaml: 2.8.2
 
   vite@6.4.1(@types/node@25.1.0)(jiti@1.21.7)(tsx@4.23.15)(yaml@2.8.2):

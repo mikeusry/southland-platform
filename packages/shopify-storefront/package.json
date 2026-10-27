@@ -18,7 +18,8 @@
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write 'src/**/*.ts'",
-    "format:check": "prettier --check 'src/**/*.ts'"
+    "format:check": "prettier --check 'src/**/*.ts'",
+    "test": "node --import tsx --test src/**/*.test.ts"
   },
   "dependencies": {
     "@shopify/storefront-api-client": "^1.0.0"
@@ -30,6 +31,7 @@
     "@typescript-eslint/parser": "^8.20.0",
     "eslint": "^9.18.0",
     "prettier": "^3.4.2",
+    "tsx": "^4.19.0",
     "typescript": "^5.7.0"
   }
 }

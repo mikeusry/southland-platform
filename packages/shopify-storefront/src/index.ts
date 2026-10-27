@@ -8,8 +8,11 @@ export {
   getAllProducts,
   getGallonProducts,
   getProductByHandle,
+  lookupProductByHandle,
   searchProducts,
 } from './queries/products'
+
+export type { ProductLookupResult } from './queries/products'
 
 // Cart operations
 export {

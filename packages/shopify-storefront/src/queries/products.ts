@@ -198,6 +198,29 @@ function parseVariant(node: Record<string, unknown>): ProductVariant {
   }
 }
 
+function parseProductDetail(node: Record<string, unknown>): ProductDetail {
+  const images = node.images as { edges: { node: Record<string, unknown> }[] }
+  const variants = node.variants as {
+    edges: { node: Record<string, unknown> }[]
+  }
+
+  return {
+    id: node.id as string,
+    title: node.title as string,
+    handle: node.handle as string,
+    description: node.description as string,
+    descriptionHtml: node.descriptionHtml as string,
+    vendor: (node.vendor as string) ?? '',
+    productType: (node.productType as string) ?? '',
+    tags: node.tags as string[],
+    collectionHandles: [],
+    seo: (node.seo as ProductDetail['seo']) ?? { title: null, description: null },
+    priceRange: node.priceRange as Product['priceRange'],
+    images: images.edges.map((e) => parseImage(e.node)),
+    variants: variants.edges.map((e) => parseVariant(e.node)),
+  }
+}
+
 function parseProduct(node: Record<string, unknown>): Product {
   const images = node.images as { edges: { node: Record<string, unknown> }[] }
   const variants = node.variants as {
@@ -342,47 +365,54 @@ export async function getGallonProducts(client: StorefrontClient): Promise<Produ
   )
 }
 
+export type ProductLookupResult =
+  | { status: 'found'; product: ProductDetail }
+  | { status: 'not_found' }
+  | { status: 'error'; cause: unknown }
+
+/**
+ * Fetch a single product by handle and distinguish missing products from API failures.
+ */
+export async function lookupProductByHandle(
+  client: StorefrontClient,
+  handle: string
+): Promise<ProductLookupResult> {
+  try {
+    const { data, errors } = await client.request(PRODUCT_BY_HANDLE_QUERY, {
+      variables: { handle },
+    })
+
+    if (errors) {
+      console.error('[shopify-storefront] lookupProductByHandle errors:', errors)
+      return { status: 'error', cause: errors }
+    }
+
+    const product = data?.product
+    if (!product) {
+      return { status: 'not_found' }
+    }
+
+    return {
+      status: 'found',
+      product: parseProductDetail(product as Record<string, unknown>),
+    }
+  } catch (cause) {
+    console.error('[shopify-storefront] lookupProductByHandle request failed:', cause)
+    return { status: 'error', cause }
+  }
+}
+
 /**
  * Fetch a single product by handle (URL slug) with full detail for PDP.
  * Returns all images, HTML description, SEO metadata, vendor, and productType.
+ * On API failure, returns null (same as not found) for backward compatibility.
  */
 export async function getProductByHandle(
   client: StorefrontClient,
   handle: string
 ): Promise<ProductDetail | null> {
-  const { data, errors } = await client.request(PRODUCT_BY_HANDLE_QUERY, {
-    variables: { handle },
-  })
-
-  if (errors) {
-    console.error('[shopify-storefront] getProductByHandle errors:', errors)
-    return null
-  }
-
-  const product = data?.product
-  if (!product) return null
-
-  const node = product as Record<string, unknown>
-  const images = node.images as { edges: { node: Record<string, unknown> }[] }
-  const variants = node.variants as {
-    edges: { node: Record<string, unknown> }[]
-  }
-
-  return {
-    id: node.id as string,
-    title: node.title as string,
-    handle: node.handle as string,
-    description: node.description as string,
-    descriptionHtml: node.descriptionHtml as string,
-    vendor: (node.vendor as string) ?? '',
-    productType: (node.productType as string) ?? '',
-    tags: node.tags as string[],
-    collectionHandles: [],
-    seo: (node.seo as ProductDetail['seo']) ?? { title: null, description: null },
-    priceRange: node.priceRange as Product['priceRange'],
-    images: images.edges.map((e) => parseImage(e.node)),
-    variants: variants.edges.map((e) => parseVariant(e.node)),
-  }
+  const result = await lookupProductByHandle(client, handle)
+  return result.status === 'found' ? result.product : null
 }
 
 /**
