@@ -1,10 +1,5 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import { PRODUCT_PAGE_RETRY_AFTER_SECONDS } from '../../lib/product-page-shopify'
-
-Astro.response.status = 503
-Astro.response.headers.set('Retry-After', String(PRODUCT_PAGE_RETRY_AFTER_SECONDS))
-
 const title = 'Product temporarily unavailable | Southland Organics'
 const description = 'Our product catalog is briefly unavailable. Please try again in a moment.'
 ---

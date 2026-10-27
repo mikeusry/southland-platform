@@ -28,6 +28,10 @@ const REDIRECTS: Record<string, string> = {
   '/collections/pig-and-swine-supplements': '/livestock/swine/',
   '/collections/sanitizers': '/products/sanitizers/',
   '/collections/waste': '/products/waste-treatment/',
+  '/collections/septic': '/products/waste-treatment/',
+  '/collections/septic-tank-treatment': '/products/waste-treatment/',
+  '/collections/waste-treatment': '/products/waste-treatment/',
+  '/collections/septic-waste': '/products/waste-treatment/',
   '/collections/all': '/',
   '/collections/other': '/',
   '/collections': '/',
@@ -90,6 +94,11 @@ const REDIRECTS: Record<string, string> = {
   // Wrong product slugs that GSC still has indexed
   '/products/natural-lawn-care-products': '/products/natural-lawn-care-subscription',
   '/products/darkling-beetle-insecticide': '/products/desecticide',
+  '/products/port': '/products/holding-tank-treatment/',
+  '/products/holding-tank-treatment-port': '/products/holding-tank-treatment/',
+  '/products/pour-the-port': '/products/pour-the-port-septic-tank-treatment/',
+  '/products/septic-tank-treatment': '/products/pour-the-port-septic-tank-treatment/',
+  '/products/port-septic-tank-treatment': '/products/pour-the-port-septic-tank-treatment/',
   // Bare-path legacy
   '/why-organic': '/about/',
   // Legacy paths
