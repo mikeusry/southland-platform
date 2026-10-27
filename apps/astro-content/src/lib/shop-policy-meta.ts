@@ -6,6 +6,18 @@ export function demotePolicyBodyH1(html: string): string {
   return html.replace(/<h1(\s|>)/gi, '<h2$1').replace(/<\/h1>/gi, '</h2>')
 }
 
+/** Slugs that share Shopify policy content but should canonicalize to another URL */
+const POLICY_CANONICAL_SLUG: Record<string, string> = {
+  'refund-policy': 'return-policy',
+}
+
+/** Canonical URL for /pages/[slug]/ shop policy routes */
+export function shopPolicyCanonicalUrl(siteUrl: string, slug: string): string {
+  const canonicalSlug = POLICY_CANONICAL_SLUG[slug] ?? slug
+  const base = siteUrl.replace(/\/$/, '')
+  return `${base}/pages/${canonicalSlug}/`
+}
+
 /** Plain-text excerpt for meta description from Shopify policy HTML */
 export function metaDescriptionFromPolicyHtml(html: string, maxLength = 160): string {
   const text = html

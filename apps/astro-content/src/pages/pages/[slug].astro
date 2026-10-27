@@ -14,7 +14,11 @@ import {
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Breadcrumbs from '../../components/shared/Breadcrumbs.astro'
 import { getServerEnv } from '../../lib/server-env'
-import { demotePolicyBodyH1, metaDescriptionFromPolicyHtml } from '../../lib/shop-policy-meta'
+import {
+  demotePolicyBodyH1,
+  metaDescriptionFromPolicyHtml,
+  shopPolicyCanonicalUrl,
+} from '../../lib/shop-policy-meta'
 
 const { slug } = Astro.params
 
@@ -52,7 +56,7 @@ if (!policy?.body?.trim()) {
 }
 
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
-const canonicalUrl = `${siteUrl}/pages/${slug}/`
+const canonicalUrl = shopPolicyCanonicalUrl(siteUrl, slug)
 const pageTitle = `${policy.title} | Southland Organics`
 const description = metaDescriptionFromPolicyHtml(policy.body)
 const policyBodyHtml = demotePolicyBodyH1(policy.body)
