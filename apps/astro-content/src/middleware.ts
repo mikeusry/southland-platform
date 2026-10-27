@@ -46,8 +46,6 @@ const REDIRECTS: Record<string, string> = {
   '/pages/store-locator': '/store-locator/',
   '/pages/build-a-case': '/build-a-case/',
   '/pages/faqs': '/contact/',
-  '/pages/shipping-policy': '/contact/',
-  '/pages/return-policy': '/contact/',
   '/pages/credit-application': '/contact/',
   '/pages/vented-caps': '/vented-caps/',
   '/pages/order-tracking': '/account/',
