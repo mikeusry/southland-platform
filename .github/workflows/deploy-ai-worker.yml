@@ -1,0 +1,86 @@
+name: Deploy AI Worker
+
+# Production releases of apps/southland-ai-worker. Push to main (worker paths)
+# or workflow_dispatch on main. Do not deploy this worker from a laptop.
+#
+# Node 22: src/product-reindex.test.ts imports node:sqlite, which Node 20 does
+# not ship. The Pages workflow stays on Node 20. pnpm and setup-node match it.
+#
+# INDEX_ADMIN_SECRET and the other worker secrets (NEXUS_API_KEY, OPENAI_API_KEY,
+# COHERE_API_KEY, SENDGRID_API_KEY) are Wrangler secrets set once in Cloudflare.
+# Do not pass them from this workflow. `wrangler deploy` leaves them in place.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/southland-ai-worker/**'
+  workflow_dispatch:
+
+# One production deploy at a time. A newer push waits; it does not cancel the
+# upload already in progress.
+concurrency:
+  group: deploy-ai-worker-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Test and deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Require main
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo "::error::southland-ai-worker deploys only from GitHub main. Run this workflow on main."
+          exit 1
+
+      - name: Require point-dog Cloudflare secrets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_AI_WORKER }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID_AI_WORKER }}
+        run: |
+          missing=0
+          if [ -z "${CLOUDFLARE_API_TOKEN}" ]; then
+            echo "::error::Missing GitHub secret CLOUDFLARE_API_TOKEN_AI_WORKER (point-dog Cloudflare API token). Add it under Settings → Secrets and variables → Actions. It is separate from the Pages secret CLOUDFLARE_API_TOKEN."
+            missing=1
+          fi
+          if [ -z "${CLOUDFLARE_ACCOUNT_ID}" ]; then
+            echo "::error::Missing GitHub secret CLOUDFLARE_ACCOUNT_ID_AI_WORKER (point-dog Cloudflare account id). Add it under Settings → Secrets and variables → Actions. It is separate from the Pages secret CLOUDFLARE_ACCOUNT_ID."
+            missing=1
+          fi
+          if [ "${missing}" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test
+        working-directory: apps/southland-ai-worker
+        run: pnpm exec vitest run
+
+      - name: Typecheck
+        working-directory: apps/southland-ai-worker
+        run: pnpm exec tsc --noEmit
+
+      - name: Deploy worker
+        working-directory: apps/southland-ai-worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_AI_WORKER }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID_AI_WORKER }}
+        run: pnpm exec wrangler deploy --env production
