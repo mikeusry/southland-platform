@@ -178,7 +178,7 @@ function withValidatedCampaign(
  * flows via cart line item properties, making it checkout-backend-agnostic.
  * Works with Shopify, Medusa, or any self-hosted checkout.
  */
-function getAttributionAttrs(): Array<{ key: string; value: string }> {
+export function getAttributionAttrs(): Array<{ key: string; value: string }> {
   if (typeof window === 'undefined') return []
   try {
     const raw = localStorage.getItem(PD_ATTRIBUTION_KEY)
@@ -201,6 +201,8 @@ function getAttributionAttrs(): Array<{ key: string; value: string }> {
       'utm_content',
       'utm_term',
       'gclid',
+      'gbraid',
+      'wbraid',
       'fbclid',
       'fbp', // Meta first-party browser ID — forwarded to CAPI by Nexus for match quality
       'msclid',
@@ -228,7 +230,7 @@ function getAttributionAttrs(): Array<{ key: string; value: string }> {
  * Nexus reads these via extractAttribution() → getFtAttr() to populate ft_* columns
  * on the orders table, giving us first-touch vs last-touch attribution on every order.
  */
-function getFirstTouchAttrs(): Array<{ key: string; value: string }> {
+export function getFirstTouchAttrs(): Array<{ key: string; value: string }> {
   if (typeof window === 'undefined') return []
   try {
     const raw = localStorage.getItem(PD_FIRST_TOUCH_KEY)
@@ -240,6 +242,8 @@ function getFirstTouchAttrs(): Array<{ key: string; value: string }> {
       'utm_medium',
       'utm_campaign',
       'gclid',
+      'gbraid',
+      'wbraid',
       'fbclid',
       'fbp',
       'msclid',
