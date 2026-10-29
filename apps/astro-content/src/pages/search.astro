@@ -6,10 +6,11 @@
  * Queries the southland-ai-worker for products, SOPs, and blog content.
  * Includes "Was this helpful?" feedback component.
  */
+import { createClient } from '@southland/shopify-storefront';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SearchBar from '../components/cdp/SearchBar.astro';
 import SearchFeedback from '../components/cdp/SearchFeedback.astro';
-import { productSearchHref } from '../lib/product-search-href';
+import { resolveLiveProductSearchCards } from '../lib/product-search-live';
 
 const AI_WORKER_URL = import.meta.env.AI_WORKER_URL || 'https://southland-ai-worker.point-dog-digital.workers.dev';
 
@@ -55,12 +56,22 @@ if (query) {
   }
 }
 
-// Split results by type
+// Split results by type. Product cards are limited to handles Shopify still publishes.
+// A Storefront error or timeout hides product cards and leaves articles unchanged.
 const productResults = searchResults?.results.filter(r => r.doc_type === 'product') || [];
-const productLinks = productResults.flatMap((result) => {
-  const href = productSearchHref(result.url);
-  return href ? [{ result, href }] : [];
-});
+let productLinks: { result: AISearchResult; href: string }[] = [];
+if (productResults.length > 0) {
+  try {
+    const client = createClient({
+      storeDomain: import.meta.env.PUBLIC_SHOPIFY_STORE_DOMAIN,
+      publicAccessToken: import.meta.env.PUBLIC_SHOPIFY_STOREFRONT_TOKEN,
+    });
+    productLinks = await resolveLiveProductSearchCards(productResults, client);
+  } catch (err) {
+    console.error('Search product handle lookup failed:', err);
+    productLinks = [];
+  }
+}
 const contentResults = searchResults?.results.filter(r => r.doc_type !== 'product') || [];
 const totalCount = searchResults?.total || 0;
 const searchId = `search-${Date.now()}`;
@@ -499,7 +510,7 @@ const description = query
   searchQuery: query,
   resultCount: totalCount,
   contentCount: contentResults.length,
-  productCount: productResults.length,
+  productCount: productLinks.length,
   searchId: searchId,
 }}>
   if (searchQuery) {

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import type { StorefrontClient } from '../client'
-import { getProductByHandle, lookupProductByHandle } from './products'
+import { getProductByHandle, lookupProductByHandle, lookupProductsByHandles } from './products'
 
 const minimalProductNode = {
   id: 'gid://shopify/Product/1',
@@ -82,6 +82,81 @@ describe('lookupProductByHandle', () => {
 
     const result = await lookupProductByHandle(client, 'test-product')
     assert.equal(result.status, 'error')
+  })
+})
+
+describe('lookupProductsByHandles', () => {
+  it('resolves every handle in one product(handle:) query', async () => {
+    const calls: Array<{ query: string; variables?: Record<string, unknown> }> = []
+    const client = mockClient(async (query, options) => {
+      calls.push({
+        query: String(query),
+        variables:
+          options && typeof options === 'object'
+            ? (options as { variables?: Record<string, unknown> }).variables
+            : undefined,
+      })
+      return {
+        data: {
+          p0: { handle: 'hen-helper' },
+          p1: null,
+          p2: { handle: 'bsi-foamer-gauges' },
+        },
+      }
+    })
+
+    const result = await lookupProductsByHandles(client, [
+      'hen-helper',
+      'ss10018',
+      'md20001',
+      'hen-helper',
+    ])
+
+    assert.equal(result.status, 'ok')
+    assert.equal(calls.length, 1)
+    assert.match(calls[0]?.query ?? '', /p0: product\(handle: \$h0\) \{ handle \}/)
+    assert.match(calls[0]?.query ?? '', /p2: product\(handle: \$h2\) \{ handle \}/)
+    assert.deepEqual(calls[0]?.variables, {
+      h0: 'hen-helper',
+      h1: 'ss10018',
+      h2: 'md20001',
+    })
+    if (result.status === 'ok') {
+      assert.equal(result.handles.get('hen-helper'), 'hen-helper')
+      assert.equal(result.handles.get('ss10018'), null)
+      assert.equal(result.handles.get('md20001'), 'bsi-foamer-gauges')
+    }
+  })
+
+  it('returns error when Shopify returns GraphQL errors, even with partial data', async () => {
+    const client = mockClient(async () => ({
+      data: { p0: { handle: 'hen-helper' } },
+      errors: [{ message: 'Throttled' }],
+    }))
+
+    const result = await lookupProductsByHandles(client, ['hen-helper'])
+    assert.equal(result.status, 'error')
+  })
+
+  it('returns error when the Storefront client throws', async () => {
+    const client = mockClient(async () => {
+      throw new Error('fetch failed')
+    })
+
+    const result = await lookupProductsByHandles(client, ['hen-helper'])
+    assert.equal(result.status, 'error')
+  })
+
+  it('does not call Shopify when there are no handles', async () => {
+    let called = false
+    const client = mockClient(async () => {
+      called = true
+      return { data: {} }
+    })
+
+    const result = await lookupProductsByHandles(client, [])
+    assert.equal(called, false)
+    assert.deepEqual(result, { status: 'ok', handles: new Map() })
   })
 })
 
