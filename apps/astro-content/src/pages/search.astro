@@ -9,6 +9,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SearchBar from '../components/cdp/SearchBar.astro';
 import SearchFeedback from '../components/cdp/SearchFeedback.astro';
+import { productSearchHref } from '../lib/product-search-href';
 
 const AI_WORKER_URL = import.meta.env.AI_WORKER_URL || 'https://southland-ai-worker.point-dog-digital.workers.dev';
 
@@ -56,6 +57,10 @@ if (query) {
 
 // Split results by type
 const productResults = searchResults?.results.filter(r => r.doc_type === 'product') || [];
+const productLinks = productResults.flatMap((result) => {
+  const href = productSearchHref(result.url);
+  return href ? [{ result, href }] : [];
+});
 const contentResults = searchResults?.results.filter(r => r.doc_type !== 'product') || [];
 const totalCount = searchResults?.total || 0;
 const searchId = `search-${Date.now()}`;
@@ -116,12 +121,12 @@ const description = query
           )}
 
           <!-- Product Results -->
-          {productResults.length > 0 && (
+          {productLinks.length > 0 && (
             <div class="search-results__section">
               <h2 class="search-results__section-title">Recommended Products</h2>
               <div class="search-results__grid search-results__grid--products">
-                {productResults.map((result) => (
-                  <a href={`/products/${result.url.split('/').pop()}`} class="product-card" data-search-id={searchId}>
+                {productLinks.map(({ result, href }) => (
+                  <a href={href} class="product-card" data-search-id={searchId}>
                     <div class="product-card__content">
                       <div class="product-card__header">
                         <span class="product-card__score">{Math.round(result.score * 100)}%</span>
