@@ -9,10 +9,11 @@ export {
   getGallonProducts,
   getProductByHandle,
   lookupProductByHandle,
+  lookupProductsByHandles,
   searchProducts,
 } from './queries/products'
 
-export type { ProductLookupResult } from './queries/products'
+export type { ProductLookupResult, ProductsByHandlesLookup } from './queries/products'
 
 // Shop policies (privacy, terms, shipping, refund)
 export {

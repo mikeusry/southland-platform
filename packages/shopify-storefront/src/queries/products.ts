@@ -402,6 +402,73 @@ export async function lookupProductByHandle(
   }
 }
 
+export type ProductsByHandlesLookup =
+  | { status: 'ok'; handles: Map<string, string | null> }
+  | { status: 'error'; cause: unknown }
+
+/**
+ * Resolve many handles in one Storefront request.
+ * Each alias is the same `product(handle:)` field `lookupProductByHandle` uses.
+ * A null map value means that handle is not a live product. Request failures are `error`.
+ */
+export async function lookupProductsByHandles(
+  client: StorefrontClient,
+  handles: readonly string[],
+  signal?: AbortSignal
+): Promise<ProductsByHandlesLookup> {
+  if (signal?.aborted) {
+    return {
+      status: 'error',
+      cause: signal.reason ?? new Error('Shopify product handle lookup aborted'),
+    }
+  }
+
+  const unique: string[] = []
+  const seen = new Set<string>()
+  for (const handle of handles) {
+    if (seen.has(handle)) continue
+    seen.add(handle)
+    unique.push(handle)
+  }
+
+  if (unique.length === 0) {
+    return { status: 'ok', handles: new Map() }
+  }
+
+  const variableDefs = unique.map((_, index) => `$h${index}: String!`).join(', ')
+  const selections = unique
+    .map((_, index) => `p${index}: product(handle: $h${index}) { handle }`)
+    .join('\n')
+  const query = `query ProductsByHandles(${variableDefs}) {\n${selections}\n}`
+  const variables: Record<string, string> = {}
+  unique.forEach((handle, index) => {
+    variables[`h${index}`] = handle
+  })
+
+  try {
+    const { data, errors } = await client.request<
+      Record<string, { handle?: string | null } | null>
+    >(query, { variables, signal })
+
+    if (errors || !data) {
+      console.error('[shopify-storefront] lookupProductsByHandles errors:', errors)
+      return { status: 'error', cause: errors ?? new Error('empty Shopify response') }
+    }
+
+    const resolved = new Map<string, string | null>()
+    unique.forEach((queried, index) => {
+      const node = data[`p${index}`]
+      const live =
+        node && typeof node.handle === 'string' && node.handle.length > 0 ? node.handle : null
+      resolved.set(queried, live)
+    })
+    return { status: 'ok', handles: resolved }
+  } catch (cause) {
+    console.error('[shopify-storefront] lookupProductsByHandles request failed:', cause)
+    return { status: 'error', cause }
+  }
+}
+
 /**
  * Fetch a single product by handle (URL slug) with full detail for PDP.
  * Returns all images, HTML description, SEO metadata, vendor, and productType.
