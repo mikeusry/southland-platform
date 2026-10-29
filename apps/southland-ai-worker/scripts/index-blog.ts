@@ -7,6 +7,8 @@
  *   cd apps/southland-ai-worker
  *   npx tsx scripts/index-blog.ts
  *   npx tsx scripts/index-blog.ts --dry-run    # Preview only
+ *
+ * INDEX_ADMIN_SECRET is required unless --dry-run (same name as the worker secret).
  */
 
 import { readdir, readFile } from 'fs/promises'
@@ -15,7 +17,9 @@ import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const BLOG_DIR = join(__dirname, '../../astro-content/src/content/blog')
-const WORKER_URL = process.env.WORKER_URL || 'https://southland-ai-worker.point-dog-digital.workers.dev'
+const WORKER_URL =
+  process.env.WORKER_URL || 'https://southland-ai-worker.point-dog-digital.workers.dev'
+const INDEX_ADMIN_SECRET = process.env.INDEX_ADMIN_SECRET
 const DRY_RUN = process.argv.includes('--dry-run')
 const BATCH_SIZE = 20
 
@@ -155,6 +159,11 @@ async function main() {
     return
   }
 
+  if (!INDEX_ADMIN_SECRET) {
+    console.error('INDEX_ADMIN_SECRET is required to call /index/blog')
+    process.exit(1)
+  }
+
   // Push in batches to Worker
   console.log(`\nPushing to ${WORKER_URL}/index/blog in batches of ${BATCH_SIZE}...`)
 
@@ -162,7 +171,10 @@ async function main() {
     const batch = posts.slice(i, i + BATCH_SIZE)
     const res = await fetch(`${WORKER_URL}/index/blog`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${INDEX_ADMIN_SECRET}`,
+      },
       body: JSON.stringify({ sops: batch, count: batch.length }),
     })
 

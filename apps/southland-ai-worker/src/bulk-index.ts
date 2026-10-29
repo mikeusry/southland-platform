@@ -1,6 +1,6 @@
 import type { Env, ChunkMetadata } from './types'
 import { embedText } from './lib/embeddings'
-import { upsertVectors } from './lib/vectorize'
+import { deleteVectors, upsertVectors } from './lib/vectorize'
 import { chunkDocument } from './lib/chunker'
 import type { DocumentData } from './lib/chunker'
 
@@ -20,6 +20,7 @@ interface NexusProduct {
   category_slug: string
   business_unit: string
   url: string
+  shopify_handle?: string
   tenant: string
   canonical_text: string
   retail_price: number | null
@@ -59,7 +60,7 @@ export async function handleBulkIndex(
     count = body.count
     console.log(`Received ${count} products via POST`)
   } else {
-    // Fetch from Nexus API
+    // Fetch from Nexus API. Auth stays NEXUS_API_KEY (not INDEX_ADMIN_SECRET).
     const nexusUrl = `${env.NEXUS_API_URL}/api/ai/products`
     console.log(`Fetching products from ${nexusUrl}...`)
     const res = await fetch(nexusUrl, {
@@ -101,7 +102,7 @@ export async function handleBulkIndex(
           doc_type: 'product' as const,
           source_id: product.sku,
           title: product.name,
-          url: product.url,
+          url: resolveProductUrl(product),
           tenant: product.tenant,
           business_unit: product.business_unit,
           category: product.category_slug,
@@ -146,30 +147,32 @@ export async function handleBulkIndex(
     console.error('Manifest update error:', err)
   }
 
-  // Step 4: Populate product aliases for exact-match search
-  try {
-    // Clear existing aliases
-    await env.DB.prepare('DELETE FROM product_aliases WHERE doc_type = ?').bind('product').run()
+  // Step 4: Drop product vectors (and their chunk-manifest rows) that are not in this feed.
+  // source_id is the SKU. Sop and blog manifests are a different doc_type and are left alone.
+  const productsPruned = await pruneStaleProducts(env, products)
 
-    for (const product of products) {
-      // Add SKU as alias
-      await env.DB.prepare(
-        `INSERT OR IGNORE INTO product_aliases (alias_upper, source_id, title, url, doc_type, business_unit)
-         VALUES (?, ?, ?, ?, 'product', ?)`
-      )
-        .bind(product.sku.toUpperCase(), product.sku, product.name, product.url, product.business_unit)
-        .run()
+  // Step 5: Rebuild product aliases from the feed. Upsert so a repeated alias_upper
+  // replaces the URL instead of keeping the first row. The delete drops aliases whose
+  // product is no longer in the feed, including old names for products that remain.
+  await env.DB.prepare('DELETE FROM product_aliases WHERE doc_type = ?').bind('product').run()
 
-      // Add product name as alias
+  for (const product of products) {
+    const url = resolveProductUrl(product)
+    const aliases = [product.sku.toUpperCase(), product.name.toUpperCase()]
+    for (const aliasUpper of aliases) {
       await env.DB.prepare(
-        `INSERT OR IGNORE INTO product_aliases (alias_upper, source_id, title, url, doc_type, business_unit)
-         VALUES (?, ?, ?, ?, 'product', ?)`
+        `INSERT INTO product_aliases (alias_upper, source_id, title, url, doc_type, business_unit)
+         VALUES (?, ?, ?, ?, 'product', ?)
+         ON CONFLICT(alias_upper) DO UPDATE SET
+           source_id = excluded.source_id,
+           title = excluded.title,
+           url = excluded.url,
+           doc_type = excluded.doc_type,
+           business_unit = excluded.business_unit`
       )
-        .bind(product.name.toUpperCase(), product.sku, product.name, product.url, product.business_unit)
+        .bind(aliasUpper, product.sku, product.name, url, product.business_unit)
         .run()
     }
-  } catch (err) {
-    console.error('Alias population error:', err)
   }
 
   const elapsed = Date.now() - start
@@ -180,6 +183,7 @@ export async function handleBulkIndex(
       products_fetched: count,
       vectors_upserted: totalUpserted,
       errors: totalErrors,
+      products_pruned: productsPruned,
       aliases_created: products.length * 2, // SKU + name per product
       latency_ms: elapsed,
       timestamp: new Date().toISOString(),
@@ -187,6 +191,74 @@ export async function handleBulkIndex(
     env,
     origin
   )
+}
+
+// Shopify handles are a single path segment. Anything else keeps the feed url as-is.
+const PRODUCT_HANDLE = /^[A-Za-z0-9][A-Za-z0-9_-]*$/
+
+export function resolveProductUrl(product: {
+  url?: string
+  shopify_handle?: string | null
+}): string {
+  const handle = typeof product.shopify_handle === 'string' ? product.shopify_handle.trim() : ''
+  if (handle && PRODUCT_HANDLE.test(handle)) {
+    return `/products/${handle}/`
+  }
+  return product.url ?? ''
+}
+
+// Product identity in chunk_manifests is source_id, which this indexer sets to the SKU.
+// The existing (doc_type, source_id, chunk_ids) rows are enough to delete stale vectors.
+const VECTOR_DELETE_BATCH = 500
+
+async function pruneStaleProducts(env: Env, products: NexusProduct[]): Promise<number> {
+  const keep = new Set<string>()
+  for (const product of products) {
+    if (product.sku) keep.add(product.sku)
+  }
+
+  const listed = await env.DB.prepare(
+    `SELECT source_id, chunk_ids FROM chunk_manifests WHERE doc_type = 'product'`
+  ).all()
+  const rows = (listed.results ?? []) as Array<{ source_id: string; chunk_ids: unknown }>
+
+  const staleSources: string[] = []
+  const staleVectors: string[] = []
+  for (const row of rows) {
+    if (keep.has(row.source_id)) continue
+    staleSources.push(row.source_id)
+    staleVectors.push(...readChunkIds(row.chunk_ids, row.source_id))
+  }
+
+  for (let i = 0; i < staleVectors.length; i += VECTOR_DELETE_BATCH) {
+    await deleteVectors(env, staleVectors.slice(i, i + VECTOR_DELETE_BATCH))
+  }
+
+  for (const sourceId of staleSources) {
+    await env.DB.prepare(`DELETE FROM chunk_manifests WHERE doc_type = 'product' AND source_id = ?`)
+      .bind(sourceId)
+      .run()
+  }
+
+  if (staleSources.length > 0) {
+    console.log(`Pruned ${staleSources.length} product chunk manifests`)
+  }
+  return staleSources.length
+}
+
+function readChunkIds(value: unknown, sourceId: string): string[] {
+  let parsed: unknown = value
+  if (typeof value === 'string') {
+    try {
+      parsed = JSON.parse(value)
+    } catch {
+      throw new Error(`chunk_manifests.chunk_ids for product ${sourceId} is not JSON`)
+    }
+  }
+  if (!Array.isArray(parsed)) {
+    throw new Error(`chunk_manifests.chunk_ids for product ${sourceId} is not an array`)
+  }
+  return parsed.filter((id): id is string => typeof id === 'string')
 }
 
 // ─── SOP Bulk Index ─────────────────────────────────────────────────────────
