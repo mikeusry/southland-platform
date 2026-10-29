@@ -15,7 +15,7 @@
     "typecheck": "astro check",
     "format": "prettier --write 'src/**/*.{ts,tsx,js,astro}'",
     "format:check": "prettier --check 'src/**/*.{ts,tsx,js,astro}'",
-    "test": "node --import tsx --test src/lib/gallonsFromPackTitle.test.ts src/lib/subscribe-nexus.test.ts src/lib/product-page-shopify.test.ts src/lib/shop-policy-meta.test.ts src/lib/product-search-href.test.ts src/lib/product-search-live.test.ts"
+    "test": "node --import tsx --test src/lib/gallonsFromPackTitle.test.ts src/lib/subscribe-nexus.test.ts src/lib/product-page-shopify.test.ts src/lib/shop-policy-meta.test.ts src/lib/product-search-href.test.ts src/lib/product-search-live.test.ts src/lib/cart-attribution.test.ts"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.12",

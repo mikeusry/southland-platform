@@ -136,7 +136,7 @@ const openaiAdsPixelId =
       (function(){
         'use strict';
         var KEY='_pd_attribution';
-        var PARAMS=['utm_source','utm_medium','utm_campaign','utm_content','utm_term','gclid','fbclid','msclid','ttclid','srsltid','oppref'];
+        var PARAMS=['utm_source','utm_medium','utm_campaign','utm_content','utm_term','gclid','gbraid','wbraid','fbclid','msclid','ttclid','srsltid','oppref'];
         try{
           var url=new URL(window.location.href);
           var found={},hasNew=false;
@@ -199,7 +199,7 @@ const openaiAdsPixelId =
         try{
           if(localStorage.getItem(FT_KEY))return;
           var url=new URL(window.location.href);
-          var PARAMS=['utm_source','utm_medium','utm_campaign','gclid','fbclid','msclid','ttclid','srsltid','oppref'];
+          var PARAMS=['utm_source','utm_medium','utm_campaign','gclid','gbraid','wbraid','fbclid','msclid','ttclid','srsltid','oppref'];
           var data={};
           PARAMS.forEach(function(p){var v=url.searchParams.get(p);if(v)data[p]=v});
           // Same listing-vs-paid rule as last-touch. First-touch is write-once;
