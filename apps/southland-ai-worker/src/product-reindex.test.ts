@@ -78,17 +78,18 @@ function feedProduct(overrides: Partial<FeedProduct> = {}): FeedProduct {
   }
 }
 
-function createD1(db: SqliteDatabase): D1Database {
+function createD1(db: SqliteDatabase, stats: { batches: number } = { batches: 0 }): D1Database {
+  const bound = (params: unknown[]) => params as Array<string | number | null>
   const run = (sql: string, params: unknown[]) => {
-    const info = db.prepare(sql).run(...(params as Array<string | number | null>))
+    const info = db.prepare(sql).run(...bound(params))
     return { success: true, meta: { changes: info.changes } }
   }
   const all = (sql: string, params: unknown[]) => {
-    const results = db.prepare(sql).all(...(params as Array<string | number | null>))
+    const results = db.prepare(sql).all(...bound(params))
     return { success: true, results }
   }
   const first = (sql: string, params: unknown[]) => {
-    return db.prepare(sql).get(...(params as Array<string | number | null>)) ?? null
+    return db.prepare(sql).get(...bound(params)) ?? null
   }
   const statement = (sql: string, params: unknown[]) => ({
     bind(...next: unknown[]) {
@@ -108,6 +109,21 @@ function createD1(db: SqliteDatabase): D1Database {
     prepare(sql: string) {
       return statement(sql, [])
     },
+    async batch(statements: Array<{ run: () => Promise<unknown> }>) {
+      stats.batches += 1
+      db.exec('BEGIN')
+      const results = []
+      try {
+        for (const statement of statements) {
+          results.push(await statement.run())
+        }
+        db.exec('COMMIT')
+        return results
+      } catch (err) {
+        db.exec('ROLLBACK')
+        throw err
+      }
+    },
   } as unknown as D1Database
 }
 
@@ -117,6 +133,7 @@ function createHarness(options?: { secret?: string | null }) {
   const vectors = new Map<string, VectorRow>()
   const deletedIds: string[] = []
   const fetchCalls: FetchCall[] = []
+  const stats = { batches: 0 }
   const secret = options?.secret === undefined ? SECRET : options.secret
 
   vi.stubGlobal(
@@ -160,7 +177,7 @@ function createHarness(options?: { secret?: string | null }) {
         return { count, ids }
       },
     },
-    DB: createD1(db),
+    DB: createD1(db, stats),
     CACHE: {
       async put() {},
       async get() {
@@ -184,7 +201,7 @@ function createHarness(options?: { secret?: string | null }) {
     return worker.fetch(new Request(`https://worker.test${pathname}`, init), env, ctx)
   }
 
-  return { db, vectors, deletedIds, fetchCalls, env, call }
+  return { db, vectors, deletedIds, fetchCalls, stats, env, call }
 }
 
 function authHeaders(secret = SECRET): HeadersInit {
@@ -358,6 +375,9 @@ describe('product reindex', () => {
       body: postBody('/index/products', [feedProduct()]),
     })
     expect(res.status).toBe(200)
+    await expect(res.json()).resolves.toMatchObject({ status: 'complete' })
+    // 1 of 2 manifests is exactly half, which is not below the guard.
+    expect(harness.stats.batches).toBe(1)
     expect(harness.vectors.has('product:STALE:0')).toBe(false)
     expect(harness.vectors.has('product:STALE:1')).toBe(false)
     expect(harness.deletedIds).toEqual(
@@ -383,20 +403,95 @@ describe('product reindex', () => {
     ).toBeDefined()
   })
 
-  it('prunes every product chunk when the feed is empty and leaves sop and blog rows', async () => {
+  it('skips prune and alias rebuild when the product feed is empty', async () => {
     const res = await harness.call('/index/products', {
       method: 'POST',
       headers: authHeaders(),
       body: postBody('/index/products', []),
     })
     expect(res.status).toBe(200)
-    expect(harness.vectors.has('product:STALE:0')).toBe(false)
-    expect(harness.vectors.has('product:STALE:1')).toBe(false)
-    expect(harness.vectors.has('product:KEEP:0')).toBe(false)
+    await expect(res.json()).resolves.toMatchObject({
+      status: 'skipped',
+      reason: 'empty_feed',
+    })
+    expect(harness.stats.batches).toBe(0)
+    expect(harness.deletedIds).toEqual([])
+    expect(harness.vectors.has('product:STALE:0')).toBe(true)
+    expect(harness.vectors.has('product:STALE:1')).toBe(true)
+    expect(harness.vectors.has('product:KEEP:0')).toBe(true)
     expect(harness.vectors.has('sop:sop-1:0')).toBe(true)
     expect(harness.vectors.has('blog:post-1:0')).toBe(true)
-    const productManifests = manifestRows(harness.db).filter((row) => row.doc_type === 'product')
-    expect(productManifests).toEqual([])
+    expect(manifestRows(harness.db).filter((row) => row.doc_type === 'product')).toHaveLength(2)
+    expect(aliasRows(harness.db).map((row) => row.alias_upper)).toEqual(['KEEP', 'OLD NAME', 'STALE'])
+  })
+
+  it('skips prune and alias rebuild when the feed is under half the product manifests', async () => {
+    seedManifest(harness.db, 'product', 'P3', ['product:P3:0'])
+    seedManifest(harness.db, 'product', 'P4', ['product:P4:0'])
+    harness.vectors.set('product:P3:0', { id: 'product:P3:0', values: [0.2], metadata: {} })
+    harness.vectors.set('product:P4:0', { id: 'product:P4:0', values: [0.2], metadata: {} })
+
+    const res = await harness.call('/index/products', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: postBody('/index/products', [feedProduct()]),
+    })
+    expect(res.status).toBe(200)
+    await expect(res.json()).resolves.toMatchObject({
+      status: 'skipped',
+      reason: 'feed_below_half_of_manifests',
+      products_fetched: 1,
+      manifest_count: 4,
+    })
+    expect(harness.stats.batches).toBe(0)
+    expect(harness.deletedIds).toEqual([])
+    expect(harness.vectors.has('product:STALE:0')).toBe(true)
+    expect(harness.vectors.has('product:P3:0')).toBe(true)
+    expect(harness.vectors.has('product:P4:0')).toBe(true)
+    expect(aliasRows(harness.db).find((row) => row.alias_upper === 'STALE')?.url).toBe(
+      '/products/STALE'
+    )
+  })
+
+  it('skips prune and alias rebuild when an embed batch errors', async () => {
+    harness.env.AI = {
+      async run() {
+        throw new Error('embed failed')
+      },
+    } as unknown as Env['AI']
+
+    const res = await harness.call('/index/products', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: postBody('/index/products', [feedProduct({ url: '/products/keep-handle/' })]),
+    })
+    expect(res.status).toBe(200)
+    await expect(res.json()).resolves.toMatchObject({
+      status: 'skipped',
+      reason: 'embed_errors',
+      errors: 1,
+    })
+    expect(harness.stats.batches).toBe(0)
+    expect(harness.deletedIds).toEqual([])
+    expect(harness.vectors.has('product:STALE:0')).toBe(true)
+    expect(harness.vectors.get('product:KEEP:0')?.metadata.url).toBe('/old/product:KEEP:0')
+    expect(aliasRows(harness.db).find((row) => row.alias_upper === 'KEEP')?.url).toBe(
+      '/products/KEEP'
+    )
+    expect(aliasRows(harness.db).find((row) => row.alias_upper === 'STALE')).toBeDefined()
+  })
+
+  it('rolls back the alias batch when a statement fails', async () => {
+    const db = new DatabaseSync(':memory:')
+    db.exec(schema)
+    seedAlias(db, 'KEEP', 'KEEP', 'Keep Product', '/products/KEEP')
+    const d1 = createD1(db)
+    const statements = [
+      d1.prepare('DELETE FROM product_aliases WHERE doc_type = ?').bind('product'),
+      d1.prepare('INSERT INTO missing_table (id) VALUES (?)').bind(1),
+    ]
+    await expect(d1.batch(statements)).rejects.toThrow()
+    expect(aliasRows(db).find((row) => row.alias_upper === 'KEEP')?.url).toBe('/products/KEEP')
   })
 
   it('does not prune when the Nexus product feed request fails', async () => {

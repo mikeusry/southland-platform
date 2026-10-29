@@ -20,3 +20,5 @@ wrangler secret put INDEX_ADMIN_SECRET --env production
 If the secret is unset or blank, those routes fail closed with HTTP 503. Do not commit the value.
 
 `scripts/seed-products.ts` and `scripts/index-blog.ts` read `INDEX_ADMIN_SECRET` from the environment and send it as the bearer token. The product feed fetch still uses `NEXUS_API_KEY`.
+
+A product reindex skips prune and alias rebuild, and returns `status: "skipped"`, when the feed is empty, when it has fewer than half as many products as the current product manifest, or when an embed batch fails.

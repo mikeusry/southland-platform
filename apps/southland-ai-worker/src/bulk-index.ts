@@ -80,6 +80,27 @@ export async function handleBulkIndex(
     console.log(`Fetched ${count} products from Nexus`)
   }
 
+  // An empty or suspiciously small successful feed must not delete the index.
+  // Feed size is the product array we would keep, not a separate count field.
+  if (!Array.isArray(products) || products.length === 0) {
+    return skippedIndex(env, origin, start, {
+      reason: 'empty_feed',
+      message: 'Skipped prune and alias rebuild because the product feed was empty.',
+      products_fetched: typeof count === 'number' ? count : 0,
+    })
+  }
+
+  const manifestCount = await countProductManifests(env)
+  if (manifestCount > 0 && products.length * 2 < manifestCount) {
+    return skippedIndex(env, origin, start, {
+      reason: 'feed_below_half_of_manifests',
+      message:
+        'Skipped prune and alias rebuild because the feed has fewer than half as many products as the current product manifest.',
+      products_fetched: products.length,
+      manifest_count: manifestCount,
+    })
+  }
+
   // Step 2: Embed in batches (Workers AI supports batch)
   // Batch size: 50 products at a time to stay within limits
   const BATCH_SIZE = 50
@@ -129,6 +150,18 @@ export async function handleBulkIndex(
     }
   }
 
+  if (totalErrors > 0) {
+    return skippedIndex(env, origin, start, {
+      reason: 'embed_errors',
+      message:
+        'Skipped prune and alias rebuild because an embed batch failed. Existing product vectors and aliases were left in place.',
+      products_fetched: count,
+      vectors_upserted: totalUpserted,
+      errors: totalErrors,
+      manifest_count: manifestCount,
+    })
+  }
+
   // Step 3: Update chunk manifests in D1
   try {
     for (const product of products) {
@@ -151,29 +184,8 @@ export async function handleBulkIndex(
   // source_id is the SKU. Sop and blog manifests are a different doc_type and are left alone.
   const productsPruned = await pruneStaleProducts(env, products)
 
-  // Step 5: Rebuild product aliases from the feed. Upsert so a repeated alias_upper
-  // replaces the URL instead of keeping the first row. The delete drops aliases whose
-  // product is no longer in the feed, including old names for products that remain.
-  await env.DB.prepare('DELETE FROM product_aliases WHERE doc_type = ?').bind('product').run()
-
-  for (const product of products) {
-    const url = resolveProductUrl(product)
-    const aliases = [product.sku.toUpperCase(), product.name.toUpperCase()]
-    for (const aliasUpper of aliases) {
-      await env.DB.prepare(
-        `INSERT INTO product_aliases (alias_upper, source_id, title, url, doc_type, business_unit)
-         VALUES (?, ?, ?, ?, 'product', ?)
-         ON CONFLICT(alias_upper) DO UPDATE SET
-           source_id = excluded.source_id,
-           title = excluded.title,
-           url = excluded.url,
-           doc_type = excluded.doc_type,
-           business_unit = excluded.business_unit`
-      )
-        .bind(aliasUpper, product.sku, product.name, url, product.business_unit)
-        .run()
-    }
-  }
+  // Step 5: Rebuild product aliases in one D1 batch so the delete and inserts commit together.
+  await rebuildProductAliases(env, products)
 
   const elapsed = Date.now() - start
 
@@ -191,6 +203,59 @@ export async function handleBulkIndex(
     env,
     origin
   )
+}
+
+function skippedIndex(
+  env: Env,
+  origin: string | null,
+  start: number,
+  body: Record<string, unknown>
+): Response {
+  console.warn(`Product reindex skipped (${String(body.reason)}): ${String(body.message ?? '')}`)
+  return json(
+    {
+      status: 'skipped',
+      ...body,
+      latency_ms: Date.now() - start,
+      timestamp: new Date().toISOString(),
+    },
+    env,
+    origin
+  )
+}
+
+async function countProductManifests(env: Env): Promise<number> {
+  const row = await env.DB.prepare(
+    `SELECT COUNT(*) AS n FROM chunk_manifests WHERE doc_type = 'product'`
+  ).first<{ n: number | string }>()
+  return Number(row?.n ?? 0)
+}
+
+async function rebuildProductAliases(env: Env, products: NexusProduct[]): Promise<void> {
+  const statements: D1PreparedStatement[] = [
+    env.DB.prepare('DELETE FROM product_aliases WHERE doc_type = ?').bind('product'),
+  ]
+
+  for (const product of products) {
+    const url = resolveProductUrl(product)
+    const aliases = [product.sku.toUpperCase(), product.name.toUpperCase()]
+    for (const aliasUpper of aliases) {
+      statements.push(
+        env.DB.prepare(
+          `INSERT INTO product_aliases (alias_upper, source_id, title, url, doc_type, business_unit)
+           VALUES (?, ?, ?, ?, 'product', ?)
+           ON CONFLICT(alias_upper) DO UPDATE SET
+             source_id = excluded.source_id,
+             title = excluded.title,
+             url = excluded.url,
+             doc_type = excluded.doc_type,
+             business_unit = excluded.business_unit`
+        ).bind(aliasUpper, product.sku, product.name, url, product.business_unit)
+      )
+    }
+  }
+
+  await env.DB.batch(statements)
 }
 
 // Shopify handles are a single path segment. Anything else keeps the feed url as-is.
