@@ -27,6 +27,8 @@ export interface Env {
   NEXUS_API_KEY: string
   OPENAI_API_KEY: string  // GPT-4o-mini for chat + copilot (fallback: Workers AI)
   COHERE_API_KEY: string  // Rerank v3.5 for two-stage retrieval
+  // Required for /index/* . Missing or blank fails closed (503).
+  INDEX_ADMIN_SECRET?: string
 }
 
 // ─── Queue Message Types ────────────────────────────────────────────────────

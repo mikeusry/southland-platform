@@ -5,6 +5,7 @@ import { handleAsk, handleAskStream } from './ask'
 import { handleBenchmark } from './benchmark'
 import { handleIndex } from './index-worker'
 import { handleBulkIndex } from './bulk-index'
+import { authorizeIndexRequest } from './index-auth'
 import { handleSummarize } from './summarize'
 import { handleContentGaps } from './content-gaps'
 import { handleEscalate } from './escalate'
@@ -55,6 +56,20 @@ export default {
     }
 
     try {
+      if (url.pathname.startsWith('/index/')) {
+        const decision = authorizeIndexRequest(request, env.INDEX_ADMIN_SECRET)
+        switch (decision.ok) {
+          case true:
+            break
+          case false:
+            return jsonResponse({ error: decision.error }, env, origin, decision.status)
+          default: {
+            const unreachable: never = decision
+            throw new Error(`Unhandled index auth decision: ${JSON.stringify(unreachable)}`)
+          }
+        }
+      }
+
       switch (url.pathname) {
         // Layer 3: Site Search
         case '/search':

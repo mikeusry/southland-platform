@@ -69,10 +69,16 @@ AI_GATEWAY_SLUG = "southland-ai"
 ALLOWED_ORIGINS = "https://southlandorganics.com,https://www.southlandorganics.com,https://southland-website.pages.dev,https://nexus.southlandorganics.com"
 
 # ─── Secrets (set via wrangler secret put) ──────────────────────────────────
-# NEXUS_API_KEY    — Service key for Nexus API calls
-# OPENAI_API_KEY   — GPT-4o-mini for chat + copilot (fallback: Workers AI Llama)
-# COHERE_API_KEY   — Rerank v3.5 for two-stage retrieval (~$12/mo)
-# SENDGRID_API_KEY — For email (Phase 5)
+# NEXUS_API_KEY      — Service key for Nexus API calls (product/SOP feed fetch)
+# OPENAI_API_KEY     — GPT-4o-mini for chat + copilot (fallback: Workers AI Llama)
+# COHERE_API_KEY     — Rerank v3.5 for two-stage retrieval (~$12/mo)
+# SENDGRID_API_KEY   — For email (Phase 5)
+# INDEX_ADMIN_SECRET — Bearer token required on every /index/* route.
+#                      If this secret is unset, those routes fail closed (503).
+#                      Set it before deploying this worker:
+#                        wrangler secret put INDEX_ADMIN_SECRET
+#                        wrangler secret put INDEX_ADMIN_SECRET --env production
+#                      Do not put the value in this file.
 
 # ─── Production ─────────────────────────────────────────────────────────────
 [env.production]

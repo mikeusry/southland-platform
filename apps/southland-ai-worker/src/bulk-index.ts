@@ -1,6 +1,6 @@
 import type { Env, ChunkMetadata } from './types'
 import { embedText } from './lib/embeddings'
-import { upsertVectors } from './lib/vectorize'
+import { deleteVectors, upsertVectors } from './lib/vectorize'
 import { chunkDocument } from './lib/chunker'
 import type { DocumentData } from './lib/chunker'
 
@@ -20,6 +20,7 @@ interface NexusProduct {
   category_slug: string
   business_unit: string
   url: string
+  shopify_handle?: string
   tenant: string
   canonical_text: string
   retail_price: number | null
@@ -59,7 +60,7 @@ export async function handleBulkIndex(
     count = body.count
     console.log(`Received ${count} products via POST`)
   } else {
-    // Fetch from Nexus API
+    // Fetch from Nexus API. Auth stays NEXUS_API_KEY (not INDEX_ADMIN_SECRET).
     const nexusUrl = `${env.NEXUS_API_URL}/api/ai/products`
     console.log(`Fetching products from ${nexusUrl}...`)
     const res = await fetch(nexusUrl, {
@@ -77,6 +78,27 @@ export async function handleBulkIndex(
     products = data.products
     count = data.count
     console.log(`Fetched ${count} products from Nexus`)
+  }
+
+  // An empty or suspiciously small successful feed must not delete the index.
+  // Feed size is the product array we would keep, not a separate count field.
+  if (!Array.isArray(products) || products.length === 0) {
+    return skippedIndex(env, origin, start, {
+      reason: 'empty_feed',
+      message: 'Skipped prune and alias rebuild because the product feed was empty.',
+      products_fetched: typeof count === 'number' ? count : 0,
+    })
+  }
+
+  const manifestCount = await countProductManifests(env)
+  if (manifestCount > 0 && products.length * 2 < manifestCount) {
+    return skippedIndex(env, origin, start, {
+      reason: 'feed_below_half_of_manifests',
+      message:
+        'Skipped prune and alias rebuild because the feed has fewer than half as many products as the current product manifest.',
+      products_fetched: products.length,
+      manifest_count: manifestCount,
+    })
   }
 
   // Step 2: Embed in batches (Workers AI supports batch)
@@ -101,7 +123,7 @@ export async function handleBulkIndex(
           doc_type: 'product' as const,
           source_id: product.sku,
           title: product.name,
-          url: product.url,
+          url: resolveProductUrl(product),
           tenant: product.tenant,
           business_unit: product.business_unit,
           category: product.category_slug,
@@ -128,6 +150,18 @@ export async function handleBulkIndex(
     }
   }
 
+  if (totalErrors > 0) {
+    return skippedIndex(env, origin, start, {
+      reason: 'embed_errors',
+      message:
+        'Skipped prune and alias rebuild because an embed batch failed. Existing product vectors and aliases were left in place.',
+      products_fetched: count,
+      vectors_upserted: totalUpserted,
+      errors: totalErrors,
+      manifest_count: manifestCount,
+    })
+  }
+
   // Step 3: Update chunk manifests in D1
   try {
     for (const product of products) {
@@ -146,31 +180,12 @@ export async function handleBulkIndex(
     console.error('Manifest update error:', err)
   }
 
-  // Step 4: Populate product aliases for exact-match search
-  try {
-    // Clear existing aliases
-    await env.DB.prepare('DELETE FROM product_aliases WHERE doc_type = ?').bind('product').run()
+  // Step 4: Drop product vectors (and their chunk-manifest rows) that are not in this feed.
+  // source_id is the SKU. Sop and blog manifests are a different doc_type and are left alone.
+  const productsPruned = await pruneStaleProducts(env, products)
 
-    for (const product of products) {
-      // Add SKU as alias
-      await env.DB.prepare(
-        `INSERT OR IGNORE INTO product_aliases (alias_upper, source_id, title, url, doc_type, business_unit)
-         VALUES (?, ?, ?, ?, 'product', ?)`
-      )
-        .bind(product.sku.toUpperCase(), product.sku, product.name, product.url, product.business_unit)
-        .run()
-
-      // Add product name as alias
-      await env.DB.prepare(
-        `INSERT OR IGNORE INTO product_aliases (alias_upper, source_id, title, url, doc_type, business_unit)
-         VALUES (?, ?, ?, ?, 'product', ?)`
-      )
-        .bind(product.name.toUpperCase(), product.sku, product.name, product.url, product.business_unit)
-        .run()
-    }
-  } catch (err) {
-    console.error('Alias population error:', err)
-  }
+  // Step 5: Rebuild product aliases in one D1 batch so the delete and inserts commit together.
+  await rebuildProductAliases(env, products)
 
   const elapsed = Date.now() - start
 
@@ -180,6 +195,7 @@ export async function handleBulkIndex(
       products_fetched: count,
       vectors_upserted: totalUpserted,
       errors: totalErrors,
+      products_pruned: productsPruned,
       aliases_created: products.length * 2, // SKU + name per product
       latency_ms: elapsed,
       timestamp: new Date().toISOString(),
@@ -187,6 +203,127 @@ export async function handleBulkIndex(
     env,
     origin
   )
+}
+
+function skippedIndex(
+  env: Env,
+  origin: string | null,
+  start: number,
+  body: Record<string, unknown>
+): Response {
+  console.warn(`Product reindex skipped (${String(body.reason)}): ${String(body.message ?? '')}`)
+  return json(
+    {
+      status: 'skipped',
+      ...body,
+      latency_ms: Date.now() - start,
+      timestamp: new Date().toISOString(),
+    },
+    env,
+    origin
+  )
+}
+
+async function countProductManifests(env: Env): Promise<number> {
+  const row = await env.DB.prepare(
+    `SELECT COUNT(*) AS n FROM chunk_manifests WHERE doc_type = 'product'`
+  ).first<{ n: number | string }>()
+  return Number(row?.n ?? 0)
+}
+
+async function rebuildProductAliases(env: Env, products: NexusProduct[]): Promise<void> {
+  const statements: D1PreparedStatement[] = [
+    env.DB.prepare('DELETE FROM product_aliases WHERE doc_type = ?').bind('product'),
+  ]
+
+  for (const product of products) {
+    const url = resolveProductUrl(product)
+    const aliases = [product.sku.toUpperCase(), product.name.toUpperCase()]
+    for (const aliasUpper of aliases) {
+      statements.push(
+        env.DB.prepare(
+          `INSERT INTO product_aliases (alias_upper, source_id, title, url, doc_type, business_unit)
+           VALUES (?, ?, ?, ?, 'product', ?)
+           ON CONFLICT(alias_upper) DO UPDATE SET
+             source_id = excluded.source_id,
+             title = excluded.title,
+             url = excluded.url,
+             doc_type = excluded.doc_type,
+             business_unit = excluded.business_unit`
+        ).bind(aliasUpper, product.sku, product.name, url, product.business_unit)
+      )
+    }
+  }
+
+  await env.DB.batch(statements)
+}
+
+// Shopify handles are a single path segment. Anything else keeps the feed url as-is.
+const PRODUCT_HANDLE = /^[A-Za-z0-9][A-Za-z0-9_-]*$/
+
+export function resolveProductUrl(product: {
+  url?: string
+  shopify_handle?: string | null
+}): string {
+  const handle = typeof product.shopify_handle === 'string' ? product.shopify_handle.trim() : ''
+  if (handle && PRODUCT_HANDLE.test(handle)) {
+    return `/products/${handle}/`
+  }
+  return product.url ?? ''
+}
+
+// Product identity in chunk_manifests is source_id, which this indexer sets to the SKU.
+// The existing (doc_type, source_id, chunk_ids) rows are enough to delete stale vectors.
+const VECTOR_DELETE_BATCH = 500
+
+async function pruneStaleProducts(env: Env, products: NexusProduct[]): Promise<number> {
+  const keep = new Set<string>()
+  for (const product of products) {
+    if (product.sku) keep.add(product.sku)
+  }
+
+  const listed = await env.DB.prepare(
+    `SELECT source_id, chunk_ids FROM chunk_manifests WHERE doc_type = 'product'`
+  ).all()
+  const rows = (listed.results ?? []) as Array<{ source_id: string; chunk_ids: unknown }>
+
+  const staleSources: string[] = []
+  const staleVectors: string[] = []
+  for (const row of rows) {
+    if (keep.has(row.source_id)) continue
+    staleSources.push(row.source_id)
+    staleVectors.push(...readChunkIds(row.chunk_ids, row.source_id))
+  }
+
+  for (let i = 0; i < staleVectors.length; i += VECTOR_DELETE_BATCH) {
+    await deleteVectors(env, staleVectors.slice(i, i + VECTOR_DELETE_BATCH))
+  }
+
+  for (const sourceId of staleSources) {
+    await env.DB.prepare(`DELETE FROM chunk_manifests WHERE doc_type = 'product' AND source_id = ?`)
+      .bind(sourceId)
+      .run()
+  }
+
+  if (staleSources.length > 0) {
+    console.log(`Pruned ${staleSources.length} product chunk manifests`)
+  }
+  return staleSources.length
+}
+
+function readChunkIds(value: unknown, sourceId: string): string[] {
+  let parsed: unknown = value
+  if (typeof value === 'string') {
+    try {
+      parsed = JSON.parse(value)
+    } catch {
+      throw new Error(`chunk_manifests.chunk_ids for product ${sourceId} is not JSON`)
+    }
+  }
+  if (!Array.isArray(parsed)) {
+    throw new Error(`chunk_manifests.chunk_ids for product ${sourceId} is not an array`)
+  }
+  return parsed.filter((id): id is string => typeof id === 'string')
 }
 
 // ─── SOP Bulk Index ─────────────────────────────────────────────────────────
