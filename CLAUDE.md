@@ -4,7 +4,7 @@ Monorepo for Southland Organics digital platform.
 
 ## Nexus Task System
 
-Tasks are managed in **Southland Nexus** (southland-inventory repo). When Mike references a task number (T-42, T-74, etc.), use `/task T-42` or query the Nexus database directly to read it, then **execute it immediately**.
+Tasks are managed in **Southland Nexus** (southland-inventory repo). When Mike references a task number (T-42, T-74, etc.), use `/task T-42` or query the Nexus database directly to read it, then **execute it immediately** — on a branch, opening a draft PR only. Agents never merge, push to `main` or deploy; Mike merges.
 
 - **DB:** `https://lmtjxckdcsdymqxpgjxo.supabase.co` (Southland Supabase)
 - **Credentials:** `SUPABASE_SERVICE_ROLE_KEY` in `/Users/mikeusry/CODING/southland-inventory/.env.local`
@@ -34,7 +34,7 @@ When Mike mentions a task number, **read it and start solving it**. The task des
 
 | Layer | Technology |
 |-------|------------|
-| Frontend | Astro (static site generation) |
+| Frontend | Astro, `output: 'server'` (SSR on the `@astrojs/cloudflare` adapter; pages opt in to prerender) |
 | Content CMS | TinaCMS (Git-backed, visual editor) |
 | Commerce Backend | Shopify Storefront API (products, cart, checkout) |
 | Images | Cloudinary CDN |
@@ -61,17 +61,17 @@ When Mike mentions a task number, **read it and start solving it**. The task des
 
 | URL Pattern | Source | Notes |
 |-------------|--------|-------|
-| `/` | Shopify (proxied) | Homepage |
+| `/` | Astro SSR + Shopify Storefront API | Homepage (`src/pages/index.astro`) |
 | `/podcast/` | Astro + TinaCMS | Podcast hub |
 | `/podcast/[slug]/` | Astro + TinaCMS | Episode pages |
 | `/blog/` | Astro + TinaCMS | Blog index |
 | `/blog/[slug]/` | Astro + TinaCMS | Blog posts |
-| `/collections/[slug]/` | Shopify (proxied) | Collection pages (Astro built, not routed yet) |
-| `/products/[handle]/` | Shopify (proxied) | Product pages |
+| `/collections/[slug]/` | Astro SSR + Shopify Storefront API | Collection pages, routed (`collections/[slug].astro`); slugs with a hub page 301 to it (e.g. `/collections/poultry/` → `/poultry/`) |
+| `/products/[handle]/` | Astro SSR + Shopify Storefront API | Product pages (`products/[handle].astro`) |
 | `/build-a-case/` | Astro + Shopify Storefront API | Mix & Match gallon case builder |
 | `/application-rate-calculator/` | Astro + React island | Application rate calculator (12 products, Add to Cart) |
 | `/erosion-control-seed-calculator/` | Astro + React island | Erosion control seed mix calculator |
-| `/cart/` | Shopify (proxied) | Cart page |
+| `/cart/` | Astro SSR + React island (`CartPage`) | Cart (noindex); checkout goes to Shopify `cart.checkoutUrl` |
 | `/about/` | Astro | About page |
 | `/contact/` | Astro | Contact page |
 | `/distribution/` | Astro | Distribution info |
@@ -101,7 +101,7 @@ When Mike mentions a task number, **read it and start solving it**. The task des
 **Master Document:** [docs/SOUTHLAND-CDP-PLAYBOOK.md](docs/SOUTHLAND-CDP-PLAYBOOK.md)
 
 Comprehensive Customer Data Platform strategy combining:
-- **4 Personas:** Broiler Bill, Backyard Betty, Turf Pro Taylor, Mold Molly
+- **Personas:** the roster in `apps/astro-content/src/lib/persona.ts` (`PERSONA_CONFIG`: 13 personas + `general`) is the source of truth
 - **10 Hero Journey Stages:** unAware → Evangelist
 - **Vector-powered personalization:** Supabase embeddings + semantic search
 - **Outcome tracking:** FCR, mortality, problem-solved metrics
@@ -257,7 +257,7 @@ Remix-based Shopify embedded app. Requires dev store setup via `shopify app dev`
 
 ## Cloudinary
 
-**Cloud Name:** `southland-organics`
+**Cloud Name:** `southland-organics` (lowercase, as in `PUBLIC_CLOUDINARY_CLOUD_NAME` in `deploy.yml` and every live image URL; Cloudinary also accepts `Southland-Organics`)
 
 ### Folder Structure
 
@@ -315,7 +315,7 @@ Initiative background (March 2026 AI-visibility audit, pillar list, PMax rewrite
 
 ### Content Rules (for all future pillar pages)
 1. Problem-first, product-second — always
-2. Specific data (ppm, $/acre, FCR) — not vague claims
+2. Specific data (ppm, $/acre, FCR) — not vague claims. Numbers and claims come only from product labels, this site, or Mike; never invent. Flag any label or efficacy claim for Mike.
 3. Honest competitor comparisons
 4. Structured for AI extraction (H2/H3, tables, FAQ schema)
 5. Products appear as ONE option among several
@@ -331,25 +331,20 @@ The ESP is **Customer.io** — Klaviyo was retired (emitters removed 2026-08-11)
 
 **Spec:** [docs/LEAD-MAGNETS.md](docs/LEAD-MAGNETS.md) — UX specs, benchmarks, analytics events, Nexus POST patterns for all lead capture tools.
 
-**4 tools to build:**
-1. **Gate the Erosion Calculator** — add "Save Your Recommendation" email capture below results → POST to Nexus as `lead_type: 'erosion_calculator'`
-2. **Lawn Health Assessment Quiz** — 5-7 question wizard → personalized product recommendations → POST as `lead_type: 'product_quiz'`
-3. **Application Rate Calculator** — product → area → quantities + cost + add-to-cart → POST as `lead_type: 'roi_calculator'`
-4. **Talk to a Rep** — inline form on every product page, pre-filled with product context → POST as `lead_type: 'lead_magnet'`
+**4 tools (all 4 now exist):**
+1. ✅ **Gate the Erosion Calculator** (built: `ErosionControlCalculator.tsx`) — add "Save Your Recommendation" email capture below results → POST to Nexus as `lead_type: 'erosion_calculator'`
+2. ✅ **Lawn Health Assessment Quiz** (built: `/tools/lawn-quiz/`) — 5-7 question wizard → personalized product recommendations → POST as `lead_type: 'product_quiz'`
+3. ✅ **Application Rate Calculator** (built: `/application-rate-calculator/`) — product → area → quantities + cost + add-to-cart → POST as `lead_type: 'roi_calculator'`
+4. ✅ **Talk to a Rep** (built: `TalkToRep.tsx` on `products/[handle].astro`) — inline form on every product page, pre-filled with product context → POST as `lead_type: 'lead_magnet'`
 
-**Nexus API:** `POST https://nexus.southlandorganics.com/api/leads` — CORS configured for southlandorganics.com. Fire-and-forget, never block UX. Include honeypot (`website` field) + sessionStorage attribution (`sl_gclid`, `sl_utm_*`, `sl_landing_page`).
+**Nexus API:** `POST https://nexus.southlandorganics.com/api/leads` — CORS configured for southlandorganics.com. Fire-and-forget, never block UX. Include honeypot +  sessionStorage attribution (`sl_gclid`, `sl_utm_*`, `sl_landing_page`).
+
+**Honeypot today:** Contact, Distribution, TalkToRep and `lib/leadCapture.ts` use a hidden `website` field. The newsletter `EmailCapture.astro` → `/api/subscribe` has **no honeypot yet** (email regex + middleware 60 req/min/IP only).
 
 **Existing forms:** Contact + Distribution forms already dual-write to Nexus. Pattern is proven — follow the same fire-and-forget approach.
 
 ## Related Resources
 
-> **Every path below was `test -f`-verified 2026-07-16.** All five previously listed here
-> were wrong — three pointed at real files one directory too shallow (Nexus reorganised its
-> flat `docs/` into `strategy/`/`sops/` and these never followed), and the Klaviyo roadmap
-> had moved. **A cross-repo path is the most rot-prone reference there is: nothing in this
-> repo's CI can see that a path in that repo moved.** `/janitor`'s link check now `test -f`s
-> every backticked repo path in memory. Full doc map:
-> `Southland Ledger/Southland Platform Memory/southland-platform-docs-map.md`.
 
 - **Mothership:** `~/CODING/mothership/` - Orchestration platform
   - `docs/esp-klaviyo/reference/flow-roadmap.md` — Klaviyo flow checklist (SUPERSEDED by Customer.io; historical)
@@ -359,3 +354,28 @@ The ESP is **Customer.io** — Klaviyo was retired (emitters removed 2026-08-11)
   - `docs/strategy/UARZO-FLOW.md` — Customer journey framework + Revenue Operating Scorecard
 - **point.dog:** CDP/analytics integration
 - **Shopify Store:** southland-organics.myshopify.com
+
+
+## Merge and deploy rules
+- Mike merges every PR. Agents work on branches and open draft PRs.
+- Agents never push to `main` and never deploy. No hand deploys with Wrangler.
+- Deploy happens only via CI on `main`: `.github/workflows/deploy.yml` ("Deploy to Cloudflare Pages"), gated by its Quality Gate job, then verifies production serves the commit.
+
+## Never break
+- Add-to-cart and checkout handoff to `shop.southlandorganics.com` (Shopify `checkoutUrl`).
+- Tracking tags in `BaseLayout.astro`: GTM (`GTM-KT63MW`; no direct gtag, so any GA4 lives inside GTM), Meta Pixel, point.dog pixel, and the UTM/click-ID attribution script.
+- Forms delivering to Nexus (`/api/leads`) and Customer.io (`/api/subscribe`).
+- Canonicals, redirects (`public/_redirects`, `astro.config.mjs` redirects), sitemap, and `robots.txt`.
+
+## Cross-check reviewer checklist (Claude Code on Mike's Mac)
+Record author model (Grok/Composer) and reviewer model in the verdict. Fail the PR if any is true:
+- Auth gap: a new route, API or admin page with no auth check, or a check that can be skipped.
+- Money math: totals, prices, tax or rounding changed without a test covering it.
+- Missing tests: behavior changed and no test fails with the fix reverted.
+- Secrets: any key, token or .env value in code, logs, PR text or output. Names only, never values.
+- Scope: files changed outside the brief, or workflow/secret/DNS/deploy changes not flagged.
+- Deletes: anything deleted without Mike's yes.
+- Cart/checkout: add-to-cart and the checkout handoff still work.
+- Tracking: GTM, Meta Pixel and point.dog tags in `BaseLayout.astro` intact.
+- SEO: title, description, canonical and schema intact on touched pages.
+- Visitor-facing change: checked on a real preview, not just the build.
