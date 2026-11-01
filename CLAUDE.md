@@ -359,3 +359,13 @@ The ESP is **Customer.io** — Klaviyo was retired (emitters removed 2026-08-11)
   - `docs/strategy/UARZO-FLOW.md` — Customer journey framework + Revenue Operating Scorecard
 - **point.dog:** CDP/analytics integration
 - **Shopify Store:** southland-organics.myshopify.com
+
+
+## Cross-check reviewer checklist (Claude Code on Mike's Mac)
+Record author model (Grok/Composer) and reviewer model in the verdict. Fail the PR if any is true:
+- Auth gap: a new route, API or admin page with no auth check, or a check that can be skipped.
+- Money math: totals, prices, tax or rounding changed without a test covering it.
+- Missing tests: behavior changed and no test fails with the fix reverted.
+- Secrets: any key, token or .env value in code, logs, PR text or output. Names only, never values.
+- Scope: files changed outside the brief, or workflow/secret/DNS/deploy changes not flagged.
+- Deletes: anything deleted without Mike's yes.
