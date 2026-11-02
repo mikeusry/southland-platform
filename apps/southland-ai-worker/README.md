@@ -53,6 +53,6 @@ If the secret is unset or blank, those routes fail closed with HTTP 503. Do not 
 
 `scripts/seed-products.ts` and `scripts/index-blog.ts` read `INDEX_ADMIN_SECRET` from the environment and send it as the bearer token. The product feed fetch still uses `NEXUS_API_KEY`.
 
-These worker secrets are also set once with `wrangler secret put <NAME> --env production`, and they are not GitHub Actions secrets: `NEXUS_API_KEY`, `OPENAI_API_KEY`, `COHERE_API_KEY`, `SENDGRID_API_KEY`. See the secrets comment in `wrangler.toml`.
+These worker secrets are also set once with `wrangler secret put <NAME> --env production`, and they are not GitHub Actions secrets: `NEXUS_API_KEY`, `OPENAI_API_KEY`, `COHERE_API_KEY` (`SENDGRID_API_KEY` is planned for Phase 5 email and not read by the code yet). See the secrets comment in `wrangler.toml`.
 
 A product reindex skips prune and alias rebuild, and returns `status: "skipped"`, when the feed is empty, when it has fewer than half as many products as the current product manifest, or when an embed batch fails.

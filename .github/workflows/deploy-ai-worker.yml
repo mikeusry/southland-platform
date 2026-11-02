@@ -7,7 +7,7 @@ name: Deploy AI Worker
 # not ship. The Pages workflow stays on Node 20. pnpm and setup-node match it.
 #
 # INDEX_ADMIN_SECRET and the other worker secrets (NEXUS_API_KEY, OPENAI_API_KEY,
-# COHERE_API_KEY, SENDGRID_API_KEY) are Wrangler secrets set once in Cloudflare.
+# COHERE_API_KEY) are Wrangler secrets set once in Cloudflare.
 # Do not pass them from this workflow. `wrangler deploy` leaves them in place.
 
 on:
