@@ -6,6 +6,7 @@ import {
   setNexusMintTimeoutMs,
 } from './subscribe-nexus'
 import { POST } from '../pages/api/subscribe'
+import { resetSubscribeGuards } from './subscribe-guard'
 
 const CIO_BASE = 'https://track.customer.io/api/v1'
 
@@ -16,9 +17,13 @@ function makeLocals(env: Record<string, string | undefined>) {
 function jsonRequest(body: Record<string, unknown>) {
   return new Request('http://localhost/api/subscribe', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', Origin: 'http://localhost' },
     body: JSON.stringify(body),
   })
+}
+
+function isMxLookup(url: string) {
+  return url.startsWith('https://1.1.1.1/')
 }
 
 type FetchInit = {
@@ -57,9 +62,11 @@ describe('POST /api/subscribe', () => {
   beforeEach(() => {
     fetchCalls = []
     resetNexusMintTimeoutMs()
+    resetSubscribeGuards()
     mock.method(console, 'warn', () => {})
     mock.method(globalThis, 'fetch', async (input: RequestInfo | URL, init?: FetchInit) => {
       const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
+      if (isMxLookup(url)) return new Response('{}', { status: 200 })
       fetchCalls.push({ url, init })
       return new Response('{}', { status: 200 })
     })
@@ -165,6 +172,7 @@ describe('POST /api/subscribe', () => {
       mock.method(globalThis, 'fetch', async (input: RequestInfo | URL, init?: FetchInit) => {
         const url =
           typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
+        if (isMxLookup(url)) return new Response('{}', { status: 200 })
         fetchCalls.push({ url, init })
         if (url === NEXUS_NEWSLETTER_URL) {
           return new Response('error', { status })
@@ -223,6 +231,7 @@ describe('POST /api/subscribe', () => {
     fetchCalls = []
     mock.method(globalThis, 'fetch', async (input: RequestInfo | URL, init?: FetchInit) => {
       const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
+      if (isMxLookup(url)) return new Response('{}', { status: 200 })
       fetchCalls.push({ url, init })
       if (url === NEXUS_NEWSLETTER_URL) {
         assert.ok(init?.signal, 'Nexus fetch must pass AbortSignal')

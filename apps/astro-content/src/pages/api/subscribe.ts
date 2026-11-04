@@ -17,25 +17,28 @@
  * Mirrors `identifyCustomerIOProfile` in southland-inventory (`src/lib/customerio.ts`):
  * PUT to /api/v1/customers/{email}, Basic auth, attributes in the body. Kept
  * deliberately close to it so the two do not drift.
+ *
+ * Guards (honeypot, origin, in-memory rate limit, syntax, domain blocklist, MX)
+ * run before any Customer.io or Nexus call. See `subscribe-guard.ts`.
  */
 
 import type { APIRoute } from 'astro'
 import { getServerEnv } from '../../lib/server-env'
 import { mintNewsletterViaNexus } from '../../lib/subscribe-nexus'
+import {
+  clientIp,
+  collectSignupUtm,
+  consumeEmailBudget,
+  consumeIpBudget,
+  domainHasMx,
+  isAllowedSubscribeOrigin,
+  isHoneypotFilled,
+  resolveSignupPage,
+  resolveSignupSource,
+  validateSubscribeEmail,
+} from '../../lib/subscribe-guard'
 
 const CIO_TRACK_API = 'https://track.customer.io/api/v1'
-
-/** The audiences a visitor can subscribe from. Maps to a Customer.io segment attribute. */
-const VALID_SOURCES = new Set([
-  'website',
-  'episode_page',
-  'hub',
-  'footer',
-  'blog',
-  'biosecurity',
-  'lawn',
-  'case-study',
-])
 
 interface SubscribePayload {
   email?: string
@@ -43,15 +46,20 @@ interface SubscribePayload {
   source?: string
   signupPage?: string
   episodeSlug?: string
+  website?: string
+  utm_source?: string
+  utm_medium?: string
+  utm_campaign?: string
+  utm_content?: string
+  utm_term?: string
 }
 
-const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-
-export const POST: APIRoute = async ({ request, locals }) => {
-  const json = (body: unknown, status: number) =>
+export const POST: APIRoute = async (context) => {
+  const { request, locals } = context
+  const json = (body: unknown, status: number, extraHeaders?: Record<string, string>) =>
     new Response(JSON.stringify(body), {
       status,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...extraHeaders },
     })
 
   let payload: SubscribePayload
@@ -60,13 +68,52 @@ export const POST: APIRoute = async ({ request, locals }) => {
   } catch {
     return json({ error: 'Invalid request body.' }, 400)
   }
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    return json({ error: 'Invalid request body.' }, 400)
+  }
 
-  const email = typeof payload.email === 'string' ? payload.email.trim().toLowerCase() : ''
-  if (!email || !isValidEmail(email)) {
+  if (!isAllowedSubscribeOrigin(request, locals)) {
+    return json({ error: 'Forbidden.' }, 403)
+  }
+
+  // Filled honeypot: look like success and do not subscribe.
+  if (isHoneypotFilled(payload.website)) {
+    return json({ success: true }, 200)
+  }
+
+  let clientAddress = ''
+  try {
+    clientAddress = context.clientAddress
+  } catch {
+    clientAddress = ''
+  }
+  const ipLimit = consumeIpBudget(clientIp(request, clientAddress))
+  if (ipLimit.limited) {
+    return json({ error: 'Too many requests.' }, 429, {
+      'Retry-After': String(ipLimit.retryAfter),
+    })
+  }
+
+  const emailInput = typeof payload.email === 'string' ? payload.email : ''
+  const verdict = validateSubscribeEmail(emailInput)
+  if (!verdict.ok) {
     return json({ error: 'A valid email address is required.' }, 400)
   }
 
-  const source = payload.source && VALID_SOURCES.has(payload.source) ? payload.source : 'website'
+  const emailLimit = consumeEmailBudget(verdict.email)
+  if (emailLimit.limited) {
+    return json({ error: 'Too many requests.' }, 429, {
+      'Retry-After': String(emailLimit.retryAfter),
+    })
+  }
+
+  if (!(await domainHasMx(verdict.domain))) {
+    return json({ error: 'A valid email address is required.' }, 400)
+  }
+
+  const page = resolveSignupPage(payload.signupPage, request, locals)
+  const source = resolveSignupSource(payload.source, page)
+  const utm = collectSignupUtm(payload, page)
 
   const siteId = getServerEnv(locals, 'CUSTOMERIO_SITE_ID')
   const trackKey = getServerEnv(locals, 'CUSTOMERIO_TRACK_API_KEY')
@@ -78,6 +125,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     return json({ error: 'Subscriptions are temporarily unavailable.' }, 503)
   }
 
+  const email = verdict.email
   const isPodcast = ['episode_page', 'hub', 'footer'].includes(source)
   const now = new Date().toISOString()
 
@@ -86,9 +134,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
     newsletter_subscriber: true,
     newsletter_subscribed_at: now,
     newsletter_signup_source: source,
-    signup_page: payload.signupPage || '',
+    signup_page: page,
     // Customer.io expects unix seconds here, not an ISO string.
     created_at: Math.floor(Date.now() / 1000),
+    ...utm,
   }
 
   if (isPodcast) {
@@ -130,7 +179,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       headers: { 'Content-Type': 'application/json', Authorization: `Basic ${auth}` },
       body: JSON.stringify({
         name: 'newsletter_signup',
-        data: { source, signup_page: payload.signupPage || '', podcast: isPodcast },
+        data: { source, signup_page: page, podcast: isPodcast, ...utm },
       }),
     }).catch((err) => {
       // Non-fatal: the profile already exists, which is the part that matters.

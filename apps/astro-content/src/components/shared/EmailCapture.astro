@@ -91,6 +91,16 @@ const buttonClasses =
   }
 
   <form class="subscribe-form flex flex-col gap-3 sm:flex-row">
+    <!-- Honeypot — hidden from humans, bots fill it -->
+    <input
+      type="text"
+      name="website"
+      value=""
+      tabindex="-1"
+      autocomplete="off"
+      aria-hidden="true"
+      class="sr-only pointer-events-none"
+    />
     <div class="flex-1">
       <label for="email-capture-input" class="sr-only">Email address</label>
       <input
@@ -158,6 +168,30 @@ const buttonClasses =
       const email = emailInput?.value
       if (!email) return
 
+      const honeypot = (formEl.querySelector('input[name="website"]') as HTMLInputElement | null)
+        ?.value
+      const utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term']
+      const params = new URLSearchParams(window.location.search)
+      let pd: Record<string, unknown> = {}
+      try {
+        const raw = localStorage.getItem('_pd_attribution')
+        if (raw) pd = JSON.parse(raw) as Record<string, unknown>
+      } catch {
+        pd = {}
+      }
+      const utm: Record<string, string> = {}
+      for (const key of utmKeys) {
+        let fromSession = ''
+        try {
+          fromSession = sessionStorage.getItem(`sl_${key}`) || ''
+        } catch {
+          fromSession = ''
+        }
+        const fromPd = typeof pd[key] === 'string' ? (pd[key] as string) : ''
+        const value = params.get(key) || fromSession || fromPd
+        if (value) utm[key] = value
+      }
+
       const submitButton = formEl.querySelector('button[type="submit"]') as HTMLButtonElement
       const originalLabel = submitButton.textContent || 'Subscribe'
       const successMessage = formEl.parentElement?.querySelector('.success-message')
@@ -194,8 +228,10 @@ const buttonClasses =
           body: JSON.stringify({
             email,
             source,
-            signupPage: window.location.pathname,
+            signupPage: `${window.location.pathname}${window.location.search}`,
             episodeSlug: episodeSlug || undefined,
+            website: honeypot || '',
+            ...utm,
           }),
         })
 
