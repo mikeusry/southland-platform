@@ -28,13 +28,15 @@ import { mintNewsletterViaNexus } from '../../lib/subscribe-nexus'
 import {
   clientIp,
   collectSignupUtm,
-  consumeEmailBudget,
   consumeIpBudget,
   domainHasMx,
   isAllowedSubscribeOrigin,
   isHoneypotFilled,
+  recordSuccessfulSignup,
   resolveSignupPage,
+  resolveSignupSignal,
   resolveSignupSource,
+  successfulSignupLimited,
   validateSubscribeEmail,
 } from '../../lib/subscribe-guard'
 
@@ -46,7 +48,8 @@ interface SubscribePayload {
   source?: string
   signupPage?: string
   episodeSlug?: string
-  website?: string
+  /** Honeypot. Password managers do not know this name. */
+  hp_fax_2?: string
   utm_source?: string
   utm_medium?: string
   utm_campaign?: string
@@ -76,22 +79,10 @@ export const POST: APIRoute = async (context) => {
     return json({ error: 'Forbidden.' }, 403)
   }
 
-  // Filled honeypot: look like success and do not subscribe.
-  if (isHoneypotFilled(payload.website)) {
+  // Filled honeypot: look like success and do not subscribe. Do not log the address.
+  if (isHoneypotFilled(payload.hp_fax_2)) {
+    console.warn('[subscribe] honeypot filled')
     return json({ success: true }, 200)
-  }
-
-  let clientAddress = ''
-  try {
-    clientAddress = context.clientAddress
-  } catch {
-    clientAddress = ''
-  }
-  const ipLimit = consumeIpBudget(clientIp(request, clientAddress))
-  if (ipLimit.limited) {
-    return json({ error: 'Too many requests.' }, 429, {
-      'Retry-After': String(ipLimit.retryAfter),
-    })
   }
 
   const emailInput = typeof payload.email === 'string' ? payload.email : ''
@@ -100,20 +91,38 @@ export const POST: APIRoute = async (context) => {
     return json({ error: 'A valid email address is required.' }, 400)
   }
 
-  const emailLimit = consumeEmailBudget(verdict.email)
+  if (!(await domainHasMx(verdict.domain))) {
+    return json({ error: 'A valid email address is required.' }, 400)
+  }
+
+  let clientAddress = ''
+  try {
+    clientAddress = context.clientAddress
+  } catch {
+    clientAddress = ''
+  }
+  const ip = clientIp(request, clientAddress)
+  if (ip) {
+    const ipLimit = consumeIpBudget(ip)
+    if (ipLimit.limited) {
+      return json({ error: 'Too many requests.' }, 429, {
+        'Retry-After': String(ipLimit.retryAfter),
+      })
+    }
+  }
+
+  const email = verdict.email
+  const emailLimit = successfulSignupLimited(email)
   if (emailLimit.limited) {
     return json({ error: 'Too many requests.' }, 429, {
       'Retry-After': String(emailLimit.retryAfter),
     })
   }
 
-  if (!(await domainHasMx(verdict.domain))) {
-    return json({ error: 'A valid email address is required.' }, 400)
-  }
-
+  const signal = resolveSignupSignal(payload.signupPage, request, locals)
   const page = resolveSignupPage(payload.signupPage, request, locals)
   const source = resolveSignupSource(payload.source, page)
-  const utm = collectSignupUtm(payload, page)
+  const utm = collectSignupUtm(payload, signal)
 
   const siteId = getServerEnv(locals, 'CUSTOMERIO_SITE_ID')
   const trackKey = getServerEnv(locals, 'CUSTOMERIO_TRACK_API_KEY')
@@ -125,7 +134,6 @@ export const POST: APIRoute = async (context) => {
     return json({ error: 'Subscriptions are temporarily unavailable.' }, 503)
   }
 
-  const email = verdict.email
   const isPodcast = ['episode_page', 'hub', 'footer'].includes(source)
   const now = new Date().toISOString()
 
@@ -161,6 +169,8 @@ export const POST: APIRoute = async (context) => {
       console.error(`[subscribe] Customer.io identify failed: ${res.status} ${detail}`)
       return json({ error: 'Could not complete signup. Please try again.' }, 502)
     }
+
+    recordSuccessfulSignup(email)
 
     const firstName = typeof payload.first_name === 'string' ? payload.first_name.trim() : undefined
 

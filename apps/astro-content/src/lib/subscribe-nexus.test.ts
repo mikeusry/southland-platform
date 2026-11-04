@@ -23,7 +23,7 @@ function jsonRequest(body: Record<string, unknown>) {
 }
 
 function isMxLookup(url: string) {
-  return url.startsWith('https://1.1.1.1/')
+  return url.startsWith('https://cloudflare-dns.com/dns-query')
 }
 
 type FetchInit = {

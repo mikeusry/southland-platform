@@ -3,20 +3,24 @@ import { afterEach, beforeEach, describe, it, mock } from 'node:test'
 import { POST } from '../pages/api/subscribe'
 import { NEXUS_NEWSLETTER_URL } from './subscribe-nexus'
 import {
+  SUBSCRIBE_BUCKET_CAP,
   SUBSCRIBE_EMAIL_LIMIT,
   SUBSCRIBE_IP_LIMIT,
   SUBSCRIBE_IP_WINDOW_MS,
+  consumeIpBudget,
   resetSubscribeGuards,
   setSubscribeClock,
 } from './subscribe-guard'
 
 const CIO_BASE = 'https://track.customer.io/api/v1'
-const MX_URL = 'https://1.1.1.1/dns-query'
+const MX_URL = 'https://cloudflare-dns.com/dns-query'
 
 const MX_OK = { Status: 0, Answer: [{ type: 15, data: '10 mx.example.com.' }] }
 const MX_NONE = { Status: 0, Answer: [] as { type: number; data: string }[] }
 const MX_NULL = { Status: 0, Answer: [{ type: 15, data: '0 .' }] }
 const MX_NXDOMAIN = { Status: 3, Answer: [] as { type: number; data: string }[] }
+const A_OK = { Status: 0, Answer: [{ type: 1, data: '192.0.2.1' }] }
+const AAAA_OK = { Status: 0, Answer: [{ type: 28, data: '2001:db8::1' }] }
 
 type FetchInit = { method?: string; headers?: Record<string, string> | Headers; body?: string }
 
@@ -36,7 +40,13 @@ function makeLocals(env: Record<string, string | undefined> = {}) {
 function postContext(
   body: Record<string, unknown>,
   locals: ReturnType<typeof makeLocals>,
-  opts?: { origin?: string | null; referer?: string; ip?: string; url?: string }
+  opts?: {
+    origin?: string | null
+    referer?: string
+    ip?: string
+    url?: string
+    clientAddress?: string
+  }
 ) {
   const url = opts?.url ?? 'http://localhost/api/subscribe'
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
@@ -46,7 +56,7 @@ function postContext(
   return {
     request: new Request(url, { method: 'POST', headers, body: JSON.stringify(body) }),
     locals,
-    clientAddress: '127.0.0.1',
+    clientAddress: opts?.clientAddress ?? '127.0.0.1',
     cookies: new Map(),
     params: {},
     preferredLocale: undefined,
@@ -61,13 +71,17 @@ function urlOf(input: RequestInfo | URL): string {
   return typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
 }
 
+type DnsReply = { status: number; body: unknown } | 'throw'
+
 describe('POST /api/subscribe guards', () => {
   let fetchCalls: { url: string; init?: FetchInit }[]
-  let mxResponse: { status: number; body: unknown } | 'throw'
+  let mxResponse: DnsReply | ((url: string) => DnsReply)
+  let cioPutStatus: number
 
   beforeEach(() => {
     fetchCalls = []
     mxResponse = { status: 200, body: MX_OK }
+    cioPutStatus = 200
     resetSubscribeGuards()
     mock.method(console, 'warn', () => {})
     mock.method(console, 'error', () => {})
@@ -75,8 +89,12 @@ describe('POST /api/subscribe guards', () => {
       const url = urlOf(input)
       fetchCalls.push({ url, init })
       if (url.startsWith(MX_URL)) {
-        if (mxResponse === 'throw') throw new Error('dns down')
-        return new Response(JSON.stringify(mxResponse.body), { status: mxResponse.status })
+        const reply = typeof mxResponse === 'function' ? mxResponse(url) : mxResponse
+        if (reply === 'throw') throw new Error('dns down')
+        return new Response(JSON.stringify(reply.body), { status: reply.status })
+      }
+      if (url.startsWith(CIO_BASE) && init?.method === 'PUT' && cioPutStatus !== 200) {
+        return new Response('no', { status: cioPutStatus })
       }
       return new Response('{}', { status: 200 })
     })
@@ -92,24 +110,38 @@ describe('POST /api/subscribe guards', () => {
   }
 
   it('returns a success-looking response and does not subscribe when the honeypot is filled', async () => {
+    const warnings: string[] = []
+    mock.method(console, 'warn', (...args: unknown[]) => {
+      warnings.push(args.map(String).join(' '))
+    })
     const res = await POST(
-      postContext({ email: 'reader@gmail.com', website: 'https://spam.test' }, makeLocals(), {
+      postContext({ email: 'reader@gmail.com', hp_fax_2: 'https://spam.test' }, makeLocals(), {
         ip: '203.0.113.10',
       })
     )
     assert.equal(res.status, 200)
     assert.deepEqual(await res.json(), { success: true })
     assert.equal(fetchCalls.length, 0)
+    const logged = warnings.join('\n')
+    assert.match(logged, /honeypot filled/)
+    assert.doesNotMatch(logged, /reader@gmail.com/)
+    assert.doesNotMatch(logged, /@/)
   })
 
-  it('still subscribes when the honeypot is empty', async () => {
-    const res = await POST(
-      postContext({ email: 'reader@gmail.com', website: '   ' }, makeLocals(), {
+  it('still subscribes when the honeypot is empty or a password manager fills website', async () => {
+    const empty = await POST(
+      postContext({ email: 'reader@gmail.com', hp_fax_2: '   ' }, makeLocals(), {
         ip: '203.0.113.11',
       })
     )
-    assert.equal(res.status, 200)
-    assert.ok(cioCalls().some((call) => call.init?.method === 'PUT'))
+    assert.equal(empty.status, 200)
+    const filledWebsite = await POST(
+      postContext({ email: 'other@gmail.com', website: 'https://autofill.example' }, makeLocals(), {
+        ip: '203.0.113.111',
+      })
+    )
+    assert.equal(filledWebsite.status, 200)
+    assert.equal(cioCalls().filter((call) => call.init?.method === 'PUT').length, 2)
   })
 
   it('rejects a missing origin and referer', async () => {
@@ -170,7 +202,7 @@ describe('POST /api/subscribe guards', () => {
     )
     const putBody = JSON.parse(put?.init?.body as string)
     assert.equal(putBody.newsletter_signup_source, 'lawn')
-    assert.equal(putBody.signup_page, '/lawn/homeowners/?utm_source=email&utm_campaign=spring')
+    assert.equal(putBody.signup_page, '/lawn/homeowners/')
     assert.equal(putBody.utm_source, 'email')
     assert.equal(putBody.utm_campaign, 'spring')
   })
@@ -208,7 +240,7 @@ describe('POST /api/subscribe guards', () => {
     assert.equal(res.status, 200)
   })
 
-  it('rate limits an IP to 5 requests an hour, then allows again after the window', async () => {
+  it('rate limits an IP to 20 validated requests an hour, then allows again after the window', async () => {
     let now = 1_700_000_000_000
     setSubscribeClock(() => now)
     const locals = makeLocals()
@@ -227,7 +259,7 @@ describe('POST /api/subscribe guards', () => {
     assert.equal(again.status, 200)
   })
 
-  it('rate limits an email to 3 subscriptions a day', async () => {
+  it('limits only repeat successful signups of the same email', async () => {
     const locals = makeLocals()
     const ip = '203.0.113.21'
     for (let i = 0; i < SUBSCRIBE_EMAIL_LIMIT; i++) {
@@ -239,6 +271,51 @@ describe('POST /api/subscribe guards', () => {
     assert.equal(blocked.status, 429)
     assert.ok(Number(blocked.headers.get('Retry-After')) > 0)
     assert.equal(cioCalls().length, before)
+
+    const other = await POST(postContext({ email: 'someone-else@gmail.com' }, locals, { ip }))
+    assert.equal(other.status, 200)
+  })
+
+  it('does not count invalid attempts or a missing IP toward the IP limit', async () => {
+    const locals = makeLocals()
+    const ip = '203.0.113.22'
+    for (let i = 0; i < SUBSCRIBE_IP_LIMIT + 5; i++) {
+      const res = await POST(postContext({ email: `bad|${i}@gmail.com` }, locals, { ip }))
+      assert.equal(res.status, 400)
+    }
+    const afterJunk = await POST(postContext({ email: 'still-ok@gmail.com' }, locals, { ip }))
+    assert.equal(afterJunk.status, 200)
+
+    for (let i = 0; i < SUBSCRIBE_IP_LIMIT + 1; i++) {
+      const res = await POST(
+        postContext({ email: `anon${i}@gmail.com` }, locals, { clientAddress: '' })
+      )
+      assert.equal(res.status, 200, `missing IP request ${i + 1}`)
+    }
+  })
+
+  it('does not lock an email out after failed signups', async () => {
+    const locals = makeLocals()
+    cioPutStatus = 502
+    for (let i = 0; i < SUBSCRIBE_EMAIL_LIMIT; i++) {
+      const res = await POST(
+        postContext({ email: 'flaky@gmail.com' }, locals, { ip: '203.0.113.23' })
+      )
+      assert.equal(res.status, 502)
+    }
+    cioPutStatus = 200
+    const res = await POST(
+      postContext({ email: 'flaky@gmail.com' }, locals, { ip: '203.0.113.23' })
+    )
+    assert.equal(res.status, 200)
+  })
+
+  it('evicts the oldest in-memory rate-limit key at 5000 entries', () => {
+    const oldest = '203.0.113.250'
+    for (let i = 0; i < SUBSCRIBE_IP_LIMIT; i++) consumeIpBudget(oldest)
+    assert.equal(consumeIpBudget(oldest).limited, true)
+    for (let i = 0; i < SUBSCRIBE_BUCKET_CAP; i++) consumeIpBudget(`filler-${i}`)
+    assert.equal(consumeIpBudget(oldest).limited, false)
   })
 
   it('rejects blocklisted domains and addresses containing | or =', async () => {
@@ -253,6 +330,8 @@ describe('POST /api/subscribe guards', () => {
       'user@ex|ample.com',
       'user@ex=ample.com',
       'has space@gmail.com',
+      'plainaddress',
+      'missing-dot@localhost',
     ]
     for (const [index, email] of rejected.entries()) {
       const res = await POST(postContext({ email }, locals, { ip: `203.0.113.${30 + index}` }))
@@ -262,10 +341,9 @@ describe('POST /api/subscribe guards', () => {
     assert.equal(fetchCalls.length, 0)
   })
 
-  it('rejects domains with no MX, NXDOMAIN, and a null MX', async () => {
+  it('rejects only NXDOMAIN and null MX', async () => {
     const locals = makeLocals()
     const cases = [
-      ['no-mx@gmail.com', MX_NONE],
       ['missing@gmail.com', MX_NXDOMAIN],
       ['nullmx@gmail.com', MX_NULL],
     ] as const
@@ -276,10 +354,69 @@ describe('POST /api/subscribe guards', () => {
       assert.equal(res.status, 400, email)
       assert.equal(cioCalls().length, 0, email)
       assert.ok(
-        fetchCalls.some((call) => call.url.startsWith(MX_URL)),
+        fetchCalls.some((call) => call.url.includes('type=MX')),
         email
       )
     }
+  })
+
+  it('accepts a domain with no MX when it has an A or AAAA record', async () => {
+    const locals = makeLocals()
+    mxResponse = (url) => {
+      if (url.includes('type=AAAA')) return { status: 200, body: AAAA_OK }
+      if (url.includes('type=A')) return { status: 200, body: A_OK }
+      return { status: 200, body: MX_NONE }
+    }
+    const withA = await POST(
+      postContext({ email: 'fallback@gmail.com' }, locals, { ip: '203.0.113.45' })
+    )
+    assert.equal(withA.status, 200)
+    assert.ok(fetchCalls.some((call) => call.url.includes('type=A') && !call.url.includes('AAAA')))
+
+    fetchCalls = []
+    mxResponse = (url) => {
+      if (url.includes('type=AAAA')) return { status: 200, body: AAAA_OK }
+      return { status: 200, body: MX_NONE }
+    }
+    const withAAAA = await POST(
+      postContext({ email: 'v6@gmail.com' }, locals, { ip: '203.0.113.46' })
+    )
+    assert.equal(withAAAA.status, 200)
+    assert.ok(fetchCalls.some((call) => call.url.includes('type=AAAA')))
+
+    fetchCalls = []
+    mxResponse = { status: 200, body: MX_NONE }
+    const nodata = await POST(
+      postContext({ email: 'nodata@gmail.com' }, locals, { ip: '203.0.113.47' })
+    )
+    assert.equal(nodata.status, 200)
+  })
+
+  it('accepts apostrophes, ampersands, edge punctuation, plus-tags, and IDN domains', async () => {
+    const locals = makeLocals()
+    const accepted = [
+      "o'brien@gmail.com",
+      'a&b@gmail.com',
+      '_lead@gmail.com',
+      'trail-@gmail.com',
+      '-lead@gmail.com',
+      'user_@gmail.com',
+      'reader+tag@gmail.com',
+    ]
+    for (const [index, email] of accepted.entries()) {
+      const res = await POST(postContext({ email }, locals, { ip: `198.51.100.${index + 1}` }))
+      assert.equal(res.status, 200, email)
+    }
+
+    fetchCalls = []
+    const idn = await POST(
+      postContext({ email: 'user@münchen.de' }, locals, { ip: '198.51.100.20' })
+    )
+    assert.equal(idn.status, 200)
+    const ascii = new URL('http://münchen.de').hostname
+    assert.ok(
+      fetchCalls.some((call) => call.url.includes(`name=${ascii}`) && call.url.includes('type=MX'))
+    )
   })
 
   it('fails open when the MX lookup errors', async () => {
@@ -310,7 +447,7 @@ describe('POST /api/subscribe guards', () => {
           utm_source: 'google',
           utm_medium: 'cpc',
           utm_campaign: 'spring',
-          website: '',
+          hp_fax_2: '',
         },
         makeLocals(),
         {
@@ -332,10 +469,7 @@ describe('POST /api/subscribe guards', () => {
     assert.equal(putBody.email, 'reader+news@gmail.com')
     assert.equal(putBody.newsletter_subscriber, true)
     assert.equal(putBody.newsletter_signup_source, 'blog')
-    assert.equal(
-      putBody.signup_page,
-      '/blog/soil/?utm_source=google&utm_medium=cpc&utm_campaign=spring'
-    )
+    assert.equal(putBody.signup_page, '/blog/soil/')
     assert.equal(putBody.utm_source, 'google')
     assert.equal(putBody.utm_medium, 'cpc')
     assert.equal(putBody.utm_campaign, 'spring')
@@ -355,7 +489,7 @@ describe('POST /api/subscribe guards', () => {
     assert.notEqual(eventBody.name, 'newsletter_subscribed')
     assert.deepEqual(eventBody.data, {
       source: 'blog',
-      signup_page: '/blog/soil/?utm_source=google&utm_medium=cpc&utm_campaign=spring',
+      signup_page: '/blog/soil/',
       podcast: false,
       utm_source: 'google',
       utm_medium: 'cpc',

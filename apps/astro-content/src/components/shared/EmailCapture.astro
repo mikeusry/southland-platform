@@ -94,7 +94,7 @@ const buttonClasses =
     <!-- Honeypot — hidden from humans, bots fill it -->
     <input
       type="text"
-      name="website"
+      name="hp_fax_2"
       value=""
       tabindex="-1"
       autocomplete="off"
@@ -168,7 +168,7 @@ const buttonClasses =
       const email = emailInput?.value
       if (!email) return
 
-      const honeypot = (formEl.querySelector('input[name="website"]') as HTMLInputElement | null)
+      const honeypot = (formEl.querySelector('input[name="hp_fax_2"]') as HTMLInputElement | null)
         ?.value
       const utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term']
       const params = new URLSearchParams(window.location.search)
@@ -228,9 +228,9 @@ const buttonClasses =
           body: JSON.stringify({
             email,
             source,
-            signupPage: `${window.location.pathname}${window.location.search}`,
+            signupPage: window.location.pathname,
             episodeSlug: episodeSlug || undefined,
-            website: honeypot || '',
+            hp_fax_2: honeypot || '',
             ...utm,
           }),
         })
