@@ -817,15 +817,13 @@ export const PRODUCTS: ProductConfig[] = [
     rates: [
       {
         useCase: 'cleanout',
-        rate: 2.5,
+        rate: 4,
         rateUnit: 'gal',
         perArea: 1,
         perAreaUnit: 'houses',
-        rateMin: 2,
-        rateMax: 3,
         frequency: 'Between each flock',
         notes:
-          'Mix 1 gal concentrate per 20 gal water. Spray litter, walls, posts, under equipment. Concentrate only — dilution water is additional.',
+          'Mix 1 gal concentrate per 10 gal water to cover 5,000 square feet. Spray litter, walls, posts, under equipment. Concentrate only — dilution water is additional.',
         rateSource: 'recommended',
       },
       {
@@ -838,7 +836,7 @@ export const PRODUCTS: ProductConfig[] = [
         rateMax: 2,
         frequency: 'Every 2-3 weeks during heavy infestations',
         notes:
-          'Mix 1 gal per 30 gal water. Spray perimeter walls, posts, beetle congregation areas. Concentrate only — dilution water is additional.',
+          'Spray perimeter walls, posts, beetle congregation areas. Concentrate only — dilution water is additional.',
         rateSource: 'recommended',
       },
     ],
