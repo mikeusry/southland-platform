@@ -347,7 +347,7 @@ describe('POST /api/subscribe guards', () => {
     assert.equal(consumeIpBudget(oldest).limited, false)
   })
 
-  it("rejects '/', ':', '?', and '#' in the email domain", async () => {
+  it("rejects '/', ':', '?', '#', '\\', and '%' in the email domain", async () => {
     const locals = makeLocals()
     const rejected = [
       'user@example.com/path',
@@ -356,6 +356,8 @@ describe('POST /api/subscribe guards', () => {
       'user@ex:ample.com',
       'user@example.com?q=1',
       'user@example.com#frag',
+      'user@example.com\\evil',
+      'user@example.com%41',
     ]
     for (const [index, email] of rejected.entries()) {
       const res = await POST(postContext({ email }, locals, { ip: `203.0.113.${80 + index}` }))
@@ -491,6 +493,35 @@ describe('POST /api/subscribe guards', () => {
     assert.match(logged, /MX lookup failed open/)
     assert.doesNotMatch(logged, /lookup-down/)
     assert.doesNotMatch(logged, /lookup-500/)
+    assert.doesNotMatch(logged, /@/)
+    assert.doesNotMatch(logged, /gmail/)
+  })
+
+  it('logs and allows SERVFAIL and REFUSED DNS answers', async () => {
+    const warnings: string[] = []
+    mock.method(console, 'warn', (...args: unknown[]) => {
+      warnings.push(args.map(String).join(' '))
+    })
+    const locals = makeLocals()
+    const cases = [
+      ['servfail@gmail.com', 2],
+      ['refused@gmail.com', 5],
+    ] as const
+    for (const [index, [email, status]] of cases.entries()) {
+      fetchCalls = []
+      mxResponse = { status: 200, body: { Status: status, Answer: [] } }
+      const res = await POST(postContext({ email }, locals, { ip: `203.0.113.${52 + index}` }))
+      assert.equal(res.status, 200, email)
+      assert.ok(
+        cioCalls().some((call) => call.init?.method === 'PUT'),
+        email
+      )
+    }
+    const logged = warnings.join('\n')
+    assert.equal(warnings.length, 2)
+    assert.match(logged, /MX lookup failed open/)
+    assert.doesNotMatch(logged, /servfail/)
+    assert.doesNotMatch(logged, /refused/)
     assert.doesNotMatch(logged, /@/)
     assert.doesNotMatch(logged, /gmail/)
   })

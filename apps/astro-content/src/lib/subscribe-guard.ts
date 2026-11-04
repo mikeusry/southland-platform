@@ -194,7 +194,7 @@ export type EmailVerdict = { ok: true; email: string; domain: string } | { ok: f
 /**
  * Loose on purpose. Real addresses include apostrophes, `&`, leading or
  * trailing `_`/`-`, plus-tags, and IDN domains. Reject `|`, `=`, whitespace,
- * `/`, `:`, `?`, and `#` in the domain, a missing `@` or domain dot, and the
+ * `/`, `:`, `?`, `#`, `\`, and `%` in the domain, a missing `@` or domain dot, and the
  * blocklist. `domain` is ASCII (punycode) for the DNS lookup.
  */
 export function validateSubscribeEmail(raw: string): EmailVerdict {
@@ -208,7 +208,7 @@ export function validateSubscribeEmail(raw: string): EmailVerdict {
   const domain = email.slice(at + 1)
   if (!local || !domain.includes('.')) return { ok: false }
   if (domain.startsWith('.') || domain.endsWith('.')) return { ok: false }
-  if (/[/:?#]/.test(domain)) return { ok: false }
+  if (/[/:?#\\%]/.test(domain)) return { ok: false }
   let ascii = domain
   try {
     ascii = new URL(`http://${domain}`).hostname.replace(/\.$/, '')
@@ -286,7 +286,7 @@ export async function domainHasMx(domain: string): Promise<boolean> {
   const mx = await dohQuery(domain, 'MX')
   if (!mx.ok) return failOpenMx()
   if (mx.data.Status === 3) return false
-  if (mx.data.Status !== 0) return true
+  if (mx.data.Status !== 0) return failOpenMx()
 
   const records = mxData(mx.data)
   if (records.some((record) => !isNullMx(record))) return true
