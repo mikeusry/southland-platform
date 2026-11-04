@@ -10,7 +10,7 @@ import { getServerEnv } from './server-env'
 
 export const SUBSCRIBE_IP_LIMIT = 20
 export const SUBSCRIBE_IP_WINDOW_MS = 60 * 60 * 1000
-export const SUBSCRIBE_EMAIL_LIMIT = 3
+export const SUBSCRIBE_EMAIL_LIMIT = 1
 export const SUBSCRIBE_EMAIL_WINDOW_MS = 24 * 60 * 60 * 1000
 /** Shared cap for IP and successful-signup buckets. Oldest key is evicted. */
 export const SUBSCRIBE_BUCKET_CAP = 5000
@@ -83,13 +83,15 @@ function isProductionHost(host: string): boolean {
 }
 
 /**
- * Localhost and *.pages.dev are accepted only when this deployment is dev or
- * preview. The request URL host is set by the server, not the Origin header.
- * A non-main CF_PAGES_BRANCH covers preview deploys on a custom hostname.
+ * Localhost is local dev. A *.pages.dev request host is not preview by itself:
+ * southland-website.pages.dev is a live production alias, and a missing
+ * CF_PAGES_BRANCH is production too. Preview origins are allowed only for
+ * localhost, or when CF_PAGES_BRANCH is set and is not main/master (including
+ * a preview deploy on a custom hostname).
  */
 export function deploymentAllowsPreview(request: Request, locals: unknown): boolean {
   const reqHost = hostnameOf(request.url)
-  if (reqHost && (isLocalHost(reqHost) || isPreviewHost(reqHost))) return true
+  if (reqHost && isLocalHost(reqHost)) return true
   const branch = getServerEnv(locals, 'CF_PAGES_BRANCH')
   return !!branch && branch !== 'main' && branch !== 'master'
 }
@@ -157,7 +159,7 @@ export function consumeIpBudget(ip: string | null): { limited: boolean; retryAft
   return { limited: false, retryAfter: 0 }
 }
 
-/** True when this address already completed the daily successful-signup cap. */
+/** True when this address already completed its one successful signup today. */
 export function successfulSignupLimited(email: string): { limited: boolean; retryAfter: number } {
   const existing = buckets.get(`em:${email}`)
   const t = clock()
@@ -192,8 +194,8 @@ export type EmailVerdict = { ok: true; email: string; domain: string } | { ok: f
 /**
  * Loose on purpose. Real addresses include apostrophes, `&`, leading or
  * trailing `_`/`-`, plus-tags, and IDN domains. Reject `|`, `=`, whitespace,
- * a missing `@` or domain dot, and the blocklist. `domain` is ASCII (punycode)
- * for the DNS lookup.
+ * `/`, `:`, `?`, and `#` in the domain, a missing `@` or domain dot, and the
+ * blocklist. `domain` is ASCII (punycode) for the DNS lookup.
  */
 export function validateSubscribeEmail(raw: string): EmailVerdict {
   const email = raw.trim().toLowerCase()
@@ -206,6 +208,7 @@ export function validateSubscribeEmail(raw: string): EmailVerdict {
   const domain = email.slice(at + 1)
   if (!local || !domain.includes('.')) return { ok: false }
   if (domain.startsWith('.') || domain.endsWith('.')) return { ok: false }
+  if (/[/:?#]/.test(domain)) return { ok: false }
   let ascii = domain
   try {
     ascii = new URL(`http://${domain}`).hostname.replace(/\.$/, '')
@@ -268,6 +271,12 @@ function hasAddressRecord(data: DnsJson): boolean {
   return answers.some((answer) => answer?.type === 1 || answer?.type === 28)
 }
 
+/** Static message only. The lookup URL contains the domain, which is the address. */
+function failOpenMx(): true {
+  console.warn('[subscribe] MX lookup failed open')
+  return true
+}
+
 /**
  * DNS-over-HTTPS via cloudflare-dns.com (1.1.1.1 is often refused from Workers).
  * Reject only NXDOMAIN or a null MX. No MX plus an A/AAAA record is deliverable.
@@ -275,7 +284,7 @@ function hasAddressRecord(data: DnsJson): boolean {
  */
 export async function domainHasMx(domain: string): Promise<boolean> {
   const mx = await dohQuery(domain, 'MX')
-  if (!mx.ok) return true
+  if (!mx.ok) return failOpenMx()
   if (mx.data.Status === 3) return false
   if (mx.data.Status !== 0) return true
 
@@ -284,11 +293,11 @@ export async function domainHasMx(domain: string): Promise<boolean> {
   if (records.length > 0) return false
 
   const ipv4 = await dohQuery(domain, 'A')
-  if (!ipv4.ok) return true
+  if (!ipv4.ok) return failOpenMx()
   if (hasAddressRecord(ipv4.data)) return true
 
   const ipv6 = await dohQuery(domain, 'AAAA')
-  if (!ipv6.ok) return true
+  if (!ipv6.ok) return failOpenMx()
   if (hasAddressRecord(ipv6.data)) return true
   if (ipv4.data.Status === 3 && ipv6.data.Status === 3) return false
   return true

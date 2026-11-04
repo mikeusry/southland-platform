@@ -229,12 +229,35 @@ describe('POST /api/subscribe guards', () => {
     assert.equal(fetchCalls.length, 0)
   })
 
-  it('allows a pages.dev origin on a preview host', async () => {
-    const res = await POST(
-      postContext({ email: 'preview@gmail.com' }, makeLocals(), {
-        origin: 'https://abc.southland-website.pages.dev',
-        url: 'https://abc.southland-website.pages.dev/api/subscribe',
+  it('rejects a foreign pages.dev origin on the production pages.dev alias', async () => {
+    const foreign = 'https://evil-preview.pages.dev'
+    const alias = 'https://southland-website.pages.dev/api/subscribe'
+    const onMain = await POST(
+      postContext({ email: 'reader@gmail.com' }, makeLocals({ CF_PAGES_BRANCH: 'main' }), {
+        origin: foreign,
+        url: alias,
         ip: '203.0.113.19',
+      })
+    )
+    assert.equal(onMain.status, 403)
+
+    const unset = await POST(
+      postContext({ email: 'reader@gmail.com' }, makeLocals(), {
+        origin: foreign,
+        url: alias,
+        ip: '203.0.113.191',
+      })
+    )
+    assert.equal(unset.status, 403)
+    assert.equal(fetchCalls.length, 0)
+  })
+
+  it('allows a foreign pages.dev origin on a non-main branch', async () => {
+    const res = await POST(
+      postContext({ email: 'preview@gmail.com' }, makeLocals({ CF_PAGES_BRANCH: 'feature-x' }), {
+        origin: 'https://abc.southland-website.pages.dev',
+        url: 'https://feature-x.southland-website.pages.dev/api/subscribe',
+        ip: '203.0.113.192',
       })
     )
     assert.equal(res.status, 200)
@@ -249,17 +272,23 @@ describe('POST /api/subscribe guards', () => {
       const res = await POST(postContext({ email: `ip${i}@gmail.com` }, locals, { ip }))
       assert.equal(res.status, 200, `request ${i + 1} should be allowed`)
     }
+    const mxBeforeBlock = fetchCalls.filter((call) => call.url.startsWith(MX_URL)).length
     const blocked = await POST(postContext({ email: 'ip-blocked@gmail.com' }, locals, { ip }))
     assert.equal(blocked.status, 429)
     assert.equal(blocked.headers.get('Retry-After'), '3600')
     assert.equal(cioCalls().filter((call) => call.url.includes('ip-blocked')).length, 0)
+    assert.equal(
+      fetchCalls.filter((call) => call.url.startsWith(MX_URL)).length,
+      mxBeforeBlock,
+      'an over-limit IP must not trigger a DNS lookup'
+    )
 
     now += SUBSCRIBE_IP_WINDOW_MS
     const again = await POST(postContext({ email: 'ip-later@gmail.com' }, locals, { ip }))
     assert.equal(again.status, 200)
   })
 
-  it('limits only repeat successful signups of the same email', async () => {
+  it('allows one successful signup per address per day and does not lock out others', async () => {
     const locals = makeLocals()
     const ip = '203.0.113.21'
     for (let i = 0; i < SUBSCRIBE_EMAIL_LIMIT; i++) {
@@ -316,6 +345,24 @@ describe('POST /api/subscribe guards', () => {
     assert.equal(consumeIpBudget(oldest).limited, true)
     for (let i = 0; i < SUBSCRIBE_BUCKET_CAP; i++) consumeIpBudget(`filler-${i}`)
     assert.equal(consumeIpBudget(oldest).limited, false)
+  })
+
+  it("rejects '/', ':', '?', and '#' in the email domain", async () => {
+    const locals = makeLocals()
+    const rejected = [
+      'user@example.com/path',
+      'user@ex/ample.com',
+      'user@example.com:25',
+      'user@ex:ample.com',
+      'user@example.com?q=1',
+      'user@example.com#frag',
+    ]
+    for (const [index, email] of rejected.entries()) {
+      const res = await POST(postContext({ email }, locals, { ip: `203.0.113.${80 + index}` }))
+      assert.equal(res.status, 400, email)
+      assert.deepEqual(await res.json(), { error: 'A valid email address is required.' })
+    }
+    assert.equal(fetchCalls.length, 0)
   })
 
   it('rejects blocklisted domains and addresses containing | or =', async () => {
@@ -419,7 +466,11 @@ describe('POST /api/subscribe guards', () => {
     )
   })
 
-  it('fails open when the MX lookup errors', async () => {
+  it('fails open when the MX lookup errors and logs without the address', async () => {
+    const warnings: string[] = []
+    mock.method(console, 'warn', (...args: unknown[]) => {
+      warnings.push(args.map(String).join(' '))
+    })
     const locals = makeLocals()
     mxResponse = 'throw'
     const thrown = await POST(
@@ -434,6 +485,14 @@ describe('POST /api/subscribe guards', () => {
     )
     assert.equal(httpFail.status, 200)
     assert.ok(cioCalls().some((call) => call.init?.method === 'PUT'))
+
+    const logged = warnings.join('\n')
+    assert.equal(warnings.length, 2)
+    assert.match(logged, /MX lookup failed open/)
+    assert.doesNotMatch(logged, /lookup-down/)
+    assert.doesNotMatch(logged, /lookup-500/)
+    assert.doesNotMatch(logged, /@/)
+    assert.doesNotMatch(logged, /gmail/)
   })
 
   it('subscribes a real address from the live origin and sends source, page, and UTM', async () => {

@@ -18,8 +18,9 @@
  * PUT to /api/v1/customers/{email}, Basic auth, attributes in the body. Kept
  * deliberately close to it so the two do not drift.
  *
- * Guards (honeypot, origin, in-memory rate limit, syntax, domain blocklist, MX)
- * run before any Customer.io or Nexus call. See `subscribe-guard.ts`.
+ * Bot defenses are the honeypot, the per-IP limit, and the MX check. The origin
+ * allowlist is separate. The IP limit runs before any DNS lookup. See
+ * `subscribe-guard.ts`.
  */
 
 import type { APIRoute } from 'astro'
@@ -91,10 +92,6 @@ export const POST: APIRoute = async (context) => {
     return json({ error: 'A valid email address is required.' }, 400)
   }
 
-  if (!(await domainHasMx(verdict.domain))) {
-    return json({ error: 'A valid email address is required.' }, 400)
-  }
-
   let clientAddress = ''
   try {
     clientAddress = context.clientAddress
@@ -109,6 +106,10 @@ export const POST: APIRoute = async (context) => {
         'Retry-After': String(ipLimit.retryAfter),
       })
     }
+  }
+
+  if (!(await domainHasMx(verdict.domain))) {
+    return json({ error: 'A valid email address is required.' }, 400)
   }
 
   const email = verdict.email

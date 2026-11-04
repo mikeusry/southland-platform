@@ -180,7 +180,7 @@ describe('POST /api/subscribe', () => {
         return new Response('{}', { status: 200 })
       })
 
-      const res = await POST(postContext({ email: 'taylor@example.com' }, locals))
+      const res = await POST(postContext({ email: `taylor-${status}@example.com` }, locals))
 
       assert.equal(res.status, 200, `expected success for Nexus ${status}`)
       const body = await res.json()
