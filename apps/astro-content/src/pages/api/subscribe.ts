@@ -17,25 +17,31 @@
  * Mirrors `identifyCustomerIOProfile` in southland-inventory (`src/lib/customerio.ts`):
  * PUT to /api/v1/customers/{email}, Basic auth, attributes in the body. Kept
  * deliberately close to it so the two do not drift.
+ *
+ * Bot defenses are the honeypot, the per-IP limit, and the MX check. The origin
+ * allowlist is separate. The IP limit runs before any DNS lookup. See
+ * `subscribe-guard.ts`.
  */
 
 import type { APIRoute } from 'astro'
 import { getServerEnv } from '../../lib/server-env'
 import { mintNewsletterViaNexus } from '../../lib/subscribe-nexus'
+import {
+  clientIp,
+  collectSignupUtm,
+  consumeIpBudget,
+  domainHasMx,
+  isAllowedSubscribeOrigin,
+  isHoneypotFilled,
+  recordSuccessfulSignup,
+  resolveSignupPage,
+  resolveSignupSignal,
+  resolveSignupSource,
+  successfulSignupLimited,
+  validateSubscribeEmail,
+} from '../../lib/subscribe-guard'
 
 const CIO_TRACK_API = 'https://track.customer.io/api/v1'
-
-/** The audiences a visitor can subscribe from. Maps to a Customer.io segment attribute. */
-const VALID_SOURCES = new Set([
-  'website',
-  'episode_page',
-  'hub',
-  'footer',
-  'blog',
-  'biosecurity',
-  'lawn',
-  'case-study',
-])
 
 interface SubscribePayload {
   email?: string
@@ -43,15 +49,21 @@ interface SubscribePayload {
   source?: string
   signupPage?: string
   episodeSlug?: string
+  /** Honeypot. Password managers do not know this name. */
+  hp_fax_2?: string
+  utm_source?: string
+  utm_medium?: string
+  utm_campaign?: string
+  utm_content?: string
+  utm_term?: string
 }
 
-const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-
-export const POST: APIRoute = async ({ request, locals }) => {
-  const json = (body: unknown, status: number) =>
+export const POST: APIRoute = async (context) => {
+  const { request, locals } = context
+  const json = (body: unknown, status: number, extraHeaders?: Record<string, string>) =>
     new Response(JSON.stringify(body), {
       status,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...extraHeaders },
     })
 
   let payload: SubscribePayload
@@ -60,13 +72,58 @@ export const POST: APIRoute = async ({ request, locals }) => {
   } catch {
     return json({ error: 'Invalid request body.' }, 400)
   }
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    return json({ error: 'Invalid request body.' }, 400)
+  }
 
-  const email = typeof payload.email === 'string' ? payload.email.trim().toLowerCase() : ''
-  if (!email || !isValidEmail(email)) {
+  if (!isAllowedSubscribeOrigin(request, locals)) {
+    return json({ error: 'Forbidden.' }, 403)
+  }
+
+  // Filled honeypot: look like success and do not subscribe. Do not log the address.
+  if (isHoneypotFilled(payload.hp_fax_2)) {
+    console.warn('[subscribe] honeypot filled')
+    return json({ success: true }, 200)
+  }
+
+  const emailInput = typeof payload.email === 'string' ? payload.email : ''
+  const verdict = validateSubscribeEmail(emailInput)
+  if (!verdict.ok) {
     return json({ error: 'A valid email address is required.' }, 400)
   }
 
-  const source = payload.source && VALID_SOURCES.has(payload.source) ? payload.source : 'website'
+  let clientAddress = ''
+  try {
+    clientAddress = context.clientAddress
+  } catch {
+    clientAddress = ''
+  }
+  const ip = clientIp(request, clientAddress)
+  if (ip) {
+    const ipLimit = consumeIpBudget(ip)
+    if (ipLimit.limited) {
+      return json({ error: 'Too many requests.' }, 429, {
+        'Retry-After': String(ipLimit.retryAfter),
+      })
+    }
+  }
+
+  if (!(await domainHasMx(verdict.domain))) {
+    return json({ error: 'A valid email address is required.' }, 400)
+  }
+
+  const email = verdict.email
+  const emailLimit = successfulSignupLimited(email)
+  if (emailLimit.limited) {
+    return json({ error: 'Too many requests.' }, 429, {
+      'Retry-After': String(emailLimit.retryAfter),
+    })
+  }
+
+  const signal = resolveSignupSignal(payload.signupPage, request, locals)
+  const page = resolveSignupPage(payload.signupPage, request, locals)
+  const source = resolveSignupSource(payload.source, page)
+  const utm = collectSignupUtm(payload, signal)
 
   const siteId = getServerEnv(locals, 'CUSTOMERIO_SITE_ID')
   const trackKey = getServerEnv(locals, 'CUSTOMERIO_TRACK_API_KEY')
@@ -86,9 +143,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
     newsletter_subscriber: true,
     newsletter_subscribed_at: now,
     newsletter_signup_source: source,
-    signup_page: payload.signupPage || '',
+    signup_page: page,
     // Customer.io expects unix seconds here, not an ISO string.
     created_at: Math.floor(Date.now() / 1000),
+    ...utm,
   }
 
   if (isPodcast) {
@@ -113,6 +171,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
       return json({ error: 'Could not complete signup. Please try again.' }, 502)
     }
 
+    recordSuccessfulSignup(email)
+
     const firstName = typeof payload.first_name === 'string' ? payload.first_name.trim() : undefined
 
     // Nexus mints a one-time welcome code and emits newsletter_subscribed in Customer.io.
@@ -130,7 +190,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       headers: { 'Content-Type': 'application/json', Authorization: `Basic ${auth}` },
       body: JSON.stringify({
         name: 'newsletter_signup',
-        data: { source, signup_page: payload.signupPage || '', podcast: isPodcast },
+        data: { source, signup_page: page, podcast: isPodcast, ...utm },
       }),
     }).catch((err) => {
       // Non-fatal: the profile already exists, which is the part that matters.
