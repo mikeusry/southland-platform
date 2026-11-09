@@ -117,6 +117,8 @@ const buttonClasses =
     </button>
   </form>
 
+  <p class="subscribe-email-error mt-2 hidden text-sm font-medium text-red-500" role="alert"></p>
+
   <!-- Success message (hidden by default) -->
   <div class="success-message hidden">
     <div
@@ -154,12 +156,42 @@ const buttonClasses =
 </div>
 
 <script>
+  import { subscribeAddressIssue, subscribeEmailError } from '../../lib/subscribe-email'
+
+  function addressHint(formEl: HTMLFormElement): HTMLElement | null {
+    const hint = formEl.parentElement?.querySelector('.subscribe-email-error')
+    return hint instanceof HTMLElement ? hint : null
+  }
+
+  function clearAddressError(formEl: HTMLFormElement) {
+    const hint = addressHint(formEl)
+    if (hint) {
+      hint.textContent = ''
+      hint.classList.add('hidden')
+    }
+    formEl.querySelector('input[type="email"]')?.removeAttribute('aria-invalid')
+  }
+
+  function showAddressError(formEl: HTMLFormElement, message: string) {
+    const hint = addressHint(formEl)
+    if (hint) {
+      hint.textContent = message
+      hint.classList.remove('hidden')
+    }
+    formEl.querySelector('input[type="email"]')?.setAttribute('aria-invalid', 'true')
+    formEl.parentElement?.querySelector('.error-message')?.classList.add('hidden')
+  }
+
   // Posts to /api/subscribe, which talks to Customer.io server-side.
   document.querySelectorAll('.subscribe-form').forEach((form) => {
-    form.addEventListener('submit', async (e) => {
+    const formEl = form as HTMLFormElement
+    formEl.querySelector('input[type="email"]')?.addEventListener('input', () => {
+      clearAddressError(formEl)
+    })
+
+    formEl.addEventListener('submit', async (e) => {
       e.preventDefault()
 
-      const formEl = e.target as HTMLFormElement
       const emailInput = formEl.querySelector('input[type="email"]') as HTMLInputElement
       const container = formEl.closest('.email-capture')
       const source = container?.getAttribute('data-source') || 'website'
@@ -167,6 +199,13 @@ const buttonClasses =
 
       const email = emailInput?.value
       if (!email) return
+
+      const issue = subscribeAddressIssue(email)
+      if (issue) {
+        showAddressError(formEl, issue)
+        return
+      }
+      clearAddressError(formEl)
 
       const honeypot = (formEl.querySelector('input[name="hp_fax_2"]') as HTMLInputElement | null)
         ?.value
@@ -237,6 +276,26 @@ const buttonClasses =
 
         // Only a real 2xx counts. The whole point of this rewrite is that a
         // subscriber must never see "You're in!" unless they actually are.
+        if (response.status === 400) {
+          let suggestion: string | undefined
+          try {
+            const body = (await response.json()) as { suggestion?: unknown }
+            if (
+              typeof body.suggestion === 'string' &&
+              body.suggestion.length <= 254 &&
+              !/[\s<>]/.test(body.suggestion) &&
+              body.suggestion.includes('@')
+            ) {
+              suggestion = body.suggestion
+            }
+          } catch {
+            suggestion = undefined
+          }
+          showAddressError(formEl, subscribeEmailError(suggestion))
+          submitButton.disabled = false
+          submitButton.textContent = originalLabel
+          return
+        }
         if (!response.ok) {
           throw new Error(`Subscription failed: ${response.status}`)
         }

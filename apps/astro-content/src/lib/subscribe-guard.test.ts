@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { afterEach, beforeEach, describe, it, mock } from 'node:test'
 import { POST } from '../pages/api/subscribe'
+import { subscribeAddressIssue } from './subscribe-email'
 import { NEXUS_NEWSLETTER_URL } from './subscribe-nexus'
 import {
   SUBSCRIBE_BUCKET_CAP,
@@ -432,13 +433,6 @@ describe('POST /api/subscribe guards', () => {
     )
     assert.equal(withAAAA.status, 200)
     assert.ok(fetchCalls.some((call) => call.url.includes('type=AAAA')))
-
-    fetchCalls = []
-    mxResponse = { status: 200, body: MX_NONE }
-    const nodata = await POST(
-      postContext({ email: 'nodata@gmail.com' }, locals, { ip: '203.0.113.47' })
-    )
-    assert.equal(nodata.status, 200)
   })
 
   it('accepts apostrophes, ampersands, edge punctuation, plus-tags, and IDN domains', async () => {
@@ -585,5 +579,167 @@ describe('POST /api/subscribe guards', () => {
       utm_medium: 'cpc',
       utm_campaign: 'spring',
     })
+  })
+
+  const EMAIL_ERROR = 'Enter a valid email address.'
+
+  function addressError(suggestion?: string): string {
+    return suggestion ? `${EMAIL_ERROR} Did you mean ${suggestion}?` : EMAIL_ERROR
+  }
+
+  it('rejects broken address syntax, including shapes the loose check allowed', async () => {
+    const locals = makeLocals()
+    const rejected = [
+      'bad@@x',
+      'a..b@gmail.com',
+      '.lead@gmail.com',
+      'lead.@gmail.com',
+      'user@-gmail.com',
+      'user@gmail-.com',
+      'user@gmail..com',
+      'a@b.c',
+      'user@my_farm.com',
+    ]
+    for (const [index, email] of rejected.entries()) {
+      const res = await POST(postContext({ email }, locals, { ip: `192.0.2.${index + 1}` }))
+      assert.equal(res.status, 400, email)
+      assert.deepEqual(await res.json(), { error: 'A valid email address is required.' })
+    }
+    assert.equal(fetchCalls.length, 0)
+  })
+
+  it('rejects common provider typos and returns a correction', async () => {
+    const locals = makeLocals()
+    const cases = [
+      ['test@gmial.com', 'test@gmail.com'],
+      ['test@gmal.com', 'test@gmail.com'],
+      ['test@gamil.com', 'test@gmail.com'],
+      ['test@yaho.com', 'test@yahoo.com'],
+      ['test@hotmal.com', 'test@hotmail.com'],
+      ['test@outlok.com', 'test@outlook.com'],
+      ['test@iclod.com', 'test@icloud.com'],
+      ['Test@Gmial.COM', 'test@gmail.com'],
+      ['reader+flock@mail.gmial.com', 'reader+flock@mail.gmail.com'],
+    ] as const
+    for (const [index, [email, suggestion]] of cases.entries()) {
+      fetchCalls = []
+      const res = await POST(postContext({ email }, locals, { ip: `192.0.2.${20 + index}` }))
+      assert.equal(res.status, 400, email)
+      assert.deepEqual(await res.json(), { error: addressError(suggestion), suggestion })
+      assert.equal(fetchCalls.length, 0, email)
+    }
+  })
+
+  it('rejects disposable domains and their subdomains before any lookup', async () => {
+    const locals = makeLocals()
+    const rejected = ['x@mailinator.com', 'x@not-listed.mailinator.com', 'x@10minutemail.com']
+    for (const [index, email] of rejected.entries()) {
+      fetchCalls = []
+      const res = await POST(postContext({ email }, locals, { ip: `192.0.2.${40 + index}` }))
+      assert.equal(res.status, 400, email)
+      assert.deepEqual(await res.json(), { error: EMAIL_ERROR })
+      assert.equal(fetchCalls.length, 0, email)
+    }
+  })
+
+  it('rejects a domain with no MX and no A or AAAA record', async () => {
+    const locals = makeLocals()
+    const nomx = 'x@nomx-domain-that-does-not-exist-12345.com'
+
+    mxResponse = { status: 200, body: MX_NXDOMAIN }
+    const nxdomain = await POST(postContext({ email: nomx }, locals, { ip: '192.0.2.50' }))
+    assert.equal(nxdomain.status, 400)
+    assert.equal(cioCalls().length, 0)
+
+    fetchCalls = []
+    mxResponse = { status: 200, body: MX_NONE }
+    const nodata = await POST(
+      postContext({ email: 'grower@empty-farm-mail.test' }, locals, { ip: '192.0.2.51' })
+    )
+    assert.equal(nodata.status, 400)
+    assert.deepEqual(await nodata.json(), { error: EMAIL_ERROR })
+    assert.equal(cioCalls().length, 0)
+    assert.ok(fetchCalls.some((call) => call.url.includes('type=MX')))
+    assert.ok(fetchCalls.some((call) => call.url.includes('type=A') && !call.url.includes('AAAA')))
+    assert.ok(fetchCalls.some((call) => call.url.includes('type=AAAA')))
+
+    fetchCalls = []
+    mxResponse = (url) => {
+      if (url.includes('type=AAAA')) return { status: 200, body: AAAA_OK }
+      if (url.includes('type=A')) return { status: 200, body: A_OK }
+      return { status: 200, body: MX_NULL }
+    }
+    const nullMx = await POST(
+      postContext({ email: 'grower@null-mx-farm.test' }, locals, { ip: '192.0.2.52' })
+    )
+    assert.equal(nullMx.status, 400)
+    assert.equal(cioCalls().length, 0)
+  })
+
+  it('still accepts gmail, yahoo, a farm domain, plus-addressing, and subdomains', async () => {
+    // MX is mocked. oakridgepoultryfarm.com is only here to prove a non-provider domain is not blocked.
+    const locals = makeLocals()
+    const accepted = [
+      'grower@gmail.com',
+      'grower@yahoo.com',
+      'pat@oakridgepoultryfarm.com',
+      'pat+flock@gmail.com',
+      'pat@news.oakridgepoultryfarm.com',
+    ]
+    for (const [index, email] of accepted.entries()) {
+      const res = await POST(postContext({ email }, locals, { ip: `192.0.2.${60 + index}` }))
+      assert.equal(res.status, 200, email)
+    }
+    assert.equal(cioCalls().filter((call) => call.init?.method === 'PUT').length, accepted.length)
+  })
+
+  it('still fails open when DNS errors after the address checks', async () => {
+    const warnings: string[] = []
+    mock.method(console, 'warn', (...args: unknown[]) => {
+      warnings.push(args.map(String).join(' '))
+    })
+    const locals = makeLocals()
+    mxResponse = 'throw'
+    const thrown = await POST(
+      postContext({ email: 'pat@oakridgepoultryfarm.com' }, locals, { ip: '192.0.2.70' })
+    )
+    assert.equal(thrown.status, 200)
+
+    fetchCalls = []
+    mxResponse = (url) => {
+      if (url.includes('type=MX')) return { status: 200, body: MX_NONE }
+      if (url.includes('type=A') && !url.includes('AAAA')) {
+        return { status: 200, body: { Status: 2, Answer: [] } }
+      }
+      return { status: 200, body: MX_NONE }
+    }
+    const servfail = await POST(
+      postContext({ email: 'pat@secondfarm.test' }, locals, { ip: '192.0.2.71' })
+    )
+    assert.equal(servfail.status, 200)
+    assert.ok(cioCalls().some((call) => call.url.includes('pat%40secondfarm.test')))
+
+    const logged = warnings.join('\n')
+    assert.equal(warnings.length, 2)
+    assert.match(logged, /MX lookup failed open/)
+    assert.doesNotMatch(logged, /oakridgepoultryfarm/)
+    assert.doesNotMatch(logged, /secondfarm/)
+    assert.doesNotMatch(logged, /@/)
+  })
+})
+
+describe('newsletter form address line', () => {
+  it('uses the same syntax and typo line the server returns', () => {
+    assert.equal(
+      subscribeAddressIssue('test@gmial.com'),
+      'Enter a valid email address. Did you mean test@gmail.com?'
+    )
+    assert.equal(subscribeAddressIssue('a..b@gmail.com'), 'Enter a valid email address.')
+    assert.equal(subscribeAddressIssue('bad@@x'), 'Enter a valid email address.')
+    assert.equal(subscribeAddressIssue("o'brien+tag@gmail.com"), null)
+    assert.equal(subscribeAddressIssue('pat@gmail.com'), null)
+    assert.equal(subscribeAddressIssue('pat@yahoo.com'), null)
+    assert.equal(subscribeAddressIssue('pat@oakridgepoultryfarm.com'), null)
+    assert.equal(subscribeAddressIssue('pat@news.oakridgepoultryfarm.com'), null)
   })
 })
