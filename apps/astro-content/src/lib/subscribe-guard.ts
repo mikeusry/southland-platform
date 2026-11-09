@@ -6,7 +6,10 @@
  * when that isolate goes away. Do not add a Cloudflare resource for this.
  */
 
+import { parseSubscribeEmail, type EmailVerdict } from './subscribe-email'
 import { getServerEnv } from './server-env'
+
+export type { EmailVerdict }
 
 export const SUBSCRIBE_IP_LIMIT = 20
 export const SUBSCRIBE_IP_WINDOW_MS = 60 * 60 * 1000
@@ -189,35 +192,19 @@ function isBlockedDomain(domain: string): boolean {
   return false
 }
 
-export type EmailVerdict = { ok: true; email: string; domain: string } | { ok: false }
-
 /**
- * Loose on purpose. Real addresses include apostrophes, `&`, leading or
- * trailing `_`/`-`, plus-tags, and IDN domains. Reject `|`, `=`, whitespace,
- * `/`, `:`, `?`, `#`, `\`, and `%` in the domain, a missing `@` or domain dot, and the
- * blocklist. `domain` is ASCII (punycode) for the DNS lookup.
+ * Strict syntax, then the blocklist. Apostrophes, `&`, leading or trailing
+ * `_`/`-`, plus-tags, and IDN domains still pass. `domain` is ASCII (punycode)
+ * for the DNS lookup.
  */
 export function validateSubscribeEmail(raw: string): EmailVerdict {
-  const email = raw.trim().toLowerCase()
-  if (!email) return { ok: false }
-  if (email.includes('|') || email.includes('=')) return { ok: false }
-  if (/\s/.test(email)) return { ok: false }
-  const at = email.indexOf('@')
-  if (at <= 0 || at !== email.lastIndexOf('@')) return { ok: false }
-  const local = email.slice(0, at)
-  const domain = email.slice(at + 1)
-  if (!local || !domain.includes('.')) return { ok: false }
-  if (domain.startsWith('.') || domain.endsWith('.')) return { ok: false }
-  if (/[/:?#\\%]/.test(domain)) return { ok: false }
-  let ascii = domain
-  try {
-    ascii = new URL(`http://${domain}`).hostname.replace(/\.$/, '')
-  } catch {
-    return { ok: false }
-  }
-  if (!ascii.includes('.')) return { ok: false }
-  if (isBlockedDomain(ascii) || isBlockedDomain(domain)) return { ok: false }
-  return { ok: true, email: `${local}@${domain}`, domain: ascii }
+  const parsed = parseSubscribeEmail(raw)
+  if (!parsed.ok) return parsed
+  if (isBlockedDomain(parsed.domain)) return { ok: false }
+  const at = parsed.email.lastIndexOf('@')
+  const typedDomain = at >= 0 ? parsed.email.slice(at + 1) : ''
+  if (typedDomain !== parsed.domain && isBlockedDomain(typedDomain)) return { ok: false }
+  return parsed
 }
 
 interface DnsAnswer {
@@ -277,10 +264,16 @@ function failOpenMx(): true {
   return true
 }
 
+/** NOERROR or NXDOMAIN. SERVFAIL, REFUSED, and anything else are not a verdict. */
+function isDefinitiveDns(status: number | undefined): boolean {
+  return status === 0 || status === 3
+}
+
 /**
  * DNS-over-HTTPS via cloudflare-dns.com (1.1.1.1 is often refused from Workers).
- * Reject only NXDOMAIN or a null MX. No MX plus an A/AAAA record is deliverable.
- * Lookup errors, timeouts, and other statuses allow the signup.
+ * Reject NXDOMAIN, a null MX, and a definitive answer with no MX and no A/AAAA.
+ * No MX plus an A or AAAA record is deliverable.
+ * Lookup errors, timeouts, SERVFAIL, and REFUSED allow the signup.
  */
 export async function domainHasMx(domain: string): Promise<boolean> {
   const mx = await dohQuery(domain, 'MX')
@@ -295,12 +288,13 @@ export async function domainHasMx(domain: string): Promise<boolean> {
   const ipv4 = await dohQuery(domain, 'A')
   if (!ipv4.ok) return failOpenMx()
   if (hasAddressRecord(ipv4.data)) return true
+  if (!isDefinitiveDns(ipv4.data.Status)) return failOpenMx()
 
   const ipv6 = await dohQuery(domain, 'AAAA')
   if (!ipv6.ok) return failOpenMx()
   if (hasAddressRecord(ipv6.data)) return true
-  if (ipv4.data.Status === 3 && ipv6.data.Status === 3) return false
-  return true
+  if (!isDefinitiveDns(ipv6.data.Status)) return failOpenMx()
+  return false
 }
 
 function hasControlChar(value: string): boolean {

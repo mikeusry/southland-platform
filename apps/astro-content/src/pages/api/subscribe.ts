@@ -19,12 +19,15 @@
  * deliberately close to it so the two do not drift.
  *
  * Bot defenses are the honeypot, the per-IP limit, and the MX check. The origin
- * allowlist is separate. The IP limit runs before any DNS lookup. See
+ * allowlist is separate. Syntax, typo, and disposable-domain checks run before
+ * the IP limit. The IP limit runs before any DNS lookup. See
  * `subscribe-guard.ts`.
  */
 
 import type { APIRoute } from 'astro'
 import { getServerEnv } from '../../lib/server-env'
+import { isDisposableDomain } from '../../lib/subscribe-disposable'
+import { emailTypoSuggestion, subscribeEmailError } from '../../lib/subscribe-email'
 import { mintNewsletterViaNexus } from '../../lib/subscribe-nexus'
 import {
   clientIp,
@@ -92,6 +95,15 @@ export const POST: APIRoute = async (context) => {
     return json({ error: 'A valid email address is required.' }, 400)
   }
 
+  const suggestion = emailTypoSuggestion(verdict.email)
+  if (suggestion) {
+    return json({ error: subscribeEmailError(suggestion), suggestion }, 400)
+  }
+
+  if (isDisposableDomain(verdict.domain)) {
+    return json({ error: subscribeEmailError() }, 400)
+  }
+
   let clientAddress = ''
   try {
     clientAddress = context.clientAddress
@@ -109,7 +121,7 @@ export const POST: APIRoute = async (context) => {
   }
 
   if (!(await domainHasMx(verdict.domain))) {
-    return json({ error: 'A valid email address is required.' }, 400)
+    return json({ error: subscribeEmailError() }, 400)
   }
 
   const email = verdict.email
