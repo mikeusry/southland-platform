@@ -27,6 +27,7 @@ import TalkToRep from '../../components/product/TalkToRep'
 import ApplicationRateCalculator from '../../components/calculators/ApplicationRateCalculator'
 import { PRODUCTS } from '../../lib/appRateRules'
 import { fetchProductReviews, fetchAllAggregates } from '../../lib/reviews'
+import { visibleProductQuestions } from '../../lib/product-questions'
 import type { KlaviyoReview } from '../../lib/reviews'
 import { getServerEnv } from '../../lib/server-env'
 import StarRating from '../../components/product/StarRating.astro'
@@ -1377,7 +1378,7 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
     }
     <ReviewsSection
       reviews={reviewData?.reviews ?? []}
-      questions={reviewData?.questions ?? []}
+      questions={visibleProductQuestions(shopifyHandle, reviewData?.questions ?? [])}
       aggregate={reviewData?.aggregate ?? {
         averageRating: 0,
         reviewCount: 0,
