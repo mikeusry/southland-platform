@@ -137,6 +137,20 @@ const openaiAdsPixelId =
         'use strict';
         var KEY='_pd_attribution';
         var PARAMS=['utm_source','utm_medium','utm_campaign','utm_content','utm_term','gclid','gbraid','wbraid','fbclid','msclid','ttclid','srsltid','oppref'];
+        var GOOGLE_CLICK=['gclid','gbraid','wbraid'];
+        var GOOGLE_CLICK_MS=90*24*60*60*1000;
+        var SESSION_MS=30*60*1000;
+        function retainGoogleClicks(store){
+          var kept={};
+          GOOGLE_CLICK.forEach(function(k){
+            var ts=Number(store[k+'_ts'])||0;
+            if(store[k]&&ts&&(Date.now()-ts)<=GOOGLE_CLICK_MS){kept[k]=store[k];kept[k+'_ts']=store[k+'_ts']}
+          });
+          return kept;
+        }
+        function stampGoogleClickTimes(obj){
+          GOOGLE_CLICK.forEach(function(k){if(obj[k])obj[k+'_ts']=Date.now()});
+        }
         try{
           var url=new URL(window.location.href);
           var found={},hasNew=false;
@@ -150,13 +164,12 @@ const openaiAdsPixelId =
           else if(found.srsltid&&found.gclid&&!found.utm_campaign){found.utm_source=found.utm_source||'google';found.utm_medium=found.utm_medium||'cpc';found.utm_campaign=window.__pdPmaxCampaign(url.pathname)}
           if(found.gclid&&!found.utm_source){found.utm_source='google';found.utm_medium=found.utm_medium||'cpc'}
           if(found.fbclid&&!found.utm_source){found.utm_source='facebook';found.utm_medium=found.utm_medium||'paid_social'}
+          stampGoogleClickTimes(found);
           // Read the real _fbp cookie set by the Meta Pixel (fbq init below). This
           // is Meta's own browser ID — the highest-signal CAPI match parameter after
           // email. Cookie may be absent on the very first pageview (pixel loads
           // async) but persists, so it's reliably present by add-to-cart, which is
-          // when cart.ts reads _pd_attribution. (_fbc is left to Nexus, which
-          // reconstructs it from fbclid; capturing the real _fbc cookie would need
-          // its own orders column + plumbing — a separate increment.)
+          // when cart.ts reads _pd_attribution.
           var ck=function(n){var m=document.cookie.match(new RegExp('(?:^|; )'+n+'=([^;]*)'));return m?decodeURIComponent(m[1]):''};
           var fbp=ck('_fbp');
           if(fbp){found.fbp=fbp;hasNew=true}
@@ -176,17 +189,11 @@ const openaiAdsPixelId =
             try{localStorage.setItem(KEY,JSON.stringify(cur))}catch(e){}
           },1500);
           var stored={};try{stored=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
-          // Expire stale last-touch attribution across a session gap. The merge below
-          // exists to backfill the async _fbp cookie WITHIN a session, but without
-          // expiry it lets a click's utm_campaign/gclid survive in localStorage for
-          // days and ride along onto an unrelated later purchase (verified: a Broiler
-          // Bill ad click on Jun-10 tainted a D2-sanitizer purchase on Jun-12). A
-          // 30-min inactivity window (standard session boundary) clears the slate so a
-          // returning visitor's new click starts clean and a stale one can't bleed.
-          // Same-session cross-sell (click A, buy B within the window) is preserved.
-          var SESSION_MS=30*60*1000;
+          // Expire stale UTMs across a session gap (30 min). Google click IDs stay up
+          // to 90 days with their capture timestamps so gclid/gbraid/wbraid are not
+          // cleared with campaign params (see cart.ts filterLastTouchAttribution).
           var lastTs=Number(stored&&stored._timestamp)||0;
-          if(lastTs&&(Date.now()-lastTs)>SESSION_MS){stored={}}
+          if(lastTs&&(Date.now()-lastTs)>SESSION_MS){stored=retainGoogleClicks(stored)}
           if(hasNew){var merged={};for(var k in stored){if(stored.hasOwnProperty(k))merged[k]=stored[k]}for(var j in found){if(found.hasOwnProperty(j))merged[j]=found[j]}merged._timestamp=Date.now();merged._landing_page=url.pathname+url.search;merged._referrer=document.referrer||'';try{localStorage.setItem(KEY,JSON.stringify(merged))}catch(e){}}
         }catch(e){}
       })();
@@ -211,6 +218,7 @@ const openaiAdsPixelId =
           if(data.gclid&&!data.utm_source){data.utm_source='google';data.utm_medium=data.utm_medium||'cpc'}
           if(data.fbclid&&!data.utm_source){data.utm_source='facebook';data.utm_medium=data.utm_medium||'paid_social'}
           var ck=function(n){var m=document.cookie.match(new RegExp('(?:^|; )'+n+'=([^;]*)'));return m?decodeURIComponent(m[1]):''};
+          ['gclid','gbraid','wbraid'].forEach(function(k){if(data[k])data[k+'_ts']=Date.now()});
           if(!data.oppref){var fromOai=ck('__oppref');if(fromOai)data.oppref=fromOai}
           if(data.oppref&&!data.utm_source){data.utm_source='chatgpt';data.utm_medium=data.utm_medium||'ppc'}
           data._timestamp=Date.now();data._landing_page=url.pathname+url.search;data._referrer=document.referrer||'';

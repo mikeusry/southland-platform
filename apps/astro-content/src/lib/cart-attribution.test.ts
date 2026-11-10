@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict'
 import { afterEach, test } from 'node:test'
-import { getAttributionAttrs, getFirstTouchAttrs } from './cart'
+import {
+  ATTRIBUTION_SESSION_MS,
+  filterLastTouchAttribution,
+  getAttributionAttrs,
+  getFirstTouchAttrs,
+} from './cart'
 
 const priorWindow = Object.getOwnPropertyDescriptor(globalThis, 'window')
 const priorStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
@@ -61,6 +66,37 @@ function clickIds(attrs: Array<{ key: string; value: string }>, prefix: string) 
   )
 }
 
+test('filterLastTouchAttribution drops UTMs after session gap but keeps Google click IDs for 90 days', () => {
+  const now = Date.now()
+  const filtered = filterLastTouchAttribution(
+    {
+      utm_campaign: 'broiler-bill-pmax',
+      gclid: 'G',
+      gclid_ts: String(now - ATTRIBUTION_SESSION_MS - 1000),
+      _timestamp: String(now - ATTRIBUTION_SESSION_MS - 1000),
+    },
+    now
+  )
+  assert.deepEqual(filtered, { gclid: 'G', gclid_ts: String(now - ATTRIBUTION_SESSION_MS - 1000) })
+})
+
+test('getAttributionAttrs returns Google click IDs when UTM session expired within 90-day click window', () => {
+  installStorage()
+  const now = Date.now()
+  localStorage.setItem(
+    '_pd_attribution',
+    JSON.stringify({
+      utm_campaign: 'stale-campaign',
+      gclid: 'G',
+      gclid_ts: now - 60 * 60 * 1000,
+      _timestamp: now - ATTRIBUTION_SESSION_MS - 60 * 1000,
+    })
+  )
+
+  assert.ok(getAttributionAttrs().some((a) => a.key === '_pd_gclid' && a.value === 'G'))
+  assert.ok(!getAttributionAttrs().some((a) => a.key === '_pd_utm_campaign'))
+})
+
 test('last-touch attrs stamp gbraid and wbraid immediately after gclid', () => {
   installStorage()
   localStorage.setItem(
@@ -69,6 +105,9 @@ test('last-touch attrs stamp gbraid and wbraid immediately after gclid', () => {
       gclid: 'G',
       gbraid: 'X',
       wbraid: 'Y',
+      gclid_ts: Date.now(),
+      gbraid_ts: Date.now(),
+      wbraid_ts: Date.now(),
       _timestamp: Date.now(),
     })
   )

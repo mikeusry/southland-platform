@@ -84,6 +84,61 @@ function getNexusCid(): string {
 const PD_ATTRIBUTION_KEY = '_pd_attribution'
 const PD_FIRST_TOUCH_KEY = '_pd_first_touch'
 
+/** Last-touch UTMs expire after 30 minutes of inactivity; Google click IDs persist longer. */
+export const ATTRIBUTION_SESSION_MS = 30 * 60 * 1000
+/** Google Ads click identifiers (gclid / gbraid / wbraid) retention window. */
+export const GOOGLE_CLICK_MS = 90 * 24 * 60 * 60 * 1000
+
+const UTM_ATTR_PARAMS = [
+  'utm_source',
+  'utm_medium',
+  'utm_campaign',
+  'utm_content',
+  'utm_term',
+] as const
+
+export const GOOGLE_CLICK_PARAMS = ['gclid', 'gbraid', 'wbraid'] as const
+
+const LAST_TOUCH_ATTR_PARAMS = [
+  ...UTM_ATTR_PARAMS,
+  ...GOOGLE_CLICK_PARAMS,
+  'gclid_ts',
+  'gbraid_ts',
+  'wbraid_ts',
+  'fbclid',
+  'fbp',
+  'msclid',
+  'ttclid',
+  'srsltid',
+  'oppref',
+] as const
+
+/**
+ * Apply the 30-minute UTM session rule while keeping Google click IDs for up to 90 days.
+ */
+export function filterLastTouchAttribution(
+  data: Record<string, string>,
+  now = Date.now()
+): Record<string, string> | null {
+  const ts = Number(data._timestamp) || 0
+  const sessionExpired = ts > 0 && now - ts > ATTRIBUTION_SESSION_MS
+
+  if (!sessionExpired) {
+    return { ...data }
+  }
+
+  const retained: Record<string, string> = {}
+  for (const key of GOOGLE_CLICK_PARAMS) {
+    const clickTs = Number(data[`${key}_ts`]) || 0
+    if (data[key] && clickTs > 0 && now - clickTs <= GOOGLE_CLICK_MS) {
+      retained[key] = data[key]
+      retained[`${key}_ts`] = String(data[`${key}_ts`])
+    }
+  }
+
+  return Object.keys(retained).length > 0 ? retained : null
+}
+
 /**
  * A utm_campaign value that downstream attribution can actually join on.
  *
@@ -184,39 +239,19 @@ export function getAttributionAttrs(): Array<{ key: string; value: string }> {
     const raw = localStorage.getItem(PD_ATTRIBUTION_KEY)
     if (!raw) return []
     const data = JSON.parse(raw) as Record<string, string>
-    // Expire stale last-touch attribution. BaseLayout clears it across a 30-min
-    // session gap on write, but a returning visitor who lands with NO params never
-    // hits that write path — so a campaign click can survive in localStorage for
-    // days and get stamped onto an unrelated later purchase (verified: a Broiler
-    // Bill click tainted a D2 purchase 2 days later). Enforce the same session
-    // window here at read time so stale attribution is never stamped on a cart line.
-    const SESSION_MS = 30 * 60 * 1000
-    const ts = Number(data._timestamp) || 0
-    if (ts && Date.now() - ts > SESSION_MS) return []
+    // Enforce the 30-minute UTM session at read time (visitors with no new params
+    // never hit BaseLayout's write path). Google click IDs survive up to 90 days.
+    const filtered = filterLastTouchAttribution(data)
+    if (!filtered) return []
     const attrs: Array<{ key: string; value: string }> = []
-    const PARAMS = [
-      'utm_source',
-      'utm_medium',
-      'utm_campaign',
-      'utm_content',
-      'utm_term',
-      'gclid',
-      'gbraid',
-      'wbraid',
-      'fbclid',
-      'fbp', // Meta first-party browser ID — forwarded to CAPI by Nexus for match quality
-      'msclid',
-      'ttclid',
-      'srsltid',
-      'oppref', // OpenAI / ChatGPT Ads click ID
-    ]
-    for (const param of PARAMS) {
-      if (data[param]) {
-        attrs.push({ key: `_pd_${param}`, value: data[param] })
+    for (const param of LAST_TOUCH_ATTR_PARAMS) {
+      if (filtered[param]) {
+        attrs.push({ key: `_pd_${param}`, value: filtered[param] })
       }
     }
-    if (data._landing_page) attrs.push({ key: '_pd_landing_page', value: data._landing_page })
-    if (data._referrer) attrs.push({ key: '_pd_referrer', value: data._referrer })
+    if (filtered._landing_page)
+      attrs.push({ key: '_pd_landing_page', value: filtered._landing_page })
+    if (filtered._referrer) attrs.push({ key: '_pd_referrer', value: filtered._referrer })
     return withValidatedCampaign(attrs, '_pd_utm_campaign', '_pd_gclid')
   } catch {
     return []
@@ -244,6 +279,9 @@ export function getFirstTouchAttrs(): Array<{ key: string; value: string }> {
       'gclid',
       'gbraid',
       'wbraid',
+      'gclid_ts',
+      'gbraid_ts',
+      'wbraid_ts',
       'fbclid',
       'fbp',
       'msclid',
@@ -474,24 +512,24 @@ export async function getCart(): Promise<Cart | null> {
 /**
  * Merge freshly-read attribution over a cart's existing cart-level attributes.
  *
- * 🛑 EXISTING VALUES WIN. This is deliberate and is the whole point of the
- * merge. getCartLevelAttributionAttrs() reads localStorage through a 30-minute
- * session window (see getAttributionAttrs), so a shopper who clicked an ad,
- * added an item, then returned 45 minutes later to add a second item reads back
- * an EMPTY attribution set on that second call. Letting the fresh read win would
- * erase the gclid that the first add-to-cart correctly captured — turning a
- * working attribution into a lost one.
- *
- * So: keep what the cart already has, and only fill in keys that are missing.
- * The one exception is identity (_pd_user_id / _pd_session_id), which is stable
- * per-browser and safe to refresh; a cart that never got them can gain them here.
+ * Existing values win for most attribution keys so a second add-to-cart after
+ * the UTM session window does not erase gclid already on the cart. Google click
+ * IDs (and their capture timestamps) are the exception: the freshest read wins
+ * so a newer ad click stamps over an older one.
  */
 function mergeCartAttributes(
   existing: Array<{ key: string; value: string }>,
   fresh: Array<{ key: string; value: string }>
 ): Array<{ key: string; value: string }> {
-  // Identity keys are refreshable — a stale/absent value should yield to a live one.
   const REFRESHABLE = new Set(['_pd_user_id', '_pd_session_id'])
+  const FRESH_WINS = new Set([
+    '_pd_gclid',
+    '_pd_gbraid',
+    '_pd_wbraid',
+    '_pd_gclid_ts',
+    '_pd_gbraid_ts',
+    '_pd_wbraid_ts',
+  ])
 
   const merged = new Map<string, string>()
   for (const a of existing) {
@@ -499,6 +537,10 @@ function mergeCartAttributes(
   }
   for (const a of fresh) {
     if (!a.key || !a.value) continue
+    if (FRESH_WINS.has(a.key)) {
+      merged.set(a.key, a.value)
+      continue
+    }
     if (!merged.has(a.key) || REFRESHABLE.has(a.key)) merged.set(a.key, a.value)
   }
   return Array.from(merged, ([key, value]) => ({ key, value }))
