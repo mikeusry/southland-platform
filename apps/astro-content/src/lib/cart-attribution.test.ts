@@ -121,13 +121,17 @@ test('last-touch attrs stamp gbraid and wbraid immediately after gclid', () => {
 
 test('first-touch attrs stamp gbraid and wbraid immediately after gclid', () => {
   installStorage()
+  const ts = 1_700_000_000_000
   localStorage.setItem(
     '_pd_first_touch',
     JSON.stringify({
       gclid: 'G',
       gbraid: 'X',
       wbraid: 'Y',
-      _timestamp: Date.now(),
+      gclid_ts: ts,
+      gbraid_ts: ts,
+      wbraid_ts: ts,
+      _timestamp: ts,
     })
   )
 
@@ -136,4 +140,38 @@ test('first-touch attrs stamp gbraid and wbraid immediately after gclid', () => 
     { key: '_pd_ft_gbraid', value: 'X' },
     { key: '_pd_ft_wbraid', value: 'Y' },
   ])
+  assert.deepEqual(
+    getFirstTouchAttrs().filter((a) => a.key.endsWith('_ts')),
+    [
+      { key: '_pd_ft_gclid_ts', value: String(ts) },
+      { key: '_pd_ft_gbraid_ts', value: String(ts) },
+      { key: '_pd_ft_wbraid_ts', value: String(ts) },
+    ]
+  )
+})
+
+test('last-touch attrs stamp Google click capture timestamps for gclid, gbraid, and wbraid', () => {
+  installStorage()
+  const ts = 1_700_000_000_000
+  localStorage.setItem(
+    '_pd_attribution',
+    JSON.stringify({
+      gclid: 'G',
+      gbraid: 'X',
+      wbraid: 'Y',
+      gclid_ts: ts,
+      gbraid_ts: ts,
+      wbraid_ts: ts,
+      _timestamp: Date.now(),
+    })
+  )
+
+  assert.deepEqual(
+    getAttributionAttrs().filter((a) => a.key.endsWith('_ts')),
+    [
+      { key: '_pd_gclid_ts', value: String(ts) },
+      { key: '_pd_gbraid_ts', value: String(ts) },
+      { key: '_pd_wbraid_ts', value: String(ts) },
+    ]
+  )
 })
