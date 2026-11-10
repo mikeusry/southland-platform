@@ -150,6 +150,21 @@ test('first-touch attrs stamp gbraid and wbraid immediately after gclid', () => 
   )
 })
 
+test('last-touch attrs stamp Meta _fbc when stored on landing capture', () => {
+  installStorage()
+  localStorage.setItem(
+    '_pd_attribution',
+    JSON.stringify({
+      fbc: 'fb.1.123.abc',
+      _timestamp: Date.now(),
+    })
+  )
+
+  assert.deepEqual(getAttributionAttrs().filter((a) => a.key === '_pd_fbc'), [
+    { key: '_pd_fbc', value: 'fb.1.123.abc' },
+  ])
+})
+
 test('last-touch attrs stamp Google click capture timestamps for gclid, gbraid, and wbraid', () => {
   installStorage()
   const ts = 1_700_000_000_000

@@ -156,6 +156,8 @@ const openaiAdsPixelId =
           var ck=function(n){var m=document.cookie.match(new RegExp('(?:^|; )'+n+'=([^;]*)'));return m?decodeURIComponent(m[1]):''};
           var fbp=ck('_fbp');
           if(fbp){found.fbp=fbp;hasNew=true}
+          var fbc=ck('_fbc');
+          if(fbc){found.fbc=fbc;hasNew=true}
           // OpenAI / ChatGPT Ads click id. Prefer the URL param; oaiq also sets
           // __oppref. Cookie may be missing on first paint — retry once.
           if(!found.oppref){var fromOai=ck('__oppref');if(fromOai){found.oppref=fromOai;hasNew=true}}
@@ -202,6 +204,8 @@ const openaiAdsPixelId =
           if(data.fbclid&&!data.utm_source){data.utm_source='facebook';data.utm_medium=data.utm_medium||'paid_social'}
           var ck=function(n){var m=document.cookie.match(new RegExp('(?:^|; )'+n+'=([^;]*)'));return m?decodeURIComponent(m[1]):''};
           ['gclid','gbraid','wbraid'].forEach(function(k){if(data[k])data[k+'_ts']=Date.now()});
+          var ftFbc=ck('_fbc');
+          if(ftFbc)data.fbc=ftFbc;
           if(!data.oppref){var fromOai=ck('__oppref');if(fromOai)data.oppref=fromOai}
           if(data.oppref&&!data.utm_source){data.utm_source='chatgpt';data.utm_medium=data.utm_medium||'ppc'}
           data._timestamp=Date.now();data._landing_page=url.pathname+url.search;data._referrer=document.referrer||'';
