@@ -247,7 +247,7 @@ export function getAttributionAttrs(): Array<{ key: string; value: string }> {
     const attrs: Array<{ key: string; value: string }> = []
     for (const param of LAST_TOUCH_ATTR_PARAMS) {
       if (filtered[param]) {
-        attrs.push({ key: `_pd_${param}`, value: filtered[param] })
+        attrs.push({ key: `_pd_${param}`, value: String(filtered[param]) })
       }
     }
     if (filtered._landing_page)
@@ -292,7 +292,7 @@ export function getFirstTouchAttrs(): Array<{ key: string; value: string }> {
     ]
     for (const param of PARAMS) {
       if (data[param]) {
-        attrs.push({ key: `_pd_ft_${param}`, value: data[param] })
+        attrs.push({ key: `_pd_ft_${param}`, value: String(data[param]) })
       }
     }
     if (data._landing_page) attrs.push({ key: '_pd_ft_landing_page', value: data._landing_page })
@@ -584,12 +584,22 @@ export async function addToCart(lines: CartLineInput[]): Promise<Cart> {
         merged.some((m) => !cart.attributes?.some((e) => e.key === m.key && e.value === m.value))
 
       if (changed && merged.length > 0) {
-        try {
-          cart = await sfUpdateCartAttributes(client, cart.id, merged)
-        } catch (attrErr) {
+        let attrErr: unknown
+        for (let attempt = 0; attempt < 2; attempt++) {
+          try {
+            cart = await sfUpdateCartAttributes(client, cart.id, merged)
+            attrErr = undefined
+            break
+          } catch (err) {
+            attrErr = err
+          }
+        }
+        if (attrErr) {
           // Attribution is best-effort — never fail an add-to-cart over it.
-          console.warn('[cart] cart attribute sync failed (non-fatal):', attrErr)
-          captureCartException(attrErr instanceof Error ? attrErr : new Error(String(attrErr)), {
+          const err =
+            attrErr instanceof Error ? attrErr : new Error(String(attrErr))
+          console.error('[cart] cart attribute sync failed after retry:', err)
+          captureCartException(err, {
             stage: 'cart-attributes-sync',
             cartId: cart.id,
           })
