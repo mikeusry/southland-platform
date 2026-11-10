@@ -20,10 +20,24 @@ import {
 } from '@southland/shopify-storefront'
 import type {
   Cart,
+  CartLineAttribute,
   CartLineInput,
   CartLineUpdateInput,
   StorefrontClient,
 } from '@southland/shopify-storefront'
+import {
+  ATTRIBUTION_SESSION_MS,
+  filterLastTouchAttribution,
+  GOOGLE_CLICK_MS,
+  GOOGLE_CLICK_PARAMS,
+} from './attribution-storage'
+
+export {
+  ATTRIBUTION_SESSION_MS,
+  filterLastTouchAttribution,
+  GOOGLE_CLICK_MS,
+  GOOGLE_CLICK_PARAMS,
+} from './attribution-storage'
 
 // Re-export for convenience
 export type { Cart, CartLineInput }
@@ -84,11 +98,6 @@ function getNexusCid(): string {
 const PD_ATTRIBUTION_KEY = '_pd_attribution'
 const PD_FIRST_TOUCH_KEY = '_pd_first_touch'
 
-/** Last-touch UTMs expire after 30 minutes of inactivity; Google click IDs persist longer. */
-export const ATTRIBUTION_SESSION_MS = 30 * 60 * 1000
-/** Google Ads click identifiers (gclid / gbraid / wbraid) retention window. */
-export const GOOGLE_CLICK_MS = 90 * 24 * 60 * 60 * 1000
-
 const UTM_ATTR_PARAMS = [
   'utm_source',
   'utm_medium',
@@ -96,8 +105,6 @@ const UTM_ATTR_PARAMS = [
   'utm_content',
   'utm_term',
 ] as const
-
-export const GOOGLE_CLICK_PARAMS = ['gclid', 'gbraid', 'wbraid'] as const
 
 const LAST_TOUCH_ATTR_PARAMS = [
   ...UTM_ATTR_PARAMS,
@@ -114,31 +121,26 @@ const LAST_TOUCH_ATTR_PARAMS = [
   'oppref',
 ] as const
 
-/**
- * Apply the 30-minute UTM session rule while keeping Google click IDs for up to 90 days.
- */
-export function filterLastTouchAttribution(
-  data: Record<string, string>,
-  now = Date.now()
-): Record<string, string> | null {
-  const ts = Number(data._timestamp) || 0
-  const sessionExpired = ts > 0 && now - ts > ATTRIBUTION_SESSION_MS
+const GOOGLE_CLICK_ATTR_KEYS = [
+  '_pd_gclid',
+  '_pd_gbraid',
+  '_pd_wbraid',
+  '_pd_gclid_ts',
+  '_pd_gbraid_ts',
+  '_pd_wbraid_ts',
+] as const
 
-  if (!sessionExpired) {
-    return { ...data }
-  }
-
-  const retained: Record<string, string> = {}
-  for (const key of GOOGLE_CLICK_PARAMS) {
-    const clickTs = Number(data[`${key}_ts`]) || 0
-    if (data[key] && clickTs > 0 && now - clickTs <= GOOGLE_CLICK_MS) {
-      retained[key] = data[key]
-      retained[`${key}_ts`] = String(data[`${key}_ts`])
-    }
-  }
-
-  return Object.keys(retained).length > 0 ? retained : null
-}
+/** UTMs and context that must move with the winning Google click on the cart. */
+const CLICK_PAIRED_CART_KEYS = [
+  '_pd_utm_source',
+  '_pd_utm_medium',
+  '_pd_utm_campaign',
+  '_pd_utm_content',
+  '_pd_utm_term',
+  '_pd_srsltid',
+  '_pd_landing_page',
+  '_pd_referrer',
+] as const
 
 /**
  * A utm_campaign value that downstream attribution can actually join on.
@@ -389,18 +391,15 @@ function getCartLevelAttributionAttrs(): Array<{ key: string; value: string }> {
 }
 
 /**
- * Inject _nexus_cid + attribution into cart line inputs.
- * Preserves any existing attributes (e.g., bundle attributes).
- *
- * Every cart line carries identity + attribution so Nexus can extract
- * them from Shopify order line_items[].properties on webhook ingest.
+ * Attribution + identity keys stamped on every cart line. Nexus still reads
+ * line_items[0].properties first, so we restamp existing lines when the winning
+ * click bundle changes (not only lines added in the latest add-to-cart).
  */
-function stampLines(lines: CartLineInput[]): CartLineInput[] {
+function getLineAttributionStamp(): CartLineAttribute[] {
   const cid = getNexusCid()
   const attrAttrs = getAttributionAttrs()
   const ftAttrs = getFirstTouchAttrs()
 
-  // Read persona from localStorage (set by DecisionEngine)
   let personaAttr: { key: string; value: string } | null = null
   try {
     const raw = localStorage.getItem('southland_persona')
@@ -412,23 +411,53 @@ function stampLines(lines: CartLineInput[]): CartLineInput[] {
     /* localStorage may be unavailable */
   }
 
-  const stampKeys = new Set([
-    NEXUS_CID_KEY,
-    '_pd_persona',
-    ...attrAttrs.map((a) => a.key),
-    ...ftAttrs.map((a) => a.key),
-  ])
+  return [
+    { key: NEXUS_CID_KEY, value: cid },
+    ...attrAttrs,
+    ...ftAttrs,
+    ...(personaAttr ? [personaAttr] : []),
+  ]
+}
+
+function stampLines(lines: CartLineInput[]): CartLineInput[] {
+  const stamp = getLineAttributionStamp()
+  const stampKeys = new Set(stamp.map((a) => a.key))
 
   return lines.map((line) => ({
     ...line,
     attributes: [
       ...(line.attributes || []).filter((a) => !stampKeys.has(a.key)),
-      { key: NEXUS_CID_KEY, value: cid },
-      ...attrAttrs,
-      ...ftAttrs,
-      ...(personaAttr ? [personaAttr] : []),
+      ...stamp,
     ],
   }))
+}
+
+async function syncCartLineAttribution(client: StorefrontClient, cart: Cart): Promise<Cart> {
+  const stamp = getLineAttributionStamp()
+  if (stamp.length === 0) return cart
+
+  const stampKeys = new Set(stamp.map((s) => s.key))
+  const updates: CartLineUpdateInput[] = []
+
+  for (const line of cart.lines) {
+    const needsUpdate = stamp.some((s) => {
+      const cur = line.attributes?.find((a) => a.key === s.key)
+      return !cur || cur.value !== s.value
+    })
+    if (!needsUpdate) continue
+
+    updates.push({
+      id: line.id,
+      attributes: [
+        ...(line.attributes ?? []).filter((a) => !stampKeys.has(a.key)),
+        ...stamp,
+      ],
+    })
+  }
+
+  if (updates.length === 0) return cart
+  const updated = await sfUpdateCartLines(client, cart.id, updates)
+  return updated ?? cart
 }
 
 function setCookie(name: string, value: string, days: number): void {
@@ -511,27 +540,35 @@ export async function getCart(): Promise<Cart | null> {
   return cart
 }
 
+export function googleClickBundleChangedOnCart(
+  existing: Array<{ key: string; value: string }>,
+  fresh: Array<{ key: string; value: string }>
+): boolean {
+  const existingMap = new Map(existing.filter((a) => a.key).map((a) => [a.key, a.value]))
+  for (const key of ['_pd_gclid', '_pd_gbraid', '_pd_wbraid'] as const) {
+    const freshVal = fresh.find((a) => a.key === key)?.value
+    if (!freshVal) continue
+    if (freshVal !== existingMap.get(key)) return true
+  }
+  return false
+}
+
 /**
  * Merge freshly-read attribution over a cart's existing cart-level attributes.
  *
- * Existing values win for most attribution keys so a second add-to-cart after
- * the UTM session window does not erase gclid already on the cart. Google click
- * IDs (and their capture timestamps) are the exception: the freshest read wins
- * so a newer ad click stamps over an older one.
+ * Existing values win for most keys so a second add-to-cart after the UTM
+ * session window does not erase a gclid already on the cart. Google click IDs
+ * always take the fresh read; when that bundle changes, matching UTMs/landing
+ * context move with it so we never pair a new click id with an old campaign.
  */
-function mergeCartAttributes(
+export function mergeCartAttributes(
   existing: Array<{ key: string; value: string }>,
   fresh: Array<{ key: string; value: string }>
 ): Array<{ key: string; value: string }> {
   const REFRESHABLE = new Set(['_pd_user_id', '_pd_session_id'])
-  const FRESH_WINS = new Set([
-    '_pd_gclid',
-    '_pd_gbraid',
-    '_pd_wbraid',
-    '_pd_gclid_ts',
-    '_pd_gbraid_ts',
-    '_pd_wbraid_ts',
-  ])
+  const FRESH_WINS = new Set<string>(GOOGLE_CLICK_ATTR_KEYS)
+  const PAIRED_WINS = new Set<string>(CLICK_PAIRED_CART_KEYS)
+  const clickBundleChanged = googleClickBundleChangedOnCart(existing, fresh)
 
   const merged = new Map<string, string>()
   for (const a of existing) {
@@ -543,9 +580,34 @@ function mergeCartAttributes(
       merged.set(a.key, a.value)
       continue
     }
+    if (clickBundleChanged && PAIRED_WINS.has(a.key)) {
+      merged.set(a.key, a.value)
+      continue
+    }
     if (!merged.has(a.key) || REFRESHABLE.has(a.key)) merged.set(a.key, a.value)
   }
   return Array.from(merged, ([key, value]) => ({ key, value }))
+}
+
+export async function retryTwice<T>(fn: () => Promise<T>): Promise<T> {
+  let lastErr: unknown
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      return await fn()
+    } catch (err) {
+      lastErr = err
+    }
+  }
+  const err = lastErr instanceof Error ? lastErr : new Error(String(lastErr))
+  throw err
+}
+
+export async function updateCartAttributesWithRetry(
+  client: StorefrontClient,
+  cartId: string,
+  attributes: Array<{ key: string; value: string }>
+): Promise<Cart> {
+  return retryTwice(() => sfUpdateCartAttributes(client, cartId, attributes))
 }
 
 /**
@@ -575,32 +637,37 @@ export async function addToCart(lines: CartLineInput[]): Promise<Cart> {
     // Try adding to existing cart
     try {
       cart = await sfAddToCart(client, cartId, stamped)
+      const preMergeAttrs = cart.attributes ?? []
 
       // cartLinesAdd preserves existing cart attributes but never sets them.
       // Reconcile so identity/attribution reaches checkout on repeat adds too.
-      const merged = mergeCartAttributes(cart.attributes ?? [], cartAttrs)
+      const merged = mergeCartAttributes(preMergeAttrs, cartAttrs)
       const changed =
         merged.length !== (cart.attributes?.length ?? 0) ||
         merged.some((m) => !cart.attributes?.some((e) => e.key === m.key && e.value === m.value))
 
       if (changed && merged.length > 0) {
-        let attrErr: unknown
-        for (let attempt = 0; attempt < 2; attempt++) {
-          try {
-            cart = await sfUpdateCartAttributes(client, cart.id, merged)
-            attrErr = undefined
-            break
-          } catch (err) {
-            attrErr = err
-          }
-        }
-        if (attrErr) {
-          // Attribution is best-effort — never fail an add-to-cart over it.
+        try {
+          cart = await updateCartAttributesWithRetry(client, cart.id, merged)
+        } catch (attrErr) {
           const err =
             attrErr instanceof Error ? attrErr : new Error(String(attrErr))
           console.error('[cart] cart attribute sync failed after retry:', err)
           captureCartException(err, {
             stage: 'cart-attributes-sync',
+            cartId: cart.id,
+          })
+        }
+      }
+
+      if (googleClickBundleChangedOnCart(preMergeAttrs, cartAttrs)) {
+        try {
+          cart = await syncCartLineAttribution(client, cart)
+        } catch (lineErr) {
+          const err = lineErr instanceof Error ? lineErr : new Error(String(lineErr))
+          console.error('[cart] cart line attribution restamp failed:', err)
+          captureCartException(err, {
+            stage: 'cart-line-attribution-sync',
             cartId: cart.id,
           })
         }

@@ -5,6 +5,9 @@ import {
   filterLastTouchAttribution,
   getAttributionAttrs,
   getFirstTouchAttrs,
+  googleClickBundleChangedOnCart,
+  mergeCartAttributes,
+  retryTwice,
 } from './cart'
 
 const priorWindow = Object.getOwnPropertyDescriptor(globalThis, 'window')
@@ -65,6 +68,84 @@ function clickIds(attrs: Array<{ key: string; value: string }>, prefix: string) 
       attr.key === `${prefix}wbraid`
   )
 }
+
+test('mergeCartAttributes pairs fresh UTMs when the Google click bundle changes', () => {
+  const merged = mergeCartAttributes(
+    [
+      { key: '_pd_gclid', value: 'OLD' },
+      { key: '_pd_utm_campaign', value: 'old-campaign' },
+      { key: '_pd_landing_page', value: '/old' },
+    ],
+    [
+      { key: '_pd_gclid', value: 'NEW' },
+      { key: '_pd_gclid_ts', value: '2000' },
+      { key: '_pd_utm_campaign', value: 'new-campaign' },
+      { key: '_pd_landing_page', value: '/new' },
+    ]
+  )
+  const map = new Map(merged.map((a) => [a.key, a.value]))
+  assert.equal(map.get('_pd_gclid'), 'NEW')
+  assert.equal(map.get('_pd_utm_campaign'), 'new-campaign')
+  assert.equal(map.get('_pd_landing_page'), '/new')
+})
+
+test('mergeCartAttributes keeps stale UTMs when the Google click bundle is unchanged', () => {
+  const merged = mergeCartAttributes(
+    [
+      { key: '_pd_gclid', value: 'SAME' },
+      { key: '_pd_utm_campaign', value: 'stale-campaign' },
+    ],
+    [
+      { key: '_pd_gclid', value: 'SAME' },
+      { key: '_pd_gclid_ts', value: '2000' },
+      { key: '_pd_utm_campaign', value: 'new-campaign' },
+    ]
+  )
+  const map = new Map(merged.map((a) => [a.key, a.value]))
+  assert.equal(map.get('_pd_gclid_ts'), '2000')
+  assert.equal(map.get('_pd_utm_campaign'), 'stale-campaign')
+})
+
+test('googleClickBundleChangedOnCart detects value changes', () => {
+  assert.equal(
+    googleClickBundleChangedOnCart(
+      [{ key: '_pd_gclid', value: 'A' }],
+      [{ key: '_pd_gclid', value: 'B' }]
+    ),
+    true
+  )
+  assert.equal(
+    googleClickBundleChangedOnCart(
+      [{ key: '_pd_gclid', value: 'A' }],
+      [{ key: '_pd_gclid', value: 'A' }]
+    ),
+    false
+  )
+})
+
+test('retryTwice succeeds on second attempt', async () => {
+  let calls = 0
+  const value = await retryTwice(async () => {
+    calls += 1
+    if (calls < 2) throw new Error('transient')
+    return 'ok'
+  })
+  assert.equal(value, 'ok')
+  assert.equal(calls, 2)
+})
+
+test('retryTwice throws after two failures', async () => {
+  let calls = 0
+  await assert.rejects(
+    () =>
+      retryTwice(async () => {
+        calls += 1
+        throw new Error('fail')
+      }),
+    /fail/
+  )
+  assert.equal(calls, 2)
+})
 
 test('filterLastTouchAttribution drops UTMs after session gap but keeps Google click IDs for 90 days', () => {
   const now = Date.now()
