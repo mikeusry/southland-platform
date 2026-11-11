@@ -9,7 +9,23 @@ export const GOOGLE_CLICK_MS = 90 * 24 * 60 * 60 * 1000
 export const GOOGLE_CLICK_PARAMS = ['gclid', 'gbraid', 'wbraid'] as const
 export type GoogleClickParam = (typeof GOOGLE_CLICK_PARAMS)[number]
 
+export const UTM_FIELD_KEYS = [
+  'utm_source',
+  'utm_medium',
+  'utm_campaign',
+  'utm_content',
+  'utm_term',
+] as const
+
 export type AttributionBag = Record<string, string>
+
+export type PaidClickNetwork = 'google' | 'meta' | 'microsoft' | 'tiktok' | 'chatgpt'
+
+export function isChatGptUtmSource(source: string | undefined): boolean {
+  if (!source) return false
+  const s = source.toLowerCase()
+  return s === 'chatgpt' || s === 'chatgpt.com' || s.includes('chatgpt')
+}
 
 /** Epoch ms used to decide whether a Google click id is still within the 90-day window. */
 export function googleClickEpochMs(
@@ -23,26 +39,45 @@ export function googleClickEpochMs(
   return sessionTs
 }
 
+/** Drop Google click ids older than 90 days (active session or not). */
+export function expireGoogleClicksPast90Days(
+  bag: AttributionBag,
+  now = Date.now()
+): AttributionBag {
+  const out: AttributionBag = { ...bag }
+  const sessionTs = Number(out._timestamp) || 0
+  for (const key of GOOGLE_CLICK_PARAMS) {
+    if (!out[key]) continue
+    const clickTs = googleClickEpochMs(out, key, sessionTs)
+    if (!(clickTs > 0 && now - clickTs <= GOOGLE_CLICK_MS)) {
+      delete out[key]
+      delete out[`${key}_ts`]
+    }
+  }
+  return out
+}
+
 /**
- * After a 30-minute UTM session gap, keep only Google click ids still inside 90 days.
- * Legacy rows without per-click *_ts use _timestamp as first-seen fallback.
+ * Normalize stored last-touch before merge: enforce 90-day expiry, then apply
+ * the 30-minute UTM session strip when needed.
  */
-export function retainGoogleClicksAfterSession(
+export function normalizeStoredLastTouch(
   store: AttributionBag,
   now = Date.now()
 ): AttributionBag {
-  const lastTs = Number(store._timestamp) || 0
+  let bag = expireGoogleClicksPast90Days(store, now)
+  const lastTs = Number(bag._timestamp) || 0
   if (!(lastTs > 0 && now - lastTs > ATTRIBUTION_SESSION_MS)) {
-    return { ...store }
+    return bag
   }
 
   const kept: AttributionBag = {}
   for (const key of GOOGLE_CLICK_PARAMS) {
-    if (!store[key]) continue
-    const clickTs = googleClickEpochMs(store, key, lastTs)
+    if (!bag[key]) continue
+    const clickTs = googleClickEpochMs(bag, key, lastTs)
     if (clickTs > 0 && now - clickTs <= GOOGLE_CLICK_MS) {
-      kept[key] = store[key]
-      const storedTs = store[`${key}_ts`]
+      kept[key] = bag[key]
+      const storedTs = bag[`${key}_ts`]
       kept[`${key}_ts`] = storedTs ? String(storedTs) : String(clickTs)
     }
   }
@@ -82,6 +117,48 @@ export function activeGoogleClickKey(bag: AttributionBag): GoogleClickParam | nu
   return null
 }
 
+export function incomingPaidNetwork(incoming: AttributionBag): PaidClickNetwork | null {
+  if (activeGoogleClickKey(incoming)) return 'google'
+  if (incoming.fbclid) return 'meta'
+  if (incoming.msclid) return 'microsoft'
+  if (incoming.ttclid) return 'tiktok'
+  if (incoming.oppref) return 'chatgpt'
+  return null
+}
+
+const NETWORK_FIELD_KEYS: Record<PaidClickNetwork, string[]> = {
+  google: [
+    ...GOOGLE_CLICK_PARAMS,
+    'gclid_ts',
+    'gbraid_ts',
+    'wbraid_ts',
+    'srsltid',
+  ],
+  meta: ['fbclid', 'fbc'],
+  microsoft: ['msclid'],
+  tiktok: ['ttclid'],
+  chatgpt: ['oppref'],
+}
+
+/** When a new paid network click lands, remove stale ids from other networks. */
+export function pruneLosingPaidNetworks(
+  merged: AttributionBag,
+  incoming: AttributionBag
+): void {
+  const winner = incomingPaidNetwork(incoming)
+  if (!winner) return
+
+  for (const network of Object.keys(NETWORK_FIELD_KEYS) as PaidClickNetwork[]) {
+    if (network === winner) continue
+    for (const field of NETWORK_FIELD_KEYS[network]) {
+      delete merged[field]
+    }
+  }
+
+  const active = activeGoogleClickKey(incoming)
+  if (active) pruneToSingleGoogleClick(merged, active)
+}
+
 /** Google sends one click id type per ad click — drop the other types. */
 export function pruneToSingleGoogleClick(
   bag: AttributionBag,
@@ -96,7 +173,7 @@ export function pruneToSingleGoogleClick(
 
 /**
  * Merge a new landing capture into stored last-touch. Prunes conflicting Google ids
- * when this pageview carried a Google click param.
+ * and other paid networks when this pageview carried a new click.
  */
 export function mergeLastTouchCapture(
   stored: AttributionBag,
@@ -111,39 +188,105 @@ export function mergeLastTouchCapture(
     if (v) merged[k] = v
   }
 
-  const active = activeGoogleClickKey(incoming)
-  if (active) pruneToSingleGoogleClick(merged, active)
+  pruneLosingPaidNetworks(merged, incoming)
 
   merged._timestamp = String(now)
   merged._landing_page = meta.landingPage
   merged._referrer = meta.referrer
-  return merged
+
+  return expireGoogleClicksPast90Days(merged, now)
 }
 
 /**
  * Apply the 30-minute UTM session rule while keeping Google click IDs for up to 90 days.
+ * Google ids past 90 days drop even inside an active session.
  */
 export function filterLastTouchAttribution(
   data: AttributionBag,
   now = Date.now()
 ): AttributionBag | null {
-  const ts = Number(data._timestamp) || 0
+  const bag = expireGoogleClicksPast90Days(data, now)
+  const ts = Number(bag._timestamp) || 0
   const sessionExpired = ts > 0 && now - ts > ATTRIBUTION_SESSION_MS
 
   if (!sessionExpired) {
-    return { ...data }
+    return Object.keys(bag).length > 0 ? bag : null
   }
 
   const retained: AttributionBag = {}
   for (const key of GOOGLE_CLICK_PARAMS) {
-    if (!data[key]) continue
-    const clickTs = googleClickEpochMs(data, key, ts)
+    if (!bag[key]) continue
+    const clickTs = googleClickEpochMs(bag, key, ts)
     if (clickTs > 0 && now - clickTs <= GOOGLE_CLICK_MS) {
-      retained[key] = data[key]
-      const storedTs = data[`${key}_ts`]
+      retained[key] = bag[key]
+      const storedTs = bag[`${key}_ts`]
       retained[`${key}_ts`] = storedTs ? String(storedTs) : String(clickTs)
     }
   }
 
   return Object.keys(retained).length > 0 ? retained : null
+}
+
+/** Cart/local snapshot of the active Google click (type + value). */
+export function googleClickSnapshotFromPairs(
+  attrs: Array<{ key: string; value: string }>,
+  prefix = '_pd_'
+): string | null {
+  for (const key of GOOGLE_CLICK_PARAMS) {
+    const attrKey = `${prefix}${key}`
+    const value = attrs.find((a) => a.key === attrKey)?.value
+    if (value) return `${attrKey}=${value}`
+  }
+  return null
+}
+
+export function winningPaidNetworkFromCartAttrs(
+  attrs: Array<{ key: string; value: string }>
+): PaidClickNetwork | null {
+  const map = new Map(attrs.filter((a) => a.key).map((a) => [a.key, a.value]))
+  if (map.get('_pd_gclid') || map.get('_pd_gbraid') || map.get('_pd_wbraid')) return 'google'
+  if (map.get('_pd_fbclid')) return 'meta'
+  if (map.get('_pd_msclid')) return 'microsoft'
+  if (map.get('_pd_ttclid')) return 'tiktok'
+  if (map.get('_pd_oppref')) return 'chatgpt'
+  return null
+}
+
+export const CART_LAST_TOUCH_CLEAR_ON_IDENTITY_CHANGE = [
+  '_pd_gclid',
+  '_pd_gbraid',
+  '_pd_wbraid',
+  '_pd_gclid_ts',
+  '_pd_gbraid_ts',
+  '_pd_wbraid_ts',
+  '_pd_utm_source',
+  '_pd_utm_medium',
+  '_pd_utm_campaign',
+  '_pd_utm_content',
+  '_pd_utm_term',
+  '_pd_srsltid',
+  '_pd_landing_page',
+  '_pd_referrer',
+  '_pd_fbclid',
+  '_pd_fbc',
+  '_pd_msclid',
+  '_pd_ttclid',
+  '_pd_oppref',
+] as const
+
+export function lastTouchIdentityChangedOnCart(
+  existing: Array<{ key: string; value: string }>,
+  fresh: Array<{ key: string; value: string }>
+): boolean {
+  const freshGoogle = googleClickSnapshotFromPairs(fresh)
+  if (!freshGoogle && !winningPaidNetworkFromCartAttrs(fresh)) return false
+
+  const existingGoogle = googleClickSnapshotFromPairs(existing)
+  if (freshGoogle && freshGoogle !== existingGoogle) return true
+
+  const ew = winningPaidNetworkFromCartAttrs(existing)
+  const fw = winningPaidNetworkFromCartAttrs(fresh)
+  if (fw && ew !== fw) return true
+
+  return false
 }

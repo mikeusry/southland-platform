@@ -27,16 +27,22 @@ import type {
 } from '@southland/shopify-storefront'
 import {
   ATTRIBUTION_SESSION_MS,
+  CART_LAST_TOUCH_CLEAR_ON_IDENTITY_CHANGE,
   filterLastTouchAttribution,
   GOOGLE_CLICK_MS,
   GOOGLE_CLICK_PARAMS,
+  googleClickSnapshotFromPairs,
+  lastTouchIdentityChangedOnCart,
 } from './attribution-storage'
 
 export {
   ATTRIBUTION_SESSION_MS,
+  CART_LAST_TOUCH_CLEAR_ON_IDENTITY_CHANGE,
   filterLastTouchAttribution,
   GOOGLE_CLICK_MS,
   GOOGLE_CLICK_PARAMS,
+  googleClickSnapshotFromPairs,
+  lastTouchIdentityChangedOnCart,
 } from './attribution-storage'
 
 // Re-export for convenience
@@ -245,7 +251,17 @@ export function getAttributionAttrs(): Array<{ key: string; value: string }> {
     // Enforce the 30-minute UTM session at read time (visitors with no new params
     // never hit BaseLayout's write path). Google click IDs survive up to 90 days.
     const filtered = filterLastTouchAttribution(data)
-    if (!filtered) return []
+    if (!filtered) {
+      localStorage.removeItem(PD_ATTRIBUTION_KEY)
+      return []
+    }
+    try {
+      if (JSON.stringify(filtered) !== raw) {
+        localStorage.setItem(PD_ATTRIBUTION_KEY, JSON.stringify(filtered))
+      }
+    } catch {
+      /* private mode */
+    }
     const attrs: Array<{ key: string; value: string }> = []
     for (const param of LAST_TOUCH_ATTR_PARAMS) {
       if (filtered[param]) {
@@ -544,13 +560,9 @@ export function googleClickBundleChangedOnCart(
   existing: Array<{ key: string; value: string }>,
   fresh: Array<{ key: string; value: string }>
 ): boolean {
-  const existingMap = new Map(existing.filter((a) => a.key).map((a) => [a.key, a.value]))
-  for (const key of ['_pd_gclid', '_pd_gbraid', '_pd_wbraid'] as const) {
-    const freshVal = fresh.find((a) => a.key === key)?.value
-    if (!freshVal) continue
-    if (freshVal !== existingMap.get(key)) return true
-  }
-  return false
+  const freshSnap = googleClickSnapshotFromPairs(fresh)
+  if (!freshSnap) return false
+  return freshSnap !== googleClickSnapshotFromPairs(existing)
 }
 
 /**
@@ -568,19 +580,33 @@ export function mergeCartAttributes(
   const REFRESHABLE = new Set(['_pd_user_id', '_pd_session_id'])
   const FRESH_WINS = new Set<string>(GOOGLE_CLICK_ATTR_KEYS)
   const PAIRED_WINS = new Set<string>(CLICK_PAIRED_CART_KEYS)
-  const clickBundleChanged = googleClickBundleChangedOnCart(existing, fresh)
+  const identityChanged = lastTouchIdentityChangedOnCart(existing, fresh)
 
   const merged = new Map<string, string>()
   for (const a of existing) {
     if (a.key && a.value) merged.set(a.key, a.value)
   }
+
+  if (identityChanged) {
+    for (const key of CART_LAST_TOUCH_CLEAR_ON_IDENTITY_CHANGE) {
+      merged.delete(key)
+    }
+  }
+
   for (const a of fresh) {
     if (!a.key || !a.value) continue
     if (FRESH_WINS.has(a.key)) {
       merged.set(a.key, a.value)
       continue
     }
-    if (clickBundleChanged && PAIRED_WINS.has(a.key)) {
+    if (identityChanged && PAIRED_WINS.has(a.key)) {
+      merged.set(a.key, a.value)
+      continue
+    }
+    if (
+      identityChanged &&
+      (CART_LAST_TOUCH_CLEAR_ON_IDENTITY_CHANGE as readonly string[]).includes(a.key)
+    ) {
       merged.set(a.key, a.value)
       continue
     }
@@ -660,7 +686,7 @@ export async function addToCart(lines: CartLineInput[]): Promise<Cart> {
         }
       }
 
-      if (googleClickBundleChangedOnCart(preMergeAttrs, cartAttrs)) {
+      if (lastTouchIdentityChangedOnCart(preMergeAttrs, cartAttrs)) {
         try {
           cart = await syncCartLineAttribution(client, cart)
         } catch (lineErr) {

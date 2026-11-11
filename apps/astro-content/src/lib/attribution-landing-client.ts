@@ -5,8 +5,9 @@ import {
   activeGoogleClickKey,
   applyGoogleClickFirstSeen,
   mergeLastTouchCapture,
+  isChatGptUtmSource,
+  normalizeStoredLastTouch,
   pruneToSingleGoogleClick,
-  retainGoogleClicksAfterSession,
 } from './attribution-storage'
 
 const LAST_TOUCH_KEY = '_pd_attribution'
@@ -57,24 +58,26 @@ function parseJsonStore(key: string): Record<string, string> {
 
 function enrichPaidShoppingRules(found: Record<string, string>): void {
   const otherPaid = found.fbclid || found.msclid || found.ttclid || found.oppref
+  const chatGptSource = isChatGptUtmSource(found.utm_source)
+
   if (found.srsltid && !found.gclid && !otherPaid) {
     found.utm_source = 'google'
     found.utm_medium = 'shopping_unattributed'
     found.utm_campaign = 'shopping-unattributed'
-  } else if (found.srsltid && found.gclid) {
+  } else if (found.srsltid && found.gclid && !chatGptSource) {
     found.utm_source = found.utm_source || 'google'
     found.utm_medium = found.utm_medium || 'cpc'
   }
-  if (found.gclid && !found.utm_source) {
+  if (found.gclid && !found.utm_source && !chatGptSource) {
     found.utm_source = 'google'
     found.utm_medium = found.utm_medium || 'cpc'
   }
-  if (found.fbclid && !found.utm_source) {
+  if (found.fbclid && !found.utm_source && !chatGptSource) {
     found.utm_source = 'facebook'
     found.utm_medium = found.utm_medium || 'paid_social'
   }
   if (found.oppref && !found.utm_source) {
-    found.utm_source = 'chatgpt'
+    found.utm_source = found.utm_source || 'chatgpt'
     found.utm_medium = found.utm_medium || 'ppc'
   }
 }
@@ -119,8 +122,8 @@ function captureLastTouch(): void {
       const cur = parseJsonStore(LAST_TOUCH_KEY)
       if (cur.oppref) return
       cur.oppref = laterOpp
-      if (!cur.utm_source) {
-        cur.utm_source = 'chatgpt'
+      if (!cur.utm_source || isChatGptUtmSource(cur.utm_source)) {
+        if (!isChatGptUtmSource(cur.utm_source)) cur.utm_source = 'chatgpt'
         cur.utm_medium = cur.utm_medium || 'ppc'
       }
       cur._timestamp = String(Date.now())
@@ -145,7 +148,7 @@ function captureLastTouch(): void {
       }
     }, 1500)
 
-    let stored = retainGoogleClicksAfterSession(parseJsonStore(LAST_TOUCH_KEY))
+    const stored = normalizeStoredLastTouch(parseJsonStore(LAST_TOUCH_KEY))
 
     if (hasNew) {
       const merged = mergeLastTouchCapture(stored, found, {

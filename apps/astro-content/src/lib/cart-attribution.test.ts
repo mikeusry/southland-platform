@@ -69,6 +69,28 @@ function clickIds(attrs: Array<{ key: string; value: string }>, prefix: string) 
   )
 }
 
+test('mergeCartAttributes clears stale gclid when winning click type is gbraid', () => {
+  const merged = mergeCartAttributes(
+    [
+      { key: '_pd_gclid', value: 'OLD-G' },
+      { key: '_pd_gclid_ts', value: '100' },
+      { key: '_pd_utm_campaign', value: 'old-campaign' },
+      { key: '_pd_utm_source', value: 'google' },
+    ],
+    [
+      { key: '_pd_gbraid', value: 'NEW-B' },
+      { key: '_pd_gbraid_ts', value: '2000' },
+      { key: '_pd_utm_campaign', value: 'new-campaign' },
+      { key: '_pd_utm_source', value: 'google' },
+    ]
+  )
+  const map = new Map(merged.map((a) => [a.key, a.value]))
+  assert.equal(map.get('_pd_gclid'), undefined)
+  assert.equal(map.get('_pd_gclid_ts'), undefined)
+  assert.equal(map.get('_pd_gbraid'), 'NEW-B')
+  assert.equal(map.get('_pd_utm_campaign'), 'new-campaign')
+})
+
 test('mergeCartAttributes pairs fresh UTMs when the Google click bundle changes', () => {
   const merged = mergeCartAttributes(
     [
@@ -106,11 +128,18 @@ test('mergeCartAttributes keeps stale UTMs when the Google click bundle is uncha
   assert.equal(map.get('_pd_utm_campaign'), 'stale-campaign')
 })
 
-test('googleClickBundleChangedOnCart detects value changes', () => {
+test('googleClickBundleChangedOnCart detects value and type changes', () => {
   assert.equal(
     googleClickBundleChangedOnCart(
       [{ key: '_pd_gclid', value: 'A' }],
       [{ key: '_pd_gclid', value: 'B' }]
+    ),
+    true
+  )
+  assert.equal(
+    googleClickBundleChangedOnCart(
+      [{ key: '_pd_gclid', value: 'A' }],
+      [{ key: '_pd_gbraid', value: 'B' }]
     ),
     true
   )
@@ -248,7 +277,7 @@ test('last-touch attrs stamp Meta _fbc when stored on landing capture', () => {
 
 test('last-touch attrs stamp Google click capture timestamps for gclid, gbraid, and wbraid', () => {
   installStorage()
-  const ts = 1_700_000_000_000
+  const ts = Date.now()
   localStorage.setItem(
     '_pd_attribution',
     JSON.stringify({
@@ -258,7 +287,7 @@ test('last-touch attrs stamp Google click capture timestamps for gclid, gbraid, 
       gclid_ts: ts,
       gbraid_ts: ts,
       wbraid_ts: ts,
-      _timestamp: Date.now(),
+      _timestamp: ts,
     })
   )
 

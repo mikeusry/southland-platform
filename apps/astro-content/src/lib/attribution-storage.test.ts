@@ -3,10 +3,14 @@ import { test } from 'node:test'
 import {
   ATTRIBUTION_SESSION_MS,
   applyGoogleClickFirstSeen,
+  expireGoogleClicksPast90Days,
   filterLastTouchAttribution,
+  GOOGLE_CLICK_MS,
+  isChatGptUtmSource,
   mergeLastTouchCapture,
+  normalizeStoredLastTouch,
+  pruneLosingPaidNetworks,
   pruneToSingleGoogleClick,
-  retainGoogleClicksAfterSession,
 } from './attribution-storage'
 
 test('applyGoogleClickFirstSeen preserves ts on reload of the same gclid', () => {
@@ -30,7 +34,7 @@ test('applyGoogleClickFirstSeen uses session _timestamp for legacy rows without 
   assert.equal(incoming.gclid_ts, '5000')
 })
 
-test('retainGoogleClicksAfterSession keeps gclid without per-click ts using _timestamp', () => {
+test('normalizeStoredLastTouch keeps gclid without per-click ts using _timestamp', () => {
   const now = 2_000_000_000_000
   const sessionTs = now - ATTRIBUTION_SESSION_MS - 60_000
   const store = {
@@ -38,11 +42,26 @@ test('retainGoogleClicksAfterSession keeps gclid without per-click ts using _tim
     utm_campaign: 'old',
     _timestamp: String(sessionTs),
   }
-  const kept = retainGoogleClicksAfterSession(store, now)
+  const kept = normalizeStoredLastTouch(store, now)
   assert.deepEqual(kept, {
     gclid: 'G',
     gclid_ts: String(sessionTs),
   })
+})
+
+test('expireGoogleClicksPast90Days drops aged ids inside an active session', () => {
+  const now = 2_000_000_000_000
+  const expired = expireGoogleClicksPast90Days(
+    {
+      gclid: 'OLD',
+      gclid_ts: String(now - GOOGLE_CLICK_MS - 1),
+      utm_campaign: 'still-here',
+      _timestamp: String(now - 60_000),
+    },
+    now
+  )
+  assert.equal(expired.gclid, undefined)
+  assert.equal(expired.utm_campaign, 'still-here')
 })
 
 test('filterLastTouchAttribution keeps legacy gclid after UTM session expires', () => {
@@ -73,6 +92,42 @@ test('mergeLastTouchCapture prunes other Google click types when gclid lands', (
   assert.equal(merged.gclid_ts, '2000')
   assert.equal(merged.gbraid, undefined)
   assert.equal(merged.gbraid_ts, undefined)
+})
+
+test('pruneLosingPaidNetworks clears Google when Meta fbclid lands', () => {
+  const merged = {
+    gclid: 'G',
+    gclid_ts: '1',
+    utm_source: 'google',
+    utm_campaign: 'old-campaign',
+    fbclid: 'stale',
+  }
+  pruneLosingPaidNetworks(merged, { fbclid: 'NEW' })
+  assert.equal(merged.gclid, undefined)
+  assert.equal(merged.gclid_ts, undefined)
+  assert.equal(merged.fbclid, 'stale')
+})
+
+test('mergeLastTouchCapture clears Google when fbclid is the new touch', () => {
+  const stored = {
+    gclid: 'G',
+    gclid_ts: '1',
+    utm_source: 'google',
+    utm_campaign: 'google-campaign',
+  }
+  const merged = mergeLastTouchCapture(
+    stored,
+    { fbclid: 'META', utm_source: 'facebook', utm_medium: 'paid_social' },
+    { landingPage: '/l', referrer: '', now: 3_000 }
+  )
+  assert.equal(merged.gclid, undefined)
+  assert.equal(merged.fbclid, 'META')
+  assert.equal(merged.utm_source, 'facebook')
+})
+
+test('isChatGptUtmSource recognizes chatgpt.com', () => {
+  assert.equal(isChatGptUtmSource('chatgpt.com'), true)
+  assert.equal(isChatGptUtmSource('google'), false)
 })
 
 test('pruneToSingleGoogleClick removes inactive click types', () => {
