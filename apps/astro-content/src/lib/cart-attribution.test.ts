@@ -360,3 +360,81 @@ test('last-touch attrs stamp Google click capture timestamp for the active click
     [{ key: '_pd_gclid_ts', value: String(ts) }]
   )
 })
+
+const JUNK_UTM_CAMPAIGN = 'Catalyst - PMax (Feed-Only)'
+const SLUG_UTM_CAMPAIGN = 'bb-backyard-betty-pmax'
+const NON_GOOGLE_UTM_CAMPAIGN = 'Welcome Series, Email #1 (YfNzYt)'
+
+const CLICK_VALUES = {
+  gclid: 'G',
+  gbraid: 'B',
+  wbraid: 'W',
+} as const
+
+type GoogleClickId = keyof typeof CLICK_VALUES
+
+function campaignValue(
+  attrs: Array<{ key: string; value: string }>,
+  key: string
+): string | undefined {
+  return attrs.find((attr) => attr.key === key)?.value
+}
+
+function storeTouch(
+  storageKey: '_pd_attribution' | '_pd_first_touch',
+  click: GoogleClickId | null,
+  campaign: string
+): void {
+  const now = Date.now()
+  const bag: Record<string, string | number> = {
+    utm_source: click ? 'google' : 'klaviyo',
+    utm_campaign: campaign,
+    _timestamp: now,
+  }
+  if (click) {
+    bag[click] = CLICK_VALUES[click]
+    bag[`${click}_ts`] = now
+  }
+  localStorage.setItem(storageKey, JSON.stringify(bag))
+}
+
+function assertJunkDroppedForGoogleClick(touch: 'last' | 'first', click: GoogleClickId): void {
+  installStorage()
+  const storageKey = touch === 'last' ? '_pd_attribution' : '_pd_first_touch'
+  const read = touch === 'last' ? getAttributionAttrs : getFirstTouchAttrs
+  const prefix = touch === 'last' ? '_pd_' : '_pd_ft_'
+  const campaignKey = `${prefix}utm_campaign`
+  const clickKey = `${prefix}${click}`
+
+  storeTouch(storageKey, click, JUNK_UTM_CAMPAIGN)
+  const junkAttrs = read()
+  assert.equal(junkAttrs.find((attr) => attr.key === clickKey)?.value, CLICK_VALUES[click])
+  assert.equal(
+    campaignValue(junkAttrs, campaignKey),
+    undefined,
+    `${touch}-touch ${click} kept junk utm_campaign`
+  )
+
+  storeTouch(storageKey, click, SLUG_UTM_CAMPAIGN)
+  assert.equal(campaignValue(read(), campaignKey), SLUG_UTM_CAMPAIGN)
+}
+
+for (const click of ['gclid', 'gbraid', 'wbraid'] as const) {
+  test(`last-touch drops a junk utm_campaign for a ${click}-only Google click and keeps a slug`, () => {
+    assertJunkDroppedForGoogleClick('last', click)
+  })
+  test(`first-touch drops a junk utm_campaign for a ${click}-only Google click and keeps a slug`, () => {
+    assertJunkDroppedForGoogleClick('first', click)
+  })
+}
+
+test('utm_campaign stays untouched when no Google click id is present', () => {
+  installStorage()
+  storeTouch('_pd_attribution', null, NON_GOOGLE_UTM_CAMPAIGN)
+  assert.equal(campaignValue(getAttributionAttrs(), '_pd_utm_campaign'), NON_GOOGLE_UTM_CAMPAIGN)
+  assert.equal(clickIds(getAttributionAttrs(), '_pd_').length, 0)
+
+  storeTouch('_pd_first_touch', null, NON_GOOGLE_UTM_CAMPAIGN)
+  assert.equal(campaignValue(getFirstTouchAttrs(), '_pd_ft_utm_campaign'), NON_GOOGLE_UTM_CAMPAIGN)
+  assert.equal(clickIds(getFirstTouchAttrs(), '_pd_ft_').length, 0)
+})
