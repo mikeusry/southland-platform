@@ -3,10 +3,12 @@
  */
 import {
   activeGoogleClickKey,
+  applyChatGptUtmIfNeeded,
   applyGoogleClickFirstSeen,
   mergeLastTouchCapture,
   isChatGptUtmSource,
   normalizeStoredLastTouch,
+  opprefCountsAsNewPaidTouch,
   pruneToSingleGoogleClick,
 } from './attribution-storage'
 
@@ -98,6 +100,9 @@ function captureLastTouch(): void {
 
     enrichPaidShoppingRules(found)
 
+    const urlOppref = url.searchParams.get('oppref') || undefined
+    const stored = normalizeStoredLastTouch(parseJsonStore(LAST_TOUCH_KEY))
+
     const fbp = readCookie('_fbp')
     if (fbp) {
       found.fbp = fbp
@@ -110,8 +115,16 @@ function captureLastTouch(): void {
     }
     if (!found.oppref) {
       const fromOai = readCookie('__oppref')
-      if (fromOai) {
+      if (
+        fromOai &&
+        opprefCountsAsNewPaidTouch(stored, fromOai, {
+          urlOppref,
+          utmSource: found.utm_source,
+          referrer: document.referrer || '',
+        })
+      ) {
         found.oppref = fromOai
+        applyChatGptUtmIfNeeded(found)
         hasNew = true
       }
     }
@@ -119,16 +132,26 @@ function captureLastTouch(): void {
     window.setTimeout(() => {
       const laterOpp = readCookie('__oppref')
       if (!laterOpp) return
-      const cur = parseJsonStore(LAST_TOUCH_KEY)
-      if (cur.oppref) return
-      cur.oppref = laterOpp
-      if (!cur.utm_source || isChatGptUtmSource(cur.utm_source)) {
-        if (!isChatGptUtmSource(cur.utm_source)) cur.utm_source = 'chatgpt'
-        cur.utm_medium = cur.utm_medium || 'ppc'
+      const curStored = normalizeStoredLastTouch(parseJsonStore(LAST_TOUCH_KEY))
+      if (curStored.oppref === laterOpp) return
+      if (
+        !opprefCountsAsNewPaidTouch(curStored, laterOpp, {
+          utmSource: curStored.utm_source,
+          referrer: document.referrer || '',
+        })
+      ) {
+        return
       }
-      cur._timestamp = String(Date.now())
+      const merged = mergeLastTouchCapture(
+        curStored,
+        { oppref: laterOpp },
+        {
+          landingPage: curStored._landing_page || window.location.pathname + window.location.search,
+          referrer: curStored._referrer || document.referrer || '',
+        }
+      )
       try {
-        localStorage.setItem(LAST_TOUCH_KEY, JSON.stringify(cur))
+        localStorage.setItem(LAST_TOUCH_KEY, JSON.stringify(merged))
       } catch {
         /* private mode */
       }
@@ -148,12 +171,11 @@ function captureLastTouch(): void {
       }
     }, 1500)
 
-    const stored = normalizeStoredLastTouch(parseJsonStore(LAST_TOUCH_KEY))
-
     if (hasNew) {
       const merged = mergeLastTouchCapture(stored, found, {
         landingPage: url.pathname + url.search,
         referrer: document.referrer || '',
+        urlOppref,
       })
       try {
         localStorage.setItem(LAST_TOUCH_KEY, JSON.stringify(merged))

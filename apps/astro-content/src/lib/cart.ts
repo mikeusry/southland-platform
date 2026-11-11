@@ -28,6 +28,7 @@ import type {
 import {
   ATTRIBUTION_SESSION_MS,
   CART_LAST_TOUCH_CLEAR_ON_IDENTITY_CHANGE,
+  coalesceLastTouchBag,
   filterLastTouchAttribution,
   GOOGLE_CLICK_MS,
   GOOGLE_CLICK_PARAMS,
@@ -255,22 +256,24 @@ export function getAttributionAttrs(): Array<{ key: string; value: string }> {
       localStorage.removeItem(PD_ATTRIBUTION_KEY)
       return []
     }
+    const coalesced = coalesceLastTouchBag(filtered)
     try {
-      if (JSON.stringify(filtered) !== raw) {
-        localStorage.setItem(PD_ATTRIBUTION_KEY, JSON.stringify(filtered))
+      const next = JSON.stringify(coalesced)
+      if (next !== raw) {
+        localStorage.setItem(PD_ATTRIBUTION_KEY, next)
       }
     } catch {
       /* private mode */
     }
     const attrs: Array<{ key: string; value: string }> = []
     for (const param of LAST_TOUCH_ATTR_PARAMS) {
-      if (filtered[param]) {
-        attrs.push({ key: `_pd_${param}`, value: String(filtered[param]) })
+      if (coalesced[param]) {
+        attrs.push({ key: `_pd_${param}`, value: String(coalesced[param]) })
       }
     }
-    if (filtered._landing_page)
-      attrs.push({ key: '_pd_landing_page', value: filtered._landing_page })
-    if (filtered._referrer) attrs.push({ key: '_pd_referrer', value: filtered._referrer })
+    if (coalesced._landing_page)
+      attrs.push({ key: '_pd_landing_page', value: coalesced._landing_page })
+    if (coalesced._referrer) attrs.push({ key: '_pd_referrer', value: coalesced._referrer })
     return withValidatedCampaign(attrs, '_pd_utm_campaign', '_pd_gclid')
   } catch {
     return []
@@ -448,26 +451,107 @@ function stampLines(lines: CartLineInput[]): CartLineInput[] {
   }))
 }
 
-async function syncCartLineAttribution(client: StorefrontClient, cart: Cart): Promise<Cart> {
+/** Re-stamp cart line properties and drop stale attribution keys on identity change. */
+export function restampCartLineAttributes(
+  existing: CartLineAttribute[],
+  stamp: CartLineAttribute[],
+  identityChanged: boolean
+): CartLineAttribute[] {
+  const stampKeys = new Set(stamp.map((s) => s.key))
+  const clearKeys = new Set<string>(CART_LAST_TOUCH_CLEAR_ON_IDENTITY_CHANGE)
+  const stampMap = new Map(stamp.map((s) => [s.key, s.value]))
+  const dropClearStale =
+    identityChanged ||
+    (existing ?? []).some((a) => a.key && clearKeys.has(a.key) && !stampMap.has(a.key))
+
+  return [
+    ...(existing ?? []).filter((a) => {
+      if (!a.key) return true
+      if (stampKeys.has(a.key)) return false
+      if (dropClearStale && clearKeys.has(a.key)) return false
+      return true
+    }),
+    ...stamp,
+  ]
+}
+
+function lineAttributionNeedsResync(
+  line: Cart['lines'][number],
+  stamp: CartLineAttribute[],
+  identityChanged: boolean
+): boolean {
+  const stampMap = new Map(stamp.map((s) => [s.key, s.value]))
+  const clearKeys = new Set<string>(CART_LAST_TOUCH_CLEAR_ON_IDENTITY_CHANGE)
+  for (const a of line.attributes ?? []) {
+    if (!a.key) continue
+    if (clearKeys.has(a.key) && !stampMap.has(a.key)) return true
+    const expected = stampMap.get(a.key)
+    if (expected !== undefined && a.value !== expected) return true
+  }
+  return identityChanged
+}
+
+function attributionBagFromPdAttrs(
+  attrs: Array<{ key: string; value: string }>
+): Record<string, string> {
+  const bag: Record<string, string> = {}
+  for (const a of attrs) {
+    if (!a.key?.startsWith('_pd_') || a.key.startsWith('_pd_ft_')) continue
+    const tail = a.key.slice(4)
+    if (tail === 'landing_page') bag._landing_page = a.value
+    else if (tail === 'referrer') bag._referrer = a.value
+    else if ((LAST_TOUCH_ATTR_PARAMS as readonly string[]).includes(tail)) {
+      bag[tail] = a.value
+    }
+  }
+  return bag
+}
+
+/** Align `_pd_attribution` localStorage with a cart merge after paid identity changes. */
+export function syncAttributionLocalStorageAfterIdentityChange(
+  mergedPdAttrs: Array<{ key: string; value: string }>
+): void {
+  if (typeof window === 'undefined') return
+  try {
+    const raw = localStorage.getItem(PD_ATTRIBUTION_KEY)
+    const prev = raw ? (JSON.parse(raw) as Record<string, string>) : {}
+    const fromCart = attributionBagFromPdAttrs(mergedPdAttrs)
+    const bag = { ...prev }
+    for (const key of CART_LAST_TOUCH_CLEAR_ON_IDENTITY_CHANGE) {
+      const tail = key.startsWith('_pd_') ? key.slice(4) : key
+      if (tail === 'landing_page') delete bag._landing_page
+      else if (tail === 'referrer') delete bag._referrer
+      else delete bag[tail]
+    }
+    Object.assign(bag, fromCart)
+    const filtered = filterLastTouchAttribution(bag)
+    if (!filtered) {
+      localStorage.removeItem(PD_ATTRIBUTION_KEY)
+      return
+    }
+    if (prev._timestamp) filtered._timestamp = prev._timestamp
+    localStorage.setItem(PD_ATTRIBUTION_KEY, JSON.stringify(coalesceLastTouchBag(filtered)))
+  } catch {
+    /* private mode */
+  }
+}
+
+async function syncCartLineAttribution(
+  client: StorefrontClient,
+  cart: Cart,
+  identityChanged: boolean
+): Promise<Cart> {
   const stamp = getLineAttributionStamp()
   if (stamp.length === 0) return cart
 
-  const stampKeys = new Set(stamp.map((s) => s.key))
   const updates: CartLineUpdateInput[] = []
 
   for (const line of cart.lines) {
-    const needsUpdate = stamp.some((s) => {
-      const cur = line.attributes?.find((a) => a.key === s.key)
-      return !cur || cur.value !== s.value
-    })
-    if (!needsUpdate) continue
+    if (!lineAttributionNeedsResync(line, stamp, identityChanged)) continue
 
     updates.push({
       id: line.id,
-      attributes: [
-        ...(line.attributes ?? []).filter((a) => !stampKeys.has(a.key)),
-        ...stamp,
-      ],
+      attributes: restampCartLineAttributes(line.attributes ?? [], stamp, identityChanged),
     })
   }
 
@@ -686,9 +770,13 @@ export async function addToCart(lines: CartLineInput[]): Promise<Cart> {
         }
       }
 
-      if (lastTouchIdentityChangedOnCart(preMergeAttrs, cartAttrs)) {
+      const identityChanged = lastTouchIdentityChangedOnCart(preMergeAttrs, cartAttrs)
+      if (identityChanged) {
+        syncAttributionLocalStorageAfterIdentityChange(
+          merged.filter((a) => a.key.startsWith('_pd_') && !a.key.startsWith('_pd_ft_'))
+        )
         try {
-          cart = await syncCartLineAttribution(client, cart)
+          cart = await syncCartLineAttribution(client, cart, true)
         } catch (lineErr) {
           const err = lineErr instanceof Error ? lineErr : new Error(String(lineErr))
           console.error('[cart] cart line attribution restamp failed:', err)

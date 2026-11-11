@@ -7,7 +7,9 @@ import {
   getFirstTouchAttrs,
   googleClickBundleChangedOnCart,
   mergeCartAttributes,
+  restampCartLineAttributes,
   retryTwice,
+  syncAttributionLocalStorageAfterIdentityChange,
 } from './cart'
 
 const priorWindow = Object.getOwnPropertyDescriptor(globalThis, 'window')
@@ -207,26 +209,23 @@ test('getAttributionAttrs returns Google click IDs when UTM session expired with
   assert.ok(!getAttributionAttrs().some((a) => a.key === '_pd_utm_campaign'))
 })
 
-test('last-touch attrs stamp gbraid and wbraid immediately after gclid', () => {
+test('last-touch attrs keep a single Google click type when legacy storage had all three', () => {
   installStorage()
+  const now = Date.now()
   localStorage.setItem(
     '_pd_attribution',
     JSON.stringify({
       gclid: 'G',
       gbraid: 'X',
       wbraid: 'Y',
-      gclid_ts: Date.now(),
-      gbraid_ts: Date.now(),
-      wbraid_ts: Date.now(),
-      _timestamp: Date.now(),
+      gclid_ts: now,
+      gbraid_ts: now,
+      wbraid_ts: now,
+      _timestamp: now,
     })
   )
 
-  assert.deepEqual(clickIds(getAttributionAttrs(), '_pd_'), [
-    { key: '_pd_gclid', value: 'G' },
-    { key: '_pd_gbraid', value: 'X' },
-    { key: '_pd_wbraid', value: 'Y' },
-  ])
+  assert.deepEqual(clickIds(getAttributionAttrs(), '_pd_'), [{ key: '_pd_gclid', value: 'G' }])
 })
 
 test('first-touch attrs stamp gbraid and wbraid immediately after gclid', () => {
@@ -275,7 +274,73 @@ test('last-touch attrs stamp Meta _fbc when stored on landing capture', () => {
   ])
 })
 
-test('last-touch attrs stamp Google click capture timestamps for gclid, gbraid, and wbraid', () => {
+test('restampCartLineAttributes drops stale gclid on line when identity changes to gbraid', () => {
+  const stamp = [
+    { key: '_pd_gbraid', value: 'B-NEW' },
+    { key: '_pd_gbraid_ts', value: '2000' },
+    { key: '_pd_utm_campaign', value: 'new-campaign' },
+  ]
+  const out = restampCartLineAttributes(
+    [
+      { key: '_pd_gclid', value: 'G-OLD' },
+      { key: '_pd_gclid_ts', value: '100' },
+      { key: '_pd_utm_campaign', value: 'old-campaign' },
+      { key: '_nexus_cid', value: 'cid-1' },
+    ],
+    stamp,
+    true
+  )
+  const map = new Map(out.map((a) => [a.key, a.value]))
+  assert.equal(map.get('_pd_gclid'), undefined)
+  assert.equal(map.get('_pd_gbraid'), 'B-NEW')
+  assert.equal(map.get('_nexus_cid'), 'cid-1')
+})
+
+test('syncAttributionLocalStorageAfterIdentityChange clears stale gclid from localStorage', () => {
+  installStorage()
+  const now = Date.now()
+  localStorage.setItem(
+    '_pd_attribution',
+    JSON.stringify({
+      gclid: 'G-OLD',
+      gclid_ts: '100',
+      utm_campaign: 'old-campaign',
+      _timestamp: String(now),
+    })
+  )
+  syncAttributionLocalStorageAfterIdentityChange([
+    { key: '_pd_gbraid', value: 'B-NEW' },
+    { key: '_pd_gbraid_ts', value: String(now) },
+    { key: '_pd_utm_campaign', value: 'new-campaign' },
+  ])
+  const bag = JSON.parse(localStorage.getItem('_pd_attribution') ?? '{}') as Record<string, string>
+  assert.equal(bag.gclid, undefined)
+  assert.equal(bag.gbraid, 'B-NEW')
+  assert.equal(bag.utm_campaign, 'new-campaign')
+})
+
+test('getAttributionAttrs coalesces duplicate Google click ids in localStorage on read', () => {
+  installStorage()
+  const now = Date.now()
+  localStorage.setItem(
+    '_pd_attribution',
+    JSON.stringify({
+      gclid: 'G-OLD',
+      gbraid: 'B-NEW',
+      gclid_ts: '100',
+      gbraid_ts: String(now),
+      _timestamp: String(now),
+    })
+  )
+  const attrs = getAttributionAttrs()
+  const clickKeys = attrs.filter((a) =>
+    ['_pd_gclid', '_pd_gbraid', '_pd_wbraid'].includes(a.key)
+  )
+  assert.equal(clickKeys.length, 1)
+  assert.equal(clickKeys[0]?.key, '_pd_gbraid')
+})
+
+test('last-touch attrs stamp Google click capture timestamp for the active click type only', () => {
   installStorage()
   const ts = Date.now()
   localStorage.setItem(
@@ -291,12 +356,7 @@ test('last-touch attrs stamp Google click capture timestamps for gclid, gbraid, 
     })
   )
 
-  assert.deepEqual(
-    getAttributionAttrs().filter((a) => a.key.endsWith('_ts')),
-    [
-      { key: '_pd_gclid_ts', value: String(ts) },
-      { key: '_pd_gbraid_ts', value: String(ts) },
-      { key: '_pd_wbraid_ts', value: String(ts) },
-    ]
-  )
+  assert.deepEqual(getAttributionAttrs().filter((a) => a.key.endsWith('_ts')), [
+    { key: '_pd_gclid_ts', value: String(ts) },
+  ])
 })

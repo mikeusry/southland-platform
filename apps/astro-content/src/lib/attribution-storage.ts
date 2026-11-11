@@ -27,6 +27,115 @@ export function isChatGptUtmSource(source: string | undefined): boolean {
   return s === 'chatgpt' || s === 'chatgpt.com' || s.includes('chatgpt')
 }
 
+export type OpprefTouchContext = {
+  urlOppref?: string
+  utmSource?: string
+  referrer?: string
+  now?: number
+}
+
+export function hasChatGptLandingSignal(ctx: OpprefTouchContext): boolean {
+  if (isChatGptUtmSource(ctx.utmSource)) return true
+  const ref = (ctx.referrer || '').toLowerCase()
+  return ref.includes('chatgpt') || ref.includes('chat.openai') || ref.includes('openai.com')
+}
+
+/**
+ * The __oppref cookie persists across pageviews. Only treat it as a new ChatGPT
+ * paid touch when the URL carried oppref, the cookie value changed, or (first
+ * capture) there is a ChatGPT landing signal — never on a plain repeat load.
+ */
+export function opprefCountsAsNewPaidTouch(
+  stored: AttributionBag,
+  oppref: string,
+  ctx: OpprefTouchContext
+): boolean {
+  if (ctx.urlOppref && ctx.urlOppref === oppref) return true
+  if (stored.oppref === oppref) return false
+
+  const now = ctx.now ?? Date.now()
+  const storedGoogle = activeGoogleClickKey(stored)
+  if (storedGoogle && !ctx.urlOppref) {
+    const sessionTs = Number(stored._timestamp) || 0
+    const inSession = sessionTs > 0 && now - sessionTs <= ATTRIBUTION_SESSION_MS
+    const clickTs = googleClickEpochMs(stored, storedGoogle, sessionTs)
+    const googleFresh =
+      inSession || (clickTs > 0 && now - clickTs <= GOOGLE_CLICK_MS)
+    if (googleFresh) return false
+  }
+
+  if (!stored.oppref) return hasChatGptLandingSignal(ctx) || Boolean(ctx.urlOppref)
+
+  return hasChatGptLandingSignal(ctx)
+}
+
+export function applyChatGptUtmIfNeeded(bag: AttributionBag): void {
+  if (bag.oppref && !bag.utm_source) {
+    bag.utm_source = 'chatgpt'
+    bag.utm_medium = bag.utm_medium || 'ppc'
+  }
+}
+
+export function stripRepeatOpprefCookie(
+  stored: AttributionBag,
+  incoming: AttributionBag,
+  ctx: OpprefTouchContext
+): AttributionBag {
+  const out = { ...incoming }
+  if (!out.oppref) return out
+  if (opprefCountsAsNewPaidTouch(stored, out.oppref, ctx)) {
+    applyChatGptUtmIfNeeded(out)
+    return out
+  }
+  delete out.oppref
+  return out
+}
+
+export const BAG_CLEAR_ON_IDENTITY_CHANGE = [
+  ...GOOGLE_CLICK_PARAMS,
+  'gclid_ts',
+  'gbraid_ts',
+  'wbraid_ts',
+  ...UTM_FIELD_KEYS,
+  'srsltid',
+  'fbclid',
+  'fbc',
+  'msclid',
+  'ttclid',
+  'oppref',
+] as const
+
+function bagGoogleSnapshot(bag: AttributionBag): string | null {
+  const key = activeGoogleClickKey(bag)
+  if (!key) return null
+  return `${key}=${bag[key]}`
+}
+
+export function lastTouchIdentityChangedInBag(
+  stored: AttributionBag,
+  incoming: AttributionBag
+): boolean {
+  const inGoogle = bagGoogleSnapshot(incoming)
+  if (!inGoogle && !incomingPaidNetwork(incoming)) return false
+
+  const storedGoogle = bagGoogleSnapshot(stored)
+  if (inGoogle && inGoogle !== storedGoogle) return true
+
+  const ew = incomingPaidNetwork(stored)
+  const fw = incomingPaidNetwork(incoming)
+  if (fw && ew !== fw) return true
+
+  return false
+}
+
+/** One Google click type per bag (read-time hygiene). */
+export function coalesceLastTouchBag(bag: AttributionBag): AttributionBag {
+  const out = { ...bag }
+  const active = activeGoogleClickKey(out)
+  if (active) pruneToSingleGoogleClick(out, active)
+  return out
+}
+
 /** Epoch ms used to decide whether a Google click id is still within the 90-day window. */
 export function googleClickEpochMs(
   bag: AttributionBag,
@@ -178,17 +287,29 @@ export function pruneToSingleGoogleClick(
 export function mergeLastTouchCapture(
   stored: AttributionBag,
   incoming: AttributionBag,
-  meta: { landingPage: string; referrer: string; now?: number }
+  meta: { landingPage: string; referrer: string; now?: number; urlOppref?: string }
 ): AttributionBag {
   const now = meta.now ?? Date.now()
-  applyGoogleClickFirstSeen(incoming, stored, now)
+  const touchIncoming = stripRepeatOpprefCookie(stored, incoming, {
+    urlOppref: meta.urlOppref,
+    utmSource: incoming.utm_source,
+    referrer: meta.referrer,
+    now,
+  })
+  applyGoogleClickFirstSeen(touchIncoming, stored, now)
 
+  const identityChanged = lastTouchIdentityChangedInBag(stored, touchIncoming)
   const merged: AttributionBag = { ...stored }
-  for (const [k, v] of Object.entries(incoming)) {
+  if (identityChanged) {
+    for (const key of BAG_CLEAR_ON_IDENTITY_CHANGE) {
+      delete merged[key]
+    }
+  }
+  for (const [k, v] of Object.entries(touchIncoming)) {
     if (v) merged[k] = v
   }
 
-  pruneLosingPaidNetworks(merged, incoming)
+  pruneLosingPaidNetworks(merged, touchIncoming)
 
   merged._timestamp = String(now)
   merged._landing_page = meta.landingPage

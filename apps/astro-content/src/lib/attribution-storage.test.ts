@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import {
   ATTRIBUTION_SESSION_MS,
+  applyChatGptUtmIfNeeded,
   applyGoogleClickFirstSeen,
   expireGoogleClicksPast90Days,
   filterLastTouchAttribution,
@@ -9,8 +10,10 @@ import {
   isChatGptUtmSource,
   mergeLastTouchCapture,
   normalizeStoredLastTouch,
+  opprefCountsAsNewPaidTouch,
   pruneLosingPaidNetworks,
   pruneToSingleGoogleClick,
+  stripRepeatOpprefCookie,
 } from './attribution-storage'
 
 test('applyGoogleClickFirstSeen preserves ts on reload of the same gclid', () => {
@@ -134,4 +137,67 @@ test('pruneToSingleGoogleClick removes inactive click types', () => {
   const bag = { gclid: 'G', gbraid: 'B', wbraid: 'W', gclid_ts: '1', gbraid_ts: '2' }
   pruneToSingleGoogleClick(bag, 'gclid')
   assert.deepEqual(bag, { gclid: 'G', gclid_ts: '1' })
+})
+
+test('repeat __oppref cookie is not a new touch when gclid is still fresh', () => {
+  const now = Date.now()
+  const stored = {
+    gclid: 'G-AD',
+    gclid_ts: String(now),
+    oppref: 'oai-same',
+    _timestamp: String(now),
+  }
+  assert.equal(
+    opprefCountsAsNewPaidTouch(stored, 'oai-same', {
+      referrer: '',
+      utmSource: undefined,
+      now,
+    }),
+    false
+  )
+  const merged = mergeLastTouchCapture(
+    stored,
+    { oppref: 'oai-same' },
+    { landingPage: '/products', referrer: '', now }
+  )
+  assert.equal(merged.gclid, 'G-AD')
+  assert.equal(merged.oppref, 'oai-same')
+})
+
+test('Google ad click after stored ChatGPT oppref wins and clears oppref', () => {
+  const now = 10_000
+  const stored = {
+    oppref: 'oai-old',
+    utm_source: 'chatgpt',
+    _timestamp: String(now - ATTRIBUTION_SESSION_MS - 1),
+  }
+  const merged = mergeLastTouchCapture(
+    stored,
+    { gclid: 'G-NEW', gclid_ts: String(now), utm_source: 'google' },
+    { landingPage: '/?gclid=G-NEW', referrer: 'https://google.com/', now }
+  )
+  assert.equal(merged.gclid, 'G-NEW')
+  assert.equal(merged.oppref, undefined)
+  assert.equal(merged.utm_source, 'google')
+})
+
+test('cookie-only oppref with ChatGPT referrer sets utm_source without overwriting explicit source', () => {
+  const touch = stripRepeatOpprefCookie(
+    {},
+    { oppref: 'oai-1' },
+    { referrer: 'https://chatgpt.com/', now: 1000 }
+  )
+  assert.equal(touch.oppref, 'oai-1')
+  assert.equal(touch.utm_source, 'chatgpt')
+
+  const keepGoogle = stripRepeatOpprefCookie(
+    {},
+    { oppref: 'oai-1', utm_source: 'google' },
+    { referrer: 'https://chatgpt.com/', now: 1000 }
+  )
+  assert.equal(keepGoogle.utm_source, 'google')
+
+  const bare = { oppref: 'oai-1' }
+  applyChatGptUtmIfNeeded(bare)
+  assert.equal(bare.utm_source, 'chatgpt')
 })
