@@ -71,14 +71,11 @@ export function prepareFirstTouchBagForStorage(bag: AttributionBag): Attribution
 
 export const UTM_CLEAR_ON_SAME_NETWORK_NEW_CLICK = [...UTM_FIELD_KEYS, 'srsltid'] as const
 
-function paidClickIdForNetwork(
-  bag: AttributionBag,
-  network: PaidClickNetwork
-): string | null {
+function paidClickIdForNetwork(bag: AttributionBag, network: PaidClickNetwork): string | null {
   switch (network) {
     case 'google': {
       const key = activeGoogleClickKey(bag)
-      return key ? bag[key] ?? null : null
+      return key ? (bag[key] ?? null) : null
     }
     case 'meta':
       return bag.fbclid ?? null
@@ -203,10 +200,7 @@ export function expireGoogleClicksPast90Days(
  * Normalize stored last-touch before merge: enforce 90-day expiry, then apply
  * the 30-minute UTM session strip when needed.
  */
-export function normalizeStoredLastTouch(
-  store: AttributionBag,
-  now = Date.now()
-): AttributionBag {
+export function normalizeStoredLastTouch(store: AttributionBag, now = Date.now()): AttributionBag {
   const bag = expireGoogleClicksPast90Days(store, now)
   const lastTs = Number(bag._timestamp) || 0
   if (!(lastTs > 0 && now - lastTs > ATTRIBUTION_SESSION_MS)) {
@@ -269,13 +263,7 @@ export function incomingPaidNetwork(incoming: AttributionBag): PaidClickNetwork 
 }
 
 const NETWORK_FIELD_KEYS: Record<PaidClickNetwork, string[]> = {
-  google: [
-    ...GOOGLE_CLICK_PARAMS,
-    'gclid_ts',
-    'gbraid_ts',
-    'wbraid_ts',
-    'srsltid',
-  ],
+  google: [...GOOGLE_CLICK_PARAMS, 'gclid_ts', 'gbraid_ts', 'wbraid_ts', 'srsltid'],
   meta: ['fbclid', 'fbc'],
   microsoft: ['msclid'],
   tiktok: ['ttclid'],
@@ -283,10 +271,7 @@ const NETWORK_FIELD_KEYS: Record<PaidClickNetwork, string[]> = {
 }
 
 /** When a new paid network click lands, remove stale ids from other networks. */
-export function pruneLosingPaidNetworks(
-  merged: AttributionBag,
-  incoming: AttributionBag
-): void {
+export function pruneLosingPaidNetworks(merged: AttributionBag, incoming: AttributionBag): void {
   const winner = incomingPaidNetwork(incoming)
   if (!winner) return
 
@@ -302,10 +287,7 @@ export function pruneLosingPaidNetworks(
 }
 
 /** Google sends one click id type per ad click — drop the other types. */
-export function pruneToSingleGoogleClick(
-  bag: AttributionBag,
-  active: GoogleClickParam
-): void {
+export function pruneToSingleGoogleClick(bag: AttributionBag, active: GoogleClickParam): void {
   for (const key of GOOGLE_CLICK_PARAMS) {
     if (key === active) continue
     delete bag[key]

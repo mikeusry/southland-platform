@@ -444,10 +444,7 @@ function stampLines(lines: CartLineInput[]): CartLineInput[] {
 
   return lines.map((line) => ({
     ...line,
-    attributes: [
-      ...(line.attributes || []).filter((a) => !stampKeys.has(a.key)),
-      ...stamp,
-    ],
+    attributes: [...(line.attributes || []).filter((a) => !stampKeys.has(a.key)), ...stamp],
   }))
 }
 
@@ -760,8 +757,7 @@ export async function addToCart(lines: CartLineInput[]): Promise<Cart> {
         try {
           cart = await updateCartAttributesWithRetry(client, cart.id, merged)
         } catch (attrErr) {
-          const err =
-            attrErr instanceof Error ? attrErr : new Error(String(attrErr))
+          const err = attrErr instanceof Error ? attrErr : new Error(String(attrErr))
           console.error('[cart] cart attribute sync failed after retry:', err)
           captureCartException(err, {
             stage: 'cart-attributes-sync',

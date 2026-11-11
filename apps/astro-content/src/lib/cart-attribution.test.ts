@@ -269,9 +269,10 @@ test('last-touch attrs stamp Meta _fbc when stored on landing capture', () => {
     })
   )
 
-  assert.deepEqual(getAttributionAttrs().filter((a) => a.key === '_pd_fbc'), [
-    { key: '_pd_fbc', value: 'fb.1.123.abc' },
-  ])
+  assert.deepEqual(
+    getAttributionAttrs().filter((a) => a.key === '_pd_fbc'),
+    [{ key: '_pd_fbc', value: 'fb.1.123.abc' }]
+  )
 })
 
 test('restampCartLineAttributes drops stale gclid on line when identity changes to gbraid', () => {
@@ -333,9 +334,7 @@ test('getAttributionAttrs coalesces duplicate Google click ids in localStorage o
     })
   )
   const attrs = getAttributionAttrs()
-  const clickKeys = attrs.filter((a) =>
-    ['_pd_gclid', '_pd_gbraid', '_pd_wbraid'].includes(a.key)
-  )
+  const clickKeys = attrs.filter((a) => ['_pd_gclid', '_pd_gbraid', '_pd_wbraid'].includes(a.key))
   assert.equal(clickKeys.length, 1)
   assert.equal(clickKeys[0]?.key, '_pd_gbraid')
 })
@@ -356,7 +355,8 @@ test('last-touch attrs stamp Google click capture timestamp for the active click
     })
   )
 
-  assert.deepEqual(getAttributionAttrs().filter((a) => a.key.endsWith('_ts')), [
-    { key: '_pd_gclid_ts', value: String(ts) },
-  ])
+  assert.deepEqual(
+    getAttributionAttrs().filter((a) => a.key.endsWith('_ts')),
+    [{ key: '_pd_gclid_ts', value: String(ts) }]
+  )
 })
