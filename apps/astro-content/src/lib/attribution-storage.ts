@@ -174,7 +174,7 @@ export function normalizeStoredLastTouch(
   store: AttributionBag,
   now = Date.now()
 ): AttributionBag {
-  let bag = expireGoogleClicksPast90Days(store, now)
+  const bag = expireGoogleClicksPast90Days(store, now)
   const lastTs = Number(bag._timestamp) || 0
   if (!(lastTs > 0 && now - lastTs > ATTRIBUTION_SESSION_MS)) {
     return bag
