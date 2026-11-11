@@ -6,6 +6,7 @@ import {
   applyChatGptUtmIfNeeded,
   applyGoogleClickFirstSeen,
   mergeLastTouchCapture,
+  prepareFirstTouchBagForStorage,
   isChatGptUtmSource,
   normalizeStoredLastTouch,
   opprefCountsAsNewPaidTouch,
@@ -217,6 +218,7 @@ function captureFirstTouch(): void {
     data._timestamp = String(now)
     data._landing_page = url.pathname + url.search
     data._referrer = document.referrer || ''
+    prepareFirstTouchBagForStorage(data)
 
     try {
       localStorage.setItem(FIRST_TOUCH_KEY, JSON.stringify(data))

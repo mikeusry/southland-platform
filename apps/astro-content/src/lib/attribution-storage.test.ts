@@ -4,6 +4,7 @@ import {
   ATTRIBUTION_SESSION_MS,
   applyChatGptUtmIfNeeded,
   applyGoogleClickFirstSeen,
+  prepareFirstTouchBagForStorage,
   expireGoogleClicksPast90Days,
   filterLastTouchAttribution,
   GOOGLE_CLICK_MS,
@@ -139,6 +140,33 @@ test('pruneToSingleGoogleClick removes inactive click types', () => {
   assert.deepEqual(bag, { gclid: 'G', gclid_ts: '1' })
 })
 
+test('ChatGPT landing with signal wins over stored gclid inside 90-day window', () => {
+  const now = Date.now()
+  const stored = {
+    gclid: 'G-OLD',
+    gclid_ts: String(now - 10 * 24 * 60 * 60 * 1000),
+    utm_source: 'google',
+    utm_campaign: 'old-campaign',
+    _timestamp: String(now - ATTRIBUTION_SESSION_MS - 1),
+  }
+  assert.equal(
+    opprefCountsAsNewPaidTouch(stored, 'oai-new', {
+      referrer: 'https://chatgpt.com/',
+      now,
+    }),
+    true
+  )
+  const merged = mergeLastTouchCapture(
+    stored,
+    { oppref: 'oai-new' },
+    { landingPage: '/', referrer: 'https://chatgpt.com/', now }
+  )
+  assert.equal(merged.gclid, undefined)
+  assert.equal(merged.oppref, 'oai-new')
+  assert.equal(merged.utm_source, 'chatgpt')
+  assert.equal(merged.utm_campaign, undefined)
+})
+
 test('repeat __oppref cookie is not a new touch when gclid is still fresh', () => {
   const now = Date.now()
   const stored = {
@@ -179,6 +207,30 @@ test('Google ad click after stored ChatGPT oppref wins and clears oppref', () =>
   assert.equal(merged.gclid, 'G-NEW')
   assert.equal(merged.oppref, undefined)
   assert.equal(merged.utm_source, 'google')
+})
+
+test('same-network Meta click id change clears stale UTMs in storage', () => {
+  const now = 5_000
+  const stored = {
+    fbclid: 'META-OLD',
+    utm_source: 'facebook',
+    utm_campaign: 'old-campaign',
+    _timestamp: String(now - 1_000),
+  }
+  const merged = mergeLastTouchCapture(
+    stored,
+    { fbclid: 'META-NEW' },
+    { landingPage: '/?fbclid=META-NEW', referrer: '', now }
+  )
+  assert.equal(merged.fbclid, 'META-NEW')
+  assert.equal(merged.utm_campaign, undefined)
+  assert.equal(merged.utm_source, undefined)
+})
+
+test('prepareFirstTouchBagForStorage sets chatgpt utm for cookie-only oppref', () => {
+  const bag = prepareFirstTouchBagForStorage({ oppref: 'oai-ft' })
+  assert.equal(bag.utm_source, 'chatgpt')
+  assert.equal(bag.utm_medium, 'ppc')
 })
 
 test('cookie-only oppref with ChatGPT referrer sets utm_source without overwriting explicit source', () => {

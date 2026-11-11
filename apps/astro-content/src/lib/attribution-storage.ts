@@ -53,20 +53,7 @@ export function opprefCountsAsNewPaidTouch(
   if (ctx.urlOppref && ctx.urlOppref === oppref) return true
   if (stored.oppref === oppref) return false
 
-  const now = ctx.now ?? Date.now()
-  const storedGoogle = activeGoogleClickKey(stored)
-  if (storedGoogle && !ctx.urlOppref) {
-    const sessionTs = Number(stored._timestamp) || 0
-    const inSession = sessionTs > 0 && now - sessionTs <= ATTRIBUTION_SESSION_MS
-    const clickTs = googleClickEpochMs(stored, storedGoogle, sessionTs)
-    const googleFresh =
-      inSession || (clickTs > 0 && now - clickTs <= GOOGLE_CLICK_MS)
-    if (googleFresh) return false
-  }
-
-  if (!stored.oppref) return hasChatGptLandingSignal(ctx) || Boolean(ctx.urlOppref)
-
-  return hasChatGptLandingSignal(ctx)
+  return hasChatGptLandingSignal(ctx) || Boolean(ctx.urlOppref)
 }
 
 export function applyChatGptUtmIfNeeded(bag: AttributionBag): void {
@@ -74,6 +61,52 @@ export function applyChatGptUtmIfNeeded(bag: AttributionBag): void {
     bag.utm_source = 'chatgpt'
     bag.utm_medium = bag.utm_medium || 'ppc'
   }
+}
+
+/** First-touch is write-once; apply ChatGPT UTM rules before persisting. */
+export function prepareFirstTouchBagForStorage(bag: AttributionBag): AttributionBag {
+  applyChatGptUtmIfNeeded(bag)
+  return bag
+}
+
+export const UTM_CLEAR_ON_SAME_NETWORK_NEW_CLICK = [...UTM_FIELD_KEYS, 'srsltid'] as const
+
+function paidClickIdForNetwork(
+  bag: AttributionBag,
+  network: PaidClickNetwork
+): string | null {
+  switch (network) {
+    case 'google': {
+      const key = activeGoogleClickKey(bag)
+      return key ? bag[key] ?? null : null
+    }
+    case 'meta':
+      return bag.fbclid ?? null
+    case 'microsoft':
+      return bag.msclid ?? null
+    case 'tiktok':
+      return bag.ttclid ?? null
+    case 'chatgpt':
+      return bag.oppref ?? null
+    default: {
+      const unexpected: never = network
+      return unexpected
+    }
+  }
+}
+
+/** Same paid network, new click id value (e.g. a second Meta ad click). */
+export function sameNetworkPaidClickValueChanged(
+  stored: AttributionBag,
+  incoming: AttributionBag
+): boolean {
+  const existing = incomingPaidNetwork(stored)
+  const fresh = incomingPaidNetwork(incoming)
+  if (!existing || !fresh || existing !== fresh) return false
+  const prev = paidClickIdForNetwork(stored, existing)
+  const next = paidClickIdForNetwork(incoming, fresh)
+  if (!prev || !next) return false
+  return prev !== next
 }
 
 export function stripRepeatOpprefCookie(
@@ -302,6 +335,10 @@ export function mergeLastTouchCapture(
   const merged: AttributionBag = { ...stored }
   if (identityChanged) {
     for (const key of BAG_CLEAR_ON_IDENTITY_CHANGE) {
+      delete merged[key]
+    }
+  } else if (sameNetworkPaidClickValueChanged(stored, touchIncoming)) {
+    for (const key of UTM_CLEAR_ON_SAME_NETWORK_NEW_CLICK) {
       delete merged[key]
     }
   }
