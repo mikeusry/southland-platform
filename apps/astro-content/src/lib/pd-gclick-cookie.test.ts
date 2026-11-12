@@ -3,13 +3,20 @@ import { afterEach, test } from 'node:test'
 import {
   GOOGLE_CLICK_COOKIE,
   GOOGLE_CLICK_COOKIE_DOMAIN,
+  GOOGLE_CLICK_COOKIE_SITE,
+  GOOGLE_CLICK_ID_MAX_LEN,
   GOOGLE_CLICK_MS,
   GOOGLE_CLICK_STORE_KEY,
   beaconGoogleClickCookie,
   googleClickCookieValue,
   googleClickSetCookieHeader,
+  isSameSitePdGclickRequest,
+  isSameSitePdGclickUrl,
+  isValidGoogleClickId,
+  loadGoogleClickStore,
   parseGoogleClickCookieBag,
   persistGoogleClickCookie,
+  readGoogleClickCookieBag,
   remainingGoogleClickMaxAgeSec,
   saveGoogleClickStore,
 } from './attribution-storage'
@@ -74,9 +81,9 @@ function installStorage(): Map<string, string> {
   return store
 }
 
-function installCookie(): { assignments: string[] } {
+function installCookie(seed = ''): { assignments: string[] } {
   const assignments: string[] = []
-  let jar = ''
+  let jar = seed
   Object.defineProperty(globalThis, 'document', {
     configurable: true,
     value: {
@@ -85,7 +92,15 @@ function installCookie(): { assignments: string[] } {
       },
       set cookie(value: string) {
         assignments.push(value)
-        jar = value
+        if (/Max-Age=0(?:;|$)/.test(value)) {
+          const name = value.split('=')[0]
+          jar = jar
+            .split('; ')
+            .filter((part) => !part.startsWith(`${name}=`))
+            .join('; ')
+          return
+        }
+        jar = value.split(';')[0]
       },
     },
   })
@@ -289,12 +304,19 @@ test('a newer click replaces the cookie and an older click does not', () => {
 
 async function postBag(
   body: string | object | null,
-  url = 'https://southlandorganics.com/api/pd-gclick'
+  opts: { origin?: string | null; referer?: string; cookie?: string; url?: string } = {}
 ) {
   const payload = body === null ? '' : typeof body === 'string' ? body : JSON.stringify(body)
+  const url = opts.url ?? `https://${GOOGLE_CLICK_COOKIE_SITE}/api/pd-gclick`
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (opts.origin !== null) {
+    headers.Origin = opts.origin ?? `https://${GOOGLE_CLICK_COOKIE_SITE}`
+  }
+  if (opts.referer) headers.Referer = opts.referer
+  if (opts.cookie) headers.Cookie = opts.cookie
   const request = new Request(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: payload,
   })
   return POST({ request } as Parameters<typeof POST>[0])
@@ -327,12 +349,11 @@ test('POST /api/pd-gclick accepts gbraid and wbraid', async () => {
   assert.ok((wbraid.headers.get('Set-Cookie') ?? '').includes('WB-API'))
 })
 
-test('POST /api/pd-gclick clears the cookie on an explicit empty bag', async () => {
+test('POST /api/pd-gclick rejects an empty bag and does not clear the cookie', async () => {
   const res = await postBag({})
   assert.equal(res.status, 204)
-  const cookie = res.headers.get('Set-Cookie')
-  assert.ok(cookie)
-  assert.ok(cookie!.includes('Max-Age=0'))
+  assert.equal(res.headers.get('Set-Cookie'), null)
+  assert.equal(res.headers.get('Cache-Control'), 'no-store')
 })
 
 test('POST /api/pd-gclick does not clear the cookie on a future timestamp or junk', async () => {
@@ -373,4 +394,132 @@ test('beaconGoogleClickCookie posts JSON and ignores failures', () => {
   assert.equal(sent.length, 1)
   assert.equal(sent[0].url, '/api/pd-gclick')
   assert.equal(sent[0].type, 'application/json')
+})
+
+test('an over-long click id is rejected', () => {
+  const now = 1_700_000_000_000
+  const longId = `G-${'A'.repeat(GOOGLE_CLICK_ID_MAX_LEN)}`
+  assert.equal(isValidGoogleClickId(longId), false)
+  assert.equal(parseGoogleClickCookieBag({ gclid: longId, gclid_ts: String(now) }, now), null)
+})
+
+test('saveGoogleClickStore restores from a live cookie when localStorage is empty', () => {
+  const now = 1_700_000_000_000
+  const bag = { gclid: 'G-SAFARI', gclid_ts: String(now - 10 * DAY_MS) }
+  const encoded = googleClickCookieValue(bag, now)
+  assert.ok(encoded)
+  installStorage()
+  const { assignments } = installCookie(`${GOOGLE_CLICK_COOKIE}=${encoded}`)
+  const beacons: string[] = []
+  Object.defineProperty(globalThis, 'navigator', {
+    configurable: true,
+    value: {
+      sendBeacon() {
+        beacons.push('beacon')
+        return true
+      },
+    },
+  })
+  assert.equal(localStorage.getItem(GOOGLE_CLICK_STORE_KEY), null)
+  const loaded = loadGoogleClickStore(now)
+  assert.equal(loaded?.gclid, 'G-SAFARI')
+  saveGoogleClickStore({ srsltid: 'S-ONLY' }, now)
+  const stored = JSON.parse(localStorage.getItem(GOOGLE_CLICK_STORE_KEY) ?? '{}') as {
+    gclid?: string
+    gclid_ts?: string
+  }
+  assert.equal(stored.gclid, 'G-SAFARI')
+  assert.equal(stored.gclid_ts, String(now - 10 * DAY_MS))
+  assert.equal(
+    assignments.some((item) => item.includes('Max-Age=0')),
+    false
+  )
+  assert.equal(beacons.length, 0)
+  saveGoogleClickStore({}, now + 60_000)
+  assert.equal(beacons.length, 0)
+  assert.equal(JSON.parse(localStorage.getItem(GOOGLE_CLICK_STORE_KEY) ?? '{}').gclid, 'G-SAFARI')
+})
+
+test('saveGoogleClickStore beacons only when the stored click changes', () => {
+  installStorage()
+  installCookie()
+  const beacons: string[] = []
+  Object.defineProperty(globalThis, 'navigator', {
+    configurable: true,
+    value: {
+      sendBeacon() {
+        beacons.push('beacon')
+        return true
+      },
+    },
+  })
+  const now = 1_700_000_000_000
+  saveGoogleClickStore({ gclid: 'G-ONCE', gclid_ts: String(now) }, now)
+  assert.equal(beacons.length, 1)
+  saveGoogleClickStore({ gclid: 'G-ONCE', gclid_ts: String(now) }, now + 1_000)
+  saveGoogleClickStore({ srsltid: 'S-1' }, now + 2_000)
+  saveGoogleClickStore({}, now + 3_000)
+  assert.equal(beacons.length, 1)
+  saveGoogleClickStore({ gclid: 'G-TWO' }, now + 4_000)
+  assert.equal(beacons.length, 2)
+})
+
+test('same-site Origin and Referer checks accept the apex and shop hosts', () => {
+  const site = `https://${GOOGLE_CLICK_COOKIE_SITE}`
+  const shop = `https://shop.${GOOGLE_CLICK_COOKIE_SITE}`
+  assert.equal(isSameSitePdGclickUrl(site), true)
+  assert.equal(isSameSitePdGclickUrl(shop), true)
+  assert.equal(isSameSitePdGclickUrl(`http://${GOOGLE_CLICK_COOKIE_SITE}`), false)
+  assert.equal(isSameSitePdGclickUrl('https://evil.example'), false)
+  assert.equal(isSameSitePdGclickUrl('null'), false)
+  assert.equal(isSameSitePdGclickUrl(''), false)
+  const ok = new Headers({ Origin: site })
+  assert.equal(isSameSitePdGclickRequest(ok), true)
+  const refererOnly = new Headers({ Referer: `${shop}/cart` })
+  assert.equal(isSameSitePdGclickRequest(refererOnly), true)
+  const evil = new Headers({ Origin: 'https://evil.example', Referer: `${site}/` })
+  assert.equal(isSameSitePdGclickRequest(evil), false)
+  const missing = new Headers()
+  assert.equal(isSameSitePdGclickRequest(missing), false)
+})
+
+test('POST /api/pd-gclick requires a same-site Origin or Referer', async () => {
+  const now = Date.now()
+  const bag = { gclid: 'G-ORIGIN', gclid_ts: String(now) }
+  const noOrigin = await postBag(bag, { origin: null })
+  assert.equal(noOrigin.headers.get('Set-Cookie'), null)
+  const evil = await postBag(bag, { origin: 'https://evil.example' })
+  assert.equal(evil.headers.get('Set-Cookie'), null)
+  const http = await postBag(bag, { origin: `http://${GOOGLE_CLICK_COOKIE_SITE}` })
+  assert.equal(http.headers.get('Set-Cookie'), null)
+  const referer = await postBag(bag, {
+    origin: null,
+    referer: `https://shop.${GOOGLE_CLICK_COOKIE_SITE}/products/x`,
+  })
+  assert.ok((referer.headers.get('Set-Cookie') ?? '').includes('G-ORIGIN'))
+})
+
+test('POST /api/pd-gclick keeps the newer existing cookie', async () => {
+  const now = Date.now()
+  const existing = googleClickCookieValue({ gclid: 'G-NEWER', gclid_ts: String(now - 1_000) }, now)
+  assert.ok(existing)
+  const older = await postBag(
+    { gclid: 'G-OLDER', gclid_ts: String(now - 10 * DAY_MS) },
+    { cookie: `${GOOGLE_CLICK_COOKIE}=${existing}` }
+  )
+  assert.equal(older.headers.get('Set-Cookie'), null)
+  const newer = await postBag(
+    { gbraid: 'GB-NEWER', gbraid_ts: String(now) },
+    { cookie: `${GOOGLE_CLICK_COOKIE}=${existing}` }
+  )
+  const set = newer.headers.get('Set-Cookie') ?? ''
+  assert.ok(set.includes('GB-NEWER'))
+  assert.equal(set.includes('G-NEWER'), false)
+})
+
+test('readGoogleClickCookieBag parses a live cookie header', () => {
+  const now = 1_700_000_000_000
+  const encoded = googleClickCookieValue({ wbraid: 'WB-READ', wbraid_ts: String(now) }, now)
+  const parsed = readGoogleClickCookieBag(`${GOOGLE_CLICK_COOKIE}=${encoded}`, now)
+  assert.deepEqual(parsed, { key: 'wbraid', value: 'WB-READ', ts: now })
 })

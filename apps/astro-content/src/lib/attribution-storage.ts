@@ -442,6 +442,19 @@ export const GOOGLE_CLICK_COOKIE = GOOGLE_CLICK_STORE_KEY
 export const GOOGLE_CLICK_COOKIE_DOMAIN = '.southlandorganics.com'
 export const GOOGLE_CLICK_ID_RE = /^[A-Za-z0-9._:-]+$/
 
+export const GOOGLE_CLICK_ID_MAX_LEN = 200
+/** Registrable site from the cookie Domain, used for same-site Origin checks. */
+export const GOOGLE_CLICK_COOKIE_SITE = GOOGLE_CLICK_COOKIE_DOMAIN.replace(/^\./, '')
+
+export function isValidGoogleClickId(value: string): boolean {
+  return (
+    typeof value === 'string' &&
+    value.length > 0 &&
+    value.length <= GOOGLE_CLICK_ID_MAX_LEN &&
+    GOOGLE_CLICK_ID_RE.test(value)
+  )
+}
+
 export type GoogleClickCookieBag = {
   key: GoogleClickParam
   value: string
@@ -464,7 +477,7 @@ export function parseGoogleClickCookieBag(
   for (const key of GOOGLE_CLICK_PARAMS) {
     const value = input[key]
     const tsRaw = input[`${key}_ts`]
-    if (typeof value === 'string' && GOOGLE_CLICK_ID_RE.test(value)) {
+    if (typeof value === 'string' && isValidGoogleClickId(value)) {
       bag[key] = value
     }
     if (tsRaw !== undefined && tsRaw !== null && tsRaw !== '') {
@@ -474,7 +487,7 @@ export function parseGoogleClickCookieBag(
   const live = liveGoogleClick(bag, now)
   if (!live) return null
   const key = activeGoogleClickKey(live)
-  if (!key || !live[key] || !GOOGLE_CLICK_ID_RE.test(live[key])) return null
+  if (!key || !live[key] || !isValidGoogleClickId(live[key])) return null
   const ts = googleClickEpochMs(live, key)
   if (!googleClickTsIsLive(ts, now)) return null
   return { key, value: live[key], ts }
@@ -494,7 +507,7 @@ export function googleClickSetCookieHeader(
 ): string {
   const cleared = `${GOOGLE_CLICK_COOKIE}=; Path=/; Domain=${GOOGLE_CLICK_COOKIE_DOMAIN}; Max-Age=0; Secure; SameSite=Lax`
   if (!bag) return cleared
-  if (!GOOGLE_CLICK_ID_RE.test(bag.value)) return cleared
+  if (!isValidGoogleClickId(bag.value)) return cleared
   const maxAge = remainingGoogleClickMaxAgeSec(bag.ts, now)
   if (maxAge <= 0) return cleared
   const json = encodeURIComponent(
@@ -517,11 +530,16 @@ export function persistGoogleClickCookie(bag: AttributionBag | null, now = Date.
   }
 }
 
-/** Uncached apex Set-Cookie; ignore failures. */
-export function beaconGoogleClickCookie(bag: AttributionBag | null, now = Date.now()): void {
+/**
+ * Uncached apex Set-Cookie; ignore failures. Never posts an empty bag — the
+ * endpoint rejects `{}` clears, and only expiry (via document.cookie Max-Age=0)
+ * may drop a stored click.
+ */
+export function beaconGoogleClickCookie(bag: AttributionBag, now = Date.now()): void {
   if (typeof window === 'undefined' || typeof fetch === 'undefined') return
-  const body = bag ? googleClickCookieValue(bag, now) : ''
-  const payload = bag && body ? decodeURIComponent(body) : '{}'
+  const body = googleClickCookieValue(bag, now)
+  if (!body) return
+  const payload = decodeURIComponent(body)
   try {
     const blob = new Blob([payload], { type: 'application/json' })
     if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
@@ -540,12 +558,120 @@ export function beaconGoogleClickCookie(bag: AttributionBag | null, now = Date.n
   }
 }
 
+export function extractCookieValue(cookieHeader: string, name: string): string {
+  const parts = `; ${cookieHeader}`.split(`; ${name}=`)
+  if (parts.length < 2) return ''
+  const raw = parts[1].split(';')[0] || ''
+  try {
+    return decodeURIComponent(raw)
+  } catch {
+    return raw
+  }
+}
+
+function parseCookieJson(raw: string, now: number): GoogleClickCookieBag | null {
+  const candidates = [raw]
+  try {
+    candidates.push(decodeURIComponent(raw))
+  } catch {
+    /* already decoded */
+  }
+  for (const candidate of candidates) {
+    try {
+      const parsed = JSON.parse(candidate) as unknown
+      const bag = parseGoogleClickCookieBag(parsed, now)
+      if (bag) return bag
+    } catch {
+      /* try next */
+    }
+  }
+  return null
+}
+
+/** Read a live Google click from a Cookie header or document.cookie. */
+export function readGoogleClickCookieBag(
+  cookieHeader: string,
+  now = Date.now()
+): GoogleClickCookieBag | null {
+  const raw = extractCookieValue(cookieHeader, GOOGLE_CLICK_COOKIE)
+  if (!raw) return null
+  return parseCookieJson(raw, now)
+}
+
+export function googleClickCookiePresent(cookieHeader: string): boolean {
+  return extractCookieValue(cookieHeader, GOOGLE_CLICK_COOKIE) !== ''
+}
+
+export function isSameSitePdGclickUrl(value: string | null | undefined): boolean {
+  if (!value) return false
+  try {
+    const url = new URL(value)
+    if (url.protocol !== 'https:') return false
+    const host = url.hostname.toLowerCase()
+    const site = GOOGLE_CLICK_COOKIE_SITE.toLowerCase()
+    return host === site || host.endsWith(`.${site}`)
+  } catch {
+    return false
+  }
+}
+
+/** Same-site https Origin, or Referer when Origin is absent. */
+export function isSameSitePdGclickRequest(headers: Headers): boolean {
+  const origin = headers.get('Origin') ?? headers.get('origin')
+  if (origin !== null && origin !== undefined && origin !== '') {
+    return isSameSitePdGclickUrl(origin)
+  }
+  const referer = headers.get('Referer') ?? headers.get('referer')
+  return isSameSitePdGclickUrl(referer)
+}
+
 function liveGoogleClick(bag: AttributionBag, now: number): AttributionBag | null {
-  const key = activeGoogleClickKey(bag)
-  if (!key || !bag[key]) return null
-  const ts = googleClickEpochMs(bag, key)
-  if (!googleClickTsIsLive(ts, now)) return null
-  return { [key]: bag[key], [`${key}_ts`]: String(ts) }
+  let best: GoogleClickCookieBag | null = null
+  for (const key of GOOGLE_CLICK_PARAMS) {
+    const value = bag[key]
+    if (!value || !isValidGoogleClickId(value)) continue
+    const ts = googleClickEpochMs(bag, key)
+    if (!googleClickTsIsLive(ts, now)) continue
+    if (!best || ts > best.ts) best = { key, value, ts }
+  }
+  if (!best) return null
+  return { [best.key]: best.value, [`${best.key}_ts`]: String(best.ts) }
+}
+
+function bagFromCookie(parsed: GoogleClickCookieBag | null): AttributionBag | null {
+  if (!parsed) return null
+  return { [parsed.key]: parsed.value, [`${parsed.key}_ts`]: String(parsed.ts) }
+}
+
+/** Newer live click wins. Equal timestamps keep the first argument. */
+export function newerGoogleClickBag(
+  first: AttributionBag | null,
+  second: AttributionBag | null,
+  now = Date.now()
+): AttributionBag | null {
+  const a = first ? liveGoogleClick(first, now) : null
+  const b = second ? liveGoogleClick(second, now) : null
+  if (!a) return b
+  if (!b) return a
+  const aKey = activeGoogleClickKey(a)
+  const bKey = activeGoogleClickKey(b)
+  if (!aKey) return b
+  if (!bKey) return a
+  const aTs = googleClickEpochMs(a, aKey)
+  const bTs = googleClickEpochMs(b, bKey)
+  return bTs > aTs ? b : a
+}
+
+export function googleClickBagsEqual(
+  a: AttributionBag | null,
+  b: AttributionBag | null,
+  now = Date.now()
+): boolean {
+  const left = a ? liveGoogleClick(a, now) : null
+  const right = b ? liveGoogleClick(b, now) : null
+  if (!left && !right) return true
+  if (!left || !right) return false
+  return JSON.stringify(left) === JSON.stringify(right)
 }
 
 export function readGoogleClickStoreBag(
@@ -626,36 +752,64 @@ export function applyStoredGoogleClick(
   return out
 }
 
-export function loadGoogleClickStore(now = Date.now()): AttributionBag | null {
-  if (typeof localStorage === 'undefined') return null
-  try {
-    const raw = localStorage.getItem(GOOGLE_CLICK_STORE_KEY)
-    if (!raw) return null
-    const live = readGoogleClickStoreBag(raw, now)
-    if (!live) localStorage.removeItem(GOOGLE_CLICK_STORE_KEY)
-    return live
-  } catch {
-    return null
-  }
+function cookieBagAsStore(now: number): AttributionBag | null {
+  if (typeof document === 'undefined') return null
+  return bagFromCookie(readGoogleClickCookieBag(document.cookie, now))
 }
 
+export function loadGoogleClickStore(now = Date.now()): AttributionBag | null {
+  let fromLs: AttributionBag | null = null
+  if (typeof localStorage !== 'undefined') {
+    try {
+      const raw = localStorage.getItem(GOOGLE_CLICK_STORE_KEY)
+      if (raw) {
+        fromLs = readGoogleClickStoreBag(raw, now)
+        if (!fromLs) localStorage.removeItem(GOOGLE_CLICK_STORE_KEY)
+      }
+    } catch {
+      /* private mode */
+    }
+  }
+  const fromCookie = cookieBagAsStore(now)
+  return newerGoogleClickBag(fromLs, fromCookie, now)
+}
+
+/**
+ * Persist a Google click to localStorage and, when the stored click changes,
+ * to the first-party cookie + beacon. Reads the cookie alongside localStorage
+ * and keeps the newest. A visit with no click, or with only srsltid, never
+ * clears the cookie and never beacons `{}`. Only expiry (or another paid
+ * network, matching the session-bag rule) may drop it, and then only via a
+ * JS Max-Age=0 write — never a `{}` beacon.
+ */
 export function saveGoogleClickStore(incoming: AttributionBag, now = Date.now()): void {
   if (typeof localStorage === 'undefined') return
   try {
-    const current = readGoogleClickStoreBag(localStorage.getItem(GOOGLE_CLICK_STORE_KEY), now)
+    const fromLs = readGoogleClickStoreBag(localStorage.getItem(GOOGLE_CLICK_STORE_KEY), now)
+    const fromCookie = cookieBagAsStore(now)
+    const current = newerGoogleClickBag(fromLs, fromCookie, now)
     const next = updateGoogleClickStore(current, incoming, now)
     if (!next) {
-      localStorage.removeItem(GOOGLE_CLICK_STORE_KEY)
-      persistGoogleClickCookie(null, now)
-      beaconGoogleClickCookie(null, now)
+      const network = incomingPaidNetwork(incoming)
+      const rawCookie =
+        typeof document !== 'undefined'
+          ? extractCookieValue(document.cookie, GOOGLE_CLICK_COOKIE)
+          : ''
+      const expiredOrInvalid = !!rawCookie && !fromCookie
+      if ((network && network !== 'google') || expiredOrInvalid) {
+        localStorage.removeItem(GOOGLE_CLICK_STORE_KEY)
+        persistGoogleClickCookie(null, now)
+      }
       return
     }
     const raw = JSON.stringify(next)
     if (raw !== localStorage.getItem(GOOGLE_CLICK_STORE_KEY)) {
       localStorage.setItem(GOOGLE_CLICK_STORE_KEY, raw)
     }
-    persistGoogleClickCookie(next, now)
-    beaconGoogleClickCookie(next, now)
+    if (!googleClickBagsEqual(fromCookie, next, now)) {
+      persistGoogleClickCookie(next, now)
+      beaconGoogleClickCookie(next, now)
+    }
   } catch {
     /* private mode */
   }

@@ -174,8 +174,10 @@ function captureLastTouch(): void {
       }
     }, 1500)
 
-    // Click store is independent of the session bag. An srsltid-only visit
-    // must not clear a gclid captured on an earlier page.
+    // Click store is independent of the session bag. saveGoogleClickStore
+    // reads the _pd_gclick cookie alongside localStorage and keeps the newest.
+    // An srsltid-only or empty visit must not clear a stored click, including
+    // the case where Safari has dropped localStorage but the cookie is live.
     saveGoogleClickStore(found)
 
     if (hasNew) {
