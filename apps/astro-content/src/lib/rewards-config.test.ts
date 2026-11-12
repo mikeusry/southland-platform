@@ -325,6 +325,43 @@ describe('catalog literals', () => {
   })
 })
 
+describe('free shipping wording', () => {
+  it('is absent from the referral page and the rewards knowledge block', () => {
+    const referral = readFileSync(
+      join(repoRoot, 'apps/astro-content/src/pages/referral/index.astro'),
+      'utf8'
+    )
+    const aiContent = readFileSync(
+      join(repoRoot, 'apps/astro-content/src/pages/api/ai-content.ts'),
+      'utf8'
+    )
+    const rewardsBlock = sliceBetween(aiContent, "id: 'page:rewards'", "id: 'page:shipping'")
+    const knowledge = [
+      buildRewardsKnowledge(FALLBACK_REWARDS_CONFIG),
+      buildRewardsKnowledge(SAMPLE),
+    ].join('\n')
+    const storeShippingPolicy = '- Free shipping on orders over $99'
+
+    assert.deepEqual(freeShippingLines(referral), [])
+    assert.deepEqual(freeShippingLines(rewardsBlock), [])
+    assert.deepEqual(freeShippingLines(knowledge), [])
+    assert.equal(aiContent.includes(storeShippingPolicy), true)
+    assert.equal(rewardsBlock.includes(storeShippingPolicy), false)
+  })
+})
+
+function freeShippingLines(text: string): string[] {
+  return text.split('\n').filter((line) => /free shipping/i.test(line))
+}
+
+function sliceBetween(text: string, start: string, end: string): string {
+  const from = text.indexOf(start)
+  const to = text.indexOf(end, from + start.length)
+  assert.notEqual(from, -1, `missing ${start}`)
+  assert.notEqual(to, -1, `missing ${end}`)
+  return text.slice(from, to)
+}
+
 function sourceFiles(dir: string, out: string[] = []): string[] {
   const skip = new Set(['node_modules', 'dist', '.git', '.astro', 'coverage', '.turbo', '.vercel'])
   for (const entry of readdirSync(dir)) {
