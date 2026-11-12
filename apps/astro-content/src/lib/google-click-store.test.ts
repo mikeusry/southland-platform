@@ -241,6 +241,172 @@ test('checkout stamp keeps existing line properties and skips a current click', 
   assert.equal(already.lineUpdates.length, 0)
 })
 
+test('a Meta line restamps to a Google line and keeps bundle and nexus ids', async () => {
+  const cartMod = await import('./cart.ts')
+  assertFunction(cartMod.planGoogleClickCheckoutStamp, 'planGoogleClickCheckoutStamp')
+  const stamp = [
+    { key: '_nexus_cid', value: 'cid-1' },
+    { key: '_pd_gclid', value: 'G-NEW' },
+    { key: '_pd_gclid_ts', value: '2000' },
+    { key: '_pd_utm_source', value: 'google' },
+    { key: '_pd_utm_medium', value: 'cpc' },
+    { key: '_pd_utm_campaign', value: 'brand-search' },
+  ]
+  const cart = {
+    id: 'gid://shopify/Cart/24542',
+    checkoutUrl: 'https://southland-organics.myshopify.com/cart/c/same-token',
+    attributes: [],
+    lines: [
+      {
+        id: 'gid://shopify/CartLine/1',
+        quantity: 1,
+        attributes: [
+          { key: '_bundle_id', value: 'case-9' },
+          { key: '_nexus_cid', value: 'cid-1' },
+          { key: '_pd_fbclid', value: 'META' },
+          { key: '_pd_utm_source', value: 'facebook' },
+          { key: '_pd_utm_medium', value: 'paid_social' },
+          { key: '_pd_utm_campaign', value: 'meta-prospecting' },
+        ],
+      },
+    ],
+  } as Cart
+  const plan = cartMod.planGoogleClickCheckoutStamp(cart, stamp, stamp)
+  const lineAttrs = plan.lineUpdates[0]?.attributes ?? []
+  assert.equal(plan.lineUpdates.length, 1)
+  assert.equal(attr(lineAttrs, '_pd_gclid'), 'G-NEW')
+  assert.equal(attr(lineAttrs, '_pd_utm_source'), 'google')
+  assert.equal(attr(lineAttrs, '_pd_utm_medium'), 'cpc')
+  assert.equal(attr(lineAttrs, '_pd_utm_campaign'), 'brand-search')
+  assert.equal(attr(lineAttrs, '_pd_fbclid'), undefined)
+  assert.equal(attr(lineAttrs, '_bundle_id'), 'case-9')
+  assert.equal(attr(lineAttrs, '_nexus_cid'), 'cid-1')
+})
+
+test('a newer gclid replaces an older Google campaign on the line', async () => {
+  const cartMod = await import('./cart.ts')
+  assertFunction(cartMod.planGoogleClickCheckoutStamp, 'planGoogleClickCheckoutStamp')
+  const stamp = [
+    { key: '_nexus_cid', value: 'cid-1' },
+    { key: '_pd_gclid', value: 'G-NEW' },
+    { key: '_pd_gclid_ts', value: '4000' },
+    { key: '_pd_utm_source', value: 'google' },
+    { key: '_pd_utm_medium', value: 'cpc' },
+    { key: '_pd_utm_campaign', value: 'brand-search' },
+  ]
+  const cart = {
+    id: 'gid://shopify/Cart/24542',
+    checkoutUrl: 'https://southland-organics.myshopify.com/cart/c/same-token',
+    attributes: [],
+    lines: [
+      {
+        id: 'gid://shopify/CartLine/1',
+        quantity: 1,
+        attributes: [
+          { key: '_bundle_id', value: 'case-9' },
+          { key: '_nexus_cid', value: 'cid-1' },
+          { key: '_pd_gclid', value: 'G-OLD' },
+          { key: '_pd_gclid_ts', value: '1000' },
+          { key: '_pd_utm_source', value: 'google' },
+          { key: '_pd_utm_medium', value: 'cpc' },
+          { key: '_pd_utm_campaign', value: 'old-campaign' },
+        ],
+      },
+    ],
+  } as Cart
+  const plan = cartMod.planGoogleClickCheckoutStamp(cart, stamp, stamp)
+  const lineAttrs = plan.lineUpdates[0]?.attributes ?? []
+  assert.equal(attr(lineAttrs, '_pd_gclid'), 'G-NEW')
+  assert.equal(attr(lineAttrs, '_pd_utm_campaign'), 'brand-search')
+  assert.equal(attr(lineAttrs, '_bundle_id'), 'case-9')
+  assert.equal(attr(lineAttrs, '_nexus_cid'), 'cid-1')
+  assert.equal(
+    lineAttrs.some((item) => item.value === 'old-campaign' || item.value === 'G-OLD'),
+    false
+  )
+})
+
+test('a line with no click gains only the Google click keys', async () => {
+  const cartMod = await import('./cart.ts')
+  assertFunction(cartMod.planGoogleClickCheckoutStamp, 'planGoogleClickCheckoutStamp')
+  const stamp = [
+    { key: '_nexus_cid', value: 'cid-1' },
+    { key: '_pd_gclid', value: 'G-ADD' },
+    { key: '_pd_gclid_ts', value: '2000' },
+    { key: '_pd_utm_source', value: 'google' },
+    { key: '_pd_utm_campaign', value: 'brand-search' },
+    { key: '_pd_fbclid', value: 'SHOULD-NOT-COPY' },
+  ]
+  const cart = {
+    id: 'gid://shopify/Cart/24542',
+    checkoutUrl: 'https://southland-organics.myshopify.com/cart/c/same-token',
+    attributes: [],
+    lines: [
+      {
+        id: 'gid://shopify/CartLine/1',
+        quantity: 1,
+        attributes: [
+          { key: '_bundle_id', value: 'case-9' },
+          { key: '_nexus_cid', value: 'cid-1' },
+          { key: '_gift_note', value: 'hello' },
+        ],
+      },
+    ],
+  } as Cart
+  const plan = cartMod.planGoogleClickCheckoutStamp(cart, stamp, stamp)
+  const lineAttrs = plan.lineUpdates[0]?.attributes ?? []
+  assert.equal(attr(lineAttrs, '_pd_gclid'), 'G-ADD')
+  assert.equal(attr(lineAttrs, '_pd_gclid_ts'), '2000')
+  assert.equal(attr(lineAttrs, '_bundle_id'), 'case-9')
+  assert.equal(attr(lineAttrs, '_nexus_cid'), 'cid-1')
+  assert.equal(attr(lineAttrs, '_gift_note'), 'hello')
+  assert.equal(attr(lineAttrs, '_pd_utm_source'), undefined)
+  assert.equal(attr(lineAttrs, '_pd_utm_campaign'), undefined)
+  assert.equal(attr(lineAttrs, '_pd_fbclid'), undefined)
+})
+
+test('a second checkout click while the first is in flight navigates once', async () => {
+  const cartMod = await import('./cart.ts')
+  assertFunction(cartMod.goToCheckoutAfterStamp, 'goToCheckoutAfterStamp')
+  const fallback = 'https://southland-organics.myshopify.com/cart/c/fallback'
+  const stamped = 'https://southland-organics.myshopify.com/cart/c/same-token?key=after'
+  const cart = {
+    id: 'gid://shopify/Cart/24532',
+    checkoutUrl: 'https://southland-organics.myshopify.com/cart/c/same-token?key=before',
+    attributes: [],
+    lines: [],
+  } as Cart
+  const urls: string[] = []
+  let release: () => void = () => {}
+  const gate = new Promise<void>((resolve) => {
+    release = resolve
+  })
+  const stamp = async (current: Cart) => {
+    await gate
+    return { ...current, checkoutUrl: stamped }
+  }
+  const first = cartMod.goToCheckoutAfterStamp(
+    fallback,
+    (url: string) => {
+      urls.push(url)
+    },
+    cart,
+    stamp
+  )
+  const second = cartMod.goToCheckoutAfterStamp(
+    fallback,
+    (url: string) => {
+      urls.push(url)
+    },
+    cart,
+    stamp
+  )
+  release()
+  await first
+  await second
+  assert.deepEqual(urls, [stamped])
+})
+
 test('a stamp that never resolves still navigates within the deadline', async () => {
   const cartMod = await import('./cart.ts')
   assertFunction(cartMod.goToCheckoutAfterStamp, 'goToCheckoutAfterStamp')

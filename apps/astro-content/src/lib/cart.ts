@@ -38,6 +38,7 @@ import {
   incomingPaidNetwork,
   lastTouchIdentityChangedOnCart,
   loadGoogleClickStore,
+  winningPaidNetworkFromCartAttrs,
 } from './attribution-storage'
 
 export {
@@ -790,10 +791,20 @@ export function planGoogleClickCheckoutStamp(
   const clickAttrs = googleClickAttrsOnly(lineStamp)
   const lineUpdates: CartLineUpdateInput[] = []
   for (const line of cart.lines) {
-    if (!lineNeedsGoogleClickWrite(line.attributes, clickAttrs)) continue
+    const lineAttrs = line.attributes ?? []
+    const hasPaidClick = winningPaidNetworkFromCartAttrs(lineAttrs) !== null
+    if (!hasPaidClick) {
+      if (!lineNeedsGoogleClickWrite(lineAttrs, clickAttrs)) continue
+      lineUpdates.push({
+        id: line.id,
+        attributes: patchLineGoogleClick(lineAttrs, clickAttrs),
+      })
+      continue
+    }
+    if (!lastTouchIdentityChangedOnCart(lineAttrs, lineStamp)) continue
     lineUpdates.push({
       id: line.id,
-      attributes: patchLineGoogleClick(line.attributes, clickAttrs),
+      attributes: restampCartLineAttributes(lineAttrs, lineStamp, true),
     })
   }
   return {
@@ -849,6 +860,22 @@ export async function ensureGoogleClickStamped(cart: Cart): Promise<Cart> {
 /** Pre-checkout read plus stamp. After this, checkout navigation does not wait. */
 export const CHECKOUT_STAMP_DEADLINE_MS = 1500
 
+let checkoutStampInFlight = false
+
+/**
+ * The cart mutation has already succeeded. Finish the click stamp without
+ * making add, update, or remove wait on Shopify.
+ */
+function stampCartWithoutBlocking(cart: Cart): void {
+  void ensureGoogleClickStamped(cart)
+    .then((stamped) => {
+      if (stamped !== cart) dispatchCartEvent(stamped)
+    })
+    .catch((err) => {
+      console.error('[cart] google click stamp failed:', err)
+    })
+}
+
 /**
  * Stamp the stored click, then navigate. The read and the stamp share one
  * deadline so a hung Storefront call cannot trap the shopper on the cart page.
@@ -860,6 +887,21 @@ export async function goToCheckoutAfterStamp(
   navigate: (url: string) => void,
   cart?: Cart | null,
   stamp: (cart: Cart) => Promise<Cart> = ensureGoogleClickStamped
+): Promise<void> {
+  if (checkoutStampInFlight) return
+  checkoutStampInFlight = true
+  try {
+    await navigateToCheckoutAfterStamp(fallbackUrl, navigate, cart, stamp)
+  } finally {
+    checkoutStampInFlight = false
+  }
+}
+
+async function navigateToCheckoutAfterStamp(
+  fallbackUrl: string,
+  navigate: (url: string) => void,
+  cart: Cart | null | undefined,
+  stamp: (cart: Cart) => Promise<Cart>
 ): Promise<void> {
   let current: Cart | null = cart ?? null
   let failed = false
@@ -986,9 +1028,9 @@ export async function addToCart(lines: CartLineInput[]): Promise<Cart> {
     cart = await sfCreateCart(client, stamped, cartAttrs)
   }
 
-  cart = await ensureGoogleClickStamped(cart)
   setCartId(cart.id)
   dispatchCartEvent(cart)
+  stampCartWithoutBlocking(cart)
   return cart
 }
 
@@ -1000,9 +1042,9 @@ export async function updateCartLines(lines: CartLineUpdateInput[]): Promise<Car
   if (!cartId) return null
 
   const cart = await sfUpdateCartLines(getClient(), cartId, lines)
-  const stamped = await ensureGoogleClickStamped(cart)
-  dispatchCartEvent(stamped)
-  return stamped
+  dispatchCartEvent(cart)
+  stampCartWithoutBlocking(cart)
+  return cart
 }
 
 /**
@@ -1013,9 +1055,9 @@ export async function removeFromCart(lineIds: string[]): Promise<Cart | null> {
   if (!cartId) return null
 
   const cart = await sfRemoveFromCart(getClient(), cartId, lineIds)
-  const stamped = await ensureGoogleClickStamped(cart)
-  dispatchCartEvent(stamped)
-  return stamped
+  dispatchCartEvent(cart)
+  stampCartWithoutBlocking(cart)
+  return cart
 }
 
 /**

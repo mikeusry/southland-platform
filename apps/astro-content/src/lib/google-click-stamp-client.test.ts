@@ -12,6 +12,17 @@ const createCartCalls: string[] = []
 const lineCalls: Array<{ cartId: string; lines: Array<{ id?: string; attributes?: unknown }> }> = []
 const attributeCalls: Array<{ cartId: string }> = []
 let getCartImpl: (client: unknown, cartId: string) => Promise<Cart | null> = async () => null
+let createCartImpl: () => Promise<unknown> = async () => {
+  createCartCalls.push('create')
+  throw new Error('cartCreate')
+}
+let updateAttributesImpl: (client: unknown, cartId: string) => Promise<unknown> = async (
+  _client,
+  cartId
+) => {
+  attributeCalls.push({ cartId })
+  return { id: cartId }
+}
 
 mock.module('@southland/shopify-storefront', {
   namedExports: {
@@ -19,8 +30,7 @@ mock.module('@southland/shopify-storefront', {
       return { request: async () => ({}) }
     },
     createCart() {
-      createCartCalls.push('create')
-      throw new Error('cartCreate')
+      return createCartImpl()
     },
     addToCart() {
       return undefined
@@ -35,9 +45,8 @@ mock.module('@southland/shopify-storefront', {
       lineCalls.push({ cartId, lines })
       return Promise.resolve({ id: cartId })
     },
-    updateCartAttributes(_client: unknown, cartId: string) {
-      attributeCalls.push({ cartId })
-      return Promise.resolve({ id: cartId })
+    updateCartAttributes(client: unknown, cartId: string) {
+      return updateAttributesImpl(client, cartId)
     },
     applyDiscountCode() {
       return undefined
@@ -98,6 +107,14 @@ afterEach(() => {
   lineCalls.length = 0
   attributeCalls.length = 0
   getCartImpl = async () => null
+  createCartImpl = async () => {
+    createCartCalls.push('create')
+    throw new Error('cartCreate')
+  }
+  updateAttributesImpl = async (_client, cartId) => {
+    attributeCalls.push({ cartId })
+    return { id: cartId }
+  }
 })
 
 function attr(attrs: Array<{ key: string; value: string }>, key: string): string | undefined {
@@ -237,4 +254,44 @@ test('a getCart that never resolves still navigates within the deadline', async 
   assert.deepEqual(urls, [fallback])
   assert.ok(elapsed < deadline + 800, `navigated after ${elapsed}ms`)
   assert.deepEqual(createCartCalls, [])
+})
+
+test('a hung click stamp does not block add to cart', async () => {
+  installStorage()
+  const now = Date.now()
+  localStorage.setItem('_pd_gclick', JSON.stringify({ gclid: 'G-HANG', gclid_ts: String(now) }))
+  localStorage.setItem('_pd_attribution', JSON.stringify({ _timestamp: String(now) }))
+  ;(globalThis as { dispatchEvent?: (event: Event) => boolean }).dispatchEvent = () => true
+
+  const created = {
+    id: 'gid://shopify/Cart/hang',
+    checkoutUrl: 'https://southland-organics.myshopify.com/cart/c/hang',
+    attributes: [] as Array<{ key: string; value: string }>,
+    lines: [] as Cart['lines'],
+    totalQuantity: 1,
+  }
+  createCartImpl = async () => {
+    createCartCalls.push('create')
+    return created
+  }
+  updateAttributesImpl = (_client, cartId) => {
+    attributeCalls.push({ cartId })
+    return new Promise(() => {})
+  }
+
+  const cartMod = await import('./cart.ts')
+  assert.equal(typeof cartMod.addToCart, 'function', 'addToCart is missing')
+  const started = Date.now()
+  let cart: { id?: string } | null = null
+  try {
+    cart = await cartMod.addToCart([
+      { merchandiseId: 'gid://shopify/ProductVariant/1', quantity: 1 },
+    ])
+  } catch {
+    cart = null
+  }
+  const elapsed = Date.now() - started
+  assert.equal(attributeCalls.length, 1)
+  assert.equal(cart?.id, created.id)
+  assert.ok(elapsed < 400, `add resolved after ${elapsed}ms`)
 })
