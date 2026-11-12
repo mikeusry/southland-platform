@@ -426,6 +426,76 @@ test('a customerio line restamps to a Google line and drops a non-slug campaign'
   assert.equal(attr(junkAttrs, '_nexus_cid'), 'cid-1')
 })
 
+function customerioLineCart(): Cart {
+  return {
+    id: 'gid://shopify/Cart/24542',
+    checkoutUrl: 'https://southland-organics.myshopify.com/cart/c/same-token',
+    attributes: [],
+    lines: [
+      {
+        id: 'gid://shopify/CartLine/1',
+        quantity: 1,
+        attributes: [
+          { key: '_bundle_id', value: 'case-9' },
+          { key: '_nexus_cid', value: 'cid-1' },
+          { key: '_pd_utm_source', value: 'customerio' },
+          { key: '_pd_utm_medium', value: 'email' },
+          { key: '_pd_utm_campaign', value: 'Welcome Series, Email #1' },
+        ],
+      },
+    ],
+  } as Cart
+}
+
+test('no stored click and an expired session leaves a customerio line alone', async () => {
+  installStorage()
+  const now = Date.now()
+  localStorage.setItem(
+    '_pd_attribution',
+    JSON.stringify({
+      utm_source: 'customerio',
+      utm_medium: 'email',
+      utm_campaign: 'Welcome Series, Email #1',
+      _timestamp: String(now - 2 * 60 * 60 * 1000),
+    })
+  )
+
+  const cartMod = await import('./cart.ts')
+  assertFunction(cartMod.planGoogleClickCheckoutStamp, 'planGoogleClickCheckoutStamp')
+  const fresh = getAttributionAttrs()
+  assert.equal(localStorage.getItem(CLICK_STORE_KEY), null)
+  const plan = cartMod.planGoogleClickCheckoutStamp(customerioLineCart(), fresh, [
+    { key: '_nexus_cid', value: 'cid-1' },
+    ...fresh,
+  ])
+  assert.equal(plan.lineUpdates.length, 0)
+})
+
+test('no stored click and a facebook non-click session leaves a customerio line alone', async () => {
+  installStorage()
+  const now = Date.now()
+  localStorage.setItem(
+    '_pd_attribution',
+    JSON.stringify({
+      utm_source: 'facebook',
+      utm_medium: 'social',
+      utm_campaign: 'link_in_bio',
+      _timestamp: String(now),
+    })
+  )
+
+  const cartMod = await import('./cart.ts')
+  assertFunction(cartMod.planGoogleClickCheckoutStamp, 'planGoogleClickCheckoutStamp')
+  const fresh = getAttributionAttrs()
+  assert.equal(attr(fresh, '_pd_utm_source'), 'facebook')
+  assert.equal(localStorage.getItem(CLICK_STORE_KEY), null)
+  const plan = cartMod.planGoogleClickCheckoutStamp(customerioLineCart(), fresh, [
+    { key: '_nexus_cid', value: 'cid-1' },
+    ...fresh,
+  ])
+  assert.equal(plan.lineUpdates.length, 0)
+})
+
 test('a second checkout click while the first is in flight navigates once', async () => {
   const cartMod = await import('./cart.ts')
   assertFunction(cartMod.goToCheckoutAfterStamp, 'goToCheckoutAfterStamp')

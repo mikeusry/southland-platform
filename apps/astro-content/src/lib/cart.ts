@@ -619,8 +619,12 @@ export function clearCartId(): void {
 
 // ─── Events ──────────────────────────────────────────────────────────────────
 
+/** Goes up on every cart-changed dispatch so a late background stamp can tell it is stale. */
+let cartVersion = 0
+
 function dispatchCartEvent(cart: Cart | null): void {
   if (typeof window === 'undefined') return
+  cartVersion++
   // Persist count for Header badge (read on next page load)
   try {
     localStorage.setItem('southland_cart_count', String(cart?.totalQuantity ?? 0))
@@ -826,7 +830,10 @@ export function planGoogleClickCheckoutStamp(
   const attributes = mergeCartAttributes(existing, freshCartAttrs)
   const clickAttrs = googleClickAttrsOnly(lineStamp)
   const lineUpdates: CartLineUpdateInput[] = []
-  for (const line of cart.lines) {
+  // No stored Google click means nothing to stamp: leave every line as the
+  // shopper's own change left it, the same as before this stamp existed.
+  const lines = clickAttrs.length > 0 ? cart.lines : []
+  for (const line of lines) {
     const lineAttrs = line.attributes ?? []
     const hasPaidClick = winningPaidNetworkFromCartAttrs(lineAttrs) !== null
     if (!hasPaidClick) {
@@ -918,12 +925,15 @@ let checkoutStampInFlight = false
 
 /**
  * The cart mutation has already succeeded. Finish the click stamp without
- * making add, update, or remove wait on Shopify.
+ * making add, update, or remove wait on Shopify. If another cart change was
+ * published while the stamp ran, its snapshot is older than what the page
+ * shows, so it is not dispatched.
  */
 function stampCartWithoutBlocking(cart: Cart): void {
+  const startedAt = cartVersion
   void ensureGoogleClickStamped(cart)
     .then((stamped) => {
-      if (stamped !== cart) dispatchCartEvent(stamped)
+      if (stamped !== cart && cartVersion === startedAt) dispatchCartEvent(stamped)
     })
     .catch((err) => {
       console.error('[cart] google click stamp failed:', err)

@@ -31,6 +31,9 @@ let updateLinesImpl: (
   lineCalls.push({ cartId, lines })
   return { id: cartId }
 }
+let addToCartImpl: (client: unknown, cartId: string) => Promise<unknown> = async () => undefined
+let removeFromCartImpl: (client: unknown, cartId: string) => Promise<unknown> = async () =>
+  undefined
 
 mock.module('@southland/shopify-storefront', {
   namedExports: {
@@ -40,14 +43,14 @@ mock.module('@southland/shopify-storefront', {
     createCart() {
       return createCartImpl()
     },
-    addToCart() {
-      return undefined
+    addToCart(client: unknown, cartId: string) {
+      return addToCartImpl(client, cartId)
     },
     getCart(client: unknown, cartId: string) {
       return getCartImpl(client, cartId)
     },
-    removeFromCart() {
-      return undefined
+    removeFromCart(client: unknown, cartId: string) {
+      return removeFromCartImpl(client, cartId)
     },
     updateCartLines(
       client: unknown,
@@ -130,6 +133,8 @@ afterEach(() => {
     lineCalls.push({ cartId, lines })
     return { id: cartId }
   }
+  addToCartImpl = async () => undefined
+  removeFromCartImpl = async () => undefined
 })
 
 function attr(attrs: Array<{ key: string; value: string }>, key: string): string | undefined {
@@ -374,4 +379,194 @@ test('a failed line stamp refetches instead of dispatching the stale cart', asyn
     dispatched.some((cart) => cart.lines?.some((line) => line.id === lineId) && cart !== withLine),
     false
   )
+})
+
+const NO_CLICK_SESSIONS = [
+  {
+    name: 'an expired session',
+    bag: (now: number) => ({
+      utm_source: 'customerio',
+      utm_medium: 'email',
+      utm_campaign: 'Welcome Series, Email #1',
+      _timestamp: String(now - 2 * 60 * 60 * 1000),
+    }),
+  },
+  {
+    name: 'a facebook non-click session',
+    bag: (now: number) => ({
+      utm_source: 'facebook',
+      utm_medium: 'social',
+      utm_campaign: 'link_in_bio',
+      _timestamp: String(now),
+    }),
+  },
+]
+
+const NO_CLICK_LINE_ID = 'gid://shopify/CartLine/customerio'
+
+function customerioCart(): Cart {
+  return {
+    id: 'gid://shopify/Cart/no-click',
+    checkoutUrl: 'https://southland-organics.myshopify.com/cart/c/no-click',
+    attributes: [{ key: '_pd_brand', value: 'southland' }],
+    lines: [
+      {
+        id: NO_CLICK_LINE_ID,
+        quantity: 1,
+        attributes: [
+          { key: '_bundle_id', value: 'case-9' },
+          { key: '_nexus_cid', value: 'cid-keep' },
+          { key: '_pd_utm_source', value: 'customerio' },
+          { key: '_pd_utm_medium', value: 'email' },
+          { key: '_pd_utm_campaign', value: 'Welcome Series, Email #1' },
+        ],
+      },
+    ],
+    totalQuantity: 1,
+  } as Cart
+}
+
+/** userLineCalls is the cartLinesUpdate the shopper's own change makes, if any. */
+const NO_CLICK_ENTRY_POINTS: Array<{
+  name: string
+  userLineCalls: number
+  run: (cart: Cart) => Promise<void>
+}> = [
+  {
+    name: 'add to cart',
+    userLineCalls: 0,
+    run: async (cart) => {
+      addToCartImpl = async () => cart
+      const cartMod = await import('./cart.ts')
+      await cartMod.addToCart([{ merchandiseId: 'gid://shopify/ProductVariant/1', quantity: 1 }])
+    },
+  },
+  {
+    name: 'update cart lines',
+    userLineCalls: 1,
+    run: async (cart) => {
+      updateLinesImpl = async (_client, cartId, lines) => {
+        lineCalls.push({ cartId, lines })
+        return cart
+      }
+      const cartMod = await import('./cart.ts')
+      await cartMod.updateCartLines([{ id: NO_CLICK_LINE_ID, quantity: 2 }])
+    },
+  },
+  {
+    name: 'remove from cart',
+    userLineCalls: 0,
+    run: async (cart) => {
+      removeFromCartImpl = async () => cart
+      const cartMod = await import('./cart.ts')
+      await cartMod.removeFromCart(['gid://shopify/CartLine/other'])
+    },
+  },
+  {
+    name: 'checkout',
+    userLineCalls: 0,
+    run: async (cart) => {
+      const cartMod = await import('./cart.ts')
+      const urls: string[] = []
+      await cartMod.goToCheckoutAfterStamp(
+        'https://southland-organics.myshopify.com/cart/c/fallback',
+        (url: string) => {
+          urls.push(url)
+        },
+        cart
+      )
+      assert.deepEqual(urls, [cart.checkoutUrl])
+    },
+  },
+]
+
+for (const session of NO_CLICK_SESSIONS) {
+  for (const entry of NO_CLICK_ENTRY_POINTS) {
+    test(`${entry.name} with no stored click and ${session.name} leaves a customerio line alone`, async () => {
+      installStorage()
+      localStorage.setItem('_pd_attribution', JSON.stringify(session.bag(Date.now())))
+      localStorage.setItem('_nexus_cid', 'cid-keep')
+      const cart = customerioCart()
+      localStorage.setItem('southland_cart_id', cart.id)
+      ;(globalThis as { dispatchEvent?: (event: Event) => boolean }).dispatchEvent = () => true
+      updateAttributesImpl = async (_client, cartId) => {
+        attributeCalls.push({ cartId })
+        return cart
+      }
+
+      await entry.run(cart)
+      await new Promise((resolve) => setTimeout(resolve, 10))
+
+      assert.equal(localStorage.getItem('_pd_gclick'), null)
+      assert.deepEqual(createCartCalls, [])
+      assert.equal(lineCalls.length, entry.userLineCalls)
+      for (const call of lineCalls) {
+        assert.deepEqual(call.lines, [{ id: NO_CLICK_LINE_ID, quantity: 2 }])
+      }
+    })
+  }
+}
+
+test('a background stamp that finishes after a later cart change does not dispatch its old snapshot', async () => {
+  installStorage()
+  const now = Date.now()
+  localStorage.setItem('_pd_gclick', JSON.stringify({ gclid: 'G-LATE', gclid_ts: String(now) }))
+  localStorage.setItem('_pd_attribution', JSON.stringify({ _timestamp: String(now) }))
+  const cartId = 'gid://shopify/Cart/late'
+  const lineId = 'gid://shopify/CartLine/late'
+  localStorage.setItem('southland_cart_id', cartId)
+
+  const updated = {
+    id: cartId,
+    checkoutUrl: 'https://southland-organics.myshopify.com/cart/c/updated',
+    attributes: [] as Array<{ key: string; value: string }>,
+    lines: [{ id: lineId, quantity: 2, attributes: [{ key: '_bundle_id', value: 'case-9' }] }],
+    totalQuantity: 2,
+  }
+  const removed = {
+    ...updated,
+    checkoutUrl: 'https://southland-organics.myshopify.com/cart/c/removed',
+    lines: [] as Cart['lines'],
+    totalQuantity: 0,
+  }
+  const staleStamped = {
+    ...updated,
+    checkoutUrl: 'https://southland-organics.myshopify.com/cart/c/stale-stamp',
+  }
+
+  let release: (cart: unknown) => void = () => {}
+  updateAttributesImpl = (_client, id) => {
+    attributeCalls.push({ cartId: id })
+    if (attributeCalls.length === 1) {
+      return new Promise((resolve) => {
+        release = resolve
+      })
+    }
+    return Promise.resolve(removed)
+  }
+  updateLinesImpl = async (_client, id, lines) => {
+    lineCalls.push({ cartId: id, lines })
+    return lineCalls.length === 1 ? updated : staleStamped
+  }
+  removeFromCartImpl = async () => removed
+
+  const dispatched: unknown[] = []
+  ;(globalThis as { dispatchEvent?: (event: Event) => boolean }).dispatchEvent = (event) => {
+    dispatched.push((event as CustomEvent<unknown>).detail)
+    return true
+  }
+
+  const cartMod = await import('./cart.ts')
+  await cartMod.updateCartLines([{ id: lineId, quantity: 2 }])
+  await new Promise((resolve) => setTimeout(resolve, 0))
+  assert.equal(attributeCalls.length, 1, 'the first stamp is held open')
+
+  await cartMod.removeFromCart([lineId])
+  await new Promise((resolve) => setTimeout(resolve, 10))
+  release(updated)
+  await new Promise((resolve) => setTimeout(resolve, 10))
+
+  assert.equal(lineCalls.length, 2, 'the held stamp still wrote its line')
+  assert.equal(dispatched.includes(staleStamped), false)
+  assert.equal(dispatched[dispatched.length - 1], removed)
 })
