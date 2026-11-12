@@ -770,6 +770,42 @@ function patchLineGoogleClick(
   return [...kept, ...clickAttrs]
 }
 
+const LAST_TOUCH_LINE_KEYS = CART_LAST_TOUCH_CLEAR_ON_IDENTITY_CHANGE as readonly string[]
+
+function lineHasLastTouchKey(
+  attributes: Array<{ key: string; value: string }> | undefined
+): boolean {
+  return (attributes ?? []).some((item) =>
+    Boolean(item.key && item.value && LAST_TOUCH_LINE_KEYS.includes(item.key))
+  )
+}
+
+/** True when a last-touch key already on the line is not the current stamp's value. */
+function lineLastTouchDiffersFromStamp(
+  attributes: Array<{ key: string; value: string }> | undefined,
+  stamp: Array<{ key: string; value: string }>
+): boolean {
+  const stampMap = new Map(
+    stamp.filter((item) => item.key && item.value).map((item) => [item.key, item.value])
+  )
+  for (const item of attributes ?? []) {
+    if (!item.key || !item.value || !LAST_TOUCH_LINE_KEYS.includes(item.key)) continue
+    if (stampMap.get(item.key) !== item.value) return true
+  }
+  return false
+}
+
+function restampLineForCurrentClick(
+  lineAttrs: CartLineAttribute[],
+  lineStamp: CartLineAttribute[]
+): CartLineAttribute[] {
+  return withValidatedCampaign(
+    restampCartLineAttributes(lineAttrs, lineStamp, true),
+    '_pd_utm_campaign',
+    '_pd_'
+  )
+}
+
 /**
  * Attributes and line updates that put the stored Google click on an existing
  * cart. cartAttributesUpdate replaces the whole list, so `attributes` is the
@@ -794,6 +830,15 @@ export function planGoogleClickCheckoutStamp(
     const lineAttrs = line.attributes ?? []
     const hasPaidClick = winningPaidNetworkFromCartAttrs(lineAttrs) !== null
     if (!hasPaidClick) {
+      const hasLastTouch = lineHasLastTouchKey(lineAttrs)
+      const lastTouchDiffers = hasLastTouch && lineLastTouchDiffersFromStamp(lineAttrs, lineStamp)
+      if (lastTouchDiffers || (hasLastTouch && lineNeedsGoogleClickWrite(lineAttrs, clickAttrs))) {
+        lineUpdates.push({
+          id: line.id,
+          attributes: restampLineForCurrentClick(lineAttrs, lineStamp),
+        })
+        continue
+      }
       if (!lineNeedsGoogleClickWrite(lineAttrs, clickAttrs)) continue
       lineUpdates.push({
         id: line.id,
@@ -853,7 +898,16 @@ export async function ensureGoogleClickStamped(cart: Cart): Promise<Cart> {
     const error = err instanceof Error ? err : new Error(String(err))
     console.error('[cart] google click line stamp failed:', error)
     captureCartException(error, { stage: 'google-click-lines', cartId: cart.id })
-    return next
+    // The attribute response can still list a line that was removed before this
+    // update. Refetch the cart Shopify has now. If that fails, keep the caller's
+    // cart so the background stamp does not publish the stale one.
+    try {
+      const fresh = await getCart()
+      if (fresh) return fresh
+    } catch (refetchErr) {
+      console.error('[cart] google click line stamp refetch failed:', refetchErr)
+    }
+    return cart
   }
 }
 

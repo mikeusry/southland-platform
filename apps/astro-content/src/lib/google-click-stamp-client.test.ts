@@ -23,6 +23,14 @@ let updateAttributesImpl: (client: unknown, cartId: string) => Promise<unknown> 
   attributeCalls.push({ cartId })
   return { id: cartId }
 }
+let updateLinesImpl: (
+  client: unknown,
+  cartId: string,
+  lines: Array<{ id?: string; attributes?: unknown }>
+) => Promise<unknown> = async (_client, cartId, lines) => {
+  lineCalls.push({ cartId, lines })
+  return { id: cartId }
+}
 
 mock.module('@southland/shopify-storefront', {
   namedExports: {
@@ -41,9 +49,12 @@ mock.module('@southland/shopify-storefront', {
     removeFromCart() {
       return undefined
     },
-    updateCartLines(_client: unknown, cartId: string, lines: Array<{ id?: string }>) {
-      lineCalls.push({ cartId, lines })
-      return Promise.resolve({ id: cartId })
+    updateCartLines(
+      client: unknown,
+      cartId: string,
+      lines: Array<{ id?: string; attributes?: unknown }>
+    ) {
+      return updateLinesImpl(client, cartId, lines)
     },
     updateCartAttributes(client: unknown, cartId: string) {
       return updateAttributesImpl(client, cartId)
@@ -115,6 +126,10 @@ afterEach(() => {
     attributeCalls.push({ cartId })
     return { id: cartId }
   }
+  updateLinesImpl = async (_client, cartId, lines) => {
+    lineCalls.push({ cartId, lines })
+    return { id: cartId }
+  }
 })
 
 function attr(attrs: Array<{ key: string; value: string }>, key: string): string | undefined {
@@ -127,6 +142,7 @@ test('ensureGoogleClickStamped updates the existing cart id and never calls cart
   const ts = String(now - 60_000)
   localStorage.setItem('_pd_gclick', JSON.stringify({ gclid: 'G-REAL', gclid_ts: ts }))
   localStorage.setItem('_pd_attribution', JSON.stringify({ _timestamp: String(now) }))
+  localStorage.setItem('_nexus_cid', 'cid-keep')
 
   const cartMod = await import('./cart.ts')
   assert.equal(
@@ -166,8 +182,8 @@ test('ensureGoogleClickStamped updates the existing cart id and never calls cart
   }>
   assert.equal(attr(lineAttrs, '_pd_gclid'), 'G-REAL')
   assert.equal(attr(lineAttrs, '_bundle_id'), 'case-9')
-  assert.equal(attr(lineAttrs, '_pd_utm_source'), 'google')
-  assert.equal(attr(lineAttrs, '_pd_utm_medium'), 'cpc')
+  assert.equal(attr(lineAttrs, '_pd_utm_source'), undefined)
+  assert.equal(attr(lineAttrs, '_pd_utm_medium'), undefined)
   assert.equal(attr(lineAttrs, '_nexus_cid'), 'cid-keep')
 })
 
@@ -294,4 +310,68 @@ test('a hung click stamp does not block add to cart', async () => {
   assert.equal(attributeCalls.length, 1)
   assert.equal(cart?.id, created.id)
   assert.ok(elapsed < 400, `add resolved after ${elapsed}ms`)
+})
+
+test('a failed line stamp refetches instead of dispatching the stale cart', async () => {
+  installStorage()
+  const now = Date.now()
+  localStorage.setItem('_pd_gclick', JSON.stringify({ gclid: 'G-FRESH', gclid_ts: String(now) }))
+  localStorage.setItem('_pd_attribution', JSON.stringify({ _timestamp: String(now) }))
+  const lineId = 'gid://shopify/CartLine/gone'
+  const withLine = {
+    id: 'gid://shopify/Cart/stale',
+    checkoutUrl: 'https://southland-organics.myshopify.com/cart/c/stale',
+    attributes: [] as Array<{ key: string; value: string }>,
+    lines: [
+      {
+        id: lineId,
+        quantity: 1,
+        attributes: [
+          { key: '_pd_utm_source', value: 'customerio' },
+          { key: '_pd_utm_campaign', value: 'Welcome Series, Email #1' },
+        ],
+      },
+    ],
+    totalQuantity: 1,
+  }
+  const stale = {
+    ...withLine,
+    attributes: [{ key: '_pd_gclid', value: 'G-STALE' }],
+  }
+  const removed = {
+    ...withLine,
+    attributes: [{ key: '_pd_gclid', value: 'G-FRESH' }],
+    lines: [] as Cart['lines'],
+    totalQuantity: 0,
+  }
+  localStorage.setItem('southland_cart_id', withLine.id)
+  updateAttributesImpl = async () => stale
+  updateLinesImpl = async (_client, cartId, lines) => {
+    lineCalls.push({ cartId, lines })
+    if (lineCalls.length === 1) return withLine
+    throw new Error('line removed')
+  }
+  getCartImpl = async () => removed as Cart
+
+  const dispatched: Array<{ lines?: Array<{ id?: string }> }> = []
+  ;(globalThis as { dispatchEvent?: (event: Event) => boolean }).dispatchEvent = (event) => {
+    const detail = (event as CustomEvent<{ lines?: Array<{ id?: string }> }>).detail
+    if (detail) dispatched.push(detail)
+    return true
+  }
+
+  const cartMod = await import('./cart.ts')
+  assert.equal(typeof cartMod.updateCartLines, 'function', 'updateCartLines is missing')
+  try {
+    await cartMod.updateCartLines([{ id: lineId, quantity: 1 }])
+  } catch {
+    /* main throws before the stamp */
+  }
+  await new Promise((resolve) => setTimeout(resolve, 0))
+  const last = dispatched[dispatched.length - 1]
+  assert.equal(last?.lines?.length, 0)
+  assert.equal(
+    dispatched.some((cart) => cart.lines?.some((line) => line.id === lineId) && cart !== withLine),
+    false
+  )
 })

@@ -167,7 +167,7 @@ test('a newer stored click wins over an older click still in the session bag', (
   assert.equal(attr(attrs, '_pd_gbraid'), undefined)
 })
 
-test('checkout stamp keeps existing line properties and skips a current click', async () => {
+test('checkout stamp replaces a differing last-touch medium and skips a current click', async () => {
   installStorage()
   const now = Date.now()
   const ts = String(now - 9 * 60 * 1000)
@@ -217,7 +217,8 @@ test('checkout stamp keeps existing line properties and skips a current click', 
   assert.equal(attr(lineAttrs, '_pd_gclid'), 'G-SSO')
   assert.equal(attr(lineAttrs, '_bundle_id'), 'case-9')
   assert.equal(attr(lineAttrs, '_pd_utm_source'), 'google')
-  assert.equal(attr(lineAttrs, '_pd_utm_medium'), 'cpc')
+  assert.equal(attr(lineAttrs, '_pd_utm_medium'), 'shopping_unattributed')
+  assert.equal(attr(lineAttrs, '_pd_srsltid'), 'S-SHOP')
   assert.equal(attr(lineAttrs, '_nexus_cid'), 'cid-1')
 
   const already = cartMod.planGoogleClickCheckoutStamp(
@@ -363,6 +364,66 @@ test('a line with no click gains only the Google click keys', async () => {
   assert.equal(attr(lineAttrs, '_pd_utm_source'), undefined)
   assert.equal(attr(lineAttrs, '_pd_utm_campaign'), undefined)
   assert.equal(attr(lineAttrs, '_pd_fbclid'), undefined)
+})
+
+test('a customerio line restamps to a Google line and drops a non-slug campaign', async () => {
+  const cartMod = await import('./cart.ts')
+  assertFunction(cartMod.planGoogleClickCheckoutStamp, 'planGoogleClickCheckoutStamp')
+  const stamp = [
+    { key: '_nexus_cid', value: 'cid-1' },
+    { key: '_pd_gclid', value: 'G-NEW' },
+    { key: '_pd_gclid_ts', value: '2000' },
+    { key: '_pd_utm_source', value: 'google' },
+    { key: '_pd_utm_medium', value: 'cpc' },
+    { key: '_pd_utm_campaign', value: 'brand-search' },
+  ]
+  const cart = {
+    id: 'gid://shopify/Cart/24542',
+    checkoutUrl: 'https://southland-organics.myshopify.com/cart/c/same-token',
+    attributes: [],
+    lines: [
+      {
+        id: 'gid://shopify/CartLine/1',
+        quantity: 1,
+        attributes: [
+          { key: '_bundle_id', value: 'case-9' },
+          { key: '_nexus_cid', value: 'cid-1' },
+          { key: '_pd_utm_source', value: 'customerio' },
+          { key: '_pd_utm_medium', value: 'email' },
+          { key: '_pd_utm_campaign', value: 'Welcome Series, Email #1' },
+          { key: '_pd_landing_page', value: '/email/abandoned-cart' },
+          { key: '_pd_referrer', value: 'https://email.customer.io/click' },
+        ],
+      },
+    ],
+  } as Cart
+  const plan = cartMod.planGoogleClickCheckoutStamp(cart, stamp, stamp)
+  const lineAttrs = plan.lineUpdates[0]?.attributes ?? []
+  assert.equal(plan.lineUpdates.length, 1)
+  assert.equal(attr(lineAttrs, '_pd_gclid'), 'G-NEW')
+  assert.equal(attr(lineAttrs, '_pd_utm_source'), 'google')
+  assert.equal(attr(lineAttrs, '_pd_utm_medium'), 'cpc')
+  assert.equal(attr(lineAttrs, '_pd_utm_campaign'), 'brand-search')
+  assert.equal(attr(lineAttrs, '_bundle_id'), 'case-9')
+  assert.equal(attr(lineAttrs, '_nexus_cid'), 'cid-1')
+  assert.equal(attr(lineAttrs, '_pd_landing_page'), undefined)
+  assert.equal(attr(lineAttrs, '_pd_referrer'), undefined)
+  assert.equal(
+    lineAttrs.some(
+      (item) => item.value === 'customerio' || item.value === 'Welcome Series, Email #1'
+    ),
+    false
+  )
+
+  const junkStamp = stamp.map((item) =>
+    item.key === '_pd_utm_campaign' ? { key: item.key, value: 'Catalyst - PMax (Feed-Only)' } : item
+  )
+  const junk = cartMod.planGoogleClickCheckoutStamp(cart, junkStamp, junkStamp)
+  const junkAttrs = junk.lineUpdates[0]?.attributes ?? []
+  assert.equal(attr(junkAttrs, '_pd_gclid'), 'G-NEW')
+  assert.equal(attr(junkAttrs, '_pd_utm_campaign'), undefined)
+  assert.equal(attr(junkAttrs, '_bundle_id'), 'case-9')
+  assert.equal(attr(junkAttrs, '_nexus_cid'), 'cid-1')
 })
 
 test('a second checkout click while the first is in flight navigates once', async () => {
