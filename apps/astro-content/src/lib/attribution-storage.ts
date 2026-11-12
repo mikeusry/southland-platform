@@ -1,5 +1,5 @@
 /**
- * Pure attribution localStorage rules shared between landing capture and cart read.
+ * Attribution rules shared between landing capture and cart read.
  * Keep BaseLayout capture and cart.ts in sync by changing this module only.
  */
 
@@ -178,6 +178,11 @@ export function googleClickEpochMs(
   return sessionTs
 }
 
+/** Future timestamps are not live. A date ahead of now would never expire. */
+function googleClickTsIsLive(ts: number, now: number): boolean {
+  return ts > 0 && ts <= now && now - ts <= GOOGLE_CLICK_MS
+}
+
 /** Drop Google click ids older than 90 days (active session or not). */
 export function expireGoogleClicksPast90Days(
   bag: AttributionBag,
@@ -188,7 +193,7 @@ export function expireGoogleClicksPast90Days(
   for (const key of GOOGLE_CLICK_PARAMS) {
     if (!out[key]) continue
     const clickTs = googleClickEpochMs(out, key, sessionTs)
-    if (!(clickTs > 0 && now - clickTs <= GOOGLE_CLICK_MS)) {
+    if (!googleClickTsIsLive(clickTs, now)) {
       delete out[key]
       delete out[`${key}_ts`]
     }
@@ -357,7 +362,7 @@ export function filterLastTouchAttribution(
   for (const key of GOOGLE_CLICK_PARAMS) {
     if (!bag[key]) continue
     const clickTs = googleClickEpochMs(bag, key, ts)
-    if (clickTs > 0 && now - clickTs <= GOOGLE_CLICK_MS) {
+    if (googleClickTsIsLive(clickTs, now)) {
       retained[key] = bag[key]
       const storedTs = bag[`${key}_ts`]
       retained[`${key}_ts`] = storedTs ? String(storedTs) : String(clickTs)
@@ -429,4 +434,124 @@ export function lastTouchIdentityChangedOnCart(
   if (fw && ew !== fw) return true
 
   return false
+}
+
+/** Latest gclid, gbraid, or wbraid. Not the session bag — srsltid must not clear it. */
+export const GOOGLE_CLICK_STORE_KEY = '_pd_gclick'
+
+function liveGoogleClick(bag: AttributionBag, now: number): AttributionBag | null {
+  const key = activeGoogleClickKey(bag)
+  if (!key || !bag[key]) return null
+  const ts = googleClickEpochMs(bag, key)
+  if (!googleClickTsIsLive(ts, now)) return null
+  return { [key]: bag[key], [`${key}_ts`]: String(ts) }
+}
+
+export function readGoogleClickStoreBag(
+  raw: string | null,
+  now = Date.now()
+): AttributionBag | null {
+  if (!raw) return null
+  try {
+    const parsed = JSON.parse(raw) as unknown
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null
+    return liveGoogleClick(parsed as AttributionBag, now)
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Record a real click. A non-click visit (srsltid, UTMs, empty) leaves the
+ * stored click in place. A newer click replaces an older one. Another paid
+ * network clears it, matching the session-bag rule.
+ */
+export function updateGoogleClickStore(
+  store: AttributionBag | null,
+  incoming: AttributionBag,
+  now = Date.now()
+): AttributionBag | null {
+  const current = store ? liveGoogleClick(store, now) : null
+  const network = incomingPaidNetwork(incoming)
+  if (network && network !== 'google') return null
+
+  const incomingClick = activeGoogleClickKey(incoming)
+  if (!incomingClick) return current
+  const value = incoming[incomingClick]
+  if (!value) return current
+
+  const previousTs = current?.[`${incomingClick}_ts`]
+  const ts = current?.[incomingClick] === value && previousTs ? String(previousTs) : String(now)
+  return { [incomingClick]: value, [`${incomingClick}_ts`]: ts }
+}
+
+/** Overlay the 90-day click onto a session bag. The newer click wins. */
+export function applyStoredGoogleClick(
+  bag: AttributionBag,
+  stored: AttributionBag | null,
+  now = Date.now()
+): AttributionBag {
+  const live = stored ? liveGoogleClick(stored, now) : null
+  if (!live) return bag
+  const network = incomingPaidNetwork(bag)
+  if (network && network !== 'google') return bag
+
+  const storedKey = activeGoogleClickKey(live)
+  if (!storedKey || !live[storedKey]) return bag
+  const storedTs = googleClickEpochMs(live, storedKey)
+  const bagKey = activeGoogleClickKey(bag)
+  if (!bagKey) {
+    return {
+      ...bag,
+      [storedKey]: live[storedKey],
+      [`${storedKey}_ts`]: String(storedTs),
+    }
+  }
+  if (bagKey === storedKey && bag[bagKey] === live[storedKey]) {
+    if (!bag[`${bagKey}_ts`]) return { ...bag, [`${bagKey}_ts`]: String(storedTs) }
+    return bag
+  }
+
+  const bagTs = googleClickEpochMs(bag, bagKey, Number(bag._timestamp) || 0)
+  if (!(storedTs > bagTs)) return bag
+
+  const out: AttributionBag = { ...bag }
+  for (const key of GOOGLE_CLICK_PARAMS) {
+    delete out[key]
+    delete out[`${key}_ts`]
+  }
+  out[storedKey] = live[storedKey]
+  out[`${storedKey}_ts`] = String(storedTs)
+  return out
+}
+
+export function loadGoogleClickStore(now = Date.now()): AttributionBag | null {
+  if (typeof localStorage === 'undefined') return null
+  try {
+    const raw = localStorage.getItem(GOOGLE_CLICK_STORE_KEY)
+    if (!raw) return null
+    const live = readGoogleClickStoreBag(raw, now)
+    if (!live) localStorage.removeItem(GOOGLE_CLICK_STORE_KEY)
+    return live
+  } catch {
+    return null
+  }
+}
+
+export function saveGoogleClickStore(incoming: AttributionBag, now = Date.now()): void {
+  if (typeof localStorage === 'undefined') return
+  try {
+    const current = readGoogleClickStoreBag(localStorage.getItem(GOOGLE_CLICK_STORE_KEY), now)
+    const next = updateGoogleClickStore(current, incoming, now)
+    if (!next) {
+      localStorage.removeItem(GOOGLE_CLICK_STORE_KEY)
+      return
+    }
+    const raw = JSON.stringify(next)
+    if (raw !== localStorage.getItem(GOOGLE_CLICK_STORE_KEY)) {
+      localStorage.setItem(GOOGLE_CLICK_STORE_KEY, raw)
+    }
+  } catch {
+    /* private mode */
+  }
 }

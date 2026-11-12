@@ -9,6 +9,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import type { Cart, CartLine } from '@southland/shopify-storefront'
 import {
   getCart,
+  goToCheckoutAfterStamp,
   updateCartLines,
   removeFromCart,
   countGallonItems,
@@ -619,13 +620,31 @@ export default function CartPage() {
           {/* Checkout button */}
           <a
             href={cart.checkoutUrl}
-            onClick={() =>
+            onClick={(event) => {
               trackBeginCheckout(
                 cart.lines,
                 cart.cost.totalAmount.amount,
                 cart.cost.totalAmount.currencyCode
               )
-            }
+              if (
+                event.metaKey ||
+                event.ctrlKey ||
+                event.shiftKey ||
+                event.altKey ||
+                event.button !== 0
+              ) {
+                return
+              }
+              event.preventDefault()
+              const fallback = cart.checkoutUrl
+              void goToCheckoutAfterStamp(
+                fallback,
+                (url) => {
+                  window.location.assign(url)
+                },
+                cart
+              )
+            }}
             className="mt-6 block w-full rounded-md bg-brand-green-dark px-6 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-green-800"
           >
             Proceed to Checkout

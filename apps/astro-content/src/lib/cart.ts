@@ -26,14 +26,19 @@ import type {
   StorefrontClient,
 } from '@southland/shopify-storefront'
 import {
+  applyStoredGoogleClick,
   ATTRIBUTION_SESSION_MS,
   CART_LAST_TOUCH_CLEAR_ON_IDENTITY_CHANGE,
   coalesceLastTouchBag,
   filterLastTouchAttribution,
   GOOGLE_CLICK_MS,
   GOOGLE_CLICK_PARAMS,
+  GOOGLE_CLICK_STORE_KEY,
   googleClickSnapshotFromPairs,
+  incomingPaidNetwork,
   lastTouchIdentityChangedOnCart,
+  loadGoogleClickStore,
+  winningPaidNetworkFromCartAttrs,
 } from './attribution-storage'
 
 export {
@@ -250,16 +255,34 @@ export function getAttributionAttrs(): Array<{ key: string; value: string }> {
   if (typeof window === 'undefined') return []
   try {
     const raw = localStorage.getItem(PD_ATTRIBUTION_KEY)
-    if (!raw) return []
-    const data = JSON.parse(raw) as Record<string, string>
+    let data: Record<string, string> = {}
+    if (raw) {
+      try {
+        data = JSON.parse(raw) as Record<string, string>
+      } catch {
+        data = {}
+      }
+    }
     // Enforce the 30-minute UTM session at read time (visitors with no new params
-    // never hit BaseLayout's write path). Google click IDs survive up to 90 days.
-    const filtered = filterLastTouchAttribution(data)
-    if (!filtered) {
-      localStorage.removeItem(PD_ATTRIBUTION_KEY)
+    // never hit BaseLayout's write path). Google click IDs survive up to 90 days
+    // in `_pd_gclick` even when this bag no longer has them.
+    const now = Date.now()
+    const filtered = raw ? filterLastTouchAttribution(data, now) : null
+    const sessionBag = filtered ?? {}
+    const otherNetwork = incomingPaidNetwork(sessionBag)
+    if (otherNetwork && otherNetwork !== 'google') {
+      try {
+        localStorage.removeItem(GOOGLE_CLICK_STORE_KEY)
+      } catch {
+        /* private mode */
+      }
+    }
+    const overlaid = applyStoredGoogleClick(sessionBag, loadGoogleClickStore(now), now)
+    if (Object.keys(overlaid).length === 0) {
+      if (raw) localStorage.removeItem(PD_ATTRIBUTION_KEY)
       return []
     }
-    const coalesced = coalesceLastTouchBag(filtered)
+    const coalesced = coalesceLastTouchBag(overlaid)
     try {
       const next = JSON.stringify(coalesced)
       if (next !== raw) {
@@ -596,8 +619,12 @@ export function clearCartId(): void {
 
 // ─── Events ──────────────────────────────────────────────────────────────────
 
+/** Goes up on every cart-changed dispatch so a late background stamp can tell it is stale. */
+let cartVersion = 0
+
 function dispatchCartEvent(cart: Cart | null): void {
   if (typeof window === 'undefined') return
+  cartVersion++
   // Persist count for Header badge (read on next page load)
   try {
     localStorage.setItem('southland_cart_count', String(cart?.totalQuantity ?? 0))
@@ -613,9 +640,10 @@ let _client: StorefrontClient | null = null
 
 function getClient(): StorefrontClient {
   if (!_client) {
+    const env = import.meta.env
     _client = createClient({
-      storeDomain: import.meta.env.PUBLIC_SHOPIFY_STORE_DOMAIN,
-      publicAccessToken: import.meta.env.PUBLIC_SHOPIFY_STOREFRONT_TOKEN,
+      storeDomain: env?.PUBLIC_SHOPIFY_STORE_DOMAIN,
+      publicAccessToken: env?.PUBLIC_SHOPIFY_STOREFRONT_TOKEN,
     })
   }
   return _client
@@ -697,6 +725,275 @@ export function mergeCartAttributes(
     if (!merged.has(a.key) || REFRESHABLE.has(a.key)) merged.set(a.key, a.value)
   }
   return Array.from(merged, ([key, value]) => ({ key, value }))
+}
+
+function attributionAttrsEqual(
+  left: Array<{ key: string; value: string }>,
+  right: Array<{ key: string; value: string }>
+): boolean {
+  const a = left.filter((item) => item.key && item.value)
+  const b = right.filter((item) => item.key && item.value)
+  if (a.length !== b.length) return false
+  const map = new Map(a.map((item) => [item.key, item.value]))
+  return b.every((item) => map.get(item.key) === item.value)
+}
+
+function googleClickAttrsOnly(
+  stamp: Array<{ key: string; value: string }>
+): Array<{ key: string; value: string }> {
+  const wanted = new Set<string>(GOOGLE_CLICK_ATTR_KEYS)
+  return stamp.filter((item) => Boolean(item.key && item.value && wanted.has(item.key)))
+}
+
+/** True when the line is missing the current click or still has a different one. */
+function lineNeedsGoogleClickWrite(
+  attributes: Array<{ key: string; value: string }> | undefined,
+  clickAttrs: Array<{ key: string; value: string }>
+): boolean {
+  if (clickAttrs.length === 0) return false
+  const have = new Map(
+    (attributes ?? []).filter((item) => item.key).map((item) => [item.key, item.value])
+  )
+  const expected = new Set(clickAttrs.map((item) => item.key))
+  for (const item of clickAttrs) {
+    if (have.get(item.key) !== item.value) return true
+  }
+  for (const key of GOOGLE_CLICK_ATTR_KEYS) {
+    if (!expected.has(key) && have.has(key)) return true
+  }
+  return false
+}
+
+/** Add or replace only the Google click keys. Every other line property stays. */
+function patchLineGoogleClick(
+  existing: CartLineAttribute[] | undefined,
+  clickAttrs: Array<{ key: string; value: string }>
+): CartLineAttribute[] {
+  const clickKeys = new Set<string>(GOOGLE_CLICK_ATTR_KEYS)
+  const kept = (existing ?? []).filter((item) => item.key && !clickKeys.has(item.key))
+  return [...kept, ...clickAttrs]
+}
+
+const LAST_TOUCH_LINE_KEYS = CART_LAST_TOUCH_CLEAR_ON_IDENTITY_CHANGE as readonly string[]
+
+function lineHasLastTouchKey(
+  attributes: Array<{ key: string; value: string }> | undefined
+): boolean {
+  return (attributes ?? []).some((item) =>
+    Boolean(item.key && item.value && LAST_TOUCH_LINE_KEYS.includes(item.key))
+  )
+}
+
+/** True when a last-touch key already on the line is not the current stamp's value. */
+function lineLastTouchDiffersFromStamp(
+  attributes: Array<{ key: string; value: string }> | undefined,
+  stamp: Array<{ key: string; value: string }>
+): boolean {
+  const stampMap = new Map(
+    stamp.filter((item) => item.key && item.value).map((item) => [item.key, item.value])
+  )
+  for (const item of attributes ?? []) {
+    if (!item.key || !item.value || !LAST_TOUCH_LINE_KEYS.includes(item.key)) continue
+    if (stampMap.get(item.key) !== item.value) return true
+  }
+  return false
+}
+
+function restampLineForCurrentClick(
+  lineAttrs: CartLineAttribute[],
+  lineStamp: CartLineAttribute[]
+): CartLineAttribute[] {
+  return withValidatedCampaign(
+    restampCartLineAttributes(lineAttrs, lineStamp, true),
+    '_pd_utm_campaign',
+    '_pd_'
+  )
+}
+
+/**
+ * Attributes and line updates that put the stored Google click on an existing
+ * cart. cartAttributesUpdate replaces the whole list, so `attributes` is the
+ * merged set. The cart id is the caller's — this does not create a cart.
+ */
+export function planGoogleClickCheckoutStamp(
+  cart: Pick<Cart, 'id' | 'checkoutUrl' | 'attributes' | 'lines'>,
+  freshCartAttrs: Array<{ key: string; value: string }>,
+  lineStamp: CartLineAttribute[]
+): {
+  cartId: string
+  checkoutUrl: string
+  needsAttributeUpdate: boolean
+  attributes: Array<{ key: string; value: string }>
+  lineUpdates: CartLineUpdateInput[]
+} {
+  const existing = cart.attributes ?? []
+  const attributes = mergeCartAttributes(existing, freshCartAttrs)
+  const clickAttrs = googleClickAttrsOnly(lineStamp)
+  const lineUpdates: CartLineUpdateInput[] = []
+  // No stored Google click means nothing to stamp: leave every line as the
+  // shopper's own change left it, the same as before this stamp existed.
+  const lines = clickAttrs.length > 0 ? cart.lines : []
+  for (const line of lines) {
+    const lineAttrs = line.attributes ?? []
+    const hasPaidClick = winningPaidNetworkFromCartAttrs(lineAttrs) !== null
+    if (!hasPaidClick) {
+      const hasLastTouch = lineHasLastTouchKey(lineAttrs)
+      const lastTouchDiffers = hasLastTouch && lineLastTouchDiffersFromStamp(lineAttrs, lineStamp)
+      if (lastTouchDiffers || (hasLastTouch && lineNeedsGoogleClickWrite(lineAttrs, clickAttrs))) {
+        lineUpdates.push({
+          id: line.id,
+          attributes: restampLineForCurrentClick(lineAttrs, lineStamp),
+        })
+        continue
+      }
+      if (!lineNeedsGoogleClickWrite(lineAttrs, clickAttrs)) continue
+      lineUpdates.push({
+        id: line.id,
+        attributes: patchLineGoogleClick(lineAttrs, clickAttrs),
+      })
+      continue
+    }
+    if (!lastTouchIdentityChangedOnCart(lineAttrs, lineStamp)) continue
+    lineUpdates.push({
+      id: line.id,
+      attributes: restampCartLineAttributes(lineAttrs, lineStamp, true),
+    })
+  }
+  return {
+    cartId: cart.id,
+    checkoutUrl: cart.checkoutUrl,
+    needsAttributeUpdate: !attributionAttrsEqual(attributes, existing),
+    attributes,
+    lineUpdates,
+  }
+}
+
+/** Write the stored click onto this cart id. Does not call cartCreate. */
+export async function ensureGoogleClickStamped(cart: Cart): Promise<Cart> {
+  const fresh = getCartLevelAttributionAttrs()
+  const lineStamp = getLineAttributionStamp()
+  const plan = planGoogleClickCheckoutStamp(cart, fresh, lineStamp)
+  if (!plan.needsAttributeUpdate && plan.lineUpdates.length === 0) return cart
+
+  let client: StorefrontClient
+  try {
+    client = getClient()
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err))
+    console.error('[cart] google click stamp failed:', error)
+    captureCartException(error, { stage: 'google-click-client', cartId: cart.id })
+    return cart
+  }
+
+  let next = cart
+  try {
+    if (plan.needsAttributeUpdate) {
+      next = await updateCartAttributesWithRetry(client, cart.id, plan.attributes)
+    }
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err))
+    console.error('[cart] google click attribute stamp failed:', error)
+    captureCartException(error, { stage: 'google-click-attributes', cartId: cart.id })
+    return cart
+  }
+
+  if (plan.lineUpdates.length === 0) return next
+  try {
+    const updated = await sfUpdateCartLines(client, cart.id, plan.lineUpdates)
+    return updated ?? next
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err))
+    console.error('[cart] google click line stamp failed:', error)
+    captureCartException(error, { stage: 'google-click-lines', cartId: cart.id })
+    // The attribute response can still list a line that was removed before this
+    // update. Refetch the cart Shopify has now. If that fails, keep the caller's
+    // cart so the background stamp does not publish the stale one.
+    try {
+      const fresh = await getCart()
+      if (fresh) return fresh
+    } catch (refetchErr) {
+      console.error('[cart] google click line stamp refetch failed:', refetchErr)
+    }
+    return cart
+  }
+}
+
+/** Pre-checkout read plus stamp. After this, checkout navigation does not wait. */
+export const CHECKOUT_STAMP_DEADLINE_MS = 1500
+
+let checkoutStampInFlight = false
+
+/**
+ * The cart mutation has already succeeded. Finish the click stamp without
+ * making add, update, or remove wait on Shopify. If another cart change was
+ * published while the stamp ran, its snapshot is older than what the page
+ * shows, so it is not dispatched.
+ */
+function stampCartWithoutBlocking(cart: Cart): void {
+  const startedAt = cartVersion
+  void ensureGoogleClickStamped(cart)
+    .then((stamped) => {
+      if (stamped !== cart && cartVersion === startedAt) dispatchCartEvent(stamped)
+    })
+    .catch((err) => {
+      console.error('[cart] google click stamp failed:', err)
+    })
+}
+
+/**
+ * Stamp the stored click, then navigate. The read and the stamp share one
+ * deadline so a hung Storefront call cannot trap the shopper on the cart page.
+ * A timeout leaves with the checkout URL already in hand. Any error leaves
+ * with the link the shopper clicked.
+ */
+export async function goToCheckoutAfterStamp(
+  fallbackUrl: string,
+  navigate: (url: string) => void,
+  cart?: Cart | null,
+  stamp: (cart: Cart) => Promise<Cart> = ensureGoogleClickStamped
+): Promise<void> {
+  if (checkoutStampInFlight) return
+  checkoutStampInFlight = true
+  try {
+    await navigateToCheckoutAfterStamp(fallbackUrl, navigate, cart, stamp)
+  } finally {
+    checkoutStampInFlight = false
+  }
+}
+
+async function navigateToCheckoutAfterStamp(
+  fallbackUrl: string,
+  navigate: (url: string) => void,
+  cart: Cart | null | undefined,
+  stamp: (cart: Cart) => Promise<Cart>
+): Promise<void> {
+  let current: Cart | null = cart ?? null
+  let failed = false
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const deadline = new Promise<'timeout'>((resolve) => {
+    timer = setTimeout(() => resolve('timeout'), CHECKOUT_STAMP_DEADLINE_MS)
+  })
+  const work = (async () => {
+    try {
+      if (!current) current = await getCart()
+      if (current) current = await stamp(current)
+    } catch (err) {
+      failed = true
+      console.error('[cart] checkout click-id stamp failed:', err)
+    }
+  })()
+
+  const winner = await Promise.race([work.then(() => 'done' as const), deadline])
+  if (timer) clearTimeout(timer)
+  if (winner === 'timeout') {
+    navigate(current?.checkoutUrl || fallbackUrl)
+    return
+  }
+  if (failed) {
+    navigate(fallbackUrl)
+    return
+  }
+  navigate(current?.checkoutUrl || fallbackUrl)
 }
 
 export async function retryTwice<T>(fn: () => Promise<T>): Promise<T> {
@@ -797,6 +1094,7 @@ export async function addToCart(lines: CartLineInput[]): Promise<Cart> {
 
   setCartId(cart.id)
   dispatchCartEvent(cart)
+  stampCartWithoutBlocking(cart)
   return cart
 }
 
@@ -809,6 +1107,7 @@ export async function updateCartLines(lines: CartLineUpdateInput[]): Promise<Car
 
   const cart = await sfUpdateCartLines(getClient(), cartId, lines)
   dispatchCartEvent(cart)
+  stampCartWithoutBlocking(cart)
   return cart
 }
 
@@ -821,6 +1120,7 @@ export async function removeFromCart(lineIds: string[]): Promise<Cart | null> {
 
   const cart = await sfRemoveFromCart(getClient(), cartId, lineIds)
   dispatchCartEvent(cart)
+  stampCartWithoutBlocking(cart)
   return cart
 }
 

@@ -11,6 +11,7 @@ import {
   normalizeStoredLastTouch,
   opprefCountsAsNewPaidTouch,
   pruneToSingleGoogleClick,
+  saveGoogleClickStore,
 } from './attribution-storage'
 
 const LAST_TOUCH_KEY = '_pd_attribution'
@@ -151,6 +152,7 @@ function captureLastTouch(): void {
           referrer: curStored._referrer || document.referrer || '',
         }
       )
+      saveGoogleClickStore({ oppref: laterOpp })
       try {
         localStorage.setItem(LAST_TOUCH_KEY, JSON.stringify(merged))
       } catch {
@@ -171,6 +173,10 @@ function captureLastTouch(): void {
         /* private mode */
       }
     }, 1500)
+
+    // Click store is independent of the session bag. An srsltid-only visit
+    // must not clear a gclid captured on an earlier page.
+    saveGoogleClickStore(found)
 
     if (hasNew) {
       const merged = mergeLastTouchCapture(stored, found, {
@@ -246,7 +252,11 @@ function captureFirstTouch(): void {
   }
 }
 
-if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+export function captureLandingAttribution(): void {
   captureLastTouch()
   captureFirstTouch()
+}
+
+if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+  captureLandingAttribution()
 }
