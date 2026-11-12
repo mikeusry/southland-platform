@@ -26,14 +26,18 @@ import type {
   StorefrontClient,
 } from '@southland/shopify-storefront'
 import {
+  applyStoredGoogleClick,
   ATTRIBUTION_SESSION_MS,
   CART_LAST_TOUCH_CLEAR_ON_IDENTITY_CHANGE,
   coalesceLastTouchBag,
   filterLastTouchAttribution,
   GOOGLE_CLICK_MS,
   GOOGLE_CLICK_PARAMS,
+  GOOGLE_CLICK_STORE_KEY,
   googleClickSnapshotFromPairs,
+  incomingPaidNetwork,
   lastTouchIdentityChangedOnCart,
+  loadGoogleClickStore,
 } from './attribution-storage'
 
 export {
@@ -250,16 +254,34 @@ export function getAttributionAttrs(): Array<{ key: string; value: string }> {
   if (typeof window === 'undefined') return []
   try {
     const raw = localStorage.getItem(PD_ATTRIBUTION_KEY)
-    if (!raw) return []
-    const data = JSON.parse(raw) as Record<string, string>
+    let data: Record<string, string> = {}
+    if (raw) {
+      try {
+        data = JSON.parse(raw) as Record<string, string>
+      } catch {
+        data = {}
+      }
+    }
     // Enforce the 30-minute UTM session at read time (visitors with no new params
-    // never hit BaseLayout's write path). Google click IDs survive up to 90 days.
-    const filtered = filterLastTouchAttribution(data)
-    if (!filtered) {
-      localStorage.removeItem(PD_ATTRIBUTION_KEY)
+    // never hit BaseLayout's write path). Google click IDs survive up to 90 days
+    // in `_pd_gclick` even when this bag no longer has them.
+    const now = Date.now()
+    const filtered = raw ? filterLastTouchAttribution(data, now) : null
+    const sessionBag = filtered ?? {}
+    const otherNetwork = incomingPaidNetwork(sessionBag)
+    if (otherNetwork && otherNetwork !== 'google') {
+      try {
+        localStorage.removeItem(GOOGLE_CLICK_STORE_KEY)
+      } catch {
+        /* private mode */
+      }
+    }
+    const overlaid = applyStoredGoogleClick(sessionBag, loadGoogleClickStore(now), now)
+    if (Object.keys(overlaid).length === 0) {
+      if (raw) localStorage.removeItem(PD_ATTRIBUTION_KEY)
       return []
     }
-    const coalesced = coalesceLastTouchBag(filtered)
+    const coalesced = coalesceLastTouchBag(overlaid)
     try {
       const next = JSON.stringify(coalesced)
       if (next !== raw) {
@@ -699,6 +721,138 @@ export function mergeCartAttributes(
   return Array.from(merged, ([key, value]) => ({ key, value }))
 }
 
+function attributionAttrsEqual(
+  left: Array<{ key: string; value: string }>,
+  right: Array<{ key: string; value: string }>
+): boolean {
+  const a = left.filter((item) => item.key && item.value)
+  const b = right.filter((item) => item.key && item.value)
+  if (a.length !== b.length) return false
+  const map = new Map(a.map((item) => [item.key, item.value]))
+  return b.every((item) => map.get(item.key) === item.value)
+}
+
+function googleClickStampMissing(
+  attributes: Array<{ key: string; value: string }> | undefined,
+  stamp: Array<{ key: string; value: string }>
+): boolean {
+  const have = new Map(
+    (attributes ?? []).filter((item) => item.key).map((item) => [item.key, item.value])
+  )
+  for (const key of GOOGLE_CLICK_ATTR_KEYS) {
+    const expected = stamp.find((item) => item.key === key)?.value
+    if (!expected) continue
+    if (have.get(key) !== expected) return true
+  }
+  return false
+}
+
+/**
+ * Attributes and line updates that put the stored Google click on an existing
+ * cart. cartAttributesUpdate replaces the whole list, so `attributes` is the
+ * merged set. The cart id is the caller's — this does not create a cart.
+ */
+export function planGoogleClickCheckoutStamp(
+  cart: Pick<Cart, 'id' | 'checkoutUrl' | 'attributes' | 'lines'>,
+  freshCartAttrs: Array<{ key: string; value: string }>,
+  lineStamp: CartLineAttribute[]
+): {
+  cartId: string
+  checkoutUrl: string
+  needsAttributeUpdate: boolean
+  attributes: Array<{ key: string; value: string }>
+  lineUpdates: CartLineUpdateInput[]
+} {
+  const existing = cart.attributes ?? []
+  const attributes = mergeCartAttributes(existing, freshCartAttrs)
+  const identityChanged = lastTouchIdentityChangedOnCart(existing, freshCartAttrs)
+  const lineUpdates: CartLineUpdateInput[] = []
+  for (const line of cart.lines) {
+    const missing = googleClickStampMissing(line.attributes, lineStamp)
+    if (!missing && !lineAttributionNeedsResync(line, lineStamp, identityChanged)) continue
+    lineUpdates.push({
+      id: line.id,
+      attributes: restampCartLineAttributes(line.attributes ?? [], lineStamp, identityChanged),
+    })
+  }
+  return {
+    cartId: cart.id,
+    checkoutUrl: cart.checkoutUrl,
+    needsAttributeUpdate: !attributionAttrsEqual(attributes, existing),
+    attributes,
+    lineUpdates,
+  }
+}
+
+/** Write the stored click onto this cart id. Does not call cartCreate. */
+export async function ensureGoogleClickStamped(cart: Cart): Promise<Cart> {
+  const fresh = getCartLevelAttributionAttrs()
+  const lineStamp = getLineAttributionStamp()
+  const plan = planGoogleClickCheckoutStamp(cart, fresh, lineStamp)
+  if (!plan.needsAttributeUpdate && plan.lineUpdates.length === 0) return cart
+
+  let client: StorefrontClient
+  try {
+    client = getClient()
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err))
+    console.error('[cart] google click stamp failed:', error)
+    captureCartException(error, { stage: 'google-click-client', cartId: cart.id })
+    return cart
+  }
+
+  let next = cart
+  try {
+    if (plan.needsAttributeUpdate) {
+      next = await updateCartAttributesWithRetry(client, cart.id, plan.attributes)
+    }
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err))
+    console.error('[cart] google click attribute stamp failed:', error)
+    captureCartException(error, { stage: 'google-click-attributes', cartId: cart.id })
+    return cart
+  }
+
+  if (plan.lineUpdates.length === 0) return next
+  try {
+    const updated = await sfUpdateCartLines(client, cart.id, plan.lineUpdates)
+    return updated ?? next
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err))
+    console.error('[cart] google click line stamp failed:', error)
+    captureCartException(error, { stage: 'google-click-lines', cartId: cart.id })
+    return next
+  }
+}
+
+/**
+ * Stamp the stored click, then navigate. Navigation waits on the stamp so a
+ * checkout, customer-accounts, or SSO hop cannot leave with a bare cart.
+ */
+export async function goToCheckoutAfterStamp(
+  fallbackUrl: string,
+  navigate: (url: string) => void,
+  cart?: Cart | null,
+  stamp: (cart: Cart) => Promise<Cart> = ensureGoogleClickStamped
+): Promise<void> {
+  let current = cart ?? null
+  if (!current) {
+    try {
+      current = await getCart()
+    } catch (err) {
+      console.error('[cart] checkout click-id read failed:', err)
+    }
+  }
+  if (current) {
+    try {
+      current = await stamp(current)
+    } catch (err) {
+      console.error('[cart] checkout click-id stamp failed:', err)
+    }
+  }
+  navigate(current?.checkoutUrl || fallbackUrl)
+}
+
 export async function retryTwice<T>(fn: () => Promise<T>): Promise<T> {
   let lastErr: unknown
   for (let attempt = 0; attempt < 2; attempt++) {
@@ -795,6 +949,7 @@ export async function addToCart(lines: CartLineInput[]): Promise<Cart> {
     cart = await sfCreateCart(client, stamped, cartAttrs)
   }
 
+  cart = await ensureGoogleClickStamped(cart)
   setCartId(cart.id)
   dispatchCartEvent(cart)
   return cart
@@ -808,8 +963,9 @@ export async function updateCartLines(lines: CartLineUpdateInput[]): Promise<Car
   if (!cartId) return null
 
   const cart = await sfUpdateCartLines(getClient(), cartId, lines)
-  dispatchCartEvent(cart)
-  return cart
+  const stamped = await ensureGoogleClickStamped(cart)
+  dispatchCartEvent(stamped)
+  return stamped
 }
 
 /**
@@ -820,8 +976,9 @@ export async function removeFromCart(lineIds: string[]): Promise<Cart | null> {
   if (!cartId) return null
 
   const cart = await sfRemoveFromCart(getClient(), cartId, lineIds)
-  dispatchCartEvent(cart)
-  return cart
+  const stamped = await ensureGoogleClickStamped(cart)
+  dispatchCartEvent(stamped)
+  return stamped
 }
 
 /**

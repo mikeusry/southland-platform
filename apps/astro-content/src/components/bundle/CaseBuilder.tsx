@@ -14,6 +14,7 @@ import {
   generateBundleId,
   fetchCaseDiscountCode,
   applyDiscount,
+  goToCheckoutAfterStamp,
 } from '../../lib/cart'
 import { getPersonaId } from '../../lib/persona'
 import CaseProgress from './CaseProgress'
@@ -253,6 +254,21 @@ export default function CaseBuilder() {
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <a
             href={checkoutUrl}
+            onClick={(event) => {
+              if (
+                event.metaKey ||
+                event.ctrlKey ||
+                event.shiftKey ||
+                event.altKey ||
+                event.button !== 0
+              ) {
+                return
+              }
+              event.preventDefault()
+              void goToCheckoutAfterStamp(checkoutUrl, (url) => {
+                window.location.assign(url)
+              })
+            }}
             className="inline-block rounded-md bg-shopify-link px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-shopify-accent-hover"
           >
             Go to checkout
