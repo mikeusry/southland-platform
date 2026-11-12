@@ -10,16 +10,26 @@ export const prerender = true
 
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { buildSouthlandUrl } from '../../lib/cloudinary'
+import {
+  formatNumber,
+  loadRewardsConfig,
+  referralTenFriendsClause,
+  referralWhatCanIDoBody,
+} from '../../lib/rewards-config'
 
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://southlandorganics.com'
 const lookupUrl = 'https://nexus.southlandorganics.com/api/loyalty/lookup'
+const config = await loadRewardsConfig()
+const referrerPointsLabel = formatNumber(config.referral.referrer_points)
+const refereeDiscountLabel = `$${formatNumber(config.referral.referee_discount)}`
+const tenFriendsClause = referralTenFriendsClause(config)
+const whatCanIDo = referralWhatCanIDoBody(config)
 
 const referralSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebPage',
   name: 'Refer a Friend | Southland Organics',
-  description:
-    'Give your friends $10 off their first order and earn 500 bonus loyalty points for every successful referral.',
+  description: `Give your friends ${refereeDiscountLabel} off their first order and earn ${referrerPointsLabel} bonus loyalty points for every successful referral.`,
   url: `${siteUrl}/referral/`,
   mainEntity: {
     '@type': 'Organization',
@@ -30,8 +40,8 @@ const referralSchema = {
 ---
 
 <BaseLayout
-  title="Refer a Friend — Give $10, Get 500 Points | Southland Organics"
-  description="Share Southland Organics with a friend. They get $10 off their first order, you earn 500 bonus loyalty points. No limit on referrals."
+  title={`Refer a Friend — Give ${refereeDiscountLabel}, Get ${referrerPointsLabel} Points | Southland Organics`}
+  description={`Share Southland Organics with a friend. They get ${refereeDiscountLabel} off their first order, you earn ${referrerPointsLabel} bonus loyalty points. No limit on referrals.`}
   ogImage={buildSouthlandUrl('heroes/Farm_Athens_GA_7_jbdjik', {
     width: 1200,
     height: 630,
@@ -51,11 +61,11 @@ const referralSchema = {
         Referral Program
       </p>
       <h1 class="mb-6 font-heading text-4xl text-white md:text-5xl lg:text-6xl">
-        Give $10, Get 500 Points
+        Give {refereeDiscountLabel}, Get {referrerPointsLabel} Points
       </h1>
       <p class="mx-auto max-w-3xl text-lg text-white/80 md:text-xl">
-        Share Southland Organics with friends and family. They get $10 off their first order, and
-        you earn 500 bonus loyalty points for every successful referral.
+        Share Southland Organics with friends and family. They get {refereeDiscountLabel} off their first
+        order, and you earn {referrerPointsLabel} bonus loyalty points for every successful referral.
       </p>
       <div class="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
         <a href="#get-link" class="btn-primary inline-flex items-center gap-2 px-8 py-3 text-lg">
@@ -124,7 +134,8 @@ const referralSchema = {
           </p>
           <h3 class="mb-2 text-xl text-shopify-title">Earn Points</h3>
           <p class="text-sm text-shopify-secondary-text">
-            When they buy, they get $10 off and you earn 500 bonus points. No limit.
+            When they buy, they get {refereeDiscountLabel} off and you earn {referrerPointsLabel} bonus
+            points. No limit.
           </p>
         </div>
       </div>
@@ -165,7 +176,9 @@ const referralSchema = {
             </svg>
           </div>
           <h3 class="mb-2 font-heading text-2xl">Your Friend Gets</h3>
-          <div class="mb-4 text-4xl font-bold text-southland-green-dark">$10 Off</div>
+          <div class="mb-4 text-4xl font-bold text-southland-green-dark">
+            {refereeDiscountLabel} Off
+          </div>
           <p class="text-shopify-secondary-text">
             Their first order, automatically applied at checkout. No minimum purchase required.
           </p>
@@ -191,7 +204,9 @@ const referralSchema = {
             </svg>
           </div>
           <h3 class="mb-2 font-heading text-2xl">You Get</h3>
-          <div class="mb-4 text-4xl font-bold text-southland-green-dark">500 Points</div>
+          <div class="mb-4 text-4xl font-bold text-southland-green-dark">
+            {referrerPointsLabel} Points
+          </div>
           <p class="text-shopify-secondary-text">
             Bonus loyalty points added to your account when they make their first purchase. Redeem
             for discounts, free shipping, and more.
@@ -202,8 +217,8 @@ const referralSchema = {
       <!-- No limit callout -->
       <div class="mt-8 rounded-lg bg-gray-50 p-5 text-center">
         <p class="text-sm text-shopify-secondary-text">
-          <span class="font-semibold text-shopify-title">No limit on referrals.</span> Refer 10 friends
-          and earn 5,000 bonus points — that's $25+ in rewards.
+          <span class="font-semibold text-shopify-title">No limit on referrals.</span>
+          {tenFriendsClause}
         </p>
       </div>
     </div>
@@ -324,8 +339,8 @@ const referralSchema = {
             >
           </summary>
           <p class="mt-3 leading-relaxed text-shopify-secondary-text">
-            No limit. Refer as many friends as you want and earn 500 points for each successful
-            referral.
+            No limit. Refer as many friends as you want and earn {referrerPointsLabel} points for each
+            successful referral.
           </p>
         </details>
         <details class="group py-5">
@@ -369,14 +384,15 @@ const referralSchema = {
           </summary>
           <p class="mt-3 leading-relaxed text-shopify-secondary-text">
             Yes, they need to use your unique referral link so we can track the referral and apply
-            their $10 discount automatically. You'll find the link in your rewards portal.
+            their {refereeDiscountLabel} discount automatically. You'll find the link in your rewards
+            portal.
           </p>
         </details>
         <details class="group py-5">
           <summary
             class="flex cursor-pointer items-center justify-between text-left font-semibold text-shopify-title transition-colors hover:text-southland-green"
           >
-            <span>What can I do with 500 points?</span>
+            <span>What can I do with {referrerPointsLabel} points?</span>
             <svg
               class="ml-4 h-5 w-5 shrink-0 text-shopify-secondary-text transition-transform group-open:rotate-180"
               fill="none"
@@ -390,8 +406,7 @@ const referralSchema = {
             >
           </summary>
           <p class="mt-3 leading-relaxed text-shopify-secondary-text">
-            500 points redeems for $5 off your next order. Refer two friends and you've earned
-            enough for free shipping (750 points). See all rewards at <a
+            {whatCanIDo} See all rewards at <a
               href="/rewards/"
               class="text-southland-green underline hover:no-underline"
               >southlandorganics.com/rewards</a
