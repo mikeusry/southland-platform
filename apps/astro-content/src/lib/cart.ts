@@ -635,9 +635,10 @@ let _client: StorefrontClient | null = null
 
 function getClient(): StorefrontClient {
   if (!_client) {
+    const env = import.meta.env
     _client = createClient({
-      storeDomain: import.meta.env.PUBLIC_SHOPIFY_STORE_DOMAIN,
-      publicAccessToken: import.meta.env.PUBLIC_SHOPIFY_STOREFRONT_TOKEN,
+      storeDomain: env?.PUBLIC_SHOPIFY_STORE_DOMAIN,
+      publicAccessToken: env?.PUBLIC_SHOPIFY_STOREFRONT_TOKEN,
     })
   }
   return _client
@@ -732,19 +733,40 @@ function attributionAttrsEqual(
   return b.every((item) => map.get(item.key) === item.value)
 }
 
-function googleClickStampMissing(
-  attributes: Array<{ key: string; value: string }> | undefined,
+function googleClickAttrsOnly(
   stamp: Array<{ key: string; value: string }>
+): Array<{ key: string; value: string }> {
+  const wanted = new Set<string>(GOOGLE_CLICK_ATTR_KEYS)
+  return stamp.filter((item) => Boolean(item.key && item.value && wanted.has(item.key)))
+}
+
+/** True when the line is missing the current click or still has a different one. */
+function lineNeedsGoogleClickWrite(
+  attributes: Array<{ key: string; value: string }> | undefined,
+  clickAttrs: Array<{ key: string; value: string }>
 ): boolean {
+  if (clickAttrs.length === 0) return false
   const have = new Map(
     (attributes ?? []).filter((item) => item.key).map((item) => [item.key, item.value])
   )
+  const expected = new Set(clickAttrs.map((item) => item.key))
+  for (const item of clickAttrs) {
+    if (have.get(item.key) !== item.value) return true
+  }
   for (const key of GOOGLE_CLICK_ATTR_KEYS) {
-    const expected = stamp.find((item) => item.key === key)?.value
-    if (!expected) continue
-    if (have.get(key) !== expected) return true
+    if (!expected.has(key) && have.has(key)) return true
   }
   return false
+}
+
+/** Add or replace only the Google click keys. Every other line property stays. */
+function patchLineGoogleClick(
+  existing: CartLineAttribute[] | undefined,
+  clickAttrs: Array<{ key: string; value: string }>
+): CartLineAttribute[] {
+  const clickKeys = new Set<string>(GOOGLE_CLICK_ATTR_KEYS)
+  const kept = (existing ?? []).filter((item) => item.key && !clickKeys.has(item.key))
+  return [...kept, ...clickAttrs]
 }
 
 /**
@@ -765,14 +787,13 @@ export function planGoogleClickCheckoutStamp(
 } {
   const existing = cart.attributes ?? []
   const attributes = mergeCartAttributes(existing, freshCartAttrs)
-  const identityChanged = lastTouchIdentityChangedOnCart(existing, freshCartAttrs)
+  const clickAttrs = googleClickAttrsOnly(lineStamp)
   const lineUpdates: CartLineUpdateInput[] = []
   for (const line of cart.lines) {
-    const missing = googleClickStampMissing(line.attributes, lineStamp)
-    if (!missing && !lineAttributionNeedsResync(line, lineStamp, identityChanged)) continue
+    if (!lineNeedsGoogleClickWrite(line.attributes, clickAttrs)) continue
     lineUpdates.push({
       id: line.id,
-      attributes: restampCartLineAttributes(line.attributes ?? [], lineStamp, identityChanged),
+      attributes: patchLineGoogleClick(line.attributes, clickAttrs),
     })
   }
   return {
@@ -825,9 +846,14 @@ export async function ensureGoogleClickStamped(cart: Cart): Promise<Cart> {
   }
 }
 
+/** Pre-checkout read plus stamp. After this, checkout navigation does not wait. */
+export const CHECKOUT_STAMP_DEADLINE_MS = 1500
+
 /**
- * Stamp the stored click, then navigate. Navigation waits on the stamp so a
- * checkout, customer-accounts, or SSO hop cannot leave with a bare cart.
+ * Stamp the stored click, then navigate. The read and the stamp share one
+ * deadline so a hung Storefront call cannot trap the shopper on the cart page.
+ * A timeout leaves with the checkout URL already in hand. Any error leaves
+ * with the link the shopper clicked.
  */
 export async function goToCheckoutAfterStamp(
   fallbackUrl: string,
@@ -835,20 +861,31 @@ export async function goToCheckoutAfterStamp(
   cart?: Cart | null,
   stamp: (cart: Cart) => Promise<Cart> = ensureGoogleClickStamped
 ): Promise<void> {
-  let current = cart ?? null
-  if (!current) {
+  let current: Cart | null = cart ?? null
+  let failed = false
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const deadline = new Promise<'timeout'>((resolve) => {
+    timer = setTimeout(() => resolve('timeout'), CHECKOUT_STAMP_DEADLINE_MS)
+  })
+  const work = (async () => {
     try {
-      current = await getCart()
+      if (!current) current = await getCart()
+      if (current) current = await stamp(current)
     } catch (err) {
-      console.error('[cart] checkout click-id read failed:', err)
-    }
-  }
-  if (current) {
-    try {
-      current = await stamp(current)
-    } catch (err) {
+      failed = true
       console.error('[cart] checkout click-id stamp failed:', err)
     }
+  })()
+
+  const winner = await Promise.race([work.then(() => 'done' as const), deadline])
+  if (timer) clearTimeout(timer)
+  if (winner === 'timeout') {
+    navigate(current?.checkoutUrl || fallbackUrl)
+    return
+  }
+  if (failed) {
+    navigate(fallbackUrl)
+    return
   }
   navigate(current?.checkoutUrl || fallbackUrl)
 }

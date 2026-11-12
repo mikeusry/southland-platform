@@ -178,6 +178,11 @@ export function googleClickEpochMs(
   return sessionTs
 }
 
+/** Future timestamps are not live. A date ahead of now would never expire. */
+function googleClickTsIsLive(ts: number, now: number): boolean {
+  return ts > 0 && ts <= now && now - ts <= GOOGLE_CLICK_MS
+}
+
 /** Drop Google click ids older than 90 days (active session or not). */
 export function expireGoogleClicksPast90Days(
   bag: AttributionBag,
@@ -188,7 +193,7 @@ export function expireGoogleClicksPast90Days(
   for (const key of GOOGLE_CLICK_PARAMS) {
     if (!out[key]) continue
     const clickTs = googleClickEpochMs(out, key, sessionTs)
-    if (!(clickTs > 0 && now - clickTs <= GOOGLE_CLICK_MS)) {
+    if (!googleClickTsIsLive(clickTs, now)) {
       delete out[key]
       delete out[`${key}_ts`]
     }
@@ -357,7 +362,7 @@ export function filterLastTouchAttribution(
   for (const key of GOOGLE_CLICK_PARAMS) {
     if (!bag[key]) continue
     const clickTs = googleClickEpochMs(bag, key, ts)
-    if (clickTs > 0 && now - clickTs <= GOOGLE_CLICK_MS) {
+    if (googleClickTsIsLive(clickTs, now)) {
       retained[key] = bag[key]
       const storedTs = bag[`${key}_ts`]
       retained[`${key}_ts`] = storedTs ? String(storedTs) : String(clickTs)
@@ -438,7 +443,7 @@ function liveGoogleClick(bag: AttributionBag, now: number): AttributionBag | nul
   const key = activeGoogleClickKey(bag)
   if (!key || !bag[key]) return null
   const ts = googleClickEpochMs(bag, key)
-  if (!(ts > 0 && now - ts <= GOOGLE_CLICK_MS)) return null
+  if (!googleClickTsIsLive(ts, now)) return null
   return { [key]: bag[key], [`${key}_ts`]: String(ts) }
 }
 
