@@ -17,6 +17,7 @@
 
 import type { APIRoute } from 'astro'
 import { getCollection } from 'astro:content'
+import { buildRewardsKnowledge, loadRewardsConfig } from '../../lib/rewards-config'
 
 const SITE_URL = 'https://southlandorganics.com'
 
@@ -59,6 +60,7 @@ function inferBU(segment: string, tags: string[], text: string): string {
 }
 
 export const GET: APIRoute = async () => {
+  const rewardsConfigPromise = loadRewardsConfig()
   const items: ContentItem[] = []
   const now = new Date().toISOString()
 
@@ -336,50 +338,19 @@ export const GET: APIRoute = async () => {
   }
 
   // ─── 6. Key Static Pages (rewards, shipping, about) ────────────────────
-  // These pages have hardcoded content in .astro files, not content collections.
-  // Including them here ensures the chatbot can answer questions about rewards,
-  // shipping, returns, and company info without relying on SOPs (which are
-  // filtered from customer chat context).
+  // Rewards numbers come from loadRewardsConfig() so the chatbot cannot drift
+  // from /rewards. Shipping and subscription copy on this route is still written
+  // here. These pages are not content collections. Including them lets the
+  // chatbot answer without relying on SOPs (filtered from customer chat).
+
+  const rewardsKnowledge = buildRewardsKnowledge(await rewardsConfigPromise)
 
   const staticPages: ContentItem[] = [
     {
       id: 'page:rewards',
       slug: 'rewards',
       title: 'Southland Organics Rewards Program',
-      content: `Loyalty Rewards Program — Earn points on every order. Redeem for discounts, free shipping, and VIP perks.
-
-How to Earn Points:
-- Earn 1 point per $1 spent on every order (after discounts, before shipping)
-- Points multiplied by tier: Bronze 1x, Silver 1.25x, Gold 1.5x
-
-VIP Tiers:
-- Bronze: Free, automatic. Basic rewards.
-- Silver: $500+ lifetime spend. 1.25x multiplier, bonus rewards.
-- Gold: $1,500+ lifetime spend. 1.5x multiplier, exclusive 15% off reward.
-
-Available Rewards:
-- $5 Off: 500 points (min $25 order)
-- Free Shipping: 750 points (any order)
-- $10 Off: 1,000 points (min $50 order)
-- 10% Off: 1,500 points (min $50, Silver+ tier)
-- 15% Off: 2,000 points (min $75, Gold only)
-- $25 Off: 2,500 points (min $100, Silver+ tier)
-
-Referral Program:
-- Share your unique referral code with friends
-- New customer gets $10 off their first order
-- You earn 500 bonus points
-- Referral codes start with REF- prefix
-
-FAQ:
-Q: Do points expire?
-A: Points remain valid as long as you make at least one purchase per year.
-
-Q: Can I use rewards with other discounts?
-A: Only one discount code per order. Rewards cannot be stacked with other promo codes.
-
-Q: How do I check my points balance?
-A: Visit southlandorganics.com/rewards and enter your email address.`,
+      content: rewardsKnowledge,
       category: 'general',
       tags: ['loyalty', 'rewards', 'points', 'referrals', 'VIP', 'discounts'],
       business_unit: 'general',
@@ -387,7 +358,7 @@ A: Visit southlandorganics.com/rewards and enter your email address.`,
       url: `${SITE_URL}/rewards`,
       tenant: 'southland',
       support_relevant: true,
-      word_count: 200,
+      word_count: rewardsKnowledge.split(/\s+/).length,
       updated_at: now,
     },
     {
