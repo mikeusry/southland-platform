@@ -533,26 +533,45 @@ export function persistGoogleClickCookie(bag: AttributionBag | null, now = Date.
 /**
  * Uncached apex Set-Cookie; ignore failures. Never posts an empty bag — the
  * endpoint rejects `{}` clears, and only expiry (via document.cookie Max-Age=0)
- * may drop a stored click.
+ * may drop a stored click. One retry if sendBeacon returns false, or if the
+ * fetch fallback rejects or is not ok. A sendBeacon that returns true is not
+ * retried, even if the server later responds 429.
  */
+function googleClickBeaconBlob(payload: string): Blob {
+  return new Blob([payload], { type: 'application/json' })
+}
+
+function postGoogleClickBeacon(payload: string, allowRetry: boolean): Promise<void> {
+  return fetch('/api/pd-gclick', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: payload,
+    credentials: 'same-origin',
+    keepalive: true,
+  })
+    .then((res) => {
+      if (!res.ok && allowRetry) return postGoogleClickBeacon(payload, false)
+    })
+    .catch(() => {
+      if (allowRetry) return postGoogleClickBeacon(payload, false)
+    })
+}
+
 export function beaconGoogleClickCookie(bag: AttributionBag, now = Date.now()): void {
   if (typeof window === 'undefined' || typeof fetch === 'undefined') return
   const body = googleClickCookieValue(bag, now)
   if (!body) return
   const payload = decodeURIComponent(body)
   try {
-    const blob = new Blob([payload], { type: 'application/json' })
     if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
-      navigator.sendBeacon('/api/pd-gclick', blob)
+      const url = '/api/pd-gclick'
+      if (navigator.sendBeacon(url, googleClickBeaconBlob(payload))) return
+      // One retry. Do not also fall through to fetch — the first call may
+      // still have been queued.
+      navigator.sendBeacon(url, googleClickBeaconBlob(payload))
       return
     }
-    void fetch('/api/pd-gclick', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: payload,
-      credentials: 'same-origin',
-      keepalive: true,
-    }).catch(() => {})
+    void postGoogleClickBeacon(payload, true)
   } catch {
     /* noop */
   }

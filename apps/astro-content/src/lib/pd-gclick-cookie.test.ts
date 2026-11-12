@@ -523,3 +523,111 @@ test('readGoogleClickCookieBag parses a live cookie header', () => {
   const parsed = readGoogleClickCookieBag(`${GOOGLE_CLICK_COOKIE}=${encoded}`, now)
   assert.deepEqual(parsed, { key: 'wbraid', value: 'WB-READ', ts: now })
 })
+
+test('POST /api/pd-gclick sets only the _pd_gclick cookie', async () => {
+  const now = Date.now()
+  const res = await postBag({ gclid: 'G-ONLY', gclid_ts: String(now) })
+  assert.equal(res.status, 204)
+  const cookies =
+    typeof res.headers.getSetCookie === 'function'
+      ? res.headers.getSetCookie()
+      : [res.headers.get('Set-Cookie')].filter((value): value is string => !!value)
+  assert.equal(cookies.length, 1)
+  assert.ok(cookies[0].startsWith(`${GOOGLE_CLICK_COOKIE}=`))
+  assert.equal(await res.text(), '')
+  // No other header is a cookie.
+  const names: string[] = []
+  res.headers.forEach((_, name) => names.push(name.toLowerCase()))
+  assert.equal(names.filter((name) => name === 'set-cookie').length, 1)
+})
+
+test('POST /api/pd-gclick rejects an over-long or malformed id', async () => {
+  const now = Date.now()
+  const longId = `G-${'A'.repeat(GOOGLE_CLICK_ID_MAX_LEN)}`
+  const tooLong = await postBag({ gclid: longId, gclid_ts: String(now) })
+  assert.equal(tooLong.headers.get('Set-Cookie'), null)
+  const badChars = await postBag({ gclid: 'G-BAD ID/<script>', gclid_ts: String(now) })
+  assert.equal(badChars.headers.get('Set-Cookie'), null)
+})
+
+test('beaconGoogleClickCookie retries sendBeacon once on failure', () => {
+  const results: boolean[] = []
+  Object.defineProperty(globalThis, 'window', {
+    configurable: true,
+    value: globalThis,
+  })
+  Object.defineProperty(globalThis, 'navigator', {
+    configurable: true,
+    value: {
+      sendBeacon() {
+        results.push(results.length === 0 ? false : true)
+        return results[results.length - 1]
+      },
+    },
+  })
+  const now = 1_700_000_000_000
+  beaconGoogleClickCookie({ gclid: 'G-RETRY', gclid_ts: String(now) }, now)
+  assert.equal(results.length, 2)
+  assert.deepEqual(results, [false, true])
+})
+
+test('beaconGoogleClickCookie does not retry a successful sendBeacon', () => {
+  let calls = 0
+  Object.defineProperty(globalThis, 'window', {
+    configurable: true,
+    value: globalThis,
+  })
+  Object.defineProperty(globalThis, 'navigator', {
+    configurable: true,
+    value: {
+      sendBeacon() {
+        calls += 1
+        return true
+      },
+    },
+  })
+  const now = 1_700_000_000_000
+  beaconGoogleClickCookie({ gclid: 'G-ONCE', gclid_ts: String(now) }, now)
+  assert.equal(calls, 1)
+})
+
+test('beaconGoogleClickCookie retries fetch once on rejection or a non-ok response', async () => {
+  Object.defineProperty(globalThis, 'window', {
+    configurable: true,
+    value: globalThis,
+  })
+  Object.defineProperty(globalThis, 'navigator', {
+    configurable: true,
+    value: {},
+  })
+
+  let rejects = 0
+  Object.defineProperty(globalThis, 'fetch', {
+    configurable: true,
+    value: async () => {
+      rejects += 1
+      if (rejects === 1) throw new Error('network')
+      return new Response(null, { status: 204 })
+    },
+  })
+  const now = 1_700_000_000_000
+  beaconGoogleClickCookie({ gclid: 'G-FETCH-REJ', gclid_ts: String(now) }, now)
+  await Promise.resolve()
+  await Promise.resolve()
+  await Promise.resolve()
+  assert.equal(rejects, 2)
+
+  let statuses = 0
+  Object.defineProperty(globalThis, 'fetch', {
+    configurable: true,
+    value: async () => {
+      statuses += 1
+      return new Response(null, { status: statuses === 1 ? 429 : 204 })
+    },
+  })
+  beaconGoogleClickCookie({ gclid: 'G-FETCH-429', gclid_ts: String(now) }, now)
+  await Promise.resolve()
+  await Promise.resolve()
+  await Promise.resolve()
+  assert.equal(statuses, 2)
+})

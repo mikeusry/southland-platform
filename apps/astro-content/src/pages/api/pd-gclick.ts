@@ -10,6 +10,14 @@
  * Newest click wins against the cookie already on the request. Same-site
  * Origin (or Referer if Origin is absent) is required. Empty `{}` bodies
  * do not clear the cookie; only expiry may drop it.
+ *
+ * Rate limit: this path is under `/api/`, so it already shares the
+ * middleware per-IP limiter (60 requests per minute, `cf-connecting-ip`).
+ * This file does not add a second limiter.
+ *
+ * Guarantees: Set-Cookie is only `_pd_gclick` (via googleClickSetCookieHeader);
+ * IDs must match GOOGLE_CLICK_ID_RE and GOOGLE_CLICK_ID_MAX_LEN (200);
+ * the body is empty; nothing else is set.
  */
 import type { APIRoute } from 'astro'
 import {

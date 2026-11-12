@@ -149,7 +149,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     })
   }
 
-  // Rate-limit /api/ endpoints
+  // Rate-limit every /api/ path (including POST /api/pd-gclick).
   if (pathname.startsWith('/api/')) {
     const ip = context.request.headers.get('cf-connecting-ip') || 'unknown'
     if (isRateLimited(ip)) {
