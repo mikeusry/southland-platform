@@ -348,10 +348,48 @@ describe('free shipping wording', () => {
     assert.equal(aiContent.includes(storeShippingPolicy), true)
     assert.equal(rewardsBlock.includes(storeShippingPolicy), false)
   })
+
+  it('flags subscription rewards and points claims without flagging the shipping FAQ', () => {
+    const subscriptions = readFileSync(
+      join(repoRoot, 'apps/astro-content/src/pages/subscriptions/index.astro'),
+      'utf8'
+    )
+    const shippingFaq = sliceBetween(
+      subscriptions,
+      "q: 'How does shipping work?'",
+      "q: 'Do subscriptions earn loyalty points?'"
+    )
+
+    assert.match(shippingFaq, /USPS or UPS/)
+    assert.match(shippingFaq, /3-5 business days/)
+    assert.deepEqual(rewardPointsFreeShippingClaims(shippingFaq), [])
+    assert.deepEqual(
+      rewardPointsFreeShippingClaims(
+        'Southland Rewards points. Redeem for\ndiscounts, free shipping, and VIP perks.'
+      ),
+      ['discounts, free shipping, and VIP perks.']
+    )
+    assert.deepEqual(rewardPointsFreeShippingClaims(subscriptions), [])
+  })
 })
 
 function freeShippingLines(text: string): string[] {
   return text.split('\n').filter((line) => /free shipping/i.test(line))
+}
+
+function rewardPointsFreeShippingClaims(text: string): string[] {
+  const lines = text.split('\n')
+  const tie = /\b(rewards?|points?|loyalty|redeem(?:ed|ing)?)\b/i
+  const claims: string[] = []
+  for (let index = 0; index < lines.length; index++) {
+    const line = lines[index]
+    if (!/free shipping/i.test(line)) continue
+    // "Redeem for" sits on the line above "discounts, free shipping, and VIP perks."
+    const context = `${lines[index - 1] ?? ''}\n${line}`
+    if (!tie.test(context)) continue
+    claims.push(line.trim())
+  }
+  return claims
 }
 
 function sliceBetween(text: string, start: string, end: string): string {
