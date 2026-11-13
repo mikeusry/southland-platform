@@ -833,3 +833,112 @@ export function saveGoogleClickStore(incoming: AttributionBag, now = Date.now())
     /* private mode */
   }
 }
+
+const CUSTOMER_ACCOUNT_HOST = 'account.southlandorganics.com'
+const SHOP_HOST = 'shop.southlandorganics.com'
+const APEX_HOSTS = new Set(['southlandorganics.com', 'www.southlandorganics.com'])
+
+/** Shopify customer-account login. Query string on this URL is dropped by the 302. */
+export const CUSTOMER_ACCOUNT_REDIRECT_URL = 'https://account.southlandorganics.com/account'
+
+function isAccountPath(pathname: string): boolean {
+  const path = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname
+  return path === '/account' || path.startsWith('/account/')
+}
+
+/** Header, /account, and account.southlandorganics.com. Not checkout or the shop cart. */
+export function isCustomerAccountHref(
+  href: string,
+  base = 'https://southlandorganics.com/'
+): boolean {
+  try {
+    const url = new URL(href, base)
+    const host = url.hostname.toLowerCase()
+    if (host === CUSTOMER_ACCOUNT_HOST) return true
+    if (host === SHOP_HOST || APEX_HOSTS.has(host)) return isAccountPath(url.pathname)
+    return false
+  } catch {
+    return false
+  }
+}
+
+export function isCustomerAccountReferrer(referrer: string): boolean {
+  try {
+    return new URL(referrer).hostname.toLowerCase() === CUSTOMER_ACCOUNT_HOST
+  } catch {
+    return false
+  }
+}
+
+/** First valid gclid, then gbraid, then wbraid. Anything else, including srsltid, is ignored. */
+export function googleClickBagFromUrl(href: string, now = Date.now()): AttributionBag {
+  let url: URL
+  try {
+    url = new URL(href)
+  } catch {
+    return {}
+  }
+  for (const key of GOOGLE_CLICK_PARAMS) {
+    const value = url.searchParams.get(key)
+    if (value && isValidGoogleClickId(value)) {
+      return { [key]: value, [`${key}_ts`]: String(now) }
+    }
+  }
+  return {}
+}
+
+/**
+ * Set-Cookie for the /account 302. The response has no document, so the head
+ * script never runs. A click on the request is stored. A click already on the
+ * request cookie is refreshed even when this URL has none, so the server cookie
+ * exists before the account host. srsltid does not clear it. Location stays
+ * the customer-account URL. The response is not cacheable.
+ */
+export function customerAccountRedirectInit(
+  requestUrl: URL,
+  now = Date.now(),
+  cookieHeader = ''
+): { status: 302; location: string; setCookie: string | null; cacheControl: 'no-store' } {
+  const incoming = googleClickBagFromUrl(requestUrl.href, now)
+  const stored = bagFromCookie(readGoogleClickCookieBag(cookieHeader, now))
+  const next = activeGoogleClickKey(incoming)
+    ? updateGoogleClickStore(stored, incoming, now)
+    : stored
+  const parsed = parseGoogleClickCookieBag(next, now)
+  return {
+    status: 302,
+    location: CUSTOMER_ACCOUNT_REDIRECT_URL,
+    setCookie: parsed ? googleClickSetCookieHeader(parsed, now) : null,
+    cacheControl: 'no-store',
+  }
+}
+
+/**
+ * The landing module is deferred, so a click on Account can leave before it runs.
+ * This classic head script writes localStorage and sends at most one keepalive
+ * beacon. It does not set document.cookie: a JS cookie would match the store
+ * and the module would skip the retried server beacon that sets the 90-day cookie.
+ * No click in the URL returns without touching storage.
+ */
+export function earlyGoogleClickCaptureSource(): string {
+  const max = GOOGLE_CLICK_ID_MAX_LEN
+  const windowMs = GOOGLE_CLICK_MS
+  const re = GOOGLE_CLICK_ID_RE.toString()
+  const storeKey = JSON.stringify(GOOGLE_CLICK_STORE_KEY)
+  const cookieName = JSON.stringify(GOOGLE_CLICK_COOKIE)
+  return `!function(){try{var p=new URLSearchParams(location.search);var keys=["gclid","gbraid","wbraid"];var key="";var value="";for(var i=0;i!==keys.length;i++){var v=p.get(keys[i]);if(v&&!(v.length>${max})&&${re}.test(v)){key=keys[i];value=v;break}}if(!key)return;var now=Date.now();function live(raw){if(!raw)return null;var o;try{o=JSON.parse(raw)}catch(e){return null}if(!o||typeof o!=="object")return null;var best=null;for(var j=0;j!==keys.length;j++){var k=keys[j];var val=o[k];var t=Number(o[k+"_ts"]);if(typeof val!=="string"||val.length>${max}||!${re}.test(val))continue;if(!(t>0)||t>now||now-t>${windowMs})continue;if(!best||t>best.ts)best={key:k,value:val,ts:t}}return best}var fromLs=null;try{fromLs=live(localStorage.getItem(${storeKey}))}catch(e){}var fromCookie=null;try{var parts=String(document.cookie||"").split(";");var prefix=${cookieName}+"=";for(var c=0;c!==parts.length;c++){var s=parts[c].replace(/^\\s+/,"");if(s.indexOf(prefix)===0){fromCookie=live(decodeURIComponent(s.slice(prefix.length)));break}}}catch(e){}var current=fromLs;if(!current||(fromCookie&&fromCookie.ts>current.ts))current=fromCookie;var ts=String(now);if(current&&current.key===key&&current.value===value)ts=String(current.ts);var bag={};bag[key]=value;bag[key+"_ts"]=ts;var json=JSON.stringify(bag);localStorage.setItem(${storeKey},json);if(typeof navigator!=="undefined"&&typeof navigator.sendBeacon==="function")navigator.sendBeacon("/api/pd-gclick",new Blob([json],{type:"application/json"}))}catch(e){}}();`
+}
+
+/**
+ * Write the current URL click, then beacon the live store. The beacon is the
+ * server Set-Cookie. It runs whenever a click is already stored, including when
+ * the JS cookie already matches, so an account click does not leave with only
+ * Safari's 7-day document.cookie.
+ */
+export function flushGoogleClickBeforeAccountLeave(now = Date.now()): void {
+  if (typeof window === 'undefined') return
+  const incoming = googleClickBagFromUrl(window.location.href, now)
+  saveGoogleClickStore(incoming, now)
+  const live = loadGoogleClickStore(now)
+  if (live) beaconGoogleClickCookie(live, now)
+}

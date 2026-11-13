@@ -6,6 +6,7 @@ import SocialMeta from '../components/shared/SocialMeta.astro';
 import PersonaBanner from '../components/cdp/PersonaBanner.astro';
 import ChatWidget from '../components/chat/ChatWidget';
 import { getLogoUrl } from '../lib/cloudinary';
+import { earlyGoogleClickCaptureSource } from '../lib/attribution-storage';
 
 interface Props {
   title: string;
@@ -61,6 +62,7 @@ const openaiAdsPixelId =
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <script is:inline set:html={earlyGoogleClickCaptureSource()} />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
 

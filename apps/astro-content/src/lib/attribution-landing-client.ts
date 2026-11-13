@@ -5,6 +5,10 @@ import {
   activeGoogleClickKey,
   applyChatGptUtmIfNeeded,
   applyGoogleClickFirstSeen,
+  flushGoogleClickBeforeAccountLeave,
+  isCustomerAccountHref,
+  isCustomerAccountReferrer,
+  loadGoogleClickStore,
   mergeLastTouchCapture,
   prepareFirstTouchBagForStorage,
   isChatGptUtmSource,
@@ -254,11 +258,74 @@ function captureFirstTouch(): void {
   }
 }
 
-export function captureLandingAttribution(): void {
+let accountLeaveBound = false
+
+export function onCustomerAccountLinkClick(event: Event): void {
+  const target = event.target as {
+    closest?: (selector: string) => {
+      href?: string
+      getAttribute?: (name: string) => string | null
+    } | null
+  } | null
+  if (!target || typeof target.closest !== 'function') return
+  const link = target.closest('a')
+  if (!link) return
+  const href = link.href || link.getAttribute?.('href') || ''
+  const base =
+    typeof window !== 'undefined' ? window.location.href : 'https://southlandorganics.com/'
+  if (!isCustomerAccountHref(href, base)) return
+  flushGoogleClickBeforeAccountLeave()
+}
+
+function bindCustomerAccountLeaveFlush(): void {
+  if (accountLeaveBound) return
+  if (typeof document === 'undefined' || typeof document.addEventListener !== 'function') return
+  accountLeaveBound = true
+  document.addEventListener('click', onCustomerAccountLinkClick, true)
+}
+
+function isAccountReturnLanding(): boolean {
+  if (typeof document !== 'undefined' && isCustomerAccountReferrer(document.referrer || '')) {
+    return true
+  }
+  if (typeof window === 'undefined') return false
+  try {
+    const url = new URL(window.location.href)
+    const path = url.pathname.length > 1 ? url.pathname.replace(/\/+$/, '') : url.pathname
+    return path === '/' && url.searchParams.get('country') === 'US'
+  } catch {
+    return false
+  }
+}
+
+function hasStoredCartId(): boolean {
+  try {
+    if (typeof localStorage !== 'undefined' && localStorage.getItem('southland_cart_id')) {
+      return true
+    }
+  } catch {
+    /* private mode */
+  }
+  if (typeof document === 'undefined') return false
+  return /(?:^|;\s*)sl_cart=/.test(document.cookie)
+}
+
+export async function captureLandingAttribution(): Promise<void> {
   captureLastTouch()
   captureFirstTouch()
+  bindCustomerAccountLeaveFlush()
+  if (!isAccountReturnLanding()) return
+  if (!loadGoogleClickStore() || !hasStoredCartId()) return
+  // Dynamic import: CLAUDE.md requires a lazy cart import. A static import
+  // loads cart code on every page, including ones that never touch the cart.
+  try {
+    const { restampCartAfterAccountReturn } = await import('./cart')
+    await restampCartAfterAccountReturn()
+  } catch (err) {
+    console.error('[attribution] account-return click stamp failed:', err)
+  }
 }
 
 if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
-  captureLandingAttribution()
+  void captureLandingAttribution()
 }

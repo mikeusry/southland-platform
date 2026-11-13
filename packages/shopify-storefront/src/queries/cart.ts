@@ -336,7 +336,9 @@ export async function applyDiscountCode(
 
 /**
  * Fetch an existing cart by ID.
- * Returns null if the cart no longer exists (expired, completed checkout, etc.)
+ * Returns null only when the response succeeded and the cart is gone (expired
+ * or completed). GraphQL errors and network failures throw, so a caller can
+ * tell those apart from a cart Shopify no longer has.
  */
 export async function getCart(client: StorefrontClient, cartId: string): Promise<Cart | null> {
   const { data, errors } = await client.request(GET_CART_QUERY, {
@@ -344,8 +346,9 @@ export async function getCart(client: StorefrontClient, cartId: string): Promise
   })
 
   if (errors) {
-    console.error('[shopify-storefront] getCart errors:', errors)
-    return null
+    const detail = typeof errors === 'object' ? JSON.stringify(errors) : String(errors)
+    console.error('[shopify-storefront] getCart errors:', detail)
+    throw new Error(`Failed to fetch cart: ${detail}`)
   }
 
   return data?.cart ? parseCart(data.cart) : null

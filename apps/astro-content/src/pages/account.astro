@@ -3,7 +3,21 @@
  * /account — Redirect to Shopify customer account.
  *
  * Shopify still owns customer accounts (login, order history, addresses).
- * This redirect ensures any /account links land on the Shopify-hosted page.
+ * A click on this request, or one already on the `_pd_gclick` cookie, is
+ * set on the 302. This response has no document. The Location is unchanged.
+ * Cache-Control is no-store so a shared cache cannot replay the redirect.
  */
-return Astro.redirect('https://account.southlandorganics.com/account', 302)
+import { customerAccountRedirectInit } from '../lib/attribution-storage'
+
+const leave = customerAccountRedirectInit(
+  Astro.url,
+  Date.now(),
+  Astro.request.headers.get('cookie') ?? ''
+)
+const headers = new Headers({
+  Location: leave.location,
+  'Cache-Control': 'no-store',
+})
+if (leave.setCookie) headers.set('Set-Cookie', leave.setCookie)
+return new Response(null, { status: leave.status, headers })
 ---

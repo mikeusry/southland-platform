@@ -26,14 +26,17 @@ import type {
   StorefrontClient,
 } from '@southland/shopify-storefront'
 import {
+  activeGoogleClickKey,
   applyStoredGoogleClick,
   ATTRIBUTION_SESSION_MS,
+  type AttributionBag,
   CART_LAST_TOUCH_CLEAR_ON_IDENTITY_CHANGE,
   coalesceLastTouchBag,
   filterLastTouchAttribution,
   GOOGLE_CLICK_MS,
   GOOGLE_CLICK_PARAMS,
   GOOGLE_CLICK_STORE_KEY,
+  googleClickEpochMs,
   googleClickSnapshotFromPairs,
   incomingPaidNetwork,
   lastTouchIdentityChangedOnCart,
@@ -652,7 +655,10 @@ function getClient(): StorefrontClient {
 // ─── Cart operations ─────────────────────────────────────────────────────────
 
 /**
- * Get the current cart. Returns null if no cart exists or it has expired.
+ * Get the current cart. Returns null when there is no saved id, or when
+ * Shopify's response succeeded and the cart is gone. That successful empty
+ * response is the only case that clears the saved id. A Storefront error
+ * throws and leaves the id in place.
  */
 export async function getCart(): Promise<Cart | null> {
   const cartId = getCartId()
@@ -660,7 +666,7 @@ export async function getCart(): Promise<Cart | null> {
 
   const cart = await sfGetCart(getClient(), cartId)
   if (!cart) {
-    // Cart expired or completed — clear the stored ID
+    // Successful response, cart is null: expired or completed.
     clearCartId()
     return null
   }
@@ -865,6 +871,56 @@ export function planGoogleClickCheckoutStamp(
     needsAttributeUpdate: !attributionAttrsEqual(attributes, existing),
     attributes,
     lineUpdates,
+  }
+}
+
+function newestCartGoogleClick(cart: Cart): { key: string; value: string; ts: number } | null {
+  const attrs = cart.attributes ?? []
+  let best: { key: string; value: string; ts: number } | null = null
+  for (const key of GOOGLE_CLICK_PARAMS) {
+    const value = attrs.find((item) => item.key === `_pd_${key}`)?.value
+    if (!value) continue
+    const ts = Number(attrs.find((item) => item.key === `_pd_${key}_ts`)?.value) || 0
+    if (!best || ts > best.ts) best = { key, value, ts }
+  }
+  return best
+}
+
+/** The stored click is missing on the cart, or newer than the cart's pair. A tie keeps the cart. */
+function storedClickNeedsWrite(stored: AttributionBag, cart: Cart): boolean {
+  const key = activeGoogleClickKey(stored)
+  if (!key || !stored[key]) return false
+  const onCart = newestCartGoogleClick(cart)
+  if (!onCart) return true
+  return googleClickEpochMs(stored, key) > onCart.ts
+}
+
+/**
+ * Write the stored click onto the cart id we already have when that cart's
+ * pair is missing or older. A missing referrer still qualifies. Does not
+ * call cartCreate, and does not write when the cart pair is current or newer.
+ */
+export async function restampCartAfterAccountReturn(): Promise<Cart | null> {
+  const stored = loadGoogleClickStore()
+  if (!stored || !getCartId()) return null
+  try {
+    const started = cartVersion
+    let cart = await getCart()
+    if (!cart) return null
+    if (cartVersion !== started || storedClickNeedsWrite(stored, cart)) {
+      const latest = await getCart()
+      if (!latest) return null
+      cart = latest
+    }
+    if (!storedClickNeedsWrite(stored, cart)) return cart
+    const stamped = await ensureGoogleClickStamped(cart)
+    if (stamped !== cart && cartVersion === started && typeof window.dispatchEvent === 'function') {
+      dispatchCartEvent(stamped)
+    }
+    return stamped
+  } catch (err) {
+    console.error('[cart] account-return click stamp failed:', err)
+    return null
   }
 }
 
