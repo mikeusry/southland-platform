@@ -636,6 +636,56 @@ test('the landing module does not statically import the cart', () => {
   assert.match(source, /import\('\.\/cart'\)/)
 })
 
+test('an ordinary page with a stored click does not read the cart', async () => {
+  installStorage()
+  const now = Date.now()
+  const cartId = 'gid://shopify/Cart/24540'
+  localStorage.setItem('southland_cart_id', cartId)
+  localStorage.setItem(
+    '_pd_gclick',
+    JSON.stringify({ gclid: 'G-STAY', gclid_ts: String(now - 60_000) })
+  )
+  const seen: string[] = []
+  getCartImpl = async (_client, id) => {
+    seen.push(id)
+    return wipedCart(id)
+  }
+
+  await captureReturn('https://southlandorganics.com/blog/soil-health/', 'https://www.google.com/')
+
+  assert.deepEqual(seen, [])
+  assert.equal(attributeWrites.length, 0)
+  assert.equal(lineCalls.length, 0)
+  assert.equal(createCartCalls.length, 0)
+  assert.equal(localStorage.getItem('southland_cart_id'), cartId)
+})
+
+test('an account referrer restamps a cart that is missing the click', async () => {
+  installStorage()
+  const now = Date.now()
+  const ts = String(now - 60_000)
+  const cartId = 'gid://shopify/Cart/24540'
+  localStorage.setItem('southland_cart_id', cartId)
+  localStorage.setItem('_pd_gclick', JSON.stringify({ gclid: 'G-SSO', gclid_ts: ts }))
+  const seen: string[] = []
+  getCartImpl = async (_client, id) => {
+    seen.push(id)
+    return wipedCart(id)
+  }
+
+  await captureReturn(
+    'https://southlandorganics.com/products/genesis/',
+    'https://account.southlandorganics.com/'
+  )
+
+  assert.equal(createCartCalls.length, 0)
+  assert.ok(seen.includes(cartId))
+  assert.equal(attributeWrites.length, 1)
+  assert.equal(attr(attributeWrites[0]?.attributes ?? [], '_pd_gclid'), 'G-SSO')
+  assert.equal(attr(attributeWrites[0]?.attributes ?? [], '_pd_gclid_ts'), ts)
+  assert.equal(localStorage.getItem('southland_cart_id'), cartId)
+})
+
 test('an account return with no stored click does not create a cart', async () => {
   installStorage()
   localStorage.setItem('southland_cart_id', 'gid://shopify/Cart/24540')

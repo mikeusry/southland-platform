@@ -7,6 +7,7 @@ import {
   applyGoogleClickFirstSeen,
   flushGoogleClickBeforeAccountLeave,
   isCustomerAccountHref,
+  isCustomerAccountReferrer,
   loadGoogleClickStore,
   mergeLastTouchCapture,
   prepareFirstTouchBagForStorage,
@@ -283,6 +284,20 @@ function bindCustomerAccountLeaveFlush(): void {
   document.addEventListener('click', onCustomerAccountLinkClick, true)
 }
 
+function isAccountReturnLanding(): boolean {
+  if (typeof document !== 'undefined' && isCustomerAccountReferrer(document.referrer || '')) {
+    return true
+  }
+  if (typeof window === 'undefined') return false
+  try {
+    const url = new URL(window.location.href)
+    const path = url.pathname.length > 1 ? url.pathname.replace(/\/+$/, '') : url.pathname
+    return path === '/' && url.searchParams.get('country') === 'US'
+  } catch {
+    return false
+  }
+}
+
 function hasStoredCartId(): boolean {
   try {
     if (typeof localStorage !== 'undefined' && localStorage.getItem('southland_cart_id')) {
@@ -299,6 +314,7 @@ export async function captureLandingAttribution(): Promise<void> {
   captureLastTouch()
   captureFirstTouch()
   bindCustomerAccountLeaveFlush()
+  if (!isAccountReturnLanding()) return
   if (!loadGoogleClickStore() || !hasStoredCartId()) return
   // Dynamic import: CLAUDE.md requires a lazy cart import. A static import
   // loads cart code on every page, including ones that never touch the cart.

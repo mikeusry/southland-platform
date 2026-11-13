@@ -655,7 +655,10 @@ function getClient(): StorefrontClient {
 // ─── Cart operations ─────────────────────────────────────────────────────────
 
 /**
- * Get the current cart. Returns null if no cart exists or it has expired.
+ * Get the current cart. Returns null when there is no saved id, or when
+ * Shopify's response succeeded and the cart is gone. That successful empty
+ * response is the only case that clears the saved id. A Storefront error
+ * throws and leaves the id in place.
  */
 export async function getCart(): Promise<Cart | null> {
   const cartId = getCartId()
@@ -663,7 +666,7 @@ export async function getCart(): Promise<Cart | null> {
 
   const cart = await sfGetCart(getClient(), cartId)
   if (!cart) {
-    // Cart expired or completed — clear the stored ID
+    // Successful response, cart is null: expired or completed.
     clearCartId()
     return null
   }
