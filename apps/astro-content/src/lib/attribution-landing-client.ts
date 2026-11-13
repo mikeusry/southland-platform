@@ -5,6 +5,9 @@ import {
   activeGoogleClickKey,
   applyChatGptUtmIfNeeded,
   applyGoogleClickFirstSeen,
+  flushGoogleClickBeforeAccountLeave,
+  isCustomerAccountHref,
+  isCustomerAccountReferrer,
   mergeLastTouchCapture,
   prepareFirstTouchBagForStorage,
   isChatGptUtmSource,
@@ -13,6 +16,7 @@ import {
   pruneToSingleGoogleClick,
   saveGoogleClickStore,
 } from './attribution-storage'
+import { restampCartAfterAccountReturn } from './cart'
 
 const LAST_TOUCH_KEY = '_pd_attribution'
 const FIRST_TOUCH_KEY = '_pd_first_touch'
@@ -254,11 +258,41 @@ function captureFirstTouch(): void {
   }
 }
 
-export function captureLandingAttribution(): void {
+let accountLeaveBound = false
+
+export function onCustomerAccountLinkClick(event: Event): void {
+  const target = event.target as {
+    closest?: (selector: string) => {
+      href?: string
+      getAttribute?: (name: string) => string | null
+    } | null
+  } | null
+  if (!target || typeof target.closest !== 'function') return
+  const link = target.closest('a')
+  if (!link) return
+  const href = link.href || link.getAttribute?.('href') || ''
+  const base =
+    typeof window !== 'undefined' ? window.location.href : 'https://southlandorganics.com/'
+  if (!isCustomerAccountHref(href, base)) return
+  flushGoogleClickBeforeAccountLeave()
+}
+
+function bindCustomerAccountLeaveFlush(): void {
+  if (accountLeaveBound) return
+  if (typeof document === 'undefined' || typeof document.addEventListener !== 'function') return
+  accountLeaveBound = true
+  document.addEventListener('click', onCustomerAccountLinkClick, true)
+}
+
+export async function captureLandingAttribution(): Promise<void> {
   captureLastTouch()
   captureFirstTouch()
+  bindCustomerAccountLeaveFlush()
+  if (typeof document !== 'undefined' && isCustomerAccountReferrer(document.referrer || '')) {
+    await restampCartAfterAccountReturn()
+  }
 }
 
 if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
-  captureLandingAttribution()
+  void captureLandingAttribution()
 }

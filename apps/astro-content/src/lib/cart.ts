@@ -868,6 +868,27 @@ export function planGoogleClickCheckoutStamp(
   }
 }
 
+/**
+ * Customer-account login sends the shopper to account.southlandorganics.com and
+ * back to `/?country=US`. Shopify's login cart no longer has the click. Write
+ * the stored one onto the cart id we already have. Does not call cartCreate.
+ */
+export async function restampCartAfterAccountReturn(): Promise<Cart | null> {
+  if (!loadGoogleClickStore()) return null
+  try {
+    const cart = await getCart()
+    if (!cart) return null
+    const stamped = await ensureGoogleClickStamped(cart)
+    if (stamped !== cart && typeof window.dispatchEvent === 'function') {
+      dispatchCartEvent(stamped)
+    }
+    return stamped
+  } catch (err) {
+    console.error('[cart] account-return click stamp failed:', err)
+    return null
+  }
+}
+
 /** Write the stored click onto this cart id. Does not call cartCreate. */
 export async function ensureGoogleClickStamped(cart: Cart): Promise<Cart> {
   const fresh = getCartLevelAttributionAttrs()
