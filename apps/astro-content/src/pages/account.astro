@@ -3,8 +3,9 @@
  * /account — Redirect to Shopify customer account.
  *
  * Shopify still owns customer accounts (login, order history, addresses).
- * A click id on this request is stored on the first-party cookie before the
- * 302, because this response has no document. The Location is unchanged.
+ * A click on this request, or one already on the `_pd_gclick` cookie, is
+ * set on the 302. This response has no document. The Location is unchanged.
+ * Cache-Control is no-store so a shared cache cannot replay the redirect.
  */
 import { customerAccountRedirectInit } from '../lib/attribution-storage'
 
@@ -13,7 +14,10 @@ const leave = customerAccountRedirectInit(
   Date.now(),
   Astro.request.headers.get('cookie') ?? ''
 )
-const headers = new Headers({ Location: leave.location })
+const headers = new Headers({
+  Location: leave.location,
+  'Cache-Control': 'no-store',
+})
 if (leave.setCookie) headers.set('Set-Cookie', leave.setCookie)
 return new Response(null, { status: leave.status, headers })
 ---

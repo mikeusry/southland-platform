@@ -26,14 +26,17 @@ import type {
   StorefrontClient,
 } from '@southland/shopify-storefront'
 import {
+  activeGoogleClickKey,
   applyStoredGoogleClick,
   ATTRIBUTION_SESSION_MS,
+  type AttributionBag,
   CART_LAST_TOUCH_CLEAR_ON_IDENTITY_CHANGE,
   coalesceLastTouchBag,
   filterLastTouchAttribution,
   GOOGLE_CLICK_MS,
   GOOGLE_CLICK_PARAMS,
   GOOGLE_CLICK_STORE_KEY,
+  googleClickEpochMs,
   googleClickSnapshotFromPairs,
   incomingPaidNetwork,
   lastTouchIdentityChangedOnCart,
@@ -868,18 +871,47 @@ export function planGoogleClickCheckoutStamp(
   }
 }
 
+function newestCartGoogleClick(cart: Cart): { key: string; value: string; ts: number } | null {
+  const attrs = cart.attributes ?? []
+  let best: { key: string; value: string; ts: number } | null = null
+  for (const key of GOOGLE_CLICK_PARAMS) {
+    const value = attrs.find((item) => item.key === `_pd_${key}`)?.value
+    if (!value) continue
+    const ts = Number(attrs.find((item) => item.key === `_pd_${key}_ts`)?.value) || 0
+    if (!best || ts > best.ts) best = { key, value, ts }
+  }
+  return best
+}
+
+/** The stored click is missing on the cart, or newer than the cart's pair. A tie keeps the cart. */
+function storedClickNeedsWrite(stored: AttributionBag, cart: Cart): boolean {
+  const key = activeGoogleClickKey(stored)
+  if (!key || !stored[key]) return false
+  const onCart = newestCartGoogleClick(cart)
+  if (!onCart) return true
+  return googleClickEpochMs(stored, key) > onCart.ts
+}
+
 /**
- * Customer-account login sends the shopper to account.southlandorganics.com and
- * back to `/?country=US`. Shopify's login cart no longer has the click. Write
- * the stored one onto the cart id we already have. Does not call cartCreate.
+ * Write the stored click onto the cart id we already have when that cart's
+ * pair is missing or older. A missing referrer still qualifies. Does not
+ * call cartCreate, and does not write when the cart pair is current or newer.
  */
 export async function restampCartAfterAccountReturn(): Promise<Cart | null> {
-  if (!loadGoogleClickStore()) return null
+  const stored = loadGoogleClickStore()
+  if (!stored || !getCartId()) return null
   try {
-    const cart = await getCart()
+    const started = cartVersion
+    let cart = await getCart()
     if (!cart) return null
+    if (cartVersion !== started || storedClickNeedsWrite(stored, cart)) {
+      const latest = await getCart()
+      if (!latest) return null
+      cart = latest
+    }
+    if (!storedClickNeedsWrite(stored, cart)) return cart
     const stamped = await ensureGoogleClickStamped(cart)
-    if (stamped !== cart && typeof window.dispatchEvent === 'function') {
+    if (stamped !== cart && cartVersion === started && typeof window.dispatchEvent === 'function') {
       dispatchCartEvent(stamped)
     }
     return stamped

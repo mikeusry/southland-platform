@@ -7,7 +7,7 @@ import {
   applyGoogleClickFirstSeen,
   flushGoogleClickBeforeAccountLeave,
   isCustomerAccountHref,
-  isCustomerAccountReferrer,
+  loadGoogleClickStore,
   mergeLastTouchCapture,
   prepareFirstTouchBagForStorage,
   isChatGptUtmSource,
@@ -16,7 +16,6 @@ import {
   pruneToSingleGoogleClick,
   saveGoogleClickStore,
 } from './attribution-storage'
-import { restampCartAfterAccountReturn } from './cart'
 
 const LAST_TOUCH_KEY = '_pd_attribution'
 const FIRST_TOUCH_KEY = '_pd_first_touch'
@@ -284,12 +283,30 @@ function bindCustomerAccountLeaveFlush(): void {
   document.addEventListener('click', onCustomerAccountLinkClick, true)
 }
 
+function hasStoredCartId(): boolean {
+  try {
+    if (typeof localStorage !== 'undefined' && localStorage.getItem('southland_cart_id')) {
+      return true
+    }
+  } catch {
+    /* private mode */
+  }
+  if (typeof document === 'undefined') return false
+  return /(?:^|;\s*)sl_cart=/.test(document.cookie)
+}
+
 export async function captureLandingAttribution(): Promise<void> {
   captureLastTouch()
   captureFirstTouch()
   bindCustomerAccountLeaveFlush()
-  if (typeof document !== 'undefined' && isCustomerAccountReferrer(document.referrer || '')) {
+  if (!loadGoogleClickStore() || !hasStoredCartId()) return
+  // Dynamic import: CLAUDE.md requires a lazy cart import. A static import
+  // loads cart code on every page, including ones that never touch the cart.
+  try {
+    const { restampCartAfterAccountReturn } = await import('./cart')
     await restampCartAfterAccountReturn()
+  } catch (err) {
+    console.error('[attribution] account-return click stamp failed:', err)
   }
 }
 

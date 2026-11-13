@@ -888,32 +888,37 @@ export function googleClickBagFromUrl(href: string, now = Date.now()): Attributi
 }
 
 /**
- * Set-Cookie for a click that is on the /account request itself. The 302 has no
- * document, so the head script never runs. A request with no click does not
- * clear a cookie the browser already stored. Location stays the customer-account URL.
+ * Set-Cookie for the /account 302. The response has no document, so the head
+ * script never runs. A click on the request is stored. A click already on the
+ * request cookie is refreshed even when this URL has none, so the server cookie
+ * exists before the account host. srsltid does not clear it. Location stays
+ * the customer-account URL. The response is not cacheable.
  */
 export function customerAccountRedirectInit(
   requestUrl: URL,
   now = Date.now(),
   cookieHeader = ''
-): { status: 302; location: string; setCookie: string | null } {
+): { status: 302; location: string; setCookie: string | null; cacheControl: 'no-store' } {
   const incoming = googleClickBagFromUrl(requestUrl.href, now)
-  if (!activeGoogleClickKey(incoming)) {
-    return { status: 302, location: CUSTOMER_ACCOUNT_REDIRECT_URL, setCookie: null }
-  }
   const stored = bagFromCookie(readGoogleClickCookieBag(cookieHeader, now))
-  const parsed = parseGoogleClickCookieBag(updateGoogleClickStore(stored, incoming, now), now)
+  const next = activeGoogleClickKey(incoming)
+    ? updateGoogleClickStore(stored, incoming, now)
+    : stored
+  const parsed = parseGoogleClickCookieBag(next, now)
   return {
     status: 302,
     location: CUSTOMER_ACCOUNT_REDIRECT_URL,
     setCookie: parsed ? googleClickSetCookieHeader(parsed, now) : null,
+    cacheControl: 'no-store',
   }
 }
 
 /**
  * The landing module is deferred, so a click on Account can leave before it runs.
- * This classic head script writes the same `_pd_gclick` store and beacons
- * POST /api/pd-gclick. No click in the URL returns without touching storage.
+ * This classic head script writes localStorage and sends at most one keepalive
+ * beacon. It does not set document.cookie: a JS cookie would match the store
+ * and the module would skip the retried server beacon that sets the 90-day cookie.
+ * No click in the URL returns without touching storage.
  */
 export function earlyGoogleClickCaptureSource(): string {
   const max = GOOGLE_CLICK_ID_MAX_LEN
@@ -921,10 +926,15 @@ export function earlyGoogleClickCaptureSource(): string {
   const re = GOOGLE_CLICK_ID_RE.toString()
   const storeKey = JSON.stringify(GOOGLE_CLICK_STORE_KEY)
   const cookieName = JSON.stringify(GOOGLE_CLICK_COOKIE)
-  return `!function(){try{var p=new URLSearchParams(location.search);var keys=["gclid","gbraid","wbraid"];var key="";var value="";for(var i=0;i!==keys.length;i++){var v=p.get(keys[i]);if(v&&!(v.length>${max})&&${re}.test(v)){key=keys[i];value=v;break}}if(!key)return;var now=Date.now();function live(raw){if(!raw)return null;var o;try{o=JSON.parse(raw)}catch(e){return null}if(!o||typeof o!=="object")return null;var best=null;for(var j=0;j!==keys.length;j++){var k=keys[j];var val=o[k];var t=Number(o[k+"_ts"]);if(typeof val!=="string"||val.length>${max}||!${re}.test(val))continue;if(!(t>0)||t>now||now-t>${windowMs})continue;if(!best||t>best.ts)best={key:k,value:val,ts:t}}return best}var fromLs=null;try{fromLs=live(localStorage.getItem(${storeKey}))}catch(e){}var fromCookie=null;try{var parts=String(document.cookie||"").split(";");var prefix=${cookieName}+"=";for(var c=0;c!==parts.length;c++){var s=parts[c].replace(/^\\s+/,"");if(s.indexOf(prefix)===0){fromCookie=live(decodeURIComponent(s.slice(prefix.length)));break}}}catch(e){}var current=fromLs;if(!current||(fromCookie&&fromCookie.ts>current.ts))current=fromCookie;var ts=String(now);if(current&&current.key===key&&current.value===value)ts=String(current.ts);var bag={};bag[key]=value;bag[key+"_ts"]=ts;var json=JSON.stringify(bag);localStorage.setItem(${storeKey},json);var remain=Math.floor((Number(ts)+${windowMs}-now)/1000);var cap=Math.floor(${windowMs}/1000);var age=remain>cap?cap:remain;if(!(age>0))age=0;document.cookie=${cookieName}+"="+encodeURIComponent(json)+"; Path=/; Domain=${GOOGLE_CLICK_COOKIE_DOMAIN}; Max-Age="+age+"; Secure; SameSite=Lax";if(typeof navigator!=="undefined"&&typeof navigator.sendBeacon==="function")navigator.sendBeacon("/api/pd-gclick",new Blob([json],{type:"application/json"}))}catch(e){}}();`
+  return `!function(){try{var p=new URLSearchParams(location.search);var keys=["gclid","gbraid","wbraid"];var key="";var value="";for(var i=0;i!==keys.length;i++){var v=p.get(keys[i]);if(v&&!(v.length>${max})&&${re}.test(v)){key=keys[i];value=v;break}}if(!key)return;var now=Date.now();function live(raw){if(!raw)return null;var o;try{o=JSON.parse(raw)}catch(e){return null}if(!o||typeof o!=="object")return null;var best=null;for(var j=0;j!==keys.length;j++){var k=keys[j];var val=o[k];var t=Number(o[k+"_ts"]);if(typeof val!=="string"||val.length>${max}||!${re}.test(val))continue;if(!(t>0)||t>now||now-t>${windowMs})continue;if(!best||t>best.ts)best={key:k,value:val,ts:t}}return best}var fromLs=null;try{fromLs=live(localStorage.getItem(${storeKey}))}catch(e){}var fromCookie=null;try{var parts=String(document.cookie||"").split(";");var prefix=${cookieName}+"=";for(var c=0;c!==parts.length;c++){var s=parts[c].replace(/^\\s+/,"");if(s.indexOf(prefix)===0){fromCookie=live(decodeURIComponent(s.slice(prefix.length)));break}}}catch(e){}var current=fromLs;if(!current||(fromCookie&&fromCookie.ts>current.ts))current=fromCookie;var ts=String(now);if(current&&current.key===key&&current.value===value)ts=String(current.ts);var bag={};bag[key]=value;bag[key+"_ts"]=ts;var json=JSON.stringify(bag);localStorage.setItem(${storeKey},json);if(typeof navigator!=="undefined"&&typeof navigator.sendBeacon==="function")navigator.sendBeacon("/api/pd-gclick",new Blob([json],{type:"application/json"}))}catch(e){}}();`
 }
 
-/** Write the current URL click, then beacon the live store so the 90-day cookie is queued before navigation. */
+/**
+ * Write the current URL click, then beacon the live store. The beacon is the
+ * server Set-Cookie. It runs whenever a click is already stored, including when
+ * the JS cookie already matches, so an account click does not leave with only
+ * Safari's 7-day document.cookie.
+ */
 export function flushGoogleClickBeforeAccountLeave(now = Date.now()): void {
   if (typeof window === 'undefined') return
   const incoming = googleClickBagFromUrl(window.location.href, now)

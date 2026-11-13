@@ -230,10 +230,8 @@ test('early capture stores gclid gbraid and wbraid and a country or srsltid URL 
       >
       assert.equal(stored[key], `CLICK-${key}`, key)
       assert.equal(stored[`${key}_ts`], String(now), key)
-      assert.equal(document.cookie.includes(encodeURIComponent(`CLICK-${key}`)), true, key)
-      const header = assignments.at(-1) ?? ''
-      assert.match(header, /Domain=\.southlandorganics\.com/, key)
-      assert.match(header, /Max-Age=7776000/, key)
+      assert.equal(assignments.length, 0, key)
+      assert.equal(document.cookie.includes(encodeURIComponent(`CLICK-${key}`)), false, key)
       assert.equal(beacons.length, 1, key)
       assert.match(beacons[0] ?? '', /^\/api\/pd-gclick /, key)
 
@@ -465,7 +463,7 @@ test('account return on /?country=US restamps the stored click onto the existing
   )
 
   assert.equal(createCartCalls.length, 0, 'account return must not call cartCreate')
-  assert.deepEqual(seen, [cartId])
+  assert.deepEqual(seen, [cartId, cartId])
   assert.equal(attributeWrites.length, 1)
   assert.equal(attributeWrites[0]?.cartId, cartId)
   const written = attributeWrites[0]?.attributes ?? []
@@ -508,19 +506,134 @@ test('account return restamps gbraid and wbraid onto the same cart id', async ()
   }
 })
 
-test('a landing that is not a customer-account return does not write the cart', async () => {
+test('a landing whose cart already has the stored click does not write the cart', async () => {
   installStorage()
   const now = Date.now()
   const ts = String(now - 60_000)
   localStorage.setItem('southland_cart_id', 'gid://shopify/Cart/24540')
   localStorage.setItem('_pd_gclick', JSON.stringify({ gclid: 'G-STAY', gclid_ts: ts }))
-  getCartImpl = async (_client, id) => wipedCart(id)
+  getCartImpl = async (_client, id) =>
+    ({
+      ...wipedCart(id),
+      attributes: [
+        { key: '_pd_brand', value: 'southland' },
+        { key: '_pd_gclid', value: 'G-STAY' },
+        { key: '_pd_gclid_ts', value: ts },
+      ],
+    }) as Cart
 
   await captureReturn('https://southlandorganics.com/?country=US', 'https://www.google.com/')
 
   assert.equal(attributeWrites.length, 0)
   assert.equal(createCartCalls.length, 0)
   assert.equal(JSON.parse(localStorage.getItem('_pd_gclick') ?? '{}').gclid, 'G-STAY')
+})
+
+test('inline script does not set the cookie and the landing module still beacons with retry', async () => {
+  installStorage()
+  const { assignments } = installDocument('')
+  setLocation('https://southlandorganics.com/?gclid=G-MOD')
+  const calls: string[] = []
+  Object.defineProperty(globalThis, 'navigator', {
+    configurable: true,
+    value: {
+      sendBeacon(url: string) {
+        calls.push(url)
+        return false
+      },
+    },
+  })
+  globalThis.setTimeout = (() => 0) as typeof setTimeout
+  const storage = await import('./attribution-storage.ts')
+  const landing = await import('./attribution-landing-client.ts')
+  localStorage.removeItem('_pd_gclick')
+  calls.length = 0
+  const source = storage.earlyGoogleClickCaptureSource()
+  assert.equal(source.includes('document.cookie='), false)
+  new Function(source)()
+  assert.equal(calls.length, 1, 'the head script sends one beacon and does not retry')
+  assert.equal(assignments.length, 0, 'the head script must not write document.cookie')
+  assert.equal(JSON.parse(localStorage.getItem('_pd_gclick') ?? '{}').gclid, 'G-MOD')
+  await landing.captureLandingAttribution()
+  assert.equal(
+    calls.length,
+    3,
+    'the landing module must still beacon /api/pd-gclick and retry once'
+  )
+})
+
+test('/account refreshes a stored click with no URL click and is not cached', async () => {
+  const page = read('../pages/account.astro')
+  assert.match(page, /no-store/)
+  const storage = await import('./attribution-storage.ts')
+  const now = 1_700_000_000_000
+  const priorTs = String(now - 60_000)
+  const prior = encodeURIComponent(JSON.stringify({ gclid: 'G-KEEP', gclid_ts: priorTs }))
+  const refresh = storage.customerAccountRedirectInit(
+    new URL('https://southlandorganics.com/account?country=US'),
+    now,
+    `_pd_gclick=${prior}`
+  )
+  assert.equal(refresh.location, 'https://account.southlandorganics.com/account')
+  assert.match(refresh.setCookie ?? '', /G-KEEP/)
+  assert.match(refresh.setCookie ?? '', new RegExp(priorTs))
+  assert.doesNotMatch(refresh.setCookie ?? '', /Max-Age=0/)
+})
+
+test('apex return to /?country=US with no referrer restamps a cart missing the click', async () => {
+  installStorage()
+  const now = Date.now()
+  const ts = String(now - 9 * 60 * 1000)
+  const cartId = 'gid://shopify/Cart/24540'
+  localStorage.setItem('southland_cart_id', cartId)
+  localStorage.setItem('_pd_gclick', JSON.stringify({ gclid: 'G-SSO', gclid_ts: ts }))
+  const seen: string[] = []
+  getCartImpl = async (_client, id) => {
+    seen.push(id)
+    return wipedCart(id)
+  }
+
+  await captureReturn('https://southlandorganics.com/?country=US', '')
+
+  assert.equal(createCartCalls.length, 0)
+  assert.ok(seen.includes(cartId))
+  assert.equal(attributeWrites.length, 1)
+  assert.equal(attr(attributeWrites[0]?.attributes ?? [], '_pd_gclid'), 'G-SSO')
+  assert.equal(attr(attributeWrites[0]?.attributes ?? [], '_pd_gclid_ts'), ts)
+})
+
+test('a restamp rereads the cart and does not overwrite a newer click', async () => {
+  installStorage()
+  const now = Date.now()
+  const ts = String(now - 60_000)
+  const cartId = 'gid://shopify/Cart/24540'
+  localStorage.setItem('southland_cart_id', cartId)
+  localStorage.setItem('_pd_gclick', JSON.stringify({ gclid: 'G-SSO', gclid_ts: ts }))
+  let reads = 0
+  getCartImpl = async (_client, id) => {
+    reads += 1
+    if (reads === 1) return wipedCart(id)
+    return {
+      ...wipedCart(id),
+      attributes: [
+        { key: '_pd_brand', value: 'southland' },
+        { key: '_pd_gclid', value: 'G-NEWER' },
+        { key: '_pd_gclid_ts', value: String(now) },
+      ],
+    } as Cart
+  }
+
+  await captureReturn('https://southlandorganics.com/?country=US', '')
+
+  assert.ok(reads >= 2, 'restamp must reread the cart before writing')
+  assert.equal(attributeWrites.length, 0)
+  assert.equal(createCartCalls.length, 0)
+})
+
+test('the landing module does not statically import the cart', () => {
+  const source = read('./attribution-landing-client.ts')
+  assert.equal(/from '\.\/cart'/.test(source), false)
+  assert.match(source, /import\('\.\/cart'\)/)
 })
 
 test('an account return with no stored click does not create a cart', async () => {
