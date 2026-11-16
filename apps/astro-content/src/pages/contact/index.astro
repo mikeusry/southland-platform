@@ -319,6 +319,19 @@ const contactSchema = {
                   placeholder="Tell us how we can help..."></textarea>
               </div>
 
+              <!-- Marketing email opt-in. Never pre-checked. No name attr, so it stays out of
+                   the /api/form/submit body; read by id and sent to Nexus only. -->
+              <div class="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="marketing-email-opt-in"
+                  class="mt-0.5 h-5 w-5 shrink-0 rounded border-gray-300 text-southland-green accent-southland-green focus:outline-none focus:ring-2 focus:ring-southland-green/40 focus:ring-offset-1"
+                />
+                <label for="marketing-email-opt-in" class="text-sm text-shopify-text"
+                  >Email me product tips and offers from Southland Organics. Unsubscribe anytime.</label
+                >
+              </div>
+
               <!-- Honeypot — hidden from humans, bots fill it -->
               <input
                 name="website"
@@ -693,6 +706,8 @@ const contactSchema = {
 
       const formData = new FormData(form)
       const data = Object.fromEntries(formData.entries())
+      const optInEl = document.getElementById('marketing-email-opt-in') as HTMLInputElement | null
+      const marketingEmailOptIn = optInEl?.checked === true
 
       const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement
       if (submitBtn) {
@@ -723,6 +738,7 @@ const contactSchema = {
             email: data.email || null,
             phone: data.phone || null,
             message: data.message || null,
+            marketing_email_opt_in: marketingEmailOptIn,
             gclid: attr.gclid,
             utm_source: attr.utm_source,
             utm_medium: attr.utm_medium,
