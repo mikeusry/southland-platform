@@ -574,6 +574,20 @@ const distributionSchema = {
             ></textarea>
           </div>
 
+          <!-- Marketing email opt-in. Checked by default (Mike, 2026-11-16); visitor unchecks to opt out. No name attr, so it stays out of
+               the /api/form/submit body; read by id and sent to Nexus only. -->
+          <div class="flex items-start gap-3">
+            <input
+              type="checkbox"
+              id="dist-marketing-email-opt-in"
+              checked
+              class="mt-0.5 h-5 w-5 shrink-0 rounded border-gray-300 text-southland-green accent-southland-green focus:outline-none focus:ring-2 focus:ring-southland-green/40 focus:ring-offset-1"
+            />
+            <label for="dist-marketing-email-opt-in" class="text-sm text-shopify-text"
+              >Email me product tips and offers from Southland Organics. Unsubscribe anytime.</label
+            >
+          </div>
+
           <!-- Honeypot — hidden from humans, bots fill it -->
           <input name="website" type="text" style="display:none" tabindex="-1" autocomplete="off" />
 
@@ -670,6 +684,10 @@ const distributionSchema = {
       formData.forEach((v, k) => {
         data[k] = v as string
       })
+      const optInEl = document.getElementById(
+        'dist-marketing-email-opt-in'
+      ) as HTMLInputElement | null
+      const marketingEmailOptIn = optInEl?.checked === true
 
       const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement
       if (submitBtn) {
@@ -701,6 +719,7 @@ const distributionSchema = {
             company: data.company || null,
             state: data.location ? data.location.split(',').pop()?.trim() || null : null,
             message: data.message || null,
+            marketing_email_opt_in: marketingEmailOptIn,
             gclid: attr.gclid,
             utm_source: attr.utm_source,
             utm_medium: attr.utm_medium,
