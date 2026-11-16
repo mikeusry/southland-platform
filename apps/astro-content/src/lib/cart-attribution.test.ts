@@ -10,6 +10,7 @@ import {
   restampCartLineAttributes,
   retryTwice,
   syncAttributionLocalStorageAfterIdentityChange,
+  withLiveMetaFbc,
 } from './cart'
 
 const priorWindow = Object.getOwnPropertyDescriptor(globalThis, 'window')
@@ -273,6 +274,53 @@ test('last-touch attrs stamp Meta _fbc when stored on landing capture', () => {
     getAttributionAttrs().filter((a) => a.key === '_pd_fbc'),
     [{ key: '_pd_fbc', value: 'fb.1.123.abc' }]
   )
+})
+
+test('live _fbc cookie stamps _pd_fbc even when the 30-minute session has expired', () => {
+  installStorage()
+  localStorage.setItem(
+    '_pd_attribution',
+    JSON.stringify({
+      fbc: 'fb.1.123.stale',
+      utm_source: 'facebook',
+      _timestamp: Date.now() - ATTRIBUTION_SESSION_MS - 60_000,
+    })
+  )
+  const stored = getAttributionAttrs()
+  assert.equal(
+    stored.find((a) => a.key === '_pd_fbc'),
+    undefined,
+    'session filter drops the stored copy'
+  )
+  assert.deepEqual(
+    withLiveMetaFbc(stored, '_fbp=fb.1.1.2; _fbc=fb.1.1731700000000.IwAR-live').filter(
+      (a) => a.key === '_pd_fbc'
+    ),
+    [{ key: '_pd_fbc', value: 'fb.1.1731700000000.IwAR-live' }]
+  )
+})
+
+test('live _fbc cookie replaces the stored copy and survives a Google-click prune', () => {
+  const attrs = [
+    { key: '_pd_gclid', value: 'G-1' },
+    { key: '_pd_fbc', value: 'fb.1.1.old' },
+  ]
+  const out = withLiveMetaFbc(attrs, '_fbc=fb.1.1731700000000.NEW')
+  assert.deepEqual(out, [
+    { key: '_pd_gclid', value: 'G-1' },
+    { key: '_pd_fbc', value: 'fb.1.1731700000000.NEW' },
+  ])
+})
+
+test('no _fbc cookie writes nothing new and keeps any stored copy', () => {
+  assert.deepEqual(withLiveMetaFbc([], '_fbp=fb.1.1.2'), [])
+  const stored = [{ key: '_pd_fbc', value: 'fb.1.1.stored' }]
+  assert.deepEqual(withLiveMetaFbc(stored, ''), stored)
+})
+
+test('malformed _fbc cookie is ignored', () => {
+  assert.deepEqual(withLiveMetaFbc([], '_fbc=undefined'), [])
+  assert.deepEqual(withLiveMetaFbc([], '_fbc='), [])
 })
 
 test('restampCartLineAttributes drops stale gclid on line when identity changes to gbraid', () => {

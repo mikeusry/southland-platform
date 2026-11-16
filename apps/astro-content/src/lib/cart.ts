@@ -32,6 +32,7 @@ import {
   type AttributionBag,
   CART_LAST_TOUCH_CLEAR_ON_IDENTITY_CHANGE,
   coalesceLastTouchBag,
+  extractCookieValue,
   filterLastTouchAttribution,
   GOOGLE_CLICK_MS,
   GOOGLE_CLICK_PARAMS,
@@ -256,6 +257,39 @@ function withValidatedCampaign(
  */
 export function getAttributionAttrs(): Array<{ key: string; value: string }> {
   if (typeof window === 'undefined') return []
+  const cookieHeader = typeof document === 'undefined' ? '' : document.cookie
+  return withLiveMetaFbc(readStoredLastTouchAttrs(), cookieHeader)
+}
+
+/** Meta's `_fbc` shape: `fb.<subdomain index>.<ms timestamp>.<fbclid>` (Meta may append a segment). */
+const META_FBC_SHAPE = /^fb\.\d+\.\d+\..+/
+
+/**
+ * Stamp `_pd_fbc` from Meta's live `_fbc` cookie when one exists.
+ *
+ * Nexus sends `_pd_fbc` to Meta CAPI as `user_data.fbc` (purchase-event.ts
+ * resolveMetaFbc) and nowhere else: channel credit keys off `fbclid`, not fbc.
+ * So the right value is the one Meta's own browser pixel holds, read at the
+ * moment the cart is built. The localStorage copy is only a fallback, because
+ * two paths drop it while the cookie is still live:
+ *   - the 30-minute last-touch session (ATTRIBUTION_SESSION_MS) strips the bag
+ *     when the cart is built more than 30 minutes after the last page load;
+ *     `_fbc` has its own 90-day life, set by Meta.
+ *   - pruneLosingPaidNetworks deletes fbc on a Google-ad landing page.
+ *
+ * No cookie and no stored value → no `_pd_fbc`. Never build one from fbclid
+ * here; Nexus does that fallback server-side.
+ */
+export function withLiveMetaFbc(
+  attrs: Array<{ key: string; value: string }>,
+  cookieHeader: string
+): Array<{ key: string; value: string }> {
+  const live = extractCookieValue(cookieHeader, '_fbc').trim()
+  if (!META_FBC_SHAPE.test(live)) return attrs
+  return [...attrs.filter((a) => a.key !== '_pd_fbc'), { key: '_pd_fbc', value: live }]
+}
+
+function readStoredLastTouchAttrs(): Array<{ key: string; value: string }> {
   try {
     const raw = localStorage.getItem(PD_ATTRIBUTION_KEY)
     let data: Record<string, string> = {}
