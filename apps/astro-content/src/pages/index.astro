@@ -97,6 +97,11 @@ const CURATED_HANDLES = [
   'natural-mite-control-livestock-poultry',     // Desecticide (Betty) — $3K
   'pour-the-port-septic-tank-treatment',        // PORT (Sam) — $3K, 88% margin
 ]
+// Tag-based getBestFor() labels these "Backyard flock health" — wrong for both.
+const BEST_FOR_OVERRIDES: Record<string, string> = {
+  'torched-all-natural-weed-killer': 'Weeds around kids, pets & the coop',
+  'poultry-litter-amendment': 'Ammonia in the coop or poultry house',
+}
 const featuredProducts = CURATED_HANDLES
   .map((handle) => allProducts.find((p) => p.handle === handle))
   .filter(Boolean) as Product[]
@@ -940,7 +945,10 @@ function getProducts(filter: string) {
             </div>
             <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-4">
               {featuredProducts.map((product) => (
-                <CollectionProductCard product={product} />
+                <CollectionProductCard
+                  product={product}
+                  bestForOverride={BEST_FOR_OVERRIDES[product.handle]}
+                />
               ))}
             </div>
             <div class="mt-10 text-center">
