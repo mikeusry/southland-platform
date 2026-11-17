@@ -1,0 +1,193 @@
+<title>Southland Marketing Mix</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Open+Sans:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: single reading column. Phase 1 (act now) first, future architecture second, open items and sources last */
+:root {
+  --bg: #f6f8f5;
+  --surface: #ffffff;
+  --fg: #191d21;
+  --muted: #5c625d;
+  --rule: #d8ded6;
+  --brand: #2c5234;
+  --accent: #44883e;
+  --warn-bg: #fdf3e1;
+  --warn-fg: #7a4b00;
+  --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --body: "Open Sans", system-ui, -apple-system, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121612; --surface: #1a201b; --fg: #e6ebe5; --muted: #a2aba2; --rule: #2e372f;
+    --brand: #8fc489; --accent: #7dbb76; --warn-bg: #3a2c12; --warn-fg: #f2c977; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121612; --surface: #1a201b; --fg: #e6ebe5; --muted: #a2aba2; --rule: #2e372f;
+  --brand: #8fc489; --accent: #7dbb76; --warn-bg: #3a2c12; --warn-fg: #f2c977; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 16px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 40px 64px;
+}
+main { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+h1, h2, h3 { font-family: var(--display); color: var(--brand); text-wrap: balance; line-height: 1.2; margin: 0; }
+h1 { font-size: 2.1rem; font-weight: 800; }
+h2 { font-size: 1.4rem; font-weight: 700; padding-bottom: 8px; border-bottom: 2px solid var(--rule); }
+h3 { font-size: 1.05rem; font-weight: 700; color: var(--fg); }
+p, ul, ol { margin: 0; }
+section { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+ul, ol { padding-left: 1.2em; display: flex; flex-direction: column; gap: 6px; }
+a { color: var(--accent); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.eyebrow { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: 1.12rem; }
+.meta { color: var(--muted); font-size: 0.9rem; }
+.part { font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: -6px; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 0.92rem; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--rule); }
+th { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+tr:last-child td { border-bottom: none; }
+.tbd { font-family: var(--mono); font-size: 0.8rem; color: var(--warn-fg); }
+.src { font-size: 0.85rem; color: var(--muted); }
+.src li { word-break: break-word; }
+.tag { font-family: var(--mono); font-size: 0.7rem; padding: 1px 6px; border-radius: 3px; background: var(--warn-bg); color: var(--warn-fg); white-space: nowrap; }
+</style>
+
+<main>
+  <header style="display:flex;flex-direction:column;gap:10px">
+    <p class="eyebrow">Southland Organics · Channel plan · v2, 2026-11-17</p>
+    <h1>Southland Marketing Mix</h1>
+    <p class="lede">Phase 1 is backyard poultry only: fix the existing egg-laying content journey, get free Shopping listings in place, and run paid tests only once three launch gates pass. Commercial poultry, lawn and septic are mapped in Part 2 as future architecture. The channels there are hypotheses to test, not settled rules.</p>
+    <p class="meta">v2 revises v1 after an outside review. Changes: Phase 1 is split from the long-term map; fixed budget percentages are replaced with per-experiment caps; the Google bidding guidance is corrected; MER is no longer treated as proof that ads caused sales; and claims approval is now a launch gate.</p>
+  </header>
+
+  <section>
+    <h2>Method</h2>
+    <p>No plan here rests on past platform ROAS, because platform-attributed results are correlation. Two things replace it:</p>
+    <ul>
+      <li><strong>How each segment buys:</strong> who decides, where the order is placed, how often it repeats, and how big it is.</li>
+      <li><strong>Controlled experiments measured against Southland's own order system (Nexus).</strong> Using Nexus data instead of platform data doesn't by itself settle cause and effect. Only a properly powered experiment does.</li>
+    </ul>
+  </section>
+
+  <p class="part">Part 1 · Act now</p>
+
+  <section>
+    <h2>Phase 1: backyard poultry</h2>
+    <p>Backyard poultry is the one segment where the whole loop happens online: discovery, purchase and reorder. Lawn, septic and commercial work wait until Phase 1 produces a result.</p>
+    <h3>Launch gates (all three before any paid spend)</h3>
+    <ol>
+      <li><strong>Claims sheet.</strong> List approved, product-specific claims for each problem the ads will name (laying, mites, vent gleet), including any organic-status claims for poultry use. A customer problem can be a good topic without showing that a product treats its cause. Landing pages must match the approved claims.</li>
+      <li><strong>Contribution economics.</strong> Set the maximum cost to acquire a new customer from first-order contribution plus observed repeat contribution, not from revenue.</li>
+      <li><strong>Test feasibility.</strong> Run a power analysis on Nexus backyard order volume and variance to show what size of effect a holdout could detect.</li>
+    </ol>
+    <h3>Work that needs no media budget (start now)</h3>
+    <ul>
+      <li><strong>Egg-laying content journey.</strong> This existing traffic should lead to a clear, claims-approved next step toward Hen Helper.</li>
+      <li><strong>Free Merchant Center listings and feed quality.</strong> Clean titles, categories and attributes for the backyard products.</li>
+      <li><strong>Retention.</strong> Post-purchase email and a consumables subscription in Customer.io.</li>
+      <li><strong>Post-purchase survey.</strong> One to three questions that record both first touch and most influential touch.</li>
+    </ul>
+    <h3>Paid experiments (after the gates pass)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Experiment</th><th>Setup</th><th>Spend cap</th><th>Success threshold</th><th>Measured by</th><th>Decision date</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Meta acquisition</strong></td><td>One campaign, backyard poultry only, broad targeting, dealers excluded. How past purchasers are handled is written down before launch. A small number of distinct concepts, each backed by the claims sheet.</td><td class="tbd">TBD</td><td class="tbd">From gate 2</td><td>Geo holdout against Nexus orders</td><td class="tbd">TBD</td></tr>
+          <tr><td><strong>Google intent capture</strong></td><td>Search on backyard problems plus Standard Shopping on backyard products. Bidding is set per campaign type, using Google's guidance for that type.</td><td class="tbd">TBD</td><td class="tbd">From gate 2</td><td>Geo holdout against Nexus orders</td><td class="tbd">TBD</td></tr>
+          <tr><td><strong>PMax challenger</strong> (optional)</td><td>Tested against Search plus Shopping, not run as the default</td><td class="tbd">TBD</td><td class="tbd">From gate 2</td><td>Experiment split</td><td class="tbd">TBD</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="meta">Caps and dates wait on a dollar budget. No fixed percentage split is set before the tests run.</p>
+  </section>
+
+  <section>
+    <h2>Measurement</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Question</th><th>Measure</th></tr></thead>
+        <tbody>
+          <tr><td>Is the business economically healthier?</td><td>Contribution after marketing, with revenue and MER (marketing efficiency ratio) as context</td></tr>
+          <tr><td>Do acquired customers pay off?</td><td>New-customer acquisition cost, first-order contribution, and observed repeat contribution</td></tr>
+          <tr><td>Did the channel cause additional sales?</td><td>A properly powered controlled experiment</td></tr>
+          <tr><td>Where is execution failing?</td><td>Platform metrics, search terms, landing-page behavior, survey answers</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="meta">The 4–8 week state holdout is an assumption until the gate 3 power analysis confirms it.</p>
+  </section>
+
+  <p class="part">Part 2 · Future channel architecture</p>
+
+  <section>
+    <h2>How Southland sells</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Segment</th><th>How they buy</th><th>Price &amp; repeat</th><th>Working hypothesis</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Commercial poultry</strong></td><td>Phone, reps and dealers. Most dealers in the locator data belong to one farm-supply chain.</td><td>Reorders about every 45 days, $200–2,000+ per order</td><td>Relationship-led. Judge advertising on qualified grower opportunities, dealer demand and contribution, not on checkout ROAS.</td></tr>
+          <tr><td><strong>Backyard poultry</strong></td><td>Online checkout, nationwide; peaks spring and summer</td><td>$20–102 per item</td><td>Phase 1</td></tr>
+          <tr><td><strong>Lawn, turf &amp; soil</strong></td><td>Online. Homeowners, turf pros, golf courses</td><td>$16–149; reapplied every 4–6 weeks</td><td>Search for a named problem, then Meta</td></tr>
+          <tr><td><strong>Septic / vault toilet</strong></td><td>Online, when the problem appears</td><td>$18–94</td><td>Search only</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Three selling motions</h2>
+    <ul>
+      <li><strong>Distribution-led selling (commercial poultry).</strong> IPPE (Jan 26–28, 2027), dealer enablement (case-study sheets, rep training, co-op), farm radio, and the poultry biosecurity YouTube channel. Growers rank farm radio, dealers and peers highly as information sources (NAFB/Kynetec 2025, an industry-commissioned study). That shows where they listen, not that Meta can't work. Any Meta test here is measured on qualified opportunities.</li>
+      <li><strong>Demand capture (Google).</strong>
+        <ul>
+          <li>Search built on named problems, matching the content hubs.</li>
+          <li>Standard Shopping, which has competed on Ad Rank with PMax since October 2024.</li>
+          <li>PMax as a challenger. The ~60 conversions a month and 10–25%-of-spend figures are third-party test assumptions (Optmyzr), not Southland findings.</li>
+          <li>For commercial leads, bid on qualified leads uploaded through enhanced conversions for leads.</li>
+        </ul>
+      </li>
+      <li><strong>Direct-response ecommerce (Meta).</strong> One acquisition campaign per segment at a time, with problem-led creative backed by the claims sheet. Creative volume and partnership-ad share are production choices to test. The 45% partnership-ad lift claim is <span class="tag">unverified</span>.</li>
+    </ul>
+    <p class="meta">Budget is planned in three separate buckets: (1) existing commercial commitments and dealer support; (2) content, retention, feed and measurement; (3) incremental acquisition experiments, each with its own cap and decision date.</p>
+  </section>
+
+  <section>
+    <h2>Google bidding</h2>
+    <ul>
+      <li>Google's Target ROAS page lists "at least 15 conversions in the past 30 days at the conversion tracking level" for Search and Shopping. Google's page does not say "per campaign" (v1's wording) or "per Merchant Center ID". Campaign splits still reduce the volume each bid strategy learns from, so keep structure lean.</li>
+      <li>Bidding is chosen per campaign type from Google's guidance for that type. No single low-volume default applies across Search and Shopping.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Open items</h2>
+    <ul>
+      <li><strong>Offline conversion uploads.</strong> Google is moving offline uploads to the Data Manager API. Audit upload processing and conversion diagnostics before concluding anything is broken; legacy access may still apply.</li>
+      <li><strong>Comparable brands.</strong> What Espoma, Jobe's and Manna Pro currently run hasn't been verified.</li>
+      <li><strong>Dealer count.</strong> The site claims 500 dealers; the locator data has 114.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Sources</h2>
+    <ul class="src">
+      <li>Google Ads Help: Target ROAS requirements — support.google.com/google-ads/answer/6268637; Shopping setup — answer/6309035</li>
+      <li>Google Ads Help: PMax and Standard Shopping prioritization by Ad Rank — answer/13810170</li>
+      <li>Google Ads Help: enhanced conversions for leads — answer/15713840; offline imports — answer/2998031; Data Manager migration — answer/15479791</li>
+      <li>Search Engine Journal, "When to say no to PMax," 2025-12-12</li>
+      <li>Optmyzr, PMax study of 24,702 campaigns, 2025-06-16</li>
+      <li>Jon Loomer, Meta Andromeda, 2025-08-19 (updated 2025-12-15); existing-customer cap removal, Feb 2025</li>
+      <li>Common Thread Collective, Andromeda creative strategy, 2026-05-06</li>
+      <li>NAFB / Kynetec farmer media study, 2025 (commissioned by the farm broadcasters' trade group)</li>
+      <li>USPOULTRY, IPPE 2026 attendance</li>
+      <li>Binet &amp; Field B2B research, The Drum, 2019-05-23</li>
+    </ul>
+  </section>
+</main>
