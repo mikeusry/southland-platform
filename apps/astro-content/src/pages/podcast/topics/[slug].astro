@@ -59,7 +59,7 @@ const relatedTopics =
     .filter(Boolean) || []
 
 // Get related products (matching topic or segment)
-const allProducts = await getCollection('products')
+const allProducts = await getCollection('products', (p) => !p.data.adOnly)
 const relatedProducts = allProducts
   .filter((product) => {
     const matchesTopic = product.data.topics?.includes(topicSlug)

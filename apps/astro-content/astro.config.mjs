@@ -43,6 +43,8 @@ function getProductSitemapUrls() {
     if (!file.endsWith('.mdx')) continue
     const slug = file.replace(/\.mdx?$/, '')
     if (UNPUBLISHED_PRODUCT_SLUGS.has(slug)) continue
+    // adOnly pages are ad landing pages (noindex) — never submit them.
+    if (/^adOnly:\s*true\s*$/m.test(readFileSync(join(dir, file), 'utf8'))) continue
     slugs.add(slug)
   }
   return [...slugs].map((s) => `${SITE_URL}/products/${s}/`)
@@ -152,8 +154,7 @@ export default defineConfig({
   redirects: {
     '/products/natural-mite-control-livestock-poultry': '/products/desecticide',
     '/products/natural-mite-control-livestock-poultry/': '/products/desecticide/',
-    '/blog/how-to-clean-football-pads':
-      'https://www.jockshockspray.com/learn/clean-football-pads/',
+    '/blog/how-to-clean-football-pads': 'https://www.jockshockspray.com/learn/clean-football-pads/',
     '/blog/how-to-clean-football-pads/':
       'https://www.jockshockspray.com/learn/clean-football-pads/',
   },

@@ -39,7 +39,7 @@ import Breadcrumbs from '../../components/shared/Breadcrumbs.astro'
 // Static — the content collection is build-time data, there is nothing per-visitor here.
 export const prerender = true
 
-const all = await getCollection('products')
+const all = await getCollection('products', (p) => !p.data.adOnly)
 
 // Only products that can actually answer "how do I use this."
 const usable = all
