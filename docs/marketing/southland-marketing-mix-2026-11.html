@@ -48,64 +48,104 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .lede { font-size: 1.12rem; }
 .meta { color: var(--muted); font-size: 0.9rem; }
 .part { font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: -6px; }
+.callout { background: var(--surface); border-left: 4px solid var(--brand); padding: 16px 18px; border-radius: 4px; display: flex; flex-direction: column; gap: 8px; }
 .table-wrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); }
 table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 0.92rem; }
 th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--rule); }
 th { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
 tr:last-child td { border-bottom: none; }
-.tbd { font-family: var(--mono); font-size: 0.8rem; color: var(--warn-fg); }
+td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.done { font-family: var(--mono); font-size: 0.72rem; padding: 1px 6px; border-radius: 3px; background: var(--rule); color: var(--brand); white-space: nowrap; }
 .src { font-size: 0.85rem; color: var(--muted); }
 .src li { word-break: break-word; }
-.tag { font-family: var(--mono); font-size: 0.7rem; padding: 1px 6px; border-radius: 3px; background: var(--warn-bg); color: var(--warn-fg); white-space: nowrap; }
+@media print {
+  :root, :root[data-theme="dark"] { --bg: #ffffff; --surface: #ffffff; --fg: #191d21; --muted: #5c625d; --rule: #d8ded6; --brand: #2c5234; --accent: #44883e; color-scheme: light; }
+  body { padding-block: 0; font-size: 11pt; }
+  main { gap: 24px; }
+  table { min-width: 0; }
+  tr, .callout, li { break-inside: avoid; }
+  h2, h3, .part { break-after: avoid; }
+}
 </style>
 
 <main>
   <header style="display:flex;flex-direction:column;gap:10px">
-    <p class="eyebrow">Southland Organics · Channel plan · v2, 2026-11-17</p>
+    <p class="eyebrow">Southland Organics · Channel plan · v3, 2026-11-18</p>
     <h1>Southland Marketing Mix</h1>
-    <p class="lede">Phase 1 is backyard poultry only: fix the existing egg-laying content journey, get free Shopping listings in place, and run paid tests only once three launch gates pass. Commercial poultry, lawn and septic are mapped in Part 2 as future architecture. The channels there are hypotheses to test, not settled rules.</p>
-    <p class="meta">v2 revises v1 after an outside review. Changes: Phase 1 is split from the long-term map; fixed budget percentages are replaced with per-experiment caps; the Google bidding guidance is corrected; MER is no longer treated as proof that ads caused sales; and claims approval is now a launch gate.</p>
+    <p class="lede">Phase 1 spends nothing on paid acquisition for backyard poultry. A quart of Hen Helper sells for about $17 and lasts a small flock 4–5 months, so no ad channel can pay to win that customer. Phase 1 works on what changes that math: bigger packs, a reorder email timed to the bottle, the content journey, free Shopping listings and retention. Paid backyard tests come back only once the entry purchase is a gallon or a case.</p>
+    <p class="meta">v3 replaces v2's backyard paid experiments. The reason is product arithmetic, not past ad results: pack size and dose rate set what one purchase cycle is worth. Commercial poultry, lawn and septic stay in Part 2 as future architecture.</p>
   </header>
 
   <section>
     <h2>Method</h2>
-    <p>No plan here rests on past platform ROAS, because platform-attributed results are correlation. Two things replace it:</p>
+    <p>No recommendation here rests on past platform ROAS, which is correlation. The plan is built from three things:</p>
     <ul>
       <li><strong>How each segment buys:</strong> who decides, where the order is placed, how often it repeats, and how big it is.</li>
-      <li><strong>Controlled experiments measured against Southland's own order system (Nexus).</strong> Using Nexus data instead of platform data doesn't by itself settle cause and effect. Only a properly powered experiment does.</li>
+      <li><strong>Product arithmetic:</strong> pack size divided by dose rate gives how long one purchase lasts, and that sets what a customer is worth per cycle.</li>
+      <li><strong>Controlled experiments measured against Southland's own order system (Nexus).</strong> These come later, and only for channels whose arithmetic can work.</li>
     </ul>
   </section>
 
   <p class="part">Part 1 · Act now</p>
 
   <section>
-    <h2>Phase 1: backyard poultry</h2>
-    <p>Backyard poultry is the one segment where the whole loop happens online: discovery, purchase and reorder. Lawn, septic and commercial work wait until Phase 1 produces a result.</p>
-    <h3>Launch gates (all three before any paid spend)</h3>
-    <ol>
-      <li><strong>Claims sheet.</strong> List approved, product-specific claims for each problem the ads will name (laying, mites, vent gleet), including any organic-status claims for poultry use. A customer problem can be a good topic without showing that a product treats its cause. Landing pages must match the approved claims.</li>
-      <li><strong>Contribution economics.</strong> Set the maximum cost to acquire a new customer from first-order contribution plus observed repeat contribution, not from revenue.</li>
-      <li><strong>Test feasibility.</strong> Run a power analysis on Nexus backyard order volume and variance to show what size of effect a holdout could detect.</li>
-    </ol>
-    <h3>Work that needs no media budget (start now)</h3>
-    <ul>
-      <li><strong>Egg-laying content journey.</strong> This existing traffic should lead to a clear, claims-approved next step toward Hen Helper.</li>
-      <li><strong>Free Merchant Center listings and feed quality.</strong> Clean titles, categories and attributes for the backyard products.</li>
-      <li><strong>Retention.</strong> Post-purchase email and a consumables subscription in Customer.io.</li>
-      <li><strong>Post-purchase survey.</strong> One to three questions that record both first touch and most influential touch.</li>
-    </ul>
-    <h3>Paid experiments (after the gates pass)</h3>
+    <h2>Why backyard paid ads are off</h2>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Experiment</th><th>Setup</th><th>Spend cap</th><th>Success threshold</th><th>Measured by</th><th>Decision date</th></tr></thead>
+        <thead><tr><th>Hen Helper size</th><th>Average price paid</th><th>How long it lasts 6–12 hens</th><th>Share of Hen Helper revenue</th></tr></thead>
         <tbody>
-          <tr><td><strong>Meta acquisition</strong></td><td>One campaign, backyard poultry only, broad targeting, dealers excluded. How past purchasers are handled is written down before launch. A small number of distinct concepts, each backed by the claims sheet.</td><td class="tbd">TBD</td><td class="tbd">From gate 2</td><td>Geo holdout against Nexus orders</td><td class="tbd">TBD</td></tr>
-          <tr><td><strong>Google intent capture</strong></td><td>Search on backyard problems plus Standard Shopping on backyard products. Bidding is set per campaign type, using Google's guidance for that type.</td><td class="tbd">TBD</td><td class="tbd">From gate 2</td><td>Geo holdout against Nexus orders</td><td class="tbd">TBD</td></tr>
-          <tr><td><strong>PMax challenger</strong> (optional)</td><td>Tested against Search plus Shopping, not run as the default</td><td class="tbd">TBD</td><td class="tbd">From gate 2</td><td>Experiment split</td><td class="tbd">TBD</td></tr>
+          <tr><td>Quart</td><td class="num">$17.10</td><td>About 4–5 months</td><td class="num">8%</td></tr>
+          <tr><td>1 gallon</td><td class="num">$37.35</td><td>About 16+ months</td><td class="num">10%</td></tr>
+          <tr><td>2 × 2.5 gallon case</td><td class="num">$154.91</td><td>Multi-flock or commercial use</td><td class="num">70%</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="meta">Caps and dates wait on a dollar budget. No fixed percentage split is set before the tests run.</p>
+    <p class="meta">Prices and revenue shares are from Nexus order lines, 2026-01-15 to 2026-07-29. Duration is the dose arithmetic: 1 tablespoon per gallon of drinking water, with treated water changed every 2–3 days.</p>
+    <p>The quart is the best-selling size by units and brings in 8% of Hen Helper's revenue. A shopper who arrives with a problem buys the smallest size that solves it today, and that quart then lasts four months. Any acquisition cost has to be paid back out of about $17 of revenue per four-month cycle. Changing the ad channel doesn't change that math. Changing the pack size does.</p>
+  </section>
+
+  <section>
+    <h2>Phase 1: backyard poultry, no paid spend</h2>
+    <ol>
+      <li><strong>Pack size.</strong>
+        <ul>
+          <li>Make the 1 gallon the default backyard size and the quart the trial size.</li>
+          <li>Build a seasonal backyard multi-gallon pack, mirroring how Big Ole Bird sells to commercial growers.</li>
+          <li>Frame it as "a season of flock care", not as a discount.</li>
+        </ul>
+      </li>
+      <li><strong>Reorder email timed to the bottle.</strong>
+        <ul>
+          <li>Quart buyers get the reminder at about 4 months, not 30 days. A 30-day reminder reaches someone holding a mostly full bottle.</li>
+          <li>Gallon buyers get theirs much later, scaled to the size they bought.</li>
+          <li>Built in Customer.io. The reminder email teaches the ACV rotation.</li>
+        </ul>
+      </li>
+      <li><strong>Egg-laying content journey.</strong> Existing organic traffic on laying, shells and molt leads to Hen Helper, sized to the gallon. Symptom and triage searches are best served by these organic pages, not by paid search.</li>
+      <li><strong>Free Merchant Center listings and feed quality.</strong> Clean titles, sizes and attributes, so free Shopping listings show the gallon and the bundle.</li>
+      <li><strong>Backyard Poultry Bundle.</strong> A multi-product starter purchase with a bigger basket than a single quart. Make it more prominent in the journey.</li>
+      <li><strong>Post-purchase survey.</strong> One to three questions recording both first touch and most influential touch.</li>
+    </ol>
+    <h3>Already done (2026-11-17 to 2026-11-18)</h3>
+    <ul>
+      <li><span class="done">live</span> The Hen Helper page now lists the quart bottle, not 16 oz.</li>
+      <li><span class="done">live</span> Invented testimonials on the Hen Helper and Bundle pages are replaced with verified customer reviews, quoted word for word.</li>
+      <li><span class="done">live</span> The ACV rotation is now consistent on the Hen Helper, Bundle, ACV and dosing-guide pages: Hen Helper 3 days, 2 days plain water, Mother Load ACV 2 days, 2 days plain water, repeat.</li>
+    </ul>
+    <div class="callout">
+      <h3>When backyard paid ads come back</h3>
+      <p>Only once the typical first backyard purchase is a gallon or larger. Even then, test with a geo holdout measured against Nexus orders before scaling.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Claims and wording</h2>
+    <ul>
+      <li>Hen Helper claims stand as written: stronger shells, more eggs, better nutrient absorption. It is the same formula as Big Ole Bird, with probiotics and electrolytes.</li>
+      <li>Organic wording: "approved for use by some certifiers." Never "certified organic" or "USDA Organic".</li>
+      <li>Testimonials come only from verified customer reviews.</li>
+      <li>No competitor names. No free-shipping offers.</li>
+    </ul>
   </section>
 
   <section>
@@ -114,14 +154,13 @@ tr:last-child td { border-bottom: none; }
       <table>
         <thead><tr><th>Question</th><th>Measure</th></tr></thead>
         <tbody>
-          <tr><td>Is the business economically healthier?</td><td>Contribution after marketing, with revenue and MER (marketing efficiency ratio) as context</td></tr>
-          <tr><td>Do acquired customers pay off?</td><td>New-customer acquisition cost, first-order contribution, and observed repeat contribution</td></tr>
-          <tr><td>Did the channel cause additional sales?</td><td>A properly powered controlled experiment</td></tr>
-          <tr><td>Where is execution failing?</td><td>Platform metrics, search terms, landing-page behavior, survey answers</td></tr>
+          <tr><td>Is pack size moving?</td><td>Share of backyard first orders that are a gallon or larger</td></tr>
+          <tr><td>Is the reorder email working?</td><td>Repeat rate of quart buyers within 6 months, compared with buyers who didn't get the email</td></tr>
+          <tr><td>Is the business healthier?</td><td>Contribution after marketing, with revenue and MER (marketing efficiency ratio) as context</td></tr>
+          <tr><td>Did a channel cause sales?</td><td>A properly powered controlled experiment, only once paid spend resumes</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="meta">The 4–8 week state holdout is an assumption until the gate 3 power analysis confirms it.</p>
   </section>
 
   <p class="part">Part 2 · Future channel architecture</p>
@@ -132,9 +171,9 @@ tr:last-child td { border-bottom: none; }
       <table>
         <thead><tr><th>Segment</th><th>How they buy</th><th>Price &amp; repeat</th><th>Working hypothesis</th></tr></thead>
         <tbody>
-          <tr><td><strong>Commercial poultry</strong></td><td>Phone, reps and dealers. Most dealers in the locator data belong to one farm-supply chain.</td><td>Reorders about every 45 days, $200–2,000+ per order</td><td>Relationship-led. Judge advertising on qualified grower opportunities, dealer demand and contribution, not on checkout ROAS.</td></tr>
-          <tr><td><strong>Backyard poultry</strong></td><td>Online checkout, nationwide; peaks spring and summer</td><td>$20–102 per item</td><td>Phase 1</td></tr>
-          <tr><td><strong>Lawn, turf &amp; soil</strong></td><td>Online. Homeowners, turf pros, golf courses</td><td>$16–149; reapplied every 4–6 weeks</td><td>Search for a named problem, then Meta</td></tr>
+          <tr><td><strong>Commercial poultry</strong></td><td>Phone, reps and dealers. Most dealers in the locator data belong to one farm-supply chain.</td><td>Reorders about every 45 days, $200–2,000+ per order, multi-gallon packs</td><td>Relationship-led. Judge any advertising on qualified grower opportunities and contribution, not on checkout ROAS.</td></tr>
+          <tr><td><strong>Backyard poultry</strong></td><td>Online checkout, nationwide; peaks spring and summer</td><td>$17 quart lasting 4–5 months</td><td>Phase 1, no paid spend</td></tr>
+          <tr><td><strong>Lawn, turf &amp; soil</strong></td><td>Online. Homeowners, turf pros, golf courses</td><td>$16–149; reapplied every 4–6 weeks in season</td><td>Search for a named problem first. Check pack size against dose before any paid spend.</td></tr>
           <tr><td><strong>Septic / vault toilet</strong></td><td>Online, when the problem appears</td><td>$18–94</td><td>Search only</td></tr>
         </tbody>
       </table>
@@ -144,50 +183,39 @@ tr:last-child td { border-bottom: none; }
   <section>
     <h2>Three selling motions</h2>
     <ul>
-      <li><strong>Distribution-led selling (commercial poultry).</strong> IPPE (Jan 26–28, 2027), dealer enablement (case-study sheets, rep training, co-op), farm radio, and the poultry biosecurity YouTube channel. Growers rank farm radio, dealers and peers highly as information sources (NAFB/Kynetec 2025, an industry-commissioned study). That shows where they listen, not that Meta can't work. Any Meta test here is measured on qualified opportunities.</li>
+      <li><strong>Distribution-led selling (commercial poultry).</strong> IPPE (Jan 26–28, 2027), dealer enablement (case-study sheets, rep training, co-op), farm radio, and the poultry biosecurity YouTube channel. Big Ole Bird already sells in multi-gallon packs to this buyer, which is the model Phase 1 copies for backyard.</li>
       <li><strong>Demand capture (Google).</strong>
         <ul>
-          <li>Search built on named problems, matching the content hubs.</li>
-          <li>Standard Shopping, which has competed on Ad Rank with PMax since October 2024.</li>
-          <li>PMax as a challenger. The ~60 conversions a month and 10–25%-of-spend figures are third-party test assumptions (Optmyzr), not Southland findings.</li>
-          <li>For commercial leads, bid on qualified leads uploaded through enhanced conversions for leads.</li>
+          <li>Search on named problems.</li>
+          <li>Standard Shopping.</li>
+          <li>PMax only as a challenger.</li>
+          <li>Commercial leads bid on qualified leads uploaded from Nexus.</li>
+          <li>Bidding is set per campaign type, from Google's guidance for that type.</li>
         </ul>
       </li>
-      <li><strong>Direct-response ecommerce (Meta).</strong> One acquisition campaign per segment at a time, with problem-led creative backed by the claims sheet. Creative volume and partnership-ad share are production choices to test. The 45% partnership-ad lift claim is <span class="tag">unverified</span>.</li>
+      <li><strong>Direct-response ecommerce (Meta).</strong> Only for segments where one purchase cycle can pay for acquisition. One campaign per segment at a time, judged by a holdout test.</li>
     </ul>
-    <p class="meta">Budget is planned in three separate buckets: (1) existing commercial commitments and dealer support; (2) content, retention, feed and measurement; (3) incremental acquisition experiments, each with its own cap and decision date.</p>
-  </section>
-
-  <section>
-    <h2>Google bidding</h2>
-    <ul>
-      <li>Google's Target ROAS page lists "at least 15 conversions in the past 30 days at the conversion tracking level" for Search and Shopping. Google's page does not say "per campaign" (v1's wording) or "per Merchant Center ID". Campaign splits still reduce the volume each bid strategy learns from, so keep structure lean.</li>
-      <li>Bidding is chosen per campaign type from Google's guidance for that type. No single low-volume default applies across Search and Shopping.</li>
-    </ul>
+    <p class="meta">Budget is planned in three buckets: (1) commercial commitments and dealer support; (2) content, retention, feed and measurement; (3) acquisition experiments, each with its own cap and decision date.</p>
   </section>
 
   <section>
     <h2>Open items</h2>
     <ul>
-      <li><strong>Offline conversion uploads.</strong> Google is moving offline uploads to the Data Manager API. Audit upload processing and conversion diagnostics before concluding anything is broken; legacy access may still apply.</li>
-      <li><strong>Comparable brands.</strong> What Espoma, Jobe's and Manna Pro currently run hasn't been verified.</li>
-      <li><strong>Dealer count.</strong> The site claims 500 dealers; the locator data has 114.</li>
+      <li><strong>Offline conversion uploads.</strong> Google is moving offline uploads to the Data Manager API. Check that Southland's daily upload of phone and rep sales is still being accepted.</li>
+      <li><strong>Dealer count.</strong> The site says 500 dealers; the locator data has 114.</li>
+      <li><strong>Comparable brands.</strong> What similar brands currently run on Google and Meta hasn't been checked.</li>
     </ul>
   </section>
 
   <section>
     <h2>Sources</h2>
     <ul class="src">
-      <li>Google Ads Help: Target ROAS requirements — support.google.com/google-ads/answer/6268637; Shopping setup — answer/6309035</li>
-      <li>Google Ads Help: PMax and Standard Shopping prioritization by Ad Rank — answer/13810170</li>
-      <li>Google Ads Help: enhanced conversions for leads — answer/15713840; offline imports — answer/2998031; Data Manager migration — answer/15479791</li>
-      <li>Search Engine Journal, "When to say no to PMax," 2025-12-12</li>
-      <li>Optmyzr, PMax study of 24,702 campaigns, 2025-06-16</li>
-      <li>Jon Loomer, Meta Andromeda, 2025-08-19 (updated 2025-12-15); existing-customer cap removal, Feb 2025</li>
-      <li>Common Thread Collective, Andromeda creative strategy, 2026-05-06</li>
+      <li>Nexus order lines, Hen Helper by size, 2026-01-15 to 2026-07-29 (Hen Helper + Big Ole Bird forward strategy, 2026-07-29)</li>
+      <li>Hen Helper dosing: southlandorganics.com/products/hen-helper</li>
+      <li>Google Ads Help: Target ROAS requirements, answer/6268637; PMax and Standard Shopping prioritization, answer/13810170; enhanced conversions for leads, answer/15713840</li>
+      <li>Search Engine Journal, "When to say no to PMax," 2025-12-12; Optmyzr PMax study, 2025-06-16</li>
       <li>NAFB / Kynetec farmer media study, 2025 (commissioned by the farm broadcasters' trade group)</li>
       <li>USPOULTRY, IPPE 2026 attendance</li>
-      <li>Binet &amp; Field B2B research, The Drum, 2019-05-23</li>
     </ul>
   </section>
 </main>
