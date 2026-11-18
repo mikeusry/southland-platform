@@ -54,10 +54,12 @@ const persona: PersonaId =
 
 // ── Load TinaCMS editorial content (resolves friendly slugs → Shopify handles)
 const allProducts = await getCollection('products')
+// Filename wins over shopifyHandle: an adOnly page shares its product's shopifyHandle
+// and must never take over the main PDP's URL. adOnly pages resolve by filename only.
 const tinaProduct =
-  allProducts.find(
-    (p) => p.data.shopifyHandle === handle || p.id.replace(/\.mdx?$/, '') === handle
-  ) ?? null
+  allProducts.find((p) => p.id.replace(/\.mdx?$/, '') === handle) ??
+  allProducts.find((p) => p.data.shopifyHandle === handle && !p.data.adOnly) ??
+  null
 
 // Resolve the Shopify handle: TinaCMS shopifyHandle takes priority, then URL handle
 const shopifyHandle = tinaProduct?.data.shopifyHandle ?? handle
@@ -78,7 +80,27 @@ if (productLoad.outcome === 'unavailable') {
   return productShopifyUnavailableResponse()
 }
 
-const product = productLoad.product
+// variantSkus narrows the sizes this page sells (ad pages). If none of the listed SKUs
+// exist in Shopify, sell every variant rather than render a page with no buy button.
+const variantSkus = tinaProduct?.data.variantSkus ?? []
+const keptVariants = variantSkus.length
+  ? productLoad.product.variants.filter((v) => !!v.sku && variantSkus.includes(v.sku))
+  : productLoad.product.variants
+if (variantSkus.length && keptVariants.length === 0) {
+  console.warn(`[pdp] ${handle}: no Shopify variant matches variantSkus`, variantSkus)
+}
+const product =
+  keptVariants.length && keptVariants.length !== productLoad.product.variants.length
+    ? {
+        ...productLoad.product,
+        variants: keptVariants,
+        priceRange: {
+          minVariantPrice: keptVariants.reduce((min, v) =>
+            parseFloat(v.price.amount) < parseFloat(min.price.amount) ? v : min
+          ).price,
+        },
+      }
+    : productLoad.product
 
 const requestedVariant = Astro.url.searchParams.get('variant')
 const matchedVariant = requestedVariant
@@ -279,7 +301,8 @@ const ogImage = product.images[0]?.url ?? '/images/podcast/og-default.jpg'
 
 // ── Schema.org Product ──────────────────────────────────────────────────────
 const hasMultipleVariants = product.variants.length > 1
-const isCommercialHouse = isCommercialHouseHandle(shopifyHandle)
+const isCommercialHouse =
+  isCommercialHouseHandle(shopifyHandle) && tinaProduct?.data.primaryPersona !== 'backyard'
 
 // Shared shipping details for all offers
 const shippingDetails = {
@@ -658,6 +681,7 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
   ogImage={ogImage}
   canonicalUrl={canonicalUrl}
   schema={schemas}
+  noIndex={tina?.adOnly ?? false}
 >
   <main data-pdp-tier={pdpTier}>
     {/* S0: Breadcrumbs */}

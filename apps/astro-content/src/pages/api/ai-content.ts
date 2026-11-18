@@ -65,7 +65,7 @@ export const GET: APIRoute = async () => {
   const now = new Date().toISOString()
 
   // ─── 1. Products (24 rich MDX files) ──────────────────────────────────
-  const products = await getCollection('products')
+  const products = await getCollection('products', (p) => !p.data.adOnly)
   for (const product of products) {
     const d = product.data as Record<string, unknown>
     const parts: string[] = []

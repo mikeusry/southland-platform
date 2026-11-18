@@ -436,6 +436,13 @@ const productsCollection = defineCollection({
     // Must be an absolute URL to a genuine equivalent of this page, or Google
     // ignores it. Leave unset for normal products.
     canonicalUrl: z.string().url().optional(),
+    // Ad landing page for a product that already has a main PDP (same shopifyHandle).
+    // Served only at its own filename URL, noindex, and kept out of the sitemap and
+    // every on-site product listing. The feed / ads link to it; the site does not.
+    adOnly: z.boolean().optional().default(false),
+    // Limit the buy box and schema offers to these Shopify variant SKUs.
+    // Empty = every variant. Used by ad pages that sell one or two sizes.
+    variantSkus: z.array(z.string()).optional().default([]),
 
     // --- Video ---
     muxPlaybackId: z.string().optional(),
