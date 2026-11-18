@@ -94,6 +94,13 @@ const product =
     ? {
         ...productLoad.product,
         variants: keptVariants,
+        // Drop photos that belong only to sizes this page doesn't sell (case packs).
+        images: productLoad.product.images.filter((img) => {
+          const ownerSkus = productLoad.product.variants
+            .filter((v) => v.image?.url === img.url)
+            .map((v) => v.sku)
+          return ownerSkus.length === 0 || keptVariants.some((v) => ownerSkus.includes(v.sku))
+        }),
         priceRange: {
           minVariantPrice: keptVariants.reduce((min, v) =>
             parseFloat(v.price.amount) < parseFloat(min.price.amount) ? v : min
