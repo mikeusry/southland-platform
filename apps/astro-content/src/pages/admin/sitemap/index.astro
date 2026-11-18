@@ -5,9 +5,12 @@
  */
 import AdminLayout from '../../../layouts/AdminLayout.astro'
 import SitemapScreen from '@pointdog/admin-core/components/SitemapScreen.astro'
-import { buildView, formatSiteScan, isSitemapView } from '@pointdog/admin-core'
+import { buildView, formatSiteScan, isSitemapView, personaOnList } from '@pointdog/admin-core'
 import { listSitemapRows, readSiteScan } from '@pointdog/admin-core/api'
 import { getServerEnv } from '../../../lib/server-env'
+import { PERSONAS } from '../../../lib/persona-profiles'
+import { hubByRoute } from '../../../lib/sitemap-hub-scan'
+import { personaSlugByRoute, routeKey } from '../../../lib/sitemap-persona-scan'
 
 export const prerender = false
 
@@ -30,6 +33,23 @@ if (!supabaseUrl || !serviceKey) {
   }
 }
 
+const personas = PERSONAS.map((person) => ({
+  slug: person.slug,
+  name: person.name,
+  href: `/admin/personas/${person.slug}/`,
+}))
+const targeted = await personaSlugByRoute()
+const hubs = hubByRoute()
+rows = rows.map((row) => {
+  const hub = hubs.get(routeKey(row.route))
+  return {
+    ...row,
+    persona: personaOnList(targeted.get(routeKey(row.route)) ?? row.persona, personas),
+    hubRole: hub?.role ?? row.hubRole,
+    hubParent: hub?.role === 'spoke' ? hub.parent : hub?.role === 'hub' ? null : row.hubParent,
+  }
+})
+
 const board = buildView(rows, view)
 const scan = supabaseUrl && serviceKey ? await readSiteScan(supabaseUrl, serviceKey, brandId) : { scannedAt: null, pageCount: null }
 const scanLabel = formatSiteScan(scan.scannedAt, scan.pageCount)
@@ -37,5 +57,10 @@ const scanLabel = formatSiteScan(scan.scannedAt, scan.pageCount)
 
 <AdminLayout title="Sitemap" activeNav="/admin/sitemap" wide>
   {error && <p style="color: #991b1b; margin-bottom: 12px;">{error}</p>}
-  <SitemapScreen board={board} scanLabel={scanLabel} />
+  <SitemapScreen
+    board={board}
+    scanLabel={scanLabel}
+    personas={personas}
+    siteOrigin="https://southlandorganics.com"
+  />
 </AdminLayout>
